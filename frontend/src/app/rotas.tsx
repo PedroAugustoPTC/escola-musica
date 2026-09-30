@@ -2,6 +2,9 @@ import type { RouteObject } from 'react-router';
 import { GuardaSessao } from './GuardaSessao';
 import { Estrutura } from '../componentes/Estrutura';
 import { EstadoVazio } from '../componentes/EstadoVazio';
+import { TelaAlunos } from '../paginas/TelaAlunos';
+import { TelaEntrar } from '../paginas/TelaEntrar';
+import { TelaPainel } from '../paginas/TelaPainel';
 
 /** Página provisória para as rotas ainda não implementadas. */
 function PaginaProvisoria({ titulo }: { titulo: string }) {
@@ -20,9 +23,9 @@ function protegida(elemento: React.ReactNode) {
 
 /** Rotas do portal (contracts/rotas-portal.md): uma rota por tela do protótipo (01 a 12). */
 export const rotas: RouteObject[] = [
-  { path: '/entrar', element: <PaginaProvisoria titulo="01 Entrar" /> },
-  { path: '/', element: protegida(<PaginaProvisoria titulo="02 Painel" />) },
-  { path: '/alunos', element: protegida(<PaginaProvisoria titulo="03 Alunos" />) },
+  { path: '/entrar', element: <TelaEntrar /> },
+  { path: '/', element: protegida(<TelaPainel />) },
+  { path: '/alunos', element: protegida(<TelaAlunos />) },
   {
     path: '/alunos/:alunoId/relatorio-em-aberto',
     element: protegida(<PaginaProvisoria titulo="04 Relatório em aberto" />),

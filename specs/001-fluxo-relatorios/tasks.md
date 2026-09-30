@@ -137,7 +137,7 @@ encerrar o acesso nos dois canais (quickstart V1, V2, V15).
 - [X] T051 [P] [US2] Escrever `AcessoContratoIT` (`POST/GET/DELETE /sessao`, cookie `HttpOnly; Secure; SameSite=Strict`, 401, 429 com `Retry-After`) e `InicioAlunosContratoIT` (`/inicio`, `/alunos?busca=`, `/alunos/{id}`, 403) em `backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada/web/`
 - [X] T052 [P] [US2] Escrever `VinculacaoConversaIT` (sequência 5.1 e estado #1 de `contracts/telegram-conversa.md`) e `InicioBuscaConversaIT` (início/menu/`/start`, busca com 1, várias e nenhuma correspondência, `sair` com confirmação, `ajuda`, grupo recusado, tipo não suportado, botão antigo → `ACAO_EXPIRADA`, segredo errado → 401, `update_id` repetido não reprocessa) em `backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada/telegram/`
 - [X] T053 [P] [US2] Escrever `TentativaAcessoIT` em `backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/saida/persistencia/TentativaAcessoIT.java` (a falha fica gravada mesmo com rollback da transação externa; zera no sucesso e ao fim do bloqueio; origem só como hash)
-- [ ] T054 [P] [US2] Escrever `TelaEntrar.test.tsx` (01, 01b, 01c com tempo restante, 01d), `TelaPainel.test.tsx` (02, 02b, menu 02c com tema e encerrar sessão) e `TelaAlunos.test.tsx` (03, 03b, 03c, marca "Em aberto") em `frontend/tests/paginas/`
+- [X] T054 [P] [US2] Escrever `TelaEntrar.test.tsx` (01, 01b, 01c com tempo restante, 01d), `TelaPainel.test.tsx` (02, 02b, menu 02c com tema e encerrar sessão) e `TelaAlunos.test.tsx` (03, 03b, 03c, marca "Em aberto") em `frontend/tests/paginas/`
 
 ### Implementação da User Story 2
 
@@ -160,11 +160,11 @@ encerrar o acesso nos dois canais (quickstart V1, V2, V15).
 - [X] T071 [US2] Criar `InterpretadorConversaTelegram` em `backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/InterpretadorConversaTelegram.java`: despacho pelo estado derivado na ordem da tabela da seção 4, com os estados #1 (código com bloqueio), #2 (confirmação de `sair`) e #10 (busca de aluno por texto), os comandos `início`/`menu`/`/start`, `sair`, `ajuda`, `registrar aula` ("Para qual aluno?"), `TIPO_NAO_SUPORTADO` e `ACAO_EXPIRADA`; renova a validade do código a cada uso
 - [X] T072 [US2] Criar `VarreduraAcessoTarefa` em `backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/VarreduraAcessoTarefa.java` (diária: apaga sessões vencidas e `update_telegram_processado` com mais de 7 dias)
 - [X] T073 [US2] Registrar os casos de uso de acesso e início em `backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/configuracao/CasosDeUsoConfiguracao.java`
-- [ ] T074 [P] [US2] Criar `frontend/src/servicos/sessao.ts`, `frontend/src/servicos/inicio.ts` e `frontend/src/servicos/alunos.ts` (hooks do TanStack Query)
-- [ ] T075 [US2] Criar `frontend/src/paginas/TelaEntrar.tsx` (tela 01 e variações 01b–01d; campo de 8 caracteres em maiúsculas; contagem do tempo de bloqueio; sem o link da secretaria)
-- [ ] T076 [US2] Criar `frontend/src/paginas/TelaPainel.tsx` (tela 02 e variações 02b–02d; saudação, relatórios em aberto, total e até 5 alunos, ações; menu com tema claro/escuro e "Encerrar sessão" que só navega após 2xx)
-- [ ] T077 [US2] Criar `frontend/src/paginas/TelaAlunos.tsx` e `frontend/src/componentes/CartaoAluno.tsx` (tela 03 e variações 03b–03c; busca com atraso; marca "Em aberto"; ações Registrar aula, Relatório semestral e Histórico)
-- [ ] T078 [US2] Criar o roteiro de paridade em `backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/paridade/`: `RoteiroParidade` (passos abstratos), `CanalWebDriver` (MockMvc) e `CanalTelegramDriver` (updates no webhook), e `RoteiroParidadeAcessoIT` (entrar/vincular, início, busca, bloqueio, encerrar; compara os resultados nos dois canais)
+- [X] T074 [P] [US2] Criar `frontend/src/servicos/sessao.ts`, `frontend/src/servicos/inicio.ts` e `frontend/src/servicos/alunos.ts` (hooks do TanStack Query)
+- [X] T075 [US2] Criar `frontend/src/paginas/TelaEntrar.tsx` (tela 01 e variações 01b–01d; campo de 8 caracteres em maiúsculas; contagem do tempo de bloqueio; sem o link da secretaria)
+- [X] T076 [US2] Criar `frontend/src/paginas/TelaPainel.tsx` (tela 02 e variações 02b–02d; saudação, relatórios em aberto, total e até 5 alunos, ações; menu com tema claro/escuro e "Encerrar sessão" que só navega após 2xx)
+- [X] T077 [US2] Criar `frontend/src/paginas/TelaAlunos.tsx` e `frontend/src/componentes/CartaoAluno.tsx` (tela 03 e variações 03b–03c; busca com atraso; marca "Em aberto"; ações Registrar aula, Relatório semestral e Histórico)
+- [X] T078 [US2] Criar o roteiro de paridade em `backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/paridade/`: `RoteiroParidade` (passos abstratos), `CanalWebDriver` (MockMvc) e `CanalTelegramDriver` (updates no webhook), e `RoteiroParidadeAcessoIT` (entrar/vincular, início, busca, bloqueio, encerrar; compara os resultados nos dois canais)
 
 **Checkpoint**: acesso, início, busca e encerramento funcionam nos dois canais (quickstart V1, V2, V15).
 

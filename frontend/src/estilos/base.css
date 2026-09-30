@@ -929,3 +929,236 @@ img {
     display: none !important;
   }
 }
+
+/* ---------- Tela 01: Entrar ---------- */
+
+.entrar {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  min-height: 100%;
+}
+
+.entrar__marca {
+  flex: 1 1 420px;
+  min-height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  background: radial-gradient(ellipse at 50% 35%, #1f1c18 0%, #0b0b0b 72%);
+}
+
+.entrar__marca img {
+  width: min(76%, 380px);
+  aspect-ratio: 697 / 447;
+  object-fit: contain;
+}
+
+.entrar__lado-formulario {
+  flex: 1 1 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 36px 24px 40px;
+  background: var(--bg);
+}
+
+.entrar__formulario {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.entrar__titulo {
+  font-size: 36px;
+}
+
+.entrada--codigo {
+  height: 56px;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* ---------- Tela 02: Painel ---------- */
+
+.painel__subtitulo {
+  max-width: 560px;
+}
+
+.painel__em-aberto {
+  align-items: center;
+}
+
+.painel__destaques {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 16px;
+}
+
+.painel__registrar {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 24px;
+  border-radius: 8px;
+  border: 1px solid var(--pbg);
+  background: var(--pbg);
+  color: var(--ptx);
+  cursor: pointer;
+  min-height: 180px;
+}
+
+.painel__registrar:hover {
+  background: var(--phov);
+}
+
+.painel__registrar-icone {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 1px solid var(--gd);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gd);
+}
+
+:root[data-tema='escuro'] .painel__registrar-icone {
+  color: var(--ptx);
+  border-color: var(--ptx);
+}
+
+.painel__registrar-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.painel__registrar-titulo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.painel__registrar-apoio {
+  font-size: 15px;
+}
+
+.painel__total {
+  justify-content: space-between;
+  padding: 24px;
+  gap: 12px;
+}
+
+.painel__total-rotulo {
+  color: var(--gs);
+}
+
+.painel__total-numero {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.painel__total-valor {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 64px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.painel__total .botao--link {
+  align-self: flex-start;
+}
+
+.painel__alunos {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lista-alunos {
+  border: 1px solid var(--bd);
+  border-radius: 8px;
+  background: var(--sf);
+  overflow: hidden;
+}
+
+.lista-alunos__item {
+  width: 100%;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 16px;
+  border: none;
+  border-bottom: 1px solid var(--bd);
+  background: transparent;
+  color: var(--tx);
+  text-align: left;
+  cursor: pointer;
+}
+
+.lista-alunos__item:last-child {
+  border-bottom: none;
+}
+
+.lista-alunos__item:hover {
+  background: var(--sf2);
+}
+
+.lista-alunos__item > .icone {
+  color: var(--mu);
+}
+
+.lista-alunos__texto {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.lista-alunos__nome {
+  font-weight: 600;
+}
+
+.iniciais--grande {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: var(--sf2);
+}
+
+/* ---------- Tela 03: Alunos ---------- */
+
+.cartao-aluno__topo {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.cartao-aluno__identidade {
+  flex: 1;
+  min-width: 0;
+}
+
+.cartao-aluno__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cartao-aluno__acoes .botao {
+  flex: 1 1 140px;
+}
+
+.cartao-aluno__acoes .cartao-aluno__principal {
+  flex: 1 1 100%;
+}

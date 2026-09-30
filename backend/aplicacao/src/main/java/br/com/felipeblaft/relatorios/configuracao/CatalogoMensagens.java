@@ -45,6 +45,11 @@ public class CatalogoMensagens {
         return textos.stringPropertyNames();
     }
 
+    /** Texto com os placeholders ainda não substituídos. */
+    public String modelo(String chave) {
+        return textos.getProperty(chave);
+    }
+
     public String texto(String chave) {
         return texto(chave, Map.of());
     }
