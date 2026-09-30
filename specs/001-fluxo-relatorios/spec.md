@@ -22,6 +22,16 @@
 - O **acesso do professor** e o **controle de acesso por aluno** fazem parte desta feature. Cadastros e funções da secretaria ficam para uma feature própria, também com paridade entre os canais. Até lá, professores, alunos e associações entram por carga inicial.
 - O relatório semestral consolida **somente as aulas aprovadas do professor que gera o relatório**.
 
+## Clarifications
+
+### Session 2026-09-30
+
+- Q: Qual deve ser o limite de tamanho do arquivo de áudio/vídeo, igual nos dois canais, considerando que o Telegram só deixa um bot receber arquivos de até 20 MB? → A: 50 MB nos dois canais; o plano inclui o servidor próprio da API de bots do Telegram para aceitar arquivos acima de 20 MB.
+- Q: No Telegram, como o sistema deve saber de qual aluno é o áudio enviado, para evitar que o relatório fique no aluno errado? → A: Todo áudio recebido no Telegram pede que o professor confirme o aluno, com um botão, antes de ser processado, mesmo que já haja um aluno selecionado.
+- Q: Usar o sistema normalmente, com a sessão da Web aberta ou o Telegram já vinculado, deve renovar a validade de 7 dias do código de acesso? → A: Sim; qualquer uso com sessão ou vínculo ativos, em qualquer canal, renova a validade por mais 7 dias, e o código só vence após 7 dias sem nenhum uso.
+- Q: Quando um relatório termina de processar ou sai uma nova versão, o sistema deve avisar o professor pelo Telegram mesmo quando ele iniciou essa etapa pela Web? → A: Sim; o resultado chega no canal em que a etapa foi pedida e, se ela foi pedida pela Web e o professor tem Telegram vinculado, o bot também envia um aviso curto com a opção de continuar no chat.
+- Q: Ao gerar o relatório semestral, o que o sistema deve fazer se ainda houver relatórios de aula daquele período em aberto, isto é, não aprovados? → A: Avisar antes de gerar ("Há N relatórios de aula em aberto neste período; eles não serão considerados") e oferecer "Gerar mesmo assim" ou "Voltar"; se o professor seguir, a conferência repete o aviso.
+
 ## Paridade entre canais
 
 Cada funcionalidade executa as mesmas regras nos dois canais; só muda a forma de interação.
@@ -32,8 +42,8 @@ Cada funcionalidade executa as mesmas regras nos dois canais; só muda a forma d
 | Encerrar acesso | "Encerrar sessão" no menu | Comando "sair" (desfaz o vínculo; novo acesso exige o código) |
 | Início | Painel: saudação, relatórios em aberto, alunos | Comando "início"/"menu": saudação, relatórios em aberto, alunos e ações |
 | Encontrar aluno | Lista com busca por nome | Nome digitado (busca aproximada) ou lista de opções |
-| Enviar áudio | Gravação no navegador ou arquivo | Mensagem de voz ou arquivo de áudio/vídeo |
-| Acompanhar processamento | Tela com etapas | Mensagens de etapa no chat |
+| Enviar áudio | Gravação no navegador ou arquivo, na tela do aluno escolhido | Mensagem de voz ou arquivo de áudio/vídeo + confirmação do aluno por botão |
+| Acompanhar processamento | Tela com etapas (e aviso pelo bot, se houver Telegram vinculado) | Mensagens de etapa no chat |
 | Responder perguntas | Lista numerada + campo de resposta | Mensagem numerada + resposta em texto |
 | Conferir | Texto das seções + PDF | Texto das seções no chat + PDF enviado como documento |
 | Pedir alteração | Campo "Precisa ajustar algo?" | Resposta em texto livre ou botão "Solicitar alteração" |
@@ -59,7 +69,7 @@ A professora Clara termina a aula de Matteo e registra o relatório pelo canal q
 
 1. **Given** um professor acessado em qualquer canal, **When** ele escolhe registrar aula para um aluno associado sem relatório em aberto, **Then** o canal indica o aluno e a data da aula (hoje, no fuso da escola) e pede o áudio.
 2. **Given** a Web, **When** o professor grava pelo navegador, **Then** pode ouvir, regravar ou enviar; o envio só fica disponível com gravação concluída ou arquivo selecionado. Sem suporte a gravação ou com o microfone bloqueado, a tela avisa "Gravação indisponível neste navegador..." e aceita apenas arquivo.
-3. **Given** o Telegram com um aluno selecionado, **When** o professor envia uma mensagem de voz ou um arquivo de áudio/vídeo, **Then** o bot confirma o recebimento citando o aluno.
+3. **Given** o Telegram, **When** o professor envia uma mensagem de voz ou um arquivo de áudio/vídeo, **Then** o bot confirma o recebimento e pede a confirmação do aluno antes de processar: com aluno selecionado, oferece os botões "Confirmar {aluno}" e "Trocar aluno"; sem aluno selecionado, mostra a lista de alunos. O processamento só começa depois que o professor confirma ou escolhe o aluno.
 4. **Given** um áudio enviado em qualquer canal, **When** o processamento avança, **Then** o professor acompanha as etapas "Enviando o áudio", "Transcrevendo", "Estruturando o relatório" e "Pronto para conferência", sem ação manual.
 5. **Given** uma estruturação que identificou informações faltantes, **When** o processamento termina, **Then** o professor recebe "Faltam algumas informações", com todas as perguntas numeradas, e pode responder a todas numa única mensagem.
 6. **Given** a resposta às perguntas enviada, **When** o sistema a incorpora, **Then** os campos correspondentes do relatório são atualizados e o relatório segue para conferência.
@@ -124,6 +134,7 @@ Ao fim do semestre, o professor escolhe "Relatório semestral" para um aluno, no
 4. **Given** um semestral em conferência, **When** o professor pede alteração, aprova ou cancela, **Then** valem as mesmas regras do relatório de aula, nos dois canais.
 5. **Given** um semestral já aprovado para o mesmo aluno, professor e período, **When** o professor pede para gerar outro, **Then** o sistema recusa e informa que o relatório daquele semestre já foi aprovado.
 6. **Given** um semestral em aberto para o mesmo aluno, professor e período, iniciado em qualquer canal, **When** o professor pede para gerar outro, **Then** o sistema oferece continuar o existente ou descartá-lo e gerar um novo.
+7. **Given** um semestre com relatórios de aula do professor para o aluno ainda em aberto, **When** ele pede para gerar o semestral em qualquer canal, **Then** recebe, antes da consolidação, o aviso "Há N relatórios de aula em aberto neste período; eles não serão considerados." com as opções "Gerar mesmo assim" e "Voltar"; se escolher gerar, a conferência do semestral repete o aviso.
 
 ---
 
@@ -158,9 +169,11 @@ O professor consulta o histórico de um aluno, no portal ou no Telegram, vê os 
 - **Relatório de outro professor**: tratado como inexistente para quem não é o dono, em qualquer canal.
 - **Sessão da Web expirada no meio do fluxo**: o professor é levado imediatamente à tela "Entrar"; o relatório em aberto continua salvo e pode ser retomado em qualquer canal.
 - **Conexão perdida durante o processamento**: o processamento continua no servidor; ao voltar, o professor encontra o relatório no ponto em que parou (via retomada), em qualquer canal.
-- **Processamento que excede o tempo esperado**: depois de 3 minutos sem conclusão, o canal avisa que está demorando mais que o normal e que o resultado será entregue quando pronto; na Web, o professor pode sair e retomar depois; no Telegram, o resultado chega no chat.
+- **Processamento que excede o tempo esperado**: depois de 3 minutos sem conclusão, o canal avisa que está demorando mais que o normal e que o resultado será entregue quando pronto; na Web, o professor pode sair e retomar depois e, se tiver Telegram vinculado, recebe o aviso do resultado pelo bot (FR-021); no Telegram, o resultado chega no chat.
+- **Áudio no Telegram sem confirmação do aluno**: enquanto aguarda a confirmação, o áudio fica guardado apenas temporariamente e nada é criado. Se o professor não confirmar em 30 minutos (configurável), cancelar ou iniciar outra ação, o áudio é descartado e o bot avisa que é preciso enviá-lo de novo. Se chegar um novo áudio antes da confirmação, ele substitui o anterior.
 - **Mensagem de tipo não suportado no Telegram** (foto, figurinha, localização): o bot responde explicando o que pode receber naquele momento.
 - **Conta do Telegram já vinculada a outro professor, ou professor já vinculado a outra conta do Telegram**: vinculação recusada com mensagem específica, orientando procurar a secretaria.
+- **Código vencido após 7 dias sem uso**: o acesso com ele é recusado com mensagem própria, orientando pedir um novo código à secretaria (reemitido pela carga inicial nesta feature).
 - **Professor sem alunos associados**: o início de qualquer canal mostra "Você ainda não tem alunos associados. Fale com a secretaria da escola."
 - **Aula registrada perto da meia-noite**: a data da aula é sempre a de hoje no fuso da escola, nunca a do servidor.
 - **Semestre corrente em andamento**: pode ser gerado com as aulas aprovadas até o momento; a lista indica "em andamento".
@@ -179,7 +192,7 @@ O professor consulta o histórico de um aluno, no portal ou no Telegram, vê os 
 **Acesso do professor e controle de acesso**
 
 - **FR-004**: O professor DEVE acessar a Web informando o seu código de acesso, e DEVE vincular a conta do Telegram enviando o mesmo código ao bot. Nos dois casos, o sistema DEVE validar que o código existe, não expirou e pertence a um professor ativo. O código tem 8 caracteres (letras maiúsculas e dígitos, sem caracteres ambíguos).
-- **FR-005**: O código de acesso DEVE valer por 7 dias a partir da emissão, e cada acesso bem-sucedido, em qualquer canal, DEVE renovar a validade por mais 7 dias. Nenhum canal DEVE consumir o código.
+- **FR-005**: O código de acesso DEVE valer por 7 dias a partir da emissão. Cada acesso bem-sucedido com o código e cada uso do sistema com sessão da Web ou vínculo do Telegram ativos, em qualquer canal, DEVEM renovar a validade por mais 7 dias; o código só vence após 7 dias sem nenhum uso. O vencimento do código NÃO DEVE encerrar sessões nem vínculos ativos, apenas impedir novos acessos com ele. Nenhum canal DEVE consumir o código.
 - **FR-006**: Uma conta do Telegram NÃO DEVE ser vinculada a mais de um professor, e um professor NÃO DEVE ter mais de uma conta do Telegram vinculada ao mesmo tempo.
 - **FR-007**: Após 5 códigos incorretos consecutivos de uma mesma origem (Web) ou de uma mesma conta (Telegram), o sistema DEVE recusar novas tentativas por 15 minutos, inclusive com o código correto, informando o tempo restante. Um acesso bem-sucedido DEVE zerar a contagem, e o fim do bloqueio também. Limite e duração DEVEM ser configuráveis e iguais nos dois canais.
 - **FR-008**: A sessão da Web DEVE expirar após 12 horas sem uso (configurável) e DEVE ser renovada a cada uso. O vínculo do Telegram DEVE durar até o professor encerrá-lo. "Encerrar sessão" (Web) e "sair" (Telegram) DEVEM encerrar o acesso no servidor.
@@ -195,13 +208,13 @@ O professor consulta o histórico de um aluno, no portal ou no Telegram, vê os 
 **Registro de aula por áudio**
 
 - **FR-014**: O professor DEVE poder registrar uma aula para um aluno associado enviando um áudio: na Web, gravado no navegador ou por arquivo; no Telegram, por mensagem de voz ou arquivo.
-- **FR-015**: Os dois canais DEVEM aceitar os mesmos formatos (os comuns de celular e navegador, incluindo MP3, M4A, OGG/Opus, WAV e WebM, e vídeos MP4, dos quais se usa apenas o áudio) e o mesmo limite de tamanho, de 50 MB (configurável). O limite vigente DEVE ser informado ao professor.
+- **FR-015**: Os dois canais DEVEM aceitar os mesmos formatos (os comuns de celular e navegador, incluindo MP3, M4A, OGG/Opus, WAV e WebM, e vídeos MP4, dos quais se usa apenas o áudio) e o mesmo limite de tamanho, de 50 MB (configurável). O limite vigente DEVE ser informado ao professor. No Telegram, o recebimento de arquivos acima do limite padrão de 20 MB para bots DEVE ser viabilizado por um servidor próprio da API de bots do Telegram, de modo que o limite efetivo seja o mesmo nos dois canais.
 - **FR-016**: A data da aula DEVE ser a data de hoje no fuso da escola (padrão: America/Sao_Paulo).
 - **FR-017**: O áudio DEVE ser transcrito antes de qualquer registro de aula ser criado. Se a transcrição falhar (áudio vazio, sem fala, corrompido, formato não suportado, falha do provedor), nenhuma aula ou relatório DEVE ser criado e o professor DEVE ser informado do motivo.
 - **FR-018**: O áudio NÃO DEVE ser retido após a transcrição; ficam apenas a transcrição e o relatório.
 - **FR-019**: A partir da transcrição, o sistema DEVE estruturar o relatório de aula em cinco seções (Conteúdos trabalhados, Evolução, Dificuldades, Atividades propostas, Observações) e gerar perguntas pendentes quando uma informação relevante não puder ser extraída com confiança.
 - **FR-020**: A estruturação NÃO DEVE inventar informação ausente da transcrição ou das respostas do professor; o que faltar DEVE ficar vazio ou virar pergunta pendente.
-- **FR-021**: O relatório DEVE ter um estado consultável (em processamento, falha no processamento, aguardando respostas, aguardando conferência, aprovado, cancelado). Os dois canais DEVEM informar o avanço por etapas e entregar o resultado sem ação manual do professor.
+- **FR-021**: O relatório DEVE ter um estado consultável (em processamento, falha no processamento, aguardando respostas, aguardando conferência, aprovado, cancelado). Os dois canais DEVEM informar o avanço por etapas e entregar o resultado sem ação manual do professor. O resultado de cada etapa (pronto para conferência, perguntas pendentes, nova versão após alteração ou falha no processamento, de relatório de aula ou semestral) DEVE ser entregue no canal em que a etapa foi pedida. Quando a etapa tiver sido pedida pela Web e o professor tiver Telegram vinculado, o bot DEVE também enviar um aviso curto (aluno, tipo de relatório e resultado, ex.: "O relatório de Matteo está pronto para conferência") com a opção de continuar no chat.
 - **FR-022**: Se a estruturação falhar depois de a transcrição ter sido salva, o relatório DEVE ficar em "falha no processamento" e o professor DEVE poder tentar de novo sem reenviar o áudio, ou cancelar.
 - **FR-023**: Os dados enviados a provedores de IA DEVEM se limitar ao necessário para a tarefa: transcrição, respostas e instruções do professor, conteúdo dos relatórios. Nome, CPF, data de nascimento e nome do responsável NÃO DEVEM ser enviados.
 
@@ -232,12 +245,12 @@ O professor consulta o histórico de um aluno, no portal ou no Telegram, vê os 
 - **FR-037**: No Telegram, as ações disponíveis em cada etapa DEVEM ser oferecidas por botões e também aceitas como texto ("aprovar", "cancelar", "continuar", "descartar", "início", "sair"). Com um relatório aguardando respostas, um texto livre é resposta; aguardando conferência, é pedido de alteração.
 - **FR-038**: A seleção de aluno no Telegram DEVE ser limpa após aprovar ou cancelar o relatório.
 - **FR-039**: O bot DEVE responder a toda mensagem recebida. Cada situação de erro (código inválido ou expirado, conflito de vínculo, bloqueio por tentativas, nenhum aluno selecionado, aluno não encontrado, aluno não associado, áudio inválido, áudio grande demais, falha de processamento, versão desatualizada, ação não permitida na etapa atual, tipo de mensagem não suportado) DEVE ter mensagem própria, dizendo o que fazer em seguida.
-- **FR-040**: Ao receber um áudio, o bot DEVE confirmar o recebimento, citando o aluno, antes de concluir o processamento.
+- **FR-040**: Ao receber um áudio, o bot DEVE confirmar o recebimento e DEVE pedir que o professor confirme o aluno por botão antes de iniciar o processamento, mesmo que já exista aluno selecionado ("Confirmar {aluno}" / "Trocar aluno"; sem aluno selecionado, a lista de alunos). Nenhuma transcrição, aula ou relatório DEVE ser iniciado antes dessa confirmação. O áudio aguardando confirmação DEVE ser descartado após 30 minutos (configurável), ao cancelar ou ao iniciar outra ação, e um novo áudio DEVE substituir o anterior.
 
 **Relatório semestral**
 
 - **FR-041**: O sistema DEVE oferecer, para cada aluno associado, a lista de semestres disponíveis (chave AAAA-S; rótulos "1º semestre AAAA"/"2º semestre AAAA"), do semestre da primeira aula registrada do aluno com o professor (ou do cadastro do aluno, se anterior) até o semestre corrente, com o mais recente pré-selecionado. Sem semestres disponíveis, DEVE informar "Nenhum semestre disponível para este aluno ainda."
-- **FR-042**: Antes de consolidar, o sistema DEVE contar os relatórios de aula aprovados do professor para o aluno com data de aula dentro do período (datas inclusive). Com zero, nada DEVE ser criado, nenhuma chamada à IA DEVE ser feita e o professor DEVE ser informado.
+- **FR-042**: Antes de consolidar, o sistema DEVE contar os relatórios de aula aprovados do professor para o aluno com data de aula dentro do período (datas inclusive). Com zero, nada DEVE ser criado, nenhuma chamada à IA DEVE ser feita e o professor DEVE ser informado. O sistema DEVE também contar os relatórios de aula do professor para o aluno no período que estejam em aberto (em processamento, falha no processamento, aguardando respostas ou aguardando conferência); havendo algum, DEVE avisar antes de consolidar que eles não serão considerados e exigir que o professor escolha "Gerar mesmo assim" ou "Voltar". A quantidade de relatórios em aberto no momento da geração DEVE ser registrada no relatório semestral e repetida como aviso na conferência.
 - **FR-043**: A consolidação DEVE usar exclusivamente os relatórios de aula aprovados do professor no período e produzir as 10 seções do modelo da escola: Informações Gerais, Frequência e Estudo, Técnica, Musicalidade, Leitura e Memorização, Pontos de Atenção, Estratégias Pedagógicas, Acompanhamento Familiar, Planejamento do Próximo Semestre e Parecer Final.
 - **FR-044**: Os dados de identificação de Informações Gerais (nome e idade do aluno, instrumento quando houver, professor, período) e a quantidade de aulas consideradas DEVEM ser preenchidos pelo próprio sistema a partir do cadastro e dos registros, e NÃO DEVEM ser enviados à IA nem gerados por ela. As datas das aulas consideradas PODEM ser enviadas à IA para apoiar a análise de frequência.
 - **FR-045**: O relatório semestral DEVE seguir o mesmo ciclo do relatório de aula (FR-026 a FR-033): nasce "aguardando conferência", versão 1, com PDF.
@@ -268,11 +281,11 @@ O professor consulta o histórico de um aluno, no portal ou no Telegram, vê os 
 - **Aluno**: quem recebe as aulas. Nome, data de nascimento, CPF (cifrado, nunca exibido), nome do responsável (obrigatório para menores de 18 anos), instrumento (opcional). Pode ter vários professores.
 - **Associação Professor–Aluno**: vínculo de responsabilidade pedagógica; base de todo o controle de acesso.
 - **Sessão do Professor (Web)**: acesso ativo no portal, com expiração por inatividade e revogação ao encerrar.
-- **Vínculo Telegram**: associação entre uma conta do Telegram e um professor, com o estado da conversa: aluno selecionado, fluxo em andamento (registro, semestral, histórico) e versão do último relatório apresentado no chat.
+- **Vínculo Telegram**: associação entre uma conta do Telegram e um professor, com o estado da conversa: aluno selecionado, fluxo em andamento (registro, semestral, histórico), áudio aguardando confirmação do aluno (temporário) e versão do último relatório apresentado no chat.
 - **Tentativa de Acesso**: contagem de códigos incorretos e bloqueio temporário por origem (Web) ou por conta (Telegram); a origem é guardada apenas de forma não reversível.
 - **Aula**: evento de ensino (professor, aluno, data no fuso da escola). Várias aulas no mesmo dia são permitidas; cada aula tem exatamente um relatório de aula.
 - **Relatório de Aula**: transcrição, cinco seções estruturadas, perguntas pendentes e rodadas já feitas, estado, versão vigente, canal de origem, datas de criação, última alteração e aprovação.
-- **Relatório Semestral**: aluno, professor, período (chave e datas), quantidade de aulas consideradas, 10 seções estruturadas, estado, versão vigente, canal de origem, datas de criação, última alteração e aprovação.
+- **Relatório Semestral**: aluno, professor, período (chave e datas), quantidade de aulas consideradas, quantidade de relatórios de aula em aberto no momento da geração, 10 seções estruturadas, estado, versão vigente, canal de origem, datas de criação, última alteração e aprovação.
 - **Versão de Relatório**: fotografia imutável do conteúdo de um relatório (aula ou semestral) em uma versão, com seu PDF, a origem da mudança (estruturação inicial, resposta a perguntas, alteração pedida) e o canal em que foi pedida.
 - **Documento PDF**: arquivo de uma versão de relatório; oficial somente quando é o da versão aprovada.
 
@@ -280,7 +293,7 @@ O professor consulta o histórico de um aluno, no portal ou no Telegram, vê os 
 
 ### Measurable Outcomes
 
-- **SC-001**: Para áudios de até 10 minutos, em 90% dos envios o relatório fica pronto para conferência (ou com perguntas pendentes) em até 2 minutos após o envio, em cada um dos canais.
+- **SC-001**: Para áudios de até 10 minutos, em 90% dos envios o relatório fica pronto para conferência (ou com perguntas pendentes) em até 2 minutos após o envio (no Telegram, após a confirmação do aluno), em cada um dos canais.
 - **SC-002**: Um professor consegue, pelo celular, ir do acesso até a aprovação de um relatório de aula sem perguntas pendentes em até 5 minutos, sem contar o tempo de gravação, em cada um dos canais.
 - **SC-003**: Ao fim de 4 semanas de uso, o tempo médio que o professor gasta por relatório de aula (da gravação à aprovação) é pelo menos 50% menor que o tempo que ele levava antes do sistema.
 - **SC-004**: Pelo menos 80% dos relatórios de aula são aprovados com no máximo uma alteração solicitada.
@@ -303,7 +316,7 @@ O professor consulta o histórico de um aluno, no portal ou no Telegram, vê os 
 - O relatório aprovado não é enviado automaticamente às famílias nesta feature; o texto do diálogo de aprovação ("documento oficial entregue à família") descreve o uso previsto do PDF.
 - O texto dos diálogos de descarte e cancelamento no protótipo ("será excluído", "serão descartados") descreve a perspectiva do professor: o relatório some para ele e não pode ser recuperado. Internamente o registro é mantido como cancelado (RN-24).
 - O texto do protótipo "Seu áudio foi recebido e não foi perdido. Tente processar novamente" vale apenas para falhas depois da transcrição (a transcrição está salva). Quando a própria transcrição falha, o áudio não é retido e o professor grava ou envia de novo.
-- O texto de apoio do protótipo sobre formatos e limite ("MP3, M4A, OGG ou WAV · até 25 MB") será ajustado para refletir os formatos e o limite configurado (FR-015). O limite de 50 MB acomoda os vídeos de teste do cliente. A configuração padrão do Telegram limita o recebimento de arquivos por bots a 20 MB; o plano deve eliminar essa diferença para manter o mesmo limite nos dois canais, ou registrá-la como desvio justificado conforme a constituição.
+- O texto de apoio do protótipo sobre formatos e limite ("MP3, M4A, OGG ou WAV · até 25 MB") será ajustado para refletir os formatos e o limite configurado (FR-015). O limite de 50 MB acomoda os vídeos de teste do cliente. A configuração padrão do Telegram limita o recebimento de arquivos por bots a 20 MB; por decisão do dono do produto, essa diferença é eliminada com um servidor próprio da API de bots do Telegram, rodando em contêiner como os demais serviços (FR-015).
 - Não há protótipo visual das conversas do Telegram. Os textos do bot serão derivados dos textos do portal e dos textos do MVP (seção 11.2 do handoff), revisados quanto a acentuação e tom.
 - O instrumento do aluno (exibido nos protótipos como "Piano · última aula ...") é um dado opcional da carga inicial.
 - Retenção e exclusão de transcrições, versões antigas e relatórios cancelados seguirão a política de LGPD a ser definida na feature de privacidade e operação; nesta feature nada é apagado automaticamente, exceto o áudio.
