@@ -1,5 +1,39 @@
 <!--
 Sync Impact Report
+- Version change: 1.2.0 → 1.3.0
+- Rationale: MINOR — expansão material do Princípio I: Web e Telegram passam a ser canais de
+  entrada equivalentes, com paridade funcional (tudo o que se faz em um se faz no outro, pelos
+  mesmos casos de uso). A decisão de produto que restringia relatório semestral, histórico e
+  administração à Web é substituída pela paridade. Nenhum princípio removido; a regra de
+  dependência e as demais garantias do Princípio I permanecem.
+- Modified principles: I. Domínio Independente de Canal e de Fornecedor (título mantido; regras de
+  paridade entre canais e justificativa ampliadas)
+- Modified sections: Restrições Adicionais ("Decisões de produto vinculantes": exclusividade da
+  Web substituída por paridade; aceitação de áudio estendida aos dois canais); Fluxo de
+  Desenvolvimento e Quality Gates (novo item de revisão de paridade)
+- Added sections: nenhuma
+- Removed sections: nenhuma
+- Templates requiring follow-up: nenhum (`plan-template.md` lê esta constituição no
+  "Constitution Check")
+- Artefatos dependentes: `specs/001-fluxo-relatorios/spec.md` ainda restringe semestral e
+  histórico à Web e deve ser revisada à luz da paridade.
+- Deferred items: nenhum
+
+Histórico — v1.2.0 (2026-09-30)
+- Version change: 1.1.0 → 1.2.0
+- Rationale: MINOR — expansão material de "Restrições Adicionais": o item "Ambiente reproduzível"
+  vira "Containerização e implantação" (todos os serviços em contêiner, localmente, nos testes e
+  em produção; implantação definitiva em VPS da Hostinger). "Stack agnóstica" passa a abrir
+  exceção apenas para a hospedagem de produção. Nenhum princípio removido ou redefinido.
+- Modified principles: nenhum (Princípios I–IX inalterados)
+- Modified sections: Restrições Adicionais ("Ambiente reproduzível" → "Containerização e
+  implantação"; "Stack agnóstica" ajustado)
+- Added sections: nenhuma
+- Removed sections: nenhuma
+- Templates requiring follow-up: nenhum
+- Deferred items: nenhum
+
+Histórico — v1.1.0 (2026-09-30)
 - Version change: 1.0.0 → 1.1.0
 - Rationale: MINOR — expansão material do Princípio VIII e do Fluxo de Desenvolvimento: ao concluir
   alterações, commit e abertura de PR passam a ser obrigatórios; merge só após revisão e aprovação
@@ -50,6 +84,15 @@ Histórico — v1.0.0 (2026-09-30)
 - Canais (Telegram, Web e futuros, como WhatsApp) DEVEM ser adaptadores de entrada que apenas
   traduzem requisições para os mesmos casos de uso. Adaptadores de entrada NÃO DEVEM conter regra
   de negócio.
+- Web e Telegram DEVEM ser canais de entrada equivalentes (paridade funcional): toda
+  funcionalidade disponível em um deles DEVE estar disponível no outro, executando os mesmos casos
+  de uso com as mesmas regras de autorização, validação e versionamento.
+- Um canal PODE adaptar a forma de interação ao seu meio (ex.: gravação no navegador ↔ mensagem
+  de voz; formulário ↔ conversa guiada ou botões; download de PDF ↔ documento enviado no chat),
+  mas NÃO DEVE restringir, ampliar ou alterar o resultado de negócio obtido no outro canal.
+- Um trabalho iniciado em um canal DEVE poder ser consultado e continuado no outro.
+- Canais futuros (ex.: WhatsApp) NÃO estão sujeitos à paridade automaticamente; o escopo de cada
+  um DEVE ser definido em spec própria (Princípio VII).
 - Provedores externos (transcrição de áudio, LLM, geração de PDF, armazenamento de arquivos,
   mensageria) DEVEM ficar atrás de portas definidas pelo núcleo. Trocar um provedor DEVE exigir
   apenas um novo adaptador e configuração, sem alteração no domínio nem nos casos de uso.
@@ -58,6 +101,8 @@ Histórico — v1.0.0 (2026-09-30)
 
 **Justificativa**: o mesmo ciclo de vida de relatório precisa funcionar em qualquer canal e
 sobreviver à troca de stack e de fornecedores de IA, que são as partes mais voláteis do produto.
+Com a paridade entre Web e Telegram, o professor escolhe o canal mais conveniente no momento sem
+perder nenhuma funcionalidade.
 
 ### II. Fonte Única da Verdade
 
@@ -193,20 +238,34 @@ recorrente.
 ## Restrições Adicionais
 
 - **Stack agnóstica**: esta constituição NÃO DEVE fixar linguagem, framework, banco de dados ou
-  fornecedor. As escolhas de stack DEVEM ser registradas e justificadas no plano
-  (`/speckit.plan`) e DEVEM respeitar os Princípios I a IX.
+  fornecedor de IA. As escolhas de stack DEVEM ser registradas e justificadas no plano
+  (`/speckit.plan`) e DEVEM respeitar os Princípios I a IX. A única exceção é a hospedagem de
+  produção, definida em "Containerização e implantação".
 - **Provedores de IA plugáveis**: transcrição e LLM DEVEM ser selecionáveis por configuração, por
   meio de adaptadores das respectivas portas (Princípio I).
 - **Decisões de produto vinculantes** (seção 0 do handoff):
   - O design visual é totalmente novo; a UI visual do MVP NÃO DEVE ser reaproveitada, somente o
     comportamento funcional.
-  - O Telegram é canal exclusivo de registro de aula por áudio; relatório semestral, histórico e
-    administração DEVEM ficar somente na Web.
-  - A Web também DEVE aceitar áudio (gravação no navegador ou envio de arquivo).
+  - Web e Telegram são canais de entrada equivalentes (Princípio I): registro de aula,
+    relatório semestral, histórico e administração DEVEM estar disponíveis nos dois canais.
+  - Os dois canais DEVEM aceitar áudio: no Telegram, por mensagem de voz ou envio de arquivo; na
+    Web, por gravação no navegador ou envio de arquivo.
   - Os dois canais DEVEM compartilhar a mesma identidade de professor e o mesmo ciclo de vida de
     relatório.
-- **Ambiente reproduzível**: todos os serviços necessários DEVEM poder ser executados localmente
-  de forma reproduzível e documentada.
+- **Containerização e implantação**:
+  - Todo serviço do sistema (aplicação, frontend, banco de dados, orquestrador de canal,
+    armazenamento, proxy reverso) DEVE rodar em contêiner, tanto no ambiente local e de testes
+    quanto em produção.
+  - O ambiente local completo DEVE subir com um único comando documentado, e os testes (locais e
+    de CI) DEVEM rodar em contêineres. A máquina do desenvolvedor NÃO DEVE precisar de nenhuma
+    dependência além do runtime de contêineres.
+  - Local e produção DEVEM usar as mesmas definições de imagem, variando apenas a configuração
+    (variáveis de ambiente e segredos). Segredos NÃO DEVEM ser embutidos nas imagens.
+  - A implantação definitiva DEVE ser feita em uma VPS da Hostinger, subindo os contêineres a partir
+    das definições versionadas no repositório. Na VPS, apenas o ponto de entrada HTTPS DEVE ser
+    exposto publicamente (Princípio IV).
+  - As definições de contêiner e os scripts de implantação são artefatos de automação e DEVEM ser
+    versionados (Princípio VIII).
 - **Referência do MVP**: o repositório `mvp-relatorios` é somente leitura e serve apenas como
   referência de comportamento; nenhuma alteração DEVE ser feita nele.
 
@@ -220,6 +279,9 @@ recorrente.
   acontecer após revisão e aprovação humanas (Princípio VIII).
 - Todo Pull Request DEVE:
   - respeitar as camadas e a regra de dependência (Princípio I) e a nomenclatura (Princípio VI);
+  - manter a paridade funcional entre Web e Telegram quando adicionar ou alterar funcionalidade
+    em um dos canais (Princípio I); entregar em um canal só é desvio que DEVE ser justificado no
+    plano e registrar a entrega pendente no outro canal;
   - incluir os testes das mudanças e manter a cobertura mínima (Princípio V), com o CI como fonte
     de verdade;
   - ser revisado quanto a segurança e privacidade quando tocar dados de aluno, áudio, autenticação
@@ -255,4 +317,4 @@ número de versão conforme a política abaixo, e (4) verificar se `spec-templat
 revisão; violações não justificadas bloqueiam o merge. Exceções DEVEM ser registradas na descrição
 do PR e aprovadas por outro revisor.
 
-**Version**: 1.1.0 | **Ratified**: 2026-09-30 | **Last Amended**: 2026-09-30
+**Version**: 1.3.0 | **Ratified**: 2026-09-30 | **Last Amended**: 2026-09-30
