@@ -1,5 +1,19 @@
 <!--
 Sync Impact Report
+- Version change: 1.1.0 → 1.2.0
+- Rationale: MINOR — expansão material de "Restrições Adicionais": o item "Ambiente reproduzível"
+  vira "Containerização e implantação" (todos os serviços em contêiner, localmente, nos testes e
+  em produção; implantação definitiva em VPS da Hostinger). "Stack agnóstica" passa a abrir
+  exceção apenas para a hospedagem de produção. Nenhum princípio removido ou redefinido.
+- Modified principles: nenhum (Princípios I–IX inalterados)
+- Modified sections: Restrições Adicionais ("Ambiente reproduzível" → "Containerização e
+  implantação"; "Stack agnóstica" ajustado)
+- Added sections: nenhuma
+- Removed sections: nenhuma
+- Templates requiring follow-up: nenhum
+- Deferred items: nenhum
+
+Histórico — v1.1.0 (2026-09-30)
 - Version change: 1.0.0 → 1.1.0
 - Rationale: MINOR — expansão material do Princípio VIII e do Fluxo de Desenvolvimento: ao concluir
   alterações, commit e abertura de PR passam a ser obrigatórios; merge só após revisão e aprovação
@@ -193,8 +207,9 @@ recorrente.
 ## Restrições Adicionais
 
 - **Stack agnóstica**: esta constituição NÃO DEVE fixar linguagem, framework, banco de dados ou
-  fornecedor. As escolhas de stack DEVEM ser registradas e justificadas no plano
-  (`/speckit.plan`) e DEVEM respeitar os Princípios I a IX.
+  fornecedor de IA. As escolhas de stack DEVEM ser registradas e justificadas no plano
+  (`/speckit.plan`) e DEVEM respeitar os Princípios I a IX. A única exceção é a hospedagem de
+  produção, definida em "Containerização e implantação".
 - **Provedores de IA plugáveis**: transcrição e LLM DEVEM ser selecionáveis por configuração, por
   meio de adaptadores das respectivas portas (Princípio I).
 - **Decisões de produto vinculantes** (seção 0 do handoff):
@@ -205,8 +220,20 @@ recorrente.
   - A Web também DEVE aceitar áudio (gravação no navegador ou envio de arquivo).
   - Os dois canais DEVEM compartilhar a mesma identidade de professor e o mesmo ciclo de vida de
     relatório.
-- **Ambiente reproduzível**: todos os serviços necessários DEVEM poder ser executados localmente
-  de forma reproduzível e documentada.
+- **Containerização e implantação**:
+  - Todo serviço do sistema (aplicação, frontend, banco de dados, orquestrador de canal,
+    armazenamento, proxy reverso) DEVE rodar em contêiner, tanto no ambiente local e de testes
+    quanto em produção.
+  - O ambiente local completo DEVE subir com um único comando documentado, e os testes (locais e
+    de CI) DEVEM rodar em contêineres. A máquina do desenvolvedor NÃO DEVE precisar de nenhuma
+    dependência além do runtime de contêineres.
+  - Local e produção DEVEM usar as mesmas definições de imagem, variando apenas a configuração
+    (variáveis de ambiente e segredos). Segredos NÃO DEVEM ser embutidos nas imagens.
+  - A implantação definitiva DEVE ser feita em uma VPS da Hostinger, subindo os contêineres a partir
+    das definições versionadas no repositório. Na VPS, apenas o ponto de entrada HTTPS DEVE ser
+    exposto publicamente (Princípio IV).
+  - As definições de contêiner e os scripts de implantação são artefatos de automação e DEVEM ser
+    versionados (Princípio VIII).
 - **Referência do MVP**: o repositório `mvp-relatorios` é somente leitura e serve apenas como
   referência de comportamento; nenhuma alteração DEVE ser feita nele.
 
@@ -255,4 +282,4 @@ número de versão conforme a política abaixo, e (4) verificar se `spec-templat
 revisão; violações não justificadas bloqueiam o merge. Exceções DEVEM ser registradas na descrição
 do PR e aprovadas por outro revisor.
 
-**Version**: 1.1.0 | **Ratified**: 2026-09-30 | **Last Amended**: 2026-09-30
+**Version**: 1.2.0 | **Ratified**: 2026-09-30 | **Last Amended**: 2026-09-30
