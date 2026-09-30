@@ -10,6 +10,8 @@
 
 **Revisão (2026-09-30)**: spec alinhada à constituição v1.3.0 (Princípio I, paridade funcional). Web e Telegram são canais equivalentes: tudo o que o professor faz em um canal nesta feature, ele também faz no outro, com as mesmas regras e o mesmo resultado.
 
+**Revisão (2026-09-30, alteração por áudio)**: Input: "o professor deve ter a possibilidade de enviar o que ele quer que seja revisado nos relatórios também via áudio. Então, quando a IA envia o relatório para ele revisar e aprovar, ele deve ser capaz de enviar o que ele quer que altere usando áudio." Na conferência, o pedido de alteração pode ser feito por texto ou por áudio, nos dois canais e para os dois tipos de relatório (FR-027a, FR-027b).
+
 **Materiais de referência**:
 
 - `HANDOFF_MVP_Relatorios_Escola_Musica.md`: regras de negócio (RN-xx), fluxos, textos e lições aprendidas do MVP.
@@ -46,7 +48,7 @@ Cada funcionalidade executa as mesmas regras nos dois canais; só muda a forma d
 | Acompanhar processamento | Tela com etapas (e aviso pelo bot, se houver Telegram vinculado) | Mensagens de etapa no chat |
 | Responder perguntas | Lista numerada + campo de resposta | Mensagem numerada + resposta em texto |
 | Conferir | Texto das seções + PDF | Texto das seções no chat + PDF enviado como documento |
-| Pedir alteração | Campo "Precisa ajustar algo?" | Resposta em texto livre ou botão "Solicitar alteração" |
+| Pedir alteração | Campo "Precisa ajustar algo?" com texto, gravação no navegador ou arquivo de áudio | Texto livre, mensagem de voz ou arquivo de áudio (com confirmação do destino por botão) ou botão "Solicitar alteração" |
 | Aprovar | Botão + diálogo de confirmação com a versão | Botão ou "aprovar" + pedido de confirmação com a versão |
 | Cancelar / descartar | Botão + diálogo de confirmação | Botão ou "cancelar" + pedido de confirmação |
 | Retomar relatório em aberto | Tela "Você tem um relatório em aberto" | Mensagem com o mesmo aviso e as opções "continuar"/"descartar" |
@@ -59,11 +61,11 @@ Preferências de apresentação próprias de um meio, como o modo claro/escuro d
 
 ### User Story 1 - Registrar uma aula por áudio até a aprovação, em qualquer canal (Priority: P1)
 
-A professora Clara termina a aula de Matteo e registra o relatório pelo canal que tiver à mão. No portal, ela escolhe o aluno, grava o áudio no navegador (ou envia um arquivo) e acompanha as etapas na tela. No Telegram, ela envia o nome do aluno, manda uma mensagem de voz (ou um arquivo) e recebe as etapas no chat. Nos dois casos, se faltar informação, ela recebe todas as perguntas de uma vez e responde numa única mensagem. Depois confere o relatório em texto e em PDF, pede um ajuste com suas palavras, confere a nova versão e aprova. O relatório vira oficial e entra no histórico do aluno.
+A professora Clara termina a aula de Matteo e registra o relatório pelo canal que tiver à mão. No portal, ela escolhe o aluno, grava o áudio no navegador (ou envia um arquivo) e acompanha as etapas na tela. No Telegram, ela envia o nome do aluno, manda uma mensagem de voz (ou um arquivo) e recebe as etapas no chat. Nos dois casos, se faltar informação, ela recebe todas as perguntas de uma vez e responde numa única mensagem. Depois confere o relatório em texto e em PDF, pede um ajuste com suas palavras, digitando ou gravando um áudio curto, confere a nova versão e aprova. O relatório vira oficial e entra no histórico do aluno.
 
 **Why this priority**: é a proposta de valor central ("o professor manda um áudio e recebe um relatório pronto para revisar") e o caminho mais usado. Sozinha, esta história já entrega um produto utilizável nos dois canais.
 
-**Independent Test**: com um professor e um aluno associado na carga inicial, executar o fluxo completo duas vezes, uma em cada canal, com as gravações fictícias de `assets/`: enviar o áudio, responder às perguntas (se houver), pedir uma alteração e aprovar. Verificar que os dois relatórios aprovados têm a versão aprovada, o PDF oficial e aparecem no histórico, e que as mesmas entradas produzem os mesmos estados nos dois canais.
+**Independent Test**: com um professor e um aluno associado na carga inicial, executar o fluxo completo duas vezes, uma em cada canal, com as gravações fictícias de `assets/`: enviar o áudio, responder às perguntas (se houver), pedir uma alteração por texto e outra por áudio e aprovar. Verificar que os dois relatórios aprovados têm a versão aprovada, o PDF oficial e aparecem no histórico, e que as mesmas entradas produzem os mesmos estados nos dois canais.
 
 **Acceptance Scenarios**:
 
@@ -75,8 +77,10 @@ A professora Clara termina a aula de Matteo e registra o relatório pelo canal q
 6. **Given** a resposta às perguntas enviada, **When** o sistema a incorpora, **Then** os campos correspondentes do relatório são atualizados e o relatório segue para conferência.
 7. **Given** um relatório em conferência, **When** o professor o abre em qualquer canal, **Then** recebe a versão vigente, o cabeçalho (aluno, professor, data da aula), o texto das cinco seções e o PDF da mesma versão (na Web: abas "Texto"/"Ver PDF" no celular, lado a lado no computador; no Telegram: texto no chat e PDF como documento).
 8. **Given** um relatório em conferência na versão N, **When** o professor descreve uma alteração, **Then** é avisado de que a alteração está sendo aplicada e em seguida recebe a versão N+1, com novo PDF e o aviso "Alteração aplicada. Confira a versão N+1."
-9. **Given** um relatório em conferência na versão N, **When** o professor pede para aprovar, **Then** o canal pede confirmação citando a versão N e informando que o relatório entrará no histórico e não poderá mais ser alterado; confirmado, o relatório é aprovado e o professor recebe "Relatório aprovado", com data e hora, e as opções de registrar outra aula ou ver o histórico.
-10. **Given** um relatório em aberto, **When** o professor pede para cancelar e confirma, **Then** o relatório é cancelado, deixa de aparecer para ele e o canal volta ao início ("Relatório cancelado.").
+9. **Given** um relatório em conferência na versão N na Web, **When** o professor grava o pedido de alteração no navegador (ou envia um arquivo de áudio) no campo "Precisa ajustar algo?", **Then** pode ouvir, regravar ou enviar; enviado o áudio, acompanha as etapas "Transcrevendo o pedido" e "Aplicando a alteração" e recebe a versão N+1, com novo PDF, o aviso "Alteração aplicada. Confira a versão N+1." e o texto do pedido como foi entendido. Sem suporte a gravação ou com o microfone bloqueado, o campo aceita texto ou arquivo.
+10. **Given** um relatório em conferência na versão N no Telegram, **When** o professor envia uma mensagem de voz ou um arquivo de áudio, **Then** o bot confirma o recebimento e oferece os botões "Alterar relatório de {aluno}" e "Registrar nova aula"; ao escolher alterar, o áudio é tratado como pedido de alteração, com o mesmo resultado do cenário anterior; ao escolher registrar nova aula, segue o fluxo do cenário 3.
+11. **Given** um relatório em conferência na versão N, **When** o professor pede para aprovar, **Then** o canal pede confirmação citando a versão N e informando que o relatório entrará no histórico e não poderá mais ser alterado; confirmado, o relatório é aprovado e o professor recebe "Relatório aprovado", com data e hora, e as opções de registrar outra aula ou ver o histórico.
+12. **Given** um relatório em aberto, **When** o professor pede para cancelar e confirma, **Then** o relatório é cancelado, deixa de aparecer para ele e o canal volta ao início ("Relatório cancelado.").
 
 ---
 
@@ -178,6 +182,10 @@ O professor consulta o histórico de um aluno, no portal ou no Telegram, vê os 
 - **Aula registrada perto da meia-noite**: a data da aula é sempre a de hoje no fuso da escola, nunca a do servidor.
 - **Semestre corrente em andamento**: pode ser gerado com as aulas aprovadas até o momento; a lista indica "em andamento".
 - **Arquivo de vídeo (ex.: .mp4 gravado no celular)**: aceito nos dois canais, e apenas a trilha de áudio é usada.
+- **Áudio de alteração sem fala, vazio, corrompido, em formato não suportado ou acima do limite**: nenhuma versão é criada; o relatório continua "aguardando conferência" na versão N e o professor é convidado a gravar de novo ou a digitar o pedido, em qualquer canal.
+- **Áudio de alteração que pede para aprovar ou cancelar** (ex.: "pode aprovar", "descarta esse"): o áudio nunca aprova nem cancela o relatório; o sistema responde lembrando que a aprovação e o cancelamento são feitos pelas ações próprias, com confirmação, e não cria nova versão se o pedido não tiver nenhuma alteração de conteúdo.
+- **Áudio de alteração enviado sobre uma versão desatualizada** (o relatório mudou no outro canal): vale a mesma regra do pedido por texto (FR-033); o pedido não é aplicado sobre a versão antiga, e o professor recebe a versão vigente para conferir antes de pedir de novo.
+- **Áudio no Telegram com relatório em conferência sem confirmação do destino**: vale a mesma regra do áudio aguardando confirmação do aluno (30 minutos, substituição por novo áudio, descarte ao iniciar outra ação).
 
 ## Requirements *(mandatory)*
 
@@ -211,7 +219,7 @@ O professor consulta o histórico de um aluno, no portal ou no Telegram, vê os 
 - **FR-015**: Os dois canais DEVEM aceitar os mesmos formatos (os comuns de celular e navegador, incluindo MP3, M4A, OGG/Opus, WAV e WebM, e vídeos MP4, dos quais se usa apenas o áudio) e o mesmo limite de tamanho, de 50 MB (configurável). O limite vigente DEVE ser informado ao professor. No Telegram, o recebimento de arquivos acima do limite padrão de 20 MB para bots DEVE ser viabilizado por um servidor próprio da API de bots do Telegram, de modo que o limite efetivo seja o mesmo nos dois canais.
 - **FR-016**: A data da aula DEVE ser a data de hoje no fuso da escola (padrão: America/Sao_Paulo).
 - **FR-017**: O áudio DEVE ser transcrito antes de qualquer registro de aula ser criado. Se a transcrição falhar (áudio vazio, sem fala, corrompido, formato não suportado, falha do provedor), nenhuma aula ou relatório DEVE ser criado e o professor DEVE ser informado do motivo.
-- **FR-018**: O áudio NÃO DEVE ser retido após a transcrição; ficam apenas a transcrição e o relatório.
+- **FR-018**: O áudio NÃO DEVE ser retido após a transcrição; ficam apenas a transcrição e o relatório. A regra vale para todo áudio recebido, inclusive os pedidos de alteração por áudio (FR-027a).
 - **FR-019**: A partir da transcrição, o sistema DEVE estruturar o relatório de aula em cinco seções (Conteúdos trabalhados, Evolução, Dificuldades, Atividades propostas, Observações) e gerar perguntas pendentes quando uma informação relevante não puder ser extraída com confiança.
 - **FR-020**: A estruturação NÃO DEVE inventar informação ausente da transcrição ou das respostas do professor; o que faltar DEVE ficar vazio ou virar pergunta pendente.
 - **FR-021**: O relatório DEVE ter um estado consultável (em processamento, falha no processamento, aguardando respostas, aguardando conferência, aprovado, cancelado). Os dois canais DEVEM informar o avanço por etapas e entregar o resultado sem ação manual do professor. O resultado de cada etapa (pronto para conferência, perguntas pendentes, nova versão após alteração ou falha no processamento, de relatório de aula ou semestral) DEVE ser entregue no canal em que a etapa foi pedida. Quando a etapa tiver sido pedida pela Web e o professor tiver Telegram vinculado, o bot DEVE também enviar um aviso curto (aluno, tipo de relatório e resultado, ex.: "O relatório de Matteo está pronto para conferência") com a opção de continuar no chat.
@@ -226,7 +234,9 @@ O professor consulta o histórico de um aluno, no portal ou no Telegram, vê os 
 **Conferência, alteração, aprovação e cancelamento** (relatório de aula e semestral)
 
 - **FR-026**: Ao chegar a "aguardando conferência", o sistema DEVE gerar o PDF da versão vigente e entregar ao professor o texto das seções e o PDF, nos dois canais.
-- **FR-027**: O professor DEVE poder pedir alterações em linguagem natural (texto obrigatório). Cada alteração DEVE criar uma nova versão (inteiro a partir de 1, incrementado a cada alteração) com seu próprio PDF, sem sobrescrever o conteúdo nem o PDF das versões anteriores.
+- **FR-027**: O professor DEVE poder pedir alterações em linguagem natural, por texto ou por áudio (FR-027a); o pedido não pode ser vazio. Cada alteração DEVE criar uma nova versão (inteiro a partir de 1, incrementado a cada alteração) com seu próprio PDF, sem sobrescrever o conteúdo nem o PDF das versões anteriores.
+- **FR-027a**: Em qualquer relatório "aguardando conferência" (de aula ou semestral), o professor DEVE poder enviar o pedido de alteração por áudio nos dois canais: na Web, gravado no navegador ou por arquivo, no próprio espaço de pedido de alteração da conferência, podendo ouvir, regravar ou enviar; no Telegram, por mensagem de voz ou arquivo de áudio. Os formatos e o limite de tamanho DEVEM ser os mesmos do registro de aula (FR-015). O áudio DEVE ser transcrito, e a transcrição DEVE ser tratada exatamente como um pedido de alteração por texto, com as mesmas regras de versionamento, versão vigente e recusa (FR-027, FR-032, FR-033). Se a transcrição falhar ou vier vazia, nenhuma versão DEVE ser criada, o relatório DEVE permanecer na versão vigente e o professor DEVE ser informado do motivo e convidado a gravar de novo ou digitar o pedido. O canal DEVE informar as etapas ("Transcrevendo o pedido", "Aplicando a alteração") e, ao entregar a nova versão, DEVE mostrar o texto do pedido como foi entendido. Um pedido por áudio NUNCA DEVE aprovar nem cancelar o relatório.
+- **FR-027b**: No Telegram, um áudio recebido enquanto há um relatório "aguardando conferência" apresentado no chat NÃO DEVE ser processado antes que o professor escolha o destino por botão: "Alterar relatório de {aluno}" (pedido de alteração, FR-027a) ou "Registrar nova aula" (fluxo de FR-040). Enquanto aguarda a escolha, o áudio segue as regras de áudio aguardando confirmação de FR-040.
 - **FR-028**: A aprovação DEVE referir-se à versão apresentada ao professor naquele canal e DEVE ser recusada se essa não for a versão vigente. Só relatórios "aguardando conferência" podem ser aprovados.
 - **FR-029**: A aprovação DEVE exigir confirmação explícita nos dois canais, citando a versão e informando que o relatório entrará no histórico e não poderá mais ser alterado.
 - **FR-030**: A aprovação DEVE ser irreversível: o relatório aprovado DEVE registrar data, hora, versão aprovada e canal da aprovação, entrar no histórico do aluno e ter um PDF oficial que indique quem aprovou, quando e qual versão.
@@ -242,10 +252,10 @@ O professor consulta o histórico de um aluno, no portal ou no Telegram, vê os 
 **Conversa no Telegram**
 
 - **FR-036**: Cada mensagem recebida pelo bot DEVE ser interpretada a partir do estado persistido no sistema (vínculo, aluno selecionado, fluxo em andamento e etapa do relatório), e não da memória do canal. Reiniciar o componente do canal NÃO DEVE perder o estado da conversa.
-- **FR-037**: No Telegram, as ações disponíveis em cada etapa DEVEM ser oferecidas por botões e também aceitas como texto ("aprovar", "cancelar", "continuar", "descartar", "início", "sair"). Com um relatório aguardando respostas, um texto livre é resposta; aguardando conferência, é pedido de alteração.
+- **FR-037**: No Telegram, as ações disponíveis em cada etapa DEVEM ser oferecidas por botões e também aceitas como texto ("aprovar", "cancelar", "continuar", "descartar", "início", "sair"). Com um relatório aguardando respostas, um texto livre é resposta; aguardando conferência, é pedido de alteração. Um áudio recebido durante a conferência segue FR-027b.
 - **FR-038**: A seleção de aluno no Telegram DEVE ser limpa após aprovar ou cancelar o relatório.
 - **FR-039**: O bot DEVE responder a toda mensagem recebida. Cada situação de erro (código inválido ou expirado, conflito de vínculo, bloqueio por tentativas, nenhum aluno selecionado, aluno não encontrado, aluno não associado, áudio inválido, áudio grande demais, falha de processamento, versão desatualizada, ação não permitida na etapa atual, tipo de mensagem não suportado) DEVE ter mensagem própria, dizendo o que fazer em seguida.
-- **FR-040**: Ao receber um áudio, o bot DEVE confirmar o recebimento e DEVE pedir que o professor confirme o aluno por botão antes de iniciar o processamento, mesmo que já exista aluno selecionado ("Confirmar {aluno}" / "Trocar aluno"; sem aluno selecionado, a lista de alunos). Nenhuma transcrição, aula ou relatório DEVE ser iniciado antes dessa confirmação. O áudio aguardando confirmação DEVE ser descartado após 30 minutos (configurável), ao cancelar ou ao iniciar outra ação, e um novo áudio DEVE substituir o anterior.
+- **FR-040**: Ao receber um áudio (exceto durante a conferência, quando vale FR-027b), o bot DEVE confirmar o recebimento e DEVE pedir que o professor confirme o aluno por botão antes de iniciar o processamento, mesmo que já exista aluno selecionado ("Confirmar {aluno}" / "Trocar aluno"; sem aluno selecionado, a lista de alunos). Nenhuma transcrição, aula ou relatório DEVE ser iniciado antes dessa confirmação. O áudio aguardando confirmação DEVE ser descartado após 30 minutos (configurável), ao cancelar ou ao iniciar outra ação, e um novo áudio DEVE substituir o anterior.
 
 **Relatório semestral**
 
@@ -273,7 +283,7 @@ O professor consulta o histórico de um aluno, no portal ou no Telegram, vê os 
 **Operação e privacidade**
 
 - **FR-055**: Os registros de operação NÃO DEVEM conter áudio, transcrição completa, CPF nem dados pessoais do aluno além do estritamente necessário para depuração.
-- **FR-056**: O sistema DEVE registrar, para cada relatório, o canal de origem, o canal de cada alteração e da aprovação, o tempo de processamento e o custo estimado das chamadas de IA, para medir tempo e custo por relatório e o uso de cada canal.
+- **FR-056**: O sistema DEVE registrar, para cada relatório, o canal de origem, o canal e o meio (texto ou áudio) de cada alteração, o canal da aprovação, o tempo de processamento e o custo estimado das chamadas de IA, para medir tempo e custo por relatório e o uso de cada canal.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -281,12 +291,12 @@ O professor consulta o histórico de um aluno, no portal ou no Telegram, vê os 
 - **Aluno**: quem recebe as aulas. Nome, data de nascimento, CPF (cifrado, nunca exibido), nome do responsável (obrigatório para menores de 18 anos), instrumento (opcional). Pode ter vários professores.
 - **Associação Professor–Aluno**: vínculo de responsabilidade pedagógica; base de todo o controle de acesso.
 - **Sessão do Professor (Web)**: acesso ativo no portal, com expiração por inatividade e revogação ao encerrar.
-- **Vínculo Telegram**: associação entre uma conta do Telegram e um professor, com o estado da conversa: aluno selecionado, fluxo em andamento (registro, semestral, histórico), áudio aguardando confirmação do aluno (temporário) e versão do último relatório apresentado no chat.
+- **Vínculo Telegram**: associação entre uma conta do Telegram e um professor, com o estado da conversa: aluno selecionado, fluxo em andamento (registro, semestral, histórico), áudio aguardando confirmação do aluno ou do destino, alteração ou nova aula (temporário) e versão do último relatório apresentado no chat.
 - **Tentativa de Acesso**: contagem de códigos incorretos e bloqueio temporário por origem (Web) ou por conta (Telegram); a origem é guardada apenas de forma não reversível.
 - **Aula**: evento de ensino (professor, aluno, data no fuso da escola). Várias aulas no mesmo dia são permitidas; cada aula tem exatamente um relatório de aula.
 - **Relatório de Aula**: transcrição, cinco seções estruturadas, perguntas pendentes e rodadas já feitas, estado, versão vigente, canal de origem, datas de criação, última alteração e aprovação.
 - **Relatório Semestral**: aluno, professor, período (chave e datas), quantidade de aulas consideradas, quantidade de relatórios de aula em aberto no momento da geração, 10 seções estruturadas, estado, versão vigente, canal de origem, datas de criação, última alteração e aprovação.
-- **Versão de Relatório**: fotografia imutável do conteúdo de um relatório (aula ou semestral) em uma versão, com seu PDF, a origem da mudança (estruturação inicial, resposta a perguntas, alteração pedida) e o canal em que foi pedida.
+- **Versão de Relatório**: fotografia imutável do conteúdo de um relatório (aula ou semestral) em uma versão, com seu PDF, a origem da mudança (estruturação inicial, resposta a perguntas, alteração pedida), o canal em que foi pedida e, no caso de alteração, o texto do pedido (digitado ou transcrito do áudio) e o meio (texto ou áudio).
 - **Documento PDF**: arquivo de uma versão de relatório; oficial somente quando é o da versão aprovada.
 
 ## Success Criteria *(mandatory)*
@@ -305,6 +315,7 @@ O professor consulta o histórico de um aluno, no portal ou no Telegram, vê os 
 - **SC-010**: O relatório semestral fica pronto para conferência em até 3 minutos para até 30 aulas aprovadas no período, em cada um dos canais.
 - **SC-011**: Todas as telas da Web passam em auditoria WCAG 2.1 AA, nos modos claro e escuro, em 390 px e em 1440 px de largura.
 - **SC-012**: Em pesquisa com os professores após o primeiro mês, pelo menos 80% dizem confiar nos relatórios gerados e preferir o sistema ao processo anterior.
+- **SC-013**: Para pedidos de alteração por áudio de até 2 minutos, em 90% dos casos a nova versão fica pronta para conferência em até 90 segundos após o envio (no Telegram, após a escolha do destino), em cada um dos canais, e em pelo menos 90% dos casos testados o texto do pedido mostrado ao professor corresponde ao que ele disse.
 
 ## Assumptions
 
@@ -322,4 +333,6 @@ O professor consulta o histórico de um aluno, no portal ou no Telegram, vê os 
 - Retenção e exclusão de transcrições, versões antigas e relatórios cancelados seguirão a política de LGPD a ser definida na feature de privacidade e operação; nesta feature nada é apagado automaticamente, exceto o áudio.
 - Os prompts de IA serão revisados (acentuação, tom institucional) e versionados. Provedores de transcrição e de IA são selecionáveis por configuração, conforme a constituição.
 - As gravações fictícias do cliente em `assets/` (.ogg e .mp4) serão usadas como casos de teste de ponta a ponta nos dois canais.
+- O áudio vale, nesta revisão, para o registro da aula e para os pedidos de alteração na conferência. As respostas às perguntas pendentes continuam só em texto (FR-024); estendê-las ao áudio pode ser decidido em `/speckit-clarify`.
+- O protótipo da tela de conferência mostra o campo "Precisa ajustar algo?" só com texto; a gravação do pedido de alteração reaproveita o componente de gravação da tela de envio de áudio (ouvir, regravar, enviar) e será incorporada ao protótipo.
 - O tema da interface Web segue a preferência escolhida pelo professor no menu; na primeira visita, segue a preferência do sistema operacional.
