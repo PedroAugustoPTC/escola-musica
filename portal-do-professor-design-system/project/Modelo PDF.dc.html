@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500&family=Cormorant+Garamond:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>html,body{margin:0;background:#D9D4CA}*{box-sizing:border-box}a{color:#141414}a:hover{color:#5A554C}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;gap:48px;padding:48px;align-items:flex-start;font-family:'Source Sans 3',sans-serif;color:#141414">
+
+<section data-screen-label="PDF Aula" style="width:794px;height:1123px;flex:none;background:#FFFFFF;box-shadow:0 4px 24px rgba(0,0,0,.15);padding:64px 72px 48px;display:flex;flex-direction:column">
+  <header style="display:flex;flex-direction:column;align-items:center;gap:18px">
+    <img src="assets/fb-logo-preto.png" alt="Instituto Musical Felipe Blaft" style="width:190px;height:auto;display:block">
+    <div style="font-family:'Cinzel',serif;font-size:12px;letter-spacing:.3em;color:#3D3A35">RELATÓRIO PEDAGÓGICO</div>
+    <h1 style="margin:-8px 0 0;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:38px;line-height:1">Relatório de Aula</h1>
+  </header>
+  <dl style="margin:28px 0 8px;display:grid;grid-template-columns:1.2fr 1.2fr 1fr;border-top:1.5px solid #141414;border-bottom:1px solid #9C968B">
+    <div style="padding:12px 14px 12px 0"><dt style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.2em;color:#3D3A35">ALUNO</dt><dd style="margin:2px 0 0;font-size:17px;font-weight:600">Matteo Mafra</dd></div>
+    <div style="padding:12px 14px;border-left:1px solid #C9C3B7"><dt style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.2em;color:#3D3A35">PROFESSORA</dt><dd style="margin:2px 0 0;font-size:17px;font-weight:600">Clara Nogueira</dd></div>
+    <div style="padding:12px 0 12px 14px;border-left:1px solid #C9C3B7"><dt style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.2em;color:#3D3A35">DATA DA AULA</dt><dd style="margin:2px 0 0;font-size:17px;font-weight:600">30/09/2026</dd></div>
+  </dl>
+  <div style="flex:1;display:flex;flex-direction:column">
+    <sc-for list="{{ aula }}" as="sec" hint-placeholder-count="5">
+      <section style="padding:14px 0;border-bottom:1px solid #E1DCD2;break-inside:avoid">
+        <h2 style="margin:0 0 6px;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:21px;line-height:1.2">{{ sec.t }}</h2>
+        <sc-if value="{{ sec.list }}">
+          <ul style="margin:0;padding:0 0 0 20px;font-size:16px;line-height:1.5">
+            <sc-for list="{{ sec.items }}" as="it" hint-placeholder-count="2"><li style="padding-left:4px">{{ it }}</li></sc-for>
+          </ul>
+        </sc-if>
+        <sc-if value="{{ sec.isText }}"><p style="margin:0;font-size:16px;line-height:1.5;text-wrap:pretty">{{ sec.text }}</p></sc-if>
+      </section>
+    </sc-for>
+    <div style="margin-top:auto;padding-top:20px;font-size:13px;color:#3D3A35">Aprovado por Clara Nogueira em 30/09/2026 às 18:42 · versão 2</div>
+  </div>
+  <footer style="margin-top:16px;display:flex;flex-direction:column;gap:10px">
+    <img src="assets/fb-filete-preto.png" alt="" style="width:100%;height:12px;object-fit:contain;display:block">
+    <div style="display:flex;justify-content:space-between;gap:24px;font-size:12px;color:#3D3A35">
+      <span>Instituto Musical Felipe Blaft — relatório pedagógico de aula.</span><span>Página 1 de 1</span>
+    </div>
+  </footer>
+</section>
+
+<section data-screen-label="PDF Semestral 1" style="width:794px;height:1123px;flex:none;background:#FFFFFF;box-shadow:0 4px 24px rgba(0,0,0,.15);padding:64px 72px 48px;display:flex;flex-direction:column">
+  <header style="display:flex;flex-direction:column;align-items:center;gap:18px">
+    <img src="assets/fb-logo-preto.png" alt="Instituto Musical Felipe Blaft" style="width:190px;height:auto;display:block">
+    <div style="font-family:'Cinzel',serif;font-size:12px;letter-spacing:.3em;color:#3D3A35">RELATÓRIO PEDAGÓGICO</div>
+    <h1 style="margin:-8px 0 0;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:38px;line-height:1">Relatório Semestral</h1>
+  </header>
+  <dl style="margin:28px 0 8px;display:grid;grid-template-columns:1fr 1fr 1.3fr;border-top:1.5px solid #141414;border-bottom:1px solid #9C968B">
+    <div style="padding:12px 14px 12px 0"><dt style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.2em;color:#3D3A35">ALUNO</dt><dd style="margin:2px 0 0;font-size:17px;font-weight:600">Matteo Mafra</dd></div>
+    <div style="padding:12px 14px;border-left:1px solid #C9C3B7"><dt style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.2em;color:#3D3A35">PROFESSORA</dt><dd style="margin:2px 0 0;font-size:17px;font-weight:600">Clara Nogueira</dd></div>
+    <div style="padding:12px 0 12px 14px;border-left:1px solid #C9C3B7"><dt style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.2em;color:#3D3A35">PERÍODO</dt><dd style="margin:2px 0 0;font-size:17px;font-weight:600">01/01/2026 a 30/06/2026</dd></div>
+  </dl>
+  <p style="margin:6px 0 4px;font-size:14px;color:#3D3A35">Consolidação de 12 relatórios de aula aprovados no período.</p>
+  <div style="flex:1">
+    <sc-for list="{{ sem1 }}" as="sec" hint-placeholder-count="5">
+      <section style="display:grid;grid-template-columns:34px 1fr;padding:13px 0;border-bottom:1px solid #E1DCD2">
+        <span style="font-family:'Cormorant Garamond',serif;font-weight:700;font-size:21px;line-height:1.2">{{ sec.n }}</span>
+        <div><h2 style="margin:0 0 4px;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:21px;line-height:1.2">{{ sec.t }}</h2><p style="margin:0;font-size:16px;line-height:1.5;text-wrap:pretty">{{ sec.text }}</p></div>
+      </section>
+    </sc-for>
+  </div>
+  <footer style="margin-top:16px;display:flex;flex-direction:column;gap:10px">
+    <img src="assets/fb-filete-preto.png" alt="" style="width:100%;height:12px;object-fit:contain;display:block">
+    <div style="display:flex;justify-content:space-between;gap:24px;font-size:12px;color:#3D3A35"><span>Instituto Musical Felipe Blaft — documento gerado a partir dos relatórios de aula do período.</span><span style="white-space:nowrap">Página 1 de 2</span></div>
+  </footer>
+</section>
+
+<section data-screen-label="PDF Semestral 2" style="width:794px;height:1123px;flex:none;background:#FFFFFF;box-shadow:0 4px 24px rgba(0,0,0,.15);padding:56px 72px 48px;display:flex;flex-direction:column">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid #9C968B">
+    <img src="assets/fb-wordmark-preto.png" alt="Instituto Musical Felipe Blaft" style="width:150px;height:auto;display:block">
+    <span style="font-size:13px;color:#3D3A35">Relatório Semestral · Matteo Mafra · 1º semestre 2026</span>
+  </div>
+  <div style="flex:1">
+    <sc-for list="{{ sem2 }}" as="sec" hint-placeholder-count="5">
+      <section style="display:grid;grid-template-columns:34px 1fr;padding:13px 0;border-bottom:1px solid #E1DCD2">
+        <span style="font-family:'Cormorant Garamond',serif;font-weight:700;font-size:21px;line-height:1.2">{{ sec.n }}</span>
+        <div><h2 style="margin:0 0 4px;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:21px;line-height:1.2">{{ sec.t }}</h2><p style="margin:0;font-size:16px;line-height:1.5;text-wrap:pretty">{{ sec.text }}</p></div>
+      </section>
+    </sc-for>
+    <div style="margin-top:40px;display:grid;grid-template-columns:1fr 1fr;gap:48px">
+      <div style="padding-top:10px;border-top:1px solid #141414;font-size:14px"><strong>Clara Nogueira</strong><br><span style="color:#3D3A35">Professora responsável</span></div>
+      <div style="padding-top:10px;border-top:1px solid #141414;font-size:14px"><strong>Aprovado em 03/07/2026</strong><br><span style="color:#3D3A35">Versão 1 · Portal do Professor</span></div>
+    </div>
+  </div>
+  <footer style="margin-top:16px;display:flex;flex-direction:column;gap:10px">
+    <img src="assets/fb-filete-preto.png" alt="" style="width:100%;height:12px;object-fit:contain;display:block">
+    <div style="display:flex;justify-content:space-between;gap:24px;font-size:12px;color:#3D3A35"><span>Instituto Musical Felipe Blaft — documento gerado a partir dos relatórios de aula do período.</span><span style="white-space:nowrap">Página 2 de 2</span></div>
+  </footer>
+</section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const SEM=[
+ ['Informações Gerais','Matteo Mafra, 11 anos, aluno de piano desde 2024. Professora responsável: Clara Nogueira.'],
+ ['Frequência e Estudo','Compareceu a 12 das 13 aulas previstas. Manteve estudo em casa regular, em média três vezes por semana.'],
+ ['Técnica','Evoluiu na articulação e na postura dos punhos. Executa escalas maiores com até dois acidentes, em duas oitavas, mãos juntas.'],
+ ['Musicalidade','Passou a diferenciar dinâmicas com mais clareza e a respeitar as respirações das frases.'],
+ ['Leitura e Memorização','Leitura em clave de sol fluente; clave de fá em desenvolvimento. Memorizou duas peças do repertório.'],
+ ['Pontos de Atenção','Independência entre as mãos em passagens com ritmos diferentes.'],
+ ['Estratégias Pedagógicas','Estudo com mãos separadas, metrônomo progressivo e leitura diária em pequenas doses.'],
+ ['Acompanhamento Familiar','—'],
+ ['Planejamento do Próximo Semestre','Introduzir escalas menores, uma sonatina clássica e preparar o repertório do recital de fim de ano.'],
+ ['Parecer Final','Matteo teve um semestre consistente, com progresso técnico claro e ótima disposição para aprender. Recomendamos a continuidade no próximo semestre.']].map(([t,text],i)=>({n:String(i+1),t,text}));
+class Component extends DCLogic {
+  renderVals(){
+    const aula=[
+      {t:'Conteúdos trabalhados',items:['Estudo nº 5 de Czerny, op. 599 — compassos 1 a 16','Escala de Sol maior em duas oitavas, mãos juntas','Leitura à primeira vista em clave de fá']},
+      {t:'Evolução',text:'Matteo tocou com mais segurança a articulação da mão direita e manteve o andamento estável na primeira metade do estudo. A postura dos punhos melhorou em relação à aula anterior.'},
+      {t:'Dificuldades',items:['Independência entre as mãos nos compassos 9 a 12','Leitura em clave de fá ainda lenta']},
+      {t:'Atividades propostas',items:['Estudar os compassos 9 a 12 com mãos separadas, 10 minutos por dia','Escala de Sol maior com metrônomo a 72 bpm','Ler uma linha do método de leitura por dia']},
+      {t:'Observações',text:'—'}].map(r=>({...r,list:!!r.items,isText:!!r.text}));
+    return {aula,sem1:SEM.slice(0,6),sem2:SEM.slice(6)};
+  }
+}
+</script>
+</body>
+</html>

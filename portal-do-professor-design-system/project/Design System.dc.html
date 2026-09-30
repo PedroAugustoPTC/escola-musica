@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,300,0..1,0&display=block" rel="stylesheet">
+<style>html,body{margin:0;background:#E9E4DA}*{box-sizing:border-box}a{color:#7A5C30}a:hover{color:#8C6D3F}:focus-visible{outline:2px solid #B8955A;outline-offset:2px}input::placeholder,textarea::placeholder{color:var(--mu);opacity:1}button:disabled{opacity:.45;cursor:not-allowed}@keyframes fbspin{to{transform:rotate(360deg)}}@keyframes fbpulse{0%,100%{opacity:1}50%{opacity:.35}}</style>
+</helmet>
+<div style="font-family:'Source Sans 3',system-ui,sans-serif;color:#141414;font-size:16px;line-height:1.5">
+  <header style="background:#0B0B0B;color:#F3EEE4;padding:56px 48px 48px;display:flex;flex-wrap:wrap;align-items:center;gap:40px">
+    <img src="assets/fb-logo-metal.png" alt="Instituto Musical Felipe Blaft" style="width:240px;height:auto;display:block">
+    <div style="flex:1 1 360px">
+      <div style="font-family:'Cinzel',serif;font-size:12px;letter-spacing:.28em;color:#C9A96E">DESIGN SYSTEM · v1</div>
+      <h1 style="margin:8px 0 10px;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:52px;line-height:1">Relatórios pedagógicos</h1>
+      <p style="margin:0;max-width:620px;color:#B3AB9C">Tokens e componentes do Portal do Professor e da Secretaria. Serifada só em títulos e marca; Source Sans 3 em toda a interface. Dourado claro nunca é usado em texto no modo claro — use <strong style="color:#D9BC85">gold-strong</strong>.</p>
+    </div>
+  </header>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,680px),1fr))">
+  <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+  <div style="{{ th.vars }}">
+  <div style="background:var(--bg);color:var(--tx);padding:40px 40px 64px;display:flex;flex-direction:column;gap:44px;height:100%">
+    <div style="display:flex;align-items:center;gap:14px">
+      <img src="assets/fb-monograma-{{ th.ink }}.png" alt="" style="width:36px;height:36px;object-fit:contain;display:block">
+      <div style="font-family:'Cinzel',serif;font-size:14px;letter-spacing:.24em;color:var(--gs)">{{ th.name }}</div>
+    </div>
+
+    <section style="display:flex;flex-direction:column;gap:14px">
+      <h2 style="margin:0;font-family:'Cinzel',serif;font-size:12px;font-weight:500;letter-spacing:.22em;color:var(--mu)">CORES</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px">
+        <sc-for list="{{ th.colors }}" as="c" hint-placeholder-count="9">
+          <div style="border:1px solid var(--bd);border-radius:6px;overflow:hidden;background:var(--sf)">
+            <div style="height:48px;background:{{ c.v }};border-bottom:1px solid var(--bd)"></div>
+            <div style="padding:8px 10px"><div style="font-size:13px;font-weight:600">{{ c.k }}</div><div style="font-size:12px;color:var(--mu);font-variant-numeric:tabular-nums">{{ c.v }}</div></div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px">
+        <sc-for list="{{ th.states }}" as="c" hint-placeholder-count="4">
+          <div style="padding:10px 12px;border-radius:6px;background:{{ c.bg }};color:{{ c.fg }};display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600"><span style="font-family:'Material Symbols Outlined';font-size:18px;font-weight:300">{{ c.i }}</span>{{ c.k }}</div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display:flex;flex-direction:column;gap:12px">
+      <h2 style="margin:0;font-family:'Cinzel',serif;font-size:12px;font-weight:500;letter-spacing:.22em;color:var(--mu)">TIPOGRAFIA</h2>
+      <div style="padding:24px;border:1px solid var(--bd);border-radius:8px;background:var(--sf);display:flex;flex-direction:column;gap:14px">
+        <div style="font-family:'Cinzel',serif;font-size:13px;letter-spacing:.26em;color:var(--gs)">INSTITUTO MUSICAL · Cinzel 11–14 · caixa-alta +0.22em</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:40px;line-height:1.05">Título de página · Cormorant 600 / 34–40</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:22px">Título de seção · Cormorant 600 / 22</div>
+        <div style="font-size:16px">Corpo · Source Sans 3 400 / 16 · altura de linha 1.5. O professor manda um áudio e recebe um relatório pronto para revisar.</div>
+        <div style="font-size:15px;font-weight:600">Rótulo de campo · 600 / 15</div>
+        <div style="font-size:14px;color:var(--mu)">Texto de apoio · 400 / 14 · text-muted</div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-end">
+        <sc-for list="{{ spacing }}" as="sp" hint-placeholder-count="8">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:{{ sp }}px;height:{{ sp }}px;background:var(--gd)"></div><span style="font-size:12px;color:var(--mu)">{{ sp }}</span></div>
+        </sc-for>
+        <div style="display:flex;gap:12px;margin-left:auto">
+          <div style="width:56px;height:40px;border:1px solid var(--gd);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px">4</div>
+          <div style="width:56px;height:40px;border:1px solid var(--gd);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px">6</div>
+          <div style="width:56px;height:40px;border:1px solid var(--gd);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;box-shadow:0 8px 24px rgba(0,0,0,.08)">8 · sombra</div>
+        </div>
+      </div>
+    </section>
+
+    <section style="display:flex;flex-direction:column;gap:14px">
+      <h2 style="margin:0;font-family:'Cinzel',serif;font-size:12px;font-weight:500;letter-spacing:.22em;color:var(--mu)">BOTÕES</h2>
+      <div style="display:grid;grid-template-columns:90px repeat(6,minmax(0,1fr));gap:10px;align-items:center;font-size:12px;color:var(--mu)">
+        <span></span><span>Normal</span><span>Hover</span><span>Foco</span><span>Pressionado</span><span>Carregando</span><span>Desabilitado</span>
+        <span>Primário</span>
+        <button style="min-height:48px;border-radius:6px;border:1px solid var(--pbg);background:var(--pbg);color:var(--ptx);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600">Aprovar</button>
+        <button style="min-height:48px;border-radius:6px;border:1px solid var(--phov);background:var(--phov);color:var(--ptx);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600">Aprovar</button>
+        <button style="min-height:48px;border-radius:6px;border:1px solid var(--pbg);background:var(--pbg);color:var(--ptx);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;outline:2px solid var(--gd);outline-offset:2px">Aprovar</button>
+        <button style="min-height:48px;border-radius:6px;border:1px solid var(--phov);background:var(--phov);color:var(--ptx);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;transform:scale(.97)">Aprovar</button>
+        <button aria-busy="true" style="min-height:48px;border-radius:6px;border:1px solid var(--pbg);background:var(--pbg);color:var(--ptx);display:flex;align-items:center;justify-content:center"><span style="width:18px;height:18px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:fbspin .8s linear infinite"></span></button>
+        <button disabled="disabled" style="min-height:48px;border-radius:6px;border:1px solid var(--pbg);background:var(--pbg);color:var(--ptx);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600">Aprovar</button>
+        <span>Secundário</span>
+        <button style="min-height:48px;border-radius:6px;border:1px solid var(--gd);background:transparent;color:var(--gs);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600">Histórico</button>
+        <button style="min-height:48px;border-radius:6px;border:1px solid var(--gd);background:var(--sf2);color:var(--gs);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600">Histórico</button>
+        <button style="min-height:48px;border-radius:6px;border:1px solid var(--gd);background:transparent;color:var(--gs);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;outline:2px solid var(--gd);outline-offset:2px">Histórico</button>
+        <button style="min-height:48px;border-radius:6px;border:1px solid var(--gdp);background:var(--sf2);color:var(--gs);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;transform:scale(.97)">Histórico</button>
+        <button style="min-height:48px;border-radius:6px;border:1px solid var(--gd);background:transparent;color:var(--gs);display:flex;align-items:center;justify-content:center"><span style="width:18px;height:18px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:fbspin .8s linear infinite"></span></button>
+        <button disabled="disabled" style="min-height:48px;border-radius:6px;border:1px solid var(--gd);background:transparent;color:var(--gs);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600">Histórico</button>
+        <span>Terciário</span>
+        <button style="min-height:44px;border:none;background:transparent;color:var(--gs);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;text-decoration:underline;text-underline-offset:4px">Ver todos</button>
+        <button style="min-height:44px;border:none;border-radius:6px;background:var(--sf2);color:var(--gs);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;text-decoration:underline;text-underline-offset:4px">Ver todos</button>
+        <button style="min-height:44px;border:none;background:transparent;color:var(--gs);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;text-decoration:underline;text-underline-offset:4px;outline:2px solid var(--gd);outline-offset:2px">Ver todos</button>
+        <button style="min-height:44px;border:none;background:transparent;color:var(--gdp);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;text-decoration:underline;text-underline-offset:4px">Ver todos</button>
+        <span></span>
+        <button disabled="disabled" style="min-height:44px;border:none;background:transparent;color:var(--gs);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;text-decoration:underline">Ver todos</button>
+        <span>Destrutivo</span>
+        <button style="min-height:48px;border-radius:6px;border:1px solid var(--err);background:var(--err);color:var(--erron);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600">Descartar</button>
+        <button style="min-height:48px;border-radius:6px;border:1px solid var(--err);background:transparent;color:var(--err);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600">Descartar</button>
+        <button style="min-height:48px;border-radius:6px;border:1px solid var(--err);background:transparent;color:var(--err);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;outline:2px solid var(--gd);outline-offset:2px">Descartar</button>
+        <button style="min-height:48px;border-radius:6px;border:1px solid var(--err);background:var(--errbg);color:var(--err);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;transform:scale(.97)">Descartar</button>
+        <span></span>
+        <button disabled="disabled" style="min-height:48px;border-radius:6px;border:1px solid var(--err);background:transparent;color:var(--err);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600">Descartar</button>
+      </div>
+    </section>
+
+    <section style="display:flex;flex-direction:column;gap:14px">
+      <h2 style="margin:0;font-family:'Cinzel',serif;font-size:12px;font-weight:500;letter-spacing:.22em;color:var(--mu)">CAMPOS</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px 20px">
+        <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:15px;font-weight:600">Nome *</span><input value="Matteo Mafra" style="height:48px;padding:0 14px;border-radius:6px;border:1px solid var(--bd);background:var(--sf);color:var(--tx);font-family:'Source Sans 3',sans-serif;font-size:16px"></label>
+        <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:15px;font-weight:600">Data de nascimento *</span><input placeholder="dd/mm/aaaa" style="height:48px;padding:0 14px;border-radius:6px;border:1px solid var(--bd);background:var(--sf);color:var(--tx);font-family:'Source Sans 3',sans-serif;font-size:16px"></label>
+        <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:15px;font-weight:600">CPF *</span><input value="305.318.204-55" style="height:48px;padding:0 14px;border-radius:6px;border:1px solid var(--bd);background:var(--sf);color:var(--tx);font-family:'Source Sans 3',sans-serif;font-size:16px;font-variant-numeric:tabular-nums"></label>
+        <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:15px;font-weight:600">Data de nascimento *</span><input value="31/02/2015" aria-invalid="true" style="height:48px;padding:0 14px;border-radius:6px;border:1px solid var(--err);background:var(--sf);color:var(--tx);font-family:'Source Sans 3',sans-serif;font-size:16px"><span style="display:flex;gap:6px;font-size:14px;color:var(--err)"><span style="font-family:'Material Symbols Outlined';font-size:18px;font-weight:300">error</span>Data de nascimento inválida. Use o formato dd/mm/aaaa.</span></label>
+        <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:15px;font-weight:600">Código de acesso</span><input value="K7M2-9QXT" style="height:56px;padding:0 16px;border-radius:6px;border:1px solid var(--bd);background:var(--sf);color:var(--tx);font-family:'Source Sans 3',sans-serif;font-size:20px;font-weight:600;letter-spacing:.18em"></label>
+        <label style="position:relative;display:flex;flex-direction:column;gap:6px"><span style="font-size:15px;font-weight:600">Busca</span><span style="position:relative;display:block"><span aria-hidden="true" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-family:'Material Symbols Outlined';font-size:20px;font-weight:300;color:var(--mu)">search</span><input placeholder="Buscar aluno por nome" style="width:100%;height:48px;padding:0 12px 0 40px;border-radius:6px;border:1px solid var(--bd);background:var(--sf2);color:var(--tx);font-family:'Source Sans 3',sans-serif;font-size:16px"></span></label>
+      </div>
+      <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:15px;font-weight:600">Precisa ajustar algo? Descreva a alteração com suas palavras.</span><textarea rows="2" placeholder="Ex.: o aluno teve mais facilidade em leitura do que consta nas dificuldades." style="padding:12px 14px;border-radius:6px;border:1px solid var(--bd);background:var(--sf);color:var(--tx);font-family:'Source Sans 3',sans-serif;font-size:16px;resize:vertical"></textarea></label>
+      <div style="display:flex;flex-wrap:wrap;gap:24px">
+        <div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:15px;font-weight:600">Pílulas (semestre)</span><div style="display:flex;gap:8px"><span style="min-height:48px;display:inline-flex;align-items:center;gap:6px;padding:0 18px;border-radius:999px;border:1px solid var(--bd);background:var(--sf);font-weight:600"><span style="font-family:'Material Symbols Outlined';font-size:18px;font-weight:300">calendar_month</span>1º semestre 2026</span><span style="min-height:48px;display:inline-flex;align-items:center;gap:6px;padding:0 18px;border-radius:999px;border:1px solid var(--pbg);background:var(--pbg);color:var(--ptx);font-weight:600"><span style="font-family:'Material Symbols Outlined';font-size:18px;font-weight:300">check</span>2º semestre 2026</span></div></div>
+        <div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:15px;font-weight:600">Multi-seleção</span><div style="display:flex;gap:8px"><span style="min-height:44px;display:inline-flex;align-items:center;gap:6px;padding:0 14px;border-radius:999px;border:1px solid var(--pbg);background:var(--pbg);color:var(--ptx);font-weight:600;font-size:15px"><span style="font-family:'Material Symbols Outlined';font-size:18px;font-weight:300">check</span>Clara Nogueira</span><span style="min-height:44px;display:inline-flex;align-items:center;gap:6px;padding:0 14px;border-radius:999px;border:1px solid var(--bd);background:var(--sf);font-weight:600;font-size:15px"><span style="font-family:'Material Symbols Outlined';font-size:18px;font-weight:300">add</span>Rafael Antunes</span></div></div>
+      </div>
+    </section>
+
+    <section style="display:flex;flex-direction:column;gap:14px">
+      <h2 style="margin:0;font-family:'Cinzel',serif;font-size:12px;font-weight:500;letter-spacing:.22em;color:var(--mu)">STATUS DO RELATÓRIO</h2>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <sc-for list="{{ th.badges }}" as="b" hint-placeholder-count="6">
+          <span style="display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:999px;font-size:13px;font-weight:600;background:{{ b.bg }};color:{{ b.c }}"><span style="font-family:'Material Symbols Outlined';font-size:16px;font-weight:300">{{ b.i }}</span>{{ b.t }}</span>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display:flex;flex-direction:column;gap:10px">
+      <h2 style="margin:0;font-family:'Cinzel',serif;font-size:12px;font-weight:500;letter-spacing:.22em;color:var(--mu)">ALERTAS · TOAST</h2>
+      <sc-for list="{{ th.alerts }}" as="a" hint-placeholder-count="4">
+        <div role="alert" style="display:flex;gap:12px;padding:14px 16px;border-radius:6px;background:{{ a.bg }};border:1px solid {{ a.c }}"><span style="font-family:'Material Symbols Outlined';font-size:22px;font-weight:300;color:{{ a.c }}">{{ a.i }}</span><div style="font-size:15px"><strong style="color:{{ a.c }}">{{ a.t }}</strong> {{ a.d }}</div></div>
+      </sc-for>
+      <div style="align-self:flex-start;display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:6px;background:#141414;color:#F3EEE4;border:1px solid #2A2A2A;box-shadow:0 12px 32px rgba(0,0,0,.25);font-size:15px"><span style="font-family:'Material Symbols Outlined';font-size:20px;font-weight:300;color:#C9A96E">check_circle</span>Alteração aplicada. Confira a versão 3.</div>
+    </section>
+
+    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <h2 style="margin:0;font-family:'Cinzel',serif;font-size:12px;font-weight:500;letter-spacing:.22em;color:var(--mu)">CARD DE ALUNO</h2>
+        <article style="padding:18px;border:1px solid var(--bd);border-radius:8px;background:var(--sf);display:flex;flex-direction:column;gap:12px">
+          <div><div style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:23px;line-height:1.15">Olavo Torrente</div><div style="font-size:14px;color:var(--mu)">Piano · última aula 24/09/2026</div></div>
+          <button style="min-height:48px;border-radius:6px;border:1px solid var(--pbg);background:var(--pbg);color:var(--ptx);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600">Novo relatório de aula</button>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button style="min-height:44px;border-radius:6px;border:1px solid var(--gd);background:transparent;color:var(--gs);font-family:'Source Sans 3',sans-serif;font-size:14px;font-weight:600">Relatório semestral</button><button style="min-height:44px;border-radius:6px;border:1px solid var(--gd);background:transparent;color:var(--gs);font-family:'Source Sans 3',sans-serif;font-size:14px;font-weight:600">Histórico</button></div>
+        </article>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <h2 style="margin:0;font-family:'Cinzel',serif;font-size:12px;font-weight:500;letter-spacing:.22em;color:var(--mu)">MODAL DE CONFIRMAÇÃO</h2>
+        <div style="padding:20px;border:1px solid var(--bd);border-radius:8px;background:var(--sf);box-shadow:0 24px 60px rgba(0,0,0,.18);display:flex;flex-direction:column;gap:10px">
+          <div style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:23px;line-height:1.15">Cancelar este relatório?</div>
+          <div style="font-size:15px;color:var(--mu)">O áudio e o texto gerado serão descartados. Esta ação não pode ser desfeita.</div>
+          <button style="min-height:48px;border-radius:6px;border:1px solid var(--err);background:var(--err);color:var(--erron);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600">Cancelar relatório</button>
+          <button style="min-height:44px;border-radius:6px;border:1px solid var(--gd);background:transparent;color:var(--gs);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600">Voltar</button>
+        </div>
+      </div>
+    </section>
+
+    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <h2 style="margin:0;font-family:'Cinzel',serif;font-size:12px;font-weight:500;letter-spacing:.22em;color:var(--mu)">GRAVADOR</h2>
+        <div style="padding:22px;border:1px solid var(--bd);border-radius:8px;background:var(--sf);display:flex;flex-direction:column;align-items:center;gap:14px">
+          <div style="font-size:36px;font-weight:300;font-variant-numeric:tabular-nums;line-height:1">01:23</div>
+          <div style="display:flex;align-items:center;gap:3px;height:48px"><sc-for list="{{ wave }}" as="w" hint-placeholder-count="28"><span style="width:3px;border-radius:2px;background:var(--gd);height:{{ w }}px"></span></sc-for></div>
+          <div style="width:80px;height:80px;border-radius:50%;background:var(--err);color:var(--erron);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 8px var(--sf2)"><span style="font-family:'Material Symbols Outlined';font-size:36px;font-weight:300">stop</span></div>
+          <div style="font-size:13px;color:var(--mu)">Alvo 88px · estados: gravar / parar / regravar</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <h2 style="margin:0;font-family:'Cinzel',serif;font-size:12px;font-weight:500;letter-spacing:.22em;color:var(--mu)">ETAPAS · TECLAS</h2>
+        <ol style="list-style:none;margin:0;padding:20px;border:1px solid var(--bd);border-radius:8px;background:var(--sf);display:flex;flex-direction:column;gap:10px">
+          <sc-for list="{{ keys }}" as="k" hint-placeholder-count="4">
+            <li style="display:flex;align-items:center;gap:14px"><span style="position:relative;width:64px;height:16px;border-radius:2px;overflow:hidden;border:1px solid {{ k.bd }};background:{{ k.bg }}"><span style="position:absolute;left:0;top:0;bottom:0;width:{{ k.p }}%;background:var(--gd)"></span></span><span style="font-size:15px;color:{{ k.c }};font-weight:{{ k.w }}">{{ k.t }}</span></li>
+          </sc-for>
+        </ol>
+        <div style="font-size:13px;color:var(--mu)">Tecla sólida = concluída · traço fino = pendente · preenchimento = em andamento.</div>
+      </div>
+    </section>
+
+    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <h2 style="margin:0;font-family:'Cinzel',serif;font-size:12px;font-weight:500;letter-spacing:.22em;color:var(--mu)">CARREGANDO · VAZIO</h2>
+        <div style="padding:18px;border:1px solid var(--bd);border-radius:8px;background:var(--sf);display:flex;flex-direction:column;gap:10px"><div style="width:60%;height:20px;border-radius:4px;background:var(--sf2);animation:fbpulse 1.6s infinite"></div><div style="width:35%;height:14px;border-radius:4px;background:var(--sf2);animation:fbpulse 1.6s infinite"></div><div style="height:44px;border-radius:6px;background:var(--sf2);animation:fbpulse 1.6s infinite"></div></div>
+        <div style="padding:28px 18px;border:1px dashed var(--bd);border-radius:8px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center"><img src="assets/fb-monograma-{{ th.gold }}.png" alt="" style="width:44px;height:44px;object-fit:contain;display:block"><span style="font-size:15px">Este aluno ainda não tem relatórios aprovados.</span></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <h2 style="margin:0;font-family:'Cinzel',serif;font-size:12px;font-weight:500;letter-spacing:.22em;color:var(--mu)">DIVISOR · FILETE</h2>
+        <div style="padding:28px 18px;border:1px solid var(--bd);border-radius:8px;background:var(--sf);display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center">
+          <div style="font-family:'Cormorant Garamond',serif;font-weight:600;font-size:28px">Relatório aprovado</div>
+          <img src="assets/fb-filete-{{ th.gold }}.png" alt="" style="width:100%;max-width:260px;height:12px;object-fit:contain;display:block">
+          <div style="font-size:13px;color:var(--mu)">Só em momentos de conclusão e no PDF.</div>
+        </div>
+      </div>
+    </section>
+
+    <section style="display:flex;flex-direction:column;gap:10px">
+      <h2 style="margin:0;font-family:'Cinzel',serif;font-size:12px;font-weight:500;letter-spacing:.22em;color:var(--mu)">CABEÇALHOS · NAVEGAÇÃO · RODAPÉ</h2>
+      <div style="border:1px solid var(--bd);border-radius:8px;overflow:hidden;background:var(--sf)">
+        <div style="height:64px;display:flex;align-items:center;gap:24px;padding:0 20px;border-bottom:1px solid var(--bd)">
+          <img src="assets/fb-monograma-{{ th.ink }}.png" alt="" style="width:30px;height:30px;object-fit:contain"><span style="width:1px;height:24px;background:var(--gd)"></span><img src="assets/fb-wordmark-{{ th.ink }}.png" alt="Felipe Blaft" style="width:120px;height:auto">
+          <span style="flex:1"></span><span style="font-size:14px;font-weight:600;color:var(--gs);border-bottom:2px solid var(--gd);padding:20px 0">Painel</span><span style="font-size:14px;font-weight:600;color:var(--mu)">Alunos</span>
+        </div>
+        <div style="display:flex;gap:16px;padding:16px 20px;align-items:flex-end">
+          <div style="width:220px;border:1px solid var(--bd);border-radius:8px;overflow:hidden">
+            <div style="height:52px;display:flex;align-items:center;gap:8px;padding:0 10px;border-bottom:1px solid var(--bd)"><img src="assets/fb-monograma-{{ th.ink }}.png" alt="" style="width:24px;height:24px;object-fit:contain"><span style="flex:1"></span><span style="font-family:'Material Symbols Outlined';font-size:22px;font-weight:300">search</span><span style="font-family:'Material Symbols Outlined';font-size:22px;font-weight:300">menu</span></div>
+            <div style="height:90px;background:var(--bg)"></div>
+            <div style="height:56px;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--bd);font-size:11px;font-weight:600;text-align:center"><span style="color:var(--gs);display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-family:'Material Symbols Outlined';font-size:20px;font-weight:300">space_dashboard</span>Painel</span><span style="color:var(--mu);display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-family:'Material Symbols Outlined';font-size:20px;font-weight:300">group</span>Alunos</span><span style="color:var(--mu);display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-family:'Material Symbols Outlined';font-size:20px;font-weight:300">mic</span>Registrar</span></div>
+          </div>
+          <div style="flex:1;font-size:12px;color:var(--mu);border-top:1px solid var(--bd);padding-top:10px;display:flex;justify-content:space-between;gap:8px"><span style="font-family:'Cinzel',serif;letter-spacing:.14em">INSTITUTO MUSICAL FELIPE BLAFT</span><span>Rodapé institucional</span></div>
+        </div>
+      </div>
+    </section>
+  </div>
+  </div>
+  </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const TH={
+ light:{'--bg':'#FAF7F0','--sf':'#FFFFFF','--sf2':'#F2EDE3','--tx':'#141414','--mu':'#5A554C','--bd':'#E3DCCE','--gd':'#B8955A','--gs':'#7A5C30','--gdp':'#8C6D3F','--pbg':'#141414','--ptx':'#FAF7F0','--phov':'#3A342C','--ok':'#4A5A26','--okbg':'#EEF0E2','--warn':'#855412','--warnbg':'#F8EEDA','--err':'#7D2330','--errbg':'#F7E7E7','--erron':'#FFFFFF','--info':'#1E5360','--infobg':'#E2EDEF'},
+ dark:{'--bg':'#0B0B0B','--sf':'#151515','--sf2':'#1E1E1E','--tx':'#F3EEE4','--mu':'#B3AB9C','--bd':'#2A2A2A','--gd':'#C9A96E','--gs':'#D9BC85','--gdp':'#8C6D3F','--pbg':'#C9A96E','--ptx':'#0B0B0B','--phov':'#D9BC85','--ok':'#AEBF7E','--okbg':'#181C10','--warn':'#E3B66A','--warnbg':'#21190B','--err':'#E69AA2','--errbg':'#261013','--erron':'#1A0A0C','--info':'#8EC4CC','--infobg':'#0E1D20'}};
+const NAMES={'--bg':'bg','--sf':'surface','--sf2':'surface-2','--tx':'text','--mu':'text-muted','--bd':'border','--gd':'gold','--gs':'gold-strong','--gdp':'gold-deep'};
+class Component extends DCLogic {
+  renderVals(){
+    const mk=(k,name,ink,gold)=>{const t=TH[k];return{name,ink,gold,vars:t,
+      colors:Object.keys(NAMES).map(x=>({k:NAMES[x],v:t[x]})),
+      states:[{k:'Sucesso',i:'check_circle',fg:'var(--ok)',bg:'var(--okbg)'},{k:'Atenção',i:'warning',fg:'var(--warn)',bg:'var(--warnbg)'},{k:'Erro',i:'error',fg:'var(--err)',bg:'var(--errbg)'},{k:'Informação',i:'info',fg:'var(--info)',bg:'var(--infobg)'}],
+      badges:[{t:'Rascunho',i:'edit_note',c:'var(--mu)',bg:'var(--sf2)'},{t:'Aguardando conferência',i:'schedule',c:'var(--warn)',bg:'var(--warnbg)'},{t:'Aprovado',i:'check_circle',c:'var(--ok)',bg:'var(--okbg)'},{t:'Cancelado',i:'block',c:'var(--mu)',bg:'var(--sf2)'},{t:'Processando',i:'progress_activity',c:'var(--info)',bg:'var(--infobg)'},{t:'Falhou',i:'error',c:'var(--err)',bg:'var(--errbg)'}],
+      alerts:[{t:'Relatório aprovado.',d:'Já consta no histórico do aluno.',i:'check_circle',c:'var(--ok)',bg:'var(--okbg)'},{t:'Relatório em aberto.',d:'Última alteração em 20/09/2026 09:57.',i:'warning',c:'var(--warn)',bg:'var(--warnbg)'},{t:'Não foi possível processar o áudio.',d:'Tente novamente.',i:'error',c:'var(--err)',bg:'var(--errbg)'},{t:'O PDF ainda está sendo gerado.',d:'Você já pode conferir o texto.',i:'info',c:'var(--info)',bg:'var(--infobg)'}]}};
+    const b=i=>Math.round(8+Math.abs(Math.sin(i*1.7)*Math.cos(i*.45))*38);
+    return {themes:[mk('light','MODO CLARO · marfim + preto + dourado','preto','ouroclaro'),mk('dark','MODO ESCURO · preto + dourado','marfim','ouro')],
+      spacing:[4,8,12,16,24,32,48,64],wave:Array.from({length:28},(_,i)=>b(i)),
+      keys:[{t:'Enviando o áudio',p:100,bg:'var(--gd)',bd:'var(--gd)',c:'var(--tx)',w:400},{t:'Transcrevendo',p:100,bg:'var(--gd)',bd:'var(--gd)',c:'var(--tx)',w:400},{t:'Estruturando o relatório',p:45,bg:'transparent',bd:'var(--gd)',c:'var(--tx)',w:600},{t:'Pronto para conferência',p:0,bg:'transparent',bd:'var(--bd)',c:'var(--mu)',w:400}]};
+  }
+}
+</script>
+</body>
+</html>

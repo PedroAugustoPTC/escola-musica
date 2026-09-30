@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500&family=Cormorant+Garamond:wght@600&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>html,body{margin:0;background:#E9E4DA}*{box-sizing:border-box}a{color:#7A5C30}a:hover{color:#8C6D3F}</style>
+</helmet>
+<div style="padding:64px;display:flex;flex-direction:column;gap:96px;font-family:'Source Sans 3',sans-serif;color:#141414">
+  <header style="display:flex;align-items:center;gap:28px">
+    <img src="assets/fb-monograma-preto.png" alt="" style="width:64px;height:64px;object-fit:contain">
+    <div>
+      <div style="font-family:'Cinzel',serif;font-size:13px;letter-spacing:.28em;color:#7A5C30">INSTITUTO MUSICAL FELIPE BLAFT</div>
+      <h1 style="margin:4px 0 6px;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:56px;line-height:1">Telas · Relatórios pedagógicos por voz</h1>
+      <div style="display:flex;gap:20px;font-size:17px"><a href="Portal do Professor.dc.html">Protótipo navegável do professor</a><a href="Secretaria.dc.html">Protótipo da secretaria</a><a href="Design System.dc.html">Design system</a><a href="Modelo PDF.dc.html">Modelo do PDF</a></div>
+    </div>
+  </header>
+
+  <section style="display:flex;flex-direction:column;gap:28px">
+    <h2 style="margin:0;font-family:'Cinzel',serif;font-weight:500;font-size:22px;letter-spacing:.2em">PORTAL DO PROFESSOR · 390 PX</h2>
+    <div style="display:flex;flex-wrap:wrap;gap:40px 32px">
+      <sc-for list="{{ pm }}" as="a" hint-placeholder-count="12">
+        <figure style="margin:0;display:flex;flex-direction:column;gap:10px">
+          <figcaption style="font-size:16px"><strong>{{ a.id }}</strong> · {{ a.t }}</figcaption>
+          <div style="width:390px;height:844px;border-radius:16px;overflow:hidden;background:#FAF7F0;box-shadow:0 2px 6px rgba(0,0,0,.06),0 20px 50px rgba(0,0,0,.12)">
+            <dc-import name="Portal do Professor" screen="{{ a.s }}" variant="{{ a.v }}" theme="{{ a.th }}" layout="mobile" frame="{{ true }}" still="{{ true }}" hint-size="390px,844px" style="width:390px;height:844px"></dc-import>
+          </div>
+        </figure>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:28px">
+    <h2 style="margin:0;font-family:'Cinzel',serif;font-weight:500;font-size:22px;letter-spacing:.2em">PORTAL DO PROFESSOR · 1440 PX</h2>
+    <div style="display:flex;flex-wrap:wrap;gap:48px">
+      <sc-for list="{{ pd }}" as="a" hint-placeholder-count="4">
+        <figure style="margin:0;display:flex;flex-direction:column;gap:10px">
+          <figcaption style="font-size:18px"><strong>{{ a.id }}</strong> · {{ a.t }}</figcaption>
+          <div style="width:1440px;height:900px;border-radius:10px;overflow:hidden;background:#FAF7F0;box-shadow:0 2px 6px rgba(0,0,0,.06),0 20px 50px rgba(0,0,0,.12)">
+            <dc-import name="Portal do Professor" screen="{{ a.s }}" variant="{{ a.v }}" theme="{{ a.th }}" layout="desktop" frame="{{ true }}" still="{{ true }}" hint-size="1440px,900px" style="width:1440px;height:900px"></dc-import>
+          </div>
+        </figure>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:28px">
+    <h2 style="margin:0;font-family:'Cinzel',serif;font-weight:500;font-size:22px;letter-spacing:.2em">SECRETARIA · 1440 PX</h2>
+    <div style="display:flex;flex-wrap:wrap;gap:48px">
+      <sc-for list="{{ sd }}" as="a" hint-placeholder-count="4">
+        <figure style="margin:0;display:flex;flex-direction:column;gap:10px">
+          <figcaption style="font-size:18px"><strong>{{ a.id }}</strong> · {{ a.t }}</figcaption>
+          <div style="width:1440px;height:900px;border-radius:10px;overflow:hidden;background:#FAF7F0;box-shadow:0 2px 6px rgba(0,0,0,.06),0 20px 50px rgba(0,0,0,.12)">
+            <dc-import name="Secretaria" screen="{{ a.s }}" variant="{{ a.v }}" theme="{{ a.th }}" layout="desktop" frame="{{ true }}" hint-size="1440px,900px" style="width:1440px;height:900px"></dc-import>
+          </div>
+        </figure>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:28px">
+    <h2 style="margin:0;font-family:'Cinzel',serif;font-weight:500;font-size:22px;letter-spacing:.2em">SECRETARIA · 390 PX</h2>
+    <div style="display:flex;flex-wrap:wrap;gap:40px 32px">
+      <sc-for list="{{ sm }}" as="a" hint-placeholder-count="6">
+        <figure style="margin:0;display:flex;flex-direction:column;gap:10px">
+          <figcaption style="font-size:16px"><strong>{{ a.id }}</strong> · {{ a.t }}</figcaption>
+          <div style="width:390px;height:844px;border-radius:16px;overflow:hidden;background:#FAF7F0;box-shadow:0 2px 6px rgba(0,0,0,.06),0 20px 50px rgba(0,0,0,.12)">
+            <dc-import name="Secretaria" screen="{{ a.s }}" variant="{{ a.v }}" theme="{{ a.th }}" layout="mobile" frame="{{ true }}" hint-size="390px,844px" style="width:390px;height:844px"></dc-import>
+          </div>
+        </figure>
+      </sc-for>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const L=(arr,th)=>arr.map(([id,t,s,v,dark])=>({id,t,s,v:v||'',th:dark?'dark':(th||'light')}));
+class Component extends DCLogic {
+  renderVals(){
+    return {
+      pm:L([['01','Entrar','login'],['01b','Código inválido','login','invalid'],['01c','Bloqueio','login','locked'],['01d','Sem conexão','login','offline'],
+        ['02','Painel','painel'],['02b','Painel · vazio','painel','empty'],['02c','Menu','painel','menu'],['02d','Painel · modo escuro','painel','',1],
+        ['03','Alunos','alunos'],['03b','Busca sem resultado','alunos','search-empty'],['03c','Carregando','alunos','loading'],
+        ['04','Relatório em aberto','retomada'],['04b','Descartar · confirmação','retomada','confirm-discard'],
+        ['05','Gravação','gravar'],['05b','Gravando','gravar','recording'],['05c','Gravação concluída','gravar','recorded'],['05d','Só envio de arquivo','gravar','blocked'],['05e','Gravando · modo escuro','gravar','recording',1],
+        ['06','Processando','processando'],['06b','Enviando','processando','step1'],['06c','Falha','processando','failed'],
+        ['07','Perguntas pendentes','perguntas'],
+        ['08','Conferência · texto','conferencia'],['08b','PDF sendo gerado','conferencia','pdf'],['08c','Aplicando alteração','conferencia','applying'],['08d','Versão desatualizada','conferencia','outdated'],['08e','Aprovar · confirmação','conferencia','confirm-approve'],['08f','Cancelar · confirmação','conferencia','confirm-cancel'],['08g','Conferência · modo escuro','conferencia','',1],
+        ['09','Relatório aprovado','aprovado'],['09b','Aprovado · modo escuro','aprovado','',1],
+        ['10','Semestral · período','semestral'],['10b','Sem aulas aprovadas','semestral','error'],['10c','Nenhum semestre','semestral','empty'],
+        ['11','Conferência semestral','confsem'],
+        ['12','Histórico','historico'],['12b','Histórico · vazio','historico','empty'],['12c','Histórico · carregando','historico','loading']]),
+      pd:L([['01','Entrar','login'],['02','Painel','painel'],['03','Alunos','alunos'],['04','Relatório em aberto','retomada'],['05','Gravação concluída','gravar','recorded'],['06','Processando','processando'],['07','Perguntas pendentes','perguntas'],
+        ['08','Conferência do relatório de aula','conferencia'],['08b','Conferência · modo escuro','conferencia','',1],['09','Relatório aprovado','aprovado'],['10','Relatório semestral','semestral'],['11','Conferência semestral','confsem'],['12','Histórico','historico']]),
+      sd:L([['13','Login','login'],['13b','Login · erro','login','error'],['14','Histórico','historico'],['14b','Histórico · vazio','historico','empty'],
+        ['15','Professores','professores'],['15b','Código gerado','professores','code'],['15c','Carregando','professores','loading'],['15d','Vazio','professores','empty'],['15e','Erro','professores','error'],
+        ['16','Cadastrar professor','cadprof'],['16b','Erros de validação','cadprof','error'],['16c','Sucesso · código','cadprof','success'],
+        ['17','Cadastrar aluno · menor','cadaluno','menor'],['17b','Cadastrar aluno · adulto','cadaluno','adulto'],['17c','Erros de validação','cadaluno','errors'],['17d','Sucesso','cadaluno','success'],['15f','Professores · modo escuro','professores','code',1]]),
+      sm:L([['13','Login','login'],['M','Menu','historico','menu'],['14','Histórico','historico'],['15','Professores · código','professores','code'],['16','Cadastro · sucesso','cadprof','success'],['17','Cadastrar aluno','cadaluno','menor']])
+    };
+  }
+}
+</script>
+</body>
+</html>
