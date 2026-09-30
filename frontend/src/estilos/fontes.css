@@ -1,0 +1,42 @@
+/* Fontes servidas localmente (OFL/Apache), sem CDN (R-02). Licenças nesta mesma pasta.
+   Material Symbols: subconjunto com os ícones de fontes/icones-incluidos.txt (peso 300); para incluir
+   um ícone novo, gere de novo o arquivo com o parâmetro icon_names da API do Google Fonts. */
+@font-face {
+  font-family: 'Cinzel';
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url('./fontes/cinzel-wght.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Cormorant Garamond';
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url('./fontes/cormorant-garamond-wght.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Cormorant Garamond';
+  font-style: italic;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url('./fontes/cormorant-garamond-wght-italic.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Source Sans 3';
+  font-style: normal;
+  font-weight: 200 900;
+  font-display: swap;
+  src: url('./fontes/source-sans-3-wght.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  font-weight: 300;
+  font-display: block;
+  src: url('./fontes/material-symbols-outlined.woff2') format('woff2');
+}

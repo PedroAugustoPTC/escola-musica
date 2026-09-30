@@ -1,0 +1,35 @@
+# Perfil dos testes de integração (rodam contra o postgres-teste de infra/compose.test.yaml).
+spring:
+  datasource:
+    url: ${BANCO_URL:jdbc:postgresql://localhost:5432/relatorios_teste}
+    username: ${BANCO_USUARIO:relatorios}
+    password: ${BANCO_SENHA:teste}
+  servlet:
+    multipart:
+      location: ${java.io.tmpdir}
+
+relatorios:
+  audio:
+    limite-mb: 50
+    temp-dir: ${java.io.tmpdir}/relatorios-teste/audios
+  sessao:
+    cookie-seguro: true
+  seguranca:
+    cpf-chave: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+    segredo-hmac: segredo-hmac-de-testes-com-mais-de-32-bytes
+  documentos:
+    dir: ${java.io.tmpdir}/relatorios-teste/documentos
+  telegram:
+    habilitado: false
+    token: "123456:TESTE"
+    segredo-webhook: segredo-webhook-teste
+    api-url: http://localhost:1
+    arquivos-dir: ${java.io.tmpdir}/relatorios-teste/telegram
+  provedores:
+    modo: simulado
+  trabalhos:
+    workers: 0
+
+logging:
+  level:
+    root: WARN

@@ -1,0 +1,104 @@
+# Configuração lida do ambiente (infra/.env.example). Nenhum segredo fica versionado (Princípio IV).
+spring:
+  application:
+    name: relatorios
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: ${BANCO_URL:jdbc:postgresql://localhost:5432/relatorios}
+    username: ${BANCO_USUARIO:relatorios}
+    password: ${BANCO_SENHA:}
+    hikari:
+      maximum-pool-size: ${BANCO_POOL:10}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+  jackson:
+    default-property-inclusion: always
+  servlet:
+    multipart:
+      # O limite de negócio é conferido pelo adaptador (AUDIO_LIMITE_MB); aqui fica uma folga de 1 MB
+      # para que o excesso seja respondido com 413 AUDIO_MUITO_GRANDE.
+      max-file-size: ${MULTIPART_LIMITE_MB:51}MB
+      max-request-size: ${MULTIPART_LIMITE_MB:51}MB
+      file-size-threshold: 0
+      location: ${AUDIOS_TEMP_DIR:/tmp/audios}
+
+server:
+  port: 8080
+  error:
+    include-message: never
+    include-stacktrace: never
+    include-exception: false
+  tomcat:
+    max-swallow-size: -1
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  endpoint:
+    health:
+      show-details: never
+
+relatorios:
+  escola:
+    fuso-horario: ${ESCOLA_FUSO_HORARIO:America/Sao_Paulo}
+  audio:
+    limite-mb: ${AUDIO_LIMITE_MB:50}
+    temp-dir: ${AUDIOS_TEMP_DIR:/tmp/audios}
+  sessao:
+    horas: ${SESSAO_WEB_HORAS:12}
+    cookie-seguro: ${SESSAO_COOKIE_SEGURO:true}
+  acesso:
+    max-tentativas: ${ACESSO_MAX_TENTATIVAS:5}
+    bloqueio-minutos: ${ACESSO_BLOQUEIO_MINUTOS:15}
+  codigo:
+    validade-dias: ${CODIGO_VALIDADE_DIAS:7}
+  seguranca:
+    cpf-chave: ${CPF_CHAVE_CIFRAGEM:}
+    segredo-hmac: ${SEGREDO_HMAC:}
+  documentos:
+    dir: ${DOCUMENTOS_DIR:/dados/documentos}
+  telegram:
+    habilitado: ${TELEGRAM_HABILITADO:false}
+    api-url: ${TELEGRAM_API_URL:http://telegram-bot-api:8081}
+    token: ${TELEGRAM_BOT_TOKEN:}
+    segredo-webhook: ${TELEGRAM_SEGREDO_WEBHOOK:}
+    webhook-url: ${TELEGRAM_WEBHOOK_URL:http://backend:8080/telegram/webhook}
+    arquivos-dir: ${TELEGRAM_ARQUIVOS_DIR:/var/lib/telegram-bot-api}
+    audio-pendente-minutos: ${AUDIO_PENDENTE_MINUTOS:30}
+  provedores:
+    modo: ${PROVEDORES_IA:simulado}
+    transcricao:
+      url: ${TRANSCRICAO_URL:https://api.groq.com/openai/v1}
+      modelo: ${TRANSCRICAO_MODELO:whisper-large-v3-turbo}
+      chave: ${TRANSCRICAO_CHAVE:}
+      preco-usd-por-hora: ${TRANSCRICAO_PRECO_USD_POR_HORA:0.04}
+    llm:
+      url: ${LLM_URL:https://api.groq.com/openai/v1}
+      modelo: ${LLM_MODELO:llama-3.3-70b-versatile}
+      chave: ${LLM_CHAVE:}
+      preco-usd-por-milhao-entrada: ${LLM_PRECO_USD_POR_MILHAO_ENTRADA:0.59}
+      preco-usd-por-milhao-saida: ${LLM_PRECO_USD_POR_MILHAO_SAIDA:0.79}
+  trabalhos:
+    workers: ${TRABALHOS_WORKERS:2}
+    intervalo-ms: ${TRABALHOS_INTERVALO_MS:500}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: carga
+  main:
+    web-application-type: none
+    banner-mode: "off"

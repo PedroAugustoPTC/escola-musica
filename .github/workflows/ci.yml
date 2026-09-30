@@ -1,0 +1,61 @@
+# CI (Princípio V): testes em contêiner; teste vermelho ou cobertura do núcleo abaixo de 90% bloqueiam o merge.
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (unitários, arquitetura, integração, contrato, cobertura)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+      - name: Testes do backend
+        run: docker compose -f infra/compose.test.yaml run --rm testes-backend
+      - name: Relatório de cobertura do núcleo
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-nucleo
+          path: backend/nucleo/target/site/jacoco/
+          if-no-files-found: ignore
+      - name: Derrubar serviços
+        if: always()
+        run: docker compose -f infra/compose.test.yaml down -v
+
+  frontend:
+    name: Frontend (lint, tipos, Vitest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - name: Testes do frontend
+        run: docker compose -f infra/compose.test.yaml run --rm testes-frontend
+
+  e2e:
+    name: Ponta a ponta e acessibilidade (Playwright + axe)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    needs: [backend, frontend]
+    steps:
+      - uses: actions/checkout@v5
+      - name: Testes ponta a ponta
+        run: docker compose -f infra/compose.test.yaml run --rm --build testes-e2e
+      - name: Relatório do Playwright
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+          if-no-files-found: ignore
+      - name: Derrubar serviços
+        if: always()
+        run: docker compose -f infra/compose.test.yaml down -v

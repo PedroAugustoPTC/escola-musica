@@ -1,0 +1,30 @@
+# Build
+target/
+node_modules/
+frontend/dist/
+frontend/src/mensagens/mensagens.json
+frontend/src/servicos/api-tipos.ts
+frontend/test-results/
+frontend/playwright-report/
+coverage/
+
+# Segredos e dados reais (constituição, Princípio IV)
+infra/.env
+infra/.env.*
+!infra/.env.example
+infra/carga/*.json
+!infra/carga/exemplo.json
+
+# Gravações de teste (grandes; usadas só pela suíte ia-real, montadas somente leitura)
+assets/*.ogg
+assets/*.mp4
+
+# IDE e sistema
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+*.log
