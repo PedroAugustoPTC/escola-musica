@@ -28,3 +28,6 @@ Thumbs.db
 *.tmp
 *.swp
 *.log
+
+# Build incremental do TypeScript
+frontend/tsconfig.tsbuildinfo

@@ -108,7 +108,7 @@
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
             <version>${pdfbox.version}</version>
-            <scope>test</scope>
+            <!-- escopo de compilação: o renderizador do openhtmltopdf precisa dele no JAR de produção -->
         </dependency>
         <dependency>
             <groupId>com.tngtech.archunit</groupId>

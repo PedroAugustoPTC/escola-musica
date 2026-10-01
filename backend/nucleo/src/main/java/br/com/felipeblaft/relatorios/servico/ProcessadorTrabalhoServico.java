@@ -165,7 +165,8 @@ public class ProcessadorTrabalhoServico {
     }
 
     /**
-     * Processa um trabalho já reservado (em execução). Erros inesperados viram falha do trabalho.
+     * Processa um trabalho já reservado (em execução). Erros inesperados (inclusive {@link Error})
+     * viram falha do trabalho, para que ele nunca fique preso em execução.
      */
     public void processar(TrabalhoProcessamento trabalho) {
         try {
@@ -180,7 +181,7 @@ public class ProcessadorTrabalhoServico {
                 case ALTERACAO -> alterarAula(trabalho);
                 default -> throw new IllegalStateException("tipo de trabalho sem processador");
             }
-        } catch (RuntimeException inesperado) {
+        } catch (RuntimeException | Error inesperado) {
             falhaInesperada(trabalho);
             throw inesperado;
         } finally {

@@ -93,7 +93,8 @@ public class TrabalhoWorker {
                     trabalho.tipo(),
                     trabalho.resultado(),
                     System.currentTimeMillis() - inicio);
-        } catch (RuntimeException erro) {
+        } catch (RuntimeException | Error erro) {
+            // o executor descartaria o erro em silêncio: registra sempre (sem dados do relatório)
             LOG.error("trabalho-falhou tipo={}", trabalho.tipo(), erro);
         } finally {
             MDC.clear();
