@@ -111,6 +111,12 @@ class RegrasArquiteturaTeste {
                 .areInterfaces()
                 .and()
                 .areTopLevelClasses()
+                .and(
+                        DescribedPredicate.describe(
+                                "não são tipos de dados (selados ou entradas)",
+                                classe ->
+                                        !classe.reflect().isSealed()
+                                                && !classe.getSimpleName().startsWith("Entrada")))
                 .should()
                 .haveSimpleNameEndingWith("Porta")
                 .orShould()
