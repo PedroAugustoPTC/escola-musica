@@ -16,9 +16,25 @@ A validação funcional completa está em
 | `caddy/Caddyfile` | HTTPS, cabeçalhos de segurança e proxy de `/api/*` |
 | `.env.example` | modelo das variáveis; copie para `infra/.env` (**nunca versionado**) |
 | `carga/exemplo.json` | carga fictícia; cargas reais ficam fora do Git (`infra/carga/*.json`) |
+| `scripts/local.sh` | atalhos do ambiente local: subir, carga, código, status, logs, testes, parar, limpar |
 | `scripts/implantar.sh` | atualização e subida da pilha de produção na VPS |
 
 ## 1. Ambiente local
+
+Atalho para tudo desta seção e da seção 3 (roda da raiz do repositório, inclusive no Git Bash do
+Windows):
+
+```bash
+sh infra/scripts/local.sh subir
+```
+
+Os demais comandos: `carga [infra/carga/arquivo.json]`, `codigo <email>`, `status`, `logs [serviço]`,
+`testes [backend|frontend|e2e|ia-real|todos]`, `parar` e `limpar` (apaga os dados locais, pede
+confirmação). O `subir` confere o `infra/.env` antes (segredos, credenciais do bot se
+`TELEGRAM_HABILITADO=true`, chaves de IA se `PROVEDORES_IA=real`) e só sobe o `telegram-bot-api`
+com o bot habilitado.
+
+Passo a passo manual:
 
 ```bash
 cp infra/.env.example infra/.env
