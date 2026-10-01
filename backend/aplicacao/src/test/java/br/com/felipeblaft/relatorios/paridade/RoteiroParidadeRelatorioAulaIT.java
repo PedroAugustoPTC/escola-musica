@@ -24,8 +24,8 @@ import org.springframework.mock.web.MockMultipartFile;
 /**
  * Paridade do relatório de aula (R-16, SC-006): o mesmo roteiro — enviar áudio, responder, alterar
  * por texto, alterar por áudio, aprovar e tentar aprovar de novo — na Web e no Telegram, com IA
- * simulada. Estados, versões, interações (meio e resultado), PDFs e aprovação devem ser iguais; só o
- * canal registrado muda.
+ * simulada. Estados, versões, interações (meio e resultado), PDFs e aprovação devem ser iguais; só
+ * o canal registrado muda.
  */
 class RoteiroParidadeRelatorioAulaIT extends TelegramConversaBase {
 
@@ -59,20 +59,26 @@ class RoteiroParidadeRelatorioAulaIT extends TelegramConversaBase {
     // ---------------------------------------------------------------- consultas neutras
 
     private UUID relatorioDe(Aluno aluno) {
-        return jdbc.queryForObject("select id from relatorio_aula where aluno_id = ?", UUID.class, aluno.id());
+        return jdbc.queryForObject(
+                "select id from relatorio_aula where aluno_id = ?", UUID.class, aluno.id());
     }
 
-    private String ultimoResultado(Aluno aluno) {
+    /** Resultado do trabalho do tipo e meio dados (o relógio fixo empata as datas). */
+    private String resultado(Aluno aluno, String tipo, String meio) {
         return jdbc.queryForObject(
-                "select resultado_codigo from trabalho_processamento where aluno_id = ?"
-                        + " order by concluido_em desc nulls last, criado_em desc limit 1",
+                "select resultado_codigo from trabalho_processamento"
+                        + " where aluno_id = ? and tipo = ? and meio = ?",
                 String.class,
-                aluno.id());
+                aluno.id(),
+                tipo,
+                meio);
     }
 
     private int versaoVigente(Aluno aluno) {
         return jdbc.queryForObject(
-                "select versao_vigente from relatorio_aula where aluno_id = ?", Integer.class, aluno.id());
+                "select versao_vigente from relatorio_aula where aluno_id = ?",
+                Integer.class,
+                aluno.id());
     }
 
     /** Estado final do relatório sem identificadores, com o canal trocado por um marcador. */
@@ -114,7 +120,9 @@ class RoteiroParidadeRelatorioAulaIT extends TelegramConversaBase {
         return new RoteiroParidade()
                 .passo("enviar áudio", c -> canal.registrar())
                 .passo("responder", c -> canal.responder("Estudou bem; vai preparar a valsa."))
-                .passo("alterar por texto", c -> canal.alterarPorTexto("Diga que a aula foi ótima."))
+                .passo(
+                        "alterar por texto",
+                        c -> canal.alterarPorTexto("Diga que a aula foi ótima."))
                 .passo("alterar por áudio", c -> canal.alterarPorAudio())
                 .passo("aprovar", c -> canal.aprovar())
                 .passo("aprovar de novo", c -> canal.aprovarDeNovo());
@@ -128,16 +136,20 @@ class RoteiroParidadeRelatorioAulaIT extends TelegramConversaBase {
                 return resultado.getResponse().getStatus();
             }
 
-            private String codigo(org.springframework.test.web.servlet.MvcResult resultado) throws Exception {
+            private String codigo(org.springframework.test.web.servlet.MvcResult resultado)
+                    throws Exception {
                 int status = corpoStatus(resultado);
                 if (status / 100 == 2) {
                     return "ACEITO";
                 }
-                return JSON.readTree(resultado.getResponse().getContentAsString()).path("codigo").asString();
+                return JSON.readTree(resultado.getResponse().getContentAsString())
+                        .path("codigo")
+                        .asString();
             }
 
             private MockMultipartFile audio() {
-                return new MockMultipartFile("audio", "aula.webm", "audio/webm", NormalizacaoAudioTeste.AUDIO_COM_FALA);
+                return new MockMultipartFile(
+                        "audio", "aula.webm", "audio/webm", NormalizacaoAudioTeste.AUDIO_COM_FALA);
             }
 
             @Override
@@ -150,7 +162,7 @@ class RoteiroParidadeRelatorioAulaIT extends TelegramConversaBase {
                                                 .with(csrf().asHeader()))
                                 .andReturn());
                 cenario.processarFila();
-                return ultimoResultado(aluno);
+                return resultado(aluno, "REGISTRO_AULA", "AUDIO");
             }
 
             @Override
@@ -160,9 +172,10 @@ class RoteiroParidadeRelatorioAulaIT extends TelegramConversaBase {
                                 .cookie(sessao)
                                 .with(csrf().asHeader())
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(JSON.writeValueAsString(java.util.Map.of("texto", texto))));
+                                .content(
+                                        JSON.writeValueAsString(java.util.Map.of("texto", texto))));
                 cenario.processarFila();
-                return ultimoResultado(aluno);
+                return resultado(aluno, "RESPOSTA_PERGUNTAS", "TEXTO");
             }
 
             @Override
@@ -174,9 +187,13 @@ class RoteiroParidadeRelatorioAulaIT extends TelegramConversaBase {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(
                                         JSON.writeValueAsString(
-                                                java.util.Map.of("texto", texto, "versaoBase", versaoVigente(aluno)))));
+                                                java.util.Map.of(
+                                                        "texto",
+                                                        texto,
+                                                        "versaoBase",
+                                                        versaoVigente(aluno)))));
                 cenario.processarFila();
-                return ultimoResultado(aluno);
+                return resultado(aluno, "ALTERACAO", "TEXTO");
             }
 
             @Override
@@ -188,17 +205,22 @@ class RoteiroParidadeRelatorioAulaIT extends TelegramConversaBase {
                                 .cookie(sessao)
                                 .with(csrf().asHeader()));
                 cenario.processarFila();
-                return ultimoResultado(aluno);
+                return resultado(aluno, "ALTERACAO", "AUDIO");
             }
 
             private String aprovarVersao() throws Exception {
                 return codigo(
                         mvc.perform(
-                                        post("/api/v1/relatorios-aula/{id}/aprovacao", relatorioDe(aluno))
+                                        post(
+                                                        "/api/v1/relatorios-aula/{id}/aprovacao",
+                                                        relatorioDe(aluno))
                                                 .cookie(sessao)
                                                 .with(csrf().asHeader())
                                                 .contentType(MediaType.APPLICATION_JSON)
-                                                .content("{\"versaoConfirmada\":" + versaoVigente(aluno) + "}"))
+                                                .content(
+                                                        "{\"versaoConfirmada\":"
+                                                                + versaoVigente(aluno)
+                                                                + "}"))
                                 .andReturn());
             }
 
@@ -206,7 +228,9 @@ class RoteiroParidadeRelatorioAulaIT extends TelegramConversaBase {
             public String aprovar() throws Exception {
                 aprovarVersao();
                 return jdbc.queryForObject(
-                        "select status from relatorio_aula where aluno_id = ?", String.class, aluno.id());
+                        "select status from relatorio_aula where aluno_id = ?",
+                        String.class,
+                        aluno.id());
             }
 
             @Override
@@ -239,33 +263,35 @@ class RoteiroParidadeRelatorioAulaIT extends TelegramConversaBase {
             public String registrar() throws Exception {
                 enviarTexto(USUARIO_CLARA, "registrar aula");
                 enviarTexto(USUARIO_CLARA, aluno.nome());
-                prepararArquivoTelegram("aula-" + aluno.id(), NormalizacaoAudioTeste.AUDIO_COM_FALA);
+                prepararArquivoTelegram(
+                        "aula-" + aluno.id(), NormalizacaoAudioTeste.AUDIO_COM_FALA);
                 enviarVoz(USUARIO_CLARA, "aula-" + aluno.id(), 1000);
                 enviarCallback(USUARIO_CLARA, "v1:confal:");
                 cenario.processarFila();
-                return ultimoResultado(aluno);
+                return resultado(aluno, "REGISTRO_AULA", "AUDIO");
             }
 
             @Override
             public String responder(String texto) throws Exception {
                 enviarTexto(USUARIO_CLARA, texto);
                 cenario.processarFila();
-                return ultimoResultado(aluno);
+                return resultado(aluno, "RESPOSTA_PERGUNTAS", "TEXTO");
             }
 
             @Override
             public String alterarPorTexto(String texto) throws Exception {
                 enviarTexto(USUARIO_CLARA, texto);
                 cenario.processarFila();
-                return ultimoResultado(aluno);
+                return resultado(aluno, "ALTERACAO", "TEXTO");
             }
 
             @Override
             public String alterarPorAudio() throws Exception {
-                prepararArquivoTelegram("pedido-" + aluno.id(), NormalizacaoAudioTeste.AUDIO_COM_FALA);
+                prepararArquivoTelegram(
+                        "pedido-" + aluno.id(), NormalizacaoAudioTeste.AUDIO_COM_FALA);
                 enviarVoz(USUARIO_CLARA, "pedido-" + aluno.id(), 1000);
                 cenario.processarFila();
-                return ultimoResultado(aluno);
+                return resultado(aluno, "ALTERACAO", "AUDIO");
             }
 
             @Override
@@ -273,7 +299,9 @@ class RoteiroParidadeRelatorioAulaIT extends TelegramConversaBase {
                 enviarTexto(USUARIO_CLARA, "aprovar");
                 enviarTexto(USUARIO_CLARA, "sim");
                 return jdbc.queryForObject(
-                        "select status from relatorio_aula where aluno_id = ?", String.class, aluno.id());
+                        "select status from relatorio_aula where aluno_id = ?",
+                        String.class,
+                        aluno.id());
             }
 
             @Override
@@ -306,7 +334,8 @@ class RoteiroParidadeRelatorioAulaIT extends TelegramConversaBase {
         assertThat(resumo(helena, "TELEGRAM")).containsExactlyElementsOf(resumoWeb);
         assertThat(resumoWeb)
                 .contains("APROVADO vigente=3 aprovada=3 canalOrigem=CANAL canalAprovacao=CANAL")
-                .anySatisfy(l -> assertThat(l).startsWith("RESPOSTA_PERGUNTAS TEXTO APLICADA base=0"))
+                .anySatisfy(
+                        l -> assertThat(l).startsWith("RESPOSTA_PERGUNTAS TEXTO APLICADA base=0"))
                 .anySatisfy(l -> assertThat(l).startsWith("ALTERACAO TEXTO APLICADA base=1"))
                 .anySatisfy(l -> assertThat(l).startsWith("ALTERACAO AUDIO APLICADA base=2"))
                 .anySatisfy(l -> assertThat(l).startsWith("pdfs=").contains("OFICIAL"));

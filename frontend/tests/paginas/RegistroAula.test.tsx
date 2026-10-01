@@ -101,7 +101,7 @@ describe('TelaGravacao (05)', () => {
     expect((envio.init.body as FormData).get('audio')).toBeInstanceOf(Blob);
   });
 
-  it('relatório em aberto mostra a mensagem e o caminho para retomar', async () => {
+  it('relatório em aberto (409) leva à tela 04', async () => {
     simularApi({
       ...BASE,
       [`GET /api/v1/alunos/${ALUNO.id}`]: { corpo: ALUNO },
@@ -109,9 +109,23 @@ describe('TelaGravacao (05)', () => {
         status: 409,
         corpo: { codigo: 'RELATORIO_EM_ABERTO', mensagem: 'Você tem um relatório em aberto.' },
       },
+      [`GET /api/v1/alunos/${ALUNO.id}/relatorio-em-aberto`]: {
+        corpo: {
+          tipo: 'AULA',
+          relatorioId: RELATORIO,
+          trabalhoId: null,
+          alunoId: ALUNO.id,
+          alunoNome: ALUNO.nome,
+          status: 'AGUARDANDO_CONFERENCIA',
+          etapa: null,
+          periodoChave: null,
+          canalOrigem: 'TELEGRAM',
+          atualizadoEm: '2026-09-20T12:57:00Z',
+        },
+      },
     });
     const usuario = userEvent.setup();
-    renderizarRotas(rotas, `/alunos/${ALUNO.id}/nova-aula`);
+    const { roteador } = renderizarRotas(rotas, `/alunos/${ALUNO.id}/nova-aula`);
 
     await usuario.upload(
       await screen.findByLabelText('Arquivo de áudio'),
@@ -119,11 +133,10 @@ describe('TelaGravacao (05)', () => {
     );
     await usuario.click(screen.getByRole('button', { name: 'Enviar áudio e gerar relatório' }));
 
-    expect(await screen.findByText('Você tem um relatório em aberto.')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Ver relatório em aberto' })).toHaveAttribute(
-      'href',
-      `/alunos/${ALUNO.id}/relatorio-em-aberto`,
-    );
+    expect(
+      await screen.findByRole('heading', { name: 'Você tem um relatório em aberto' }),
+    ).toBeInTheDocument();
+    expect(roteador.state.location.pathname).toBe(`/alunos/${ALUNO.id}/relatorio-em-aberto`);
   });
 });
 

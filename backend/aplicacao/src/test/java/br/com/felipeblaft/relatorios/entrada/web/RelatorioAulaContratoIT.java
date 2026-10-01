@@ -20,7 +20,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 
-/** Contrato dos endpoints de relatório de aula (registro, respostas, alteração, aprovação, cancelamento). */
+/**
+ * Contrato dos endpoints de relatório de aula (registro, respostas, alteração, aprovação,
+ * cancelamento).
+ */
 class RelatorioAulaContratoIT extends ContratoApiBase {
 
     private Aluno matteo;
@@ -48,7 +51,13 @@ class RelatorioAulaContratoIT extends ContratoApiBase {
 
     private UUID registrar() throws Exception {
         String corpo =
-                mvc.perform(autenticada(multipart("/api/v1/alunos/{id}/relatorios-aula", matteo.id()).file(audio()), sessao))
+                mvc.perform(
+                                autenticada(
+                                        multipart(
+                                                        "/api/v1/alunos/{id}/relatorios-aula",
+                                                        matteo.id())
+                                                .file(audio()),
+                                        sessao))
                         .andExpect(status().isAccepted())
                         .andExpect(respostaSegueContrato())
                         .andExpect(jsonPath("$.trabalhoId").isString())
@@ -90,14 +99,23 @@ class RelatorioAulaContratoIT extends ContratoApiBase {
 
     @Test
     void registrarRecusaAlunoNaoAssociadoFormatoTamanhoERelatorioEmAberto() throws Exception {
-        mvc.perform(autenticada(multipart("/api/v1/alunos/{id}/relatorios-aula", helena.id()).file(audio()), sessao))
+        mvc.perform(
+                        autenticada(
+                                multipart("/api/v1/alunos/{id}/relatorios-aula", helena.id())
+                                        .file(audio()),
+                                sessao))
                 .andExpect(status().isForbidden())
                 .andExpect(respostaSegueContrato())
                 .andExpect(jsonPath("$.codigo").value("ALUNO_NAO_ASSOCIADO"));
         mvc.perform(
                         autenticada(
                                 multipart("/api/v1/alunos/{id}/relatorios-aula", matteo.id())
-                                        .file(new MockMultipartFile("audio", "notas.txt", "text/plain", new byte[] {1})),
+                                        .file(
+                                                new MockMultipartFile(
+                                                        "audio",
+                                                        "notas.txt",
+                                                        "text/plain",
+                                                        new byte[] {1})),
                                 sessao))
                 .andExpect(status().isUnsupportedMediaType())
                 .andExpect(respostaSegueContrato())
@@ -113,7 +131,11 @@ class RelatorioAulaContratoIT extends ContratoApiBase {
                 .andExpect(jsonPath("$.detalhes.limiteMb").value(50));
 
         registrar();
-        mvc.perform(autenticada(multipart("/api/v1/alunos/{id}/relatorios-aula", matteo.id()).file(audio()), sessao))
+        mvc.perform(
+                        autenticada(
+                                multipart("/api/v1/alunos/{id}/relatorios-aula", matteo.id())
+                                        .file(audio()),
+                                sessao))
                 .andExpect(status().isConflict())
                 .andExpect(respostaSegueContrato())
                 .andExpect(jsonPath("$.codigo").value("RELATORIO_EM_ABERTO"))
@@ -153,7 +175,11 @@ class RelatorioAulaContratoIT extends ContratoApiBase {
                 .andExpect(status().isBadRequest())
                 .andExpect(segueContrato())
                 .andExpect(jsonPath("$.codigo").value("RESPOSTA_VAZIA"));
-        mvc.perform(autenticada(multipart("/api/v1/relatorios-aula/{id}/respostas", id).file(audio()), sessao))
+        mvc.perform(
+                        autenticada(
+                                multipart("/api/v1/relatorios-aula/{id}/respostas", id)
+                                        .file(audio()),
+                                sessao))
                 .andExpect(status().isAccepted())
                 .andExpect(respostaSegueContrato());
         mvc.perform(
@@ -188,7 +214,7 @@ class RelatorioAulaContratoIT extends ContratoApiBase {
         mvc.perform(
                         autenticada(post("/api/v1/relatorios-aula/{id}/alteracoes", id), sessao)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"texto\":\"\",\"versaoBase\":1}"))
+                                .content("{\"texto\":\"   \",\"versaoBase\":1}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(segueContrato())
                 .andExpect(jsonPath("$.codigo").value("ALTERACAO_VAZIA"));

@@ -25,6 +25,13 @@
   border-color: var(--err);
 }
 
+.cartao--retomada {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 28px 24px;
+}
+
 .separador-ou {
   display: flex;
   align-items: center;

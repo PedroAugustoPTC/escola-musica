@@ -10,6 +10,7 @@ import { TelaGravacao } from '../paginas/TelaGravacao';
 import { TelaPainel } from '../paginas/TelaPainel';
 import { TelaPerguntas } from '../paginas/TelaPerguntas';
 import { TelaProcessando } from '../paginas/TelaProcessando';
+import { TelaRelatorioEmAberto } from '../paginas/TelaRelatorioEmAberto';
 
 /** Página provisória para as rotas ainda não implementadas. */
 function PaginaProvisoria({ titulo }: { titulo: string }) {
@@ -31,10 +32,7 @@ export const rotas: RouteObject[] = [
   { path: '/entrar', element: <TelaEntrar /> },
   { path: '/', element: protegida(<TelaPainel />) },
   { path: '/alunos', element: protegida(<TelaAlunos />) },
-  {
-    path: '/alunos/:alunoId/relatorio-em-aberto',
-    element: protegida(<PaginaProvisoria titulo="04 Relatório em aberto" />),
-  },
+  { path: '/alunos/:alunoId/relatorio-em-aberto', element: protegida(<TelaRelatorioEmAberto />) },
   { path: '/alunos/:alunoId/nova-aula', element: protegida(<TelaGravacao />) },
   { path: '/trabalhos/:trabalhoId', element: protegida(<TelaProcessando />) },
   { path: '/relatorios-aula/:relatorioId/perguntas', element: protegida(<TelaPerguntas />) },

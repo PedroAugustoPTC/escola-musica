@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { Botao } from '../componentes/Botao';
 import { EstadoCarregando } from '../componentes/EstadoCarregando';
 import { AlertaErro, EstadoErro } from '../componentes/EstadoErro';
 import { Estrutura } from '../componentes/Estrutura';
 import { GravadorAudio } from '../componentes/GravadorAudio';
-import { Icone } from '../componentes/Icone';
 import { msg } from '../mensagens/mensagens';
 import { useAluno } from '../servicos/alunos';
 import { ErroApi } from '../servicos/clienteApi';
@@ -55,12 +54,15 @@ export function TelaGravacao() {
       const { trabalhoId } = await relatoriosAula.registrar(alunoId, audio);
       navegar(`/trabalhos/${trabalhoId}`, { state: { alunoId } });
     } catch (falha) {
+      if (falha instanceof ErroApi && falha.codigo === 'RELATORIO_EM_ABERTO') {
+        // FR-034: o aluno já tem relatório em aberto; a tela 04 oferece continuar ou descartar
+        navegar(`/alunos/${alunoId}/relatorio-em-aberto`, { replace: true });
+        return;
+      }
       setErro(falha);
       setEnviando(false);
     }
   };
-
-  const emAberto = erro instanceof ErroApi && erro.codigo === 'RELATORIO_EM_ABERTO';
 
   return (
     <Estrutura
@@ -85,20 +87,7 @@ export function TelaGravacao() {
           <h1 className="titulo-pagina">{aluno.data.nome}</h1>
           <p className="subtitulo">Aula de {formatarData(hojeNaEscola())}</p>
         </div>
-        {emAberto ? (
-          <div role="alert" className="alerta alerta--aviso">
-            <Icone nome="edit_note" />
-            <div className="alerta__texto">{(erro as ErroApi).message}</div>
-            <Link
-              className="botao botao--aviso botao--compacto"
-              to={`/alunos/${alunoId}/relatorio-em-aberto`}
-            >
-              Ver relatório em aberto
-            </Link>
-          </div>
-        ) : erro ? (
-          <AlertaErro erro={erro} />
-        ) : null}
+        {erro ? <AlertaErro erro={erro} /> : null}
         <GravadorAudio
           limiteMb={limiteMb}
           aoMudar={setAudio}

@@ -197,6 +197,21 @@ public class ApresentadorTelegram {
         return new Mensagem(chatId, cabecalho, new Teclado(linhas));
     }
 
+    /**
+     * Aviso "Você tem um relatório em aberto" (FR-034) com o canal de origem e a última alteração,
+     * e os botões "Continuar de onde parei" / "Descartar e começar um novo".
+     */
+    public Mensagem avisoEmAberto(long chatId, RelatorioEmAberto aberto) {
+        return new Mensagem(
+                chatId,
+                erro(
+                                chatId,
+                                CodigoErro.RELATORIO_EM_ABERTO,
+                                Map.of("relatorioEmAberto", aberto.detalhes()))
+                        .texto(),
+                Teclado.de(botao("BOTAO_CONTINUAR", "cont"), botao("BOTAO_DESCARTAR", "desc")));
+    }
+
     public Mensagem confirmacao(long chatId, String texto, Botao confirmar) {
         return new Mensagem(
                 chatId,

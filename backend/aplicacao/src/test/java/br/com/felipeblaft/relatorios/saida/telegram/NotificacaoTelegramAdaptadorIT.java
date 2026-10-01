@@ -22,7 +22,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import tools.jackson.databind.JsonNode;
 
-/** Avisos do bot (FR-021, contracts/telegram-conversa.md §6) para trabalhos pedidos em cada canal. */
+/**
+ * Avisos do bot (FR-021, contracts/telegram-conversa.md §6) para trabalhos pedidos em cada canal.
+ */
 class NotificacaoTelegramAdaptadorIT extends TelegramConversaBase {
 
     @Autowired private RegistrarAulaPorAudioCasoDeUso registrar;
@@ -59,11 +61,15 @@ class NotificacaoTelegramAdaptadorIT extends TelegramConversaBase {
         cenario.processarFila();
 
         JsonNode aviso = ultimaMensagem();
-        assertThat(aviso.get("text").asString()).isEqualTo("O relatório de Matteo Ferreira tem perguntas pendentes.");
+        assertThat(aviso.get("text").asString())
+                .isEqualTo("O relatório de Matteo Ferreira tem perguntas pendentes.");
         assertThat(rotulosBotoes(aviso)).containsExactly("Continuar no chat");
         assertThat(botoes(aviso)).containsExactly("v1:foco:a" + relatorioId());
         assertThat(textosEditados()).isEmpty();
-        assertThat(jdbc.queryForObject("select relatorio_foco_id from vinculo_telegram", UUID.class)).isNull();
+        assertThat(
+                        jdbc.queryForObject(
+                                "select relatorio_foco_id from vinculo_telegram", UUID.class))
+                .isNull();
 
         API_BOTS.resetRequests();
         responder.responderTexto(clara.id(), relatorioId(), "Estudou bem.", Canal.WEB);
@@ -72,11 +78,15 @@ class NotificacaoTelegramAdaptadorIT extends TelegramConversaBase {
                 .isEqualTo("O relatório de Matteo Ferreira está pronto para conferência.");
 
         API_BOTS.resetRequests();
-        alterar.alterarPorTexto(clara.id(), relatorioId(), "Diga que a aula foi ótima.", 1, Canal.WEB);
+        alterar.alterarPorTexto(
+                clara.id(), relatorioId(), "Diga que a aula foi ótima.", 1, Canal.WEB);
         cenario.processarFila();
         assertThat(ultimaMensagem().get("text").asString())
                 .isEqualTo("O relatório de Matteo Ferreira tem uma nova versão (2).");
-        assertThat(jdbc.queryForObject("select relatorio_foco_id from vinculo_telegram", UUID.class)).isNull();
+        assertThat(
+                        jdbc.queryForObject(
+                                "select relatorio_foco_id from vinculo_telegram", UUID.class))
+                .isNull();
     }
 
     @Test
@@ -109,7 +119,11 @@ class NotificacaoTelegramAdaptadorIT extends TelegramConversaBase {
         assertThat(textosEnviados())
                 .containsExactly(
                         "Está demorando mais que o normal. O resultado será entregue assim que ficar pronto; você pode sair e voltar depois.");
-        assertThat(jdbc.queryForObject("select aviso_demora_enviado from trabalho_processamento", Boolean.class)).isTrue();
+        assertThat(
+                        jdbc.queryForObject(
+                                "select aviso_demora_enviado from trabalho_processamento",
+                                Boolean.class))
+                .isTrue();
     }
 
     @Test
@@ -121,7 +135,11 @@ class NotificacaoTelegramAdaptadorIT extends TelegramConversaBase {
         avisoDemora.verificar();
 
         assertThat(chamadas("sendMessage")).isEmpty();
-        assertThat(jdbc.queryForObject("select aviso_demora_enviado from trabalho_processamento", Boolean.class)).isTrue();
+        assertThat(
+                        jdbc.queryForObject(
+                                "select aviso_demora_enviado from trabalho_processamento",
+                                Boolean.class))
+                .isTrue();
         cenario.processarFila();
     }
 }

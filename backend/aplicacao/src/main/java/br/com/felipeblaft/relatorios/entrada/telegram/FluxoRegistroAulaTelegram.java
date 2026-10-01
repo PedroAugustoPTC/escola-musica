@@ -1,5 +1,6 @@
 package br.com.felipeblaft.relatorios.entrada.telegram;
 
+import br.com.felipeblaft.relatorios.casodeuso.aula.ObterRelatorioEmAbertoCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.aula.RegistrarAulaPorAudioCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.inicio.AlunoResumo;
 import br.com.felipeblaft.relatorios.casodeuso.inicio.BuscarAlunosCasoDeUso;
@@ -7,6 +8,7 @@ import br.com.felipeblaft.relatorios.dominio.comum.Canal;
 import br.com.felipeblaft.relatorios.dominio.comum.CodigoErro;
 import br.com.felipeblaft.relatorios.dominio.comum.ExcecaoDominio;
 import br.com.felipeblaft.relatorios.dominio.comum.ParametrosNegocio;
+import br.com.felipeblaft.relatorios.dominio.relatorio.RelatorioEmAberto;
 import br.com.felipeblaft.relatorios.dominio.telegram.AudioPendente;
 import br.com.felipeblaft.relatorios.dominio.telegram.ConversaTelegram;
 import br.com.felipeblaft.relatorios.dominio.telegram.EtapaFluxoConversa;
@@ -44,6 +46,7 @@ public class FluxoRegistroAulaTelegram implements FluxoTelegram {
     private final ApresentadorTelegram apresentador;
     private final ParametrosNegocio parametros;
     private final RelogioPorta relogio;
+    private final ObterRelatorioEmAbertoCasoDeUso obterEmAberto;
 
     public FluxoRegistroAulaTelegram(
             RegistrarAulaPorAudioCasoDeUso registrar,
@@ -51,7 +54,9 @@ public class FluxoRegistroAulaTelegram implements FluxoTelegram {
             InterpretadorConversaTelegram interpretador,
             ApresentadorTelegram apresentador,
             ParametrosNegocio parametros,
-            RelogioPorta relogio) {
+            RelogioPorta relogio,
+            ObterRelatorioEmAbertoCasoDeUso obterEmAberto) {
+        this.obterEmAberto = obterEmAberto;
         this.registrar = registrar;
         this.buscarAlunos = buscarAlunos;
         this.interpretador = interpretador;
@@ -148,8 +153,20 @@ public class FluxoRegistroAulaTelegram implements FluxoTelegram {
 
     @Override
     public boolean aoEscolherAluno(ContextoTelegram contexto, AlunoResumo aluno) {
-        if (contexto.conversa().audioPendente().isEmpty()) {
+        ConversaTelegram conversa = contexto.conversa();
+        if (conversa.fluxo() != FluxoConversa.REGISTRO_AULA
+                && conversa.fluxo() != FluxoConversa.NENHUM) {
             return false;
+        }
+        if (conversa.audioPendente().isEmpty()) {
+            // aluno com relatório em aberto: avisa antes de pedir o áudio (FR-034)
+            Optional<RelatorioEmAberto> aberto =
+                    obterEmAberto.executar(contexto.professor().id(), aluno.id());
+            if (aberto.isEmpty()) {
+                return false;
+            }
+            avisarEmAberto(contexto, aluno.id(), aberto.get());
+            return true;
         }
         // com áudio pendente, escolher o aluno na lista (ou pelo nome) é a confirmação (FR-040)
         registrarAudioPendente(contexto, aluno, null);
@@ -206,7 +223,17 @@ public class FluxoRegistroAulaTelegram implements FluxoTelegram {
                 : null;
     }
 
-    private void registrarAudioPendente(
+    /** Guarda o aluno do aviso na conversa e mostra "Você tem um relatório em aberto". */
+    void avisarEmAberto(ContextoTelegram contexto, UUID alunoId, RelatorioEmAberto aberto) {
+        ConversaTelegram conversa = contexto.conversa();
+        conversa.limparFoco();
+        conversa.iniciarFluxo(
+                FluxoConversa.REGISTRO_AULA, EtapaFluxoConversa.AVISO_RELATORIO_EM_ABERTO);
+        conversa.guardar(ALUNO_EM_ABERTO, alunoId.toString());
+        contexto.responder(apresentador.avisoEmAberto(contexto.chatId(), aberto));
+    }
+
+    void registrarAudioPendente(
             ContextoTelegram contexto, AlunoResumo aluno, Long editarMensagemId) {
         ConversaTelegram conversa = contexto.conversa();
         AudioPendente audio = conversa.audioPendente().orElseThrow();
@@ -230,18 +257,12 @@ public class FluxoRegistroAulaTelegram implements FluxoTelegram {
             }
             // FR-034: avisa e oferece continuar ou descartar; o áudio só é reaproveitado no
             // descarte
-            conversa.iniciarFluxo(
-                    FluxoConversa.REGISTRO_AULA, EtapaFluxoConversa.AVISO_RELATORIO_EM_ABERTO);
-            conversa.guardar(ALUNO_EM_ABERTO, aluno.id().toString());
-            contexto.responder(
-                    new Mensagem(
-                            contexto.chatId(),
-                            apresentador
-                                    .erro(contexto.chatId(), erro.codigo(), erro.detalhes())
-                                    .texto(),
-                            Teclado.de(
-                                    apresentador.botao("BOTAO_CONTINUAR", "cont"),
-                                    apresentador.botao("BOTAO_DESCARTAR", "desc"))));
+            Optional<RelatorioEmAberto> aberto =
+                    obterEmAberto.executar(contexto.professor().id(), aluno.id());
+            if (aberto.isEmpty()) {
+                throw erro;
+            }
+            avisarEmAberto(contexto, aluno.id(), aberto.get());
             return;
         }
         conversa.descartarAudio();

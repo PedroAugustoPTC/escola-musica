@@ -18,7 +18,8 @@ import tools.jackson.databind.JsonNode;
 /** Perguntas, conferência, alteração, aprovação e cancelamento no chat (estados #3 a #6, 5.2). */
 class ConferenciaConversaIT extends TelegramConversaBase {
 
-    private static final String LEMBRETE = "Texto ou áudio enviado aqui será aplicado a este relatório.";
+    private static final String LEMBRETE =
+            "Texto ou áudio enviado aqui será aplicado a este relatório.";
 
     private UUID relatorioId;
 
@@ -56,17 +57,25 @@ class ConferenciaConversaIT extends TelegramConversaBase {
     void respostaPorTextoVaiDiretoParaOProcessamentoEChegaAConferenciaComPdf() throws Exception {
         enviarTexto(USUARIO_CLARA, "Estudou bem; vai preparar a valsa.");
 
-        assertThat(ultimaMensagem().get("text").asString()).isEqualTo("<i>Incorporando suas respostas…</i>");
-        assertThat(jdbc.queryForObject("select count(*) from trabalho_processamento where tipo = 'RESPOSTA_PERGUNTAS' and status = 'PENDENTE'", Integer.class))
+        assertThat(ultimaMensagem().get("text").asString())
+                .isEqualTo("<i>Incorporando suas respostas…</i>");
+        assertThat(
+                        jdbc.queryForObject(
+                                "select count(*) from trabalho_processamento where tipo = 'RESPOSTA_PERGUNTAS' and status = 'PENDENTE'",
+                                Integer.class))
                 .isEqualTo(1);
 
         cenario.processarFila();
 
         List<String> textos = textosEnviados();
         String conferencia =
-                textos.stream().filter(t -> t.contains("Confira o relatório antes de aprovar")).findFirst().orElseThrow();
+                textos.stream()
+                        .filter(t -> t.contains("Confira o relatório antes de aprovar"))
+                        .findFirst()
+                        .orElseThrow();
         assertThat(conferencia)
-                .startsWith("Respostas incorporadas ao relatório. Entendi: “Estudou bem; vai preparar a valsa.”")
+                .startsWith(
+                        "Respostas incorporadas ao relatório. Entendi: “Estudou bem; vai preparar a valsa.”")
                 .contains("Aluno: Matteo Ferreira")
                 .contains("Professor: Clara Souza")
                 .contains("Data da aula: 21/09/2026")
@@ -76,7 +85,8 @@ class ConferenciaConversaIT extends TelegramConversaBase {
         API_BOTS.verify(1, postRequestedFor(urlPathMatching(".*/sendDocument")));
         JsonNode acoes = ultimaMensagem();
         assertThat(acoes.get("text").asString()).contains(LEMBRETE);
-        assertThat(botoes(acoes)).containsExactly("v1:aprov:1", "v1:alt:", "v1:pdf:", "v1:canc:", "v1:reg:");
+        assertThat(botoes(acoes))
+                .containsExactly("v1:aprov:1", "v1:alt:", "v1:pdf:", "v1:canc:", "v1:reg:");
         assertThat(conversa().get("versao_apresentada")).isEqualTo(1);
         assertThat(status()).isEqualTo("AGUARDANDO_CONFERENCIA");
     }
@@ -87,11 +97,13 @@ class ConferenciaConversaIT extends TelegramConversaBase {
 
         enviarVoz(USUARIO_CLARA, "resposta", 1000);
 
-        assertThat(ultimaMensagem().get("text").asString()).isEqualTo("<i>Transcrevendo o pedido…</i>");
+        assertThat(ultimaMensagem().get("text").asString())
+                .isEqualTo("<i>Transcrevendo o pedido…</i>");
         assertThat(conversa().get("audio_pendente_file_id")).isNull();
         cenario.processarFila();
         assertThat(status()).isEqualTo("AGUARDANDO_CONFERENCIA");
-        assertThat(String.join("\n", textosEnviados())).contains("Respostas incorporadas ao relatório. Entendi:");
+        assertThat(String.join("\n", textosEnviados()))
+                .contains("Respostas incorporadas ao relatório. Entendi:");
     }
 
     @Test
@@ -102,7 +114,8 @@ class ConferenciaConversaIT extends TelegramConversaBase {
         enviarTexto(USUARIO_CLARA, "mais uma coisa");
 
         assertThat(ultimaMensagem().get("text").asString())
-                .isEqualTo("Este relatório ainda está sendo processado (Incorporando suas respostas). Aguarde a conclusão.");
+                .isEqualTo(
+                        "Este relatório ainda está sendo processado (Incorporando suas respostas). Aguarde a conclusão.");
     }
 
     @Test
@@ -110,15 +123,23 @@ class ConferenciaConversaIT extends TelegramConversaBase {
         chegarAConferencia();
 
         enviarTexto(USUARIO_CLARA, "Nas observações, diga que a aula foi ótima.");
-        assertThat(ultimaMensagem().get("text").asString()).isEqualTo("<i>Aplicando a alteração…</i>");
-        assertThat(jdbc.queryForObject("select parametros->>'versaoBase' from trabalho_processamento where tipo = 'ALTERACAO'", String.class))
+        assertThat(ultimaMensagem().get("text").asString())
+                .isEqualTo("<i>Aplicando a alteração…</i>");
+        assertThat(
+                        jdbc.queryForObject(
+                                "select parametros->>'versaoBase' from trabalho_processamento where tipo = 'ALTERACAO'",
+                                String.class))
                 .isEqualTo("1");
         cenario.processarFila();
 
         String conferencia =
-                textosEnviados().stream().filter(t -> t.contains("Confira o relatório")).findFirst().orElseThrow();
+                textosEnviados().stream()
+                        .filter(t -> t.contains("Confira o relatório"))
+                        .findFirst()
+                        .orElseThrow();
         assertThat(conferencia)
-                .startsWith("Alteração aplicada. Confira a versão 2.\nEntendi: “Nas observações, diga que a aula foi ótima.”")
+                .startsWith(
+                        "Alteração aplicada. Confira a versão 2.\nEntendi: “Nas observações, diga que a aula foi ótima.”")
                 .contains("Versão 2");
         assertThat(botoes(ultimaMensagem())).contains("v1:aprov:2");
         assertThat(conversa().get("versao_apresentada")).isEqualTo(2);
@@ -130,7 +151,8 @@ class ConferenciaConversaIT extends TelegramConversaBase {
         prepararArquivoTelegram("pedido", NormalizacaoAudioTeste.AUDIO_COM_FALA);
 
         enviarVoz(USUARIO_CLARA, "pedido", 1000);
-        assertThat(ultimaMensagem().get("text").asString()).isEqualTo("<i>Transcrevendo o pedido…</i>");
+        assertThat(ultimaMensagem().get("text").asString())
+                .isEqualTo("<i>Transcrevendo o pedido…</i>");
         cenario.processarFila();
 
         assertThat(String.join("\n", textosEnviados()))
@@ -146,13 +168,18 @@ class ConferenciaConversaIT extends TelegramConversaBase {
 
         JsonNode mensagem = ultimaMensagem();
         assertThat(mensagem.get("text").asString())
-                .isEqualTo("Você quer trocar para Helena Prado? O relatório de Matteo Ferreira continua em aberto.");
+                .isEqualTo(
+                        "Você quer trocar para Helena Prado? O relatório de Matteo Ferreira continua em aberto.");
         assertThat(rotulosBotoes(mensagem)).containsExactly("Confirmar Helena Prado", "Voltar");
-        assertThat(jdbc.queryForObject("select count(*) from trabalho_processamento where tipo = 'ALTERACAO'", Integer.class))
+        assertThat(
+                        jdbc.queryForObject(
+                                "select count(*) from trabalho_processamento where tipo = 'ALTERACAO'",
+                                Integer.class))
                 .isZero();
 
         enviarCallback(USUARIO_CLARA, "v1:aluno:0");
-        assertThat(ultimaMensagem().get("text").asString()).startsWith("Aula de hoje, 21/09/2026, com Helena Prado.");
+        assertThat(ultimaMensagem().get("text").asString())
+                .startsWith("Aula de hoje, 21/09/2026, com Helena Prado.");
         assertThat(conversa().get("relatorio_foco_id")).isNull();
         assertThat(status()).isEqualTo("AGUARDANDO_CONFERENCIA");
     }
@@ -164,7 +191,8 @@ class ConferenciaConversaIT extends TelegramConversaBase {
         enviarTexto(USUARIO_CLARA, "aprovar");
         JsonNode confirmacao = ultimaMensagem();
         assertThat(confirmacao.get("text").asString())
-                .isEqualTo("Aprovar a versão 1? O relatório entrará no histórico do aluno e não poderá mais ser alterado.");
+                .isEqualTo(
+                        "Aprovar a versão 1? O relatório entrará no histórico do aluno e não poderá mais ser alterado.");
         assertThat(botoes(confirmacao)).containsExactly("v1:aprovok:1", "v1:inicio:");
         assertThat(rotulosBotoes(confirmacao).getFirst()).isEqualTo("Sim, aprovar a versão 1");
 
@@ -172,15 +200,20 @@ class ConferenciaConversaIT extends TelegramConversaBase {
 
         JsonNode aprovado = ultimaMensagem();
         assertThat(aprovado.get("text").asString())
-                .isEqualTo("Relatório aprovado em 21/09/2026 às 10:00. Ele já consta no histórico do aluno.");
+                .isEqualTo(
+                        "Relatório aprovado em 21/09/2026 às 10:00. Ele já consta no histórico do aluno.");
         assertThat(rotulosBotoes(aprovado)).containsExactly("Registrar outra aula", "Histórico");
         assertThat(status()).isEqualTo("APROVADO");
         Map<String, Object> estado = conversa();
         assertThat(estado.get("relatorio_foco_id")).isNull();
         assertThat(estado.get("aluno_selecionado_id")).isNull();
-        assertThat(jdbc.queryForObject("select count(*) from documento_pdf where tipo = 'OFICIAL'", Integer.class))
+        assertThat(
+                        jdbc.queryForObject(
+                                "select count(*) from documento_pdf where tipo = 'OFICIAL'",
+                                Integer.class))
                 .isEqualTo(1);
-        assertThat(jdbc.queryForObject("select canal_aprovacao from relatorio_aula", String.class)).isEqualTo("TELEGRAM");
+        assertThat(jdbc.queryForObject("select canal_aprovacao from relatorio_aula", String.class))
+                .isEqualTo("TELEGRAM");
     }
 
     @Test
@@ -200,7 +233,8 @@ class ConferenciaConversaIT extends TelegramConversaBase {
         enviarCallback(USUARIO_CLARA, "v1:aprov:2");
         enviarCallback(USUARIO_CLARA, "v1:aprovok:2");
         assertThat(status()).isEqualTo("APROVADO");
-        assertThat(jdbc.queryForObject("select versao_aprovada from relatorio_aula", Integer.class)).isEqualTo(2);
+        assertThat(jdbc.queryForObject("select versao_aprovada from relatorio_aula", Integer.class))
+                .isEqualTo(2);
     }
 
     @Test
@@ -209,7 +243,8 @@ class ConferenciaConversaIT extends TelegramConversaBase {
 
         enviarCallback(USUARIO_CLARA, "v1:aprovok:1");
 
-        assertThat(textosEnviados().getFirst()).isEqualTo("Esta opção não vale mais. Veja abaixo a etapa atual.");
+        assertThat(textosEnviados().getFirst())
+                .isEqualTo("Esta opção não vale mais. Veja abaixo a etapa atual.");
         assertThat(status()).isEqualTo("AGUARDANDO_CONFERENCIA");
     }
 
@@ -219,7 +254,8 @@ class ConferenciaConversaIT extends TelegramConversaBase {
 
         enviarCallback(USUARIO_CLARA, "v1:canc:");
         assertThat(ultimaMensagem().get("text").asString())
-                .isEqualTo("Cancelar este relatório? Ele deixará de aparecer para você e não poderá ser recuperado.");
+                .isEqualTo(
+                        "Cancelar este relatório? Ele deixará de aparecer para você e não poderá ser recuperado.");
         enviarCallback(USUARIO_CLARA, "v1:cancok:");
 
         assertThat(textosEnviados()).contains("Relatório cancelado.");
@@ -235,7 +271,8 @@ class ConferenciaConversaIT extends TelegramConversaBase {
 
         enviarTexto(USUARIO_CLARA, "Acrescente que o aluno chegou atrasado.");
 
-        assertThat(ultimaMensagem().get("text").asString()).isEqualTo("<i>Aplicando a alteração…</i>");
+        assertThat(ultimaMensagem().get("text").asString())
+                .isEqualTo("<i>Aplicando a alteração…</i>");
         assertThat(status()).isEqualTo("AGUARDANDO_CONFERENCIA");
     }
 
@@ -250,7 +287,8 @@ class ConferenciaConversaIT extends TelegramConversaBase {
 
     @Test
     void falhaDeProcessamentoOfereceTentarDeNovo() throws Exception {
-        jdbc.update("update relatorio_aula set status = 'FALHA_PROCESSAMENTO', etapa_processamento = null, motivo_falha = 'TESTE'");
+        jdbc.update(
+                "update relatorio_aula set status = 'FALHA_PROCESSAMENTO', etapa_processamento = null, motivo_falha = 'TESTE'");
 
         enviarTexto(USUARIO_CLARA, "e agora?");
         assertThat(ultimaMensagem().get("text").asString())
@@ -259,7 +297,10 @@ class ConferenciaConversaIT extends TelegramConversaBase {
 
         enviarCallback(USUARIO_CLARA, "v1:tent:");
 
-        assertThat(jdbc.queryForObject("select count(*) from trabalho_processamento where tipo = 'NOVA_TENTATIVA'", Integer.class))
+        assertThat(
+                        jdbc.queryForObject(
+                                "select count(*) from trabalho_processamento where tipo = 'NOVA_TENTATIVA'",
+                                Integer.class))
                 .isEqualTo(1);
         assertThat(textosEditados()).contains("<i>Estruturando o relatório…</i>");
     }
@@ -285,7 +326,8 @@ class ConferenciaConversaIT extends TelegramConversaBase {
 
         enviarCallback(USUARIO_CLARA, "v1:foco:a" + relatorioId);
 
-        assertThat(String.join("\n", textosEnviados())).contains("Confira o relatório antes de aprovar");
+        assertThat(String.join("\n", textosEnviados()))
+                .contains("Confira o relatório antes de aprovar");
         assertThat(conversa().get("relatorio_foco_id")).isEqualTo(relatorioId);
     }
 }

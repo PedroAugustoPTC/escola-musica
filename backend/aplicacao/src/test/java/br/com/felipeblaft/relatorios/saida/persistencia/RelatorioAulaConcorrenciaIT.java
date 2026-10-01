@@ -42,7 +42,9 @@ class RelatorioAulaConcorrenciaIT extends IntegracaoBase {
     @Autowired private ResponderPerguntasCasoDeUso responder;
     @Autowired private AprovarRelatorioAulaCasoDeUso aprovar;
     @Autowired private RelatorioAulaRepositorio relatorios;
-    @Autowired private br.com.felipeblaft.relatorios.configuracao.PropriedadesAplicacao propriedades;
+
+    @Autowired
+    private br.com.felipeblaft.relatorios.configuracao.PropriedadesAplicacao propriedades;
 
     private Professor clara;
     private Aluno matteo;
@@ -56,7 +58,11 @@ class RelatorioAulaConcorrenciaIT extends IntegracaoBase {
         Files.createDirectories(diretorio);
         Path arquivo = diretorio.resolve("web-" + UUID.randomUUID() + ".webm");
         Files.write(arquivo, NormalizacaoAudioTeste.AUDIO_COM_FALA);
-        registrar.executar(clara.id(), matteo.id(), new ArquivoTemporario(arquivo, 22, "audio/webm"), Canal.WEB);
+        registrar.executar(
+                clara.id(),
+                matteo.id(),
+                new ArquivoTemporario(arquivo, 22, "audio/webm"),
+                Canal.WEB);
         cenario.processarFila();
         relatorioId = jdbc.queryForObject("select id from relatorio_aula", UUID.class);
         responder.responderTexto(clara.id(), relatorioId, "Estudou bem.", Canal.WEB);
@@ -91,12 +97,17 @@ class RelatorioAulaConcorrenciaIT extends IntegracaoBase {
         canais.shutdown();
 
         assertThat(codigos).containsOnlyOnce("APROVADO");
-        assertThat(codigos).filteredOn(c -> !c.equals("APROVADO"))
+        assertThat(codigos)
+                .filteredOn(c -> !c.equals("APROVADO"))
                 .singleElement()
                 .isIn(CodigoErro.RELATORIO_JA_APROVADO.name(), "CONFLITO");
-        assertThat(jdbc.queryForObject("select count(*) from documento_pdf where tipo = 'OFICIAL'", Integer.class))
+        assertThat(
+                        jdbc.queryForObject(
+                                "select count(*) from documento_pdf where tipo = 'OFICIAL'",
+                                Integer.class))
                 .isEqualTo(1);
-        assertThat(jdbc.queryForObject("select status from relatorio_aula", String.class)).isEqualTo("APROVADO");
+        assertThat(jdbc.queryForObject("select status from relatorio_aula", String.class))
+                .isEqualTo("APROVADO");
     }
 
     @Test
@@ -111,10 +122,13 @@ class RelatorioAulaConcorrenciaIT extends IntegracaoBase {
 
     @Test
     void indiceParcialImpedeSegundoRelatorioEmAbertoParaOMesmoAluno() {
-        Aula aula = Aula.nova(clara.id(), matteo.id(), relogio.hojeNoFusoDaEscola(), relogio.agora());
+        Aula aula =
+                Aula.nova(clara.id(), matteo.id(), relogio.hojeNoFusoDaEscola(), relogio.agora());
         relatorios.salvarAula(aula);
-        RelatorioAula outro = RelatorioAula.criar(aula, "transcrição", Canal.TELEGRAM, relogio.agora());
+        RelatorioAula outro =
+                RelatorioAula.criar(aula, "transcrição", Canal.TELEGRAM, relogio.agora());
 
-        assertThatThrownBy(() -> relatorios.salvar(outro)).isInstanceOf(ConflitoConcorrenciaExcecao.class);
+        assertThatThrownBy(() -> relatorios.salvar(outro))
+                .isInstanceOf(ConflitoConcorrenciaExcecao.class);
     }
 }

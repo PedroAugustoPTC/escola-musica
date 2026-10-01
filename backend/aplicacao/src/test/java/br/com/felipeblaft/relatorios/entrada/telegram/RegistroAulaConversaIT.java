@@ -221,18 +221,16 @@ class RegistroAulaConversaIT extends TelegramConversaBase {
     }
 
     @Test
-    void relatorioEmAbertoNaConfirmacaoAvisaEOfereceContinuarOuDescartar() throws Exception {
+    void alunoComRelatorioEmAbertoAvisaAntesDePedirOAudio() throws Exception {
         prepararArquivoTelegram("primeiro", NormalizacaoAudioTeste.AUDIO_COM_FALA);
         escolherMatteo();
         enviarVoz(USUARIO_CLARA, "primeiro", 1000);
         enviarCallback(USUARIO_CLARA, "v1:confal:");
         cenario.processarFila();
         enviarTexto(USUARIO_CLARA, "registrar aula");
-        escolherMatteo();
-        enviarVoz(USUARIO_CLARA, "segundo", 1000);
         API_BOTS.resetRequests();
 
-        enviarCallback(USUARIO_CLARA, "v1:confal:");
+        enviarTexto(USUARIO_CLARA, "Matteo");
 
         assertThat(ultimaMensagem().get("text").asString())
                 .startsWith("Você tem um relatório em aberto.")

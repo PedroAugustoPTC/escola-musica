@@ -76,7 +76,8 @@ class FilaTrabalhoPostgresAdaptadorIT extends IntegracaoBase {
                             () -> {
                                 largada.await();
                                 Optional<TrabalhoProcessamento> proximo;
-                                while ((proximo = fila.reservarProximo(relogio.agora())).isPresent()) {
+                                while ((proximo = fila.reservarProximo(relogio.agora()))
+                                        .isPresent()) {
                                     reservados.add(proximo.get().id());
                                     todos.add(proximo.get().id());
                                 }
@@ -91,7 +92,10 @@ class FilaTrabalhoPostgresAdaptadorIT extends IntegracaoBase {
 
         assertThat(todos).hasSize(12);
         assertThat(reservados).hasSize(12);
-        assertThat(jdbc.queryForObject("select count(*) from trabalho_processamento where status = 'EM_EXECUCAO'", Integer.class))
+        assertThat(
+                        jdbc.queryForObject(
+                                "select count(*) from trabalho_processamento where status = 'EM_EXECUCAO'",
+                                Integer.class))
                 .isEqualTo(12);
     }
 
@@ -107,14 +111,18 @@ class FilaTrabalhoPostgresAdaptadorIT extends IntegracaoBase {
         primeiro.concluir(ResultadoTrabalho.AUDIO_NAO_PROCESSAVEL, relogio.agora());
         fila.atualizar(primeiro);
         fila.enfileirar(registro(matteo));
-        assertThat(jdbc.queryForObject("select count(*) from trabalho_processamento", Integer.class)).isEqualTo(2);
+        assertThat(
+                        jdbc.queryForObject(
+                                "select count(*) from trabalho_processamento", Integer.class))
+                .isEqualTo(2);
     }
 
     @Test
     void trabalhoTravadoVoltaParaAFilaEOQueDependiaDeArquivoFalha() {
         TrabalhoProcessamento semArquivo = registro(matteo);
         fila.enfileirar(semArquivo);
-        TrabalhoProcessamento comArquivo = registro(cenario.aluno(clara, "Helena Prado", "Violino"));
+        TrabalhoProcessamento comArquivo =
+                registro(cenario.aluno(clara, "Helena Prado", "Violino"));
         comArquivo.definirArquivoTemporario("/tmp/audios/sumiu.webm");
         fila.enfileirar(comArquivo);
         fila.reservarProximo(relogio.agora());
@@ -122,7 +130,8 @@ class FilaTrabalhoPostgresAdaptadorIT extends IntegracaoBase {
 
         assertThat(fila.recuperarTravados(relogio.agora())).isEqualTo(2);
 
-        assertThat(fila.buscarPorId(semArquivo.id()).orElseThrow().status()).isEqualTo(StatusTrabalho.PENDENTE);
+        assertThat(fila.buscarPorId(semArquivo.id()).orElseThrow().status())
+                .isEqualTo(StatusTrabalho.PENDENTE);
         TrabalhoProcessamento falhou = fila.buscarPorId(comArquivo.id()).orElseThrow();
         assertThat(falhou.status()).isEqualTo(StatusTrabalho.FALHOU);
         assertThat(falhou.resultado()).isEqualTo(ResultadoTrabalho.AUDIO_NAO_PROCESSAVEL);
@@ -136,7 +145,8 @@ class FilaTrabalhoPostgresAdaptadorIT extends IntegracaoBase {
         TrabalhoProcessamento doWorker = fila.reservarProximo(relogio.agora()).orElseThrow();
 
         relogio.avancar(Duration.ofMinutes(3));
-        assertThat(fila.listarDemoradosSemAviso(relogio.agora().minus(Duration.ofMinutes(3)))).hasSize(1);
+        assertThat(fila.listarDemoradosSemAviso(relogio.agora().minus(Duration.ofMinutes(3))))
+                .hasSize(1);
         assertThat(fila.marcarAvisoDemora(trabalho.id())).isTrue();
         assertThat(fila.marcarAvisoDemora(trabalho.id())).isFalse();
 
@@ -156,7 +166,10 @@ class FilaTrabalhoPostgresAdaptadorIT extends IntegracaoBase {
 
         doWorker.avancar(EtapaTrabalho.TRANSCREVENDO);
         fila.atualizar(doWorker);
-        assertThat(fila.buscarPorId(trabalho.id()).orElseThrow().parametro(TrabalhoProcessamento.MENSAGEM_ETAPA))
+        assertThat(
+                        fila.buscarPorId(trabalho.id())
+                                .orElseThrow()
+                                .parametro(TrabalhoProcessamento.MENSAGEM_ETAPA))
                 .contains("321");
         assertThat(doWorker.parametro(TrabalhoProcessamento.MENSAGEM_ETAPA)).contains("321");
 
@@ -166,6 +179,7 @@ class FilaTrabalhoPostgresAdaptadorIT extends IntegracaoBase {
         doWorker.avancar(EtapaTrabalho.ESTRUTURANDO);
         fila.atualizar(doWorker);
 
-        assertThat(fila.buscarPorId(trabalho.id()).orElseThrow().status()).isEqualTo(StatusTrabalho.DESCARTADO);
+        assertThat(fila.buscarPorId(trabalho.id()).orElseThrow().status())
+                .isEqualTo(StatusTrabalho.DESCARTADO);
     }
 }

@@ -62,8 +62,8 @@ public abstract class ContratoApiBase extends IntegracaoBase {
 
     /** A requisição e a resposta seguem o contrato OpenAPI. */
     /**
-     * Só a resposta segue o contrato: para envios multipart, cujo corpo o validador não lê do MockMvc
-     * (o formato do multipart é coberto pelos próprios testes).
+     * Só a resposta segue o contrato: para envios multipart, cujo corpo o validador não lê do
+     * MockMvc (o formato do multipart é coberto pelos próprios testes).
      */
     protected static ResultMatcher respostaSegueContrato() {
         return resultado -> {

@@ -11,6 +11,7 @@ import br.com.felipeblaft.relatorios.casodeuso.acesso.VincularTelegramCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.aula.AprovarRelatorioAulaCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.aula.CancelarRelatorioAulaCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.aula.ObterRelatorioAulaCasoDeUso;
+import br.com.felipeblaft.relatorios.casodeuso.aula.ObterRelatorioEmAbertoCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.aula.RegistrarAulaPorAudioCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.aula.ResponderPerguntasCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.aula.SolicitarAlteracaoRelatorioAulaCasoDeUso;
@@ -22,6 +23,7 @@ import br.com.felipeblaft.relatorios.casodeuso.inicio.BuscarAlunosCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.inicio.ObterInicioProfessorCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.inicio.ObterResumoAlunoCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.trabalho.ConsultarTrabalhoCasoDeUso;
+import br.com.felipeblaft.relatorios.casodeuso.trabalho.DescartarRegistroEmProcessamentoCasoDeUso;
 import br.com.felipeblaft.relatorios.dominio.comum.ParametrosNegocio;
 import br.com.felipeblaft.relatorios.porta.AlunoRepositorio;
 import br.com.felipeblaft.relatorios.porta.ArmazenamentoDocumentoPorta;
@@ -385,5 +387,19 @@ public class CasosDeUsoConfiguracao {
             GeracaoDocumentoServico geracao) {
         return new ObterDocumentoRelatorioCasoDeUso(
                 acesso, relatorios, versoes, documentos, geracao);
+    }
+
+    // ---- Retomada entre canais (US3)
+
+    @Bean
+    ObterRelatorioEmAbertoCasoDeUso obterRelatorioEmAbertoCasoDeUso(
+            AutorizacaoServico autorizacao, RelatoriosEmAbertoConsultaPorta consulta) {
+        return new ObterRelatorioEmAbertoCasoDeUso(autorizacao, consulta);
+    }
+
+    @Bean
+    DescartarRegistroEmProcessamentoCasoDeUso descartarRegistroEmProcessamentoCasoDeUso(
+            FilaTrabalhoPorta fila, AudioTemporarioServico audio, RelogioPorta relogio) {
+        return new DescartarRegistroEmProcessamentoCasoDeUso(fila, audio, relogio);
     }
 }

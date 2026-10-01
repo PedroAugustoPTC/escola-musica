@@ -3,6 +3,7 @@ package br.com.felipeblaft.relatorios.entrada.web;
 import br.com.felipeblaft.relatorios.casodeuso.aula.AprovarRelatorioAulaCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.aula.CancelarRelatorioAulaCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.aula.ObterRelatorioAulaCasoDeUso;
+import br.com.felipeblaft.relatorios.casodeuso.aula.ObterRelatorioEmAbertoCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.aula.RegistrarAulaPorAudioCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.aula.ResponderPerguntasCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.aula.SolicitarAlteracaoRelatorioAulaCasoDeUso;
@@ -51,6 +52,7 @@ public class RelatorioAulaControlador {
     private final TentarNovamenteRelatorioAulaCasoDeUso tentar;
     private final AprovarRelatorioAulaCasoDeUso aprovar;
     private final CancelarRelatorioAulaCasoDeUso cancelar;
+    private final ObterRelatorioEmAbertoCasoDeUso obterEmAberto;
 
     @SuppressWarnings("java:S107")
     public RelatorioAulaControlador(
@@ -61,7 +63,8 @@ public class RelatorioAulaControlador {
             SolicitarAlteracaoRelatorioAulaCasoDeUso alterar,
             TentarNovamenteRelatorioAulaCasoDeUso tentar,
             AprovarRelatorioAulaCasoDeUso aprovar,
-            CancelarRelatorioAulaCasoDeUso cancelar) {
+            CancelarRelatorioAulaCasoDeUso cancelar,
+            ObterRelatorioEmAbertoCasoDeUso obterEmAberto) {
         this.recepcao = recepcao;
         this.registrar = registrar;
         this.obter = obter;
@@ -70,6 +73,7 @@ public class RelatorioAulaControlador {
         this.tentar = tentar;
         this.aprovar = aprovar;
         this.cancelar = cancelar;
+        this.obterEmAberto = obterEmAberto;
     }
 
     @PostMapping(
@@ -83,6 +87,17 @@ public class RelatorioAulaControlador {
         ArquivoTemporario arquivo = recepcao.receber(audio);
         return RelatorioAulaMapeador.referencia(
                 registrar.executar(professor.id(), alunoId, arquivo, Canal.WEB));
+    }
+
+    /** Relatório em aberto do aluno (FR-034): 200 com o relatório ou 204 se não houver. */
+    @GetMapping("/alunos/{alunoId}/relatorio-em-aberto")
+    public ResponseEntity<RelatorioEmAbertoDto> relatorioEmAberto(
+            @AuthenticationPrincipal ProfessorAutenticado professor, @PathVariable UUID alunoId) {
+        return obterEmAberto
+                .executar(professor.id(), alunoId)
+                .map(InicioMapeador::emAberto)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
     @GetMapping("/relatorios-aula/{relatorioId}")

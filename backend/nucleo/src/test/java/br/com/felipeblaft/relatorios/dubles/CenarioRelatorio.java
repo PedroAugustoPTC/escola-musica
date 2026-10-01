@@ -109,6 +109,15 @@ public class CenarioRelatorio extends CenarioAcesso {
                     fila);
     public final ConsultarTrabalhoCasoDeUso consultarTrabalho =
             new ConsultarTrabalhoCasoDeUso(fila, relogio);
+    public final br.com.felipeblaft.relatorios.casodeuso.aula.ObterRelatorioEmAbertoCasoDeUso
+            obterEmAberto =
+                    new br.com.felipeblaft.relatorios.casodeuso.aula
+                            .ObterRelatorioEmAbertoCasoDeUso(autorizacao, emAberto);
+    public final br.com.felipeblaft.relatorios.casodeuso.trabalho
+                    .DescartarRegistroEmProcessamentoCasoDeUso
+            descartarRegistro =
+                    new br.com.felipeblaft.relatorios.casodeuso.trabalho
+                            .DescartarRegistroEmProcessamentoCasoDeUso(fila, audio, relogio);
     public final ObterDocumentoRelatorioCasoDeUso obterDocumento =
             new ObterDocumentoRelatorioCasoDeUso(
                     acesso, relatorios, versoes, documentosPdf, documentos);

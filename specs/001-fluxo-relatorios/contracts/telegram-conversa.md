@@ -54,6 +54,7 @@ etapa atual.
 | `confal` | — | "Confirmar {aluno}" |
 | `trocal` | — | "Trocar aluno" |
 | `cont` / `desc` | — | "Continuar de onde parei" / "Descartar e começar um novo" |
+| `descok` | — | "Sim, descartar" (confirma o descarte pedido por `desc`) |
 | `aprov` | versão | "Aprovar relatório" |
 | `aprovok` | versão | "Sim, aprovar a versão N" |
 | `alt` | — | "Solicitar alteração" |
