@@ -1,0 +1,95 @@
+{
+  "_comentario": "Massa de DEMONSTRAÇÃO, 100% fictícia (nomes, CPFs e responsáveis inventados). Usada por `local.sh subir --massa=true`.",
+  "professores": [
+    {
+      "email": "clara@exemplo.test",
+      "nome": "Clara Souza",
+      "ativo": true
+    },
+    {
+      "email": "bruno@exemplo.test",
+      "nome": "Bruno Lima",
+      "ativo": true
+    }
+  ],
+  "alunos": [
+    {
+      "cpf": "300.007.919-03",
+      "nome": "Matteo Mafra",
+      "dataNascimento": "2014-05-10",
+      "nomeResponsavel": "Responsável Fictício de Matteo",
+      "instrumento": "Piano",
+      "professores": [
+        "clara@exemplo.test"
+      ]
+    },
+    {
+      "cpf": "300.015.838-32",
+      "nome": "Olavo Torrente",
+      "dataNascimento": "1998-02-01",
+      "instrumento": "Violão",
+      "professores": [
+        "clara@exemplo.test"
+      ]
+    },
+    {
+      "cpf": "300.023.757-70",
+      "nome": "Miguel de Castro Torrente",
+      "dataNascimento": "2016-08-20",
+      "nomeResponsavel": "Responsável Fictício de Miguel",
+      "instrumento": "Violino",
+      "professores": [
+        "clara@exemplo.test"
+      ]
+    },
+    {
+      "cpf": "300.031.676-07",
+      "nome": "Beatriz Arruda",
+      "dataNascimento": "2009-11-14",
+      "nomeResponsavel": "Responsável Fictícia de Beatriz",
+      "instrumento": "Canto",
+      "professores": [
+        "clara@exemplo.test"
+      ]
+    },
+    {
+      "cpf": "300.039.595-46",
+      "nome": "Lucas Pimentel",
+      "dataNascimento": "2012-03-03",
+      "nomeResponsavel": "Responsável Fictício de Lucas",
+      "instrumento": "Piano",
+      "professores": [
+        "clara@exemplo.test"
+      ]
+    },
+    {
+      "cpf": "300.047.514-18",
+      "nome": "Sofia Rangel",
+      "dataNascimento": "2001-07-22",
+      "instrumento": "Violão",
+      "professores": [
+        "clara@exemplo.test"
+      ]
+    },
+    {
+      "cpf": "300.055.433-55",
+      "nome": "Helena Prado",
+      "dataNascimento": "2010-11-03",
+      "nomeResponsavel": "Responsável Fictícia de Helena",
+      "instrumento": "Flauta",
+      "professores": [
+        "bruno@exemplo.test"
+      ]
+    },
+    {
+      "cpf": "300.063.352-92",
+      "nome": "Davi Coutinho",
+      "dataNascimento": "2013-09-30",
+      "nomeResponsavel": "Responsável Fictício de Davi",
+      "instrumento": "Bateria",
+      "professores": [
+        "bruno@exemplo.test"
+      ]
+    }
+  ]
+}

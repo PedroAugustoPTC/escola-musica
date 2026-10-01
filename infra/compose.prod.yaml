@@ -1,0 +1,13 @@
+# Produção na VPS Hostinger: só o `web` (Caddy, HTTPS) publica portas; os demais ficam na rede interna.
+services:
+  web:
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: unless-stopped
+  backend:
+    restart: unless-stopped
+  postgres:
+    restart: unless-stopped
+  telegram-bot-api:
+    restart: unless-stopped

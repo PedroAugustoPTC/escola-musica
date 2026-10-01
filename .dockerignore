@@ -1,0 +1,9 @@
+**/node_modules
+**/target
+**/dist
+assets
+.git
+infra/.env
+infra/carga
+frontend/playwright-report
+frontend/test-results

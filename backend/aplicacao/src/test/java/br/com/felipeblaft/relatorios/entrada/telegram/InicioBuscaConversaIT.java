@@ -1,0 +1,135 @@
+package br.com.felipeblaft.relatorios.entrada.telegram;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import br.com.felipeblaft.relatorios.dominio.cadastro.Professor;
+import br.com.felipeblaft.relatorios.suporte.CenarioIT;
+import br.com.felipeblaft.relatorios.suporte.TelegramConversaBase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+/** Início, busca de aluno (#10), sair (#2), ajuda, tipo não suportado e botão antigo. */
+class InicioBuscaConversaIT extends TelegramConversaBase {
+
+    @BeforeEach
+    void carregar() throws Exception {
+        Professor clara = cenario.clara();
+        Professor bruno = cenario.bruno();
+        cenario.aluno(clara, "Matteo Mafra", "Piano");
+        cenario.aluno(clara, "Olavo Torrente", "Violão");
+        cenario.aluno(clara, "Miguel de Castro Torrente", "Violino");
+        cenario.aluno(bruno, "Helena Prado", "Flauta");
+        vincular(USUARIO_CLARA, CenarioIT.CODIGO_CLARA);
+    }
+
+    @Test
+    void inicioEMenuMostramOBlocoDeInicio() throws Exception {
+        for (String comando : new String[] {"início", "/inicio", "MENU", "/start"}) {
+            enviarTexto(USUARIO_CLARA, comando);
+            assertThat(ultimaMensagem().get("text").asString())
+                    .contains("<b>Olá, Clara</b>", "3 aluno(s)");
+        }
+    }
+
+    @Test
+    void buscaComUmaVariasENenhumaCorrespondencia() throws Exception {
+        enviarTexto(USUARIO_CLARA, "matteo");
+        assertThat(ultimaMensagem().get("text").asString())
+                .startsWith("Aula de hoje, 21/09/2026, com Matteo Mafra.")
+                .contains("até 50 MB");
+
+        enviarTexto(USUARIO_CLARA, "torrente");
+        assertThat(ultimaMensagem().get("text").asString())
+                .isEqualTo("Encontrei mais de um aluno. Qual deles?");
+        assertThat(rotulosBotoes(ultimaMensagem()))
+                .containsExactly("Miguel de Castro Torrente", "Olavo Torrente", "Início");
+        assertThat(botoes(ultimaMensagem())).startsWith("v1:aluno:0", "v1:aluno:1");
+
+        enviarCallback(USUARIO_CLARA, "v1:aluno:1");
+        assertThat(ultimaMensagem().get("text").asString()).contains("com Olavo Torrente");
+
+        enviarTexto(USUARIO_CLARA, "Helena");
+        assertThat(ultimaMensagem().get("text").asString())
+                .isEqualTo("Nenhum aluno encontrado para \"Helena\".");
+        assertThat(rotulosBotoes(ultimaMensagem())).doesNotContain("Helena Prado").hasSize(4);
+    }
+
+    @Test
+    void registrarAulaPedeOAluno() throws Exception {
+        enviarTexto(USUARIO_CLARA, "registrar aula");
+        assertThat(ultimaMensagem().get("text").asString()).isEqualTo("Para qual aluno?");
+        enviarCallback(USUARIO_CLARA, "v1:reg:");
+        assertThat(ultimaMensagem().get("text").asString()).isEqualTo("Para qual aluno?");
+        enviarCallback(USUARIO_CLARA, "v1:aluno:0");
+        assertThat(ultimaMensagem().get("text").asString()).contains("com Matteo Mafra");
+    }
+
+    @Test
+    void sairPedeConfirmacaoEDesfazOVinculo() throws Exception {
+        enviarTexto(USUARIO_CLARA, "sair");
+        assertThat(ultimaMensagem().get("text").asString()).startsWith("Deseja sair?");
+        assertThat(botoes(ultimaMensagem())).contains("v1:sairok:");
+
+        enviarTexto(USUARIO_CLARA, "não");
+        assertThat(jdbc.queryForObject("select count(*) from vinculo_telegram", Integer.class))
+                .isEqualTo(1);
+
+        enviarTexto(USUARIO_CLARA, "sair");
+        enviarTexto(USUARIO_CLARA, "Sim");
+        assertThat(ultimaMensagem().get("text").asString())
+                .isEqualTo("Você saiu. Para voltar, envie o seu código de acesso.");
+        assertThat(jdbc.queryForObject("select count(*) from vinculo_telegram", Integer.class))
+                .isZero();
+
+        enviarTexto(USUARIO_CLARA, "início");
+        assertThat(ultimaMensagem().get("text").asString()).startsWith("Olá! Para usar o bot");
+    }
+
+    @Test
+    void sairPeloBotao() throws Exception {
+        enviarTexto(USUARIO_CLARA, "sair");
+        enviarCallback(USUARIO_CLARA, "v1:sairok:");
+        assertThat(jdbc.queryForObject("select count(*) from vinculo_telegram", Integer.class))
+                .isZero();
+    }
+
+    @Test
+    void ajudaTipoNaoSuportadoEBotaoAntigo() throws Exception {
+        enviarTexto(USUARIO_CLARA, "/help");
+        assertThat(ultimaMensagem().get("text").asString())
+                .startsWith("Posso ajudar a registrar aulas");
+
+        enviarUpdate(
+                mensagemJson(
+                        proximoUpdate(),
+                        USUARIO_CLARA,
+                        "\"location\": {\"latitude\": 1, \"longitude\": 2}"));
+        assertThat(ultimaMensagem().get("text").asString())
+                .isEqualTo(
+                        "Não consigo usar este tipo de mensagem aqui. Envie o nome de um aluno, um áudio de aula ou escolha uma ação.");
+
+        enviarCallback(USUARIO_CLARA, "v1:aluno:9");
+        assertThat(textosEnviados())
+                .contains("Esta opção não vale mais. Veja abaixo a etapa atual.");
+        enviarCallback(USUARIO_CLARA, "v1:sairok:");
+        enviarCallback(USUARIO_CLARA, "lixo");
+        assertThat(jdbc.queryForObject("select count(*) from vinculo_telegram", Integer.class))
+                .isEqualTo(1);
+
+        enviarTexto(USUARIO_CLARA, "aprovar");
+        assertThat(ultimaMensagem().get("text").asString())
+                .isEqualTo("Esta ação não está disponível nesta etapa do relatório.");
+    }
+
+    @Test
+    void usoPeloTelegramRenovaOCodigo() throws Exception {
+        relogio.avancar(java.time.Duration.ofDays(6));
+        enviarTexto(USUARIO_CLARA, "início");
+        java.time.Instant expira =
+                jdbc.queryForObject(
+                                "select codigo_acesso_expira_em from professor where email = 'clara@exemplo.test'",
+                                java.sql.Timestamp.class)
+                        .toInstant();
+        assertThat(expira).isEqualTo(relogio.agora().plus(java.time.Duration.ofDays(7)));
+    }
+}

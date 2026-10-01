@@ -1,0 +1,93 @@
+# Definição base dos serviços (R-15). Local:  compose.yaml + compose.dev.yaml
+#                                     Produção: compose.yaml + compose.prod.yaml (VPS Hostinger)
+name: relatorios
+
+services:
+  web:
+    build:
+      context: ..
+      dockerfile: frontend/Dockerfile
+    image: relatorios-web
+    environment:
+      DOMINIO: ${DOMINIO:-localhost}
+      ACME_EMAIL: ${ACME_EMAIL:-admin@localhost}
+    volumes:
+      - caddy-dados:/data
+      - caddy-config:/config
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks: [interna]
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "--no-check-certificate", "https://localhost/"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: aplicacao/Dockerfile
+    image: relatorios-backend
+    env_file: .env
+    environment:
+      BANCO_URL: jdbc:postgresql://postgres:5432/relatorios
+      BANCO_USUARIO: relatorios
+      BANCO_SENHA: ${POSTGRES_PASSWORD}
+      TELEGRAM_API_URL: http://telegram-bot-api:8081
+      TELEGRAM_WEBHOOK_URL: http://backend:8080/telegram/webhook
+      TELEGRAM_ARQUIVOS_DIR: /var/lib/telegram-bot-api
+      DOCUMENTOS_DIR: /dados/documentos
+      AUDIOS_TEMP_DIR: /tmp/audios
+    volumes:
+      - documentos:/dados/documentos
+      - telegram-bot-api-dados:/var/lib/telegram-bot-api
+    tmpfs:
+      - /tmp/audios:size=256m,mode=1777
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [interna]
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8080 && printf 'GET /actuator/health HTTP/1.0\r\n\r\n' >&3 && grep -q UP <&3"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: relatorios
+      POSTGRES_USER: relatorios
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql
+    networks: [interna]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U relatorios -d relatorios"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # Servidor local da API de bots (R-05): arquivos de até 50 MB, sem expor o backend à internet.
+  # A imagem aiogram/telegram-bot-api empacota o servidor oficial tdlib/telegram-bot-api (--local).
+  telegram-bot-api:
+    image: aiogram/telegram-bot-api:latest
+    environment:
+      TELEGRAM_API_ID: ${TELEGRAM_API_ID}
+      TELEGRAM_API_HASH: ${TELEGRAM_API_HASH}
+      TELEGRAM_LOCAL: "1"
+    volumes:
+      - telegram-bot-api-dados:/var/lib/telegram-bot-api
+    networks: [interna]
+
+networks:
+  interna:
+
+volumes:
+  pgdata:
+  documentos:
+  telegram-bot-api-dados:
+  caddy-dados:
+  caddy-config:

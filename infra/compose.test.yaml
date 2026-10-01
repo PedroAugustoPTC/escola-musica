@@ -1,0 +1,147 @@
+# Testes em contêiner (R-16): a máquina só precisa do runtime de contêineres.
+#   docker compose -f infra/compose.test.yaml run --rm testes-backend
+#   docker compose -f infra/compose.test.yaml run --rm testes-frontend
+#   docker compose -f infra/compose.test.yaml run --rm testes-e2e
+#   docker compose -f infra/compose.test.yaml run --rm testes-ia-real
+name: relatorios-testes
+
+x-maven: &maven
+  image: maven:3.9-eclipse-temurin-25
+  working_dir: /work/backend
+  volumes:
+    - ..:/work
+    - m2:/root/.m2
+  environment: &maven-env
+    BANCO_URL: jdbc:postgresql://postgres-teste:5432/relatorios_teste
+    BANCO_USUARIO: relatorios
+    BANCO_SENHA: teste
+    CONTRATO_API: /work/specs/001-fluxo-relatorios/contracts/api-portal.openapi.yaml
+  depends_on:
+    postgres-teste:
+      condition: service_healthy
+
+services:
+  postgres-teste:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: relatorios_teste
+      POSTGRES_USER: relatorios
+      POSTGRES_PASSWORD: teste
+    tmpfs:
+      - /var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U relatorios -d relatorios_teste"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  testes-backend:
+    <<: *maven
+    # FFmpeg para FfmpegNormalizacaoAudioAdaptadorIT (o mesmo binário da imagem do backend)
+    command: ["sh", "-c", "apt-get update -qq && apt-get install -y -qq ffmpeg >/dev/null && mvn -B -ntp verify"]
+
+  testes-ia-real:
+    <<: *maven
+    environment:
+      <<: *maven-env
+      PROVEDORES_IA: real
+      TRANSCRICAO_URL: ${TRANSCRICAO_URL:-https://api.groq.com/openai/v1}
+      TRANSCRICAO_MODELO: ${TRANSCRICAO_MODELO:-whisper-large-v3-turbo}
+      TRANSCRICAO_CHAVE: ${TRANSCRICAO_CHAVE:-}
+      LLM_URL: ${LLM_URL:-https://api.groq.com/openai/v1}
+      LLM_MODELO: ${LLM_MODELO:-llama-3.3-70b-versatile}
+      LLM_CHAVE: ${LLM_CHAVE:-}
+      ASSETS_DIR: /assets
+    volumes:
+      - ..:/work
+      - m2:/root/.m2
+      - ../assets:/assets:ro
+    command: ["sh", "-c", "apt-get update -qq && apt-get install -y -qq ffmpeg >/dev/null && mvn -B -ntp -Pia-real verify"]
+
+  testes-frontend:
+    image: node:24-alpine
+    working_dir: /work/frontend
+    volumes:
+      - ..:/work
+      - node-modules:/work/frontend/node_modules
+    command: ["sh", "-c", "npm ci && npm run lint && npm run typecheck && npm test"]
+
+  # Pilha completa com IA simulada para os testes ponta a ponta (Playwright + axe).
+  postgres-e2e:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: relatorios
+      POSTGRES_USER: relatorios
+      POSTGRES_PASSWORD: e2e
+    tmpfs:
+      - /var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U relatorios -d relatorios"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  backend-e2e:
+    build:
+      context: ../backend
+      dockerfile: aplicacao/Dockerfile
+    image: relatorios-backend
+    environment:
+      BANCO_URL: jdbc:postgresql://postgres-e2e:5432/relatorios
+      BANCO_USUARIO: relatorios
+      BANCO_SENHA: e2e
+      PROVEDORES_IA: simulado
+      TELEGRAM_HABILITADO: "false"
+      CPF_CHAVE_CIFRAGEM: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+      SEGREDO_HMAC: segredo-hmac-de-testes-e2e-com-mais-de-32-bytes
+      SESSAO_COOKIE_SEGURO: "true"
+      DOCUMENTOS_DIR: /dados/documentos
+      AUDIOS_TEMP_DIR: /tmp/audios
+    tmpfs:
+      - /tmp/audios:mode=1777
+    depends_on:
+      postgres-e2e:
+        condition: service_healthy
+    networks:
+      default:
+        aliases: [backend]
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8080 && printf 'GET /actuator/health HTTP/1.0\r\n\r\n' >&3 && grep -q UP <&3"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+
+  web-e2e:
+    build:
+      context: ..
+      dockerfile: frontend/Dockerfile
+    image: relatorios-web
+    environment:
+      DOMINIO: web-e2e
+      CERTIFICADOS_LOCAIS: local_certs
+    depends_on:
+      backend-e2e:
+        condition: service_healthy
+
+  testes-e2e:
+    image: mcr.microsoft.com/playwright:v1.63.0-noble
+    working_dir: /work/frontend
+    environment:
+      E2E_URL: https://web-e2e
+      E2E_BANCO_URL: postgres://relatorios:e2e@postgres-e2e:5432/relatorios
+      # Os mesmos segredos de testes do backend-e2e: a semeadura grava o HMAC e o CPF cifrado.
+      E2E_CPF_CHAVE: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+      E2E_SEGREDO_HMAC: segredo-hmac-de-testes-e2e-com-mais-de-32-bytes
+    volumes:
+      - ..:/work
+      - node-modules-e2e:/work/frontend/node_modules
+    depends_on:
+      web-e2e:
+        condition: service_started
+    command: ["sh", "-c", "npm ci && npx playwright test"]
+
+volumes:
+  m2:
+  node-modules:
+  node-modules-e2e:
