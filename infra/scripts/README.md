@@ -64,30 +64,42 @@ PROVEDORES_IA=simulado
 O `infra/.env` nunca vai para o Git (está no `.gitignore`). Cada variável está explicada no
 [`infra/.env.example`](../.env.example).
 
-### 3. Suba a pilha
+### 3. Suba a pilha — com ou sem massa
+
+Escolha como quer começar:
 
 ```bash
-sh infra/scripts/local.sh subir
+sh infra/scripts/local.sh subir --massa=true
 ```
 
-A primeira vez demora alguns minutos (build das imagens do backend e do portal). O comando confere o
-`infra/.env`, sobe os serviços e espera todos ficarem saudáveis. No fim aparece:
+```bash
+sh infra/scripts/local.sh subir --massa=false
+```
+
+| Opção | O que acontece |
+|---|---|
+| `--massa=true` | **zera** os dados locais (banco e PDFs) e sobe com a [massa de demonstração](#massa-de-demonstração): professores, alunos, aulas aprovadas com PDFs, semestrais e relatórios em aberto. Ideal para testar logo. |
+| `--massa=false` | **zera** os dados locais e sobe só o sistema, sem nenhum dado. Para começar do zero. |
+| sem `--massa` | sobe mantendo os dados que já existem (o uso do dia a dia, depois da primeira vez). |
+
+A primeira vez demora alguns minutos (build das imagens do backend e do portal); a massa leva cerca
+de mais um minuto. O comando confere o `infra/.env`, sobe os serviços e espera todos ficarem
+saudáveis. No fim aparece:
 
 ```text
 Portal: https://localhost  (certificado local do Caddy: aceite no navegador)
 ```
 
-### 4. Carregue os dados de exemplo
+`--massa=true` e `--massa=false` apagam o banco e os PDFs locais (os certificados do Caddy e o volume
+do bot são mantidos). Não afetam a pilha de testes nem a produção.
 
-```bash
-sh infra/scripts/local.sh carga
-```
+### 4. Pegue o código de acesso
 
-Cria os professores e alunos **fictícios** de `infra/carga/exemplo.json` (Clara, com Matteo, Olavo e
-Miguel; Bruno, com Helena) e mostra uma linha por professor novo:
+Com `--massa=true`, a saída termina com uma linha por professor:
 
 ```text
 clara@exemplo.test → XXXX-XXXX (válido até …)
+bruno@exemplo.test → XXXX-XXXX (válido até …)
 ```
 
 Esse é o código de acesso. Ele só aparece nessa saída (no banco fica apenas o HMAC). Se perder,
@@ -95,6 +107,13 @@ gere outro (o anterior deixa de valer):
 
 ```bash
 sh infra/scripts/local.sh codigo clara@exemplo.test
+```
+
+Com `--massa=false`, o sistema começa sem professores. Para cadastrar os de exemplo (só cadastros,
+sem relatórios):
+
+```bash
+sh infra/scripts/local.sh carga
 ```
 
 Para carregar outro arquivo, coloque-o em `infra/carga/` (cargas reais nunca vão para o Git) e
@@ -107,7 +126,7 @@ passe o caminho: `sh infra/scripts/local.sh carga infra/carga/minha-carga.json`.
 2. Na primeira vez o navegador avisa que o certificado não é confiável, porque é emitido pela CA
    interna do Caddy. Clique em **Avançado → Continuar para localhost**.
 3. Entre com o código da Clara.
-4. Escolha um aluno → **Registrar aula** → envie um arquivo de áudio (MP3, M4A, OGG, WAV, WebM ou
+4. Escolha um aluno (com a massa, Lucas ou Sofia não têm aulas ainda) → **Registrar aula** → envie um arquivo de áudio (MP3, M4A, OGG, WAV, WebM ou
    vídeo MP4, até 50 MB) ou grave pelo microfone.
 
 Com `PROVEDORES_IA=simulado`, o sistema não chama a IA: qualquer áudio com som gera o mesmo
@@ -117,7 +136,9 @@ relatório de exemplo, com duas perguntas pendentes. Serve para testar o fluxo c
 
 | Comando | O que faz |
 |---|---|
-| `sh infra/scripts/local.sh subir` | sobe (ou atualiza, após mudanças no código) a pilha e espera ficar saudável |
+| `sh infra/scripts/local.sh subir` | sobe (ou atualiza, após mudanças no código) a pilha mantendo os dados |
+| `sh infra/scripts/local.sh subir --massa=true` | zera os dados locais e sobe com a massa de demonstração |
+| `sh infra/scripts/local.sh subir --massa=false` | zera os dados locais e sobe o sistema vazio |
 | `sh infra/scripts/local.sh status` | estado de cada serviço |
 | `sh infra/scripts/local.sh logs` | acompanha os logs do backend (`Ctrl+C` sai); `logs web` ou `logs postgres` para os outros |
 | `sh infra/scripts/local.sh carga [arquivo]` | carga inicial de professores e alunos |
@@ -131,6 +152,40 @@ relatório de exemplo, com duas perguntas pendentes. Serve para testar o fluxo c
 
 Depois de mudar código do backend ou do portal, rode `subir` de novo: ele reconstrói as imagens e
 recria só o que mudou.
+
+## Massa de demonstração
+
+Criada por `subir --massa=true` a partir de [`infra/carga/demonstracao.json`](../carga/demonstracao.json).
+**Todos os dados são fictícios** (nomes, CPFs e responsáveis inventados). Os relatórios são criados
+pelas mesmas regras de domínio e pelo mesmo gerador de PDF do sistema, com datas relativas ao dia em
+que você sobe a pilha (semestre atual e anterior).
+
+| Professor | Aluno | O que já existe |
+|---|---|---|
+| Clara Souza | Matteo Mafra (Piano) | ~12 aulas aprovadas no semestre anterior e ~10 no atual; **semestral do semestre anterior aprovado** |
+| Clara Souza | Olavo Torrente (Violão) | ~8 + ~8 aulas aprovadas; **semestral do semestre anterior em conferência**; **aula de ontem aguardando conferência** |
+| Clara Souza | Miguel de Castro Torrente (Violino) | ~6 aulas aprovadas no semestre atual; **aula de hoje aguardando respostas** (2 perguntas) |
+| Clara Souza | Beatriz Arruda (Canto) | 4 aulas aprovadas no semestre atual |
+| Clara Souza | Lucas Pimentel (Piano), Sofia Rangel (Violão) | nada — para testar histórico vazio e o primeiro registro |
+| Bruno Lima | Helena Prado (Flauta), Davi Coutinho (Bateria) | algumas aulas aprovadas — para testar o acesso cruzado (Clara não pode ver) |
+
+Cada aula aprovada tem o PDF de conferência e o PDF oficial; o semestral aprovado também. Os
+relatórios aprovados alternam o canal (portal e Telegram), como aconteceria no uso real. No total
+são cerca de 57 aulas aprovadas, 2 aulas em aberto, 2 semestrais e 118 PDFs.
+
+O que dá para testar logo de cara (entrando como Clara):
+
+- **Painel**: 3 relatórios em aberto (Olavo — aula e semestral; Miguel — perguntas).
+- **Histórico** de Matteo: aulas dos dois semestres e o semestral, com "Abrir PDF".
+- **Retomada**: "Continuar" no relatório de Olavo (conferência) ou de Miguel (perguntas).
+- **Semestral**: gerar o do semestre atual de Matteo ou de Beatriz; ver o de Olavo em conferência;
+  tentar gerar de novo o de Matteo (já aprovado → recusado).
+- **Telas vazias**: histórico de Lucas ou Sofia.
+- **Acesso cruzado**: entrar como Bruno (código dele na mesma saída) e conferir que os alunos da
+  Clara não aparecem.
+
+O comando que gera a massa (`massa`, dentro do backend) só funciona com o banco vazio — por isso
+nunca mistura dados fictícios com dados reais.
 
 ## Acessar o banco como administrador
 
@@ -269,4 +324,5 @@ pilha local.
 | "Acesso bloqueado temporariamente" | 5 códigos errados seguidos: espere 15 minutos ou gere um código novo. |
 | A carga diz que não leu o arquivo | O arquivo precisa estar em `infra/carga/` e ser JSON válido. |
 | Os serviços sumiram depois de reiniciar o PC | Na pilha local eles não reiniciam sozinhos: rode `subir` (os dados continuam lá). |
-| Quero começar do zero | `sh infra/scripts/local.sh limpar`, depois `subir` e `carga`. |
+| Quero começar do zero | `sh infra/scripts/local.sh subir --massa=false` (ou `--massa=true` para já ter dados). |
+| `A massa de demonstração só é criada em banco vazio` | Rode pelo script (`subir --massa=true`), que zera os dados antes. |

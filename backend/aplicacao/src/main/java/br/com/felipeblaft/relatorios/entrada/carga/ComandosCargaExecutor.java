@@ -21,12 +21,17 @@ class ComandosCargaExecutor implements ApplicationRunner {
 
     private final CargaComando carga;
     private final EmitirCodigoComando emitirCodigo;
+    private final MassaDemonstracaoComando massa;
     private final ApplicationContext contexto;
 
     ComandosCargaExecutor(
-            CargaComando carga, EmitirCodigoComando emitirCodigo, ApplicationContext contexto) {
+            CargaComando carga,
+            EmitirCodigoComando emitirCodigo,
+            MassaDemonstracaoComando massa,
+            ApplicationContext contexto) {
         this.carga = carga;
         this.emitirCodigo = emitirCodigo;
+        this.massa = massa;
         this.contexto = contexto;
     }
 
@@ -42,9 +47,11 @@ class ComandosCargaExecutor implements ApplicationRunner {
                 switch (comando) {
                     case CargaComando.NOME -> carga.executar(argumentos, saida);
                     case EmitirCodigoComando.NOME -> emitirCodigo.executar(argumentos, saida);
+                    case MassaDemonstracaoComando.NOME -> massa.executar(argumentos, saida);
                     default -> {
                         saida.println(
-                                "Comandos: carga --arquivo <arquivo.json> [--simular] | emitir-codigo --email <email>");
+                                "Comandos: carga --arquivo <arquivo.json> [--simular] | emitir-codigo --email <email>"
+                                        + " | massa --arquivo <cadastros.json>");
                         yield 2;
                     }
                 };

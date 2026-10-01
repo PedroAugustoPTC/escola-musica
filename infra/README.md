@@ -16,6 +16,7 @@ A validação funcional completa está em
 | `caddy/Caddyfile` | HTTPS, cabeçalhos de segurança e proxy de `/api/*` |
 | `.env.example` | modelo das variáveis; copie para `infra/.env` (**nunca versionado**) |
 | `carga/exemplo.json` | carga fictícia; cargas reais ficam fora do Git (`infra/carga/*.json`) |
+| `carga/demonstracao.json` | cadastros fictícios da massa de demonstração (`local.sh subir --massa=true`) |
 | `scripts/local.sh` | ambiente local: subir, carga, código, banco, status, logs, testes, parar, limpar — passo a passo em [`scripts/README.md`](scripts/README.md) |
 | `compose.banco.yaml` | só local: publica o banco em `127.0.0.1` para ferramentas gráficas (`local.sh banco-porta`) |
 | `scripts/implantar.sh` | atualização e subida da pilha de produção na VPS |

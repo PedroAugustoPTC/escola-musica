@@ -2,6 +2,9 @@
 # Ambiente local em contêineres (a máquina só precisa do Docker). Rode da raiz do repositório:
 #
 #   sh infra/scripts/local.sh subir          # build + sobe web, backend, postgres (e o bot, se habilitado)
+#        --massa=true                        #   zera os dados locais e sobe com a massa de demonstração
+#        --massa=false                       #   zera os dados locais e sobe só o sistema, vazio
+#        (sem --massa)                       #   mantém os dados que já existem
 #   sh infra/scripts/local.sh carga [arq]    # carga inicial (padrão: infra/carga/exemplo.json) e códigos
 #   sh infra/scripts/local.sh codigo <email> # reemite o código de acesso de um professor
 #   sh infra/scripts/local.sh status         # estado dos serviços
@@ -55,6 +58,13 @@ exigir_env() {
   fi
 }
 
+# Apaga só o banco e os PDFs locais (mantém os certificados do Caddy e o volume do bot).
+zerar_dados() {
+  echo "Zerando os dados locais (banco e PDFs)..."
+  $LOCAL down --remove-orphans
+  docker volume rm -f relatorios_pgdata relatorios_documentos >/dev/null
+}
+
 servicos() {
   if [ "$(valor TELEGRAM_HABILITADO)" = "true" ]; then
     echo "web backend postgres telegram-bot-api"
@@ -93,14 +103,42 @@ comando="${1:-ajuda}"
 
 case "$comando" in
   subir)
+    massa=""
+    while [ "$#" -gt 0 ]; do
+      case "$1" in
+        --massa=true|--massa=false) massa="${1#--massa=}" ;;
+        --massa) massa="${2:-}"; shift ;;
+        *) echo "Opção desconhecida: $1 (use --massa=true ou --massa=false)" >&2; exit 2 ;;
+      esac
+      shift
+    done
+    case "$massa" in
+      ""|true|false) ;;
+      *) echo "Use --massa=true ou --massa=false" >&2; exit 2 ;;
+    esac
     exigir_env
+    [ -n "$massa" ] && zerar_dados
     # shellcheck disable=SC2046
     $LOCAL up -d --build --remove-orphans $(servicos)
     aguardar
+    if [ "$massa" = "true" ]; then
+      echo "Gerando a massa de demonstração (cadastros, aulas, semestrais e PDFs)..."
+      if saida_massa="$($LOCAL run --rm backend massa --arquivo /carga/demonstracao.json 2>&1)"; then
+        echo "$saida_massa" | grep -v -e '^{' -e '^Picked up' -e 'Container ' -e 'WARN ' -e 'INFO::' || true
+      else
+        echo "$saida_massa" | grep -v -e '^{' -e '^Picked up' -e 'Container ' -e 'WARN ' -e 'INFO::' >&2 || true
+        echo "A massa de demonstração falhou; o sistema está no ar, mas vazio." >&2
+        exit 1
+      fi
+    fi
     echo
     echo "Portal: https://$(valor DOMINIO | sed 's/^$/localhost/')  (certificado local do Caddy: aceite no navegador)"
     echo "IA: $(valor PROVEDORES_IA) · Telegram: $(valor TELEGRAM_HABILITADO)"
-    echo "Primeira vez? Rode: sh infra/scripts/local.sh carga"
+    case "$massa" in
+      true) echo "Massa carregada: entre com o código da Clara mostrado acima." ;;
+      false) echo "Sistema vazio. Para cadastros de exemplo: sh infra/scripts/local.sh carga" ;;
+      *) echo "Dados mantidos. Massa de demonstração: sh infra/scripts/local.sh subir --massa=true" ;;
+    esac
     ;;
   carga)
     exigir_env
@@ -175,11 +213,11 @@ case "$comando" in
     $LOCAL down -v
     ;;
   ajuda|-h|--help)
-    sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'
+    sed -n '2,19p' "$0" | sed 's/^# \{0,1\}//'
     ;;
   *)
     echo "Comando desconhecido: $comando" >&2
-    sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//' >&2
+    sed -n '2,19p' "$0" | sed 's/^# \{0,1\}//' >&2
     exit 2
     ;;
 esac
