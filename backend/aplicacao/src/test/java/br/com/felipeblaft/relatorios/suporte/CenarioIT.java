@@ -36,6 +36,12 @@ public class CenarioIT {
     @org.springframework.beans.factory.annotation.Autowired
     private br.com.felipeblaft.relatorios.porta.RelatorioAulaRepositorio relatoriosAula;
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private br.com.felipeblaft.relatorios.porta.VersaoRelatorioRepositorio versoes;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private br.com.felipeblaft.relatorios.servico.GeracaoDocumentoServico documentos;
+
     private int sequenciaCpf;
 
     public CenarioIT(
@@ -139,6 +145,20 @@ public class CenarioIT {
                         0,
                         0);
         relatoriosAula.salvar(relatorio);
+        br.com.felipeblaft.relatorios.dominio.relatorio.VersaoRelatorio versao =
+                br.com.felipeblaft.relatorios.dominio.relatorio.VersaoRelatorio.nova(
+                        br.com.felipeblaft.relatorios.dominio.comum.TipoRelatorio.AULA,
+                        relatorio.id(),
+                        1,
+                        relatorio.conteudo(),
+                        br.com.felipeblaft.relatorios.dominio.relatorio.OrigemVersao
+                                .ESTRUTURACAO_INICIAL,
+                        null,
+                        br.com.felipeblaft.relatorios.dominio.comum.Canal.WEB,
+                        "estruturacao-aula.v1",
+                        agora);
+        versoes.salvar(versao);
+        documentos.gerarOficial(relatorio, versao);
         return relatorio;
     }
 

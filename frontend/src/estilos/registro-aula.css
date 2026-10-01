@@ -649,3 +649,89 @@
   color: var(--mu);
   margin-bottom: 2px;
 }
+
+/* Tela 12 — Histórico */
+.historico {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.historico__item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--bd);
+  border-radius: 8px;
+  background: var(--sf);
+}
+
+.historico__selo {
+  width: 56px;
+  flex: none;
+  text-align: center;
+  border-right: 1px solid var(--bd);
+  padding-right: 14px;
+}
+
+.historico__dia {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.historico__mes {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--gs);
+}
+
+.historico__corpo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.historico__titulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  font-weight: 600;
+}
+
+.historico__etiqueta {
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--gd);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gs);
+}
+
+.historico__aprovado {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+  color: var(--mu);
+}
+
+.historico__aprovado .icone {
+  font-size: 16px;
+  color: var(--ok);
+}
+
+.historico__pdf {
+  flex: none;
+  min-height: 44px;
+  min-width: 44px;
+}

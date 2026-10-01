@@ -19,6 +19,7 @@ import br.com.felipeblaft.relatorios.casodeuso.aula.TentarNovamenteRelatorioAula
 import br.com.felipeblaft.relatorios.casodeuso.carga.CarregarCadastroInicialCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.carga.EmitirCodigoAcessoCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.documento.ObterDocumentoRelatorioCasoDeUso;
+import br.com.felipeblaft.relatorios.casodeuso.historico.ConsultarHistoricoAlunoCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.inicio.BuscarAlunosCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.inicio.ObterInicioProfessorCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.inicio.ObterResumoAlunoCasoDeUso;
@@ -521,5 +522,15 @@ public class CasosDeUsoConfiguracao {
                         acesso, interacoes, versoes, documentos, geracao, fila);
         obterDocumento.registrarFonteSemestral(obter);
         return obter;
+    }
+
+    // ---- Histórico (US5)
+
+    @Bean
+    ConsultarHistoricoAlunoCasoDeUso consultarHistoricoAlunoCasoDeUso(
+            ObterResumoAlunoCasoDeUso resumoAluno,
+            RelatorioAulaRepositorio aulas,
+            RelatorioSemestralRepositorio semestrais) {
+        return new ConsultarHistoricoAlunoCasoDeUso(resumoAluno, aulas, semestrais);
     }
 }

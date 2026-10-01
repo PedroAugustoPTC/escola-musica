@@ -82,6 +82,18 @@ class RelatorioAulaRepositorioAdaptador implements RelatorioAulaRepositorio {
     }
 
     @Override
+    public List<AulaAprovada> listarAprovados(UUID professorId, UUID alunoId) {
+        return relatorios.aprovados(professorId, alunoId).stream().map(this::aprovada).toList();
+    }
+
+    private AulaAprovada aprovada(Object[] linha) {
+        RelatorioAula relatorio =
+                RelatorioAulaMapeador.paraDominio((RelatorioAulaEntidade) linha[0]);
+        return new AulaAprovada(
+                relatorio.id(), (LocalDate) linha[1], relatorio.conteudo(), relatorio.aprovadoEm());
+    }
+
+    @Override
     public int contarEmAbertoNoPeriodo(
             UUID professorId, UUID alunoId, LocalDate inicio, LocalDate fim) {
         return (int) relatorios.contarEmAbertoNoPeriodo(professorId, alunoId, inicio, fim);

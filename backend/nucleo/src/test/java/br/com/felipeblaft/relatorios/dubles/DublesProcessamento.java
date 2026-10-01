@@ -401,6 +401,12 @@ public final class DublesProcessamento {
         }
 
         @Override
+        public List<AulaAprovada> listarAprovados(UUID professorId, UUID alunoId) {
+            return listarAprovadosNoPeriodo(
+                    professorId, alunoId, java.time.LocalDate.MIN, java.time.LocalDate.MAX);
+        }
+
+        @Override
         public int contarEmAbertoNoPeriodo(
                 UUID professorId,
                 UUID alunoId,

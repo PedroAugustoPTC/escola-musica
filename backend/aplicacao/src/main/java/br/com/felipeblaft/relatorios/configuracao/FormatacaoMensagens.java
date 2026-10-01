@@ -1,7 +1,9 @@
 package br.com.felipeblaft.relatorios.configuracao;
 
+import br.com.felipeblaft.relatorios.casodeuso.historico.ConsultarHistoricoAlunoCasoDeUso.ItemHistorico;
 import br.com.felipeblaft.relatorios.dominio.comum.Canal;
 import br.com.felipeblaft.relatorios.dominio.comum.CodigoErro;
+import br.com.felipeblaft.relatorios.dominio.comum.TipoRelatorio;
 import br.com.felipeblaft.relatorios.porta.RelogioPorta;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -38,6 +40,25 @@ public class FormatacaoMensagens {
 
     public String hora(Instant instante) {
         return instante.atZone(relogio.fusoDaEscola()).format(HORA);
+    }
+
+    /** "Aula de dd/mm/aaaa" ou "Semestral (dd/mm/aaaa a dd/mm/aaaa)" — iguais nos dois canais. */
+    public String rotuloHistorico(ItemHistorico item) {
+        return item.tipo() == TipoRelatorio.AULA
+                ? catalogo.texto("ROTULO_AULA", Map.of("data", data(item.dataAula())))
+                : catalogo.texto(
+                        "ROTULO_SEMESTRAL",
+                        Map.of(
+                                "inicio",
+                                data(item.periodo().inicio()),
+                                "fim",
+                                data(item.periodo().fim())));
+    }
+
+    /** "Aprovado em dd/mm/aaaa às hh:mm" no fuso da escola. */
+    public String aprovadoEm(Instant instante) {
+        return catalogo.texto(
+                "APROVADO_EM", Map.of("data", data(instante), "hora", hora(instante)));
     }
 
     public String canalOrigem(Canal canal) {

@@ -39,6 +39,9 @@ public interface RelatorioAulaRepositorio {
     /** Quantos relatórios de aula do par seguem em aberto com aula no período. */
     int contarEmAbertoNoPeriodo(UUID professorId, UUID alunoId, LocalDate inicio, LocalDate fim);
 
+    /** Todos os relatórios de aula aprovados do par (histórico), em qualquer ordem. */
+    List<AulaAprovada> listarAprovados(UUID professorId, UUID alunoId);
+
     /** Data da primeira aula do aluno com o professor, se houver. */
     Optional<LocalDate> dataPrimeiraAula(UUID professorId, UUID alunoId);
 

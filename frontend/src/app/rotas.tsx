@@ -7,6 +7,7 @@ import { TelaAprovado } from '../paginas/TelaAprovado';
 import { TelaConferencia } from '../paginas/TelaConferencia';
 import { TelaConferenciaSemestral } from '../paginas/TelaConferenciaSemestral';
 import { TelaEntrar } from '../paginas/TelaEntrar';
+import { TelaHistorico } from '../paginas/TelaHistorico';
 import { TelaGravacao } from '../paginas/TelaGravacao';
 import { TelaPainel } from '../paginas/TelaPainel';
 import { TelaPerguntas } from '../paginas/TelaPerguntas';
@@ -43,6 +44,6 @@ export const rotas: RouteObject[] = [
   { path: '/alunos/:alunoId/semestral', element: protegida(<TelaSemestral />) },
   { path: '/relatorios-semestrais/:relatorioId', element: protegida(<TelaConferenciaSemestral />) },
   { path: '/relatorios-semestrais/:relatorioId/aprovado', element: protegida(<TelaAprovado semestral />) },
-  { path: '/alunos/:alunoId/historico', element: protegida(<PaginaProvisoria titulo="12 Histórico" />) },
+  { path: '/alunos/:alunoId/historico', element: protegida(<TelaHistorico />) },
   { path: '*', element: protegida(<PaginaProvisoria titulo="Página não encontrada" />) },
 ];

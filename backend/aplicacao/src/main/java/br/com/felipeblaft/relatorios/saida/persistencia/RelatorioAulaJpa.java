@@ -56,4 +56,12 @@ interface RelatorioAulaJpa extends JpaRepository<RelatorioAulaEntidade, UUID> {
     @Query(
             "select min(a.dataAula) from AulaEntidade a where a.professorId = :professorId and a.alunoId = :alunoId")
     Optional<java.time.LocalDate> primeiraAula(UUID professorId, UUID alunoId);
+
+    @Query(
+            """
+            select r, a.dataAula from RelatorioAulaEntidade r, AulaEntidade a
+            where a.id = r.aulaId and r.professorId = :professorId and r.alunoId = :alunoId
+              and r.status = 'APROVADO'
+            """)
+    List<Object[]> aprovados(UUID professorId, UUID alunoId);
 }
