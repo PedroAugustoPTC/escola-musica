@@ -21,6 +21,12 @@ if (typeof window.matchMedia !== 'function') {
   });
 }
 
+// jsdom não cria URLs de Blob; os testes só precisam de um identificador.
+if (typeof URL.createObjectURL !== 'function') {
+  Object.defineProperty(URL, 'createObjectURL', { writable: true, value: () => 'blob:teste' });
+  Object.defineProperty(URL, 'revokeObjectURL', { writable: true, value: () => undefined });
+}
+
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();

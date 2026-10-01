@@ -3,8 +3,13 @@ import { GuardaSessao } from './GuardaSessao';
 import { Estrutura } from '../componentes/Estrutura';
 import { EstadoVazio } from '../componentes/EstadoVazio';
 import { TelaAlunos } from '../paginas/TelaAlunos';
+import { TelaAprovado } from '../paginas/TelaAprovado';
+import { TelaConferencia } from '../paginas/TelaConferencia';
 import { TelaEntrar } from '../paginas/TelaEntrar';
+import { TelaGravacao } from '../paginas/TelaGravacao';
 import { TelaPainel } from '../paginas/TelaPainel';
+import { TelaPerguntas } from '../paginas/TelaPerguntas';
+import { TelaProcessando } from '../paginas/TelaProcessando';
 
 /** Página provisória para as rotas ainda não implementadas. */
 function PaginaProvisoria({ titulo }: { titulo: string }) {
@@ -30,17 +35,11 @@ export const rotas: RouteObject[] = [
     path: '/alunos/:alunoId/relatorio-em-aberto',
     element: protegida(<PaginaProvisoria titulo="04 Relatório em aberto" />),
   },
-  { path: '/alunos/:alunoId/nova-aula', element: protegida(<PaginaProvisoria titulo="05 Gravação" />) },
-  { path: '/trabalhos/:trabalhoId', element: protegida(<PaginaProvisoria titulo="06 Processando" />) },
-  {
-    path: '/relatorios-aula/:relatorioId/perguntas',
-    element: protegida(<PaginaProvisoria titulo="07 Perguntas pendentes" />),
-  },
-  { path: '/relatorios-aula/:relatorioId', element: protegida(<PaginaProvisoria titulo="08 Conferência" />) },
-  {
-    path: '/relatorios-aula/:relatorioId/aprovado',
-    element: protegida(<PaginaProvisoria titulo="09 Relatório aprovado" />),
-  },
+  { path: '/alunos/:alunoId/nova-aula', element: protegida(<TelaGravacao />) },
+  { path: '/trabalhos/:trabalhoId', element: protegida(<TelaProcessando />) },
+  { path: '/relatorios-aula/:relatorioId/perguntas', element: protegida(<TelaPerguntas />) },
+  { path: '/relatorios-aula/:relatorioId', element: protegida(<TelaConferencia />) },
+  { path: '/relatorios-aula/:relatorioId/aprovado', element: protegida(<TelaAprovado />) },
   { path: '/alunos/:alunoId/semestral', element: protegida(<PaginaProvisoria titulo="10 Semestral" />) },
   {
     path: '/relatorios-semestrais/:relatorioId',

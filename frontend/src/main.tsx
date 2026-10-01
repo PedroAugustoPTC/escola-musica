@@ -4,6 +4,7 @@ import './estilos/tokens.css';
 import './estilos/fontes.css';
 import './estilos/tipografia.css';
 import './estilos/base.css';
+import './estilos/registro-aula.css';
 import { App } from './app/App';
 
 createRoot(document.getElementById('raiz')!).render(

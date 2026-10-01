@@ -65,6 +65,12 @@ etapa atual.
 | `voltar` | — | "Voltar" |
 | `hitem` | índice | rótulo do item do histórico |
 | `sairok` | — | "Sim, sair" |
+| `foco` | `a<UUID>` (relatório de aula), `s<UUID>` (semestral) ou `t<UUID>` (registro ainda em transcrição) | "Continuar no chat" / "Continuar: {aluno} ({data})" |
+
+O botão `foco` revalida o dono e o estado do relatório, põe o relatório em foco e apresenta a etapa
+atual (processamento, perguntas ou conferência); um relatório já aprovado ou cancelado não entra em
+foco. As mensagens de etapa do processamento são editadas no lugar: o id da mensagem fica no
+parâmetro `mensagemEtapa` do trabalho.
 
 ## 4. Estados da conversa e interpretação da próxima mensagem
 

@@ -48,7 +48,7 @@ interface TrabalhoProcessamentoJpa extends JpaRepository<TrabalhoProcessamentoEn
             """
             select t from TrabalhoProcessamentoEntidade t
             where t.status in ('PENDENTE', 'EM_EXECUCAO') and t.avisoDemoraEnviado = false
-              and t.criadoEm < :limite
+              and t.criadoEm <= :limite
             """)
     List<TrabalhoProcessamentoEntidade> demoradosSemAviso(Instant limite);
 
