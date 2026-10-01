@@ -8,14 +8,21 @@ import { Icone } from '../componentes/Icone';
 import { msg } from '../mensagens/mensagens';
 import { dataDoInstante, horaDoInstante } from '../servicos/formatacao';
 import { useRelatorioAula } from '../servicos/relatoriosAula';
+import { useRelatorioSemestral } from '../servicos/semestral';
 
 /** Tela 09 — Relatório aprovado (09b modo escuro): data e hora da aprovação e próximos passos. */
-export function TelaAprovado() {
+export function TelaAprovado({ semestral = false }: { semestral?: boolean }) {
   const { relatorioId } = useParams();
-  const relatorio = useRelatorioAula(relatorioId);
+  const aula = useRelatorioAula(semestral ? undefined : relatorioId);
+  const relatorioSemestral = useRelatorioSemestral(semestral ? relatorioId : undefined);
+  const relatorio = semestral ? relatorioSemestral : aula;
   const navegar = useNavigate();
   const { tintaOuro } = useTema();
-  const contexto = { sobretitulo: 'Relatório de aula', titulo: 'Aprovado', voltarPara: '/' };
+  const contexto = {
+    sobretitulo: semestral ? 'Relatório semestral' : 'Relatório de aula',
+    titulo: 'Aprovado',
+    voltarPara: '/',
+  };
 
   if (relatorio.isPending) {
     return (
@@ -33,6 +40,8 @@ export function TelaAprovado() {
   }
 
   const dados = relatorio.data;
+  if (!dados) return null;
+  const alunoNome = 'alunoNome' in dados ? dados.alunoNome : dados.informacoesGerais.nome;
   const aprovadoEm = dados.aprovadoEm ?? dados.atualizadoEm;
   const data = dataDoInstante(aprovadoEm);
   const hora = horaDoInstante(aprovadoEm);
@@ -43,7 +52,9 @@ export function TelaAprovado() {
         <span className="circulo-icone circulo-icone--ok">
           <Icone nome="check" tamanho="grande" />
         </span>
-        <div className="sobretitulo">Relatório de aula · versão {dados.versaoVigente}</div>
+        <div className="sobretitulo">
+          {semestral ? 'Relatório semestral' : 'Relatório de aula'} · versão {dados.versaoVigente}
+        </div>
         <h1 role="status" className="titulo-pagina titulo-pagina--maior">
           Relatório aprovado
         </h1>
@@ -52,7 +63,7 @@ export function TelaAprovado() {
         <div className="aprovado__dados">
           <div>
             <div className="aprovado__rotulo">ALUNO</div>
-            <div className="aprovado__valor">{dados.alunoNome}</div>
+            <div className="aprovado__valor">{alunoNome}</div>
           </div>
           <div>
             <div className="aprovado__rotulo">APROVADO EM</div>

@@ -569,3 +569,83 @@
   grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
+
+/* ---------- Semestral (telas 10 e 11) ---------- */
+
+.periodos {
+  margin: 0;
+  padding: 0;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.periodos__opcoes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.periodos__opcao {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  border: 1px solid var(--bd);
+  border-radius: 8px;
+  background: var(--sf);
+  color: var(--tx);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.periodos__opcao[aria-checked='true'] {
+  border-color: var(--gd);
+  box-shadow: inset 0 0 0 1px var(--gd);
+}
+
+.periodos__opcao .icone {
+  color: var(--gs);
+}
+
+.alerta--coluna {
+  flex-wrap: wrap;
+}
+
+.alerta--coluna .pilha-acoes {
+  flex: 1 1 100%;
+}
+
+.consolidacao {
+  padding: 12px 16px;
+  border-left: 3px solid var(--gd);
+  background: var(--sf);
+  font-size: 15px;
+}
+
+.secoes__titulo--numerado {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.secoes__numero {
+  min-width: 24px;
+  color: var(--gs);
+}
+
+.secoes__campo + .secoes__campo {
+  margin-top: 10px;
+}
+
+.secoes__rotulo {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--mu);
+  margin-bottom: 2px;
+}

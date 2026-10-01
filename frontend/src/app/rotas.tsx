@@ -5,12 +5,14 @@ import { EstadoVazio } from '../componentes/EstadoVazio';
 import { TelaAlunos } from '../paginas/TelaAlunos';
 import { TelaAprovado } from '../paginas/TelaAprovado';
 import { TelaConferencia } from '../paginas/TelaConferencia';
+import { TelaConferenciaSemestral } from '../paginas/TelaConferenciaSemestral';
 import { TelaEntrar } from '../paginas/TelaEntrar';
 import { TelaGravacao } from '../paginas/TelaGravacao';
 import { TelaPainel } from '../paginas/TelaPainel';
 import { TelaPerguntas } from '../paginas/TelaPerguntas';
 import { TelaProcessando } from '../paginas/TelaProcessando';
 import { TelaRelatorioEmAberto } from '../paginas/TelaRelatorioEmAberto';
+import { TelaSemestral } from '../paginas/TelaSemestral';
 
 /** Página provisória para as rotas ainda não implementadas. */
 function PaginaProvisoria({ titulo }: { titulo: string }) {
@@ -38,15 +40,9 @@ export const rotas: RouteObject[] = [
   { path: '/relatorios-aula/:relatorioId/perguntas', element: protegida(<TelaPerguntas />) },
   { path: '/relatorios-aula/:relatorioId', element: protegida(<TelaConferencia />) },
   { path: '/relatorios-aula/:relatorioId/aprovado', element: protegida(<TelaAprovado />) },
-  { path: '/alunos/:alunoId/semestral', element: protegida(<PaginaProvisoria titulo="10 Semestral" />) },
-  {
-    path: '/relatorios-semestrais/:relatorioId',
-    element: protegida(<PaginaProvisoria titulo="11 Conferência semestral" />),
-  },
-  {
-    path: '/relatorios-semestrais/:relatorioId/aprovado',
-    element: protegida(<PaginaProvisoria titulo="09 Semestral aprovado" />),
-  },
+  { path: '/alunos/:alunoId/semestral', element: protegida(<TelaSemestral />) },
+  { path: '/relatorios-semestrais/:relatorioId', element: protegida(<TelaConferenciaSemestral />) },
+  { path: '/relatorios-semestrais/:relatorioId/aprovado', element: protegida(<TelaAprovado semestral />) },
   { path: '/alunos/:alunoId/historico', element: protegida(<PaginaProvisoria titulo="12 Histórico" />) },
   { path: '*', element: protegida(<PaginaProvisoria titulo="Página não encontrada" />) },
 ];
