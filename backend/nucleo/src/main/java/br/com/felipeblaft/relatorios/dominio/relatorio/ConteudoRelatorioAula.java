@@ -31,7 +31,11 @@ public record ConteudoRelatorioAula(
         if (itens == null) {
             return List.of();
         }
-        return itens.stream().filter(Objects::nonNull).map(String::strip).filter(i -> !i.isEmpty()).toList();
+        return itens.stream()
+                .filter(Objects::nonNull)
+                .map(String::strip)
+                .filter(i -> !i.isEmpty())
+                .toList();
     }
 
     static String texto(String texto) {

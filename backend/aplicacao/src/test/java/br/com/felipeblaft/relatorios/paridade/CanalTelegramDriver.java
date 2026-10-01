@@ -20,13 +20,15 @@ public class CanalTelegramDriver implements CanalDriver {
     }
 
     private static final Pattern TOTAL = Pattern.compile("(\\d+) aluno\\(s\\) associado\\(s\\)");
-    private static final Pattern ALUNO = Pattern.compile("^• ([^·\\n]+?)(?: ·.*)?$", Pattern.MULTILINE);
+    private static final Pattern ALUNO =
+            Pattern.compile("^• ([^·\\n]+?)(?: ·.*)?$", Pattern.MULTILINE);
 
     private final Conversa conversa;
     private final CatalogoMensagens catalogo;
     private final Supplier<Long> vinculos;
 
-    public CanalTelegramDriver(Conversa conversa, CatalogoMensagens catalogo, Supplier<Long> vinculos) {
+    public CanalTelegramDriver(
+            Conversa conversa, CatalogoMensagens catalogo, Supplier<Long> vinculos) {
         this.conversa = conversa;
         this.catalogo = catalogo;
         this.vinculos = vinculos;

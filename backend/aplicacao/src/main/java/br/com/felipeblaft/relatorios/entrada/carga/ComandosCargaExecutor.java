@@ -43,7 +43,8 @@ class ComandosCargaExecutor implements ApplicationRunner {
                     case CargaComando.NOME -> carga.executar(argumentos, saida);
                     case EmitirCodigoComando.NOME -> emitirCodigo.executar(argumentos, saida);
                     default -> {
-                        saida.println("Comandos: carga --arquivo <arquivo.json> [--simular] | emitir-codigo --email <email>");
+                        saida.println(
+                                "Comandos: carga --arquivo <arquivo.json> [--simular] | emitir-codigo --email <email>");
                         yield 2;
                     }
                 };

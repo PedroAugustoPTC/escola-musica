@@ -36,7 +36,9 @@ public class ControleTentativasAcessoServico {
         this.parametros = Objects.requireNonNull(parametros);
     }
 
-    /** Recusa com {@code BLOQUEADO_TEMPORARIAMENTE} (e o tempo restante) se a origem está bloqueada. */
+    /**
+     * Recusa com {@code BLOQUEADO_TEMPORARIAMENTE} (e o tempo restante) se a origem está bloqueada.
+     */
     public void verificarBloqueio(Canal canal, String origem) {
         Instant agora = relogio.agora();
         Optional<TentativaAcesso> registro = tentativas.buscar(canal, hash(canal, origem));
@@ -60,7 +62,9 @@ public class ControleTentativasAcessoServico {
         Instant agora = relogio.agora();
         String hash = hash(canal, origem);
         TentativaAcesso tentativa =
-                tentativas.buscar(canal, hash).orElseGet(() -> TentativaAcesso.nova(canal, hash, agora));
+                tentativas
+                        .buscar(canal, hash)
+                        .orElseGet(() -> TentativaAcesso.nova(canal, hash, agora));
         tentativa.registrarFalha(
                 agora, parametros.maximoTentativasAcesso(), parametros.duracaoBloqueio());
         tentativas.salvar(tentativa);

@@ -35,7 +35,12 @@ class SessaoWebRepositorioAdaptador implements SessaoWebRepositorio {
     public void salvar(SessaoWeb s) {
         jpa.save(
                 new SessaoWebEntidade(
-                        s.id(), s.professorId(), s.tokenHash(), s.criadaEm(), s.ultimoUsoEm(), s.expiraEm()));
+                        s.id(),
+                        s.professorId(),
+                        s.tokenHash(),
+                        s.criadaEm(),
+                        s.ultimoUsoEm(),
+                        s.expiraEm()));
     }
 
     @Override

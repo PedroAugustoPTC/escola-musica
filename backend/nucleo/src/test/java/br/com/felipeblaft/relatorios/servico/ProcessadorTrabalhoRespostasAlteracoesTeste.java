@@ -36,15 +36,21 @@ class ProcessadorTrabalhoRespostasAlteracoesTeste {
     @Test
     void respostaPorTextoIncorporadaVaiParaConferencia() {
         RelatorioAula relatorio = c.relatorioComPerguntas();
-        c.llm.programar(TarefaLlm.INCORPORACAO_RESPOSTAS, CenarioRelatorio.saida("Estudou três vezes.", List.of()));
+        c.llm.programar(
+                TarefaLlm.INCORPORACAO_RESPOSTAS,
+                CenarioRelatorio.saida("Estudou três vezes.", List.of()));
 
         TrabalhoProcessamento trabalho =
-                c.responder.responderTexto(c.clara.id(), relatorio.id(), "Czerny; estudou três vezes.", Canal.WEB);
+                c.responder.responderTexto(
+                        c.clara.id(), relatorio.id(), "Czerny; estudou três vezes.", Canal.WEB);
 
         assertThat(resultado(trabalho)).isEqualTo(ResultadoTrabalho.PRONTO_PARA_CONFERENCIA);
         assertThat(relatorio.status()).isEqualTo(StatusRelatorio.AGUARDANDO_CONFERENCIA);
         assertThat(relatorio.conteudo().evolucao()).isEqualTo("Estudou três vezes.");
-        assertThat(c.versoes.versoes).singleElement().extracting(v -> v.origem()).isEqualTo(OrigemVersao.RESPOSTA_PERGUNTAS);
+        assertThat(c.versoes.versoes)
+                .singleElement()
+                .extracting(v -> v.origem())
+                .isEqualTo(OrigemVersao.RESPOSTA_PERGUNTAS);
         InteracaoRelatorio interacao = c.interacoes.interacoes.getFirst();
         assertThat(interacao.tipo()).isEqualTo(TipoInteracao.RESPOSTA_PERGUNTAS);
         assertThat(interacao.meio()).isEqualTo(Meio.TEXTO);
@@ -53,7 +59,8 @@ class ProcessadorTrabalhoRespostasAlteracoesTeste {
         assertThat(c.versoes.versoes.getFirst().interacaoId()).isEqualTo(interacao.id());
         EntradaTarefa.IncorporacaoRespostas entrada =
                 (EntradaTarefa.IncorporacaoRespostas) c.llm.entradas.getLast();
-        assertThat(entrada.perguntas()).containsExactly("Qual repertório foi trabalhado?", "Estudou em casa?");
+        assertThat(entrada.perguntas())
+                .containsExactly("Qual repertório foi trabalhado?", "Estudou em casa?");
         assertThat(entrada.resposta()).isEqualTo("Czerny; estudou três vezes.");
     }
 
@@ -61,11 +68,16 @@ class ProcessadorTrabalhoRespostasAlteracoesTeste {
     void respostaPorAudioMostraOTextoEntendidoESegundaRodada() {
         RelatorioAula relatorio = c.relatorioComPerguntas();
         c.transcricao.programar("Foi o Czerny.");
-        c.llm.programar(TarefaLlm.INCORPORACAO_RESPOSTAS, CenarioRelatorio.saida("x", List.of("E a escala?")));
+        c.llm.programar(
+                TarefaLlm.INCORPORACAO_RESPOSTAS,
+                CenarioRelatorio.saida("x", List.of("E a escala?")));
 
         TrabalhoProcessamento trabalho =
                 c.responder.responderAudio(
-                        c.clara.id(), relatorio.id(), CenarioRelatorio.arquivo("resp.ogg", 10), Canal.TELEGRAM);
+                        c.clara.id(),
+                        relatorio.id(),
+                        CenarioRelatorio.arquivo("resp.ogg", 10),
+                        Canal.TELEGRAM);
 
         assertThat(resultado(trabalho)).isEqualTo(ResultadoTrabalho.PERGUNTAS_PENDENTES);
         assertThat(c.fila.buscarPorId(trabalho.id()).orElseThrow().parametros())
@@ -73,17 +85,22 @@ class ProcessadorTrabalhoRespostasAlteracoesTeste {
         assertThat(relatorio.rodadasPerguntas()).isEqualTo(2);
         assertThat(relatorio.etapa()).isNull();
         assertThat(c.interacoes.interacoes.getFirst().meio()).isEqualTo(Meio.AUDIO);
-        assertThat(c.notificacao.eventos).contains("etapa:TRANSCREVENDO_PEDIDO", "etapa:INCORPORANDO_RESPOSTAS");
+        assertThat(c.notificacao.eventos)
+                .contains("etapa:TRANSCREVENDO_PEDIDO", "etapa:INCORPORANDO_RESPOSTAS");
     }
 
     @Test
     void transcricaoDaRespostaFalhaSemInteracaoESemConsumirRodada() {
         RelatorioAula relatorio = c.relatorioComPerguntas();
-        c.transcricao.programar(new AudioNaoProcessavelExcecao(AudioNaoProcessavelExcecao.Motivo.SEM_FALA));
+        c.transcricao.programar(
+                new AudioNaoProcessavelExcecao(AudioNaoProcessavelExcecao.Motivo.SEM_FALA));
 
         TrabalhoProcessamento trabalho =
                 c.responder.responderAudio(
-                        c.clara.id(), relatorio.id(), CenarioRelatorio.arquivo("r.ogg", 10), Canal.WEB);
+                        c.clara.id(),
+                        relatorio.id(),
+                        CenarioRelatorio.arquivo("r.ogg", 10),
+                        Canal.WEB);
 
         assertThat(resultado(trabalho)).isEqualTo(ResultadoTrabalho.FALHA_RESPOSTA);
         assertThat(relatorio.status()).isEqualTo(StatusRelatorio.AGUARDANDO_RESPOSTAS);
@@ -96,9 +113,11 @@ class ProcessadorTrabalhoRespostasAlteracoesTeste {
     void falhaDaIaNaRespostaRegistraInteracaoQueFalhou() {
         RelatorioAula relatorio = c.relatorioComPerguntas();
         c.llm.programar(TarefaLlm.INCORPORACAO_RESPOSTAS, new SaidaIaInvalidaExcecao("x"));
-        TrabalhoProcessamento trabalho = c.responder.responderTexto(c.clara.id(), relatorio.id(), "ok", Canal.WEB);
+        TrabalhoProcessamento trabalho =
+                c.responder.responderTexto(c.clara.id(), relatorio.id(), "ok", Canal.WEB);
         assertThat(resultado(trabalho)).isEqualTo(ResultadoTrabalho.FALHA_RESPOSTA);
-        assertThat(c.interacoes.interacoes.getFirst().resultado()).isEqualTo(ResultadoInteracao.FALHOU);
+        assertThat(c.interacoes.interacoes.getFirst().resultado())
+                .isEqualTo(ResultadoInteracao.FALHOU);
         assertThat(relatorio.status()).isEqualTo(StatusRelatorio.AGUARDANDO_RESPOSTAS);
     }
 
@@ -107,16 +126,24 @@ class ProcessadorTrabalhoRespostasAlteracoesTeste {
     @Test
     void alteracaoPorTextoCriaNovaVersaoComPdf() {
         RelatorioAula relatorio = c.relatorioEmConferencia();
-        c.llm.programar(TarefaLlm.REVISAO_AULA, CenarioRelatorio.revisao("Leitura mais fácil.", false, "NENHUM"));
+        c.llm.programar(
+                TarefaLlm.REVISAO_AULA,
+                CenarioRelatorio.revisao("Leitura mais fácil.", false, "NENHUM"));
 
         TrabalhoProcessamento trabalho =
-                c.alterar.alterarPorTexto(c.clara.id(), relatorio.id(), "A leitura foi mais fácil.", 1, Canal.TELEGRAM);
+                c.alterar.alterarPorTexto(
+                        c.clara.id(),
+                        relatorio.id(),
+                        "A leitura foi mais fácil.",
+                        1,
+                        Canal.TELEGRAM);
 
         assertThat(resultado(trabalho)).isEqualTo(ResultadoTrabalho.NOVA_VERSAO);
         assertThat(relatorio.versaoVigente()).isEqualTo(2);
         assertThat(relatorio.conteudo().evolucao()).isEqualTo("Leitura mais fácil.");
         assertThat(c.versoes.versoes).hasSize(2);
-        assertThat(c.versoes.versoes.getFirst().conteudo()).isNotEqualTo(c.versoes.versoes.getLast().conteudo());
+        assertThat(c.versoes.versoes.getFirst().conteudo())
+                .isNotEqualTo(c.versoes.versoes.getLast().conteudo());
         assertThat(c.pdf.modelos).extracting(m -> m.versao()).containsExactly(1, 2);
         InteracaoRelatorio interacao = c.interacoes.interacoes.getLast();
         assertThat(interacao.resultado()).isEqualTo(ResultadoInteracao.APLICADA);
@@ -128,11 +155,17 @@ class ProcessadorTrabalhoRespostasAlteracoesTeste {
     void alteracaoPorAudioDevolveOTextoEntendido() {
         RelatorioAula relatorio = c.relatorioEmConferencia();
         c.transcricao.programar("Troque a observação para: estudou pouco.");
-        c.llm.programar(TarefaLlm.REVISAO_AULA, CenarioRelatorio.revisao("Nova evolução.", false, "NENHUM"));
+        c.llm.programar(
+                TarefaLlm.REVISAO_AULA,
+                CenarioRelatorio.revisao("Nova evolução.", false, "NENHUM"));
 
         TrabalhoProcessamento trabalho =
                 c.alterar.alterarPorAudio(
-                        c.clara.id(), relatorio.id(), CenarioRelatorio.arquivo("alt.ogg", 5), 1, Canal.WEB);
+                        c.clara.id(),
+                        relatorio.id(),
+                        CenarioRelatorio.arquivo("alt.ogg", 5),
+                        1,
+                        Canal.WEB);
 
         assertThat(resultado(trabalho)).isEqualTo(ResultadoTrabalho.NOVA_VERSAO);
         assertThat(c.fila.buscarPorId(trabalho.id()).orElseThrow().parametros())
@@ -145,15 +178,19 @@ class ProcessadorTrabalhoRespostasAlteracoesTeste {
     @Test
     void pedidoDeAcaoNuncaAprovaNemCancela() {
         RelatorioAula relatorio = c.relatorioEmConferencia();
-        c.llm.programar(TarefaLlm.REVISAO_AULA, CenarioRelatorio.revisao("Evoluiu na articulação.", true, "APROVAR"));
+        c.llm.programar(
+                TarefaLlm.REVISAO_AULA,
+                CenarioRelatorio.revisao("Evoluiu na articulação.", true, "APROVAR"));
         TrabalhoProcessamento trabalho =
-                c.alterar.alterarPorTexto(c.clara.id(), relatorio.id(), "pode aprovar", 1, Canal.WEB);
+                c.alterar.alterarPorTexto(
+                        c.clara.id(), relatorio.id(), "pode aprovar", 1, Canal.WEB);
 
         assertThat(resultado(trabalho)).isEqualTo(ResultadoTrabalho.PEDIDO_DE_ACAO_IGNORADO);
         assertThat(relatorio.status()).isEqualTo(StatusRelatorio.AGUARDANDO_CONFERENCIA);
         assertThat(relatorio.versaoVigente()).isEqualTo(1);
         assertThat(relatorio.etapa()).isNull();
-        assertThat(c.interacoes.interacoes.getLast().resultado()).isEqualTo(ResultadoInteracao.PEDIDO_DE_ACAO_IGNORADO);
+        assertThat(c.interacoes.interacoes.getLast().resultado())
+                .isEqualTo(ResultadoInteracao.PEDIDO_DE_ACAO_IGNORADO);
     }
 
     @Test
@@ -197,19 +234,28 @@ class ProcessadorTrabalhoRespostasAlteracoesTeste {
     @Test
     void falhasNaAlteracaoMantemAVersao() {
         RelatorioAula relatorio = c.relatorioEmConferencia();
-        c.transcricao.programar(new AudioNaoProcessavelExcecao(AudioNaoProcessavelExcecao.Motivo.VAZIO));
+        c.transcricao.programar(
+                new AudioNaoProcessavelExcecao(AudioNaoProcessavelExcecao.Motivo.VAZIO));
         TrabalhoProcessamento audio =
-                c.alterar.alterarPorAudio(c.clara.id(), relatorio.id(), CenarioRelatorio.arquivo("v.ogg", 1), 1, Canal.WEB);
+                c.alterar.alterarPorAudio(
+                        c.clara.id(),
+                        relatorio.id(),
+                        CenarioRelatorio.arquivo("v.ogg", 1),
+                        1,
+                        Canal.WEB);
         assertThat(resultado(audio)).isEqualTo(ResultadoTrabalho.FALHA_ALTERACAO);
         assertThat(c.interacoes.interacoes).isEmpty();
 
         c.llm.programar(TarefaLlm.REVISAO_AULA, new ProvedorIndisponivelExcecao("503"));
-        TrabalhoProcessamento ia = c.alterar.alterarPorTexto(c.clara.id(), relatorio.id(), "x", 1, Canal.WEB);
+        TrabalhoProcessamento ia =
+                c.alterar.alterarPorTexto(c.clara.id(), relatorio.id(), "x", 1, Canal.WEB);
         assertThat(resultado(ia)).isEqualTo(ResultadoTrabalho.FALHA_ALTERACAO);
-        assertThat(c.interacoes.interacoes.getLast().resultado()).isEqualTo(ResultadoInteracao.FALHOU);
+        assertThat(c.interacoes.interacoes.getLast().resultado())
+                .isEqualTo(ResultadoInteracao.FALHOU);
         assertThat(relatorio.versaoVigente()).isEqualTo(1);
         assertThat(relatorio.etapa()).isNull();
-        assertThat(ProcessadorTrabalhoServico.codigoDaFalha(new SaidaIaInvalidaExcecao("x"))).isEqualTo("SAIDA_INVALIDA");
+        assertThat(ProcessadorTrabalhoServico.codigoDaFalha(new SaidaIaInvalidaExcecao("x")))
+                .isEqualTo("SAIDA_INVALIDA");
     }
 
     @Test
@@ -218,7 +264,8 @@ class ProcessadorTrabalhoRespostasAlteracoesTeste {
         c.processador.registrarComplementar(
                 new ProcessadorTrabalhoServico.ProcessadorComplementar() {
                     @Override
-                    public boolean atende(br.com.felipeblaft.relatorios.dominio.trabalho.TipoTrabalho tipo) {
+                    public boolean atende(
+                            br.com.felipeblaft.relatorios.dominio.trabalho.TipoTrabalho tipo) {
                         return true;
                     }
 
@@ -229,7 +276,8 @@ class ProcessadorTrabalhoRespostasAlteracoesTeste {
                 });
         TrabalhoProcessamento semestral =
                 TrabalhoProcessamento.novo(
-                        br.com.felipeblaft.relatorios.dominio.trabalho.TipoTrabalho.CONSOLIDACAO_SEMESTRAL,
+                        br.com.felipeblaft.relatorios.dominio.trabalho.TipoTrabalho
+                                .CONSOLIDACAO_SEMESTRAL,
                         c.clara.id(),
                         c.matteo.id(),
                         null,

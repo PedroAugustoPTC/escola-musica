@@ -76,7 +76,11 @@ public class ObterDocumentoRelatorioCasoDeUso {
         if (relatorio.status() != StatusRelatorio.APROVADO) {
             throw naoEncontrado();
         }
-        return ler(relatorio.id(), relatorio.versaoAprovada(), TipoDocumento.OFICIAL, nomeAula(relatorio, ""));
+        return ler(
+                relatorio.id(),
+                relatorio.versaoAprovada(),
+                TipoDocumento.OFICIAL,
+                nomeAula(relatorio, ""));
     }
 
     private String nomeAula(RelatorioAula relatorio, String sufixo) {
@@ -89,7 +93,9 @@ public class ObterDocumentoRelatorioCasoDeUso {
                 versoes.buscar(TipoRelatorio.AULA, relatorioId, numero)
                         .flatMap(v -> documentos.buscar(v.id(), tipo));
         byte[] bytes =
-                documento.flatMap(geracao::abrir).orElseThrow(ObterDocumentoRelatorioCasoDeUso::naoEncontrado);
+                documento
+                        .flatMap(geracao::abrir)
+                        .orElseThrow(ObterDocumentoRelatorioCasoDeUso::naoEncontrado);
         return new DocumentoObtido(bytes, nome);
     }
 

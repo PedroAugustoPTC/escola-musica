@@ -52,7 +52,12 @@ public class SolicitarAlteracaoRelatorioAulaCasoDeUso {
             throw new ExcecaoDominio(CodigoErro.ALTERACAO_VAZIA);
         }
         TrabalhoProcessamento trabalho =
-                iniciar(relatorio, canal, Meio.TEXTO, EtapaRelatorio.APLICANDO_ALTERACAO, versaoBase);
+                iniciar(
+                        relatorio,
+                        canal,
+                        Meio.TEXTO,
+                        EtapaRelatorio.APLICANDO_ALTERACAO,
+                        versaoBase);
         trabalho.definirParametro(TrabalhoProcessamento.TEXTO, texto.strip());
         fila.enfileirar(trabalho);
         return trabalho;
@@ -65,7 +70,12 @@ public class SolicitarAlteracaoRelatorioAulaCasoDeUso {
             relatorio.exigirPodeAlterar(versaoBase);
             envioAudio.exigirDentroDoLimite(audio);
             TrabalhoProcessamento trabalho =
-                    iniciar(relatorio, canal, Meio.AUDIO, EtapaRelatorio.TRANSCREVENDO_PEDIDO, versaoBase);
+                    iniciar(
+                            relatorio,
+                            canal,
+                            Meio.AUDIO,
+                            EtapaRelatorio.TRANSCREVENDO_PEDIDO,
+                            versaoBase);
             envioAudio.anexar(trabalho, audio);
             fila.enfileirar(trabalho);
             return trabalho;

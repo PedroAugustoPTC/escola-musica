@@ -81,7 +81,8 @@ public class RegistrarAulaPorAudioCasoDeUso {
         Optional<RelatorioEmAberto> aberto = emAberto.buscarDoAluno(professorId, alunoId);
         if (aberto.isPresent()) {
             throw new ExcecaoDominio(
-                    CodigoErro.RELATORIO_EM_ABERTO, Map.of("relatorioEmAberto", aberto.get().detalhes()));
+                    CodigoErro.RELATORIO_EM_ABERTO,
+                    Map.of("relatorioEmAberto", aberto.get().detalhes()));
         }
     }
 }

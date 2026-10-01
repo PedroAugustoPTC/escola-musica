@@ -57,7 +57,12 @@ public class GeracaoDocumentoServico {
     }
 
     public static String chave(TipoRelatorio tipo, UUID relatorioId, String arquivo) {
-        return "relatorios/" + tipo.name().toLowerCase(Locale.ROOT) + "/" + relatorioId + "/" + arquivo;
+        return "relatorios/"
+                + tipo.name().toLowerCase(Locale.ROOT)
+                + "/"
+                + relatorioId
+                + "/"
+                + arquivo;
     }
 
     public DocumentoPdf gerarConferencia(RelatorioAula relatorio, VersaoRelatorio versao) {
@@ -90,7 +95,9 @@ public class GeracaoDocumentoServico {
                         aprovacao);
         DocumentoGerado gerado = geracaoPdf.gerarRelatorioAula(modelo);
         String arquivo =
-                situacao == SituacaoDocumento.OFICIAL ? "oficial.pdf" : "v" + versao.numero() + ".pdf";
+                situacao == SituacaoDocumento.OFICIAL
+                        ? "oficial.pdf"
+                        : "v" + versao.numero() + ".pdf";
         return guardar(TipoRelatorio.AULA, relatorio.id(), versao, situacao, gerado, arquivo);
     }
 

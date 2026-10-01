@@ -22,7 +22,8 @@ class TentativaAcessoIT extends IntegracaoBase {
 
     private int tentativas() {
         return jdbc.queryForObject(
-                "select coalesce(max(tentativas_incorretas), 0) from tentativa_acesso", Integer.class);
+                "select coalesce(max(tentativas_incorretas), 0) from tentativa_acesso",
+                Integer.class);
     }
 
     @Test
@@ -31,7 +32,8 @@ class TentativaAcessoIT extends IntegracaoBase {
         assertThatThrownBy(() -> entrar.executar("ZZZZZZZZ", "198.51.100.7"))
                 .isInstanceOf(ExcecaoDominio.class);
         assertThat(tentativas()).isEqualTo(1);
-        String origem = jdbc.queryForObject("select origem_hash from tentativa_acesso", String.class);
+        String origem =
+                jdbc.queryForObject("select origem_hash from tentativa_acesso", String.class);
         assertThat(origem).hasSize(64).doesNotContain("198.51");
         assertThat(jdbc.queryForObject("select count(*) from sessao_web", Integer.class)).isZero();
     }
@@ -40,14 +42,21 @@ class TentativaAcessoIT extends IntegracaoBase {
     void zeraNoSucessoEAoFimDoBloqueio() {
         cenario.clara();
         for (int i = 0; i < 5; i++) {
-            assertThatThrownBy(() -> entrar.executar("ZZZZZZZZ", "ip")).isInstanceOf(ExcecaoDominio.class);
+            assertThatThrownBy(() -> entrar.executar("ZZZZZZZZ", "ip"))
+                    .isInstanceOf(ExcecaoDominio.class);
         }
-        assertThat(jdbc.queryForObject("select count(*) from tentativa_acesso where bloqueado_ate is not null", Integer.class))
+        assertThat(
+                        jdbc.queryForObject(
+                                "select count(*) from tentativa_acesso where bloqueado_ate is not null",
+                                Integer.class))
                 .isEqualTo(1);
         relogio.avancar(Duration.ofMinutes(15));
         entrar.executar(CenarioIT.CODIGO_CLARA, "ip");
         assertThat(tentativas()).isZero();
-        assertThat(jdbc.queryForObject("select count(*) from tentativa_acesso where bloqueado_ate is not null", Integer.class))
+        assertThat(
+                        jdbc.queryForObject(
+                                "select count(*) from tentativa_acesso where bloqueado_ate is not null",
+                                Integer.class))
                 .isZero();
     }
 }

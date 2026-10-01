@@ -87,7 +87,9 @@ public class ResponderPerguntasCasoDeUso {
                 relatorio.id(),
                 canal,
                 meio,
-                meio == Meio.AUDIO ? EtapaTrabalho.TRANSCREVENDO_PEDIDO : EtapaTrabalho.INCORPORANDO_RESPOSTAS,
+                meio == Meio.AUDIO
+                        ? EtapaTrabalho.TRANSCREVENDO_PEDIDO
+                        : EtapaTrabalho.INCORPORANDO_RESPOSTAS,
                 relogio.agora());
     }
 }

@@ -34,7 +34,8 @@ class CarregarCadastroInicialCasoDeUsoTeste {
     private final AssociacaoRepositorioEmMemoria associacoes = new AssociacaoRepositorioEmMemoria();
     private final AlunoRepositorioEmMemoria alunos = new AlunoRepositorioEmMemoria(associacoes);
     private final ProtecaoDadosFalsa protecao = new ProtecaoDadosFalsa();
-    private final GeradorCodigoAcessoFixo gerador = new GeradorCodigoAcessoFixo("K7QM2XPA", "BRUN2XPA");
+    private final GeradorCodigoAcessoFixo gerador =
+            new GeradorCodigoAcessoFixo("K7QM2XPA", "BRUN2XPA");
     private final CarregarCadastroInicialCasoDeUso casoDeUso =
             new CarregarCadastroInicialCasoDeUso(
                     professores,
@@ -64,7 +65,10 @@ class CarregarCadastroInicialCasoDeUsoTeste {
                                 "1990-02-01",
                                 null,
                                 " ",
-                                List.of("clara@exemplo.test", "CLARA@exemplo.test", "bruno@exemplo.test"))));
+                                List.of(
+                                        "clara@exemplo.test",
+                                        "CLARA@exemplo.test",
+                                        "bruno@exemplo.test"))));
     }
 
     @Test
@@ -79,8 +83,14 @@ class CarregarCadastroInicialCasoDeUsoTeste {
         assertThat(resultado.codigosEmitidos())
                 .extracting(c -> c.email(), c -> c.codigo(), c -> c.validoAte())
                 .containsExactly(
-                        tuple("clara@exemplo.test", "K7QM2XPA", relogio.agora().plus(Duration.ofDays(7))),
-                        tuple("bruno@exemplo.test", "BRUN2XPA", relogio.agora().plus(Duration.ofDays(7))));
+                        tuple(
+                                "clara@exemplo.test",
+                                "K7QM2XPA",
+                                relogio.agora().plus(Duration.ofDays(7))),
+                        tuple(
+                                "bruno@exemplo.test",
+                                "BRUN2XPA",
+                                relogio.agora().plus(Duration.ofDays(7))));
         assertThat(resultado.codigosEmitidos().getFirst().toString()).doesNotContain("K7QM2XPA");
 
         Professor clara = professores.buscarPorEmail("clara@exemplo.test").orElseThrow();
@@ -92,7 +102,8 @@ class CarregarCadastroInicialCasoDeUsoTeste {
         assertThat(matteo.nomeResponsavel()).isEqualTo("Responsável Fictício");
         Aluno olavo = alunos.buscarPorCpfHash("cpf:12345678909").orElseThrow();
         assertThat(olavo.instrumento()).isNull();
-        assertThat(alunos.listarDoProfessor(clara.id())).extracting(Aluno::nome)
+        assertThat(alunos.listarDoProfessor(clara.id()))
+                .extracting(Aluno::nome)
                 .containsExactly("Matteo Mafra", "Olavo Torrente");
     }
 
@@ -131,7 +142,8 @@ class CarregarCadastroInicialCasoDeUsoTeste {
         assertThat(resultado.professores()).isEqualTo(new Contagem(0, 1, 0));
         assertThat(resultado.alunos()).isEqualTo(new Contagem(0, 1, 0));
         assertThat(resultado.associacoesCriadas()).isEqualTo(1);
-        assertThat(professores.buscarPorEmail("clara@exemplo.test").orElseThrow().ativo()).isFalse();
+        assertThat(professores.buscarPorEmail("clara@exemplo.test").orElseThrow().ativo())
+                .isFalse();
     }
 
     @Test
@@ -213,15 +225,26 @@ class CarregarCadastroInicialCasoDeUsoTeste {
                                         null,
                                         java.util.Arrays.asList((String) null)),
                                 new AlunoCarga(
-                                        "390.533.447-05", "Data ruim", "10/05/2014", null, null, List.of()),
+                                        "390.533.447-05",
+                                        "Data ruim",
+                                        "10/05/2014",
+                                        null,
+                                        null,
+                                        List.of()),
                                 new AlunoCarga(
-                                        "245.781.963-64", "Sem data", null, null, null, List.of())));
+                                        "245.781.963-64",
+                                        "Sem data",
+                                        null,
+                                        null,
+                                        null,
+                                        List.of())));
 
         ResultadoCarga resultado = casoDeUso.executar(arquivo, false);
 
         assertThat(resultado.sucesso()).isFalse();
         assertThat(resultado.erros())
-                .extracting(ErroCarga::secao, ErroCarga::indice, ErroCarga::campo, ErroCarga::codigo)
+                .extracting(
+                        ErroCarga::secao, ErroCarga::indice, ErroCarga::campo, ErroCarga::codigo)
                 .containsExactlyInAnyOrder(
                         tuple("professores", 1, "email", CodigoErro.EMAIL_DUPLICADO_NO_ARQUIVO),
                         tuple("professores", 1, "nome", CodigoErro.NOME_OBRIGATORIO),
@@ -264,9 +287,7 @@ class CarregarCadastroInicialCasoDeUsoTeste {
         assertThat(resultado.alunos()).isEqualTo(new Contagem(1, 0, 0));
         assertThat(resultado.associacoesCriadas()).isEqualTo(1);
         assertThat(new ArquivoCarga(null, null).alunos()).isEmpty();
-        assertThat(
-                        new AlunoCarga("c", "n", "d", null, null, null).professores())
-                .isEmpty();
+        assertThat(new AlunoCarga("c", "n", "d", null, null, null).professores()).isEmpty();
         assertThat(LocalDate.parse("2012-03-03")).isNotNull();
     }
 }

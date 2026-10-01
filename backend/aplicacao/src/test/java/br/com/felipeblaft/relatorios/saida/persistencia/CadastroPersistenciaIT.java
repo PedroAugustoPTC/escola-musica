@@ -74,9 +74,9 @@ class CadastroPersistenciaIT extends IntegracaoBase {
         assertThat(noBanco.length).isGreaterThan(12 + 11);
         assertThat(protecao.cifrarCpf(cpf)).isNotEqualTo(noBanco);
         assertThat(protecao.hashCpf(Cpf.de("52998224725"))).isEqualTo(matteo.cpfHash()).hasSize(64);
-        assertThat(protecao.hashCpf(cpf)).isNotEqualTo(protecao.hashOrigem(Canal.WEB, "52998224725"));
-        assertThat(AcessoDecifragem.decifrar(protecao, noBanco))
-                .isEqualTo("52998224725");
+        assertThat(protecao.hashCpf(cpf))
+                .isNotEqualTo(protecao.hashOrigem(Canal.WEB, "52998224725"));
+        assertThat(AcessoDecifragem.decifrar(protecao, noBanco)).isEqualTo("52998224725");
 
         String colunas =
                 String.join(
@@ -125,5 +125,4 @@ class CadastroPersistenciaIT extends IntegracaoBase {
         alunos.salvar(aluno);
         return aluno;
     }
-
 }

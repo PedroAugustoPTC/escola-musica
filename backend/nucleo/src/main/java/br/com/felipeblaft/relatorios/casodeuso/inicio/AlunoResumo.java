@@ -6,7 +6,11 @@ import java.util.UUID;
 
 /** Aluno como aparece nas listas dos dois canais (sem CPF nem data de nascimento). */
 public record AlunoResumo(
-        UUID id, String nome, String instrumento, LocalDate ultimaAulaEm, boolean possuiRelatorioEmAberto) {
+        UUID id,
+        String nome,
+        String instrumento,
+        LocalDate ultimaAulaEm,
+        boolean possuiRelatorioEmAberto) {
 
     static AlunoResumo de(Aluno aluno, LocalDate ultimaAula, boolean emAberto) {
         return new AlunoResumo(aluno.id(), aluno.nome(), aluno.instrumento(), ultimaAula, emAberto);

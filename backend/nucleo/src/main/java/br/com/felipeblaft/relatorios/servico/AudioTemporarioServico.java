@@ -13,9 +13,9 @@ import br.com.felipeblaft.relatorios.porta.TranscricaoPorta;
 import java.util.Objects;
 
 /**
- * Obtém, normaliza e transcreve o áudio e apaga o original e o normalizado num {@code finally},
- * com sucesso ou falha (FR-018). Diante de indisponibilidade do provedor, tenta de novo uma vez
- * (R-08) antes de apagar.
+ * Obtém, normaliza e transcreve o áudio e apaga o original e o normalizado num {@code finally}, com
+ * sucesso ou falha (FR-018). Diante de indisponibilidade do provedor, tenta de novo uma vez (R-08)
+ * antes de apagar.
  */
 public class AudioTemporarioServico {
 
@@ -39,7 +39,8 @@ public class AudioTemporarioServico {
             original =
                     switch (entrada) {
                         case ArquivoTemporario arquivo -> arquivo;
-                        case ReferenciaArquivoCanal referencia -> arquivoCanal.obterArquivo(referencia);
+                        case ReferenciaArquivoCanal referencia ->
+                                arquivoCanal.obterArquivo(referencia);
                     };
             normalizado = normalizacao.normalizar(original);
             ResultadoTranscricao resultado;

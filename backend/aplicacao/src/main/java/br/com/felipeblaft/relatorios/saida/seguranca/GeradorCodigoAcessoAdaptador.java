@@ -16,7 +16,8 @@ public class GeradorCodigoAcessoAdaptador implements GeradorCodigoAcessoPorta {
         StringBuilder codigo = new StringBuilder(CodigoAcesso.TAMANHO);
         for (int i = 0; i < CodigoAcesso.TAMANHO; i++) {
             codigo.append(
-                    CodigoAcesso.ALFABETO.charAt(aleatorio.nextInt(CodigoAcesso.ALFABETO.length())));
+                    CodigoAcesso.ALFABETO.charAt(
+                            aleatorio.nextInt(CodigoAcesso.ALFABETO.length())));
         }
         return CodigoAcesso.de(codigo.toString());
     }

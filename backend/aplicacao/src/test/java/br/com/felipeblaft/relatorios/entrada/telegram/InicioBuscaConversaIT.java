@@ -26,7 +26,8 @@ class InicioBuscaConversaIT extends TelegramConversaBase {
     void inicioEMenuMostramOBlocoDeInicio() throws Exception {
         for (String comando : new String[] {"início", "/inicio", "MENU", "/start"}) {
             enviarTexto(USUARIO_CLARA, comando);
-            assertThat(ultimaMensagem().get("text").asString()).contains("<b>Olá, Clara</b>", "3 aluno(s)");
+            assertThat(ultimaMensagem().get("text").asString())
+                    .contains("<b>Olá, Clara</b>", "3 aluno(s)");
         }
     }
 
@@ -38,7 +39,8 @@ class InicioBuscaConversaIT extends TelegramConversaBase {
                 .contains("até 50 MB");
 
         enviarTexto(USUARIO_CLARA, "torrente");
-        assertThat(ultimaMensagem().get("text").asString()).isEqualTo("Encontrei mais de um aluno. Qual deles?");
+        assertThat(ultimaMensagem().get("text").asString())
+                .isEqualTo("Encontrei mais de um aluno. Qual deles?");
         assertThat(rotulosBotoes(ultimaMensagem()))
                 .containsExactly("Miguel de Castro Torrente", "Olavo Torrente", "Início");
         assertThat(botoes(ultimaMensagem())).startsWith("v1:aluno:0", "v1:aluno:1");
@@ -47,7 +49,8 @@ class InicioBuscaConversaIT extends TelegramConversaBase {
         assertThat(ultimaMensagem().get("text").asString()).contains("com Olavo Torrente");
 
         enviarTexto(USUARIO_CLARA, "Helena");
-        assertThat(ultimaMensagem().get("text").asString()).isEqualTo("Nenhum aluno encontrado para \"Helena\".");
+        assertThat(ultimaMensagem().get("text").asString())
+                .isEqualTo("Nenhum aluno encontrado para \"Helena\".");
         assertThat(rotulosBotoes(ultimaMensagem())).doesNotContain("Helena Prado").hasSize(4);
     }
 
@@ -68,13 +71,15 @@ class InicioBuscaConversaIT extends TelegramConversaBase {
         assertThat(botoes(ultimaMensagem())).contains("v1:sairok:");
 
         enviarTexto(USUARIO_CLARA, "não");
-        assertThat(jdbc.queryForObject("select count(*) from vinculo_telegram", Integer.class)).isEqualTo(1);
+        assertThat(jdbc.queryForObject("select count(*) from vinculo_telegram", Integer.class))
+                .isEqualTo(1);
 
         enviarTexto(USUARIO_CLARA, "sair");
         enviarTexto(USUARIO_CLARA, "Sim");
         assertThat(ultimaMensagem().get("text").asString())
                 .isEqualTo("Você saiu. Para voltar, envie o seu código de acesso.");
-        assertThat(jdbc.queryForObject("select count(*) from vinculo_telegram", Integer.class)).isZero();
+        assertThat(jdbc.queryForObject("select count(*) from vinculo_telegram", Integer.class))
+                .isZero();
 
         enviarTexto(USUARIO_CLARA, "início");
         assertThat(ultimaMensagem().get("text").asString()).startsWith("Olá! Para usar o bot");
@@ -84,24 +89,32 @@ class InicioBuscaConversaIT extends TelegramConversaBase {
     void sairPeloBotao() throws Exception {
         enviarTexto(USUARIO_CLARA, "sair");
         enviarCallback(USUARIO_CLARA, "v1:sairok:");
-        assertThat(jdbc.queryForObject("select count(*) from vinculo_telegram", Integer.class)).isZero();
+        assertThat(jdbc.queryForObject("select count(*) from vinculo_telegram", Integer.class))
+                .isZero();
     }
 
     @Test
     void ajudaTipoNaoSuportadoEBotaoAntigo() throws Exception {
         enviarTexto(USUARIO_CLARA, "/help");
-        assertThat(ultimaMensagem().get("text").asString()).startsWith("Posso ajudar a registrar aulas");
+        assertThat(ultimaMensagem().get("text").asString())
+                .startsWith("Posso ajudar a registrar aulas");
 
-        enviarUpdate(mensagemJson(proximoUpdate(), USUARIO_CLARA, "\"location\": {\"latitude\": 1, \"longitude\": 2}"));
+        enviarUpdate(
+                mensagemJson(
+                        proximoUpdate(),
+                        USUARIO_CLARA,
+                        "\"location\": {\"latitude\": 1, \"longitude\": 2}"));
         assertThat(ultimaMensagem().get("text").asString())
                 .isEqualTo(
                         "Não consigo usar este tipo de mensagem aqui. Envie o nome de um aluno, um áudio de aula ou escolha uma ação.");
 
         enviarCallback(USUARIO_CLARA, "v1:aluno:9");
-        assertThat(textosEnviados()).contains("Esta opção não vale mais. Veja abaixo a etapa atual.");
+        assertThat(textosEnviados())
+                .contains("Esta opção não vale mais. Veja abaixo a etapa atual.");
         enviarCallback(USUARIO_CLARA, "v1:sairok:");
         enviarCallback(USUARIO_CLARA, "lixo");
-        assertThat(jdbc.queryForObject("select count(*) from vinculo_telegram", Integer.class)).isEqualTo(1);
+        assertThat(jdbc.queryForObject("select count(*) from vinculo_telegram", Integer.class))
+                .isEqualTo(1);
 
         enviarTexto(USUARIO_CLARA, "aprovar");
         assertThat(ultimaMensagem().get("text").asString())
@@ -114,8 +127,8 @@ class InicioBuscaConversaIT extends TelegramConversaBase {
         enviarTexto(USUARIO_CLARA, "início");
         java.time.Instant expira =
                 jdbc.queryForObject(
-                        "select codigo_acesso_expira_em from professor where email = 'clara@exemplo.test'",
-                        java.sql.Timestamp.class)
+                                "select codigo_acesso_expira_em from professor where email = 'clara@exemplo.test'",
+                                java.sql.Timestamp.class)
                         .toInstant();
         assertThat(expira).isEqualTo(relogio.agora().plus(java.time.Duration.ofDays(7)));
     }

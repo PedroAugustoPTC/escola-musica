@@ -8,26 +8,54 @@ import br.com.felipeblaft.relatorios.casodeuso.acesso.EntrarPortalCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.acesso.IdentificarProfessorTelegramCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.acesso.ValidarSessaoWebCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.acesso.VincularTelegramCasoDeUso;
+import br.com.felipeblaft.relatorios.casodeuso.aula.AprovarRelatorioAulaCasoDeUso;
+import br.com.felipeblaft.relatorios.casodeuso.aula.CancelarRelatorioAulaCasoDeUso;
+import br.com.felipeblaft.relatorios.casodeuso.aula.ObterRelatorioAulaCasoDeUso;
+import br.com.felipeblaft.relatorios.casodeuso.aula.RegistrarAulaPorAudioCasoDeUso;
+import br.com.felipeblaft.relatorios.casodeuso.aula.ResponderPerguntasCasoDeUso;
+import br.com.felipeblaft.relatorios.casodeuso.aula.SolicitarAlteracaoRelatorioAulaCasoDeUso;
+import br.com.felipeblaft.relatorios.casodeuso.aula.TentarNovamenteRelatorioAulaCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.carga.CarregarCadastroInicialCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.carga.EmitirCodigoAcessoCasoDeUso;
+import br.com.felipeblaft.relatorios.casodeuso.documento.ObterDocumentoRelatorioCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.inicio.BuscarAlunosCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.inicio.ObterInicioProfessorCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.inicio.ObterResumoAlunoCasoDeUso;
+import br.com.felipeblaft.relatorios.casodeuso.trabalho.ConsultarTrabalhoCasoDeUso;
 import br.com.felipeblaft.relatorios.dominio.comum.ParametrosNegocio;
 import br.com.felipeblaft.relatorios.porta.AlunoRepositorio;
+import br.com.felipeblaft.relatorios.porta.ArmazenamentoDocumentoPorta;
+import br.com.felipeblaft.relatorios.porta.ArquivoCanalPorta;
 import br.com.felipeblaft.relatorios.porta.AssociacaoRepositorio;
+import br.com.felipeblaft.relatorios.porta.DocumentoPdfRepositorio;
+import br.com.felipeblaft.relatorios.porta.FilaTrabalhoPorta;
+import br.com.felipeblaft.relatorios.porta.GeracaoPdfPorta;
 import br.com.felipeblaft.relatorios.porta.GeradorCodigoAcessoPorta;
+import br.com.felipeblaft.relatorios.porta.InteracaoRelatorioRepositorio;
+import br.com.felipeblaft.relatorios.porta.LlmPorta;
+import br.com.felipeblaft.relatorios.porta.NormalizacaoAudioPorta;
+import br.com.felipeblaft.relatorios.porta.NotificacaoProfessorPorta;
 import br.com.felipeblaft.relatorios.porta.ProfessorRepositorio;
 import br.com.felipeblaft.relatorios.porta.ProtecaoDadosPorta;
+import br.com.felipeblaft.relatorios.porta.RegistroCustoPorta;
+import br.com.felipeblaft.relatorios.porta.RelatorioAulaRepositorio;
 import br.com.felipeblaft.relatorios.porta.RelatoriosEmAbertoConsultaPorta;
 import br.com.felipeblaft.relatorios.porta.RelogioPorta;
 import br.com.felipeblaft.relatorios.porta.SessaoWebRepositorio;
 import br.com.felipeblaft.relatorios.porta.TentativaAcessoRepositorio;
+import br.com.felipeblaft.relatorios.porta.TransacaoPorta;
+import br.com.felipeblaft.relatorios.porta.TranscricaoPorta;
+import br.com.felipeblaft.relatorios.porta.VersaoRelatorioRepositorio;
 import br.com.felipeblaft.relatorios.porta.VinculoTelegramRepositorio;
+import br.com.felipeblaft.relatorios.servico.AcessoRelatorioServico;
+import br.com.felipeblaft.relatorios.servico.AudioTemporarioServico;
 import br.com.felipeblaft.relatorios.servico.AutenticacaoCodigoServico;
 import br.com.felipeblaft.relatorios.servico.AutorizacaoServico;
 import br.com.felipeblaft.relatorios.servico.ControleTentativasAcessoServico;
 import br.com.felipeblaft.relatorios.servico.EmissaoCodigoAcessoServico;
+import br.com.felipeblaft.relatorios.servico.EnvioAudioServico;
+import br.com.felipeblaft.relatorios.servico.GeracaoDocumentoServico;
+import br.com.felipeblaft.relatorios.servico.ProcessadorTrabalhoServico;
 import br.com.felipeblaft.relatorios.servico.RenovacaoAcessoServico;
 import java.time.Duration;
 import org.springframework.context.annotation.Bean;
@@ -107,7 +135,9 @@ public class CasosDeUsoConfiguracao {
 
     @Bean
     EmitirCodigoAcessoCasoDeUso emitirCodigoAcessoCasoDeUso(
-            ProfessorRepositorio professores, EmissaoCodigoAcessoServico emissao, RelogioPorta relogio) {
+            ProfessorRepositorio professores,
+            EmissaoCodigoAcessoServico emissao,
+            RelogioPorta relogio) {
         return new EmitirCodigoAcessoCasoDeUso(professores, emissao, relogio);
     }
 
@@ -199,5 +229,161 @@ public class CasosDeUsoConfiguracao {
             RelatoriosEmAbertoConsultaPorta consulta,
             AutorizacaoServico autorizacao) {
         return new ObterResumoAlunoCasoDeUso(alunos, consulta, autorizacao);
+    }
+
+    // ---- Registro de aula (US1): serviços
+
+    @Bean
+    AcessoRelatorioServico acessoRelatorioServico(
+            RelatorioAulaRepositorio relatorios, AssociacaoRepositorio associacoes) {
+        return new AcessoRelatorioServico(relatorios, associacoes);
+    }
+
+    @Bean
+    AudioTemporarioServico audioTemporarioServico(
+            ArquivoCanalPorta arquivoCanal,
+            NormalizacaoAudioPorta normalizacao,
+            TranscricaoPorta transcricao) {
+        return new AudioTemporarioServico(arquivoCanal, normalizacao, transcricao);
+    }
+
+    @Bean
+    EnvioAudioServico envioAudioServico(
+            ParametrosNegocio parametros, AudioTemporarioServico audio) {
+        return new EnvioAudioServico(parametros, audio);
+    }
+
+    @Bean
+    GeracaoDocumentoServico geracaoDocumentoServico(
+            GeracaoPdfPorta geracaoPdf,
+            ArmazenamentoDocumentoPorta armazenamento,
+            DocumentoPdfRepositorio documentos,
+            RelatorioAulaRepositorio relatorios,
+            AlunoRepositorio alunos,
+            ProfessorRepositorio professores,
+            RelogioPorta relogio) {
+        return new GeracaoDocumentoServico(
+                geracaoPdf, armazenamento, documentos, relatorios, alunos, professores, relogio);
+    }
+
+    @Bean
+    @SuppressWarnings("java:S107")
+    ProcessadorTrabalhoServico processadorTrabalhoServico(
+            FilaTrabalhoPorta fila,
+            RelatorioAulaRepositorio relatorios,
+            VersaoRelatorioRepositorio versoes,
+            InteracaoRelatorioRepositorio interacoes,
+            AudioTemporarioServico audio,
+            LlmPorta llm,
+            GeracaoDocumentoServico documentos,
+            NotificacaoProfessorPorta notificacao,
+            RegistroCustoPorta custos,
+            TransacaoPorta transacao,
+            RelogioPorta relogio) {
+        return new ProcessadorTrabalhoServico(
+                fila,
+                relatorios,
+                versoes,
+                interacoes,
+                audio,
+                llm,
+                documentos,
+                notificacao,
+                custos,
+                transacao,
+                relogio);
+    }
+
+    // ---- Registro de aula (US1): casos de uso
+
+    @Bean
+    RegistrarAulaPorAudioCasoDeUso registrarAulaPorAudioCasoDeUso(
+            AutorizacaoServico autorizacao,
+            RelatoriosEmAbertoConsultaPorta emAberto,
+            EnvioAudioServico envioAudio,
+            FilaTrabalhoPorta fila,
+            RelogioPorta relogio) {
+        return new RegistrarAulaPorAudioCasoDeUso(autorizacao, emAberto, envioAudio, fila, relogio);
+    }
+
+    @Bean
+    ResponderPerguntasCasoDeUso responderPerguntasCasoDeUso(
+            AcessoRelatorioServico acesso,
+            RelatorioAulaRepositorio relatorios,
+            EnvioAudioServico envioAudio,
+            FilaTrabalhoPorta fila,
+            RelogioPorta relogio) {
+        return new ResponderPerguntasCasoDeUso(acesso, relatorios, envioAudio, fila, relogio);
+    }
+
+    @Bean
+    SolicitarAlteracaoRelatorioAulaCasoDeUso solicitarAlteracaoRelatorioAulaCasoDeUso(
+            AcessoRelatorioServico acesso,
+            RelatorioAulaRepositorio relatorios,
+            EnvioAudioServico envioAudio,
+            FilaTrabalhoPorta fila,
+            RelogioPorta relogio) {
+        return new SolicitarAlteracaoRelatorioAulaCasoDeUso(
+                acesso, relatorios, envioAudio, fila, relogio);
+    }
+
+    @Bean
+    TentarNovamenteRelatorioAulaCasoDeUso tentarNovamenteRelatorioAulaCasoDeUso(
+            AcessoRelatorioServico acesso,
+            RelatorioAulaRepositorio relatorios,
+            FilaTrabalhoPorta fila,
+            RelogioPorta relogio) {
+        return new TentarNovamenteRelatorioAulaCasoDeUso(acesso, relatorios, fila, relogio);
+    }
+
+    @Bean
+    AprovarRelatorioAulaCasoDeUso aprovarRelatorioAulaCasoDeUso(
+            AcessoRelatorioServico acesso,
+            RelatorioAulaRepositorio relatorios,
+            VersaoRelatorioRepositorio versoes,
+            GeracaoDocumentoServico documentos,
+            RelogioPorta relogio) {
+        return new AprovarRelatorioAulaCasoDeUso(acesso, relatorios, versoes, documentos, relogio);
+    }
+
+    @Bean
+    CancelarRelatorioAulaCasoDeUso cancelarRelatorioAulaCasoDeUso(
+            AcessoRelatorioServico acesso,
+            RelatorioAulaRepositorio relatorios,
+            FilaTrabalhoPorta fila,
+            RelogioPorta relogio) {
+        return new CancelarRelatorioAulaCasoDeUso(acesso, relatorios, fila, relogio);
+    }
+
+    @Bean
+    @SuppressWarnings("java:S107")
+    ObterRelatorioAulaCasoDeUso obterRelatorioAulaCasoDeUso(
+            AcessoRelatorioServico acesso,
+            RelatorioAulaRepositorio relatorios,
+            AlunoRepositorio alunos,
+            ProfessorRepositorio professores,
+            InteracaoRelatorioRepositorio interacoes,
+            VersaoRelatorioRepositorio versoes,
+            DocumentoPdfRepositorio documentos,
+            FilaTrabalhoPorta fila) {
+        return new ObterRelatorioAulaCasoDeUso(
+                acesso, relatorios, alunos, professores, interacoes, versoes, documentos, fila);
+    }
+
+    @Bean
+    ConsultarTrabalhoCasoDeUso consultarTrabalhoCasoDeUso(
+            FilaTrabalhoPorta fila, RelogioPorta relogio) {
+        return new ConsultarTrabalhoCasoDeUso(fila, relogio);
+    }
+
+    @Bean
+    ObterDocumentoRelatorioCasoDeUso obterDocumentoRelatorioCasoDeUso(
+            AcessoRelatorioServico acesso,
+            RelatorioAulaRepositorio relatorios,
+            VersaoRelatorioRepositorio versoes,
+            DocumentoPdfRepositorio documentos,
+            GeracaoDocumentoServico geracao) {
+        return new ObterDocumentoRelatorioCasoDeUso(
+                acesso, relatorios, versoes, documentos, geracao);
     }
 }

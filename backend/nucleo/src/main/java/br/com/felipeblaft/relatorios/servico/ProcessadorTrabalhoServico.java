@@ -105,7 +105,9 @@ public class ProcessadorTrabalhoServico {
         this.complementar = processador;
     }
 
-    /** Processa um trabalho já reservado (em execução). Erros inesperados viram falha do trabalho. */
+    /**
+     * Processa um trabalho já reservado (em execução). Erros inesperados viram falha do trabalho.
+     */
     public void processar(TrabalhoProcessamento trabalho) {
         try {
             switch (trabalho.tipo()) {
@@ -207,7 +209,11 @@ public class ProcessadorTrabalhoServico {
                                             saida.conteudo(), saida.perguntasPendentes(), agora);
                             if (conferencia[0]) {
                                 criarVersao(
-                                        atual, OrigemVersao.ESTRUTURACAO_INICIAL, null, trabalho, prompt);
+                                        atual,
+                                        OrigemVersao.ESTRUTURACAO_INICIAL,
+                                        null,
+                                        trabalho,
+                                        prompt);
                             }
                             return true;
                         });
@@ -317,7 +323,10 @@ public class ProcessadorTrabalhoServico {
             encerrarEtapaSemMudanca(trabalho, ResultadoTrabalho.FALHA_ALTERACAO);
             return;
         }
-        int versaoBase = trabalho.parametro(TrabalhoProcessamento.VERSAO_BASE).map(Integer::parseInt).orElse(0);
+        int versaoBase =
+                trabalho.parametro(TrabalhoProcessamento.VERSAO_BASE)
+                        .map(Integer::parseInt)
+                        .orElse(0);
         RelatorioAula relatorio = relatorios.buscarPorId(trabalho.relatorioId()).orElseThrow();
         if (relatorio.versaoVigente() != versaoBase) {
             boolean gravou =
@@ -436,13 +445,15 @@ public class ProcessadorTrabalhoServico {
         Optional<ResultadoTranscricao> transcricao = transcrever(trabalho);
         transcricao.ifPresent(
                 t -> {
-                    trabalho.definirParametro(TrabalhoProcessamento.TEXTO_ENTENDIDO, t.texto().strip());
+                    trabalho.definirParametro(
+                            TrabalhoProcessamento.TEXTO_ENTENDIDO, t.texto().strip());
                     fila.atualizar(trabalho);
                 });
         return transcricao.map(t -> t.texto().strip());
     }
 
-    private void encerrarEtapaSemMudanca(TrabalhoProcessamento trabalho, ResultadoTrabalho resultado) {
+    private void encerrarEtapaSemMudanca(
+            TrabalhoProcessamento trabalho, ResultadoTrabalho resultado) {
         boolean gravou =
                 comRelatorioAberto(
                         trabalho,
@@ -486,7 +497,10 @@ public class ProcessadorTrabalhoServico {
     }
 
     private Optional<RespostaLlm<SaidaRelatorioAulaIa>> chamarLlm(
-            TrabalhoProcessamento trabalho, TarefaLlm tarefa, TarefaIa tarefaIa, EntradaTarefa entrada) {
+            TrabalhoProcessamento trabalho,
+            TarefaLlm tarefa,
+            TarefaIa tarefaIa,
+            EntradaTarefa entrada) {
         long inicio = System.nanoTime();
         try {
             RespostaLlm<SaidaRelatorioAulaIa> resposta =
@@ -548,7 +562,9 @@ public class ProcessadorTrabalhoServico {
     static EntradaAudio fonte(TrabalhoProcessamento trabalho) {
         if (trabalho.arquivoTemporario() != null) {
             long tamanho =
-                    trabalho.parametro(TrabalhoProcessamento.ARQUIVO_TAMANHO).map(Long::parseLong).orElse(0L);
+                    trabalho.parametro(TrabalhoProcessamento.ARQUIVO_TAMANHO)
+                            .map(Long::parseLong)
+                            .orElse(0L);
             return new ArquivoTemporario(
                     Path.of(trabalho.arquivoTemporario()),
                     tamanho,
@@ -558,7 +574,9 @@ public class ProcessadorTrabalhoServico {
                 trabalho.parametro(TrabalhoProcessamento.ARQUIVO_CANAL).orElseThrow(),
                 trabalho.parametro(TrabalhoProcessamento.ARQUIVO_CANAL_UNICO).orElse(null),
                 trabalho.parametro(TrabalhoProcessamento.ARQUIVO_MIME).orElse(null),
-                trabalho.parametro(TrabalhoProcessamento.ARQUIVO_TAMANHO).map(Long::parseLong).orElse(0L));
+                trabalho.parametro(TrabalhoProcessamento.ARQUIVO_TAMANHO)
+                        .map(Long::parseLong)
+                        .orElse(0L));
     }
 
     private void descartarArquivo(TrabalhoProcessamento trabalho) {
@@ -624,15 +642,18 @@ public class ProcessadorTrabalhoServico {
     }
 
     /**
-     * Relê o relatório numa transação e aplica a operação. Se o relatório foi cancelado ou o trabalho
-     * descartado (ou outro canal gravou antes), o resultado é descartado e devolve {@code false}.
+     * Relê o relatório numa transação e aplica a operação. Se o relatório foi cancelado ou o
+     * trabalho descartado (ou outro canal gravou antes), o resultado é descartado e devolve {@code
+     * false}.
      */
     private boolean comRelatorioAberto(TrabalhoProcessamento trabalho, OperacaoRelatorio operacao) {
         try {
             return transacao.executar(
                     () -> {
                         RelatorioAula atual =
-                                relatorios.buscarParaAtualizar(trabalho.relatorioId()).orElseThrow();
+                                relatorios
+                                        .buscarParaAtualizar(trabalho.relatorioId())
+                                        .orElseThrow();
                         if (atual.status() == StatusRelatorio.CANCELADO
                                 || atual.status() == StatusRelatorio.APROVADO
                                 || estaDescartado(trabalho)) {
@@ -687,7 +708,8 @@ public class ProcessadorTrabalhoServico {
         transacao.executar(
                 () -> {
                     fila.atualizar(trabalho);
-                    if (trabalho.relatorioId() != null && trabalho.relatorioTipo() == TipoRelatorio.AULA) {
+                    if (trabalho.relatorioId() != null
+                            && trabalho.relatorioTipo() == TipoRelatorio.AULA) {
                         relatorios
                                 .buscarPorId(trabalho.relatorioId())
                                 .ifPresent(

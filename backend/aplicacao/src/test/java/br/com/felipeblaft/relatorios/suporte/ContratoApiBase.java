@@ -48,8 +48,12 @@ public abstract class ContratoApiBase extends IntegracaoBase {
                 .withLevelResolver(
                         LevelResolver.create()
                                 // a ausência do cookie é justamente o cenário de 401
-                                .withLevel("validation.request.security.missing", ValidationReport.Level.IGNORE)
-                                .withLevel("validation.request.parameter.header.missing", ValidationReport.Level.IGNORE)
+                                .withLevel(
+                                        "validation.request.security.missing",
+                                        ValidationReport.Level.IGNORE)
+                                .withLevel(
+                                        "validation.request.parameter.header.missing",
+                                        ValidationReport.Level.IGNORE)
                                 .build())
                 .build();
     }

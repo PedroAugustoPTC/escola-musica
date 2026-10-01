@@ -17,7 +17,13 @@ class SessaoWebCasosDeUsoTeste {
     private final CenarioAcesso c = new CenarioAcesso();
     private final EntrarPortalCasoDeUso entrar =
             new EntrarPortalCasoDeUso(
-                    c.autenticacao, c.renovacao, c.sessoes, c.vinculos, c.protecao, c.relogio, c.parametros);
+                    c.autenticacao,
+                    c.renovacao,
+                    c.sessoes,
+                    c.vinculos,
+                    c.protecao,
+                    c.relogio,
+                    c.parametros);
     private final ValidarSessaoWebCasoDeUso validar =
             new ValidarSessaoWebCasoDeUso(
                     c.sessoes, c.professores, c.renovacao, c.protecao, c.relogio, c.parametros);
@@ -40,7 +46,8 @@ class SessaoWebCasosDeUsoTeste {
         ValidarSessaoWebCasoDeUso.Resultado resultado = validar.executar(token);
 
         assertThat(resultado.professor().id()).isEqualTo(clara.id());
-        assertThat(resultado.sessao().expiraEm()).isEqualTo(c.relogio.agora().plus(Duration.ofHours(12)));
+        assertThat(resultado.sessao().expiraEm())
+                .isEqualTo(c.relogio.agora().plus(Duration.ofHours(12)));
         c.relogio.avancar(Duration.ofHours(11));
         assertThat(validar.executar(token).professor().id()).isEqualTo(clara.id());
     }

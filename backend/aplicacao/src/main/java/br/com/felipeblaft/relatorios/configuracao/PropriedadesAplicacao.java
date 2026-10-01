@@ -5,7 +5,9 @@ import java.nio.file.Path;
 import java.time.ZoneId;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-/** Propriedades da aplicação (prefixo {@code relatorios}), lidas do ambiente via application.yaml. */
+/**
+ * Propriedades da aplicação (prefixo {@code relatorios}), lidas do ambiente via application.yaml.
+ */
 @ConfigurationProperties(prefix = "relatorios")
 public record PropriedadesAplicacao(
         Escola escola,

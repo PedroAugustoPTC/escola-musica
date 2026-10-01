@@ -44,7 +44,15 @@ public class Professor {
 
     public static Professor novo(String nome, String email, boolean ativo, Instant agora) {
         return new Professor(
-                GeradorId.novo(), nome, normalizarEmail(email), ativo, null, null, null, agora, agora);
+                GeradorId.novo(),
+                nome,
+                normalizarEmail(email),
+                ativo,
+                null,
+                null,
+                null,
+                agora,
+                agora);
     }
 
     public static String normalizarEmail(String email) {

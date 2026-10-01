@@ -37,7 +37,8 @@ services:
 
   testes-backend:
     <<: *maven
-    command: ["mvn", "-B", "-ntp", "verify"]
+    # FFmpeg para FfmpegNormalizacaoAudioAdaptadorIT (o mesmo binário da imagem do backend)
+    command: ["sh", "-c", "apt-get update -qq && apt-get install -y -qq ffmpeg >/dev/null && mvn -B -ntp verify"]
 
   testes-ia-real:
     <<: *maven

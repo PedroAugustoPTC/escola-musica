@@ -30,7 +30,9 @@ public record UpdateTelegram(
             Object location,
             Object contact) {
 
-        /** Primeiro arquivo de áudio ou vídeo da mensagem, se houver (voz, áudio, vídeo, documento). */
+        /**
+         * Primeiro arquivo de áudio ou vídeo da mensagem, se houver (voz, áudio, vídeo, documento).
+         */
         public ArquivoTelegram arquivoDeAudio() {
             if (voice != null) {
                 return voice;

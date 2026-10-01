@@ -4,6 +4,7 @@ import br.com.felipeblaft.relatorios.configuracao.PropriedadesAplicacao;
 import br.com.felipeblaft.relatorios.entrada.telegram.ApresentadorTelegram;
 import br.com.felipeblaft.relatorios.entrada.telegram.EnvioTelegram;
 import br.com.felipeblaft.relatorios.entrada.telegram.SaidaTelegram;
+import br.com.felipeblaft.relatorios.saida.persistencia.FilaTrabalhoPostgresAdaptador;
 import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -24,8 +25,8 @@ import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Chamadas à API de bots no servidor local {@code telegram-bot-api} (R-05): {@code sendMessage}
- * (HTML, texto escapado), {@code editMessageText}, {@code answerCallbackQuery}, {@code sendDocument}
- * e {@code getFile}. Falhas são registradas sem o conteúdo das mensagens (FR-055).
+ * (HTML, texto escapado), {@code editMessageText}, {@code answerCallbackQuery}, {@code
+ * sendDocument} e {@code getFile}. Falhas são registradas sem o conteúdo das mensagens (FR-055).
  */
 @Component
 public class MensageriaTelegramAdaptador implements EnvioTelegram {
@@ -38,7 +39,11 @@ public class MensageriaTelegramAdaptador implements EnvioTelegram {
     private final HttpClient cliente =
             HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
 
-    public MensageriaTelegramAdaptador(PropriedadesAplicacao propriedades) {
+    private final FilaTrabalhoPostgresAdaptador fila;
+
+    public MensageriaTelegramAdaptador(
+            PropriedadesAplicacao propriedades, FilaTrabalhoPostgresAdaptador fila) {
+        this.fila = fila;
         PropriedadesAplicacao.Telegram telegram = propriedades.telegram();
         this.habilitado = telegram.token() != null && !telegram.token().isBlank();
         this.baseUrl = telegram.apiUrl() + "/bot" + telegram.token() + "/";
@@ -49,13 +54,37 @@ public class MensageriaTelegramAdaptador implements EnvioTelegram {
         switch (saida) {
             case SaidaTelegram.Mensagem m -> enviarMensagem(m.chatId(), m.texto(), m.teclado());
             case SaidaTelegram.Edicao e -> editar(e);
+            case SaidaTelegram.MensagemEtapa m -> enviarEtapa(m);
             case SaidaTelegram.Documento d -> enviarDocumento(d);
             case SaidaTelegram.RespostaCallback r ->
                     chamar("answerCallbackQuery", Map.of("callback_query_id", r.callbackId()));
         }
     }
 
-    private void enviarMensagem(long chatId, String texto, SaidaTelegram.Teclado teclado) {
+    /**
+     * Envia (ou edita no lugar) a mensagem de etapa e grava o seu id no trabalho, para que o worker
+     * edite a mesma mensagem a cada etapa (sequência 5.2, passo 4).
+     */
+    private void enviarEtapa(SaidaTelegram.MensagemEtapa etapa) {
+        Optional<Long> mensagemId;
+        if (etapa.editarMensagemId() != null) {
+            editar(
+                    new SaidaTelegram.Edicao(
+                            etapa.chatId(),
+                            etapa.editarMensagemId(),
+                            etapa.texto(),
+                            SaidaTelegram.Teclado.NENHUM));
+            mensagemId = Optional.of(etapa.editarMensagemId());
+        } else {
+            mensagemId =
+                    enviarMensagem(etapa.chatId(), etapa.texto(), SaidaTelegram.Teclado.NENHUM);
+        }
+        mensagemId.ifPresent(id -> fila.registrarMensagemEtapa(etapa.trabalhoId(), id));
+    }
+
+    /** Envia uma mensagem nova; devolve o id da última parte enviada, se a API respondeu. */
+    public Optional<Long> enviarMensagem(long chatId, String texto, SaidaTelegram.Teclado teclado) {
+        Optional<Long> ultimaId = Optional.empty();
         List<String> partes = ApresentadorTelegram.dividir(texto);
         for (int i = 0; i < partes.size(); i++) {
             Map<String, Object> corpo = new LinkedHashMap<>();
@@ -66,17 +95,27 @@ public class MensageriaTelegramAdaptador implements EnvioTelegram {
             if (i == partes.size() - 1 && teclado != null && !teclado.vazio()) {
                 corpo.put("reply_markup", tecladoJson(teclado));
             }
-            chamar("sendMessage", corpo);
+            ultimaId =
+                    chamar("sendMessage", corpo)
+                            .map(resultado -> resultado.path("message_id"))
+                            .filter(JsonNode::isNumber)
+                            .map(JsonNode::asLong);
         }
+        return ultimaId;
     }
 
-    private void editar(SaidaTelegram.Edicao edicao) {
+    public void editar(SaidaTelegram.Edicao edicao) {
         Map<String, Object> corpo = new LinkedHashMap<>();
         corpo.put("chat_id", edicao.chatId());
         corpo.put("message_id", edicao.mensagemId());
         corpo.put("text", edicao.texto());
         corpo.put("parse_mode", "HTML");
-        corpo.put("reply_markup", tecladoJson(edicao.teclado() == null ? SaidaTelegram.Teclado.NENHUM : edicao.teclado()));
+        corpo.put(
+                "reply_markup",
+                tecladoJson(
+                        edicao.teclado() == null
+                                ? SaidaTelegram.Teclado.NENHUM
+                                : edicao.teclado()));
         chamar("editMessageText", corpo);
     }
 
@@ -111,7 +150,9 @@ public class MensageriaTelegramAdaptador implements EnvioTelegram {
         }
         escrever(
                 corpo,
-                "--" + fronteira + "\r\nContent-Disposition: form-data; name=\"document\"; filename=\""
+                "--"
+                        + fronteira
+                        + "\r\nContent-Disposition: form-data; name=\"document\"; filename=\""
                         + documento.nomeArquivo()
                         + "\"\r\nContent-Type: application/pdf\r\n\r\n");
         corpo.writeBytes(documento.conteudo());
@@ -125,10 +166,15 @@ public class MensageriaTelegramAdaptador implements EnvioTelegram {
         executar("sendDocument", requisicao);
     }
 
-    private static void campo(ByteArrayOutputStream corpo, String fronteira, String nome, String valor) {
+    private static void campo(
+            ByteArrayOutputStream corpo, String fronteira, String nome, String valor) {
         escrever(
                 corpo,
-                "--" + fronteira + "\r\nContent-Disposition: form-data; name=\"" + nome + "\"\r\n\r\n"
+                "--"
+                        + fronteira
+                        + "\r\nContent-Disposition: form-data; name=\""
+                        + nome
+                        + "\"\r\n\r\n"
                         + valor
                         + "\r\n");
     }
@@ -146,7 +192,9 @@ public class MensageriaTelegramAdaptador implements EnvioTelegram {
                 HttpRequest.newBuilder(URI.create(baseUrl + metodo))
                         .timeout(Duration.ofSeconds(15))
                         .header("Content-Type", "application/json")
-                        .POST(HttpRequest.BodyPublishers.ofString(JSON.writeValueAsString(parametros)))
+                        .POST(
+                                HttpRequest.BodyPublishers.ofString(
+                                        JSON.writeValueAsString(parametros)))
                         .build();
         return executar(metodo, requisicao);
     }
@@ -154,7 +202,8 @@ public class MensageriaTelegramAdaptador implements EnvioTelegram {
     private Optional<JsonNode> executar(String metodo, HttpRequest requisicao) {
         try {
             HttpResponse<String> resposta =
-                    cliente.send(requisicao, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+                    cliente.send(
+                            requisicao, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (resposta.statusCode() / 100 != 2) {
                 LOG.warn("telegram-falha metodo={} status={}", metodo, resposta.statusCode());
                 return Optional.empty();

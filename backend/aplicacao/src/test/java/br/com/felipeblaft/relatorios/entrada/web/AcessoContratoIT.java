@@ -27,14 +27,16 @@ class AcessoContratoIT extends ContratoApiBase {
         cenario.clara();
     }
 
-    private org.springframework.test.web.servlet.ResultActions tentar(String codigo, String ip) throws Exception {
+    private org.springframework.test.web.servlet.ResultActions tentar(String codigo, String ip)
+            throws Exception {
         return mvc.perform(
                 post("/api/v1/sessao")
                         .with(csrf().asHeader())
-                        .with(r -> {
-                            r.setRemoteAddr("10.0.0.2");
-                            return r;
-                        })
+                        .with(
+                                r -> {
+                                    r.setRemoteAddr("10.0.0.2");
+                                    return r;
+                                })
                         .header("X-Forwarded-For", ip)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"codigo\":\"" + codigo + "\"}"));
@@ -52,7 +54,8 @@ class AcessoContratoIT extends ContratoApiBase {
                 .andExpect(header().string("Set-Cookie", containsString("Secure")))
                 .andExpect(header().string("Set-Cookie", containsString("SameSite=Strict")))
                 .andExpect(header().string("Set-Cookie", containsString("Path=/")));
-        assertThat(jdbc.queryForObject("select count(*) from sessao_web", Integer.class)).isEqualTo(1);
+        assertThat(jdbc.queryForObject("select count(*) from sessao_web", Integer.class))
+                .isEqualTo(1);
         String hash = jdbc.queryForObject("select token_hash from sessao_web", String.class);
         assertThat(hash).hasSize(64);
     }
@@ -83,7 +86,9 @@ class AcessoContratoIT extends ContratoApiBase {
                 .andExpect(status().isUnauthorized())
                 .andExpect(segueContrato())
                 .andExpect(jsonPath("$.codigo").value("NAO_AUTENTICADO"))
-                .andExpect(jsonPath("$.mensagem").value("Entre com o seu código de acesso para continuar."));
+                .andExpect(
+                        jsonPath("$.mensagem")
+                                .value("Entre com o seu código de acesso para continuar."));
     }
 
     @Test

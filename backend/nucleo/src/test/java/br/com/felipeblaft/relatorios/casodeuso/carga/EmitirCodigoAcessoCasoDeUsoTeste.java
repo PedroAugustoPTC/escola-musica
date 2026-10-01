@@ -23,7 +23,8 @@ class EmitirCodigoAcessoCasoDeUsoTeste {
     private final ProtecaoDadosFalsa protecao = new ProtecaoDadosFalsa();
     private final GeradorCodigoAcessoFixo gerador = new GeradorCodigoAcessoFixo();
     private final EmissaoCodigoAcessoServico emissao =
-            new EmissaoCodigoAcessoServico(gerador, protecao, professores, ParametrosNegocio.padrao());
+            new EmissaoCodigoAcessoServico(
+                    gerador, protecao, professores, ParametrosNegocio.padrao());
     private final EmitirCodigoAcessoCasoDeUso casoDeUso =
             new EmitirCodigoAcessoCasoDeUso(professores, emissao, relogio);
 

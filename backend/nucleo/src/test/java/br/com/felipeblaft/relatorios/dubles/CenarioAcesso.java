@@ -20,13 +20,15 @@ public class CenarioAcesso {
     public final AssociacaoRepositorioEmMemoria associacoes = new AssociacaoRepositorioEmMemoria();
     public final AlunoRepositorioEmMemoria alunos = new AlunoRepositorioEmMemoria(associacoes);
     public final SessaoWebRepositorioEmMemoria sessoes = new SessaoWebRepositorioEmMemoria();
-    public final VinculoTelegramRepositorioEmMemoria vinculos = new VinculoTelegramRepositorioEmMemoria();
+    public final VinculoTelegramRepositorioEmMemoria vinculos =
+            new VinculoTelegramRepositorioEmMemoria();
     public final TentativaAcessoRepositorioEmMemoria tentativasRepositorio =
             new TentativaAcessoRepositorioEmMemoria();
     public final RelatoriosEmAbertoConsultaFalsa emAberto = new RelatoriosEmAbertoConsultaFalsa();
 
     public final ControleTentativasAcessoServico tentativas =
-            new ControleTentativasAcessoServico(tentativasRepositorio, protecao, relogio, parametros);
+            new ControleTentativasAcessoServico(
+                    tentativasRepositorio, protecao, relogio, parametros);
     public final RenovacaoAcessoServico renovacao =
             new RenovacaoAcessoServico(professores, relogio, parametros);
     public final AutenticacaoCodigoServico autenticacao =

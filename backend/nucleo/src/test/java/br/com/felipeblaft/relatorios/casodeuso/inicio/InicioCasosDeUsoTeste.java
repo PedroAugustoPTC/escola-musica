@@ -58,10 +58,12 @@ class InicioCasosDeUsoTeste {
         assertThat(resultado.professor().primeiroNome()).isEqualTo("Clara");
         assertThat(resultado.totalAlunos()).isEqualTo(6);
         assertThat(resultado.semAlunos()).isFalse();
-        assertThat(resultado.alunos()).hasSize(5).extracting(AlunoResumo::nome).doesNotContain("Olavo");
+        assertThat(resultado.alunos())
+                .hasSize(5)
+                .extracting(AlunoResumo::nome)
+                .doesNotContain("Olavo");
         assertThat(resultado.relatoriosEmAberto()).hasSize(1);
-        AlunoResumo primeiro =
-                buscar.executar(clara.id(), "matteo").alunos().getFirst();
+        AlunoResumo primeiro = buscar.executar(clara.id(), "matteo").alunos().getFirst();
         assertThat(primeiro.possuiRelatorioEmAberto()).isTrue();
         assertThat(primeiro.ultimaAulaEm()).isEqualTo(LocalDate.of(2026, 9, 21));
         assertThat(primeiro.instrumento()).isEqualTo("Piano");
@@ -83,17 +85,23 @@ class InicioCasosDeUsoTeste {
         assertThat(buscar.executar(clara.id(), "").tipo()).isEqualTo(TipoResultado.TODOS);
         BuscarAlunosCasoDeUso.Resultado encontrados = buscar.executar(clara.id(), "ola");
         assertThat(encontrados.tipo()).isEqualTo(TipoResultado.ENCONTRADOS);
-        assertThat(encontrados.alunos()).extracting(AlunoResumo::nome).containsExactly("Olavo Torrente");
+        assertThat(encontrados.alunos())
+                .extracting(AlunoResumo::nome)
+                .containsExactly("Olavo Torrente");
         BuscarAlunosCasoDeUso.Resultado nenhum = buscar.executar(clara.id(), "Olívia");
         assertThat(nenhum.tipo()).isEqualTo(TipoResultado.NENHUM);
-        assertThat(nenhum.alunos()).extracting(AlunoResumo::nome).containsExactly("Matteo Mafra", "Olavo Torrente");
+        assertThat(nenhum.alunos())
+                .extracting(AlunoResumo::nome)
+                .containsExactly("Matteo Mafra", "Olavo Torrente");
     }
 
     @Test
     void correspondenciaExataSoEntreOsAlunosDoProfessor() {
         c.aluno(clara, "Olavo Torrente", "Violão");
         c.aluno(bruno, "Helena Prado", "Flauta");
-        assertThat(buscar.correspondenciaExata(clara.id(), "olavo")).map(AlunoResumo::nome).contains("Olavo Torrente");
+        assertThat(buscar.correspondenciaExata(clara.id(), "olavo"))
+                .map(AlunoResumo::nome)
+                .contains("Olavo Torrente");
         assertThat(buscar.correspondenciaExata(clara.id(), "helena")).isEmpty();
     }
 
@@ -127,7 +135,13 @@ class InicioCasosDeUsoTeste {
         assertThat(emAberto(matteo).detalhes())
                 .containsEntry("canalOrigem", Canal.TELEGRAM)
                 .containsEntry("alunoId", matteo.id())
-                .containsKeys("relatorioId", "trabalhoId", "status", "etapa", "periodoChave", "atualizadoEm");
+                .containsKeys(
+                        "relatorioId",
+                        "trabalhoId",
+                        "status",
+                        "etapa",
+                        "periodoChave",
+                        "atualizadoEm");
         assertThat(StatusRelatorio.AGUARDANDO_RESPOSTAS.emAberto()).isTrue();
         assertThat(StatusRelatorio.APROVADO.emAberto()).isFalse();
         assertThat(StatusRelatorio.CANCELADO.emAberto()).isFalse();

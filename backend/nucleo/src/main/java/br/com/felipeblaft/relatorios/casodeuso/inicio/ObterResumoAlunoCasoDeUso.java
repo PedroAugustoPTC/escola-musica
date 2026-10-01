@@ -10,8 +10,8 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * Resumo de um aluno associado. Aluno de outro professor (ou inexistente) é
- * {@code ALUNO_NAO_ASSOCIADO}, sem revelar nenhum dado (FR-009).
+ * Resumo de um aluno associado. Aluno de outro professor (ou inexistente) é {@code
+ * ALUNO_NAO_ASSOCIADO}, sem revelar nenhum dado (FR-009).
  */
 public class ObterResumoAlunoCasoDeUso {
 

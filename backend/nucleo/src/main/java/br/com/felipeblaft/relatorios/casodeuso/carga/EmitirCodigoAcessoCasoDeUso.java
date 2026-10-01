@@ -12,8 +12,8 @@ import java.time.Instant;
 import java.util.Objects;
 
 /**
- * Reemite o código de acesso de um professor (comando {@code emitir-codigo}). Substitui o anterior e
- * reinicia a validade; não encerra sessões nem vínculos (contracts/carga-inicial.md).
+ * Reemite o código de acesso de um professor (comando {@code emitir-codigo}). Substitui o anterior
+ * e reinicia a validade; não encerra sessões nem vínculos (contracts/carga-inicial.md).
  */
 public class EmitirCodigoAcessoCasoDeUso {
 
@@ -38,6 +38,7 @@ public class EmitirCodigoAcessoCasoDeUso {
         Instant agora = relogio.agora();
         CodigoAcesso codigo = emissao.emitir(professor, agora);
         professores.salvar(professor);
-        return new CodigoEmitido(professor.email(), codigo.valor(), professor.codigoAcessoExpiraEm());
+        return new CodigoEmitido(
+                professor.email(), codigo.valor(), professor.codigoAcessoExpiraEm());
     }
 }

@@ -17,7 +17,13 @@ class EntrarPortalCasoDeUsoTeste {
     private final CenarioAcesso c = new CenarioAcesso();
     private final EntrarPortalCasoDeUso casoDeUso =
             new EntrarPortalCasoDeUso(
-                    c.autenticacao, c.renovacao, c.sessoes, c.vinculos, c.protecao, c.relogio, c.parametros);
+                    c.autenticacao,
+                    c.renovacao,
+                    c.sessoes,
+                    c.vinculos,
+                    c.protecao,
+                    c.relogio,
+                    c.parametros);
     private final Professor clara = c.professor("Clara Souza", "clara@exemplo.test", "K7QM2XPA");
 
     private static void falhaCom(ThrowingCallable acao, CodigoErro codigo) {
@@ -34,7 +40,8 @@ class EntrarPortalCasoDeUsoTeste {
         assertThat(resultado.professor().id()).isEqualTo(clara.id());
         assertThat(resultado.token()).isEqualTo("token-1");
         assertThat(resultado.sessao().tokenHash()).isEqualTo("hash:token-1");
-        assertThat(resultado.sessao().expiraEm()).isEqualTo(c.relogio.agora().plus(Duration.ofHours(12)));
+        assertThat(resultado.sessao().expiraEm())
+                .isEqualTo(c.relogio.agora().plus(Duration.ofHours(12)));
         assertThat(resultado.telegramVinculado()).isFalse();
         assertThat(resultado.toString()).doesNotContain("token-1");
         assertThat(c.sessoes.todas()).hasSize(1);
@@ -78,11 +85,13 @@ class EntrarPortalCasoDeUsoTeste {
                 .satisfies(
                         e -> {
                             ExcecaoDominio erro = (ExcecaoDominio) e;
-                            assertThat(erro.codigo()).isEqualTo(CodigoErro.BLOQUEADO_TEMPORARIAMENTE);
+                            assertThat(erro.codigo())
+                                    .isEqualTo(CodigoErro.BLOQUEADO_TEMPORARIAMENTE);
                             assertThat(erro.detalhes()).containsEntry("segundosRestantes", 900L);
                         });
         // outra origem não é afetada
-        assertThat(casoDeUso.executar("K7QM2XPA", "outro-ip").professor().id()).isEqualTo(clara.id());
+        assertThat(casoDeUso.executar("K7QM2XPA", "outro-ip").professor().id())
+                .isEqualTo(clara.id());
 
         c.relogio.avancar(Duration.ofMinutes(15));
         assertThat(casoDeUso.executar("K7QM2XPA", "ip").professor().id()).isEqualTo(clara.id());

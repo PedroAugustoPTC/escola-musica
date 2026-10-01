@@ -22,8 +22,7 @@ public class MascaramentoDadosSensiveisConversor implements ValueMasker {
                     // CPF com ou sem pontuação
                     Pattern.compile("\\b\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}\\b"),
                     // Código de acesso: 8 caracteres do alfabeto, com ao menos um dígito
-                    Pattern.compile(
-                            "\\b(?=[A-HJ-NP-Z2-9]*[2-9])[A-HJ-NP-Z2-9]{8}\\b"),
+                    Pattern.compile("\\b(?=[A-HJ-NP-Z2-9]*[2-9])[A-HJ-NP-Z2-9]{8}\\b"),
                     // Tokens opacos (Base64 URL de 32 bytes) e cabeçalhos de autorização
                     Pattern.compile("\\b[A-Za-z0-9_-]{43}\\b"),
                     Pattern.compile("(?i)(bearer|bot)[0-9]*[: ]?[A-Za-z0-9:_-]{20,}"));

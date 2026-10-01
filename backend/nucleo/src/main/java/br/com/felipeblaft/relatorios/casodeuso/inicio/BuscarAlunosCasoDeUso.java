@@ -20,7 +20,8 @@ public class BuscarAlunosCasoDeUso {
     private final AlunoRepositorio alunos;
     private final RelatoriosEmAbertoConsultaPorta consulta;
 
-    public BuscarAlunosCasoDeUso(AlunoRepositorio alunos, RelatoriosEmAbertoConsultaPorta consulta) {
+    public BuscarAlunosCasoDeUso(
+            AlunoRepositorio alunos, RelatoriosEmAbertoConsultaPorta consulta) {
         this.alunos = Objects.requireNonNull(alunos);
         this.consulta = Objects.requireNonNull(consulta);
     }
@@ -29,7 +30,8 @@ public class BuscarAlunosCasoDeUso {
         List<Aluno> todos = alunos.listarDoProfessor(professorId);
         BuscaAluno.Resultado resultado = BuscaAluno.buscar(todos, busca);
         ResumosAlunos resumos =
-                ResumosAlunos.carregar(consulta, professorId, consulta.listarDoProfessor(professorId));
+                ResumosAlunos.carregar(
+                        consulta, professorId, consulta.listarDoProfessor(professorId));
         return new Resultado(resultado.tipo(), resumos.resumos(resultado.alunos()));
     }
 
@@ -37,6 +39,13 @@ public class BuscarAlunosCasoDeUso {
     public Optional<AlunoResumo> correspondenciaExata(UUID professorId, String texto) {
         List<Aluno> todos = alunos.listarDoProfessor(professorId);
         return BuscaAluno.correspondenciaExata(todos, texto)
-                .map(aluno -> new AlunoResumo(aluno.id(), aluno.nome(), aluno.instrumento(), null, false));
+                .map(
+                        aluno ->
+                                new AlunoResumo(
+                                        aluno.id(),
+                                        aluno.nome(),
+                                        aluno.instrumento(),
+                                        null,
+                                        false));
     }
 }

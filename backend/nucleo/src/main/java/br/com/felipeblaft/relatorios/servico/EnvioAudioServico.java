@@ -32,7 +32,8 @@ public class EnvioAudioServico {
     }
 
     public void anexar(TrabalhoProcessamento trabalho, EntradaAudio entrada) {
-        trabalho.definirParametro(TrabalhoProcessamento.ARQUIVO_TAMANHO, Long.toString(entrada.tamanho()));
+        trabalho.definirParametro(
+                TrabalhoProcessamento.ARQUIVO_TAMANHO, Long.toString(entrada.tamanho()));
         switch (entrada) {
             case ArquivoTemporario arquivo -> {
                 trabalho.definirArquivoTemporario(arquivo.caminho().toString());
@@ -40,7 +41,8 @@ public class EnvioAudioServico {
             }
             case ReferenciaArquivoCanal referencia -> {
                 trabalho.definirParametro(TrabalhoProcessamento.ARQUIVO_CANAL, referencia.id());
-                trabalho.definirParametro(TrabalhoProcessamento.ARQUIVO_CANAL_UNICO, referencia.idUnico());
+                trabalho.definirParametro(
+                        TrabalhoProcessamento.ARQUIVO_CANAL_UNICO, referencia.idUnico());
                 trabalho.definirParametro(TrabalhoProcessamento.ARQUIVO_MIME, referencia.mime());
             }
         }

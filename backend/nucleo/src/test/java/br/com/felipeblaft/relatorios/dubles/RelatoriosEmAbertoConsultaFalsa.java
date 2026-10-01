@@ -33,7 +33,11 @@ public class RelatoriosEmAbertoConsultaFalsa implements RelatoriosEmAbertoConsul
     public Optional<RelatorioEmAberto> buscarDoAluno(UUID professorId, UUID alunoId) {
         return listarDoProfessor(professorId).stream()
                 .filter(r -> r.alunoId().equals(alunoId))
-                .filter(r -> r.tipo() == br.com.felipeblaft.relatorios.dominio.comum.TipoRelatorio.AULA)
+                .filter(
+                        r ->
+                                r.tipo()
+                                        == br.com.felipeblaft.relatorios.dominio.comum.TipoRelatorio
+                                                .AULA)
                 .findFirst();
     }
 

@@ -107,7 +107,10 @@ public class TratadorErrosControlador {
         return resposta(CodigoErro.DADOS_INVALIDOS, Map.of());
     }
 
-    @ExceptionHandler({NoResourceFoundException.class, HttpRequestMethodNotSupportedException.class})
+    @ExceptionHandler({
+        NoResourceFoundException.class,
+        HttpRequestMethodNotSupportedException.class
+    })
     public ResponseEntity<ErroResposta> naoEncontrado(Exception erro) {
         return resposta(CodigoErro.RECURSO_NAO_ENCONTRADO, Map.of());
     }
@@ -120,7 +123,8 @@ public class TratadorErrosControlador {
 
     ResponseEntity<ErroResposta> resposta(CodigoErro codigo, Map<String, Object> detalhes) {
         HttpStatus status = statusDe(codigo);
-        Map<String, Object> parametrosTexto = new HashMap<>(parametros.parametrosErro(codigo, detalhes));
+        Map<String, Object> parametrosTexto =
+                new HashMap<>(parametros.parametrosErro(codigo, detalhes));
         Integer retryAfter = null;
         ResponseEntity.BodyBuilder corpo = ResponseEntity.status(status);
         if (codigo == CodigoErro.BLOQUEADO_TEMPORARIAMENTE

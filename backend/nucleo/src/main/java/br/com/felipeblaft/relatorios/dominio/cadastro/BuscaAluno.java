@@ -44,7 +44,8 @@ public final class BuscaAluno {
         if (consulta.isEmpty()) {
             return new Resultado(TipoResultado.TODOS, alunos);
         }
-        List<Aluno> encontrados = alunos.stream().filter(a -> corresponde(a.nome(), consulta)).toList();
+        List<Aluno> encontrados =
+                alunos.stream().filter(a -> corresponde(a.nome(), consulta)).toList();
         if (encontrados.isEmpty()) {
             return new Resultado(TipoResultado.NENHUM, alunos);
         }
@@ -58,12 +59,13 @@ public final class BuscaAluno {
         }
         List<String> palavras = Arrays.asList(alvo.split(" "));
         return Arrays.stream(consultaNormalizada.split(" "))
-                .allMatch(termo -> palavras.stream().anyMatch(palavra -> palavra.startsWith(termo)));
+                .allMatch(
+                        termo -> palavras.stream().anyMatch(palavra -> palavra.startsWith(termo)));
     }
 
     /**
-     * Correspondência exata (caso de borda do nome enviado durante a conferência): o texto é igual ao
-     * nome completo ou ao primeiro nome de um único aluno.
+     * Correspondência exata (caso de borda do nome enviado durante a conferência): o texto é igual
+     * ao nome completo ou ao primeiro nome de um único aluno.
      */
     public static Optional<Aluno> correspondenciaExata(List<Aluno> alunos, String texto) {
         String consulta = normalizar(texto);

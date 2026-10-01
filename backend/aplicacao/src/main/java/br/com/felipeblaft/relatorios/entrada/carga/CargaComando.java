@@ -28,9 +28,7 @@ public class CargaComando {
     private final CatalogoMensagens catalogo;
     private final FormatacaoMensagens formatacao;
     private final JsonMapper json =
-            JsonMapper.builder()
-                    .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-                    .build();
+            JsonMapper.builder().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).build();
 
     public CargaComando(
             CarregarCadastroInicialCasoDeUso casoDeUso,
@@ -53,7 +51,8 @@ public class CargaComando {
         try {
             conteudo = json.readValue(Files.readString(Path.of(arquivo)), ArquivoCarga.class);
         } catch (Exception erro) {
-            saida.println("Não foi possível ler o arquivo de carga (JSON inválido ou arquivo ausente).");
+            saida.println(
+                    "Não foi possível ler o arquivo de carga (JSON inválido ou arquivo ausente).");
             return 1;
         }
         ResultadoCarga resultado = casoDeUso.executar(conteudo, simular);
@@ -75,7 +74,10 @@ public class CargaComando {
             }
             return;
         }
-        saida.println(resultado.simulacao() ? "Simulação concluída: nada foi gravado." : "Carga concluída.");
+        saida.println(
+                resultado.simulacao()
+                        ? "Simulação concluída: nada foi gravado."
+                        : "Carga concluída.");
         saida.printf(
                 "Professores: %d criados, %d atualizados, %d inalterados%n",
                 resultado.professores().criados(),

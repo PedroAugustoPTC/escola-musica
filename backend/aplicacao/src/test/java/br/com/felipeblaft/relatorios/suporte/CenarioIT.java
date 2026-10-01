@@ -5,13 +5,17 @@ import br.com.felipeblaft.relatorios.dominio.cadastro.Aluno;
 import br.com.felipeblaft.relatorios.dominio.cadastro.Cpf;
 import br.com.felipeblaft.relatorios.dominio.cadastro.Professor;
 import br.com.felipeblaft.relatorios.dominio.cadastro.ProfessorAluno;
+import br.com.felipeblaft.relatorios.dominio.trabalho.TrabalhoProcessamento;
 import br.com.felipeblaft.relatorios.porta.AlunoRepositorio;
 import br.com.felipeblaft.relatorios.porta.AssociacaoRepositorio;
+import br.com.felipeblaft.relatorios.porta.FilaTrabalhoPorta;
 import br.com.felipeblaft.relatorios.porta.ProfessorRepositorio;
 import br.com.felipeblaft.relatorios.porta.ProtecaoDadosPorta;
 import br.com.felipeblaft.relatorios.porta.RelogioPorta;
+import br.com.felipeblaft.relatorios.servico.ProcessadorTrabalhoServico;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 /** Cria cadastros fictícios com códigos conhecidos para os testes de integração. */
@@ -26,6 +30,8 @@ public class CenarioIT {
     private final AssociacaoRepositorio associacoes;
     private final ProtecaoDadosPorta protecao;
     private final RelogioPorta relogio;
+    private final FilaTrabalhoPorta fila;
+    private final ProcessadorTrabalhoServico processador;
     private int sequenciaCpf;
 
     public CenarioIT(
@@ -33,18 +39,37 @@ public class CenarioIT {
             AlunoRepositorio alunos,
             AssociacaoRepositorio associacoes,
             ProtecaoDadosPorta protecao,
-            RelogioPorta relogio) {
+            RelogioPorta relogio,
+            FilaTrabalhoPorta fila,
+            ProcessadorTrabalhoServico processador) {
         this.professores = professores;
         this.alunos = alunos;
         this.associacoes = associacoes;
         this.protecao = protecao;
         this.relogio = relogio;
+        this.fila = fila;
+        this.processador = processador;
+    }
+
+    /**
+     * Processa a fila até esvaziar, como o worker faria (os workers ficam desligados nos testes).
+     */
+    public int processarFila() {
+        int processados = 0;
+        Optional<TrabalhoProcessamento> proximo;
+        while ((proximo = fila.reservarProximo(relogio.agora())).isPresent()) {
+            processador.processar(proximo.get());
+            processados++;
+        }
+        return processados;
     }
 
     public Professor professor(String nome, String email, String codigo) {
         Professor professor = Professor.novo(nome, email, true, relogio.agora());
         professor.substituirCodigo(
-                protecao.hashCodigoAcesso(CodigoAcesso.de(codigo)), relogio.agora(), Duration.ofDays(7));
+                protecao.hashCodigoAcesso(CodigoAcesso.de(codigo)),
+                relogio.agora(),
+                Duration.ofDays(7));
         professores.salvar(professor);
         return professor;
     }

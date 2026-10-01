@@ -25,8 +25,10 @@ class ComumTeste {
         }
         UUID posterior = GeradorId.novo();
         assertThat(ids).hasSize(1000);
-        assertThat(Long.compareUnsigned(anterior.getMostSignificantBits() >>> 16,
-                        posterior.getMostSignificantBits() >>> 16))
+        assertThat(
+                        Long.compareUnsigned(
+                                anterior.getMostSignificantBits() >>> 16,
+                                posterior.getMostSignificantBits() >>> 16))
                 .isNegative();
     }
 

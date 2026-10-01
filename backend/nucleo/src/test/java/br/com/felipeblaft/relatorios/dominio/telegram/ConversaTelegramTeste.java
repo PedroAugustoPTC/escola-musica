@@ -66,7 +66,8 @@ class ConversaTelegramTeste {
         assertThat(conversa.audioPendente()).map(AudioPendente::fileId).contains("f2");
 
         assertThat(conversa.descartarAudioSeExpirado(T0.plus(TRINTA), TRINTA)).isFalse();
-        assertThat(conversa.descartarAudioSeExpirado(T0.plusSeconds(60).plus(TRINTA), TRINTA)).isTrue();
+        assertThat(conversa.descartarAudioSeExpirado(T0.plusSeconds(60).plus(TRINTA), TRINTA))
+                .isTrue();
         assertThat(conversa.audioPendente()).isEmpty();
         assertThat(conversa.descartarAudioSeExpirado(T0, TRINTA)).isFalse();
 

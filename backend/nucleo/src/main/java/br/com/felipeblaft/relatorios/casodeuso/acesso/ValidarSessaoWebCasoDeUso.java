@@ -56,10 +56,7 @@ public class ValidarSessaoWebCasoDeUso {
             throw new ExcecaoDominio(CodigoErro.SESSAO_EXPIRADA);
         }
         Professor professor =
-                professores
-                        .buscarPorId(sessao.professorId())
-                        .filter(Professor::ativo)
-                        .orElse(null);
+                professores.buscarPorId(sessao.professorId()).filter(Professor::ativo).orElse(null);
         if (professor == null) {
             sessoes.remover(sessao.id());
             throw new ExcecaoDominio(CodigoErro.SESSAO_EXPIRADA);

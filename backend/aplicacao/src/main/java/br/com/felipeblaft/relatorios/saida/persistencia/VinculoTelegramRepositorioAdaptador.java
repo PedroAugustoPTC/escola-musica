@@ -17,7 +17,8 @@ class VinculoTelegramRepositorioAdaptador implements VinculoTelegramRepositorio 
 
     @Override
     public Optional<VinculoTelegram> buscarPorTelegramUsuarioId(long telegramUsuarioId) {
-        return jpa.findByTelegramUsuarioId(telegramUsuarioId).map(VinculoTelegramMapeador::paraDominio);
+        return jpa.findByTelegramUsuarioId(telegramUsuarioId)
+                .map(VinculoTelegramMapeador::paraDominio);
     }
 
     @Override
@@ -27,7 +28,8 @@ class VinculoTelegramRepositorioAdaptador implements VinculoTelegramRepositorio 
 
     @Override
     public void salvar(VinculoTelegram vinculo) {
-        VinculoTelegramEntidade salvo = jpa.saveAndFlush(VinculoTelegramMapeador.paraEntidade(vinculo));
+        VinculoTelegramEntidade salvo =
+                jpa.saveAndFlush(VinculoTelegramMapeador.paraEntidade(vinculo));
         vinculo.registrarVersaoPersistida(salvo.bloqueioOtimista);
     }
 

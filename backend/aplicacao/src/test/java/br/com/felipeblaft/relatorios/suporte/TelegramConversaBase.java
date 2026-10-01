@@ -2,14 +2,18 @@ package br.com.felipeblaft.relatorios.suporte;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.anyUrl;
+import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import br.com.felipeblaft.relatorios.configuracao.PropriedadesAplicacao;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -24,8 +28,8 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
- * Base dos testes de conversa do Telegram (contracts/telegram-conversa.md §7): envia updates JSON ao
- * webhook com o segredo e verifica as chamadas feitas à API de bots simulada no WireMock.
+ * Base dos testes de conversa do Telegram (contracts/telegram-conversa.md §7): envia updates JSON
+ * ao webhook com o segredo e verifica as chamadas feitas à API de bots simulada no WireMock.
  */
 @AutoConfigureMockMvc
 public abstract class TelegramConversaBase extends IntegracaoBase {
@@ -36,7 +40,8 @@ public abstract class TelegramConversaBase extends IntegracaoBase {
     protected static final long USUARIO_BRUNO = 7002L;
     protected static final JsonMapper JSON = JsonMapper.builder().build();
 
-    protected static final WireMockServer API_BOTS = new WireMockServer(wireMockConfig().dynamicPort());
+    protected static final WireMockServer API_BOTS =
+            new WireMockServer(wireMockConfig().dynamicPort());
 
     static {
         API_BOTS.start();
@@ -48,6 +53,8 @@ public abstract class TelegramConversaBase extends IntegracaoBase {
     @Autowired protected MockMvc mvc;
 
     @Autowired protected CenarioIT cenario;
+
+    @Autowired protected PropriedadesAplicacao propriedades;
 
     @DynamicPropertySource
     static void apiDeBots(DynamicPropertyRegistry registro) {
@@ -75,7 +82,8 @@ public abstract class TelegramConversaBase extends IntegracaoBase {
 
     protected void enviarUpdate(String json) throws Exception {
         mvc.perform(
-                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/telegram/webhook")
+                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
+                                        "/telegram/webhook")
                                 .header("X-Telegram-Bot-Api-Secret-Token", SEGREDO)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(json))
@@ -86,17 +94,26 @@ public abstract class TelegramConversaBase extends IntegracaoBase {
         return mensagemJson(updateId, usuario, "private", campoEConteudo);
     }
 
-    protected static String mensagemJson(long updateId, long usuario, String tipoChat, String campoEConteudo) {
+    protected static String mensagemJson(
+            long updateId, long usuario, String tipoChat, String campoEConteudo) {
         return """
                 {"update_id": %d, "message": {"message_id": %d, "date": 1,
                  "from": {"id": %d, "is_bot": false, "first_name": "Teste"},
                  "chat": {"id": %d, "type": "%s"}, %s}}
                 """
-                .formatted(updateId, MENSAGENS.incrementAndGet(), usuario, usuario, tipoChat, campoEConteudo);
+                .formatted(
+                        updateId,
+                        MENSAGENS.incrementAndGet(),
+                        usuario,
+                        usuario,
+                        tipoChat,
+                        campoEConteudo);
     }
 
     protected void enviarTexto(long usuario, String texto) throws Exception {
-        enviarUpdate(mensagemJson(proximoUpdate(), usuario, "\"text\": " + JSON.writeValueAsString(texto)));
+        enviarUpdate(
+                mensagemJson(
+                        proximoUpdate(), usuario, "\"text\": " + JSON.writeValueAsString(texto)));
     }
 
     protected void enviarCallback(long usuario, String dados) throws Exception {
@@ -123,6 +140,54 @@ public abstract class TelegramConversaBase extends IntegracaoBase {
                                 .formatted(fileId, fileId, tamanho)));
     }
 
+    /**
+     * Envia um arquivo de áudio ou vídeo pelo campo indicado (voice, audio, video, video_note,
+     * document).
+     */
+    protected void enviarArquivo(
+            long usuario, String campo, String fileId, String mime, long tamanho) throws Exception {
+        enviarUpdate(
+                mensagemJson(
+                        proximoUpdate(),
+                        usuario,
+                        "\"%s\": {\"file_id\": \"%s\", \"file_unique_id\": \"u-%s\", \"mime_type\": \"%s\", \"file_size\": %d}"
+                                .formatted(campo, fileId, fileId, mime, tamanho)));
+    }
+
+    /**
+     * Simula o servidor local da API de bots: grava o arquivo no volume compartilhado e responde ao
+     * {@code getFile} com o caminho absoluto (modo {@code --local}).
+     */
+    protected Path prepararArquivoTelegram(String fileId, byte[] conteudo) throws Exception {
+        Path diretorio = propriedades.telegram().arquivosDir().resolve("voice");
+        Files.createDirectories(diretorio);
+        Path arquivo = diretorio.resolve(fileId + ".oga");
+        Files.write(arquivo, conteudo);
+        API_BOTS.stubFor(
+                post(urlPathMatching("/bot.*/getFile"))
+                        .withRequestBody(containing(fileId))
+                        .willReturn(
+                                aResponse()
+                                        .withHeader("Content-Type", "application/json")
+                                        .withBody(
+                                                JSON.writeValueAsString(
+                                                        java.util.Map.of(
+                                                                "ok",
+                                                                true,
+                                                                "result",
+                                                                java.util.Map.of(
+                                                                        "file_id",
+                                                                        fileId,
+                                                                        "file_path",
+                                                                        arquivo.toString()))))));
+        return arquivo;
+    }
+
+    /** Textos das edições de mensagem (etapas do processamento editadas no lugar). */
+    protected static List<String> textosEditados() {
+        return chamadas("editMessageText").stream().map(m -> m.get("text").asString()).toList();
+    }
+
     /** Vincula a conta de teste com o código (sequência 5.1) e limpa as chamadas registradas. */
     protected void vincular(long usuario, String codigo) throws Exception {
         enviarTexto(usuario, codigo);
@@ -134,12 +199,17 @@ public abstract class TelegramConversaBase extends IntegracaoBase {
     protected static List<JsonNode> chamadas(String metodo) {
         List<JsonNode> corpos = new ArrayList<>();
         for (LoggedRequest requisicao :
-                API_BOTS.findAll(postRequestedFor(urlPathMatching("/bot" + TOKEN.replace(":", "\\:") + "/" + metodo)))) {
+                API_BOTS.findAll(
+                        postRequestedFor(
+                                urlPathMatching(
+                                        "/bot" + TOKEN.replace(":", "\\:") + "/" + metodo)))) {
             if (requisicao.getHeader("Content-Type") != null
                     && requisicao.getHeader("Content-Type").startsWith("application/json")) {
                 corpos.add(JSON.readTree(requisicao.getBodyAsString()));
             } else {
-                corpos.add(JSON.createObjectNode().put("multipart", requisicao.getBodyAsString().length()));
+                corpos.add(
+                        JSON.createObjectNode()
+                                .put("multipart", requisicao.getBodyAsString().length()));
             }
         }
         return corpos;

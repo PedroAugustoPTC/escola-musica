@@ -30,8 +30,8 @@ import br.com.felipeblaft.relatorios.porta.RelatorioAulaRepositorio;
 import br.com.felipeblaft.relatorios.porta.RespostaLlm;
 import br.com.felipeblaft.relatorios.porta.ResultadoTranscricao;
 import br.com.felipeblaft.relatorios.porta.TarefaLlm;
-import br.com.felipeblaft.relatorios.porta.TranscricaoPorta;
 import br.com.felipeblaft.relatorios.porta.TransacaoPorta;
+import br.com.felipeblaft.relatorios.porta.TranscricaoPorta;
 import br.com.felipeblaft.relatorios.porta.VersaoRelatorioRepositorio;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -72,7 +72,10 @@ public final class DublesProcessamento {
                 throw erro;
             }
             return new ResultadoTranscricao(
-                    (String) proxima, audio.duracaoSegundos(), new BigDecimal("0.001"), "provedor/modelo");
+                    (String) proxima,
+                    audio.duracaoSegundos(),
+                    new BigDecimal("0.001"),
+                    "provedor/modelo");
         }
     }
 
@@ -114,7 +117,9 @@ public final class DublesProcessamento {
         public ArquivoTemporario obterArquivo(ReferenciaArquivoCanal referencia) {
             obtidos.add(referencia);
             return new ArquivoTemporario(
-                    Path.of("/tmp/audios/canal-" + referencia.id()), referencia.tamanho(), referencia.mime());
+                    Path.of("/tmp/audios/canal-" + referencia.id()),
+                    referencia.tamanho(),
+                    referencia.mime());
         }
     }
 
@@ -130,7 +135,8 @@ public final class DublesProcessamento {
 
         @Override
         @SuppressWarnings("unchecked")
-        public <T> RespostaLlm<T> gerarJson(TarefaLlm tarefa, EntradaTarefa entrada, Class<T> tipoSaida) {
+        public <T> RespostaLlm<T> gerarJson(
+                TarefaLlm tarefa, EntradaTarefa entrada, Class<T> tipoSaida) {
             entradas.add(entrada);
             Deque<Object> fila = roteiro.get(tarefa);
             if (fila == null || fila.isEmpty()) {
@@ -157,7 +163,9 @@ public final class DublesProcessamento {
         @Override
         public DocumentoGerado gerarRelatorioAula(ModeloPdfRelatorioAula modelo) {
             modelos.add(modelo);
-            byte[] bytes = ("PDF " + modelo.situacao() + " v" + modelo.versao()).getBytes(StandardCharsets.UTF_8);
+            byte[] bytes =
+                    ("PDF " + modelo.situacao() + " v" + modelo.versao())
+                            .getBytes(StandardCharsets.UTF_8);
             return new DocumentoGerado(bytes, "sha-" + modelos.size(), bytes.length);
         }
     }
@@ -226,7 +234,8 @@ public final class DublesProcessamento {
         @Override
         public void enfileirar(TrabalhoProcessamento trabalho) {
             if (trabalho.tipo() == TipoTrabalho.REGISTRO_AULA
-                    && buscarRegistroEmCurso(trabalho.professorId(), trabalho.alunoId()).isPresent()) {
+                    && buscarRegistroEmCurso(trabalho.professorId(), trabalho.alunoId())
+                            .isPresent()) {
                 throw new ConflitoConcorrenciaExcecao("registro em curso");
             }
             trabalhos.put(trabalho.id(), trabalho);
@@ -249,13 +258,16 @@ public final class DublesProcessamento {
         @Override
         public Optional<TrabalhoProcessamento> reservarProximo(Instant agora) {
             Optional<TrabalhoProcessamento> proximo =
-                    trabalhos.values().stream().filter(t -> t.status() == StatusTrabalho.PENDENTE).findFirst();
+                    trabalhos.values().stream()
+                            .filter(t -> t.status() == StatusTrabalho.PENDENTE)
+                            .findFirst();
             proximo.ifPresent(t -> t.iniciar(agora));
             return proximo;
         }
 
         @Override
-        public Optional<TrabalhoProcessamento> buscarEmCursoDoRelatorio(TipoRelatorio tipo, UUID relatorioId) {
+        public Optional<TrabalhoProcessamento> buscarEmCursoDoRelatorio(
+                TipoRelatorio tipo, UUID relatorioId) {
             return trabalhos.values().stream()
                     .filter(t -> t.status().emCurso())
                     .filter(t -> tipo == t.relatorioTipo() && relatorioId.equals(t.relatorioId()))
@@ -263,12 +275,23 @@ public final class DublesProcessamento {
         }
 
         @Override
-        public Optional<TrabalhoProcessamento> buscarRegistroEmCurso(UUID professorId, UUID alunoId) {
+        public Optional<TrabalhoProcessamento> buscarRegistroEmCurso(
+                UUID professorId, UUID alunoId) {
             return trabalhos.values().stream()
                     .filter(t -> t.status().emCurso())
                     .filter(t -> t.relatorioId() == null)
                     .filter(t -> t.professorId().equals(professorId) && t.alunoId().equals(alunoId))
                     .findFirst();
+        }
+
+        @Override
+        public boolean marcarAvisoDemora(UUID trabalhoId) {
+            TrabalhoProcessamento trabalho = trabalhos.get(trabalhoId);
+            if (trabalho == null || trabalho.avisoDemoraEnviado()) {
+                return false;
+            }
+            trabalho.marcarAvisoDemora();
+            return true;
         }
 
         @Override
@@ -334,12 +357,17 @@ public final class DublesProcessamento {
         @Override
         public Optional<VersaoRelatorio> buscar(TipoRelatorio tipo, UUID relatorioId, int numero) {
             return versoes.stream()
-                    .filter(v -> v.relatorioTipo() == tipo && v.relatorioId().equals(relatorioId) && v.numero() == numero)
+                    .filter(
+                            v ->
+                                    v.relatorioTipo() == tipo
+                                            && v.relatorioId().equals(relatorioId)
+                                            && v.numero() == numero)
                     .findFirst();
         }
     }
 
-    public static class InteracaoRelatorioRepositorioEmMemoria implements InteracaoRelatorioRepositorio {
+    public static class InteracaoRelatorioRepositorioEmMemoria
+            implements InteracaoRelatorioRepositorio {
         public final List<InteracaoRelatorio> interacoes = new ArrayList<>();
 
         @Override
@@ -356,7 +384,10 @@ public final class DublesProcessamento {
         public Optional<InteracaoRelatorio> ultima(TipoRelatorio tipo, UUID relatorioId) {
             List<InteracaoRelatorio> doRelatorio =
                     interacoes.stream()
-                            .filter(i -> i.relatorioTipo() == tipo && i.relatorioId().equals(relatorioId))
+                            .filter(
+                                    i ->
+                                            i.relatorioTipo() == tipo
+                                                    && i.relatorioId().equals(relatorioId))
                             .toList();
             return doRelatorio.isEmpty() ? Optional.empty() : Optional.of(doRelatorio.getLast());
         }

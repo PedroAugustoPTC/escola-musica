@@ -43,7 +43,9 @@ public interface FluxoTelegram {
         return false;
     }
 
-    /** Complemento do "o que posso receber" em {@code TIPO_NAO_SUPORTADO}; nulo se não se aplica. */
+    /**
+     * Complemento do "o que posso receber" em {@code TIPO_NAO_SUPORTADO}; nulo se não se aplica.
+     */
     default String oQuePossoReceber(ContextoTelegram contexto) {
         return null;
     }

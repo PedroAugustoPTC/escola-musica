@@ -41,12 +41,14 @@ public class AprovarRelatorioAulaCasoDeUso {
         this.relogio = Objects.requireNonNull(relogio);
     }
 
-    public Aprovacao executar(UUID professorId, UUID relatorioId, int versaoConfirmada, Canal canal) {
+    public Aprovacao executar(
+            UUID professorId, UUID relatorioId, int versaoConfirmada, Canal canal) {
         RelatorioAula relatorio = acesso.relatorioAulaParaAtualizar(professorId, relatorioId);
         relatorio.aprovar(versaoConfirmada, canal, relogio.agora());
         relatorios.salvar(relatorio);
         VersaoRelatorio versao =
-                versoes.buscar(TipoRelatorio.AULA, relatorio.id(), relatorio.versaoAprovada()).orElseThrow();
+                versoes.buscar(TipoRelatorio.AULA, relatorio.id(), relatorio.versaoAprovada())
+                        .orElseThrow();
         documentos.gerarOficial(relatorio, versao);
         return new Aprovacao(relatorio.id(), relatorio.versaoAprovada(), relatorio.aprovadoEm());
     }

@@ -45,7 +45,9 @@ public class SessaoWeb {
         return instante.isBefore(expiraEm);
     }
 
-    /** Renova a expiração; devolve {@code true} se precisa gravar (1 escrita por minuto, no máximo). */
+    /**
+     * Renova a expiração; devolve {@code true} se precisa gravar (1 escrita por minuto, no máximo).
+     */
     public boolean registrarUso(Instant agora, Duration inatividade) {
         if (Duration.between(ultimoUsoEm, agora)
                         .compareTo(ParametrosNegocio.INTERVALO_RENOVACAO_SESSAO)

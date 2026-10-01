@@ -18,9 +18,11 @@ class RelatorioAulaTeste {
 
     private static final Instant T0 = Instant.parse("2026-09-21T13:00:00Z");
     private static final ConteudoRelatorioAula CONTEUDO =
-            new ConteudoRelatorioAula(List.of("Czerny"), "Evoluiu.", List.of(), List.of("Escala"), "");
+            new ConteudoRelatorioAula(
+                    List.of("Czerny"), "Evoluiu.", List.of(), List.of("Escala"), "");
     private static final ConteudoRelatorioAula OUTRO =
-            new ConteudoRelatorioAula(List.of("Czerny"), "Evoluiu muito.", List.of(), List.of(), "");
+            new ConteudoRelatorioAula(
+                    List.of("Czerny"), "Evoluiu muito.", List.of(), List.of(), "");
 
     private static RelatorioAula novo() {
         Aula aula = Aula.nova(UUID.randomUUID(), UUID.randomUUID(), LocalDate.of(2026, 9, 21), T0);
@@ -60,7 +62,8 @@ class RelatorioAulaTeste {
     @Test
     void estruturacaoSemPerguntasVaiParaConferenciaNaVersaoUm() {
         RelatorioAula relatorio = novo();
-        assertThat(relatorio.registrarEstruturacao(CONTEUDO, List.of(" "), T0.plusSeconds(5))).isTrue();
+        assertThat(relatorio.registrarEstruturacao(CONTEUDO, List.of(" "), T0.plusSeconds(5)))
+                .isTrue();
         assertThat(relatorio.status()).isEqualTo(StatusRelatorio.AGUARDANDO_CONFERENCIA);
         assertThat(relatorio.versaoVigente()).isEqualTo(1);
         assertThat(relatorio.etapa()).isNull();
@@ -99,7 +102,9 @@ class RelatorioAulaTeste {
         assertThat(relatorio.etapa()).isEqualTo(EtapaRelatorio.ESTRUTURANDO);
         assertThat(relatorio.motivoFalha()).isNull();
         falhaCom(relatorio::exigirPodeTentarDeNovo, CodigoErro.PROCESSAMENTO_EM_ANDAMENTO);
-        falhaCom(() -> emConferencia().exigirPodeTentarDeNovo(), CodigoErro.ACAO_NAO_PERMITIDA_NA_ETAPA);
+        falhaCom(
+                () -> emConferencia().exigirPodeTentarDeNovo(),
+                CodigoErro.ACAO_NAO_PERMITIDA_NA_ETAPA);
     }
 
     @Test
@@ -113,7 +118,10 @@ class RelatorioAulaTeste {
         assertThat(relatorio.etapa()).isNull();
         assertThatThrownBy(() -> relatorio.exigirVersaoVigente(1))
                 .isInstanceOf(ExcecaoDominio.class)
-                .satisfies(e -> assertThat(((ExcecaoDominio) e).detalhes()).containsEntry("versaoVigente", 2));
+                .satisfies(
+                        e ->
+                                assertThat(((ExcecaoDominio) e).detalhes())
+                                        .containsEntry("versaoVigente", 2));
     }
 
     @Test
@@ -124,7 +132,9 @@ class RelatorioAulaTeste {
         relatorio.iniciarEtapa(EtapaRelatorio.INCORPORANDO_RESPOSTAS, T0);
         falhaCom(relatorio::exigirPodeResponder, CodigoErro.PROCESSAMENTO_EM_ANDAMENTO);
         relatorio.concluirEtapa(T0);
-        falhaCom(() -> emConferencia().exigirPodeResponder(), CodigoErro.ACAO_NAO_PERMITIDA_NA_ETAPA);
+        falhaCom(
+                () -> emConferencia().exigirPodeResponder(),
+                CodigoErro.ACAO_NAO_PERMITIDA_NA_ETAPA);
     }
 
     @Test
@@ -182,7 +192,8 @@ class RelatorioAulaTeste {
                 .isInstanceOf(IllegalStateException.class);
         assertThatThrownBy(() -> relatorio.incorporarResposta(CONTEUDO, List.of(), T0))
                 .isInstanceOf(IllegalStateException.class);
-        assertThatThrownBy(() -> relatorio.falharEstruturacao(T0)).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> relatorio.falharEstruturacao(T0))
+                .isInstanceOf(IllegalStateException.class);
         assertThatThrownBy(() -> novo().aplicarAlteracao(CONTEUDO, T0))
                 .isInstanceOf(IllegalStateException.class);
     }

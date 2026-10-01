@@ -5,7 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
-interface UpdateTelegramProcessadoJpa extends JpaRepository<UpdateTelegramProcessadoEntidade, Long> {
+interface UpdateTelegramProcessadoJpa
+        extends JpaRepository<UpdateTelegramProcessadoEntidade, Long> {
 
     /** Insere o {@code update_id}; devolve 0 se ele já foi processado. */
     @Modifying

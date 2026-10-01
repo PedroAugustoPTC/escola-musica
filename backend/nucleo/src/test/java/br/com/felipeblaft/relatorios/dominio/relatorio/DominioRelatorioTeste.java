@@ -21,17 +21,29 @@ class DominioRelatorioTeste {
     void conteudoNormalizaSemInventar() {
         ConteudoRelatorioAula conteudo =
                 new ConteudoRelatorioAula(
-                        Arrays.asList(" Czerny ", "", null, "  "), null, null, List.of("Escala"), "  obs ");
+                        Arrays.asList(" Czerny ", "", null, "  "),
+                        null,
+                        null,
+                        List.of("Escala"),
+                        "  obs ");
         assertThat(conteudo.conteudosTrabalhados()).containsExactly("Czerny");
         assertThat(conteudo.evolucao()).isEmpty();
         assertThat(conteudo.dificuldades()).isEmpty();
         assertThat(conteudo.observacoes()).isEqualTo("obs");
         assertThat(conteudo.estaVazio()).isFalse();
         assertThat(ConteudoRelatorioAula.vazio().estaVazio()).isTrue();
-        assertThat(new ConteudoRelatorioAula(List.of(), "x", List.of(), List.of(), "").estaVazio()).isFalse();
-        assertThat(new ConteudoRelatorioAula(List.of(), "", List.of("d"), List.of(), "").estaVazio()).isFalse();
-        assertThat(new ConteudoRelatorioAula(List.of(), "", List.of(), List.of("a"), "").estaVazio()).isFalse();
-        assertThat(new ConteudoRelatorioAula(List.of(), "", List.of(), List.of(), "o").estaVazio()).isFalse();
+        assertThat(new ConteudoRelatorioAula(List.of(), "x", List.of(), List.of(), "").estaVazio())
+                .isFalse();
+        assertThat(
+                        new ConteudoRelatorioAula(List.of(), "", List.of("d"), List.of(), "")
+                                .estaVazio())
+                .isFalse();
+        assertThat(
+                        new ConteudoRelatorioAula(List.of(), "", List.of(), List.of("a"), "")
+                                .estaVazio())
+                .isFalse();
+        assertThat(new ConteudoRelatorioAula(List.of(), "", List.of(), List.of(), "o").estaVazio())
+                .isFalse();
     }
 
     @Test
@@ -87,9 +99,22 @@ class DominioRelatorioTeste {
     @Test
     void documentoPdfEAula() {
         DocumentoPdf documento =
-                DocumentoPdf.novo(UUID.randomUUID(), TipoDocumento.OFICIAL, "relatorios/aula/x/oficial.pdf", 10, "sha", T0);
+                DocumentoPdf.novo(
+                        UUID.randomUUID(),
+                        TipoDocumento.OFICIAL,
+                        "relatorios/aula/x/oficial.pdf",
+                        10,
+                        "sha",
+                        T0);
         assertThat(documento.tipo()).isEqualTo(TipoDocumento.OFICIAL);
-        assertThatThrownBy(() -> new Aula(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), null, T0))
+        assertThatThrownBy(
+                        () ->
+                                new Aula(
+                                        UUID.randomUUID(),
+                                        UUID.randomUUID(),
+                                        UUID.randomUUID(),
+                                        null,
+                                        T0))
                 .isInstanceOf(NullPointerException.class);
         assertThat(EtapaRelatorio.valueOf("GERANDO_PDF")).isNotNull();
         assertThat(OrigemVersao.values()).hasSize(4);

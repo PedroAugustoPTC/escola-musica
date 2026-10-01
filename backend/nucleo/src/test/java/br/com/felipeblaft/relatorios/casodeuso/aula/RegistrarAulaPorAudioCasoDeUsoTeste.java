@@ -28,19 +28,22 @@ class RegistrarAulaPorAudioCasoDeUsoTeste {
     void enfileiraORegistroComOCanalEOArquivo() {
         ArquivoTemporario arquivo = CenarioRelatorio.arquivo("web.webm", 2048);
 
-        TrabalhoProcessamento trabalho = c.registrar.executar(c.clara.id(), c.matteo.id(), arquivo, Canal.WEB);
+        TrabalhoProcessamento trabalho =
+                c.registrar.executar(c.clara.id(), c.matteo.id(), arquivo, Canal.WEB);
 
         assertThat(trabalho.tipo()).isEqualTo(TipoTrabalho.REGISTRO_AULA);
         assertThat(trabalho.canalSolicitacao()).isEqualTo(Canal.WEB);
         assertThat(trabalho.etapa()).isEqualTo(EtapaTrabalho.ENVIANDO);
-        assertThat(trabalho.arquivoTemporario()).isEqualTo(Path.of("/tmp/audios/web.webm").toString());
+        assertThat(trabalho.arquivoTemporario())
+                .isEqualTo(Path.of("/tmp/audios/web.webm").toString());
         assertThat(trabalho.parametros()).containsEntry("arquivoTamanho", "2048");
         assertThat(c.fila.trabalhos).containsKey(trabalho.id());
     }
 
     @Test
     void referenciaDoTelegramNaoTrazBytes() {
-        ReferenciaArquivoCanal voz = new ReferenciaArquivoCanal("file-1", "u-1", "audio/ogg", 30_000);
+        ReferenciaArquivoCanal voz =
+                new ReferenciaArquivoCanal("file-1", "u-1", "audio/ogg", 30_000);
 
         TrabalhoProcessamento trabalho =
                 c.registrar.executar(c.clara.id(), c.matteo.id(), voz, Canal.TELEGRAM);
@@ -55,7 +58,8 @@ class RegistrarAulaPorAudioCasoDeUsoTeste {
     @Test
     void alunoDeOutroProfessorDescartaOAudio() {
         ArquivoTemporario arquivo = CenarioRelatorio.arquivo("x.ogg", 10);
-        assertThatThrownBy(() -> c.registrar.executar(c.clara.id(), c.helena.id(), arquivo, Canal.WEB))
+        assertThatThrownBy(
+                        () -> c.registrar.executar(c.clara.id(), c.helena.id(), arquivo, Canal.WEB))
                 .isInstanceOf(ExcecaoDominio.class)
                 .extracting(e -> ((ExcecaoDominio) e).codigo())
                 .isEqualTo(CodigoErro.ALUNO_NAO_ASSOCIADO);
@@ -83,14 +87,18 @@ class RegistrarAulaPorAudioCasoDeUsoTeste {
         assertThatThrownBy(
                         () ->
                                 c.registrar.executar(
-                                        c.clara.id(), c.matteo.id(), CenarioRelatorio.arquivo("x", 1), Canal.WEB))
+                                        c.clara.id(),
+                                        c.matteo.id(),
+                                        CenarioRelatorio.arquivo("x", 1),
+                                        Canal.WEB))
                 .isInstanceOf(ExcecaoDominio.class)
                 .satisfies(
                         e -> {
                             ExcecaoDominio erro = (ExcecaoDominio) e;
                             assertThat(erro.codigo()).isEqualTo(CodigoErro.RELATORIO_EM_ABERTO);
                             @SuppressWarnings("unchecked")
-                            Map<String, Object> aberto = (Map<String, Object>) erro.detalhes().get("relatorioEmAberto");
+                            Map<String, Object> aberto =
+                                    (Map<String, Object>) erro.detalhes().get("relatorioEmAberto");
                             assertThat(aberto)
                                     .containsEntry("canalOrigem", Canal.TELEGRAM)
                                     .containsEntry("atualizadoEm", quando);
@@ -99,11 +107,15 @@ class RegistrarAulaPorAudioCasoDeUsoTeste {
 
     @Test
     void registroAindaEmTranscricaoContaComoEmAberto() {
-        c.registrar.executar(c.clara.id(), c.matteo.id(), CenarioRelatorio.arquivo("a", 1), Canal.WEB);
+        c.registrar.executar(
+                c.clara.id(), c.matteo.id(), CenarioRelatorio.arquivo("a", 1), Canal.WEB);
         assertThatThrownBy(
                         () ->
                                 c.registrar.executar(
-                                        c.clara.id(), c.matteo.id(), CenarioRelatorio.arquivo("b", 1), Canal.TELEGRAM))
+                                        c.clara.id(),
+                                        c.matteo.id(),
+                                        CenarioRelatorio.arquivo("b", 1),
+                                        Canal.TELEGRAM))
                 .isInstanceOf(ExcecaoDominio.class)
                 .extracting(e -> ((ExcecaoDominio) e).codigo())
                 .isEqualTo(CodigoErro.RELATORIO_EM_ABERTO);
@@ -123,8 +135,10 @@ class RegistrarAulaPorAudioCasoDeUsoTeste {
                 .isInstanceOf(ExcecaoDominio.class)
                 .satisfies(
                         e -> {
-                            assertThat(((ExcecaoDominio) e).codigo()).isEqualTo(CodigoErro.AUDIO_MUITO_GRANDE);
-                            assertThat(((ExcecaoDominio) e).detalhes()).containsEntry("limiteMb", 50);
+                            assertThat(((ExcecaoDominio) e).codigo())
+                                    .isEqualTo(CodigoErro.AUDIO_MUITO_GRANDE);
+                            assertThat(((ExcecaoDominio) e).detalhes())
+                                    .containsEntry("limiteMb", 50);
                         });
         assertThat(c.fila.trabalhos).isEmpty();
     }
@@ -136,10 +150,14 @@ class RegistrarAulaPorAudioCasoDeUsoTeste {
         c.llm.programar(
                 br.com.felipeblaft.relatorios.porta.TarefaLlm.ESTRUTURACAO_AULA,
                 CenarioRelatorio.saida("x", List.of()));
-        c.registrar.executar(c.clara.id(), c.matteo.id(), CenarioRelatorio.arquivo("a", 1), Canal.WEB);
+        c.registrar.executar(
+                c.clara.id(), c.matteo.id(), CenarioRelatorio.arquivo("a", 1), Canal.WEB);
         c.processarFila();
         assertThat(c.relatorios.aulas.values())
                 .singleElement()
-                .satisfies(a -> assertThat(a.dataAula()).isEqualTo(java.time.LocalDate.of(2026, 9, 21)));
+                .satisfies(
+                        a ->
+                                assertThat(a.dataAula())
+                                        .isEqualTo(java.time.LocalDate.of(2026, 9, 21)));
     }
 }

@@ -56,7 +56,8 @@ public class SegurancaConfiguracao {
                         cookie.path("/")
                                 .sameSite("Strict")
                                 .secure(propriedades.sessao().cookieSeguro()));
-        // Sem o atributo diferido o token é carregado em toda requisição: o SPA sempre recebe o cookie.
+        // Sem o atributo diferido o token é carregado em toda requisição: o SPA sempre recebe o
+        // cookie.
         CsrfTokenRequestAttributeHandler tratadorCsrf = new CsrfTokenRequestAttributeHandler();
         tratadorCsrf.setCsrfRequestAttributeName(null);
 
@@ -83,7 +84,10 @@ public class SegurancaConfiguracao {
                                         .permitAll()
                                         .requestMatchers("/telegram/webhook", "/error")
                                         .permitAll()
-                                        .requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/prometheus")
+                                        .requestMatchers(
+                                                "/actuator/health",
+                                                "/actuator/health/**",
+                                                "/actuator/prometheus")
                                         .permitAll()
                                         .requestMatchers("/api/**")
                                         .authenticated()
@@ -115,7 +119,8 @@ public class SegurancaConfiguracao {
                                                                 CodigoErro.DADOS_INVALIDOS,
                                                                 catalogo)))
                 .addFilterBefore(
-                        new SessaoCookieFiltro(validarSessao, cookieSessao), AuthorizationFilter.class);
+                        new SessaoCookieFiltro(validarSessao, cookieSessao),
+                        AuthorizationFilter.class);
         return http.build();
     }
 

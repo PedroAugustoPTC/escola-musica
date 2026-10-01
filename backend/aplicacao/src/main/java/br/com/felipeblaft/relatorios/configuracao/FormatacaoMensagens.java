@@ -41,7 +41,8 @@ public class FormatacaoMensagens {
     }
 
     public String canalOrigem(Canal canal) {
-        return catalogo.texto(canal == Canal.TELEGRAM ? "CANAL_ORIGEM_TELEGRAM" : "CANAL_ORIGEM_WEB");
+        return catalogo.texto(
+                canal == Canal.TELEGRAM ? "CANAL_ORIGEM_TELEGRAM" : "CANAL_ORIGEM_WEB");
     }
 
     public String etapa(String etapa) {
@@ -78,7 +79,8 @@ public class FormatacaoMensagens {
                 }
             }
             default -> {
-                // demais códigos usam os detalhes como estão (ex.: versaoVigente, quantidade, limiteMb)
+                // demais códigos usam os detalhes como estão (ex.: versaoVigente, quantidade,
+                // limiteMb)
             }
         }
         return parametros;

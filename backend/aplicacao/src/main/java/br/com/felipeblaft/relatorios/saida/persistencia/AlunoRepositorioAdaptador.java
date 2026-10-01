@@ -28,7 +28,9 @@ class AlunoRepositorioAdaptador implements AlunoRepositorio {
 
     @Override
     public List<Aluno> listarDoProfessor(UUID professorId) {
-        return jpa.listarDoProfessor(professorId).stream().map(CadastroMapeador::paraDominio).toList();
+        return jpa.listarDoProfessor(professorId).stream()
+                .map(CadastroMapeador::paraDominio)
+                .toList();
     }
 
     @Override

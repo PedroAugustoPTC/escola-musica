@@ -14,7 +14,9 @@ import java.util.UUID;
  */
 public class ConversaTelegram {
 
-    /** Chave dos dados do fluxo com a confirmação pendente (aprovar, cancelar, descartar, sair…). */
+    /**
+     * Chave dos dados do fluxo com a confirmação pendente (aprovar, cancelar, descartar, sair…).
+     */
     public static final String CONFIRMACAO = "confirmacao";
 
     private UUID alunoSelecionadoId;

@@ -79,5 +79,4 @@ class RegrasAdaptadoresTeste {
                 .resideInAPackage(BASE + ".saida..")
                 .check(aplicacao);
     }
-
 }

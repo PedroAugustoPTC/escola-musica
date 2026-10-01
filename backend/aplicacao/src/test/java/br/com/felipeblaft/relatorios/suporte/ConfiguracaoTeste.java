@@ -1,5 +1,6 @@
 package br.com.felipeblaft.relatorios.suporte;
 
+import br.com.felipeblaft.relatorios.porta.NormalizacaoAudioPorta;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
@@ -12,5 +13,12 @@ public class ConfiguracaoTeste {
     @Primary
     RelogioAjustavel relogioAjustavel() {
         return new RelogioAjustavel();
+    }
+
+    /** O FFmpeg real é coberto por FfmpegNormalizacaoAudioAdaptadorIT. */
+    @Bean
+    @Primary
+    NormalizacaoAudioPorta normalizacaoAudioTeste() {
+        return new NormalizacaoAudioTeste();
     }
 }

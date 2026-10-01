@@ -25,7 +25,12 @@ public record DocumentoPdf(
     }
 
     public static DocumentoPdf novo(
-            UUID versaoId, TipoDocumento tipo, String chave, long tamanho, String sha256, Instant agora) {
+            UUID versaoId,
+            TipoDocumento tipo,
+            String chave,
+            long tamanho,
+            String sha256,
+            Instant agora) {
         return new DocumentoPdf(GeradorId.novo(), versaoId, tipo, chave, tamanho, sha256, agora);
     }
 }

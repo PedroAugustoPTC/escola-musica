@@ -19,8 +19,8 @@ public final class CodigoAcesso {
     }
 
     /**
-     * Normaliza (sem espaços nem hífens, em maiúsculas) e valida o formato; vazio se não for um código
-     * possível. Aceita a forma agrupada mostrada ao professor (ex.: {@code K7QM-2XPA}).
+     * Normaliza (sem espaços nem hífens, em maiúsculas) e valida o formato; vazio se não for um
+     * código possível. Aceita a forma agrupada mostrada ao professor (ex.: {@code K7QM-2XPA}).
      */
     public static Optional<CodigoAcesso> tentar(String entrada) {
         if (entrada == null) {
@@ -45,7 +45,8 @@ public final class CodigoAcesso {
 
     public static CodigoAcesso de(String entrada) {
         return tentar(entrada)
-                .orElseThrow(() -> new IllegalArgumentException("código de acesso fora do formato"));
+                .orElseThrow(
+                        () -> new IllegalArgumentException("código de acesso fora do formato"));
     }
 
     public String valor() {

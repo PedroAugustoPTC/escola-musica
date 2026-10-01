@@ -65,7 +65,8 @@ class RoteiroParidadeAcessoIT extends TelegramConversaBase {
                 roteiro(() -> relogio.avancar(Duration.ofMinutes(15)))
                         .executar(new CanalWebDriver(mvc, "198.51.100.20"));
         relogio.definir(br.com.felipeblaft.relatorios.suporte.RelogioAjustavel.PADRAO);
-        List<String> bot = roteiro(() -> relogio.avancar(Duration.ofMinutes(15))).executar(telegram());
+        List<String> bot =
+                roteiro(() -> relogio.avancar(Duration.ofMinutes(15))).executar(telegram());
 
         assertThat(bot).containsExactlyElementsOf(web);
         assertThat(web)
@@ -79,5 +80,4 @@ class RoteiroParidadeAcessoIT extends TelegramConversaBase {
                         "busca sem resultado = ResultadoBusca[tipo=NENHUM, alunos=[Matteo Mafra, Miguel de Castro Torrente, Olavo Torrente]]",
                         "encerrar = ENCERRADO");
     }
-
 }

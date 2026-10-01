@@ -89,7 +89,11 @@ public class CanalWebDriver implements CanalDriver {
     @Override
     public String encerrar() throws Exception {
         mvc.perform(delete("/api/v1/sessao").cookie(sessao).with(csrf().asHeader()));
-        int status = mvc.perform(get("/api/v1/inicio").cookie(sessao)).andReturn().getResponse().getStatus();
+        int status =
+                mvc.perform(get("/api/v1/inicio").cookie(sessao))
+                        .andReturn()
+                        .getResponse()
+                        .getStatus();
         return status == 401 ? "ENCERRADO" : "ATIVO";
     }
 }

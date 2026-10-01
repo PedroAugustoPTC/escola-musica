@@ -33,7 +33,11 @@ class ProcessadorTrabalhoRegistroTeste {
 
     private TrabalhoProcessamento registrarEProcessar(Canal canal) {
         TrabalhoProcessamento trabalho =
-                c.registrar.executar(c.clara.id(), c.matteo.id(), CenarioRelatorio.arquivo("aula.ogg", 10), canal);
+                c.registrar.executar(
+                        c.clara.id(),
+                        c.matteo.id(),
+                        CenarioRelatorio.arquivo("aula.ogg", 10),
+                        canal);
         c.processarFila();
         return c.fila.buscarPorId(trabalho.id()).orElseThrow();
     }
@@ -63,7 +67,8 @@ class ProcessadorTrabalhoRegistroTeste {
                 .satisfies(d -> assertThat(d.tipo()).isEqualTo(TipoDocumento.CONFERENCIA));
         assertThat(c.pdf.modelos.getFirst().situacao()).isEqualTo(SituacaoDocumento.CONFERENCIA);
         assertThat(c.pdf.modelos.getFirst().alunoNome()).isEqualTo("Matteo Mafra");
-        assertThat(c.armazenamento.arquivos).containsKey("relatorios/aula/" + relatorio.id() + "/v1.pdf");
+        assertThat(c.armazenamento.arquivos)
+                .containsKey("relatorios/aula/" + relatorio.id() + "/v1.pdf");
         assertThat(c.notificacao.eventos)
                 .containsExactly(
                         "etapa:ENVIANDO",
@@ -83,7 +88,9 @@ class ProcessadorTrabalhoRegistroTeste {
         registrarEProcessar(Canal.WEB);
 
         assertThat(c.normalizacao.apagados)
-                .contains(Path.of("/tmp/audios/aula.ogg"), Path.of("/tmp/audios/aula.ogg.normalizado.ogg"));
+                .contains(
+                        Path.of("/tmp/audios/aula.ogg"),
+                        Path.of("/tmp/audios/aula.ogg.normalizado.ogg"));
         assertThat(c.llm.entradas)
                 .singleElement()
                 .isInstanceOf(EntradaTarefa.EstruturacaoAula.class)
@@ -94,7 +101,8 @@ class ProcessadorTrabalhoRegistroTeste {
 
     @Test
     void comPerguntasAguardaRespostasSemPdf() {
-        c.llm.programar(TarefaLlm.ESTRUTURACAO_AULA, CenarioRelatorio.saida("x", List.of("Qual peça?")));
+        c.llm.programar(
+                TarefaLlm.ESTRUTURACAO_AULA, CenarioRelatorio.saida("x", List.of("Qual peça?")));
 
         TrabalhoProcessamento trabalho = registrarEProcessar(Canal.TELEGRAM);
 
@@ -108,7 +116,8 @@ class ProcessadorTrabalhoRegistroTeste {
 
     @Test
     void transcricaoVaziaOuFormatoInvalidoNaoCriaNada() {
-        c.transcricao.programar(new AudioNaoProcessavelExcecao(AudioNaoProcessavelExcecao.Motivo.SEM_FALA));
+        c.transcricao.programar(
+                new AudioNaoProcessavelExcecao(AudioNaoProcessavelExcecao.Motivo.SEM_FALA));
         TrabalhoProcessamento semFala = registrarEProcessar(Canal.WEB);
         assertThat(semFala.resultado()).isEqualTo(ResultadoTrabalho.AUDIO_NAO_PROCESSAVEL);
         assertThat(semFala.status()).isEqualTo(StatusTrabalho.FALHOU);
@@ -125,20 +134,27 @@ class ProcessadorTrabalhoRegistroTeste {
         assertThat(c.relatorios.aulas).isEmpty();
         assertThat(c.normalizacao.apagados).contains(Path.of("/tmp/audios/aula.ogg"));
         assertThat(c.custos.chamadas).noneMatch(ChamadaIa::sucesso);
-        assertThat(c.custos.chamadas).extracting(ChamadaIa::codigoErro)
+        assertThat(c.custos.chamadas)
+                .extracting(ChamadaIa::codigoErro)
                 .containsExactly("AUDIO_SEM_FALA", "FORMATO_NAO_SUPORTADO", "AUDIO_SEM_FALA");
     }
 
     @Test
     void provedorIndisponivelTentaDeNovoUmaVez() {
-        c.transcricao.programar(new ProvedorIndisponivelExcecao("503"), "Transcrição na segunda tentativa.");
+        c.transcricao.programar(
+                new ProvedorIndisponivelExcecao("503"), "Transcrição na segunda tentativa.");
         c.llm.programar(TarefaLlm.ESTRUTURACAO_AULA, CenarioRelatorio.saida("x", List.of()));
-        assertThat(registrarEProcessar(Canal.WEB).resultado()).isEqualTo(ResultadoTrabalho.PRONTO_PARA_CONFERENCIA);
+        assertThat(registrarEProcessar(Canal.WEB).resultado())
+                .isEqualTo(ResultadoTrabalho.PRONTO_PARA_CONFERENCIA);
 
-        c.transcricao.programar(new ProvedorIndisponivelExcecao("503"), new ProvedorIndisponivelExcecao("503"));
+        c.transcricao.programar(
+                new ProvedorIndisponivelExcecao("503"), new ProvedorIndisponivelExcecao("503"));
         TrabalhoProcessamento falhou =
-                c.registrar.executar(c.clara.id(), c.aluno(c.clara, "Olavo", "Violão").id(),
-                        CenarioRelatorio.arquivo("b.ogg", 1), Canal.WEB);
+                c.registrar.executar(
+                        c.clara.id(),
+                        c.aluno(c.clara, "Olavo", "Violão").id(),
+                        CenarioRelatorio.arquivo("b.ogg", 1),
+                        Canal.WEB);
         c.processarFila();
         assertThat(c.fila.buscarPorId(falhou.id()).orElseThrow().resultado())
                 .isEqualTo(ResultadoTrabalho.AUDIO_NAO_PROCESSAVEL);
@@ -155,7 +171,9 @@ class ProcessadorTrabalhoRegistroTeste {
                 Canal.TELEGRAM);
         assertThat(c.arquivoCanal.obtidos).isEmpty();
         c.processarFila();
-        assertThat(c.arquivoCanal.obtidos).extracting(ReferenciaArquivoCanal::id).containsExactly("file-9");
+        assertThat(c.arquivoCanal.obtidos)
+                .extracting(ReferenciaArquivoCanal::id)
+                .containsExactly("file-9");
         assertThat(c.normalizacao.apagados).contains(Path.of("/tmp/audios/canal-file-9"));
     }
 
@@ -171,7 +189,8 @@ class ProcessadorTrabalhoRegistroTeste {
         assertThat(relatorio.transcricao()).isEqualTo("Transcrição preservada.");
 
         c.llm.programar(TarefaLlm.ESTRUTURACAO_AULA, CenarioRelatorio.saida("x", List.of()));
-        TrabalhoProcessamento novaTentativa = c.tentar.executar(c.clara.id(), relatorio.id(), Canal.TELEGRAM);
+        TrabalhoProcessamento novaTentativa =
+                c.tentar.executar(c.clara.id(), relatorio.id(), Canal.TELEGRAM);
         int transcricoes = c.transcricao.recebidos.size();
         c.processarFila();
 
@@ -191,7 +210,8 @@ class ProcessadorTrabalhoRegistroTeste {
 
         c.processador.processar(reservado);
 
-        assertThat(c.fila.buscarPorId(trabalho.id()).orElseThrow().status()).isEqualTo(StatusTrabalho.DESCARTADO);
+        assertThat(c.fila.buscarPorId(trabalho.id()).orElseThrow().status())
+                .isEqualTo(StatusTrabalho.DESCARTADO);
         assertThat(falha.status()).isEqualTo(StatusRelatorio.CANCELADO);
         assertThat(c.versoes.versoes).isEmpty();
         assertThat(c.notificacao.eventos).doesNotContain("resultado:PRONTO_PARA_CONFERENCIA");
@@ -200,23 +220,27 @@ class ProcessadorTrabalhoRegistroTeste {
     @Test
     void registroDescartadoDuranteATranscricaoNaoCriaRelatorio() {
         TrabalhoProcessamento trabalho =
-                c.registrar.executar(c.clara.id(), c.matteo.id(), CenarioRelatorio.arquivo("a", 1), Canal.WEB);
+                c.registrar.executar(
+                        c.clara.id(), c.matteo.id(), CenarioRelatorio.arquivo("a", 1), Canal.WEB);
         TrabalhoProcessamento reservado = c.fila.reservarProximo(c.relogio.agora()).orElseThrow();
         reservado.descartar(c.relogio.agora());
 
         c.processador.processar(reservado);
 
         assertThat(c.relatorios.relatorios).isEmpty();
-        assertThat(c.fila.buscarPorId(trabalho.id()).orElseThrow().status()).isEqualTo(StatusTrabalho.DESCARTADO);
+        assertThat(c.fila.buscarPorId(trabalho.id()).orElseThrow().status())
+                .isEqualTo(StatusTrabalho.DESCARTADO);
     }
 
     @Test
     void erroInesperadoFalhaOTrabalhoSemPrenderORelatorio() {
         // sem resposta programada, o dublê lança IllegalStateException
         TrabalhoProcessamento trabalho =
-                c.registrar.executar(c.clara.id(), c.matteo.id(), CenarioRelatorio.arquivo("a", 1), Canal.WEB);
+                c.registrar.executar(
+                        c.clara.id(), c.matteo.id(), CenarioRelatorio.arquivo("a", 1), Canal.WEB);
         TrabalhoProcessamento reservado = c.fila.reservarProximo(c.relogio.agora()).orElseThrow();
-        assertThatThrownBy(() -> c.processador.processar(reservado)).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> c.processador.processar(reservado))
+                .isInstanceOf(IllegalStateException.class);
 
         TrabalhoProcessamento gravado = c.fila.buscarPorId(trabalho.id()).orElseThrow();
         assertThat(gravado.status()).isEqualTo(StatusTrabalho.FALHOU);

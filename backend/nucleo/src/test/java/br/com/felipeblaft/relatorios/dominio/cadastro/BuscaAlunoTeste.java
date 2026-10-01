@@ -11,7 +11,14 @@ import org.junit.jupiter.api.Test;
 class BuscaAlunoTeste {
 
     private static Aluno aluno(String nome) {
-        return Aluno.novo(nome, LocalDate.of(2012, 1, 1), new byte[] {1}, "h" + nome, null, null, Instant.EPOCH);
+        return Aluno.novo(
+                nome,
+                LocalDate.of(2012, 1, 1),
+                new byte[] {1},
+                "h" + nome,
+                null,
+                null,
+                Instant.EPOCH);
     }
 
     private final Aluno matteo = aluno("Matteo Mafra");

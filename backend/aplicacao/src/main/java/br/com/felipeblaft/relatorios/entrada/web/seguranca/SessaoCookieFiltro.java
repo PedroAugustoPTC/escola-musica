@@ -44,7 +44,8 @@ public class SessaoCookieFiltro extends OncePerRequestFilter {
             try {
                 ValidarSessaoWebCasoDeUso.Resultado resultado = validarSessao.executar(token);
                 ProfessorAutenticado principal =
-                        new ProfessorAutenticado(resultado.professor(), resultado.sessao().expiraEm());
+                        new ProfessorAutenticado(
+                                resultado.professor(), resultado.sessao().expiraEm());
                 var autenticacao =
                         new UsernamePasswordAuthenticationToken(
                                 principal, null, List.of(new SimpleGrantedAuthority("PROFESSOR")));

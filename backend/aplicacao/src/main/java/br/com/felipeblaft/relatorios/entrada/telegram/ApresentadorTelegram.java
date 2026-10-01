@@ -16,8 +16,8 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 /**
- * Monta as mensagens do bot a partir do catálogo único (FR-003): mesmos textos da Web, adaptados
- * ao chat (HTML escapado, listas e botões). Não decide nada; só apresenta.
+ * Monta as mensagens do bot a partir do catálogo único (FR-003): mesmos textos da Web, adaptados ao
+ * chat (HTML escapado, listas e botões). Não decide nada; só apresenta.
  */
 @Component
 public class ApresentadorTelegram {
@@ -73,7 +73,8 @@ public class ApresentadorTelegram {
                 chatId,
                 escapar(
                         catalogo.texto(
-                                codigo.chaveMensagem(), formatacao.parametrosErro(codigo, detalhes))),
+                                codigo.chaveMensagem(),
+                                formatacao.parametrosErro(codigo, detalhes))),
                 Teclado.NENHUM);
     }
 
@@ -81,9 +82,11 @@ public class ApresentadorTelegram {
         return new Botao(rotulo(codigoRotulo), DadosCallbackCodificador.codificar(acao));
     }
 
-    public Botao botao(String codigoRotulo, Map<String, ?> parametros, String acao, String argumento) {
+    public Botao botao(
+            String codigoRotulo, Map<String, ?> parametros, String acao, String argumento) {
         return new Botao(
-                rotulo(codigoRotulo, parametros), DadosCallbackCodificador.codificar(acao, argumento));
+                rotulo(codigoRotulo, parametros),
+                DadosCallbackCodificador.codificar(acao, argumento));
     }
 
     public Teclado acoesInicio() {
@@ -95,7 +98,8 @@ public class ApresentadorTelegram {
     }
 
     /** Bloco de início (FR-012): saudação, relatórios em aberto, total e até 5 alunos, ações. */
-    public Mensagem inicio(long chatId, ObterInicioProfessorCasoDeUso.Inicio inicio, String prefixo) {
+    public Mensagem inicio(
+            long chatId, ObterInicioProfessorCasoDeUso.Inicio inicio, String prefixo) {
         StringBuilder texto = new StringBuilder();
         if (prefixo != null) {
             texto.append(prefixo).append("\n\n");
@@ -127,7 +131,8 @@ public class ApresentadorTelegram {
             if (aberto.tipo() == TipoRelatorio.AULA || aberto.relatorioId() != null) {
                 String argumento =
                         aberto.relatorioId() != null
-                                ? (aberto.tipo() == TipoRelatorio.AULA ? "a" : "s") + aberto.relatorioId()
+                                ? (aberto.tipo() == TipoRelatorio.AULA ? "a" : "s")
+                                        + aberto.relatorioId()
                                 : "t" + aberto.trabalhoId();
                 linhas.add(
                         List.of(
@@ -177,10 +182,16 @@ public class ApresentadorTelegram {
         List<List<Botao>> linhas = new ArrayList<>();
         for (int i = 0; i < alunos.size(); i++) {
             AlunoResumo aluno = alunos.get(i);
-            String rotulo = aluno.possuiRelatorioEmAberto()
-                    ? aluno.nome() + " · " + rotulo("MARCA_EM_ABERTO")
-                    : aluno.nome();
-            linhas.add(List.of(new Botao(rotulo, DadosCallbackCodificador.codificar("aluno", Integer.toString(i)))));
+            String rotulo =
+                    aluno.possuiRelatorioEmAberto()
+                            ? aluno.nome() + " · " + rotulo("MARCA_EM_ABERTO")
+                            : aluno.nome();
+            linhas.add(
+                    List.of(
+                            new Botao(
+                                    rotulo,
+                                    DadosCallbackCodificador.codificar(
+                                            "aluno", Integer.toString(i)))));
         }
         linhas.add(List.of(botao("BOTAO_INICIO", "inicio")));
         return new Mensagem(chatId, cabecalho, new Teclado(linhas));
@@ -193,7 +204,9 @@ public class ApresentadorTelegram {
                 new Teclado(List.of(List.of(confirmar), List.of(botao("BOTAO_VOLTAR", "inicio")))));
     }
 
-    /** Divide textos longos em partes de até 4096 caracteres, quebrando em linhas quando possível. */
+    /**
+     * Divide textos longos em partes de até 4096 caracteres, quebrando em linhas quando possível.
+     */
     public static List<String> dividir(String texto) {
         List<String> partes = new ArrayList<>();
         String restante = texto;

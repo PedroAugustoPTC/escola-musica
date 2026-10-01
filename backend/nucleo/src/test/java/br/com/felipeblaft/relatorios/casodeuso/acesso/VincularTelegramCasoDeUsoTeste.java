@@ -36,7 +36,8 @@ class VincularTelegramCasoDeUsoTeste {
 
     @Test
     void vinculaComOMesmoCodigoSemConsumir() {
-        ConsultarVinculoTelegramCasoDeUso consultar = new ConsultarVinculoTelegramCasoDeUso(c.vinculos);
+        ConsultarVinculoTelegramCasoDeUso consultar =
+                new ConsultarVinculoTelegramCasoDeUso(c.vinculos);
         assertThat(consultar.executar(clara.id())).isFalse();
         VincularTelegramCasoDeUso.Resultado resultado = vincular.executar(111L, 999L, "k7qm2xpa");
         assertThat(consultar.executar(clara.id())).isTrue();
@@ -61,7 +62,9 @@ class VincularTelegramCasoDeUsoTeste {
         for (int i = 0; i < 5; i++) {
             falhaCom(() -> vincular.executar(111L, 1L, "ERRADO22"), CodigoErro.CODIGO_INVALIDO);
         }
-        falhaCom(() -> vincular.executar(111L, 1L, "K7QM2XPA"), CodigoErro.BLOQUEADO_TEMPORARIAMENTE);
+        falhaCom(
+                () -> vincular.executar(111L, 1L, "K7QM2XPA"),
+                CodigoErro.BLOQUEADO_TEMPORARIAMENTE);
         c.relogio.avancar(Duration.ofDays(8));
         falhaCom(() -> vincular.executar(111L, 1L, "K7QM2XPA"), CodigoErro.CODIGO_EXPIRADO);
     }

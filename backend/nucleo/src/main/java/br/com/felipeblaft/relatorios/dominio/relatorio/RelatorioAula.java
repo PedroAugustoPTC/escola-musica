@@ -12,8 +12,8 @@ import java.util.UUID;
 
 /**
  * Relatório de aula e sua máquina de estados (data-model.md §8.1). Toda mudança de conteúdo após a
- * primeira conferência gera nova versão; a aprovação exige a versão vigente e nenhuma etapa em curso
- * (Princípio III).
+ * primeira conferência gera nova versão; a aprovação exige a versão vigente e nenhuma etapa em
+ * curso (Princípio III).
  */
 public class RelatorioAula {
 
@@ -73,7 +73,8 @@ public class RelatorioAula {
         this.alunoId = Objects.requireNonNull(alunoId);
         this.transcricao = Objects.requireNonNull(transcricao);
         this.conteudo = conteudo == null ? ConteudoRelatorioAula.vazio() : conteudo;
-        this.perguntasPendentes = perguntasPendentes == null ? List.of() : List.copyOf(perguntasPendentes);
+        this.perguntasPendentes =
+                perguntasPendentes == null ? List.of() : List.copyOf(perguntasPendentes);
         this.rodadasPerguntas = rodadasPerguntas;
         this.status = Objects.requireNonNull(status);
         this.etapa = etapa;
@@ -262,8 +263,8 @@ public class RelatorioAula {
     }
 
     /**
-     * Cancelamento (FR-031). Em processamento, só é permitido pelo descarte na retomada; o resultado
-     * de um trabalho em curso é descartado.
+     * Cancelamento (FR-031). Em processamento, só é permitido pelo descarte na retomada; o
+     * resultado de um trabalho em curso é descartado.
      */
     public void cancelar(Instant agora, boolean descarteNaRetomada) {
         exigirAberto();

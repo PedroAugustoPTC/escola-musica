@@ -30,7 +30,8 @@ final class VinculoTelegramMapeador {
         RelatorioFoco foco =
                 e.relatorioFocoId == null
                         ? null
-                        : new RelatorioFoco(TipoRelatorio.valueOf(e.relatorioFocoTipo), e.relatorioFocoId);
+                        : new RelatorioFoco(
+                                TipoRelatorio.valueOf(e.relatorioFocoTipo), e.relatorioFocoId);
         ConversaTelegram conversa =
                 new ConversaTelegram(
                         e.alunoSelecionadoId,

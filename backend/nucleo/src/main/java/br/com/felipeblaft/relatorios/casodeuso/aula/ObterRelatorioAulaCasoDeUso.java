@@ -68,7 +68,10 @@ public class ObterRelatorioAulaCasoDeUso {
         String professor = professores.buscarPorId(relatorio.professorId()).orElseThrow().nome();
         boolean pdf =
                 relatorio.versaoVigente() > 0
-                        && versoes.buscar(TipoRelatorio.AULA, relatorio.id(), relatorio.versaoVigente())
+                        && versoes.buscar(
+                                        TipoRelatorio.AULA,
+                                        relatorio.id(),
+                                        relatorio.versaoVigente())
                                 .flatMap(v -> documentos.buscar(v.id(), TipoDocumento.CONFERENCIA))
                                 .isPresent();
         return new VisaoRelatorioAula(

@@ -38,8 +38,7 @@ import java.util.regex.Pattern;
  */
 public class CarregarCadastroInicialCasoDeUso {
 
-    private static final Pattern FORMATO_EMAIL =
-            Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
+    private static final Pattern FORMATO_EMAIL = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
 
     private final ProfessorRepositorio professores;
     private final AlunoRepositorio alunos;
@@ -74,12 +73,7 @@ public class CarregarCadastroInicialCasoDeUso {
 
         if (!erros.isEmpty()) {
             return new ResultadoCarga(
-                    simular,
-                    new Contagem(0, 0, 0),
-                    new Contagem(0, 0, 0),
-                    0,
-                    erros,
-                    List.of());
+                    simular, new Contagem(0, 0, 0), new Contagem(0, 0, 0), 0, erros, List.of());
         }
 
         List<CodigoEmitido> codigos = new ArrayList<>();
@@ -171,14 +165,16 @@ public class CarregarCadastroInicialCasoDeUso {
                             simular,
                             () ->
                                     associacoes.salvar(
-                                            ProfessorAluno.nova(professor.id(), aluno.id(), agora)));
+                                            ProfessorAluno.nova(
+                                                    professor.id(), aluno.id(), agora)));
                 }
             }
         }
 
         return new ResultadoCarga(
                 simular,
-                new Contagem(contagemProfessores[0], contagemProfessores[1], contagemProfessores[2]),
+                new Contagem(
+                        contagemProfessores[0], contagemProfessores[1], contagemProfessores[2]),
                 new Contagem(contagemAlunos[0], contagemAlunos[1], contagemAlunos[2]),
                 associacoesCriadas,
                 List.of(),
@@ -244,7 +240,10 @@ public class CarregarCadastroInicialCasoDeUso {
             if (nascimento == null || nascimento.isAfter(hoje)) {
                 erros.add(
                         new ErroCarga(
-                                "alunos", i, "dataNascimento", CodigoErro.DATA_NASCIMENTO_INVALIDA));
+                                "alunos",
+                                i,
+                                "dataNascimento",
+                                CodigoErro.DATA_NASCIMENTO_INVALIDA));
             } else {
                 nascimentos.put(i, nascimento);
                 if (Aluno.exigeResponsavel(nascimento, hoje)

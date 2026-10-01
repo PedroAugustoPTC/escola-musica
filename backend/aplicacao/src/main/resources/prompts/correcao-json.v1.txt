@@ -1,0 +1,3 @@
+A resposta anterior não seguiu o formato exigido. Devolva apenas um objeto JSON válido, no mesmo formato e com as mesmas chaves pedidas nas instruções, corrigindo os problemas abaixo. Não acrescente texto fora do JSON e não invente informação.
+
+Problemas encontrados:

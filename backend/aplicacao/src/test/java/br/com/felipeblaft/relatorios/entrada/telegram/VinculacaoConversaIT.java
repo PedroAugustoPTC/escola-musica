@@ -31,7 +31,8 @@ class VinculacaoConversaIT extends TelegramConversaBase {
         assertThat(textosEnviados())
                 .containsOnly(
                         "Olá! Para usar o bot, envie o código de acesso que a secretaria da escola te passou.");
-        assertThat(jdbc.queryForObject("select count(*) from tentativa_acesso", Integer.class)).isZero();
+        assertThat(jdbc.queryForObject("select count(*) from tentativa_acesso", Integer.class))
+                .isZero();
     }
 
     @Test
@@ -48,7 +49,9 @@ class VinculacaoConversaIT extends TelegramConversaBase {
         assertThat(botoes(ultimaMensagem())).containsExactly("v1:reg:", "v1:sem:", "v1:hist:");
         assertThat(ultimaMensagem().get("parse_mode").asString()).isEqualTo("HTML");
         assertThat(ultimaMensagem().get("chat_id").asLong()).isEqualTo(USUARIO_CLARA);
-        assertThat(jdbc.queryForObject("select professor_id from vinculo_telegram", java.util.UUID.class))
+        assertThat(
+                        jdbc.queryForObject(
+                                "select professor_id from vinculo_telegram", java.util.UUID.class))
                 .isEqualTo(clara.id());
     }
 
@@ -65,7 +68,8 @@ class VinculacaoConversaIT extends TelegramConversaBase {
                         "Acesso bloqueado temporariamente por muitas tentativas incorretas. Tente novamente em 15 minuto(s).");
         relogio.avancar(Duration.ofDays(7));
         enviarTexto(USUARIO_CLARA, CenarioIT.CODIGO_CLARA);
-        assertThat(ultimaMensagem().get("text").asString()).startsWith("Este código venceu após 7 dias sem uso.");
+        assertThat(ultimaMensagem().get("text").asString())
+                .startsWith("Este código venceu após 7 dias sem uso.");
     }
 
     @Test
@@ -74,7 +78,8 @@ class VinculacaoConversaIT extends TelegramConversaBase {
         vincular(USUARIO_CLARA, CenarioIT.CODIGO_CLARA);
         enviarTexto(USUARIO_BRUNO, CenarioIT.CODIGO_CLARA);
         assertThat(ultimaMensagem().get("text").asString())
-                .isEqualTo("Seu cadastro já está vinculado a outra conta do Telegram. Procure a secretaria da escola.");
+                .isEqualTo(
+                        "Seu cadastro já está vinculado a outra conta do Telegram. Procure a secretaria da escola.");
     }
 
     @Test
@@ -100,14 +105,17 @@ class VinculacaoConversaIT extends TelegramConversaBase {
 
     @Test
     void grupoRecusadoEOutrosTiposPedemCodigo() throws Exception {
-        enviarUpdate(mensagemJson(proximoUpdate(), USUARIO_CLARA, "group", "\"text\": \"K7QM2XPA\""));
+        enviarUpdate(
+                mensagemJson(proximoUpdate(), USUARIO_CLARA, "group", "\"text\": \"K7QM2XPA\""));
         assertThat(ultimaMensagem().get("text").asString())
                 .isEqualTo("Eu só atendo em conversa privada. Fale comigo diretamente.");
-        enviarUpdate(mensagemJson(proximoUpdate(), USUARIO_CLARA, "\"sticker\": {\"file_id\": \"x\"}"));
+        enviarUpdate(
+                mensagemJson(proximoUpdate(), USUARIO_CLARA, "\"sticker\": {\"file_id\": \"x\"}"));
         assertThat(ultimaMensagem().get("text").asString()).startsWith("Olá! Para usar o bot");
         enviarCallback(USUARIO_CLARA, "v1:reg:");
         assertThat(chamadas("answerCallbackQuery")).hasSize(1);
         assertThat(ultimaMensagem().get("text").asString()).startsWith("Olá! Para usar o bot");
-        assertThat(jdbc.queryForObject("select count(*) from vinculo_telegram", Integer.class)).isZero();
+        assertThat(jdbc.queryForObject("select count(*) from vinculo_telegram", Integer.class))
+                .isZero();
     }
 }

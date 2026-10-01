@@ -45,7 +45,8 @@ class CargaComandoIT extends IntegracaoBase {
                 .contains("Professores: 2 criados, 0 atualizados, 0 inalterados")
                 .contains("Alunos: 4 criados, 0 atualizados, 0 inalterados")
                 .contains("Associações criadas: 4")
-                .containsPattern("clara@exemplo\\.test → [A-HJ-NP-Z2-9]{8} \\(válido até 28/09/2026 10:00\\)")
+                .containsPattern(
+                        "clara@exemplo\\.test → [A-HJ-NP-Z2-9]{8} \\(válido até 28/09/2026 10:00\\)")
                 .containsPattern("bruno@exemplo\\.test → [A-HJ-NP-Z2-9]{8}")
                 .doesNotContain("529.982.247-25", "52998224725");
         assertThat(contar("professor")).isEqualTo(2);
@@ -131,10 +132,13 @@ class CargaComandoIT extends IntegracaoBase {
                         String.class);
         bytes.reset();
 
-        int codigo = emitirCodigo.executar(List.of("emitir-codigo", "--email", "clara@exemplo.test"), saida);
+        int codigo =
+                emitirCodigo.executar(
+                        List.of("emitir-codigo", "--email", "clara@exemplo.test"), saida);
 
         assertThat(codigo).isZero();
-        assertThat(texto()).containsPattern("clara@exemplo\\.test → [A-HJ-NP-Z2-9]{8} \\(válido até");
+        assertThat(texto())
+                .containsPattern("clara@exemplo\\.test → [A-HJ-NP-Z2-9]{8} \\(válido até");
         String hashDepois =
                 jdbc.queryForObject(
                         "select codigo_acesso_hash from professor where email = 'clara@exemplo.test'",

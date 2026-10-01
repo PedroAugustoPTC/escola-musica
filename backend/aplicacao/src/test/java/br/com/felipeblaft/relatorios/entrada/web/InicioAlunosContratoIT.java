@@ -81,7 +81,9 @@ class InicioAlunosContratoIT extends ContratoApiBase {
 
     @Test
     void semSessaoTudoE401() throws Exception {
-        mvc.perform(get("/api/v1/inicio")).andExpect(status().isUnauthorized()).andExpect(segueContrato());
+        mvc.perform(get("/api/v1/inicio"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(segueContrato());
         mvc.perform(get("/api/v1/alunos")).andExpect(status().isUnauthorized());
     }
 }

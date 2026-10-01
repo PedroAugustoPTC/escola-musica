@@ -12,7 +12,9 @@ class CodigoAcessoTeste {
 
     @Test
     void normalizaEspacosEMaiusculas() {
-        assertThat(CodigoAcesso.tentar("  k7qm2xpa ")).map(CodigoAcesso::valor).contains("K7QM2XPA");
+        assertThat(CodigoAcesso.tentar("  k7qm2xpa "))
+                .map(CodigoAcesso::valor)
+                .contains("K7QM2XPA");
     }
 
     @Test
@@ -32,7 +34,8 @@ class CodigoAcessoTeste {
 
     @ParameterizedTest
     @NullSource
-    @ValueSource(strings = {"", "K7QM2XP", "K7QM2XPAB", "K7QM2XP0", "K7QM2XPI", "K7QM2XP1", "K7QM_XPA"})
+    @ValueSource(
+            strings = {"", "K7QM2XP", "K7QM2XPAB", "K7QM2XP0", "K7QM2XPI", "K7QM2XP1", "K7QM_XPA"})
     void recusaForaDoFormato(String entrada) {
         assertThat(CodigoAcesso.tentar(entrada)).isEmpty();
     }
@@ -40,7 +43,8 @@ class CodigoAcessoTeste {
     @Test
     void deExigeFormatoValido() {
         assertThat(CodigoAcesso.de("ABCDEFGH").valor()).isEqualTo("ABCDEFGH");
-        assertThatThrownBy(() -> CodigoAcesso.de("ABC")).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> CodigoAcesso.de("ABC"))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -52,7 +56,9 @@ class CodigoAcessoTeste {
     void naoRevelaOValorEComparaPeloValor() {
         CodigoAcesso codigo = CodigoAcesso.de("K7QM2XPA");
         assertThat(codigo.toString()).doesNotContain("K7QM");
-        assertThat(codigo).isEqualTo(CodigoAcesso.de("k7qm2xpa")).hasSameHashCodeAs(CodigoAcesso.de("K7QM2XPA"));
+        assertThat(codigo)
+                .isEqualTo(CodigoAcesso.de("k7qm2xpa"))
+                .hasSameHashCodeAs(CodigoAcesso.de("K7QM2XPA"));
         assertThat(codigo).isNotEqualTo(CodigoAcesso.de("K7QM2XPB")).isNotEqualTo("K7QM2XPA");
     }
 }

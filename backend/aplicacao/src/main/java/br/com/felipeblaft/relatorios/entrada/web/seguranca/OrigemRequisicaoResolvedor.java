@@ -32,5 +32,4 @@ public class OrigemRequisicaoResolvedor {
             return false;
         }
     }
-
 }

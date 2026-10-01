@@ -126,9 +126,7 @@ class RegrasArquiteturaTeste {
 
     @Test
     void nucleoNaoCitaFornecedores() {
-        classes()
-                .should(naoCitarFornecedor())
-                .check(nucleo);
+        classes().should(naoCitarFornecedor()).check(nucleo);
     }
 
     @Test

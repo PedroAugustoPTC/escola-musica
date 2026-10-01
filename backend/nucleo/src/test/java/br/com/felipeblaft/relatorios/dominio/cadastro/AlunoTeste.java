@@ -54,7 +54,11 @@ class AlunoTeste {
                 .isFalse();
         assertThat(
                         aluno.atualizarCadastro(
-                                "Matteo Mafra", LocalDate.of(2014, 5, 10), "Resp", "Violão", depois))
+                                "Matteo Mafra",
+                                LocalDate.of(2014, 5, 10),
+                                "Resp",
+                                "Violão",
+                                depois))
                 .isTrue();
         assertThat(aluno.instrumento()).isEqualTo("Violão");
         assertThat(aluno.atualizadoEm()).isEqualTo(depois);

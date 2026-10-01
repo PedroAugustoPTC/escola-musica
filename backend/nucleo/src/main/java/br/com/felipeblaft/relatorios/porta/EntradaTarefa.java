@@ -29,7 +29,10 @@ public sealed interface EntradaTarefa
 
     /** INCORPORACAO_RESPOSTAS: conteúdo atual, perguntas pendentes, resposta e rodada atual. */
     record IncorporacaoRespostas(
-            ConteudoRelatorioAula conteudoAtual, List<String> perguntas, String resposta, int rodada)
+            ConteudoRelatorioAula conteudoAtual,
+            List<String> perguntas,
+            String resposta,
+            int rodada)
             implements EntradaTarefa {
 
         public IncorporacaoRespostas {
@@ -45,7 +48,8 @@ public sealed interface EntradaTarefa
     }
 
     /** REVISAO_AULA: conteúdo atual e o pedido de alteração. */
-    record RevisaoAula(ConteudoRelatorioAula conteudoAtual, String pedido) implements EntradaTarefa {
+    record RevisaoAula(ConteudoRelatorioAula conteudoAtual, String pedido)
+            implements EntradaTarefa {
 
         public RevisaoAula {
             Objects.requireNonNull(conteudoAtual);

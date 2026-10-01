@@ -25,8 +25,8 @@ import br.com.felipeblaft.relatorios.dubles.DublesProcessamento.NormalizacaoAudi
 import br.com.felipeblaft.relatorios.dubles.DublesProcessamento.NotificacaoRegistradora;
 import br.com.felipeblaft.relatorios.dubles.DublesProcessamento.RegistroCustoEmMemoria;
 import br.com.felipeblaft.relatorios.dubles.DublesProcessamento.RelatorioAulaRepositorioEmMemoria;
-import br.com.felipeblaft.relatorios.dubles.DublesProcessamento.TranscricaoRoteirizada;
 import br.com.felipeblaft.relatorios.dubles.DublesProcessamento.TransacaoImediata;
+import br.com.felipeblaft.relatorios.dubles.DublesProcessamento.TranscricaoRoteirizada;
 import br.com.felipeblaft.relatorios.dubles.DublesProcessamento.VersaoRelatorioRepositorioEmMemoria;
 import br.com.felipeblaft.relatorios.porta.ArquivoTemporario;
 import br.com.felipeblaft.relatorios.porta.SaidaRelatorioAulaIa;
@@ -47,21 +47,26 @@ public class CenarioRelatorio extends CenarioAcesso {
     public final ArquivoCanalFalso arquivoCanal = new ArquivoCanalFalso();
     public final LlmRoteirizado llm = new LlmRoteirizado();
     public final GeracaoPdfFalsa pdf = new GeracaoPdfFalsa();
-    public final ArmazenamentoDocumentoEmMemoria armazenamento = new ArmazenamentoDocumentoEmMemoria();
+    public final ArmazenamentoDocumentoEmMemoria armazenamento =
+            new ArmazenamentoDocumentoEmMemoria();
     public final NotificacaoRegistradora notificacao = new NotificacaoRegistradora();
     public final RegistroCustoEmMemoria custos = new RegistroCustoEmMemoria();
     public final TransacaoImediata transacao = new TransacaoImediata();
     public final FilaTrabalhoEmMemoria fila = new FilaTrabalhoEmMemoria();
-    public final RelatorioAulaRepositorioEmMemoria relatorios = new RelatorioAulaRepositorioEmMemoria();
-    public final VersaoRelatorioRepositorioEmMemoria versoes = new VersaoRelatorioRepositorioEmMemoria();
+    public final RelatorioAulaRepositorioEmMemoria relatorios =
+            new RelatorioAulaRepositorioEmMemoria();
+    public final VersaoRelatorioRepositorioEmMemoria versoes =
+            new VersaoRelatorioRepositorioEmMemoria();
     public final InteracaoRelatorioRepositorioEmMemoria interacoes =
             new InteracaoRelatorioRepositorioEmMemoria();
-    public final DocumentoPdfRepositorioEmMemoria documentosPdf = new DocumentoPdfRepositorioEmMemoria();
+    public final DocumentoPdfRepositorioEmMemoria documentosPdf =
+            new DocumentoPdfRepositorioEmMemoria();
 
     public final AudioTemporarioServico audio =
             new AudioTemporarioServico(arquivoCanal, normalizacao, transcricao);
     public final EnvioAudioServico envioAudio = new EnvioAudioServico(parametros, audio);
-    public final AcessoRelatorioServico acesso = new AcessoRelatorioServico(relatorios, associacoes);
+    public final AcessoRelatorioServico acesso =
+            new AcessoRelatorioServico(relatorios, associacoes);
     public final GeracaoDocumentoServico documentos =
             new GeracaoDocumentoServico(
                     pdf, armazenamento, documentosPdf, relatorios, alunos, professores, relogio);
@@ -84,7 +89,8 @@ public class CenarioRelatorio extends CenarioAcesso {
     public final ResponderPerguntasCasoDeUso responder =
             new ResponderPerguntasCasoDeUso(acesso, relatorios, envioAudio, fila, relogio);
     public final SolicitarAlteracaoRelatorioAulaCasoDeUso alterar =
-            new SolicitarAlteracaoRelatorioAulaCasoDeUso(acesso, relatorios, envioAudio, fila, relogio);
+            new SolicitarAlteracaoRelatorioAulaCasoDeUso(
+                    acesso, relatorios, envioAudio, fila, relogio);
     public final TentarNovamenteRelatorioAulaCasoDeUso tentar =
             new TentarNovamenteRelatorioAulaCasoDeUso(acesso, relatorios, fila, relogio);
     public final AprovarRelatorioAulaCasoDeUso aprovar =
@@ -93,10 +99,19 @@ public class CenarioRelatorio extends CenarioAcesso {
             new CancelarRelatorioAulaCasoDeUso(acesso, relatorios, fila, relogio);
     public final ObterRelatorioAulaCasoDeUso obter =
             new ObterRelatorioAulaCasoDeUso(
-                    acesso, relatorios, alunos, professores, interacoes, versoes, documentosPdf, fila);
-    public final ConsultarTrabalhoCasoDeUso consultarTrabalho = new ConsultarTrabalhoCasoDeUso(fila, relogio);
+                    acesso,
+                    relatorios,
+                    alunos,
+                    professores,
+                    interacoes,
+                    versoes,
+                    documentosPdf,
+                    fila);
+    public final ConsultarTrabalhoCasoDeUso consultarTrabalho =
+            new ConsultarTrabalhoCasoDeUso(fila, relogio);
     public final ObterDocumentoRelatorioCasoDeUso obterDocumento =
-            new ObterDocumentoRelatorioCasoDeUso(acesso, relatorios, versoes, documentosPdf, documentos);
+            new ObterDocumentoRelatorioCasoDeUso(
+                    acesso, relatorios, versoes, documentosPdf, documentos);
 
     public final Professor clara = professor("Clara Souza", "clara@exemplo.test", "K7QM2XPA");
     public final Professor bruno = professor("Bruno Lima", "bruno@exemplo.test", "BRUN2XPA");
@@ -149,7 +164,9 @@ public class CenarioRelatorio extends CenarioAcesso {
         TrabalhoProcessamento trabalho =
                 registrar.executar(clara.id(), matteo.id(), arquivo("aula.ogg", 1000), Canal.WEB);
         processarFila();
-        return relatorios.buscarPorId(fila.buscarPorId(trabalho.id()).orElseThrow().relatorioId()).orElseThrow();
+        return relatorios
+                .buscarPorId(fila.buscarPorId(trabalho.id()).orElseThrow().relatorioId())
+                .orElseThrow();
     }
 
     /** Registra uma aula que fica aguardando respostas (rodada 1). */
@@ -158,9 +175,12 @@ public class CenarioRelatorio extends CenarioAcesso {
                 TarefaLlm.ESTRUTURACAO_AULA,
                 saida("Evoluiu.", List.of("Qual repertório foi trabalhado?", "Estudou em casa?")));
         TrabalhoProcessamento trabalho =
-                registrar.executar(clara.id(), matteo.id(), arquivo("aula.ogg", 1000), Canal.TELEGRAM);
+                registrar.executar(
+                        clara.id(), matteo.id(), arquivo("aula.ogg", 1000), Canal.TELEGRAM);
         processarFila();
-        return relatorios.buscarPorId(fila.buscarPorId(trabalho.id()).orElseThrow().relatorioId()).orElseThrow();
+        return relatorios
+                .buscarPorId(fila.buscarPorId(trabalho.id()).orElseThrow().relatorioId())
+                .orElseThrow();
     }
 
     /** Outro aluno de Clara com relatório aguardando respostas. */
@@ -170,6 +190,8 @@ public class CenarioRelatorio extends CenarioAcesso {
         TrabalhoProcessamento trabalho =
                 registrar.executar(clara.id(), olavo.id(), arquivo("olavo.ogg", 10), Canal.WEB);
         processarFila();
-        return relatorios.buscarPorId(fila.buscarPorId(trabalho.id()).orElseThrow().relatorioId()).orElseThrow();
+        return relatorios
+                .buscarPorId(fila.buscarPorId(trabalho.id()).orElseThrow().relatorioId())
+                .orElseThrow();
     }
 }

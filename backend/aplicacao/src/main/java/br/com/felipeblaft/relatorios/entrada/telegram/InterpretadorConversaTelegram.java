@@ -75,7 +75,9 @@ public class InterpretadorConversaTelegram {
         this.provedorFluxos = provedorFluxos;
     }
 
-    /** Fluxos resolvidos sob demanda: eles também usam este interpretador (sem ciclo na criação). */
+    /**
+     * Fluxos resolvidos sob demanda: eles também usam este interpretador (sem ciclo na criação).
+     */
     private List<FluxoTelegram> fluxos() {
         List<FluxoTelegram> atuais = fluxos;
         if (atuais == null) {
@@ -112,7 +114,8 @@ public class InterpretadorConversaTelegram {
                 vinculado(contexto, mensagem);
             }
         } catch (ExcecaoDominio erro) {
-            contexto.responder(apresentador.erro(contexto.chatId(), erro.codigo(), erro.detalhes()));
+            contexto.responder(
+                    apresentador.erro(contexto.chatId(), erro.codigo(), erro.detalhes()));
         } finally {
             gravar(contexto);
         }
@@ -147,12 +150,14 @@ public class InterpretadorConversaTelegram {
                 apresentador.texto(
                         "VINCULO_CRIADO", Map.of("nome", resultado.professor().primeiroNome()));
         contexto.responder(
-                apresentador.inicio(contexto.chatId(), obterInicio.executar(resultado.professor()), prefixo));
+                apresentador.inicio(
+                        contexto.chatId(), obterInicio.executar(resultado.professor()), prefixo));
     }
 
     private void vinculado(ContextoTelegram contexto, MensagemTelegram mensagem) {
         ConversaTelegram conversa = contexto.conversa();
-        if (conversa.descartarAudioSeExpirado(relogio.agora(), parametros.expiracaoAudioPendente())) {
+        if (conversa.descartarAudioSeExpirado(
+                relogio.agora(), parametros.expiracaoAudioPendente())) {
             contexto.responder(apresentador.simples(contexto.chatId(), "AUDIO_PENDENTE_EXPIRADO"));
         }
         ArquivoTelegram arquivo = mensagem.arquivoDeAudio();
@@ -189,7 +194,8 @@ public class InterpretadorConversaTelegram {
         buscarAluno(contexto, texto);
     }
 
-    private void audio(ContextoTelegram contexto, MensagemTelegram mensagem, ArquivoTelegram arquivo) {
+    private void audio(
+            ContextoTelegram contexto, MensagemTelegram mensagem, ArquivoTelegram arquivo) {
         contexto.conversa().limparConfirmacao();
         for (FluxoTelegram fluxo : fluxos()) {
             if (fluxo.aoAudio(contexto, mensagem, arquivo)) {
@@ -262,7 +268,9 @@ public class InterpretadorConversaTelegram {
                 }
                 contexto.responder(
                         apresentador.erro(
-                                contexto.chatId(), CodigoErro.ACAO_NAO_PERMITIDA_NA_ETAPA, Map.of()));
+                                contexto.chatId(),
+                                CodigoErro.ACAO_NAO_PERMITIDA_NA_ETAPA,
+                                Map.of()));
             }
         }
     }
@@ -287,16 +295,20 @@ public class InterpretadorConversaTelegram {
 
     public void mostrarInicio(ContextoTelegram contexto) {
         contexto.responder(
-                apresentador.inicio(contexto.chatId(), obterInicio.executar(contexto.professor()), null));
+                apresentador.inicio(
+                        contexto.chatId(), obterInicio.executar(contexto.professor()), null));
     }
 
-    /** Começa um fluxo pela escolha do aluno ("Para qual aluno?"). Limpa o foco, sem cancelar nada. */
+    /**
+     * Começa um fluxo pela escolha do aluno ("Para qual aluno?"). Limpa o foco, sem cancelar nada.
+     */
     public void iniciarEscolhaDeAluno(ContextoTelegram contexto, FluxoConversa fluxo) {
         ConversaTelegram conversa = contexto.conversa();
         conversa.limparFoco();
         conversa.descartarAudio();
         conversa.iniciarFluxo(fluxo, EtapaFluxoConversa.ESCOLHENDO_ALUNO);
-        BuscarAlunosCasoDeUso.Resultado todos = buscarAlunos.executar(contexto.professor().id(), "");
+        BuscarAlunosCasoDeUso.Resultado todos =
+                buscarAlunos.executar(contexto.professor().id(), "");
         if (todos.alunos().isEmpty()) {
             contexto.responder(apresentador.simples(contexto.chatId(), "SEM_ALUNOS"));
             return;
@@ -305,11 +317,13 @@ public class InterpretadorConversaTelegram {
     }
 
     /** Lista de alunos como botões; as opções ficam na conversa para validar o toque. */
-    public void oferecerAlunos(ContextoTelegram contexto, String cabecalho, List<AlunoResumo> alunos) {
+    public void oferecerAlunos(
+            ContextoTelegram contexto, String cabecalho, List<AlunoResumo> alunos) {
         ConversaTelegram conversa = contexto.conversa();
         conversa.definirEtapa(EtapaFluxoConversa.ESCOLHENDO_ALUNO);
         conversa.guardar(
-                OPCOES_ALUNOS, String.join(",", alunos.stream().map(a -> a.id().toString()).toList()));
+                OPCOES_ALUNOS,
+                String.join(",", alunos.stream().map(a -> a.id().toString()).toList()));
         contexto.responder(apresentador.listaAlunos(contexto.chatId(), cabecalho, alunos));
     }
 
@@ -324,7 +338,8 @@ public class InterpretadorConversaTelegram {
         if (resultado.tipo() == TipoResultado.ENCONTRADOS && resultado.alunos().size() == 1) {
             escolherAluno(contexto, resultado.alunos().getFirst());
         } else if (resultado.tipo() == TipoResultado.ENCONTRADOS) {
-            oferecerAlunos(contexto, apresentador.texto("VARIOS_ALUNOS_ENCONTRADOS"), resultado.alunos());
+            oferecerAlunos(
+                    contexto, apresentador.texto("VARIOS_ALUNOS_ENCONTRADOS"), resultado.alunos());
         } else if (resultado.tipo() == TipoResultado.NENHUM) {
             oferecerAlunos(
                     contexto,
@@ -347,6 +362,7 @@ public class InterpretadorConversaTelegram {
     /** Aluno selecionado para registrar aula: pede o áudio (sequência 5.2, passo 2). */
     public void selecionarParaRegistro(ContextoTelegram contexto, AlunoResumo aluno) {
         ConversaTelegram conversa = contexto.conversa();
+        conversa.limparFoco();
         conversa.selecionarAluno(aluno.id());
         conversa.iniciarFluxo(FluxoConversa.REGISTRO_AULA, EtapaFluxoConversa.AGUARDANDO_AUDIO);
         contexto.responder(
@@ -450,7 +466,8 @@ public class InterpretadorConversaTelegram {
             return false;
         }
         conversa.limparConfirmacao();
-        BuscarAlunosCasoDeUso.Resultado todos = buscarAlunos.executar(contexto.professor().id(), "");
+        BuscarAlunosCasoDeUso.Resultado todos =
+                buscarAlunos.executar(contexto.professor().id(), "");
         Optional<AlunoResumo> aluno =
                 todos.alunos().stream().filter(a -> a.id().equals(alunoId.get())).findFirst();
         if (aluno.isEmpty()) {
