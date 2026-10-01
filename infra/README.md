@@ -23,16 +23,24 @@ A validação funcional completa está em
 
 ## 1. Ambiente local
 
-Atalho para tudo desta seção e da seção 3 (roda da raiz do repositório, inclusive no Git Bash do
-Windows):
+Atalho para tudo desta seção e das seções 2 e 3 (roda da raiz do repositório, inclusive no Git Bash
+do Windows). **Passo a passo completo, massa de demonstração e acesso ao banco em
+[`scripts/README.md`](scripts/README.md).**
 
 ```bash
-sh infra/scripts/local.sh subir
+sh infra/scripts/local.sh subir --massa=true
 ```
 
-Os demais comandos: `carga [infra/carga/arquivo.json]`, `codigo <email>`, `status`, `logs [serviço]`,
-`testes [backend|frontend|e2e|ia-real|todos]`, `parar` e `limpar` (apaga os dados locais, pede
-confirmação). O `subir` confere o `infra/.env` antes (segredos, credenciais do bot se
+| Opção do `subir` | Resultado |
+|---|---|
+| `--massa=true` | zera banco e PDFs locais e sobe com a massa de demonstração (cadastros, aulas aprovadas com PDFs, semestrais, relatórios em aberto) |
+| `--massa=false` | zera banco e PDFs locais e sobe só o sistema, vazio |
+| sem `--massa` | sobe mantendo os dados existentes |
+
+Os demais comandos: `carga [infra/carga/arquivo.json]`, `codigo <email>`, `banco` (psql),
+`banco-porta`/`banco-fechar` (banco em `127.0.0.1` para DBeaver/pgAdmin), `status`,
+`logs [serviço]`, `testes [backend|frontend|e2e|ia-real|todos]`, `parar` e `limpar` (apaga os dados
+locais, pede confirmação). O `subir` confere o `infra/.env` antes (segredos, credenciais do bot se
 `TELEGRAM_HABILITADO=true`, chaves de IA se `PROVEDORES_IA=real`) e só sobe o `telegram-bot-api`
 com o bot habilitado.
 
@@ -45,6 +53,10 @@ cp infra/.env.example infra/.env
 Preencha `infra/.env` (ver comentários do arquivo). Para gerar os segredos:
 
 ```bash
+openssl rand -base64 24
+```
+
+```bash
 openssl rand -base64 32
 ```
 
@@ -52,7 +64,8 @@ openssl rand -base64 32
 openssl rand -base64 48
 ```
 
-O primeiro vai em `CPF_CHAVE_CIFRAGEM`; o segundo em `SEGREDO_HMAC`. Sem chaves de IA, use
+O primeiro vai em `POSTGRES_PASSWORD`, o segundo em `CPF_CHAVE_CIFRAGEM` e o terceiro em
+`SEGREDO_HMAC`. Sem chaves de IA, use
 `PROVEDORES_IA=simulado`.
 
 ```bash
@@ -72,6 +85,10 @@ curl -s "https://api.telegram.org/bot<TOKEN>/logOut"
 ```
 
 ## 2. Carga inicial e códigos de acesso
+
+No ambiente local, `sh infra/scripts/local.sh subir --massa=true` já faz a carga (de
+`carga/demonstracao.json`) e cria relatórios e PDFs fictícios; os comandos abaixo servem para cargas
+avulsas e para a produção.
 
 Formato e regras em [`contracts/carga-inicial.md`](../specs/001-fluxo-relatorios/contracts/carga-inicial.md).
 
