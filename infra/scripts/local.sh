@@ -6,11 +6,14 @@
 #   sh infra/scripts/local.sh codigo <email> # reemite o código de acesso de um professor
 #   sh infra/scripts/local.sh status         # estado dos serviços
 #   sh infra/scripts/local.sh logs [serviço] # acompanha os logs (padrão: backend)
+#   sh infra/scripts/local.sh banco          # abre o psql no banco local (como administrador)
+#   sh infra/scripts/local.sh banco-porta    # publica o banco em 127.0.0.1 para DBeaver/pgAdmin
+#   sh infra/scripts/local.sh banco-fechar   # volta a deixar o banco só na rede interna
 #   sh infra/scripts/local.sh testes [qual]  # backend | frontend | e2e | ia-real | todos (padrão: todos)
 #   sh infra/scripts/local.sh parar          # para a pilha local (mantém os dados)
 #   sh infra/scripts/local.sh limpar         # para e APAGA os dados locais (banco, PDFs, certificados)
 #
-# Usa infra/.env (copie de infra/.env.example). Detalhes em infra/README.md.
+# Usa infra/.env (copie de infra/.env.example). Passo a passo em infra/scripts/README.md.
 set -eu
 
 # Git Bash (Windows) converte "/carga/..." em caminho do Windows antes de passar ao Docker.
@@ -119,6 +122,27 @@ case "$comando" in
   logs)
     $LOCAL logs -f --tail=200 "${1:-backend}"
     ;;
+  banco)
+    # com terminal: psql interativo; sem terminal (ex.: echo "select ..." | local.sh banco): -T
+    if [ -t 0 ]; then
+      $LOCAL exec postgres psql -U relatorios -d relatorios
+    else
+      $LOCAL exec -T postgres psql -U relatorios -d relatorios
+    fi
+    ;;
+  banco-porta)
+    exigir_env
+    $LOCAL -f infra/compose.banco.yaml up -d postgres
+    porta="$(valor BANCO_PORTA_LOCAL)"
+    echo "Banco publicado só nesta máquina: host localhost, porta ${porta:-5432}, banco relatorios,"
+    echo "usuário relatorios, senha = POSTGRES_PASSWORD do infra/.env."
+    echo "Ao terminar: sh infra/scripts/local.sh banco-fechar"
+    ;;
+  banco-fechar)
+    exigir_env
+    $LOCAL up -d postgres
+    echo "Banco de volta só na rede interna dos contêineres."
+    ;;
   testes)
     qual="${1:-todos}"
     case "$qual" in
@@ -151,11 +175,11 @@ case "$comando" in
     $LOCAL down -v
     ;;
   ajuda|-h|--help)
-    sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'
+    sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'
     ;;
   *)
     echo "Comando desconhecido: $comando" >&2
-    sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//' >&2
+    sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//' >&2
     exit 2
     ;;
 esac
