@@ -70,4 +70,22 @@ interface TrabalhoProcessamentoJpa extends JpaRepository<TrabalhoProcessamentoEn
                             + " where id = :id",
             nativeQuery = true)
     int definirParametro(UUID id, String chave, String valor);
+
+    @Query(
+            value =
+                    "select * from trabalho_processamento where tipo = 'CONSOLIDACAO_SEMESTRAL'"
+                            + " and status in ('PENDENTE', 'EM_EXECUCAO') and professor_id = :professorId"
+                            + " and aluno_id = :alunoId and parametros ->> 'periodoChave' = :periodoChave",
+            nativeQuery = true)
+    List<TrabalhoProcessamentoEntidade> consolidacaoEmCurso(
+            UUID professorId, UUID alunoId, String periodoChave);
+
+    @Query(
+            """
+            select t from TrabalhoProcessamentoEntidade t
+            where t.tipo = 'CONSOLIDACAO_SEMESTRAL' and t.relatorioId is null
+              and t.professorId = :professorId and t.status in ('PENDENTE', 'EM_EXECUCAO')
+            order by t.criadoEm desc
+            """)
+    List<TrabalhoProcessamentoEntidade> consolidacoesEmCursoDoProfessor(UUID professorId);
 }

@@ -14,6 +14,7 @@ import br.com.felipeblaft.relatorios.dominio.trabalho.ResultadoTrabalho;
 import br.com.felipeblaft.relatorios.dominio.trabalho.TipoTrabalho;
 import br.com.felipeblaft.relatorios.dominio.trabalho.TrabalhoProcessamento;
 import br.com.felipeblaft.relatorios.entrada.telegram.ApresentacaoRelatorioAulaTelegram;
+import br.com.felipeblaft.relatorios.entrada.telegram.ApresentacaoRelatorioSemestralTelegram;
 import br.com.felipeblaft.relatorios.entrada.telegram.ApresentadorTelegram;
 import br.com.felipeblaft.relatorios.entrada.telegram.SaidaTelegram;
 import br.com.felipeblaft.relatorios.entrada.telegram.SaidaTelegram.Mensagem;
@@ -54,6 +55,7 @@ public class NotificacaoTelegramAdaptador implements NotificacaoProfessorPorta {
     private final AlunoRepositorio alunos;
     private final FilaTrabalhoPorta fila;
     private final ApresentacaoRelatorioAulaTelegram apresentacao;
+    private final ApresentacaoRelatorioSemestralTelegram apresentacaoSemestral;
     private final ApresentadorTelegram apresentador;
     private final MensageriaTelegramAdaptador mensageria;
 
@@ -62,12 +64,14 @@ public class NotificacaoTelegramAdaptador implements NotificacaoProfessorPorta {
             AlunoRepositorio alunos,
             FilaTrabalhoPorta fila,
             ApresentacaoRelatorioAulaTelegram apresentacao,
+            ApresentacaoRelatorioSemestralTelegram apresentacaoSemestral,
             ApresentadorTelegram apresentador,
             MensageriaTelegramAdaptador mensageria) {
         this.vinculos = vinculos;
         this.alunos = alunos;
         this.fila = fila;
         this.apresentacao = apresentacao;
+        this.apresentacaoSemestral = apresentacaoSemestral;
         this.apresentador = apresentador;
         this.mensageria = mensageria;
     }
@@ -151,9 +155,6 @@ public class NotificacaoTelegramAdaptador implements NotificacaoProfessorPorta {
         if (trabalho.resultado() == null || trabalho.resultado() == ResultadoTrabalho.DESCARTADO) {
             return;
         }
-        if (trabalho.relatorioTipo() != null && trabalho.relatorioTipo() != TipoRelatorio.AULA) {
-            return; // relatórios semestrais têm a própria apresentação
-        }
         protegido(
                 "resultado",
                 () -> {
@@ -175,20 +176,27 @@ public class NotificacaoTelegramAdaptador implements NotificacaoProfessorPorta {
                     case PRONTO_PARA_CONFERENCIA -> "AVISO_RESULTADO_WEB_PRONTO";
                     case PERGUNTAS_PENDENTES -> "AVISO_RESULTADO_WEB_PERGUNTAS";
                     case NOVA_VERSAO -> "AVISO_RESULTADO_WEB_NOVA_VERSAO";
-                    case FALHA_ESTRUTURACAO, AUDIO_NAO_PROCESSAVEL -> "AVISO_RESULTADO_WEB_FALHA";
+                    case FALHA_ESTRUTURACAO, AUDIO_NAO_PROCESSAVEL, FALHA_CONSOLIDACAO ->
+                            "AVISO_RESULTADO_WEB_FALHA";
                     default -> null;
                 };
         if (codigo == null) {
             return;
         }
         String aluno = alunos.buscarPorId(trabalho.alunoId()).map(a -> a.nome()).orElse("");
+        boolean semestral = trabalho.relatorioTipo() == TipoRelatorio.SEMESTRAL;
         Integer versao = null;
         if (trabalho.relatorioId() != null) {
             versao =
-                    apresentacao
-                            .obter(trabalho.professorId(), trabalho.relatorioId())
-                            .relatorio()
-                            .versaoVigente();
+                    semestral
+                            ? apresentacaoSemestral
+                                    .obter(trabalho.professorId(), trabalho.relatorioId())
+                                    .relatorio()
+                                    .versaoVigente()
+                            : apresentacao
+                                    .obter(trabalho.professorId(), trabalho.relatorioId())
+                                    .relatorio()
+                                    .versaoVigente();
         }
         Teclado teclado =
                 trabalho.relatorioId() == null
@@ -198,7 +206,7 @@ public class NotificacaoTelegramAdaptador implements NotificacaoProfessorPorta {
                                         "CONTINUAR_NO_CHAT",
                                         Map.of(),
                                         "foco",
-                                        "a" + trabalho.relatorioId()));
+                                        (semestral ? "s" : "a") + trabalho.relatorioId()));
         mensageria.enviar(
                 new Mensagem(
                         vinculo.get().chatId(),
@@ -268,6 +276,9 @@ public class NotificacaoTelegramAdaptador implements NotificacaoProfessorPorta {
         if (trabalho.relatorioId() == null) {
             return List.of();
         }
+        if (trabalho.relatorioTipo() == TipoRelatorio.SEMESTRAL) {
+            return saidasDoSemestral(trabalho, chatId, conversa, entendido);
+        }
         VisaoRelatorioAula visao;
         try {
             visao = apresentacao.obter(trabalho.professorId(), trabalho.relatorioId());
@@ -300,6 +311,62 @@ public class NotificacaoTelegramAdaptador implements NotificacaoProfessorPorta {
                                 conversa,
                                 prefixo(trabalho, vigente, entendido)));
             }
+        }
+    }
+
+    private List<SaidaTelegram> saidasDoSemestral(
+            TrabalhoProcessamento trabalho,
+            long chatId,
+            ConversaTelegram conversa,
+            Optional<String> entendido) {
+        String prefixo =
+                switch (trabalho.resultado()) {
+                    case NOVA_VERSAO,
+                            SEM_ALTERACAO_DE_CONTEUDO,
+                            PEDIDO_DE_ACAO_IGNORADO,
+                            FALHA_ALTERACAO -> {
+                        int vigente =
+                                apresentacaoSemestral
+                                        .obter(trabalho.professorId(), trabalho.relatorioId())
+                                        .relatorio()
+                                        .versaoVigente();
+                        String codigo =
+                                trabalho.resultado() == ResultadoTrabalho.NOVA_VERSAO
+                                        ? "ALTERACAO_APLICADA"
+                                        : trabalho.resultado().name();
+                        yield apresentador.texto(codigo, Map.of("versao", vigente))
+                                + entendido
+                                        .map(
+                                                t ->
+                                                        "\n"
+                                                                + apresentador.texto(
+                                                                        "TEXTO_ENTENDIDO",
+                                                                        Map.of("texto", t)))
+                                        .orElse("");
+                    }
+                    case VERSAO_DESATUALIZADA ->
+                            apresentador.texto(
+                                    "VERSAO_DESATUALIZADA",
+                                    Map.of(
+                                            "versaoVigente",
+                                            apresentacaoSemestral
+                                                    .obter(
+                                                            trabalho.professorId(),
+                                                            trabalho.relatorioId())
+                                                    .relatorio()
+                                                    .versaoVigente()));
+                    default -> null;
+                };
+        try {
+            return new ArrayList<>(
+                    apresentacaoSemestral.apresentar(
+                            chatId,
+                            trabalho.professorId(),
+                            trabalho.relatorioId(),
+                            conversa,
+                            prefixo));
+        } catch (ExcecaoDominio naoEncontrado) {
+            return List.of();
         }
     }
 

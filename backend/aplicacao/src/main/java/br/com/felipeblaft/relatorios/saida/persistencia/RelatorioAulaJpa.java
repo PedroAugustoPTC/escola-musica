@@ -31,4 +31,29 @@ interface RelatorioAulaJpa extends JpaRepository<RelatorioAulaEntidade, UUID> {
             order by r.atualizadoEm desc
             """)
     List<RelatorioAulaEntidade> listarEmAbertoDoProfessor(UUID professorId);
+
+    /** Aprovados do par com aula no período, com a data da aula, em ordem cronológica. */
+    @Query(
+            """
+            select r, a.dataAula from RelatorioAulaEntidade r, AulaEntidade a
+            where a.id = r.aulaId and r.professorId = :professorId and r.alunoId = :alunoId
+              and r.status = 'APROVADO' and a.dataAula between :inicio and :fim
+            order by a.dataAula, r.aprovadoEm
+            """)
+    List<Object[]> aprovadosNoPeriodo(
+            UUID professorId, UUID alunoId, java.time.LocalDate inicio, java.time.LocalDate fim);
+
+    @Query(
+            """
+            select count(r) from RelatorioAulaEntidade r, AulaEntidade a
+            where a.id = r.aulaId and r.professorId = :professorId and r.alunoId = :alunoId
+              and r.status in ('EM_PROCESSAMENTO', 'FALHA_PROCESSAMENTO', 'AGUARDANDO_RESPOSTAS', 'AGUARDANDO_CONFERENCIA')
+              and a.dataAula between :inicio and :fim
+            """)
+    long contarEmAbertoNoPeriodo(
+            UUID professorId, UUID alunoId, java.time.LocalDate inicio, java.time.LocalDate fim);
+
+    @Query(
+            "select min(a.dataAula) from AulaEntidade a where a.professorId = :professorId and a.alunoId = :alunoId")
+    Optional<java.time.LocalDate> primeiraAula(UUID professorId, UUID alunoId);
 }

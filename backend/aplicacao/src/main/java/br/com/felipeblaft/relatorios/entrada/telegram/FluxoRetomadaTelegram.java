@@ -86,16 +86,16 @@ public class FluxoRetomadaTelegram implements FluxoTelegram {
                 return alunoDoAviso(contexto).map(aluno -> pedirDescarte(contexto)).orElse(false);
             }
             case "descok" -> {
-                if (!contexto.conversa()
-                        .confirmacaoPendente()
-                        .filter(CONFIRMACAO_DESCARTE::equals)
-                        .isPresent()) {
+                Optional<UUID> aluno = alunoDoAviso(contexto);
+                if (aluno.isEmpty()
+                        || !contexto.conversa()
+                                .confirmacaoPendente()
+                                .filter(CONFIRMACAO_DESCARTE::equals)
+                                .isPresent()) {
                     return false;
                 }
                 contexto.conversa().limparConfirmacao();
-                return alunoDoAviso(contexto)
-                        .map(aluno -> descartar(contexto, aluno))
-                        .orElse(false);
+                return descartar(contexto, aluno.get());
             }
             default -> {
                 return false;

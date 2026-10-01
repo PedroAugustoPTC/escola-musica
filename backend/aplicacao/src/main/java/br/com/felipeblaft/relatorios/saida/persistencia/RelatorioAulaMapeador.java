@@ -39,6 +39,13 @@ final class RelatorioAulaMapeador {
         LEITORES.put(
                 TipoRelatorio.AULA,
                 json -> JsonPersistencia.ler(json, ConteudoRelatorioAula.class));
+        LEITORES.put(
+                TipoRelatorio.SEMESTRAL,
+                json ->
+                        JsonPersistencia.ler(
+                                json,
+                                br.com.felipeblaft.relatorios.dominio.semestral
+                                        .ConteudoRelatorioSemestral.class));
     }
 
     private RelatorioAulaMapeador() {}

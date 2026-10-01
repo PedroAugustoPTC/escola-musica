@@ -16,7 +16,6 @@ import br.com.felipeblaft.relatorios.dominio.trabalho.EtapaTrabalho;
 import br.com.felipeblaft.relatorios.dominio.trabalho.ResultadoTrabalho;
 import br.com.felipeblaft.relatorios.dominio.trabalho.StatusTrabalho;
 import br.com.felipeblaft.relatorios.dominio.trabalho.TarefaIa;
-import br.com.felipeblaft.relatorios.dominio.trabalho.TipoTrabalho;
 import br.com.felipeblaft.relatorios.dominio.trabalho.TrabalhoProcessamento;
 import br.com.felipeblaft.relatorios.porta.ArquivoTemporario;
 import br.com.felipeblaft.relatorios.porta.AudioNaoProcessavelExcecao;
@@ -56,12 +55,72 @@ import java.util.Optional;
  */
 public class ProcessadorTrabalhoServico {
 
-    /** Processamento de outros tipos de trabalho (ex.: consolidação semestral). */
+    /** Processamento de outros relatórios (ex.: consolidação e alteração do semestral). */
     public interface ProcessadorComplementar {
-        boolean atende(TipoTrabalho tipo);
+        boolean atende(TrabalhoProcessamento trabalho);
 
-        void processar(TrabalhoProcessamento trabalho);
+        void processar(TrabalhoProcessamento trabalho, ApoioProcessamento apoio);
+
+        /** Erro inesperado: o relatório não pode ficar preso numa etapa (FR-022). */
+        default void falhou(TrabalhoProcessamento trabalho) {}
+
+        /** Soma o tempo do trabalho concluído ao relatório (dentro da transação de conclusão). */
+        default void registrarTempo(TrabalhoProcessamento trabalho) {}
     }
+
+    /** Operações comuns oferecidas aos processadores complementares. */
+    public interface ApoioProcessamento {
+        void avancar(TrabalhoProcessamento trabalho, EtapaTrabalho etapa);
+
+        void concluir(TrabalhoProcessamento trabalho, ResultadoTrabalho resultado);
+
+        /** O trabalho foi descartado em outro canal; se sim, encerra sem resultado. */
+        boolean descartado(TrabalhoProcessamento trabalho);
+
+        /** Texto digitado ou transcrito do áudio; vazio se a transcrição falhou. */
+        Optional<String> textoDoPedido(TrabalhoProcessamento trabalho);
+
+        <T> Optional<RespostaLlm<T>> chamarLlm(
+                TrabalhoProcessamento trabalho,
+                TarefaLlm tarefa,
+                TarefaIa tarefaIa,
+                EntradaTarefa entrada,
+                Class<T> tipoSaida);
+    }
+
+    private final ApoioProcessamento apoio =
+            new ApoioProcessamento() {
+                @Override
+                public void avancar(TrabalhoProcessamento trabalho, EtapaTrabalho etapa) {
+                    ProcessadorTrabalhoServico.this.avancar(trabalho, etapa);
+                }
+
+                @Override
+                public void concluir(TrabalhoProcessamento trabalho, ResultadoTrabalho resultado) {
+                    ProcessadorTrabalhoServico.this.concluir(trabalho, resultado);
+                }
+
+                @Override
+                public boolean descartado(TrabalhoProcessamento trabalho) {
+                    return ProcessadorTrabalhoServico.this.descartado(trabalho);
+                }
+
+                @Override
+                public Optional<String> textoDoPedido(TrabalhoProcessamento trabalho) {
+                    return ProcessadorTrabalhoServico.this.textoDoPedido(trabalho);
+                }
+
+                @Override
+                public <T> Optional<RespostaLlm<T>> chamarLlm(
+                        TrabalhoProcessamento trabalho,
+                        TarefaLlm tarefa,
+                        TarefaIa tarefaIa,
+                        EntradaTarefa entrada,
+                        Class<T> tipoSaida) {
+                    return ProcessadorTrabalhoServico.this.chamarLlmTipado(
+                            trabalho, tarefa, tarefaIa, entrada, tipoSaida);
+                }
+            };
 
     private final FilaTrabalhoPorta fila;
     private final RelatorioAulaRepositorio relatorios;
@@ -110,17 +169,16 @@ public class ProcessadorTrabalhoServico {
      */
     public void processar(TrabalhoProcessamento trabalho) {
         try {
+            if (complementar != null && complementar.atende(trabalho)) {
+                complementar.processar(trabalho, apoio);
+                return;
+            }
             switch (trabalho.tipo()) {
                 case REGISTRO_AULA -> registrarAula(trabalho);
                 case NOVA_TENTATIVA -> novaTentativa(trabalho);
                 case RESPOSTA_PERGUNTAS -> responder(trabalho);
                 case ALTERACAO -> alterarAula(trabalho);
-                default -> {
-                    if (complementar == null || !complementar.atende(trabalho.tipo())) {
-                        throw new IllegalStateException("tipo de trabalho sem processador");
-                    }
-                    complementar.processar(trabalho);
-                }
+                default -> throw new IllegalStateException("tipo de trabalho sem processador");
             }
         } catch (RuntimeException inesperado) {
             falhaInesperada(trabalho);
@@ -501,10 +559,18 @@ public class ProcessadorTrabalhoServico {
             TarefaLlm tarefa,
             TarefaIa tarefaIa,
             EntradaTarefa entrada) {
+        return chamarLlmTipado(trabalho, tarefa, tarefaIa, entrada, SaidaRelatorioAulaIa.class);
+    }
+
+    private <T> Optional<RespostaLlm<T>> chamarLlmTipado(
+            TrabalhoProcessamento trabalho,
+            TarefaLlm tarefa,
+            TarefaIa tarefaIa,
+            EntradaTarefa entrada,
+            Class<T> tipoSaida) {
         long inicio = System.nanoTime();
         try {
-            RespostaLlm<SaidaRelatorioAulaIa> resposta =
-                    llm.gerarJson(tarefa, entrada, SaidaRelatorioAulaIa.class);
+            RespostaLlm<T> resposta = llm.gerarJson(tarefa, entrada, tipoSaida);
             custos.registrar(
                     ChamadaIa.nova(
                             trabalho.id(),
@@ -708,6 +774,11 @@ public class ProcessadorTrabalhoServico {
         transacao.executar(
                 () -> {
                     fila.atualizar(trabalho);
+                    if (complementar != null
+                            && trabalho.relatorioTipo() != null
+                            && trabalho.relatorioTipo() != TipoRelatorio.AULA) {
+                        complementar.registrarTempo(trabalho);
+                    }
                     if (trabalho.relatorioId() != null
                             && trabalho.relatorioTipo() == TipoRelatorio.AULA) {
                         relatorios
@@ -735,7 +806,10 @@ public class ProcessadorTrabalhoServico {
                                     : ResultadoTrabalho.FALHA_ESTRUTURACAO;
                 };
         try {
-            if (trabalho.relatorioId() != null && trabalho.relatorioTipo() == TipoRelatorio.AULA) {
+            if (complementar != null && complementar.atende(trabalho)) {
+                complementar.falhou(trabalho);
+            } else if (trabalho.relatorioId() != null
+                    && trabalho.relatorioTipo() == TipoRelatorio.AULA) {
                 comRelatorioAberto(
                         trabalho,
                         atual -> {

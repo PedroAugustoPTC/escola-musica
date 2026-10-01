@@ -14,9 +14,10 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * "Descartar e começar um novo" para um registro ainda em transcrição (sem relatório criado): o
- * trabalho fica {@code DESCARTADO} e o resultado que o worker produzir depois é ignorado. O áudio
- * de um trabalho ainda pendente é apagado agora (FR-018); o de um em execução, pelo próprio worker.
+ * "Descartar e começar um novo" para um registro em transcrição ou uma consolidação semestral ainda
+ * em curso (sem relatório criado): o trabalho fica {@code DESCARTADO} e o resultado que o worker
+ * produzir depois é ignorado. O áudio de um trabalho ainda pendente é apagado agora (FR-018); o de
+ * um em execução, pelo próprio worker.
  */
 public class DescartarRegistroEmProcessamentoCasoDeUso {
 
@@ -36,7 +37,10 @@ public class DescartarRegistroEmProcessamentoCasoDeUso {
                 fila.buscarPorId(trabalhoId)
                         .filter(t -> t.professorId().equals(professorId))
                         .orElseThrow(() -> new ExcecaoDominio(CodigoErro.RECURSO_NAO_ENCONTRADO));
-        if (trabalho.tipo() != TipoTrabalho.REGISTRO_AULA || trabalho.relatorioId() != null) {
+        boolean registroOuConsolidacao =
+                trabalho.tipo() == TipoTrabalho.REGISTRO_AULA
+                        || trabalho.tipo() == TipoTrabalho.CONSOLIDACAO_SEMESTRAL;
+        if (!registroOuConsolidacao || trabalho.relatorioId() != null) {
             throw new ExcecaoDominio(CodigoErro.ACAO_NAO_PERMITIDA_NA_ETAPA);
         }
         boolean pendente = trabalho.status() == StatusTrabalho.PENDENTE;

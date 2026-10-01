@@ -32,6 +32,10 @@ public class CenarioIT {
     private final RelogioPorta relogio;
     private final FilaTrabalhoPorta fila;
     private final ProcessadorTrabalhoServico processador;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private br.com.felipeblaft.relatorios.porta.RelatorioAulaRepositorio relatoriosAula;
+
     private int sequenciaCpf;
 
     public CenarioIT(
@@ -96,6 +100,46 @@ public class CenarioIT {
         alunos.salvar(aluno);
         associacoes.salvar(ProfessorAluno.nova(professor.id(), aluno.id(), relogio.agora()));
         return aluno;
+    }
+
+    /** Relatório de aula já aprovado, com aula na data dada (base do semestral e do histórico). */
+    public br.com.felipeblaft.relatorios.dominio.relatorio.RelatorioAula aulaAprovada(
+            Professor professor, Aluno aluno, LocalDate data, String conteudo) {
+        java.time.Instant agora = relogio.agora();
+        br.com.felipeblaft.relatorios.dominio.relatorio.Aula aula =
+                br.com.felipeblaft.relatorios.dominio.relatorio.Aula.nova(
+                        professor.id(), aluno.id(), data, agora);
+        relatoriosAula.salvarAula(aula);
+        br.com.felipeblaft.relatorios.dominio.relatorio.RelatorioAula relatorio =
+                new br.com.felipeblaft.relatorios.dominio.relatorio.RelatorioAula(
+                        br.com.felipeblaft.relatorios.dominio.comum.GeradorId.novo(),
+                        aula.id(),
+                        professor.id(),
+                        aluno.id(),
+                        "transcrição fictícia",
+                        new br.com.felipeblaft.relatorios.dominio.relatorio.ConteudoRelatorioAula(
+                                java.util.List.of(conteudo),
+                                "Evoluiu bem.",
+                                java.util.List.of(),
+                                java.util.List.of(),
+                                ""),
+                        java.util.List.of(),
+                        0,
+                        br.com.felipeblaft.relatorios.dominio.relatorio.StatusRelatorio.APROVADO,
+                        null,
+                        1,
+                        br.com.felipeblaft.relatorios.dominio.comum.Canal.WEB,
+                        null,
+                        agora,
+                        agora,
+                        agora,
+                        1,
+                        br.com.felipeblaft.relatorios.dominio.comum.Canal.WEB,
+                        null,
+                        0,
+                        0);
+        relatoriosAula.salvar(relatorio);
+        return relatorio;
     }
 
     /** CPF fictício válido a partir de um número de sequência. */

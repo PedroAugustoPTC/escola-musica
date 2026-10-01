@@ -2,7 +2,9 @@ package br.com.felipeblaft.relatorios.saida.pdf;
 
 import br.com.felipeblaft.relatorios.configuracao.CatalogoMensagens;
 import br.com.felipeblaft.relatorios.configuracao.FormatacaoMensagens;
+import br.com.felipeblaft.relatorios.configuracao.SecoesRelatorioSemestral;
 import br.com.felipeblaft.relatorios.dominio.relatorio.ConteudoRelatorioAula;
+import br.com.felipeblaft.relatorios.dominio.semestral.InformacoesGerais;
 import br.com.felipeblaft.relatorios.porta.GeracaoPdfPorta;
 import com.openhtmltopdf.outputdevice.helper.BaseRendererBuilder.FontStyle;
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
@@ -70,6 +72,7 @@ public class OpenHtmlToPdfGeracaoPdfAdaptador implements GeracaoPdfPorta {
                     new Fonte("SourceSans3-It.ttf", "Source Sans 3", 400, FontStyle.ITALIC));
 
     private final CatalogoMensagens catalogo;
+    private final SecoesRelatorioSemestral secoesSemestral;
     private final FormatacaoMensagens formatacao;
     private final TemplateEngine motor;
     private final Map<Fonte, byte[]> fontes = new HashMap<>();
@@ -78,6 +81,15 @@ public class OpenHtmlToPdfGeracaoPdfAdaptador implements GeracaoPdfPorta {
 
     public OpenHtmlToPdfGeracaoPdfAdaptador(
             CatalogoMensagens catalogo, FormatacaoMensagens formatacao) {
+        this(catalogo, formatacao, new SecoesRelatorioSemestral(catalogo, formatacao));
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public OpenHtmlToPdfGeracaoPdfAdaptador(
+            CatalogoMensagens catalogo,
+            FormatacaoMensagens formatacao,
+            SecoesRelatorioSemestral secoesSemestral) {
+        this.secoesSemestral = secoesSemestral;
         this.catalogo = catalogo;
         this.formatacao = formatacao;
         ClassLoaderTemplateResolver resolvedor = new ClassLoaderTemplateResolver();
@@ -114,6 +126,35 @@ public class OpenHtmlToPdfGeracaoPdfAdaptador implements GeracaoPdfPorta {
                 "rodapeTexto", catalogo.texto("PDF_RODAPE") + " — relatório pedagógico de aula.");
         preencherSituacao(variaveis, modelo.situacao(), modelo.aprovacao(), modelo.versao());
         return gerar("relatorio-aula", variaveis);
+    }
+
+    @Override
+    public DocumentoGerado gerarRelatorioSemestral(ModeloPdfRelatorioSemestral modelo) {
+        InformacoesGerais info = modelo.informacoesGerais();
+        Map<String, Object> variaveis = new HashMap<>();
+        variaveis.put("titulo", catalogo.texto("PDF_TITULO_SEMESTRAL"));
+        variaveis.put("aluno", info.nome());
+        variaveis.put("professor", info.professor());
+        variaveis.put("periodo", secoesSemestral.rotuloPeriodo(info.periodoChave()));
+        variaveis.put(
+                "consolidacao",
+                catalogo.texto(
+                        "CONSOLIDACAO_DE_AULAS",
+                        Map.of("quantidade", info.quantidadeAulasConsideradas())));
+        variaveis.put("secoes", secoesSemestral.secoes(info, modelo.conteudo()));
+        variaveis.put(
+                "rodapeTexto", catalogo.texto("PDF_RODAPE") + " — relatório pedagógico semestral.");
+        preencherSituacao(variaveis, modelo.situacao(), modelo.aprovacao(), modelo.versao());
+        variaveis.put(
+                "aprovadoEm",
+                modelo.aprovacao() == null
+                        ? ""
+                        : catalogo.texto(
+                                "APROVADO_EM",
+                                Map.of(
+                                        "data", formatacao.data(modelo.aprovacao().aprovadoEm()),
+                                        "hora", formatacao.hora(modelo.aprovacao().aprovadoEm()))));
+        return gerar("relatorio-semestral", variaveis);
     }
 
     /** Variáveis comuns de situação (faixa de conferência ou linha de aprovação). */

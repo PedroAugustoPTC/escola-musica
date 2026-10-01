@@ -264,13 +264,14 @@ class ProcessadorTrabalhoRespostasAlteracoesTeste {
         c.processador.registrarComplementar(
                 new ProcessadorTrabalhoServico.ProcessadorComplementar() {
                     @Override
-                    public boolean atende(
-                            br.com.felipeblaft.relatorios.dominio.trabalho.TipoTrabalho tipo) {
+                    public boolean atende(TrabalhoProcessamento trabalho) {
                         return true;
                     }
 
                     @Override
-                    public void processar(TrabalhoProcessamento trabalho) {
+                    public void processar(
+                            TrabalhoProcessamento trabalho,
+                            ProcessadorTrabalhoServico.ApoioProcessamento apoio) {
                         chamado[0] = true;
                     }
                 });

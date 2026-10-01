@@ -5,6 +5,8 @@ import br.com.felipeblaft.relatorios.dominio.relatorio.RelatorioAula;
 import br.com.felipeblaft.relatorios.porta.ConflitoConcorrenciaExcecao;
 import br.com.felipeblaft.relatorios.porta.RelatorioAulaRepositorio;
 import br.com.felipeblaft.relatorios.saida.persistencia.RelatorioEntidades.RelatorioAulaEntidade;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -59,5 +61,34 @@ class RelatorioAulaRepositorioAdaptador implements RelatorioAulaRepositorio {
         return relatorios
                 .buscarEmAberto(professorId, alunoId)
                 .map(RelatorioAulaMapeador::paraDominio);
+    }
+
+    @Override
+    public List<AulaAprovada> listarAprovadosNoPeriodo(
+            UUID professorId, UUID alunoId, LocalDate inicio, LocalDate fim) {
+        return relatorios.aprovadosNoPeriodo(professorId, alunoId, inicio, fim).stream()
+                .map(
+                        linha -> {
+                            RelatorioAula relatorio =
+                                    RelatorioAulaMapeador.paraDominio(
+                                            (RelatorioAulaEntidade) linha[0]);
+                            return new AulaAprovada(
+                                    relatorio.id(),
+                                    (LocalDate) linha[1],
+                                    relatorio.conteudo(),
+                                    relatorio.aprovadoEm());
+                        })
+                .toList();
+    }
+
+    @Override
+    public int contarEmAbertoNoPeriodo(
+            UUID professorId, UUID alunoId, LocalDate inicio, LocalDate fim) {
+        return (int) relatorios.contarEmAbertoNoPeriodo(professorId, alunoId, inicio, fim);
+    }
+
+    @Override
+    public Optional<LocalDate> dataPrimeiraAula(UUID professorId, UUID alunoId) {
+        return relatorios.primeiraAula(professorId, alunoId);
     }
 }

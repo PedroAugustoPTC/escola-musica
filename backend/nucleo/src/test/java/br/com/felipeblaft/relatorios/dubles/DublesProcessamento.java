@@ -20,6 +20,7 @@ import br.com.felipeblaft.relatorios.porta.DocumentoPdfRepositorio;
 import br.com.felipeblaft.relatorios.porta.EntradaTarefa;
 import br.com.felipeblaft.relatorios.porta.FilaTrabalhoPorta;
 import br.com.felipeblaft.relatorios.porta.GeracaoPdfPorta;
+import br.com.felipeblaft.relatorios.porta.GeracaoPdfPorta.ModeloPdfRelatorioSemestral;
 import br.com.felipeblaft.relatorios.porta.InteracaoRelatorioRepositorio;
 import br.com.felipeblaft.relatorios.porta.LlmPorta;
 import br.com.felipeblaft.relatorios.porta.NormalizacaoAudioPorta;
@@ -27,6 +28,7 @@ import br.com.felipeblaft.relatorios.porta.NotificacaoProfessorPorta;
 import br.com.felipeblaft.relatorios.porta.ReferenciaArquivoCanal;
 import br.com.felipeblaft.relatorios.porta.RegistroCustoPorta;
 import br.com.felipeblaft.relatorios.porta.RelatorioAulaRepositorio;
+import br.com.felipeblaft.relatorios.porta.RelatorioAulaRepositorio.AulaAprovada;
 import br.com.felipeblaft.relatorios.porta.RespostaLlm;
 import br.com.felipeblaft.relatorios.porta.ResultadoTranscricao;
 import br.com.felipeblaft.relatorios.porta.TarefaLlm;
@@ -168,6 +170,17 @@ public final class DublesProcessamento {
                             .getBytes(StandardCharsets.UTF_8);
             return new DocumentoGerado(bytes, "sha-" + modelos.size(), bytes.length);
         }
+
+        public final List<ModeloPdfRelatorioSemestral> modelosSemestrais = new ArrayList<>();
+
+        @Override
+        public DocumentoGerado gerarRelatorioSemestral(ModeloPdfRelatorioSemestral modelo) {
+            modelosSemestrais.add(modelo);
+            byte[] bytes =
+                    ("PDF SEMESTRAL " + modelo.situacao() + " v" + modelo.versao())
+                            .getBytes(StandardCharsets.UTF_8);
+            return new DocumentoGerado(bytes, "sha-s" + modelosSemestrais.size(), bytes.length);
+        }
     }
 
     public static class ArmazenamentoDocumentoEmMemoria implements ArmazenamentoDocumentoPorta {
@@ -256,6 +269,21 @@ public final class DublesProcessamento {
         }
 
         @Override
+        public Optional<TrabalhoProcessamento> buscarConsolidacaoEmCurso(
+                UUID professorId, UUID alunoId, String periodoChave) {
+            return trabalhos.values().stream()
+                    .filter(t -> t.tipo() == TipoTrabalho.CONSOLIDACAO_SEMESTRAL)
+                    .filter(t -> t.professorId().equals(professorId) && t.alunoId().equals(alunoId))
+                    .filter(
+                            t ->
+                                    periodoChave.equals(
+                                            t.parametro(TrabalhoProcessamento.PERIODO_CHAVE)
+                                                    .orElse(null)))
+                    .filter(t -> t.status().emCurso())
+                    .findFirst();
+        }
+
+        @Override
         public Optional<TrabalhoProcessamento> reservarProximo(Instant agora) {
             Optional<TrabalhoProcessamento> proximo =
                     trabalhos.values().stream()
@@ -340,6 +368,155 @@ public final class DublesProcessamento {
                     .filter(r -> r.status().emAberto())
                     .filter(r -> r.professorId().equals(professorId) && r.alunoId().equals(alunoId))
                     .findFirst();
+        }
+
+        private java.util.stream.Stream<RelatorioAula> doPar(UUID professorId, UUID alunoId) {
+            return relatorios.values().stream()
+                    .filter(
+                            r ->
+                                    r.professorId().equals(professorId)
+                                            && r.alunoId().equals(alunoId));
+        }
+
+        private java.time.LocalDate data(RelatorioAula relatorio) {
+            return aulas.get(relatorio.aulaId()).dataAula();
+        }
+
+        @Override
+        public List<AulaAprovada> listarAprovadosNoPeriodo(
+                UUID professorId,
+                UUID alunoId,
+                java.time.LocalDate inicio,
+                java.time.LocalDate fim) {
+            return doPar(professorId, alunoId)
+                    .filter(
+                            r ->
+                                    r.status()
+                                            == br.com.felipeblaft.relatorios.dominio.relatorio
+                                                    .StatusRelatorio.APROVADO)
+                    .filter(r -> !data(r).isBefore(inicio) && !data(r).isAfter(fim))
+                    .sorted(java.util.Comparator.comparing(this::data))
+                    .map(r -> new AulaAprovada(r.id(), data(r), r.conteudo(), r.aprovadoEm()))
+                    .toList();
+        }
+
+        @Override
+        public int contarEmAbertoNoPeriodo(
+                UUID professorId,
+                UUID alunoId,
+                java.time.LocalDate inicio,
+                java.time.LocalDate fim) {
+            return (int)
+                    doPar(professorId, alunoId)
+                            .filter(r -> r.status().emAberto())
+                            .filter(r -> !data(r).isBefore(inicio) && !data(r).isAfter(fim))
+                            .count();
+        }
+
+        @Override
+        public Optional<java.time.LocalDate> dataPrimeiraAula(UUID professorId, UUID alunoId) {
+            return aulas.values().stream()
+                    .filter(a -> a.professorId().equals(professorId) && a.alunoId().equals(alunoId))
+                    .map(Aula::dataAula)
+                    .min(java.util.Comparator.naturalOrder());
+        }
+    }
+
+    public static class RelatorioSemestralRepositorioEmMemoria
+            implements br.com.felipeblaft.relatorios.porta.RelatorioSemestralRepositorio {
+        public final Map<UUID, br.com.felipeblaft.relatorios.dominio.semestral.RelatorioSemestral>
+                relatorios = new LinkedHashMap<>();
+
+        @Override
+        public void salvar(
+                br.com.felipeblaft.relatorios.dominio.semestral.RelatorioSemestral relatorio) {
+            boolean conflito =
+                    relatorios.values().stream()
+                            .filter(r -> !r.id().equals(relatorio.id()))
+                            .filter(
+                                    r ->
+                                            r.professorId().equals(relatorio.professorId())
+                                                    && r.alunoId().equals(relatorio.alunoId())
+                                                    && r.periodo().equals(relatorio.periodo()))
+                            .anyMatch(
+                                    r ->
+                                            r.status() == relatorio.status()
+                                                    && (r.status()
+                                                                    == br.com.felipeblaft.relatorios
+                                                                            .dominio.relatorio
+                                                                            .StatusRelatorio
+                                                                            .APROVADO
+                                                            || r.status()
+                                                                    == br.com.felipeblaft.relatorios
+                                                                            .dominio.relatorio
+                                                                            .StatusRelatorio
+                                                                            .AGUARDANDO_CONFERENCIA));
+            if (conflito) {
+                throw new ConflitoConcorrenciaExcecao("relatorio_semestral");
+            }
+            relatorios.put(relatorio.id(), relatorio);
+        }
+
+        @Override
+        public Optional<br.com.felipeblaft.relatorios.dominio.semestral.RelatorioSemestral>
+                buscarPorId(UUID id) {
+            return Optional.ofNullable(relatorios.get(id));
+        }
+
+        @Override
+        public Optional<br.com.felipeblaft.relatorios.dominio.semestral.RelatorioSemestral>
+                buscarParaAtualizar(UUID id) {
+            return buscarPorId(id);
+        }
+
+        private Optional<br.com.felipeblaft.relatorios.dominio.semestral.RelatorioSemestral> doTrio(
+                UUID professorId,
+                UUID alunoId,
+                String periodoChave,
+                java.util.function.Predicate<
+                                br.com.felipeblaft.relatorios.dominio.relatorio.StatusRelatorio>
+                        status) {
+            return relatorios.values().stream()
+                    .filter(r -> r.professorId().equals(professorId) && r.alunoId().equals(alunoId))
+                    .filter(r -> r.periodo().chave().equals(periodoChave))
+                    .filter(r -> status.test(r.status()))
+                    .findFirst();
+        }
+
+        @Override
+        public Optional<br.com.felipeblaft.relatorios.dominio.semestral.RelatorioSemestral>
+                buscarAprovado(UUID professorId, UUID alunoId, String periodoChave) {
+            return doTrio(
+                    professorId,
+                    alunoId,
+                    periodoChave,
+                    s ->
+                            s
+                                    == br.com.felipeblaft.relatorios.dominio.relatorio
+                                            .StatusRelatorio.APROVADO);
+        }
+
+        @Override
+        public Optional<br.com.felipeblaft.relatorios.dominio.semestral.RelatorioSemestral>
+                buscarEmAberto(UUID professorId, UUID alunoId, String periodoChave) {
+            return doTrio(
+                    professorId,
+                    alunoId,
+                    periodoChave,
+                    br.com.felipeblaft.relatorios.dominio.relatorio.StatusRelatorio::emAberto);
+        }
+
+        @Override
+        public List<br.com.felipeblaft.relatorios.dominio.semestral.RelatorioSemestral>
+                listarAprovados(UUID professorId, UUID alunoId) {
+            return relatorios.values().stream()
+                    .filter(r -> r.professorId().equals(professorId) && r.alunoId().equals(alunoId))
+                    .filter(
+                            r ->
+                                    r.status()
+                                            == br.com.felipeblaft.relatorios.dominio.relatorio
+                                                    .StatusRelatorio.APROVADO)
+                    .toList();
         }
     }
 

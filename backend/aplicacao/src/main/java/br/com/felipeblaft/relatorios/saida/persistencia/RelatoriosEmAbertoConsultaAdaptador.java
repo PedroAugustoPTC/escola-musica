@@ -4,6 +4,7 @@ import br.com.felipeblaft.relatorios.dominio.comum.Canal;
 import br.com.felipeblaft.relatorios.dominio.comum.TipoRelatorio;
 import br.com.felipeblaft.relatorios.dominio.relatorio.RelatorioEmAberto;
 import br.com.felipeblaft.relatorios.dominio.relatorio.StatusRelatorio;
+import br.com.felipeblaft.relatorios.dominio.semestral.RelatorioSemestral;
 import br.com.felipeblaft.relatorios.dominio.trabalho.EtapaTrabalho;
 import br.com.felipeblaft.relatorios.dominio.trabalho.TrabalhoProcessamento;
 import br.com.felipeblaft.relatorios.porta.RelatoriosEmAbertoConsultaPorta;
@@ -37,13 +38,16 @@ public class RelatoriosEmAbertoConsultaAdaptador implements RelatoriosEmAbertoCo
     private final FilaTrabalhoPostgresAdaptador fila;
     private final AlunoJpa alunos;
     private final JdbcTemplate jdbc;
+    private final RelatorioSemestralRepositorioAdaptador semestrais;
     private final List<FonteEmAberto> fontes = new ArrayList<>();
 
     RelatoriosEmAbertoConsultaAdaptador(
             RelatorioAulaJpa relatorios,
             FilaTrabalhoPostgresAdaptador fila,
             AlunoJpa alunos,
-            JdbcTemplate jdbc) {
+            JdbcTemplate jdbc,
+            RelatorioSemestralRepositorioAdaptador semestrais) {
+        this.semestrais = semestrais;
         this.relatorios = relatorios;
         this.fila = fila;
         this.alunos = alunos;
@@ -63,6 +67,34 @@ public class RelatoriosEmAbertoConsultaAdaptador implements RelatoriosEmAbertoCo
         }
         for (TrabalhoProcessamento t : fila.registrosEmCursoDoProfessor(professorId)) {
             lista.add(deTrabalho(t, nome(nomes, t.alunoId())));
+        }
+        for (RelatorioSemestral r : semestrais.emAbertoDoProfessor(professorId)) {
+            lista.add(
+                    new RelatorioEmAberto(
+                            TipoRelatorio.SEMESTRAL,
+                            r.id(),
+                            null,
+                            r.alunoId(),
+                            nome(nomes, r.alunoId()),
+                            r.status(),
+                            r.etapa() == null ? null : etapaTrabalho(r.etapa().name()),
+                            r.periodo().chave(),
+                            r.canalOrigem(),
+                            r.atualizadoEm()));
+        }
+        for (TrabalhoProcessamento t : fila.consolidacoesEmCursoDoProfessor(professorId)) {
+            lista.add(
+                    new RelatorioEmAberto(
+                            TipoRelatorio.SEMESTRAL,
+                            null,
+                            t.id(),
+                            t.alunoId(),
+                            nome(nomes, t.alunoId()),
+                            null,
+                            t.etapa(),
+                            t.parametro(TrabalhoProcessamento.PERIODO_CHAVE).orElse(null),
+                            t.canalSolicitacao(),
+                            t.criadoEm()));
         }
         for (FonteEmAberto fonte : fontes) {
             lista.addAll(fonte.listarDoProfessor(professorId));

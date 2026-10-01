@@ -35,6 +35,10 @@ public interface FilaTrabalhoPorta {
      */
     boolean marcarAvisoDemora(UUID trabalhoId);
 
+    /** Consolidação semestral ainda em curso para o trio professor–aluno–período (FR-034). */
+    Optional<TrabalhoProcessamento> buscarConsolidacaoEmCurso(
+            UUID professorId, UUID alunoId, String periodoChave);
+
     /** Trabalhos em curso criados antes do limite e ainda sem aviso de demora. */
     List<TrabalhoProcessamento> listarDemoradosSemAviso(Instant criadosAntesDe);
 }

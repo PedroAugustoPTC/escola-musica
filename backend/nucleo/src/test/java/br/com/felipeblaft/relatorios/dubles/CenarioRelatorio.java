@@ -122,6 +122,69 @@ public class CenarioRelatorio extends CenarioAcesso {
             new ObterDocumentoRelatorioCasoDeUso(
                     acesso, relatorios, versoes, documentosPdf, documentos);
 
+    // ---- Semestral (US4)
+    public final DublesProcessamento.RelatorioSemestralRepositorioEmMemoria semestrais =
+            new DublesProcessamento.RelatorioSemestralRepositorioEmMemoria();
+    public final br.com.felipeblaft.relatorios.servico.AcessoSemestralServico acessoSemestral =
+            new br.com.felipeblaft.relatorios.servico.AcessoSemestralServico(
+                    semestrais, associacoes);
+    public final br.com.felipeblaft.relatorios.servico.ProcessadorSemestralServico
+            processadorSemestral =
+                    new br.com.felipeblaft.relatorios.servico.ProcessadorSemestralServico(
+                            semestrais,
+                            relatorios,
+                            alunos,
+                            professores,
+                            versoes,
+                            interacoes,
+                            documentos,
+                            fila,
+                            transacao,
+                            relogio);
+    public final br.com.felipeblaft.relatorios.casodeuso.semestral
+                    .ListarSemestresDisponiveisCasoDeUso
+            listarSemestres =
+                    new br.com.felipeblaft.relatorios.casodeuso.semestral
+                            .ListarSemestresDisponiveisCasoDeUso(
+                            autorizacao, alunos, relatorios, relogio);
+    public final br.com.felipeblaft.relatorios.casodeuso.semestral.ObterPreviaSemestralCasoDeUso
+            previa =
+                    new br.com.felipeblaft.relatorios.casodeuso.semestral
+                            .ObterPreviaSemestralCasoDeUso(
+                            autorizacao, alunos, relatorios, semestrais, fila);
+    public final br.com.felipeblaft.relatorios.casodeuso.semestral.GerarRelatorioSemestralCasoDeUso
+            gerarSemestral =
+                    new br.com.felipeblaft.relatorios.casodeuso.semestral
+                            .GerarRelatorioSemestralCasoDeUso(previa, fila, relogio);
+    public final br.com.felipeblaft.relatorios.casodeuso.semestral
+                    .SolicitarAlteracaoRelatorioSemestralCasoDeUso
+            alterarSemestral =
+                    new br.com.felipeblaft.relatorios.casodeuso.semestral
+                            .SolicitarAlteracaoRelatorioSemestralCasoDeUso(
+                            acessoSemestral, semestrais, envioAudio, fila, relogio);
+    public final br.com.felipeblaft.relatorios.casodeuso.semestral
+                    .AprovarRelatorioSemestralCasoDeUso
+            aprovarSemestral =
+                    new br.com.felipeblaft.relatorios.casodeuso.semestral
+                            .AprovarRelatorioSemestralCasoDeUso(
+                            acessoSemestral, semestrais, versoes, documentos, relogio);
+    public final br.com.felipeblaft.relatorios.casodeuso.semestral
+                    .CancelarRelatorioSemestralCasoDeUso
+            cancelarSemestral =
+                    new br.com.felipeblaft.relatorios.casodeuso.semestral
+                            .CancelarRelatorioSemestralCasoDeUso(
+                            acessoSemestral, semestrais, fila, relogio);
+    public final br.com.felipeblaft.relatorios.casodeuso.semestral.ObterRelatorioSemestralCasoDeUso
+            obterSemestral =
+                    new br.com.felipeblaft.relatorios.casodeuso.semestral
+                            .ObterRelatorioSemestralCasoDeUso(
+                            acessoSemestral, interacoes, versoes, documentosPdf, documentos, fila);
+
+    {
+        processador.registrarComplementar(processadorSemestral);
+        obterDocumento.registrarFonteSemestral(obterSemestral);
+    }
+
     public final Professor clara = professor("Clara Souza", "clara@exemplo.test", "K7QM2XPA");
     public final Professor bruno = professor("Bruno Lima", "bruno@exemplo.test", "BRUN2XPA");
     public final Aluno matteo = aluno(clara, "Matteo Mafra", "Piano");
@@ -202,5 +265,63 @@ public class CenarioRelatorio extends CenarioAcesso {
         return relatorios
                 .buscarPorId(fila.buscarPorId(trabalho.id()).orElseThrow().relatorioId())
                 .orElseThrow();
+    }
+
+    /** Relatório de aula já aprovado do aluno, com aula na data dada (para o semestral). */
+    public RelatorioAula aulaAprovada(Aluno aluno, java.time.LocalDate data, String conteudo) {
+        java.time.Instant agora = relogio.agora();
+        br.com.felipeblaft.relatorios.dominio.relatorio.Aula aula =
+                br.com.felipeblaft.relatorios.dominio.relatorio.Aula.nova(
+                        professorDe(aluno), aluno.id(), data, agora);
+        relatorios.salvarAula(aula);
+        RelatorioAula relatorio =
+                new RelatorioAula(
+                        br.com.felipeblaft.relatorios.dominio.comum.GeradorId.novo(),
+                        aula.id(),
+                        aula.professorId(),
+                        aluno.id(),
+                        "transcrição de " + data,
+                        new br.com.felipeblaft.relatorios.dominio.relatorio.ConteudoRelatorioAula(
+                                List.of(conteudo), "Evoluiu em " + data, List.of(), List.of(), ""),
+                        List.of(),
+                        0,
+                        br.com.felipeblaft.relatorios.dominio.relatorio.StatusRelatorio.APROVADO,
+                        null,
+                        1,
+                        Canal.WEB,
+                        null,
+                        agora,
+                        agora,
+                        agora,
+                        1,
+                        Canal.WEB,
+                        null,
+                        0,
+                        0);
+        relatorios.salvar(relatorio);
+        return relatorio;
+    }
+
+    private java.util.UUID professorDe(Aluno aluno) {
+        return aluno.id().equals(helena.id()) ? bruno.id() : clara.id();
+    }
+
+    public static br.com.felipeblaft.relatorios.porta.SaidaRelatorioSemestralIa saidaSemestral(
+            String parecer) {
+        return br.com.felipeblaft.relatorios.porta.SaidaRelatorioSemestralIa.de(
+                new br.com.felipeblaft.relatorios.dominio.semestral.ConteudoRelatorioSemestral(
+                        new br.com.felipeblaft.relatorios.dominio.semestral
+                                .ConteudoRelatorioSemestral.FrequenciaEEstudo(
+                                "Frequentou as aulas", "Regular", "Alto", null),
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        parecer),
+                false,
+                "NENHUM");
     }
 }

@@ -713,6 +713,7 @@ components:
         conteudo: { $ref: "#/components/schemas/ConteudoRelatorioSemestralDto" }
         quantidadeRelatoriosEmAberto: { type: integer, description: Se > 0, a conferência repete o aviso (FR-042) }
         ultimaInteracao: { oneOf: [{ $ref: "#/components/schemas/InteracaoDto" }, { type: "null" }] }
+        pdfDisponivel: { type: boolean }
         aprovadoEm: { type: [string, "null"], format: date-time }
         atualizadoEm: { type: string, format: date-time }
 

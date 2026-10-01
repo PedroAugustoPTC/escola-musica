@@ -125,6 +125,23 @@ public class FilaTrabalhoPostgresAdaptador implements FilaTrabalhoPorta {
                 .toList();
     }
 
+    @Override
+    public Optional<TrabalhoProcessamento> buscarConsolidacaoEmCurso(
+            UUID professorId, UUID alunoId, String periodoChave) {
+        return jpa.consolidacaoEmCurso(professorId, alunoId, periodoChave).stream()
+                .findFirst()
+                .map(FilaTrabalhoPostgresAdaptador::paraDominio);
+    }
+
+    /**
+     * Consolidações semestrais em curso do professor (semestrais em aberto ainda sem relatório).
+     */
+    List<TrabalhoProcessamento> consolidacoesEmCursoDoProfessor(UUID professorId) {
+        return jpa.consolidacoesEmCursoDoProfessor(professorId).stream()
+                .map(FilaTrabalhoPostgresAdaptador::paraDominio)
+                .toList();
+    }
+
     /** Registros de aula em transcrição do professor (relatórios em aberto ainda sem relatório). */
     List<TrabalhoProcessamento> registrosEmCursoDoProfessor(UUID professorId) {
         return jpa.registrosEmCursoDoProfessor(professorId).stream()

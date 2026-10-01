@@ -2,10 +2,14 @@ package br.com.felipeblaft.relatorios.saida.ia.simulado;
 
 import br.com.felipeblaft.relatorios.dominio.cadastro.BuscaAluno;
 import br.com.felipeblaft.relatorios.dominio.relatorio.ConteudoRelatorioAula;
+import br.com.felipeblaft.relatorios.dominio.semestral.ConteudoRelatorioSemestral;
+import br.com.felipeblaft.relatorios.porta.EntradaConsolidacaoSemestral;
+import br.com.felipeblaft.relatorios.porta.EntradaRevisaoSemestral;
 import br.com.felipeblaft.relatorios.porta.EntradaTarefa;
 import br.com.felipeblaft.relatorios.porta.LlmPorta;
 import br.com.felipeblaft.relatorios.porta.RespostaLlm;
 import br.com.felipeblaft.relatorios.porta.SaidaRelatorioAulaIa;
+import br.com.felipeblaft.relatorios.porta.SaidaRelatorioSemestralIa;
 import br.com.felipeblaft.relatorios.porta.TarefaLlm;
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,6 +49,8 @@ public class LlmSimuladoAdaptador implements LlmPorta {
                     case EntradaTarefa.EstruturacaoAula e -> estruturacao();
                     case EntradaTarefa.IncorporacaoRespostas e -> incorporacao(e);
                     case EntradaTarefa.RevisaoAula e -> revisao(e);
+                    case EntradaConsolidacaoSemestral e -> consolidacao();
+                    case EntradaRevisaoSemestral e -> revisaoSemestral(e);
                     default ->
                             Objects.requireNonNull(complementar, "tarefa sem simulação")
                                     .apply(tarefa, entrada);
@@ -68,6 +74,41 @@ public class LlmSimuladoAdaptador implements LlmPorta {
         } catch (IOException erro) {
             throw new UncheckedIOException(erro);
         }
+    }
+
+    private static SaidaRelatorioSemestralIa consolidacao() {
+        try (InputStream entrada =
+                LlmSimuladoAdaptador.class
+                        .getClassLoader()
+                        .getResourceAsStream("ia/simulado/consolidacao-semestral.json")) {
+            return JSON.readValue(entrada, SaidaRelatorioSemestralIa.class);
+        } catch (IOException erro) {
+            throw new UncheckedIOException(erro);
+        }
+    }
+
+    /** Revisão do semestral: o pedido vira o parecer final; aprovar/cancelar só são sinalizados. */
+    private static SaidaRelatorioSemestralIa revisaoSemestral(EntradaRevisaoSemestral entrada) {
+        String pedido = BuscaAluno.normalizar(entrada.pedido());
+        ConteudoRelatorioSemestral atual = entrada.conteudoAtual();
+        if (pedido.contains("aprovar") || pedido.contains("aprova")) {
+            return SaidaRelatorioSemestralIa.de(atual, true, "APROVAR");
+        }
+        if (pedido.contains("cancelar") || pedido.contains("descarta")) {
+            return SaidaRelatorioSemestralIa.de(atual, true, "CANCELAR");
+        }
+        ConteudoRelatorioSemestral alterado =
+                new ConteudoRelatorioSemestral(
+                        atual.frequenciaEEstudo(),
+                        atual.tecnica(),
+                        atual.musicalidade(),
+                        atual.leituraEMemorizacao(),
+                        atual.pontosDeAtencao(),
+                        atual.estrategiasPedagogicas(),
+                        atual.acompanhamentoFamiliar(),
+                        atual.planejamentoProximoSemestre(),
+                        entrada.pedido().strip());
+        return SaidaRelatorioSemestralIa.de(alterado, false, SaidaRelatorioAulaIa.NENHUM);
     }
 
     private static SaidaRelatorioAulaIa incorporacao(EntradaTarefa.IncorporacaoRespostas entrada) {
