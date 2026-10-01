@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,300,0..1,0&display=block" rel="stylesheet">
+<style>
+:root{--bg:#FAF7F0;--sf:#FFFFFF;--sf2:#F2EDE3;--tx:#141414;--mu:#5A554C;--bd:#E3DCCE;--gd:#B8955A;--gs:#7A5C30;--gdp:#8C6D3F;--pbg:#141414;--ptx:#FAF7F0;--phov:#3A342C;--ok:#4A5A26;--okbg:#EEF0E2;--warn:#855412;--warnbg:#F8EEDA;--err:#7D2330;--errbg:#F7E7E7;--erron:#FFFFFF;--info:#1E5360;--infobg:#E2EDEF}
+html,body{margin:0;height:100%;background:var(--bg)}
+*{box-sizing:border-box}
+a{color:var(--gs)}a:hover{color:var(--gdp)}
+:focus-visible{outline:2px solid var(--gd);outline-offset:2px}
+input::placeholder,textarea::placeholder{color:var(--mu);opacity:1}
+button:disabled{opacity:.45;cursor:not-allowed}
+@keyframes fbspin{to{transform:rotate(360deg)}}
+@keyframes fbpulse{0%,100%{opacity:1}50%{opacity:.35}}
+</style>
+</helmet>
+<div style="{{ rootVars }}">
+<div style="position:relative;height:100%;display:flex;flex-direction:column;background:var(--bg);color:var(--tx);font-family:'Source Sans 3',system-ui,sans-serif;font-size:16px;line-height:1.5;overflow:hidden">
+
+<sc-if value="{{ showHeaderM }}" hint-placeholder-val="{{ false }}">
+<header style="height:60px;flex:none;display:flex;align-items:center;gap:6px;padding:0 6px 0 12px;background:var(--sf);border-bottom:1px solid var(--bd)">
+  <sc-if value="{{ showBack }}">
+    <button aria-label="Voltar" onClick="{{ goBack }}" style="width:44px;height:44px;flex:none;border:none;background:transparent;color:var(--tx);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer"><span style="font-family:'Material Symbols Outlined';font-size:24px;font-weight:300">arrow_back</span></button>
+    <div style="flex:1;min-width:0">
+      <div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gs)">{{ headKicker }}</div>
+      <div style="font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ aluno.nome }}</div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ noBack }}">
+    <div style="flex:1;display:flex;align-items:center;gap:10px;padding-left:4px">
+      <img src="assets/fb-monograma-{{ inkTx }}.png" alt="Instituto Musical Felipe Blaft" style="width:30px;height:30px;object-fit:contain;display:block">
+      <img src="assets/fb-wordmark-{{ inkTx }}.png" alt="" style="width:112px;height:25px;object-fit:contain;display:block">
+    </div>
+  </sc-if>
+  <button aria-label="Buscar aluno" onClick="{{ openSearch }}" style="width:44px;height:44px;flex:none;border:none;background:transparent;color:var(--tx);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer"><span style="font-family:'Material Symbols Outlined';font-size:24px;font-weight:300">search</span></button>
+  <button aria-label="Menu" aria-expanded="{{ menuOpen }}" onClick="{{ toggleMenu }}" style="width:44px;height:44px;flex:none;border:none;background:transparent;color:var(--tx);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer"><span style="font-family:'Material Symbols Outlined';font-size:24px;font-weight:300">menu</span></button>
+</header>
+</sc-if>
+
+<sc-if value="{{ showHeaderD }}" hint-placeholder-val="{{ false }}">
+<header style="height:76px;flex:none;display:flex;align-items:center;gap:40px;padding:0 40px;background:var(--sf);border-bottom:1px solid var(--bd)">
+  <button onClick="{{ goPainel }}" aria-label="Instituto Musical Felipe Blaft — Painel" style="display:flex;align-items:center;gap:14px;border:none;background:transparent;padding:0;cursor:pointer">
+    <img src="assets/fb-monograma-{{ inkTx }}.png" alt="" style="width:38px;height:38px;object-fit:contain;display:block">
+    <div style="width:1px;height:30px;background:var(--gd)"></div>
+    <img src="assets/fb-wordmark-{{ inkTx }}.png" alt="" style="width:150px;height:33px;object-fit:contain;display:block">
+  </button>
+  <nav aria-label="Principal" style="display:flex;gap:28px;height:100%">
+    <sc-for list="{{ navItems }}" as="n" hint-placeholder-count="3">
+      <button onClick="{{ n.on }}" aria-current="{{ n.current }}" style="height:100%;border:none;background:transparent;padding:0 2px;font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;white-space:nowrap;cursor:pointer;color:{{ n.color }};border-bottom:2px solid {{ n.bar }};border-top:2px solid transparent">{{ n.label }}</button>
+    </sc-for>
+  </nav>
+  <div style="flex:1"></div>
+  <label style="position:relative;display:block;width:280px">
+    <span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Buscar aluno</span>
+    <span aria-hidden="true" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-family:'Material Symbols Outlined';font-size:20px;font-weight:300;color:var(--mu)">search</span>
+    <input value="{{ q }}" onChange="{{ onHeaderQ }}" placeholder="Buscar aluno" style="width:100%;height:44px;padding:0 12px 0 40px;border:1px solid var(--bd);border-radius:6px;background:var(--sf2);color:var(--tx);font-family:'Source Sans 3',sans-serif;font-size:15px">
+  </label>
+  <button onClick="{{ toggleMenu }}" aria-expanded="{{ menuOpen }}" style="height:44px;display:flex;align-items:center;gap:10px;padding:0 8px 0 4px;border:none;background:transparent;color:var(--tx);cursor:pointer;font-family:'Source Sans 3',sans-serif">
+    <span style="width:36px;height:36px;border-radius:50%;border:1px solid var(--gd);display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:13px;color:var(--gs)">CN</span>
+    <span style="font-size:15px;font-weight:600">Clara Nogueira</span>
+    <span style="font-family:'Material Symbols Outlined';font-size:20px;font-weight:300">expand_more</span>
+  </button>
+</header>
+</sc-if>
+
+<sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ toggleMenu }}" style="position:absolute;inset:0;z-index:30"></div>
+  <div role="menu" style="position:absolute;z-index:31;right:12px;top:{{ menuTop }};width:280px;background:var(--sf);border:1px solid var(--bd);border-radius:8px;box-shadow:0 16px 40px rgba(0,0,0,.18);padding:8px">
+    <div style="padding:12px 12px 14px;border-bottom:1px solid var(--bd);margin-bottom:6px">
+      <div style="font-weight:600">Clara Nogueira</div>
+      <div style="font-size:14px;color:var(--mu)">Professora · 7 alunos</div>
+    </div>
+    <button role="menuitemcheckbox" aria-checked="{{ isDark }}" onClick="{{ toggleTheme }}" style="width:100%;min-height:48px;display:flex;align-items:center;gap:12px;padding:0 12px;border:none;background:transparent;color:var(--tx);font-family:'Source Sans 3',sans-serif;font-size:15px;border-radius:6px;cursor:pointer" style-hover="background:var(--sf2)">
+      <span style="font-family:'Material Symbols Outlined';font-size:22px;font-weight:300;color:var(--gs)">dark_mode</span>
+      <span style="flex:1;text-align:left">Modo escuro</span>
+      <span style="width:40px;height:24px;border-radius:12px;padding:3px;display:flex;justify-content:{{ switchJustify }};background:{{ switchBg }};border:1px solid var(--gd)"><span style="width:16px;height:16px;border-radius:50%;background:{{ switchKnob }}"></span></span>
+    </button>
+    <button role="menuitem" onClick="{{ logout }}" style="width:100%;min-height:48px;display:flex;align-items:center;gap:12px;padding:0 12px;border:none;background:transparent;color:var(--tx);font-family:'Source Sans 3',sans-serif;font-size:15px;border-radius:6px;cursor:pointer" style-hover="background:var(--sf2)">
+      <span style="font-family:'Material Symbols Outlined';font-size:22px;font-weight:300;color:var(--gs)">logout</span>
+      <span>Encerrar sessão</span>
+    </button>
+  </div>
+</sc-if>
+
+<main ref="{{ mainRef }}" style="flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column">
+
+<!-- 1 ENTRAR -->
+<sc-if value="{{ s.login }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-wrap:wrap;min-height:100%">
+  <div style="flex:1 1 420px;min-height:320px;display:flex;align-items:center;justify-content:center;padding:48px 24px;background:radial-gradient(ellipse at 50% 35%,#1F1C18 0%,#0B0B0B 72%)">
+    <img src="assets/fb-logo-metal.png" alt="Instituto Musical Felipe Blaft" style="width:min(76%,380px);aspect-ratio:697/447;object-fit:contain;display:block">
+  </div>
+  <div style="flex:1 1 420px;display:flex;align-items:center;justify-content:center;padding:36px 24px 40px;background:var(--bg)">
+    <form onSubmit="{{ submitLogin }}" style="width:100%;max-width:400px;display:flex;flex-direction:column;gap:18px">
+      <div>
+        <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--gs)">Portal do Professor</div>
+        <h1 style="margin:6px 0 8px;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:36px;line-height:1.1">Entrar</h1>
+        <p style="margin:0;color:var(--mu);text-wrap:pretty">Informe o mesmo código de vinculação que você usa no Telegram para acessar seus alunos e relatórios.</p>
+      </div>
+      <sc-if value="{{ v.locked }}">
+        <div role="alert" style="display:flex;gap:12px;padding:14px 16px;border-radius:6px;background:var(--warnbg);border:1px solid var(--warn)">
+          <span style="font-family:'Material Symbols Outlined';font-size:22px;font-weight:300;color:var(--warn)">lock_clock</span>
+          <div style="font-size:15px;color:var(--tx)"><strong style="color:var(--warn)">Acesso bloqueado temporariamente.</strong> Muitas tentativas incorretas. Tente novamente em 15 minutos.</div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ v.offline }}">
+        <div role="alert" style="display:flex;gap:12px;padding:14px 16px;border-radius:6px;background:var(--errbg);border:1px solid var(--err)">
+          <span style="font-family:'Material Symbols Outlined';font-size:22px;font-weight:300;color:var(--err)">wifi_off</span>
+          <div style="font-size:15px;color:var(--tx)">Não foi possível entrar agora. Verifique sua conexão e tente novamente.</div>
+        </div>
+      </sc-if>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <label for="codigo" style="font-size:15px;font-weight:600">Código de acesso</label>
+        <input id="codigo" value="{{ code }}" onChange="{{ onCode }}" disabled="{{ v.locked }}" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" aria-invalid="{{ v.invalid }}" aria-describedby="codigo-msg" placeholder="K7M2-9QXT" style="height:56px;padding:0 16px;border-radius:6px;border:1px solid {{ codeBorder }};background:var(--sf);color:var(--tx);font-family:'Source Sans 3',sans-serif;font-size:20px;font-weight:600;letter-spacing:.18em;text-transform:uppercase">
+        <sc-if value="{{ v.invalid }}">
+          <div id="codigo-msg" style="display:flex;gap:6px;align-items:flex-start;font-size:14px;color:var(--err)"><span style="font-family:'Material Symbols Outlined';font-size:18px;font-weight:300;line-height:1.2">error</span>Código inválido. Confira os caracteres e tente novamente.</div>
+        </sc-if>
+        <sc-if value="{{ v.none }}">
+          <div id="codigo-msg" style="font-size:14px;color:var(--mu)">O código tem 8 caracteres, letras e números.</div>
+        </sc-if>
+      </div>
+      <button type="submit" disabled="{{ v.locked }}" style="min-height:52px;padding:0 24px;border-radius:6px;border:1px solid var(--pbg);background:var(--pbg);color:var(--ptx);font-family:'Source Sans 3',sans-serif;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer" style-hover="background:var(--phov);border-color:var(--phov)">
+        <sc-if value="{{ loggingIn }}"><span style="width:18px;height:18px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:fbspin .8s linear infinite"></span></sc-if>
+        {{ loginLabel }}
+      </button>
+      <div style="height:1px;background:var(--bd);margin:6px 0"></div>
+      <a href="Secretaria.dc.html" style="font-size:15px;color:var(--gs);text-underline-offset:4px;align-self:center;padding:10px 0">É da secretaria? Acesse a área administrativa.</a>
+    </form>
+  </div>
+</div>
+</sc-if>
+
+<!-- 2 PAINEL -->
+<sc-if value="{{ s.painel }}" hint-placeholder-val="{{ false }}">
+<div style="width:100%;max-width:1080px;margin:0 auto;padding:28px 20px 40px;display:flex;flex-direction:column;gap:24px">
+  <div>
+    <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--gs)">Painel</div>
+    <h1 style="margin:6px 0 6px;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:36px;line-height:1.1">Olá, Clara</h1>
+    <p style="margin:0;color:var(--mu);max-width:560px;text-wrap:pretty">Registre uma aula por áudio ou gere o relatório semestral de um aluno.</p>
+  </div>
+  <sc-if value="{{ v.empty }}">
+    <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;padding:48px 24px;border:1px solid var(--bd);border-radius:8px;background:var(--sf)">
+      <img src="assets/fb-monograma-{{ inkGd }}.png" alt="" style="width:64px;height:64px;object-fit:contain;display:block">
+      <h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:24px">Nenhum aluno por aqui</h2>
+      <p style="margin:0;color:var(--mu);max-width:360px">Você ainda não tem alunos associados. Fale com a secretaria da escola.</p>
+    </div>
+  </sc-if>
+  <sc-if value="{{ v.notEmpty }}">
+    <div role="status" style="display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;padding:16px;border-radius:8px;background:var(--warnbg);border:1px solid var(--warn)">
+      <span style="font-family:'Material Symbols Outlined';font-size:24px;font-weight:300;color:var(--warn)">edit_note</span>
+      <div style="flex:1 1 200px">
+        <div style="font-weight:600;color:var(--warn)">Relatório em aberto</div>
+        <div style="font-size:15px;color:var(--tx)">Matteo Mafra · última alteração em 20/09/2026 09:57</div>
+      </div>
+      <button onClick="{{ openRetomada }}" style="min-height:44px;padding:0 18px;border-radius:6px;border:1px solid var(--warn);background:transparent;color:var(--warn);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;cursor:pointer">Retomar relatório</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px">
+      <button onClick="{{ goRegistrar }}" style="text-align:left;display:flex;flex-direction:column;gap:18px;padding:24px;border-radius:8px;border:1px solid var(--pbg);background:var(--pbg);color:var(--ptx);font-family:'Source Sans 3',sans-serif;cursor:pointer;min-height:180px" style-hover="background:var(--phov)">
+        <span style="width:56px;height:56px;border-radius:50%;border:1px solid var(--gd);display:flex;align-items:center;justify-content:center"><span style="font-family:'Material Symbols Outlined';font-size:28px;font-weight:300;color:var(--gd)">mic</span></span>
+        <span style="display:flex;flex-direction:column;gap:4px">
+          <span style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;line-height:1.1">Registrar aula</span>
+          <span style="font-size:15px;opacity:.85">Grave um áudio contando como foi a aula.</span>
+        </span>
+      </button>
+      <div style="display:flex;flex-direction:column;justify-content:space-between;gap:12px;padding:24px;border-radius:8px;border:1px solid var(--bd);background:var(--sf)">
+        <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gs)">Seus alunos</div>
+        <div style="display:flex;align-items:baseline;gap:12px">
+          <span style="font-family:'Cormorant Garamond',serif;font-size:64px;font-weight:600;line-height:1">7</span>
+          <span style="color:var(--mu)">alunos associados</span>
+        </div>
+        <button onClick="{{ goAlunos }}" style="align-self:flex-start;min-height:44px;padding:0;border:none;background:transparent;color:var(--gs);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;text-decoration:underline;text-underline-offset:4px;cursor:pointer">Ver todos os alunos</button>
+      </div>
+    </div>
+    <section aria-labelledby="h-alunos" style="display:flex;flex-direction:column;gap:10px">
+      <h2 id="h-alunos" style="margin:0;font-family:'Cinzel',serif;font-size:12px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--mu)">Primeiros alunos</h2>
+      <div style="border:1px solid var(--bd);border-radius:8px;background:var(--sf);overflow:hidden">
+        <sc-for list="{{ firstFive }}" as="a" hint-placeholder-count="5">
+          <button onClick="{{ a.onHist }}" style="width:100%;min-height:64px;display:flex;align-items:center;gap:14px;padding:10px 16px;border:none;border-bottom:1px solid var(--bd);background:transparent;color:var(--tx);font-family:'Source Sans 3',sans-serif;text-align:left;cursor:pointer" style-hover="background:var(--sf2)">
+            <span style="width:40px;height:40px;flex:none;border-radius:50%;background:var(--sf2);display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:13px;color:var(--gs)">{{ a.ini }}</span>
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column">
+              <span style="font-weight:600">{{ a.nome }}</span>
+              <span style="font-size:14px;color:var(--mu)">{{ a.inst }} · última aula {{ a.ultima }}</span>
+            </span>
+            <span style="font-family:'Material Symbols Outlined';font-size:22px;font-weight:300;color:var(--mu)">chevron_right</span>
+          </button>
+        </sc-for>
+      </div>
+    </section>
+  </sc-if>
+</div>
+</sc-if>
+
+<!-- 3 ALUNOS -->
+<sc-if value="{{ s.alunos }}" hint-placeholder-val="{{ false }}">
+<div style="width:100%;max-width:1080px;margin:0 auto;padding:28px 20px 40px;display:flex;flex-direction:column;gap:20px">
+  <div>
+    <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--gs)">{{ alunosKicker }}</div>
+    <h1 style="margin:6px 0 6px;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:36px;line-height:1.1">{{ alunosTitle }}</h1>
+    <p style="margin:0;color:var(--mu)">7 alunos associados a você.</p>
+  </div>
+  <label style="position:relative;display:block;max-width:520px">
+    <span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Buscar aluno por nome</span>
+    <span aria-hidden="true" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-family:'Material Symbols Outlined';font-size:22px;font-weight:300;color:var(--mu)">search</span>
+    <input type="search" ref="{{ searchRef }}" value="{{ q }}" onChange="{{ onQ }}" placeholder="Buscar aluno por nome" style="width:100%;height:52px;padding:0 16px 0 46px;border:1px solid var(--bd);border-radius:6px;background:var(--sf);color:var(--tx);font-family:'Source Sans 3',sans-serif;font-size:16px">
+  </label>
+  <sc-if value="{{ v.loading }}">
+    <div aria-busy="true" aria-label="Carregando alunos" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,440px),1fr));gap:14px">
+      <sc-for list="{{ skel }}" as="k" hint-placeholder-count="3">
+        <div style="padding:20px;border:1px solid var(--bd);border-radius:8px;background:var(--sf);display:flex;flex-direction:column;gap:12px">
+          <div style="width:55%;height:22px;border-radius:4px;background:var(--sf2);animation:fbpulse 1.6s ease-in-out infinite"></div>
+          <div style="width:30%;height:14px;border-radius:4px;background:var(--sf2);animation:fbpulse 1.6s ease-in-out infinite"></div>
+          <div style="height:48px;border-radius:6px;background:var(--sf2);animation:fbpulse 1.6s ease-in-out infinite"></div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+  <sc-if value="{{ noResults }}">
+    <div role="status" style="display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:48px 20px;border:1px dashed var(--bd);border-radius:8px">
+      <span style="font-family:'Material Symbols Outlined';font-size:36px;font-weight:300;color:var(--gd)">person_search</span>
+      <p style="margin:0;font-size:17px">Nenhum aluno encontrado para “{{ q }}”.</p>
+      <button onClick="{{ clearQ }}" style="min-height:44px;padding:0 18px;border-radius:6px;border:1px solid var(--gd);background:transparent;color:var(--gs);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;cursor:pointer">Limpar busca</button>
+    </div>
+  </sc-if>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,440px),1fr));gap:14px">
+    <sc-for list="{{ filtered }}" as="a" hint-placeholder-count="4">
+      <article style="padding:20px;border:1px solid var(--bd);border-radius:8px;background:var(--sf);display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="flex:1;min-width:0">
+            <h2 style="margin:0;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:24px;line-height:1.15">{{ a.nome }}</h2>
+            <div style="font-size:14px;color:var(--mu)">{{ a.inst }} · última aula {{ a.ultima }}</div>
+          </div>
+          <sc-if value="{{ a.aberto }}">
+            <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;background:var(--warnbg);color:var(--warn);font-size:13px;font-weight:600;white-space:nowrap"><span style="font-family:'Material Symbols Outlined';font-size:16px;font-weight:300">edit_note</span>Em aberto</span>
+          </sc-if>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <button onClick="{{ a.onNovo }}" style="flex:1 1 100%;min-height:48px;padding:0 16px;border-radius:6px;border:1px solid var(--pbg);background:var(--pbg);color:var(--ptx);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer" style-hover="background:var(--phov)"><span style="font-family:'Material Symbols Outlined';font-size:20px;font-weight:300">mic</span>Novo relatório de aula</button>
+          <button onClick="{{ a.onSem }}" style="flex:1 1 140px;min-height:44px;padding:0 12px;border-radius:6px;border:1px solid var(--gd);background:transparent;color:var(--gs);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;cursor:pointer" style-hover="background:var(--sf2)">Relatório semestral</button>
+          <button onClick="{{ a.onHist }}" style="flex:1 1 110px;min-height:44px;padding:0 12px;border-radius:6px;border:1px solid var(--gd);background:transparent;color:var(--gs);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;cursor:pointer" style-hover="background:var(--sf2)">Histórico</button>
+        </div>
+      </article>
+    </sc-for>
+  </div>
+</div>
+</sc-if>
+
+<!-- 4 RETOMADA -->
+<sc-if value="{{ s.retomada }}" hint-placeholder-val="{{ false }}">
+<div style="width:100%;max-width:640px;margin:0 auto;padding:32px 20px 40px;display:flex;flex-direction:column;gap:24px">
+  <div style="display:flex;flex-direction:column;gap:16px;padding:28px 24px;border:1px solid var(--bd);border-radius:8px;background:var(--sf)">
+    <span style="width:52px;height:52px;border-radius:50%;background:var(--warnbg);display:flex;align-items:center;justify-content:center"><span style="font-family:'Material Symbols Outlined';font-size:28px;font-weight:300;color:var(--warn)">edit_note</span></span>
+    <div>
+      <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--gs)">Matteo Mafra</div>
+      <h1 style="margin:6px 0 10px;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:32px;line-height:1.1">Você tem um relatório em aberto</h1>
+      <p style="margin:0;color:var(--mu);text-wrap:pretty">Este aluno já tem um relatório de aula iniciado pelo Telegram e ainda não concluído (última alteração em 20/09/2026 09:57).</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px">
+      <button onClick="{{ continuar }}" style="min-height:52px;padding:0 24px;border-radius:6px;border:1px solid var(--pbg);background:var(--pbg);color:var(--ptx);font-family:'Source Sans 3',sans-serif;font-size:16px;font-weight:600;cursor:pointer" style-hover="background:var(--phov)">Continuar de onde parei</button>
+      <button onClick="{{ askDiscard }}" style="min-height:52px;padding:0 24px;border-radius:6px;border:1px solid var(--err);background:transparent;color:var(--err);font-family:'Source Sans 3',sans-serif;font-size:16px;font-weight:600;cursor:pointer" style-hover="background:var(--errbg)">Descartar e começar um novo</button>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- 5 GRAVAR -->
+<sc-if value="{{ s.gravar }}" hint-placeholder-val="{{ false }}">
+<div style="width:100%;max-width:640px;margin:0 auto;padding:28px 20px 32px;display:flex;flex-direction:column;gap:20px">
+  <div>
+    <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--gs)">Novo relatório de aula</div>
+    <h1 style="margin:6px 0 4px;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:34px;line-height:1.1">{{ aluno.nome }}</h1>
+    <p style="margin:0;color:var(--mu)">Aula de 30/09/2026</p>
+  </div>
+  <sc-if value="{{ v.blocked }}">
+    <div role="alert" style="display:flex;gap:12px;padding:14px 16px;border-radius:6px;background:var(--infobg);border:1px solid var(--info)">
+      <span style="font-family:'Material Symbols Outlined';font-size:22px;font-weight:300;color:var(--info)">mic_off</span>
+      <div style="font-size:15px"><strong style="color:var(--info)">Gravação indisponível neste navegador.</strong> O microfone está bloqueado ou não é compatível. Envie um arquivo de áudio gravado no celular.</div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ canRecord }}">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:18px;padding:28px 20px 24px;border:1px solid var(--bd);border-radius:8px;background:var(--sf)">
+      <div aria-live="polite" style="display:flex;flex-direction:column;align-items:center;gap:2px">
+        <div style="font-size:44px;font-weight:300;font-variant-numeric:tabular-nums;letter-spacing:.04em;line-height:1.1">{{ timer }}</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:15px;color:var(--mu)">
+          <sc-if value="{{ recording }}"><span style="width:8px;height:8px;border-radius:50%;background:var(--err);animation:fbpulse 1.2s infinite"></span></sc-if>
+          {{ recStatus }}
+        </div>
+      </div>
+      <div aria-hidden="true" style="width:100%;max-width:420px;height:64px;display:flex;align-items:center;justify-content:center;gap:3px">
+        <sc-for list="{{ bars }}" as="b" hint-placeholder-count="36">
+          <span style="width:3px;border-radius:2px;background:{{ b.c }};height:{{ b.h }}px"></span>
+        </sc-for>
+      </div>
+      <button onClick="{{ recToggle }}" aria-label="{{ recAria }}" style="width:88px;height:88px;border-radius:50%;border:1px solid var(--gd);background:{{ recBg }};color:{{ recFg }};display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 0 8px var(--sf2)">
+        <span style="font-family:'Material Symbols Outlined';font-size:40px;font-weight:300">{{ recIcon }}</span>
+      </button>
+      <sc-if value="{{ recorded }}">
+        <div style="display:flex;gap:8px">
+          <button style="min-height:44px;padding:0 16px;border-radius:6px;border:1px solid var(--gd);background:transparent;color:var(--gs);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;display:flex;align-items:center;gap:6px;cursor:pointer"><span style="font-family:'Material Symbols Outlined';font-size:20px;font-weight:300">play_arrow</span>Ouvir</button>
+          <button onClick="{{ regravar }}" style="min-height:44px;padding:0 16px;border-radius:6px;border:1px solid var(--gd);background:transparent;color:var(--gs);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;display:flex;align-items:center;gap:6px;cursor:pointer"><span style="font-family:'Material Symbols Outlined';font-size:20px;font-weight:300">replay</span>Regravar</button>
+        </div>
+      </sc-if>
+      <p style="margin:0;max-width:400px;text-align:center;font-size:14px;color:var(--mu);text-wrap:pretty">Conte o que foi trabalhado, como o aluno evoluiu, as dificuldades e o que ele deve estudar em casa.</p>
+    </div>
+    <div aria-hidden="true" style="display:flex;align-items:center;gap:14px;color:var(--mu);font-family:'Cinzel',serif;font-size:11px;letter-spacing:.24em"><span style="flex:1;height:1px;background:var(--bd)"></span>OU<span style="flex:1;height:1px;background:var(--bd)"></span></div>
+  </sc-if>
+  <sc-if value="{{ hasFile }}">
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 12px 12px 16px;border:1px solid var(--gd);border-radius:8px;background:var(--sf)">
+      <span style="font-family:'Material Symbols Outlined';font-size:26px;font-weight:300;color:var(--gs)">audio_file</span>
+      <div style="flex:1;min-width:0"><div style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">aula-matteo-30-09.m4a</div><div style="font-size:14px;color:var(--mu)">4,2 MB · 03:12</div></div>
+      <button onClick="{{ removeFile }}" aria-label="Remover arquivo" style="width:44px;height:44px;border:none;background:transparent;color:var(--mu);border-radius:6px;cursor:pointer"><span style="font-family:'Material Symbols Outlined';font-size:22px;font-weight:300">close</span></button>
+    </div>
+  </sc-if>
+  <sc-if value="{{ noFile }}">
+    <button onClick="{{ chooseFile }}" style="min-height:{{ uploadH }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:14px 20px;border:1px dashed var(--gd);border-radius:8px;background:transparent;color:var(--tx);font-family:'Source Sans 3',sans-serif;cursor:pointer" style-hover="background:var(--sf2)">
+      <span style="display:flex;align-items:center;gap:8px;font-size:16px;font-weight:600;color:var(--gs)"><span style="font-family:'Material Symbols Outlined';font-size:22px;font-weight:300">upload</span>Enviar arquivo de áudio</span>
+      <span style="font-size:14px;color:var(--mu)">MP3, M4A, OGG ou WAV · até 25 MB</span>
+    </button>
+  </sc-if>
+</div>
+</sc-if>
+
+<!-- 6 PROCESSANDO -->
+<sc-if value="{{ s.processando }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;width:100%;max-width:520px;margin:0 auto;padding:40px 24px;display:flex;flex-direction:column;justify-content:center;gap:28px">
+  <sc-if value="{{ v.notFailed }}">
+    <div aria-live="polite">
+      <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--gs)">{{ procKicker }}</div>
+      <h1 style="margin:8px 0 10px;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:32px;line-height:1.15;text-wrap:pretty">{{ procTitle }}</h1>
+      <p style="margin:0;color:var(--mu);text-wrap:pretty">Isso pode levar alguns segundos. Mantenha esta tela aberta — avisaremos assim que o relatório estiver pronto para conferência.</p>
+    </div>
+    <ol aria-label="Etapas do processamento" style="list-style:none;margin:0;padding:24px;border:1px solid var(--bd);border-radius:8px;background:var(--sf);display:flex;flex-direction:column;gap:10px">
+      <sc-for list="{{ steps }}" as="st" hint-placeholder-count="4">
+        <li aria-current="{{ st.current }}" style="display:flex;align-items:center;gap:16px;min-height:40px">
+          <span style="position:relative;width:72px;height:18px;flex:none;border-radius:2px;overflow:hidden;border:1px solid {{ st.border }};background:{{ st.bg }}"><span style="position:absolute;left:0;top:0;bottom:0;width:{{ st.pct }}%;background:var(--gd)"></span></span>
+          <span style="flex:1;font-size:16px;color:{{ st.color }};font-weight:{{ st.weight }}">{{ st.label }}</span>
+          <sc-if value="{{ st.done }}"><span aria-label="concluído" style="font-family:'Material Symbols Outlined';font-size:20px;font-weight:300;color:var(--ok)">check</span></sc-if>
+        </li>
+      </sc-for>
+    </ol>
+  </sc-if>
+  <sc-if value="{{ v.failed }}">
+    <div role="alert" style="display:flex;flex-direction:column;gap:16px;padding:28px 24px;border:1px solid var(--err);border-radius:8px;background:var(--sf)">
+      <span style="width:52px;height:52px;border-radius:50%;background:var(--errbg);display:flex;align-items:center;justify-content:center"><span style="font-family:'Material Symbols Outlined';font-size:28px;font-weight:300;color:var(--err)">error</span></span>
+      <div>
+        <h1 style="margin:0 0 8px;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:30px;line-height:1.15">Não foi possível processar o áudio.</h1>
+        <p style="margin:0;color:var(--mu);text-wrap:pretty">Seu áudio foi recebido e não foi perdido. Tente processar novamente; se o problema continuar, grave a aula de novo.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button onClick="{{ retry }}" style="min-height:52px;padding:0 24px;border-radius:6px;border:1px solid var(--pbg);background:var(--pbg);color:var(--ptx);font-family:'Source Sans 3',sans-serif;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer"><span style="font-family:'Material Symbols Outlined';font-size:20px;font-weight:300">refresh</span>Tentar novamente</button>
+        <button onClick="{{ backToRec }}" style="min-height:44px;border:none;background:transparent;color:var(--gs);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;text-decoration:underline;text-underline-offset:4px;cursor:pointer">Gravar novamente</button>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</sc-if>
+
+<!-- 7 PERGUNTAS -->
+<sc-if value="{{ s.perguntas }}" hint-placeholder-val="{{ false }}">
+<div style="width:100%;max-width:640px;margin:0 auto;padding:28px 20px 32px;display:flex;flex-direction:column;gap:22px">
+  <div>
+    <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--gs)">Relatório de aula · 30/09/2026</div>
+    <h1 style="margin:6px 0 8px;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:32px;line-height:1.1">Faltam algumas informações</h1>
+    <p style="margin:0;color:var(--mu);text-wrap:pretty">Faltam algumas informações para concluir o relatório. Responda com suas palavras, tudo em uma única mensagem.</p>
+  </div>
+  <ol style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;border:1px solid var(--bd);border-radius:8px;background:var(--sf)">
+    <sc-for list="{{ perguntas }}" as="pq" hint-placeholder-count="3">
+      <li style="display:flex;gap:14px;padding:16px 18px;border-bottom:1px solid var(--bd)">
+        <span style="flex:none;width:28px;font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;line-height:1;color:var(--gs)">{{ pq.n }}</span>
+        <span style="font-size:17px">{{ pq.t }}</span>
+      </li>
+    </sc-for>
+  </ol>
+  <div style="display:flex;flex-direction:column;gap:6px">
+    <label for="resp" style="font-size:15px;font-weight:600">Sua resposta</label>
+    <textarea id="resp" value="{{ answer }}" onChange="{{ onAnswer }}" aria-describedby="resp-help" rows="5" placeholder="Ex.: Trabalhamos o Estudo nº 5 de Czerny. Ele estudou em casa três vezes. Para a próxima aula, pedi a escala de Sol maior." style="padding:14px 16px;border:1px solid var(--bd);border-radius:6px;background:var(--sf);color:var(--tx);font-family:'Source Sans 3',sans-serif;font-size:16px;line-height:1.5;resize:vertical"></textarea>
+    <div id="resp-help" style="font-size:14px;color:var(--mu)">Você pode responder a todas as perguntas de uma vez.</div>
+  </div>
+</div>
+</sc-if>
+
+<!-- 8 CONFERÊNCIA -->
+<sc-if value="{{ s.conferencia }}" hint-placeholder-val="{{ false }}">
+<div style="width:100%;max-width:1180px;margin:0 auto;padding:28px 20px 32px;display:flex;flex-direction:column;gap:20px">
+  <div>
+    <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--gs)">Relatório de aula</div>
+    <h1 style="margin:6px 0 12px;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:34px;line-height:1.1;text-wrap:pretty">Confira o relatório antes de aprovar</h1>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+      <span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;background:var(--warnbg);color:var(--warn);font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Outlined';font-size:16px;font-weight:300">schedule</span>Aguardando conferência</span>
+      <span style="display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;border:1px solid var(--gd);color:var(--gs);font-size:13px;font-weight:600">Versão {{ versao }}</span>
+    </div>
+  </div>
+  <dl style="margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px 24px;padding:16px 0;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd)">
+    <div><dt style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:.2em;color:var(--mu)">ALUNO</dt><dd style="margin:2px 0 0;font-weight:600">{{ aluno.nome }}</dd></div>
+    <div><dt style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:.2em;color:var(--mu)">PROFESSORA</dt><dd style="margin:2px 0 0;font-weight:600">Clara Nogueira</dd></div>
+    <div><dt style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:.2em;color:var(--mu)">DATA DA AULA</dt><dd style="margin:2px 0 0;font-weight:600">30/09/2026</dd></div>
+  </dl>
+  <sc-if value="{{ v.outdated }}">
+    <div role="alert" style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:14px 16px;border-radius:6px;background:var(--warnbg);border:1px solid var(--warn)">
+      <span style="font-family:'Material Symbols Outlined';font-size:22px;font-weight:300;color:var(--warn)">sync_problem</span>
+      <div style="flex:1 1 220px;font-size:15px"><strong style="color:var(--warn)">Esta versão está desatualizada.</strong> O relatório foi alterado em outro lugar. Recarregue para conferir a versão atual antes de aprovar.</div>
+      <button onClick="{{ reload }}" style="min-height:44px;padding:0 16px;border-radius:6px;border:1px solid var(--warn);background:transparent;color:var(--warn);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;cursor:pointer">Recarregar</button>
+    </div>
+  </sc-if>
+  <sc-if value="{{ v.applying }}">
+    <div role="status" style="display:flex;gap:12px;align-items:center;padding:14px 16px;border-radius:6px;background:var(--infobg);border:1px solid var(--info)">
+      <span style="width:18px;height:18px;flex:none;border-radius:50%;border:2px solid var(--info);border-right-color:transparent;animation:fbspin .8s linear infinite"></span>
+      <div style="font-size:15px"><strong style="color:var(--info)">Aplicando sua alteração…</strong> Uma nova versão será gerada em instantes.</div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ isMobile }}">
+    <div role="tablist" aria-label="Formato" style="display:grid;grid-template-columns:1fr 1fr;padding:4px;border-radius:8px;background:var(--sf2);border:1px solid var(--bd)">
+      <button role="tab" aria-selected="{{ tabTexto }}" onClick="{{ tabToTexto }}" style="min-height:44px;border:none;border-radius:6px;font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;cursor:pointer;background:{{ tabA.bg }};color:{{ tabA.c }};box-shadow:{{ tabA.sh }}">Texto</button>
+      <button role="tab" aria-selected="{{ tabPdf }}" onClick="{{ tabToPdf }}" style="min-height:44px;border:none;border-radius:6px;font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;cursor:pointer;background:{{ tabB.bg }};color:{{ tabB.c }};box-shadow:{{ tabB.sh }}">Ver PDF</button>
+    </div>
+  </sc-if>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:28px;align-items:start">
+    <sc-if value="{{ showText }}">
+      <div style="display:flex;flex-direction:column;gap:24px;opacity:{{ bodyOpacity }}">
+        <article aria-label="Relatório em texto" style="padding:8px 24px;border:1px solid var(--bd);border-radius:8px;background:var(--sf)">
+          <sc-for list="{{ report }}" as="sec" hint-placeholder-count="5">
+            <section style="padding:18px 0;border-bottom:1px solid var(--bd)">
+              <h2 style="margin:0 0 8px;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:22px;line-height:1.2">{{ sec.t }}</h2>
+              <sc-if value="{{ sec.list }}">
+                <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px">
+                  <sc-for list="{{ sec.items }}" as="it" hint-placeholder-count="2">
+                    <li style="display:flex;gap:12px;align-items:baseline"><span aria-hidden="true" style="flex:none;width:12px;height:4px;background:var(--gd);transform:translateY(-4px)"></span><span>{{ it }}</span></li>
+                  </sc-for>
+                </ul>
+              </sc-if>
+              <sc-if value="{{ sec.isText }}"><p style="margin:0;text-wrap:pretty">{{ sec.text }}</p></sc-if>
+            </section>
+          </sc-for>
+        </article>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <label for="ajuste" style="font-size:15px;font-weight:600">Precisa ajustar algo? Descreva a alteração com suas palavras.</label>
+          <textarea id="ajuste" value="{{ adjust }}" onChange="{{ onAdjust }}" disabled="{{ v.applying }}" rows="3" placeholder="Ex.: o aluno teve mais facilidade em leitura do que consta nas dificuldades." style="padding:14px 16px;border:1px solid var(--bd);border-radius:6px;background:var(--sf);color:var(--tx);font-family:'Source Sans 3',sans-serif;font-size:16px;line-height:1.5;resize:vertical"></textarea>
+          <button onClick="{{ requestChange }}" disabled="{{ cantAdjust }}" style="align-self:flex-start;min-height:48px;padding:0 20px;border-radius:6px;border:1px solid var(--gd);background:transparent;color:var(--gs);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;cursor:pointer" style-hover="background:var(--sf2)"><span style="font-family:'Material Symbols Outlined';font-size:20px;font-weight:300">edit</span>Solicitar alteração</button>
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ showPdf }}">
+      <div style="position:sticky;top:0;display:flex;flex-direction:column;gap:12px;padding:16px;border:1px solid var(--bd);border-radius:8px;background:var(--sf2)">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <span style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.2em;color:var(--mu)">PDF · VERSÃO {{ versao }}</span>
+          <sc-if value="{{ pdfReady }}"><a href="Modelo PDF.dc.html" style="min-height:44px;display:inline-flex;align-items:center;gap:6px;font-size:15px;font-weight:600;color:var(--gs);text-underline-offset:4px"><span style="font-family:'Material Symbols Outlined';font-size:20px;font-weight:300">open_in_new</span>Abrir PDF</a></sc-if>
+        </div>
+        <sc-if value="{{ pdfGenerating }}">
+          <div role="status" style="aspect-ratio:210/297;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:24px;border:1px dashed var(--gd);border-radius:4px;background:var(--sf)">
+            <span style="width:28px;height:28px;border-radius:50%;border:2px solid var(--gd);border-right-color:transparent;animation:fbspin .9s linear infinite"></span>
+            <div style="font-weight:600">O PDF ainda está sendo gerado.</div>
+            <div style="font-size:14px;color:var(--mu);max-width:260px">Você já pode conferir o texto enquanto isso.</div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ pdfReady }}">
+          <div aria-label="Pré-visualização do PDF" style="aspect-ratio:210/297;background:#FFFFFF;color:#141414;border-radius:2px;box-shadow:0 2px 12px rgba(0,0,0,.12);padding:9% 10%;display:flex;flex-direction:column;gap:10px;overflow:hidden">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+              <img src="assets/fb-logo-preto.png" alt="" style="width:34%;aspect-ratio:697/447;object-fit:contain;display:block">
+            </div>
+            <div style="height:1px;background:#141414;opacity:.5;margin:4px 0"></div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;text-align:center">Relatório de Aula</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-size:9px;border-top:1px solid #CFC8BA;border-bottom:1px solid #CFC8BA;padding:6px 0"><span><b>Aluno</b><br>Matteo Mafra</span><span><b>Professora</b><br>Clara Nogueira</span><span><b>Data</b><br>30/09/2026</span></div>
+            <sc-for list="{{ report }}" as="sec" hint-placeholder-count="5">
+              <div style="font-size:8.5px;line-height:1.45"><div style="font-family:'Cormorant Garamond',serif;font-size:12px;font-weight:700">{{ sec.t }}</div>{{ sec.flat }}</div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+  </div>
+</div>
+</sc-if>
+
+<!-- 9 APROVADO -->
+<sc-if value="{{ s.aprovado }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;width:100%;max-width:560px;margin:0 auto;padding:48px 24px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:18px">
+  <span style="width:64px;height:64px;border-radius:50%;border:1px solid var(--gd);display:flex;align-items:center;justify-content:center"><span style="font-family:'Material Symbols Outlined';font-size:32px;font-weight:300;color:var(--ok)">check</span></span>
+  <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--gs)">{{ aprovKicker }}</div>
+  <h1 role="status" style="margin:0;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:40px;line-height:1.05">Relatório aprovado</h1>
+  <img src="assets/fb-filete-{{ inkGd }}.png" alt="" style="width:min(100%,300px);height:14px;object-fit:contain;display:block">
+  <p style="margin:0;color:var(--mu);max-width:420px;text-wrap:pretty">{{ aprovText }}</p>
+  <div style="width:100%;display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--bd);border:1px solid var(--bd);border-radius:8px;overflow:hidden;text-align:left">
+    <div style="padding:12px 16px;background:var(--sf)"><div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:.2em;color:var(--mu)">ALUNO</div><div style="font-weight:600">{{ aluno.nome }}</div></div>
+    <div style="padding:12px 16px;background:var(--sf)"><div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:.2em;color:var(--mu)">APROVADO EM</div><div style="font-weight:600">30/09/2026 18:42</div></div>
+  </div>
+  <div style="width:100%;display:flex;flex-direction:column;gap:10px;margin-top:6px">
+    <button onClick="{{ goRegistrar }}" style="min-height:52px;padding:0 24px;border-radius:6px;border:1px solid var(--pbg);background:var(--pbg);color:var(--ptx);font-family:'Source Sans 3',sans-serif;font-size:16px;font-weight:600;cursor:pointer" style-hover="background:var(--phov)">Registrar outra aula</button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <button onClick="{{ goHist }}" style="min-height:48px;padding:0 12px;border-radius:6px;border:1px solid var(--gd);background:transparent;color:var(--gs);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;cursor:pointer">Ver histórico</button>
+      <button onClick="{{ goAlunos }}" style="min-height:48px;padding:0 12px;border-radius:6px;border:1px solid var(--gd);background:transparent;color:var(--gs);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;cursor:pointer">Voltar para alunos</button>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- 10 SEMESTRAL -->
+<sc-if value="{{ s.semestral }}" hint-placeholder-val="{{ false }}">
+<div style="width:100%;max-width:640px;margin:0 auto;padding:28px 20px 32px;display:flex;flex-direction:column;gap:22px">
+  <div>
+    <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--gs)">Relatório semestral</div>
+    <h1 style="margin:6px 0 8px;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:34px;line-height:1.1">{{ aluno.nome }}</h1>
+    <p style="margin:0;color:var(--mu);text-wrap:pretty">Escolha o período. O relatório consolida todas as aulas aprovadas no semestre.</p>
+  </div>
+  <sc-if value="{{ v.empty }}">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:40px 20px;border:1px dashed var(--bd);border-radius:8px">
+      <span style="font-family:'Material Symbols Outlined';font-size:36px;font-weight:300;color:var(--gd)">event_busy</span>
+      <p style="margin:0;font-size:17px">Nenhum semestre disponível para este aluno ainda.</p>
+    </div>
+  </sc-if>
+  <sc-if value="{{ v.notEmpty }}">
+    <fieldset style="margin:0;padding:0;border:none;display:flex;flex-direction:column;gap:10px">
+      <legend style="font-size:15px;font-weight:600;margin-bottom:10px">Período</legend>
+      <div role="radiogroup" style="display:flex;flex-wrap:wrap;gap:10px">
+        <sc-for list="{{ sems }}" as="se" hint-placeholder-count="2">
+          <button role="radio" aria-checked="{{ se.on }}" onClick="{{ se.pick }}" style="min-height:52px;display:flex;align-items:center;gap:8px;padding:0 20px;border-radius:999px;font-family:'Source Sans 3',sans-serif;font-size:16px;font-weight:600;cursor:pointer;border:1px solid {{ se.bd }};background:{{ se.bg }};color:{{ se.c }}">
+            <span style="font-family:'Material Symbols Outlined';font-size:20px;font-weight:300">{{ se.icon }}</span>{{ se.t }}
+          </button>
+        </sc-for>
+      </div>
+      <div style="font-size:14px;color:var(--mu)">{{ semHint }}</div>
+    </fieldset>
+    <sc-if value="{{ v.error }}">
+      <div role="alert" style="display:flex;gap:12px;padding:14px 16px;border-radius:6px;background:var(--errbg);border:1px solid var(--err)">
+        <span style="font-family:'Material Symbols Outlined';font-size:22px;font-weight:300;color:var(--err)">error</span>
+        <div style="font-size:15px">Nenhum relatório de aula aprovado neste período. Registre as aulas do semestre antes de gerar o relatório.</div>
+      </div>
+    </sc-if>
+  </sc-if>
+</div>
+</sc-if>
+
+<!-- 11 CONFERÊNCIA SEMESTRAL -->
+<sc-if value="{{ s.confsem }}" hint-placeholder-val="{{ false }}">
+<div style="width:100%;max-width:1080px;margin:0 auto;padding:28px 20px 32px;display:flex;flex-direction:column;gap:20px">
+  <div>
+    <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--gs)">Relatório semestral · {{ semLabel }}</div>
+    <h1 style="margin:6px 0 12px;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:34px;line-height:1.1;text-wrap:pretty">Confira o relatório antes de aprovar</h1>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      <span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;background:var(--warnbg);color:var(--warn);font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Outlined';font-size:16px;font-weight:300">schedule</span>Aguardando conferência</span>
+      <span style="display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;border:1px solid var(--gd);color:var(--gs);font-size:13px;font-weight:600">Versão 1</span>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:18px;padding:18px 20px;border:1px solid var(--gd);border-radius:8px;background:var(--sf)">
+    <span style="font-family:'Cormorant Garamond',serif;font-size:52px;font-weight:600;line-height:1;color:var(--gs)">12</span>
+    <span style="font-size:16px;text-wrap:pretty">relatórios de aula foram considerados nesta consolidação.</span>
+  </div>
+  <div style="display:grid;grid-template-columns:{{ semCols }};gap:32px;align-items:start">
+    <sc-if value="{{ isDesktop }}">
+      <nav aria-label="Seções do relatório" style="position:sticky;top:0;display:flex;flex-direction:column;border-left:1px solid var(--bd)">
+        <sc-for list="{{ semSecs }}" as="ss" hint-placeholder-count="10">
+          <a href="#{{ ss.id }}" style="min-height:36px;display:flex;align-items:center;gap:10px;padding:4px 14px;font-size:14px;color:var(--mu);text-decoration:none" style-hover="color:var(--gs)"><span style="font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:700;color:var(--gs);width:18px">{{ ss.n }}</span>{{ ss.t }}</a>
+        </sc-for>
+      </nav>
+    </sc-if>
+    <div style="display:flex;flex-direction:column;gap:24px;min-width:0">
+      <div style="border:1px solid var(--bd);border-radius:8px;background:var(--sf);overflow:hidden">
+        <sc-for list="{{ semSecs }}" as="ss" hint-placeholder-count="10">
+          <section id="{{ ss.id }}" style="border-bottom:1px solid var(--bd)">
+            <h2 style="margin:0">
+              <button onClick="{{ ss.toggle }}" aria-expanded="{{ ss.open }}" style="width:100%;min-height:56px;display:flex;align-items:center;gap:14px;padding:12px 20px;border:none;background:transparent;color:var(--tx);text-align:left;cursor:pointer;font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:600">
+                <span style="width:22px;flex:none;color:var(--gs)">{{ ss.n }}</span><span style="flex:1">{{ ss.t }}</span>
+                <sc-if value="{{ isMobile }}"><span style="font-family:'Material Symbols Outlined';font-size:22px;font-weight:300;color:var(--mu)">{{ ss.chev }}</span></sc-if>
+              </button>
+            </h2>
+            <sc-if value="{{ ss.open }}"><p style="margin:0;padding:0 20px 18px 56px;text-wrap:pretty;font-family:'Source Sans 3',sans-serif">{{ ss.text }}</p></sc-if>
+          </section>
+        </sc-for>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <label for="ajuste2" style="font-size:15px;font-weight:600">Precisa ajustar algo? Descreva a alteração com suas palavras.</label>
+        <textarea id="ajuste2" rows="3" placeholder="Ex.: incluir no parecer final a participação no recital de junho." style="padding:14px 16px;border:1px solid var(--bd);border-radius:6px;background:var(--sf);color:var(--tx);font-family:'Source Sans 3',sans-serif;font-size:16px;line-height:1.5;resize:vertical"></textarea>
+        <button style="align-self:flex-start;min-height:48px;padding:0 20px;border-radius:6px;border:1px solid var(--gd);background:transparent;color:var(--gs);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;cursor:pointer"><span style="font-family:'Material Symbols Outlined';font-size:20px;font-weight:300">edit</span>Solicitar alteração</button>
+      </div>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- 12 HISTÓRICO -->
+<sc-if value="{{ s.historico }}" hint-placeholder-val="{{ false }}">
+<div style="width:100%;max-width:800px;margin:0 auto;padding:28px 20px 40px;display:flex;flex-direction:column;gap:22px">
+  <div>
+    <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--gs)">Histórico</div>
+    <h1 style="margin:6px 0 6px;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:34px;line-height:1.1">{{ aluno.nome }}</h1>
+    <p style="margin:0;color:var(--mu)">Relatórios aprovados, do mais recente ao mais antigo.</p>
+  </div>
+  <sc-if value="{{ v.loading }}">
+    <div aria-busy="true" aria-label="Carregando histórico" style="display:flex;flex-direction:column;gap:10px">
+      <sc-for list="{{ skel }}" as="k" hint-placeholder-count="3"><div style="height:92px;border-radius:8px;background:var(--sf2);animation:fbpulse 1.6s ease-in-out infinite"></div></sc-for>
+    </div>
+  </sc-if>
+  <sc-if value="{{ v.empty }}">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;padding:48px 20px;border:1px dashed var(--bd);border-radius:8px">
+      <img src="assets/fb-monograma-{{ inkGd }}.png" alt="" style="width:56px;height:56px;object-fit:contain;display:block">
+      <p style="margin:0;font-size:17px">Este aluno ainda não tem relatórios aprovados.</p>
+      <button onClick="{{ goGravar }}" style="min-height:48px;padding:0 20px;border-radius:6px;border:1px solid var(--pbg);background:var(--pbg);color:var(--ptx);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;cursor:pointer">Registrar aula</button>
+    </div>
+  </sc-if>
+  <sc-if value="{{ v.ready }}">
+    <ol style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px">
+      <sc-for list="{{ hist }}" as="h" hint-placeholder-count="5">
+        <li style="display:flex;align-items:center;gap:16px;padding:16px;border:1px solid var(--bd);border-radius:8px;background:var(--sf)">
+          <div aria-hidden="true" style="width:56px;flex:none;text-align:center;border-right:1px solid var(--bd);padding-right:14px">
+            <div style="font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;line-height:1">{{ h.d }}</div>
+            <div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:.16em;color:var(--gs)">{{ h.m }}</div>
+          </div>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+            <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px"><span style="font-weight:600">{{ h.titulo }}</span><sc-if value="{{ h.sem }}"><span style="padding:1px 8px;border-radius:999px;border:1px solid var(--gd);font-size:12px;font-weight:600;color:var(--gs)">Semestral</span></sc-if></div>
+            <div style="display:flex;align-items:center;gap:5px;font-size:14px;color:var(--mu)"><span style="font-family:'Material Symbols Outlined';font-size:16px;font-weight:300;color:var(--ok)">check_circle</span>{{ h.apr }}</div>
+          </div>
+          <a href="Modelo PDF.dc.html" aria-label="Abrir PDF — {{ h.titulo }}" style="flex:none;min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 14px;border-radius:6px;border:1px solid var(--gd);color:var(--gs);font-size:15px;font-weight:600;text-decoration:none"><span style="font-family:'Material Symbols Outlined';font-size:20px;font-weight:300">picture_as_pdf</span>{{ pdfLabel }}</a>
+        </li>
+      </sc-for>
+    </ol>
+  </sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ showRodape }}" hint-placeholder-val="{{ false }}">
+  <footer style="margin-top:auto;padding:24px 40px;border-top:1px solid var(--bd);display:flex;justify-content:space-between;gap:16px;font-size:13px;color:var(--mu)">
+    <span style="font-family:'Cinzel',serif;letter-spacing:.16em">INSTITUTO MUSICAL FELIPE BLAFT</span>
+    <span>Portal do Professor · Relatórios pedagógicos</span>
+  </footer>
+</sc-if>
+</main>
+
+<sc-if value="{{ showFoot }}" hint-placeholder-val="{{ false }}">
+<div style="flex:none;border-top:1px solid var(--bd);background:var(--sf);padding:12px 16px 14px">
+  <div style="{{ footStyle }}">
+    <sc-if value="{{ f.gravar }}">
+      <button onClick="{{ sendAudio }}" disabled="{{ cantSend }}" style="min-height:52px;padding:0 24px;border-radius:6px;border:1px solid var(--pbg);background:var(--pbg);color:var(--ptx);font-family:'Source Sans 3',sans-serif;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer">Enviar áudio e gerar relatório</button>
+    </sc-if>
+    <sc-if value="{{ f.perguntas }}">
+      <button onClick="{{ askCancel }}" style="min-height:44px;padding:0 16px;border:none;background:transparent;color:var(--err);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:4px">Cancelar relatório</button>
+      <button onClick="{{ sendAnswer }}" style="min-height:52px;padding:0 24px;border-radius:6px;border:1px solid var(--pbg);background:var(--pbg);color:var(--ptx);font-family:'Source Sans 3',sans-serif;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer"><span style="font-family:'Material Symbols Outlined';font-size:20px;font-weight:300">send</span>Enviar resposta</button>
+    </sc-if>
+    <sc-if value="{{ f.conf }}">
+      <button onClick="{{ askCancel }}" disabled="{{ v.applying }}" style="min-height:44px;padding:0 16px;border:none;background:transparent;color:var(--err);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:4px">Cancelar relatório</button>
+      <button onClick="{{ askApprove }}" disabled="{{ cantApprove }}" style="min-height:52px;padding:0 24px;border-radius:6px;border:1px solid var(--pbg);background:var(--pbg);color:var(--ptx);font-family:'Source Sans 3',sans-serif;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer" style-hover="background:var(--phov)"><span style="font-family:'Material Symbols Outlined';font-size:20px;font-weight:300">verified</span>Aprovar relatório · versão {{ approveVersion }}</button>
+    </sc-if>
+    <sc-if value="{{ f.semestral }}">
+      <button onClick="{{ genSem }}" style="min-height:52px;padding:0 24px;border-radius:6px;border:1px solid var(--pbg);background:var(--pbg);color:var(--ptx);font-family:'Source Sans 3',sans-serif;font-size:16px;font-weight:600;cursor:pointer">Gerar relatório semestral</button>
+    </sc-if>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showBottomNav }}" hint-placeholder-val="{{ false }}">
+<nav aria-label="Principal" style="flex:none;height:68px;display:grid;grid-template-columns:repeat(3,1fr);background:var(--sf);border-top:1px solid var(--bd)">
+  <sc-for list="{{ navItems }}" as="n" hint-placeholder-count="3">
+    <button onClick="{{ n.on }}" aria-current="{{ n.current }}" style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:none;background:transparent;font-family:'Source Sans 3',sans-serif;font-size:13px;font-weight:600;cursor:pointer;color:{{ n.color }}">
+      <span style="position:absolute;top:0;left:30%;right:30%;height:2px;background:{{ n.bar }}"></span>
+      <span style="font-family:'Material Symbols Outlined';font-size:24px;font-weight:300">{{ n.icon }}</span>{{ n.label }}
+    </button>
+  </sc-for>
+</nav>
+</sc-if>
+
+<sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+  <div role="status" style="position:absolute;z-index:40;left:50%;transform:translateX(-50%);bottom:{{ toastBottom }};width:max-content;max-width:calc(100% - 32px);display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:6px;background:#141414;color:#F3EEE4;border:1px solid #2A2A2A;box-shadow:0 12px 32px rgba(0,0,0,.25);font-size:15px">
+    <span style="font-family:'Material Symbols Outlined';font-size:20px;font-weight:300;color:#C9A96E">check_circle</span>{{ toast }}
+  </div>
+</sc-if>
+
+<sc-if value="{{ hasModal }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;inset:0;z-index:50;background:rgba(11,11,11,.6);display:flex;align-items:{{ modalAlign }};justify-content:center;padding:16px">
+    <div role="dialog" aria-modal="true" aria-labelledby="mdl-t" style="width:100%;max-width:460px;background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:28px 24px 20px;box-shadow:0 24px 60px rgba(0,0,0,.3);display:flex;flex-direction:column;gap:12px">
+      <span style="width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:{{ modal.bg }}"><span style="font-family:'Material Symbols Outlined';font-size:26px;font-weight:300;color:{{ modal.c }}">{{ modal.icon }}</span></span>
+      <h2 id="mdl-t" style="margin:0;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:28px;line-height:1.15">{{ modal.title }}</h2>
+      <p style="margin:0;color:var(--mu);text-wrap:pretty">{{ modal.text }}</p>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+        <sc-if value="{{ modal.danger }}"><button onClick="{{ modalConfirm }}" style="min-height:52px;padding:0 24px;border-radius:6px;border:1px solid var(--err);background:var(--err);color:var(--erron);font-family:'Source Sans 3',sans-serif;font-size:16px;font-weight:600;cursor:pointer">{{ modal.ok }}</button></sc-if>
+        <sc-if value="{{ modal.safe }}"><button onClick="{{ modalConfirm }}" style="min-height:52px;padding:0 24px;border-radius:6px;border:1px solid var(--pbg);background:var(--pbg);color:var(--ptx);font-family:'Source Sans 3',sans-serif;font-size:16px;font-weight:600;cursor:pointer">{{ modal.ok }}</button></sc-if>
+        <button onClick="{{ closeModal }}" style="min-height:48px;padding:0 24px;border-radius:6px;border:1px solid var(--gd);background:transparent;color:var(--gs);font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;cursor:pointer">Voltar</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;screen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;login&quot;,&quot;painel&quot;,&quot;alunos&quot;,&quot;retomada&quot;,&quot;gravar&quot;,&quot;processando&quot;,&quot;perguntas&quot;,&quot;conferencia&quot;,&quot;aprovado&quot;,&quot;semestral&quot;,&quot;confsem&quot;,&quot;historico&quot;],&quot;default&quot;:&quot;login&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;variant&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;layout&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;mobile&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;frame&quot;:{&quot;editor&quot;:null,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;still&quot;:{&quot;editor&quot;:null,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+const TH={
+ light:{'--bg':'#FAF7F0','--sf':'#FFFFFF','--sf2':'#F2EDE3','--tx':'#141414','--mu':'#5A554C','--bd':'#E3DCCE','--gd':'#B8955A','--gs':'#7A5C30','--gdp':'#8C6D3F','--pbg':'#141414','--ptx':'#FAF7F0','--phov':'#3A342C','--ok':'#4A5A26','--okbg':'#EEF0E2','--warn':'#855412','--warnbg':'#F8EEDA','--err':'#7D2330','--errbg':'#F7E7E7','--erron':'#FFFFFF','--info':'#1E5360','--infobg':'#E2EDEF'},
+ dark:{'--bg':'#0B0B0B','--sf':'#151515','--sf2':'#1E1E1E','--tx':'#F3EEE4','--mu':'#B3AB9C','--bd':'#2A2A2A','--gd':'#C9A96E','--gs':'#D9BC85','--gdp':'#8C6D3F','--pbg':'#C9A96E','--ptx':'#0B0B0B','--phov':'#D9BC85','--ok':'#AEBF7E','--okbg':'#181C10','--warn':'#E3B66A','--warnbg':'#21190B','--err':'#E69AA2','--errbg':'#261013','--erron':'#1A0A0C','--info':'#8EC4CC','--infobg':'#0E1D20'}};
+const ALUNOS=[
+ {id:'mm',nome:'Matteo Mafra',inst:'Piano',ultima:'21/09/2026',aberto:true},
+ {id:'ot',nome:'Olavo Torrente',inst:'Piano',ultima:'24/09/2026'},
+ {id:'mc',nome:'Miguel Castro',inst:'Violino',ultima:'23/09/2026'},
+ {id:'hv',nome:'Helena Vasconcellos',inst:'Piano',ultima:'22/09/2026'},
+ {id:'ba',nome:'Beatriz Arruda',inst:'Canto',ultima:'19/09/2026'},
+ {id:'ls',nome:'Lívia Sarmento',inst:'Violoncelo',ultima:'18/09/2026'},
+ {id:'tr',nome:'Tomás Ribeiro',inst:'Piano',ultima:'17/09/2026'}];
+const REP=v=>[
+ {t:'Conteúdos trabalhados',items:['Estudo nº 5 de Czerny, op. 599 — compassos 1 a 16','Escala de Sol maior em duas oitavas, mãos juntas','Leitura à primeira vista em clave de fá']},
+ {t:'Evolução',text:'Matteo tocou com mais segurança a articulação da mão direita e manteve o andamento estável na primeira metade do estudo. A postura dos punhos melhorou em relação à aula anterior.'+(v>2?' Na leitura em clave de fá, mostrou mais facilidade do que nas semanas anteriores.':'')},
+ {t:'Dificuldades',items:v>2?['Independência entre as mãos nos compassos 9 a 12']:['Independência entre as mãos nos compassos 9 a 12','Leitura em clave de fá ainda lenta']},
+ {t:'Atividades propostas',items:['Estudar os compassos 9 a 12 com mãos separadas, 10 minutos por dia','Escala de Sol maior com metrônomo a 72 bpm','Ler uma linha do método de leitura por dia']},
+ {t:'Observações',text:'Matteo contou que estudou em casa três vezes durante a semana.'}];
+const SEM=[
+ ['Informações Gerais','Matteo Mafra, 11 anos, aluno de piano. Professora responsável: Clara Nogueira. Período de 01/01/2026 a 30/06/2026.'],
+ ['Frequência e Estudo','Compareceu a 12 das 13 aulas previstas. Manteve estudo em casa regular, em média três vezes por semana.'],
+ ['Técnica','Evoluiu na articulação e na postura dos punhos. Executa escalas maiores com até dois acidentes, em duas oitavas, mãos juntas.'],
+ ['Musicalidade','Passou a diferenciar dinâmicas com mais clareza e a respeitar as respirações das frases.'],
+ ['Leitura e Memorização','Leitura em clave de sol fluente; clave de fá em desenvolvimento. Memorizou duas peças do repertório.'],
+ ['Pontos de Atenção','Independência entre as mãos em passagens com ritmos diferentes.'],
+ ['Estratégias Pedagógicas','Estudo com mãos separadas, metrônomo progressivo e leitura diária em pequenas doses.'],
+ ['Acompanhamento Familiar','A família acompanha a rotina de estudo. Recomenda-se manter um horário fixo para praticar.'],
+ ['Planejamento do Próximo Semestre','Introduzir escalas menores, uma sonatina clássica e preparar o repertório do recital de fim de ano.'],
+ ['Parecer Final','Matteo teve um semestre consistente, com progresso técnico claro e ótima disposição para aprender.']];
+const HIST=[
+ {titulo:'Aula de 21/09/2026',apr:'Aprovado em 21/09/2026 às 18:40',d:'21',m:'SET'},
+ {titulo:'Aula de 14/09/2026',apr:'Aprovado em 14/09/2026 às 19:05',d:'14',m:'SET'},
+ {titulo:'Aula de 31/08/2026',apr:'Aprovado em 31/08/2026 às 18:22',d:'31',m:'AGO'},
+ {titulo:'Semestral (01/01/2026 a 30/06/2026)',apr:'Aprovado em 03/07/2026 às 10:12',d:'1º',m:'SEM',sem:true},
+ {titulo:'Aula de 29/06/2026',apr:'Aprovado em 29/06/2026 às 18:51',d:'29',m:'JUN'}];
+const SEMS=[{t:'1º semestre 2026',p:'01/01/2026 a 30/06/2026'},{t:'2º semestre 2026',p:'01/07/2026 a 31/12/2026 · em andamento'}];
+const STEPS=['Enviando o áudio','Transcrevendo','Estruturando o relatório','Pronto para conferência'];
+const FLOW=['retomada','gravar','processando','perguntas','conferencia','semestral','confsem','historico'];
+const bar=i=>Math.round(8+Math.abs(Math.sin(i*1.7)*Math.cos(i*.45))*46);
+
+class Component extends DCLogic {
+  mainRef=React.createRef(); searchRef=React.createRef(); timers=[];
+  state=this.fromProps(this.props);
+  fromProps(p){
+    const v=p.variant||'';
+    const st={screen:p.screen||'login',variant:v,theme:p.theme||'light',tab:v==='pdf'?'pdf':'texto',q:p.search||'',code:v==='invalid'?'K7M2-9QXP':'',aluno:'mm',
+      rec:v==='recording'?'recording':v==='recorded'?'recorded':'idle',secs:v==='recording'?83:v==='recorded'?192:0,tick:0,
+      step:v==='step1'?0:1,pct:v==='step1'?60:45,versao:2,modal:null,menu:false,open:0,sem:1,answer:'',adjust:'',file:false,
+      mode:'aula',approved:false,loggingIn:false,toast:'',pick:false,w:typeof window!=='undefined'?window.innerWidth:1200};
+    if(p.screen==='alunos'&&v==='search-empty')st.q='Beethoven';
+    if(v==='confirm-discard')st.modal='discard';
+    if(v==='confirm-approve')st.modal='approve';
+    if(v==='confirm-cancel')st.modal='cancel';
+    if(v==='menu')st.menu=true;
+    if(p.screen==='aprovado'&&v==='semestral')st.mode='semestral';
+    return st;
+  }
+  componentDidMount(){this.onR=()=>this.setState({w:window.innerWidth});window.addEventListener('resize',this.onR)}
+  componentWillUnmount(){window.removeEventListener('resize',this.onR);this.clear()}
+  componentDidUpdate(pp){const p=this.props;if(pp.screen!==p.screen||pp.variant!==p.variant||pp.theme!==p.theme){this.clear();this.setState(this.fromProps(p))}}
+  clear(){this.timers.forEach(t=>{clearInterval(t);clearTimeout(t)});this.timers=[]}
+  live(){return !this.props.still}
+  isMobile(){const l=this.props.layout||'auto';return l==='mobile'||(l==='auto'&&this.state.w<900)}
+  go(screen,extra={}){this.clear();this.setState({screen,variant:'',modal:null,menu:false,tab:'texto',...extra});const m=this.mainRef.current;if(m)m.scrollTop=0}
+  later(fn,ms){this.timers.push(setTimeout(fn,ms))}
+  startRec(){this.setState({rec:'recording',secs:0,tick:0});const t=setInterval(()=>this.setState(s=>({tick:s.tick+1,secs:Math.floor((s.tick+1)/5)})),200);this.timers.push(t)}
+  stopRec(){this.clear();this.setState({rec:'recorded',secs:Math.max(this.state.secs,1)})}
+  startProc(mode){
+    this.go('processando',{step:0,pct:0,mode});
+    const t=setInterval(()=>{const s=this.state;if(s.step>=3)return;let pct=s.pct+(s.step===0?7:3),step=s.step;if(pct>=100){step++;pct=0}
+      this.setState({step,pct});if(step===3){clearInterval(t);this.later(()=>this.go(mode==='semestral'?'confsem':mode==='aula'?'perguntas':'conferencia'),700)}},90);
+    this.timers.push(t);
+  }
+  renderVals(){
+    const s=this.state,p=this.props,m=this.isMobile(),v=s.variant,scr=s.screen,dark=s.theme==='dark';
+    const aluno=ALUNOS.find(a=>a.id===s.aluno)||ALUNOS[0];
+    const isFlow=FLOW.includes(scr);
+    const go=(k,e)=>()=>this.go(k,e);
+    const sArr=['login','painel','alunos','retomada','gravar','processando','perguntas','conferencia','aprovado','semestral','confsem','historico'];
+    const S={};sArr.forEach(k=>S[k]=scr===k);
+    const V={invalid:v==='invalid',locked:v==='locked',offline:v==='offline',none:!['invalid'].includes(v),empty:v==='empty',notEmpty:v!=='empty',loading:v==='loading',
+      blocked:v==='blocked',failed:v==='failed',notFailed:v!=='failed',applying:v==='applying',outdated:v==='outdated',error:v==='error',ready:v!=='loading'&&v!=='empty'};
+    const navDef=[['Painel','space_dashboard','painel'],['Alunos','group','alunos'],['Registrar aula','mic','registrar']];
+    const activeNav=scr==='painel'?'painel':scr==='alunos'?(s.pick?'registrar':'alunos'):isFlow?'alunos':'';
+    const navItems=navDef.map(([label,icon,k])=>{const a=k===activeNav;return{label,icon,current:a?'page':undefined,color:a?'var(--gs)':'var(--mu)',bar:a?'var(--gd)':'transparent',
+      on:()=>k==='registrar'?this.go('alunos',{pick:true,q:''}):this.go(k,{pick:false})}});
+    const q=s.q.trim().toLowerCase();
+    const mk=a=>({...a,ini:a.nome.split(' ').map(x=>x[0]).slice(0,2).join(''),
+      onNovo:()=>this.go(a.aberto&&!s.discarded?'retomada':'gravar',{aluno:a.id,rec:'idle',secs:0,file:false}),
+      onSem:()=>this.go('semestral',{aluno:a.id,sem:1}),onHist:()=>this.go('historico',{aluno:a.id})});
+    const filtered=V.loading?[]:ALUNOS.filter(a=>a.nome.toLowerCase().includes(q)).map(mk);
+    const recording=s.rec==='recording',recorded=s.rec==='recorded';
+    const mmss=n=>String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');
+    const bars=Array.from({length:36},(_,i)=>({h:s.rec==='idle'?4:recording?(this.live()?Math.round(6+Math.random()*50*(0.4+Math.abs(Math.sin((i+s.tick)*.5)))):bar(i+3)):bar(i),c:s.rec==='idle'?'var(--bd)':'var(--gd)'}));
+    const failed=v==='failed';
+    const steps=STEPS.map((label,i)=>{const done=i<s.step,cur=i===s.step;return{label,done,current:cur?'step':undefined,
+      border:done?'var(--gd)':cur?'var(--gd)':'var(--bd)',bg:done?'var(--gd)':'transparent',pct:done?100:cur?s.pct:0,
+      color:done||cur?'var(--tx)':'var(--mu)',weight:cur?600:400}});
+    const report=REP(s.versao).map(r=>({...r,list:!!r.items,isText:!!r.text,flat:r.items?r.items.join(' · '):r.text}));
+    const modals={
+      discard:{title:'Descartar o relatório em aberto?',text:'O relatório iniciado pelo Telegram em 20/09/2026 será excluído e não poderá ser recuperado.',ok:'Descartar relatório',danger:true,icon:'delete',c:'var(--err)',bg:'var(--errbg)',act:()=>this.go('gravar',{discarded:true,rec:'idle',secs:0})},
+      cancel:{title:'Cancelar este relatório?',text:'O áudio e o texto gerado serão descartados. Esta ação não pode ser desfeita.',ok:'Cancelar relatório',danger:true,icon:'block',c:'var(--err)',bg:'var(--errbg)',act:()=>this.go('alunos',{toast:'Relatório cancelado.'})},
+      approve:{title:`Aprovar a versão ${scr==='confsem'?1:s.versao}?`,text:'Após aprovar, o relatório entra no histórico e não poderá ser alterado. Ele será o documento oficial entregue à família.',ok:'Aprovar relatório',safe:true,icon:'verified',c:'var(--gs)',bg:'var(--sf2)',act:()=>this.go('aprovado',{approved:true,mode:scr==='confsem'?'semestral':'aula'})}};
+    const modal=s.modal?modals[s.modal]:null;
+    const semi=s.sem;
+    const narrow=['gravar','perguntas','semestral'].includes(scr);
+    const showFoot=['gravar','perguntas','conferencia','semestral','confsem'].includes(scr)&&!(scr==='semestral'&&V.empty);
+    const hist=(s.approved&&s.mode==='aula'?[{titulo:'Aula de 30/09/2026',apr:'Aprovado em 30/09/2026 às 18:42',d:'30',m:'SET'}]:[]).concat(HIST);
+    if(s.toast&&!this.toastT){this.toastT=setTimeout(()=>{this.toastT=null;this.setState({toast:''})},3200)}
+    const tabOn={bg:'var(--sf)',c:'var(--tx)',sh:'0 1px 3px rgba(0,0,0,.12)'},tabOff={bg:'transparent',c:'var(--mu)',sh:'none'};
+    return {
+      rootVars:{...TH[dark?'dark':'light'],height:p.frame?'100%':'100vh',width:'100%'},
+      inkTx:dark?'marfim':'preto',inkGd:dark?'ouro':'ouroclaro',
+      s:S,v:V,aluno,isMobile:m,isDesktop:!m,isDark:dark,
+      showHeaderM:m&&!S.login,showHeaderD:!m&&!S.login,showBack:m&&isFlow&&!S.processando,noBack:!(m&&isFlow&&!S.processando),
+      headKicker:{retomada:'Relatório em aberto',gravar:'Novo relatório',processando:'Processando',perguntas:'Relatório de aula',conferencia:'Conferência',semestral:'Relatório semestral',confsem:'Conferência semestral',historico:'Histórico'}[scr]||'',
+      goBack:go('alunos'),openSearch:()=>{this.go('alunos',{pick:false});setTimeout(()=>this.searchRef.current&&this.searchRef.current.focus(),50)},
+      menuOpen:s.menu,toggleMenu:()=>this.setState({menu:!s.menu}),menuTop:m?'56px':'70px',
+      toggleTheme:()=>this.setState({theme:dark?'light':'dark'}),switchJustify:dark?'flex-end':'flex-start',switchBg:dark?'var(--gd)':'transparent',switchKnob:dark?'var(--ptx)':'var(--gd)',
+      logout:go('login',{code:''}),navItems,showBottomNav:m&&(S.painel||S.alunos||S.historico||S.aprovado),showRodape:!m&&!S.login&&!showFoot,
+      q:s.q,onQ:e=>this.setState({q:e.target.value}),onHeaderQ:e=>this.go('alunos',{q:e.target.value,pick:false}),clearQ:()=>this.setState({q:''}),
+      code:s.code,onCode:e=>this.setState({code:e.target.value.toUpperCase()}),codeBorder:V.invalid?'var(--err)':'var(--bd)',
+      loggingIn:s.loggingIn,loginLabel:s.loggingIn?'Entrando…':'Entrar',
+      submitLogin:e=>{e.preventDefault();if(V.locked)return;this.setState({loggingIn:true});this.later(()=>this.go('painel',{loggingIn:false}),700)},
+      goPainel:go('painel'),goAlunos:go('alunos',{pick:false}),goRegistrar:go('alunos',{pick:true,q:''}),openRetomada:go('retomada',{aluno:'mm'}),
+      goHist:go('historico'),goGravar:go('gravar',{rec:'idle',secs:0}),
+      firstFive:ALUNOS.slice(0,5).map(mk),filtered,noResults:!V.loading&&filtered.length===0,skel:[1,2,3],
+      alunosKicker:s.pick?'Registrar aula':'Alunos',alunosTitle:s.pick?'Para qual aluno?':'Seus alunos',
+      continuar:go('perguntas'),askDiscard:()=>this.setState({modal:'discard'}),
+      canRecord:!V.blocked,timer:mmss(s.secs),recording,recorded,bars,
+      recStatus:recording?'Gravando…':recorded?'Gravação concluída':'Toque para começar a gravar',
+      recToggle:()=>recording?this.stopRec():this.startRec(),recAria:recording?'Parar gravação':'Começar a gravar',
+      recIcon:recording?'stop':'mic',recBg:recording?'var(--err)':'var(--pbg)',recFg:recording?'var(--erron)':'var(--ptx)',
+      regravar:()=>this.setState({rec:'idle',secs:0}),
+      hasFile:s.file,noFile:!s.file,chooseFile:()=>this.setState({file:true}),removeFile:()=>this.setState({file:false}),uploadH:V.blocked?'160px':'72px',
+      cantSend:!(recorded||s.file),sendAudio:()=>this.startProc('aula'),
+      steps,procKicker:s.mode==='semestral'?'Relatório semestral':'Relatório de aula',
+      procTitle:s.step===0?'Enviando o áudio...':s.step>=3?'Pronto para conferência':s.mode==='semestral'?'Consolidando os relatórios do semestre...':'Transcrevendo o áudio e estruturando o relatório...',
+      retry:()=>this.startProc(s.mode),backToRec:go('gravar',{rec:'idle',secs:0}),
+      perguntas:[{n:'1',t:'Qual repertório foi trabalhado?'},{n:'2',t:'O aluno estudou em casa durante a semana?'},{n:'3',t:'Que atividade você propôs para a próxima aula?'}],
+      answer:s.answer,onAnswer:e=>this.setState({answer:e.target.value}),sendAnswer:()=>this.startProc('aula-resp'),
+      askCancel:()=>this.setState({modal:'cancel'}),
+      versao:s.versao,report,tabTexto:s.tab==='texto',tabPdf:s.tab==='pdf',tabToTexto:()=>this.setState({tab:'texto'}),tabToPdf:()=>this.setState({tab:'pdf'}),
+      tabA:s.tab==='texto'?tabOn:tabOff,tabB:s.tab==='pdf'?tabOn:tabOff,
+      showText:!m||s.tab==='texto',showPdf:!m||s.tab==='pdf',pdfGenerating:v==='pdf'||V.applying,pdfReady:!(v==='pdf'||V.applying),
+      bodyOpacity:V.applying?0.5:1,adjust:s.adjust,onAdjust:e=>this.setState({adjust:e.target.value}),cantAdjust:V.applying||V.outdated,
+      requestChange:()=>{this.setState({variant:'applying'});this.later(()=>this.setState({variant:'',versao:s.versao+1,adjust:'',toast:`Alteração aplicada. Confira a versão ${s.versao+1}.`}),1800)},
+      reload:()=>this.setState({variant:'',versao:s.versao+1}),cantApprove:V.applying||V.outdated,
+      askApprove:()=>this.setState({modal:'approve'}),approveVersion:scr==='confsem'?1:s.versao,
+      aprovKicker:s.mode==='semestral'?'Relatório semestral':'Relatório de aula · 30/09/2026',
+      aprovText:s.mode==='semestral'?'O relatório semestral foi aprovado e já consta no histórico do aluno.':'O relatório desta aula foi aprovado e já consta no histórico do aluno.',
+      sems:SEMS.map((x,i)=>{const on=i===semi;return{t:x.t,on,icon:on?'check':'calendar_month',bd:on?'var(--pbg)':'var(--bd)',bg:on?'var(--pbg)':'var(--sf)',c:on?'var(--ptx)':'var(--tx)',pick:()=>this.setState({sem:i,variant:''})}}),
+      semHint:'Período: '+SEMS[semi].p,genSem:()=>this.startProc('semestral'),semLabel:SEMS[semi===1&&scr==='confsem'?0:semi].t,
+      semCols:m?'minmax(0,1fr)':'220px minmax(0,1fr)',
+      semSecs:SEM.map(([t,text],i)=>{const open=!m||s.open===i;return{n:String(i+1),t,text,id:'sec-'+(i+1),open,chev:open?'expand_less':'expand_more',toggle:()=>m&&this.setState({open:s.open===i?-1:i})}}),
+      hist,pdfLabel:m?'PDF':'Abrir PDF',
+      showFoot,f:{gravar:S.gravar,perguntas:S.perguntas,conf:S.conferencia||S.confsem,semestral:S.semestral},
+      footStyle:m?{display:'flex',flexDirection:'column-reverse',gap:6,maxWidth:1080,margin:'0 auto'}:{display:'flex',justifyContent:'flex-end',alignItems:'center',gap:16,maxWidth:narrow?600:1140,margin:'0 auto'},
+      hasToast:!!s.toast,toast:s.toast,toastBottom:showFoot?(m?'150px':'96px'):(m?'84px':'24px'),
+      hasModal:!!modal,modal:modal||{},modalAlign:m?'flex-end':'center',modalConfirm:()=>modal&&modal.act(),closeModal:()=>this.setState({modal:null})
+    };
+  }
+}
+</script>
+</body>
+</html>
