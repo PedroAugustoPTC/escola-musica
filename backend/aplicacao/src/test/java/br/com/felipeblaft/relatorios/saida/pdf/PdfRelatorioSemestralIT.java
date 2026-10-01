@@ -116,9 +116,25 @@ class PdfRelatorioSemestralIT {
                                 new Aprovacao(
                                         "Clara Souza", Instant.parse("2026-07-02T21:42:00Z"), 2)));
 
-        assertThat(texto(documento))
-                .contains("Aprovado por Clara Souza em 02/07/2026 às 18:42 · versão 2")
+        String texto = texto(documento);
+        // como no modelo: a aprovação aparece só no bloco de assinatura, sem linha duplicada
+        assertThat(texto)
+                .contains("Clara Souza")
+                .contains("Professor responsável")
                 .contains("Aprovado em 02/07/2026 às 18:42")
+                .contains("Versão 2")
+                .contains("documento gerado a partir dos relatórios de aula do período.")
+                .doesNotContain("Aprovado por")
                 .doesNotContain("Documento em conferência");
+        // cabeçalho corrido só a partir da página 2
+        try (PDDocument pdf = Loader.loadPDF(documento.bytes())) {
+            if (pdf.getNumberOfPages() > 1) {
+                PDFTextStripper extrator = new PDFTextStripper();
+                extrator.setStartPage(2);
+                extrator.setEndPage(2);
+                assertThat(extrator.getText(pdf))
+                        .contains("Relatório Semestral · Matteo Ferreira · 1º semestre 2026");
+            }
+        }
     }
 }

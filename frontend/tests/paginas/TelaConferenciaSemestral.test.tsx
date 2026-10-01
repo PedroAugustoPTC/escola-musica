@@ -76,10 +76,10 @@ describe('TelaConferenciaSemestral (11)', () => {
     renderizarRotas(rotas, `/relatorios-semestrais/${ID}`);
 
     expect(
-      await screen.findByText('12 relatórios de aula foram considerados nesta consolidação.'),
-    ).toBeInTheDocument();
+      (await screen.findByText('relatório(s) de aula considerado(s) nesta consolidação.')).parentElement,
+    ).toHaveTextContent('12 relatório(s) de aula considerado(s) nesta consolidação.');
     expect(
-      screen.getByText('Há 2 relatórios de aula em aberto neste período; eles não serão considerados.'),
+      screen.getByText('Há 2 relatório(s) de aula em aberto neste período; eles não serão considerados.'),
     ).toBeInTheDocument();
     const texto = screen.getByRole('article', { name: 'Relatório em texto' });
     expect(within(texto).getAllByRole('heading', { level: 2 })).toHaveLength(10);
@@ -153,7 +153,7 @@ describe('TelaConferenciaSemestral (11)', () => {
     });
     renderizarRotas(rotas, `/relatorios-semestrais/${ID}/aprovado`);
 
-    expect(await screen.findByText(/Relatório semestral · versão 1/)).toBeInTheDocument();
+    expect(await screen.findByText(/Relatório semestral · 1º semestre 2026/)).toBeInTheDocument();
     expect(
       screen.getByText('Relatório aprovado em 21/09/2026 às 18:42. Ele já consta no histórico do aluno.'),
     ).toBeInTheDocument();

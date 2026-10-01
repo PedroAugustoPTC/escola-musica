@@ -95,7 +95,7 @@ class SemestralConversaIT extends TelegramConversaBase {
                 .contains("Aluno: Matteo Ferreira")
                 .contains("Período: 1º semestre 2026")
                 .contains("Versão 1")
-                .contains("2 relatórios de aula foram considerados nesta consolidação.")
+                .contains("2 relatório(s) de aula considerado(s) nesta consolidação.")
                 .contains("<b>1. Informações Gerais</b>")
                 .contains("<b>10. Parecer Final</b>");
         API_BOTS.verify(1, postRequestedFor(urlPathMatching(".*/sendDocument")));
@@ -167,12 +167,12 @@ class SemestralConversaIT extends TelegramConversaBase {
 
         assertThat(ultimaMensagem().get("text").asString())
                 .contains(
-                        "Há 1 relatórios de aula em aberto neste período; eles não serão considerados.");
+                        "Há 1 relatório(s) de aula em aberto neste período; eles não serão considerados.");
         assertThat(botoes(ultimaMensagem())).containsExactly("v1:gerarsim:", "v1:voltar:");
         enviarCallback(USUARIO_CLARA, "v1:gerar:");
         assertThat(ultimaMensagem().get("text").asString())
                 .isEqualTo(
-                        "Há 1 relatórios de aula em aberto neste período; eles não serão considerados.");
+                        "Há 1 relatório(s) de aula em aberto neste período; eles não serão considerados.");
         enviarCallback(USUARIO_CLARA, "v1:per:1");
         enviarCallback(USUARIO_CLARA, "v1:gerarsim:");
         cenario.processarFila();

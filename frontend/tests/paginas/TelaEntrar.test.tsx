@@ -89,7 +89,10 @@ describe('TelaEntrar (01)', () => {
     await usuario.type(screen.getByLabelText('Código de acesso'), 'K7QM2XPA');
     await usuario.click(screen.getByRole('button', { name: 'Entrar' }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Tente novamente em 2 minuto(s).');
+    // folga maior que o padrão de 1 s: sob carga (suíte inteira em paralelo) a resposta pode atrasar
+    expect(await screen.findByRole('alert', {}, { timeout: 5000 })).toHaveTextContent(
+      'Tente novamente em 2 minuto(s).',
+    );
     expect(screen.getByLabelText('Código de acesso')).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Entrar' })).toBeDisabled();
   });

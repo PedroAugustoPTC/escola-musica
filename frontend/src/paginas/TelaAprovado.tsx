@@ -6,7 +6,7 @@ import { EstadoErro } from '../componentes/EstadoErro';
 import { Estrutura } from '../componentes/Estrutura';
 import { Icone } from '../componentes/Icone';
 import { msg } from '../mensagens/mensagens';
-import { dataDoInstante, horaDoInstante } from '../servicos/formatacao';
+import { dataDoInstante, formatarData, horaDoInstante } from '../servicos/formatacao';
 import { useRelatorioAula } from '../servicos/relatoriosAula';
 import { useRelatorioSemestral } from '../servicos/semestral';
 
@@ -45,6 +45,9 @@ export function TelaAprovado({ semestral = false }: { semestral?: boolean }) {
   const aprovadoEm = dados.aprovadoEm ?? dados.atualizadoEm;
   const data = dataDoInstante(aprovadoEm);
   const hora = horaDoInstante(aprovadoEm);
+  // como no protótipo: a aula pela data; o semestral pelo período
+  const referencia =
+    'dataAula' in dados ? formatarData(dados.dataAula) : dados.informacoesGerais.periodoRotulo;
 
   return (
     <Estrutura contexto={contexto}>
@@ -53,7 +56,7 @@ export function TelaAprovado({ semestral = false }: { semestral?: boolean }) {
           <Icone nome="check" tamanho="grande" />
         </span>
         <div className="sobretitulo">
-          {semestral ? 'Relatório semestral' : 'Relatório de aula'} · versão {dados.versaoVigente}
+          {semestral ? 'Relatório semestral' : 'Relatório de aula'} · {referencia}
         </div>
         <h1 role="status" className="titulo-pagina titulo-pagina--maior">
           Relatório aprovado

@@ -55,14 +55,14 @@ export function TelaSemestral() {
 
   if (aluno.isPending || semestres.isPending) {
     return (
-      <Estrutura contexto={contexto}>
+      <Estrutura navAtiva="alunos" contexto={contexto}>
         <EstadoCarregando rotulo="Carregando os semestres" />
       </Estrutura>
     );
   }
   if (aluno.isError || semestres.isError) {
     return (
-      <Estrutura contexto={contexto}>
+      <Estrutura navAtiva="alunos" contexto={contexto}>
         <EstadoErro erro={aluno.error ?? semestres.error} aoTentarDeNovo={() => void semestres.refetch()} />
       </Estrutura>
     );
@@ -113,6 +113,7 @@ export function TelaSemestral() {
 
   return (
     <Estrutura
+      navAtiva="alunos"
       contexto={contexto}
       barraEstreita
       barraAcoes={

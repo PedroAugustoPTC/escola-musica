@@ -18,7 +18,7 @@
 
 | Código | HTTP | Texto |
 |---|---|---|
-| `CODIGO_NECESSARIO` | — | Olá! Para usar o bot, envie o código de acesso que a secretaria da escola te passou. † |
+| `CODIGO_NECESSARIO` | — | Olá! Para usar o bot, envie o código de acesso que você recebeu da secretaria da escola. † |
 | `CODIGO_INVALIDO` | 401 | Código inválido. Confira o código e tente de novo, ou peça um novo à secretaria da escola. |
 | `CODIGO_EXPIRADO` | 401 | Este código venceu após 7 dias sem uso. Peça um novo código à secretaria da escola. |
 | `BLOQUEADO_TEMPORARIAMENTE` | 429 | Acesso bloqueado temporariamente por muitas tentativas incorretas. Tente novamente em {minutos} minuto(s). |
@@ -115,9 +115,9 @@
 | `SEM_SEMESTRES` | — | Nenhum semestre disponível para este aluno ainda. |
 | `SEMESTRE_EM_ANDAMENTO` | — | em andamento |
 | `SEM_AULAS_APROVADAS_NO_PERIODO` | 409 | Nenhum relatório de aula aprovado neste período. Registre as aulas do semestre antes de gerar o relatório. |
-| `HA_RELATORIOS_EM_ABERTO` | 409 | Há {quantidade} relatórios de aula em aberto neste período; eles não serão considerados. |
+| `HA_RELATORIOS_EM_ABERTO` | 409 | Há {quantidade} relatório(s) de aula em aberto neste período; eles não serão considerados. |
 | `SEMESTRAL_JA_APROVADO` | 409 | O relatório semestral deste período já foi aprovado. |
-| `AULAS_CONSIDERADAS` | — | {quantidade} relatórios de aula foram considerados nesta consolidação. |
+| `AULAS_CONSIDERADAS` | — | {quantidade} relatório(s) de aula considerado(s) nesta consolidação. |
 | `FALHA_CONSOLIDACAO` | — | Não foi possível gerar o relatório semestral agora. Nada foi criado. Tente novamente. |
 
 ## Histórico e documentos

@@ -73,14 +73,14 @@ export function TelaProcessando() {
 
   if (trabalho.isPending) {
     return (
-      <Estrutura contexto={contexto}>
+      <Estrutura navAtiva="alunos" contexto={contexto}>
         <EstadoCarregando rotulo="Consultando o processamento" />
       </Estrutura>
     );
   }
   if (trabalho.isError) {
     return (
-      <Estrutura contexto={contexto}>
+      <Estrutura navAtiva="alunos" contexto={contexto}>
         <EstadoErro erro={trabalho.error} aoTentarDeNovo={() => void trabalho.refetch()} />
       </Estrutura>
     );
@@ -121,7 +121,7 @@ export function TelaProcessando() {
   if (falhou) {
     const semRelatorio = dados.resultadoCodigo === 'AUDIO_NAO_PROCESSAVEL';
     return (
-      <Estrutura contexto={contexto}>
+      <Estrutura navAtiva="alunos" contexto={contexto}>
         <div className="pagina pagina--centro">
           <div role="alert" className="cartao cartao--falha">
             <span className="circulo-icone circulo-icone--erro">
@@ -174,7 +174,7 @@ export function TelaProcessando() {
   }
 
   return (
-    <Estrutura contexto={contexto}>
+    <Estrutura navAtiva="alunos" contexto={contexto}>
       <div className="pagina pagina--centro">
         <div aria-live="polite">
           <div className="sobretitulo">

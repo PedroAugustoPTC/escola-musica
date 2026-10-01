@@ -65,14 +65,14 @@ export function TelaPerguntas() {
 
   if (relatorio.isPending) {
     return (
-      <Estrutura contexto={contexto}>
+      <Estrutura navAtiva="alunos" contexto={contexto}>
         <EstadoCarregando rotulo="Carregando as perguntas" />
       </Estrutura>
     );
   }
   if (relatorio.isError) {
     return (
-      <Estrutura contexto={contexto}>
+      <Estrutura navAtiva="alunos" contexto={contexto}>
         <EstadoErro erro={relatorio.error} aoTentarDeNovo={() => void relatorio.refetch()} />
       </Estrutura>
     );
@@ -114,6 +114,7 @@ export function TelaPerguntas() {
 
   return (
     <Estrutura
+      navAtiva="alunos"
       contexto={contexto}
       barraEstreita
       barraAcoes={

@@ -136,14 +136,14 @@ export function TelaConferencia() {
 
   if (relatorio.isPending) {
     return (
-      <Estrutura contexto={contexto}>
+      <Estrutura navAtiva="alunos" contexto={contexto}>
         <EstadoCarregando rotulo="Carregando o relatório" />
       </Estrutura>
     );
   }
   if (relatorio.isError) {
     return (
-      <Estrutura contexto={contexto}>
+      <Estrutura navAtiva="alunos" contexto={contexto}>
         <EstadoErro erro={relatorio.error} aoTentarDeNovo={() => void relatorio.refetch()} />
       </Estrutura>
     );
@@ -216,6 +216,7 @@ export function TelaConferencia() {
 
   return (
     <Estrutura
+      navAtiva="alunos"
       contexto={contexto}
       barraAcoes={
         <>

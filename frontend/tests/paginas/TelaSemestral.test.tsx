@@ -123,7 +123,7 @@ describe('TelaSemestral (10)', () => {
 
     expect(
       await screen.findByText(
-        'Há 2 relatórios de aula em aberto neste período; eles não serão considerados.',
+        'Há 2 relatório(s) de aula em aberto neste período; eles não serão considerados.',
       ),
     ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Gerar relatório semestral' })).toBeDisabled();

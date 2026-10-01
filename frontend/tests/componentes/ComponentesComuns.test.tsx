@@ -200,6 +200,8 @@ describe('Cabecalho', () => {
     await usuario.type(screen.getByRole('searchbox', { name: 'Buscar aluno' }), 'olavo{Enter}');
     expect(roteador.state.location.search).toBe('?busca=olavo');
     await waitFor(() => expect(screen.getByText('CS')).toBeInTheDocument());
-    expect(iniciais('Clara de Souza Lima')).toBe('CD');
+    expect(iniciais('Clara de Souza Lima')).toBe('CL');
+    expect(iniciais('Miguel de Castro Torrente')).toBe('MT');
+    expect(iniciais('Matteo')).toBe('M');
   });
 });

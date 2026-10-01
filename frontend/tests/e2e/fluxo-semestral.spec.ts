@@ -14,7 +14,9 @@ test('gera, confere e aprova o semestral; gerar de novo é recusado', async ({ p
 
   await page.goto(`/alunos/${dados.alunos.matteo}/semestral`);
   await page.getByRole('button', { name: 'Gerar relatório semestral' }).click();
-  await expect(page.getByText('1 relatórios de aula foram considerados nesta consolidação.')).toBeVisible();
+  await expect(page.locator('.consolidacao')).toHaveText(
+    '1 relatório(s) de aula considerado(s) nesta consolidação.',
+  );
   await expect(page.getByRole('article', { name: 'Relatório em texto' })).toContainText('Informações Gerais');
 
   await aprovar(page, 1);

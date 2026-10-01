@@ -105,14 +105,14 @@ export function TelaConferenciaSemestral() {
 
   if (relatorio.isPending) {
     return (
-      <Estrutura contexto={contexto}>
+      <Estrutura navAtiva="alunos" contexto={contexto}>
         <EstadoCarregando rotulo="Carregando o relatório semestral" />
       </Estrutura>
     );
   }
   if (relatorio.isError) {
     return (
-      <Estrutura contexto={contexto}>
+      <Estrutura navAtiva="alunos" contexto={contexto}>
         <EstadoErro erro={relatorio.error} aoTentarDeNovo={() => void relatorio.refetch()} />
       </Estrutura>
     );
@@ -180,6 +180,7 @@ export function TelaConferenciaSemestral() {
 
   return (
     <Estrutura
+      navAtiva="alunos"
       contexto={contexto}
       barraAcoes={
         <>
@@ -210,7 +211,8 @@ export function TelaConferenciaSemestral() {
           </div>
         </div>
         <div className="consolidacao">
-          {msg('AULAS_CONSIDERADAS', { quantidade: dados.informacoesGerais.quantidadeAulasConsideradas })}
+          <span className="consolidacao__numero">{dados.informacoesGerais.quantidadeAulasConsideradas}</span>{' '}
+          <span>{msg('AULAS_CONSIDERADAS', { quantidade: '' }).trim()}</span>
         </div>
         {dados.quantidadeRelatoriosEmAberto > 0 ? (
           <div role="status" className="alerta alerta--aviso">

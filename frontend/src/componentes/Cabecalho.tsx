@@ -21,13 +21,12 @@ export const ITENS_NAVEGACAO: { chave: ItemNavegacao; rotulo: string; icone: str
   { chave: 'registrar', rotulo: msg('BOTAO_REGISTRAR_AULA'), icone: 'mic', rota: '/alunos?registrar=1' },
 ];
 
+/** Iniciais do primeiro e do último nome ("Miguel de Castro Torrente" → "MT"). */
 export function iniciais(nome: string): string {
-  return nome
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((parte) => parte[0]!.toUpperCase())
-    .slice(0, 2)
-    .join('');
+  const partes = nome.split(/\s+/).filter(Boolean);
+  const primeira = partes[0]?.[0] ?? '';
+  const ultima = partes.length > 1 ? partes[partes.length - 1]![0]! : '';
+  return (primeira + ultima).toUpperCase();
 }
 
 /** Menu do professor (02c): tema claro/escuro e "Encerrar sessão" (só navega após 2xx). */

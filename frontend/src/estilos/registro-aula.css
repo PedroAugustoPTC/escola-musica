@@ -622,10 +622,23 @@
 }
 
 .consolidacao {
-  padding: 12px 16px;
-  border-left: 3px solid var(--gd);
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 18px 20px;
+  border: 1px solid var(--gd);
+  border-radius: 8px;
   background: var(--sf);
-  font-size: 15px;
+  font-size: 16px;
+  text-wrap: pretty;
+}
+
+.consolidacao__numero {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 52px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--gs);
 }
 
 .secoes__titulo--numerado {

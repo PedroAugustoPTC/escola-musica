@@ -30,7 +30,7 @@ class VinculacaoConversaIT extends TelegramConversaBase {
         enviarTexto(USUARIO_CLARA, "/start");
         assertThat(textosEnviados())
                 .containsOnly(
-                        "Olá! Para usar o bot, envie o código de acesso que a secretaria da escola te passou.");
+                        "Olá! Para usar o bot, envie o código de acesso que você recebeu da secretaria da escola.");
         assertThat(jdbc.queryForObject("select count(*) from tentativa_acesso", Integer.class))
                 .isZero();
     }

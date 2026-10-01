@@ -135,7 +135,10 @@ public class OpenHtmlToPdfGeracaoPdfAdaptador implements GeracaoPdfPorta {
         variaveis.put("titulo", catalogo.texto("PDF_TITULO_SEMESTRAL"));
         variaveis.put("aluno", info.nome());
         variaveis.put("professor", info.professor());
-        variaveis.put("periodo", secoesSemestral.rotuloPeriodo(info.periodoChave()));
+        variaveis.put(
+                "periodo",
+                formatacao.data(info.periodoInicio()) + " a " + formatacao.data(info.periodoFim()));
+        variaveis.put("periodoRotulo", secoesSemestral.rotuloPeriodo(info.periodoChave()));
         variaveis.put(
                 "consolidacao",
                 catalogo.texto(
@@ -143,7 +146,9 @@ public class OpenHtmlToPdfGeracaoPdfAdaptador implements GeracaoPdfPorta {
                         Map.of("quantidade", info.quantidadeAulasConsideradas())));
         variaveis.put("secoes", secoesSemestral.secoes(info, modelo.conteudo()));
         variaveis.put(
-                "rodapeTexto", catalogo.texto("PDF_RODAPE") + " — relatório pedagógico semestral.");
+                "rodapeTexto",
+                catalogo.texto("PDF_RODAPE")
+                        + " — documento gerado a partir dos relatórios de aula do período.");
         preencherSituacao(variaveis, modelo.situacao(), modelo.aprovacao(), modelo.versao());
         variaveis.put(
                 "aprovadoEm",

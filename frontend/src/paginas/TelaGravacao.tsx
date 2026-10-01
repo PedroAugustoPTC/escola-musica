@@ -33,14 +33,14 @@ export function TelaGravacao() {
 
   if (aluno.isPending) {
     return (
-      <Estrutura contexto={contexto}>
+      <Estrutura navAtiva="alunos" contexto={contexto}>
         <EstadoCarregando rotulo="Carregando o aluno" />
       </Estrutura>
     );
   }
   if (aluno.isError) {
     return (
-      <Estrutura contexto={contexto}>
+      <Estrutura navAtiva="alunos" contexto={contexto}>
         <EstadoErro erro={aluno.error} />
       </Estrutura>
     );
@@ -66,6 +66,7 @@ export function TelaGravacao() {
 
   return (
     <Estrutura
+      navAtiva="alunos"
       contexto={contexto}
       barraEstreita
       barraAcoes={

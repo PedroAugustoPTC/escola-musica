@@ -37,14 +37,14 @@ export function TelaHistorico() {
 
   if (historico.isPending) {
     return (
-      <Estrutura contexto={contexto} navInferior>
+      <Estrutura navAtiva="alunos" contexto={contexto} navInferior>
         <EstadoCarregando rotulo="Carregando histórico" />
       </Estrutura>
     );
   }
   if (historico.isError) {
     return (
-      <Estrutura contexto={contexto} navInferior>
+      <Estrutura navAtiva="alunos" contexto={contexto} navInferior>
         <EstadoErro erro={historico.error} aoTentarDeNovo={() => void historico.refetch()} />
       </Estrutura>
     );
@@ -67,7 +67,7 @@ export function TelaHistorico() {
   };
 
   return (
-    <Estrutura contexto={contexto} navInferior>
+    <Estrutura navAtiva="alunos" contexto={contexto} navInferior>
       <div className="pagina pagina--media">
         <div>
           <div className="sobretitulo">Histórico</div>

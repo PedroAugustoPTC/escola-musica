@@ -42,14 +42,14 @@ export function TelaRelatorioEmAberto() {
 
   if (consulta.isPending) {
     return (
-      <Estrutura contexto={contexto}>
+      <Estrutura navAtiva="alunos" contexto={contexto}>
         <EstadoCarregando rotulo="Consultando o relatório em aberto" />
       </Estrutura>
     );
   }
   if (consulta.isError) {
     return (
-      <Estrutura contexto={contexto}>
+      <Estrutura navAtiva="alunos" contexto={contexto}>
         <EstadoErro erro={consulta.error} aoTentarDeNovo={() => void consulta.refetch()} />
       </Estrutura>
     );
@@ -80,7 +80,7 @@ export function TelaRelatorioEmAberto() {
   };
 
   return (
-    <Estrutura contexto={contexto}>
+    <Estrutura navAtiva="alunos" contexto={contexto}>
       <div className="pagina pagina--estreita">
         <div className="cartao cartao--retomada">
           <span className="circulo-icone circulo-icone--aviso">

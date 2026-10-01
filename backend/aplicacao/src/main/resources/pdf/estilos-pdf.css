@@ -167,13 +167,17 @@ table.numerada td.numero {
 table.assinaturas {
   width: 100%;
   margin-top: 30pt;
-  border-collapse: separate;
-  border-spacing: 36pt 0;
+  border-collapse: collapse;
   page-break-inside: avoid;
 }
 
+table.assinaturas td.espaco {
+  width: 8%;
+  border-top: none;
+}
+
 table.assinaturas td {
-  width: 50%;
+  width: 46%;
   padding-top: 8pt;
   border-top: 0.75pt solid #141414;
   font-size: 10.5pt;
@@ -182,4 +186,32 @@ table.assinaturas td {
 
 .apoio {
   color: #3d3a35;
+}
+
+/* Cabeçalho corrido das páginas 2+ (só no semestral). */
+.corrido {
+  position: running(corrido);
+  width: 100%;
+  padding-bottom: 6pt;
+  border-bottom: 0.75pt solid #141414;
+  font-size: 9pt;
+  color: #3d3a35;
+}
+
+.corrido table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.corrido img {
+  height: 22pt;
+}
+
+.corrido td.identificacao {
+  text-align: right;
+  vertical-align: bottom;
+}
+
+.fim {
+  page-break-inside: avoid;
 }
