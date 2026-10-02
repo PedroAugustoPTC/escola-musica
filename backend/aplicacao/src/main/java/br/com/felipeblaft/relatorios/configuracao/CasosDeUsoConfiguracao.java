@@ -16,6 +16,12 @@ import br.com.felipeblaft.relatorios.casodeuso.aula.RegistrarAulaPorAudioCasoDeU
 import br.com.felipeblaft.relatorios.casodeuso.aula.ResponderPerguntasCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.aula.SolicitarAlteracaoRelatorioAulaCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.aula.TentarNovamenteRelatorioAulaCasoDeUso;
+import br.com.felipeblaft.relatorios.casodeuso.canal.ConfirmarExecucaoAcoesCanalCasoDeUso;
+import br.com.felipeblaft.relatorios.casodeuso.canal.ConsultarAcaoCanalCasoDeUso;
+import br.com.felipeblaft.relatorios.casodeuso.canal.EmitirDocumentoCanalCasoDeUso;
+import br.com.felipeblaft.relatorios.casodeuso.canal.GravarAcoesCanalCasoDeUso;
+import br.com.felipeblaft.relatorios.casodeuso.canal.ObterAcoesNaoConfirmadasDoUpdateCasoDeUso;
+import br.com.felipeblaft.relatorios.casodeuso.canal.ObterDocumentoCanalCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.carga.CarregarCadastroInicialCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.carga.EmitirCodigoAcessoCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.documento.ObterDocumentoRelatorioCasoDeUso;
@@ -32,11 +38,14 @@ import br.com.felipeblaft.relatorios.casodeuso.semestral.ObterRelatorioSemestral
 import br.com.felipeblaft.relatorios.casodeuso.semestral.SolicitarAlteracaoRelatorioSemestralCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.trabalho.ConsultarTrabalhoCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.trabalho.DescartarRegistroEmProcessamentoCasoDeUso;
+import br.com.felipeblaft.relatorios.dominio.canal.PoliticaRetentativa;
 import br.com.felipeblaft.relatorios.dominio.comum.ParametrosNegocio;
+import br.com.felipeblaft.relatorios.porta.AcaoCanalRepositorio;
 import br.com.felipeblaft.relatorios.porta.AlunoRepositorio;
 import br.com.felipeblaft.relatorios.porta.ArmazenamentoDocumentoPorta;
 import br.com.felipeblaft.relatorios.porta.ArquivoCanalPorta;
 import br.com.felipeblaft.relatorios.porta.AssociacaoRepositorio;
+import br.com.felipeblaft.relatorios.porta.DocumentoCanalRepositorio;
 import br.com.felipeblaft.relatorios.porta.DocumentoPdfRepositorio;
 import br.com.felipeblaft.relatorios.porta.FilaTrabalhoPorta;
 import br.com.felipeblaft.relatorios.porta.GeracaoPdfPorta;
@@ -71,6 +80,7 @@ import br.com.felipeblaft.relatorios.servico.ProcessadorSemestralServico;
 import br.com.felipeblaft.relatorios.servico.ProcessadorTrabalhoServico;
 import br.com.felipeblaft.relatorios.servico.RenovacaoAcessoServico;
 import java.time.Duration;
+import java.util.concurrent.ThreadLocalRandom;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -522,6 +532,60 @@ public class CasosDeUsoConfiguracao {
                         acesso, interacoes, versoes, documentos, geracao, fila);
         obterDocumento.registrarFonteSemestral(obter);
         return obter;
+    }
+
+    // ---- Canal Telegram interno (feature 002)
+
+    @Bean
+    PoliticaRetentativa politicaRetentativaCanal(PropriedadesAplicacao propriedades) {
+        PropriedadesAplicacao.CanalTelegram canal = propriedades.canalTelegram();
+        return new PoliticaRetentativa(
+                Duration.ofSeconds(canal.retentativaInicialSegundos()),
+                Duration.ofSeconds(canal.retentativaTetoSegundos()),
+                Duration.ofHours(canal.prazoHoras()),
+                () -> ThreadLocalRandom.current().nextDouble(-1.0, 1.0));
+    }
+
+    @Bean
+    GravarAcoesCanalCasoDeUso gravarAcoesCanalCasoDeUso(
+            AcaoCanalRepositorio acoes, RelogioPorta relogio, PoliticaRetentativa politica) {
+        return new GravarAcoesCanalCasoDeUso(acoes, relogio, politica);
+    }
+
+    @Bean
+    EmitirDocumentoCanalCasoDeUso emitirDocumentoCanalCasoDeUso(
+            DocumentoCanalRepositorio documentos,
+            RelogioPorta relogio,
+            PoliticaRetentativa politica) {
+        return new EmitirDocumentoCanalCasoDeUso(documentos, relogio, politica);
+    }
+
+    @Bean
+    ObterAcoesNaoConfirmadasDoUpdateCasoDeUso obterAcoesNaoConfirmadasDoUpdateCasoDeUso(
+            AcaoCanalRepositorio acoes) {
+        return new ObterAcoesNaoConfirmadasDoUpdateCasoDeUso(acoes);
+    }
+
+    @Bean
+    ConfirmarExecucaoAcoesCanalCasoDeUso confirmarExecucaoAcoesCanalCasoDeUso(
+            AcaoCanalRepositorio acoes,
+            FilaTrabalhoPorta fila,
+            RelogioPorta relogio,
+            PoliticaRetentativa politica) {
+        return new ConfirmarExecucaoAcoesCanalCasoDeUso(acoes, fila, relogio, politica);
+    }
+
+    @Bean
+    ConsultarAcaoCanalCasoDeUso consultarAcaoCanalCasoDeUso(AcaoCanalRepositorio acoes) {
+        return new ConsultarAcaoCanalCasoDeUso(acoes);
+    }
+
+    @Bean
+    ObterDocumentoCanalCasoDeUso obterDocumentoCanalCasoDeUso(
+            DocumentoCanalRepositorio documentos,
+            ObterDocumentoRelatorioCasoDeUso obterDocumento,
+            RelogioPorta relogio) {
+        return new ObterDocumentoCanalCasoDeUso(documentos, obterDocumento, relogio);
     }
 
     // ---- Histórico (US5)

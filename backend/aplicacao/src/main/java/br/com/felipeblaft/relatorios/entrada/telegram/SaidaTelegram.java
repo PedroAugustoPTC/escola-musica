@@ -29,7 +29,16 @@ public sealed interface SaidaTelegram {
     record Edicao(long chatId, long mensagemId, String texto, Teclado teclado)
             implements SaidaTelegram {}
 
-    record Documento(long chatId, byte[] conteudo, String nomeArquivo, String legenda)
+    /**
+     * PDF para o chat. O envio direto usa os bytes em {@code conteudo}; a rota interna do canal usa só
+     * a {@code referencia} (o orquestrador obtém os bytes por identificador opaco).
+     */
+    record Documento(
+            long chatId,
+            byte[] conteudo,
+            String nomeArquivo,
+            String legenda,
+            ReferenciaDocumento referencia)
             implements SaidaTelegram {}
 
     /**

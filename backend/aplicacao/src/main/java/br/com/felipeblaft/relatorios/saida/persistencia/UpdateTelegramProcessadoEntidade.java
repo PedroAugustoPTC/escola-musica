@@ -17,6 +17,12 @@ public class UpdateTelegramProcessadoEntidade {
     @Column(name = "recebido_em", nullable = false)
     private Instant recebidoEm;
 
+    @Column(name = "total_acoes")
+    private Integer totalAcoes;
+
+    @Column(name = "origem")
+    private String origem;
+
     protected UpdateTelegramProcessadoEntidade() {}
 
     long getUpdateId() {
@@ -25,5 +31,13 @@ public class UpdateTelegramProcessadoEntidade {
 
     Instant getRecebidoEm() {
         return recebidoEm;
+    }
+
+    Integer getTotalAcoes() {
+        return totalAcoes;
+    }
+
+    String getOrigem() {
+        return origem;
     }
 }

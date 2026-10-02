@@ -10,13 +10,16 @@ import java.util.function.DoubleSupplier;
  */
 public final class PoliticaRetentativa {
 
+    /** Jitter de ±10% (contracts/canal-telegram-interno.md §3). */
+    private static final double JITTER_MAXIMO = 0.1;
+
     private final Duration inicial;
     private final Duration teto;
     private final Duration prazo;
     private final DoubleSupplier jitter;
 
     /**
-     * @param jitter devolve um fator em [-1, 1] aplicado como {@code espera × (1 + fator × 0,2)};
+     * @param jitter devolve um fator em [-1, 1] aplicado como {@code espera × (1 + fator × 0,1)};
      *     zero nos testes determinísticos
      */
     public PoliticaRetentativa(
@@ -52,7 +55,7 @@ public final class PoliticaRetentativa {
         }
         segundos = Math.min(segundos, limite);
         double fator = Math.max(-1.0, Math.min(1.0, jitter.getAsDouble()));
-        long milissegundos = Math.round(segundos * 1000.0 * (1.0 + fator * 0.2));
+        long milissegundos = Math.round(segundos * 1000.0 * (1.0 + fator * JITTER_MAXIMO));
         return agora.plusMillis(Math.max(milissegundos, 0));
     }
 
