@@ -16,6 +16,16 @@
 
 **Escopo desta feature**: somente a **API interna do backend** que permite a um orquestrador externo fazer o transporte do Telegram. Fora de escopo (feature `003`): criar os workflows do n8n, alterar a composição de contêineres e o proxy, trocar o webhook registrado no Telegram, remover o caminho antigo de envio direto ao Telegram. O webhook atual continua funcionando integralmente durante e depois desta feature.
 
+## Clarifications
+
+### Session 2026-10-02
+
+- Q: Quando o n8n repete um update já processado, como evitar que o professor receba as mesmas mensagens duas vezes no chat? → A: Toda ação de resposta também tem id estável (derivado de `update_id` + posição) e confirmação de execução ao backend; o update repetido devolve só as ações ainda não confirmadas (lista vazia se todas confirmadas).
+- Q: Quando uma ação da lista falha ao ser executada no Telegram, o que o orquestrador faz com as ações seguintes? → A: Continua com as seguintes, em ordem, sem parar; informa cada falha ao backend na confirmação, com código de motivo (ex.: `MENSAGEM_NAO_EDITAVEL`); o backend decide a compensação (ex.: nova mensagem no lugar da edição).
+- Q: Por quanto tempo e com quais intervalos o backend tenta entregar uma ação proativa antes de marcá-la como falha definitiva? → A: Intervalo inicial de 30 s, dobrando a cada tentativa até o teto de 15 min, com prazo total de 24 h (valores padrão, configuráveis por ambiente); depois disso a ação vira falha definitiva.
+- Q: Na rotação do token de serviço, o backend aceita dois tokens válidos ao mesmo tempo durante a troca? → A: Sim, até dois tokens simultâneos (atual e próximo), cada um comparado em tempo constante, para trocar sem janela de indisponibilidade.
+- Q: Dentro do formato v1, o que pode mudar sem nova versão, e o que o orquestrador faz ao receber um tipo de ação desconhecido? → A: Mudanças aditivas (campo opcional novo, tipo de ação novo) ficam na v1; o orquestrador ignora campos desconhecidos e, diante de ação desconhecida, a pula, informa `ACAO_NAO_SUPORTADA` na confirmação e continua; mudança incompatível cria nova versão, e a anterior é mantida durante a migração.
+
 ## Quem usa esta API
 
 - **Orquestrador de canal (n8n)**: consumidor técnico direto. Só transporta: entrega ao backend o que chegou do Telegram e executa no Telegram o que o backend mandar. Não decide o que responder.
@@ -38,7 +48,7 @@ O orquestrador recebe um update do Telegram (mensagem de texto, mensagem de voz,
 2. **Given** um professor vinculado com relatório aguardando conferência, **When** o orquestrador entrega o toque no botão "Aprovar relatório", **Then** a resposta traz, em ordem, a confirmação do toque (para tirar o indicador de carregamento) e a mensagem `CONFIRMAR_APROVACAO` com os botões esperados.
 3. **Given** um professor que confirmou o aluno de um áudio, **When** a resposta do backend inclui uma mensagem de etapa, **Then** a ação identifica o trabalho a que a etapa pertence e, se for uma etapa seguinte, a mensagem anterior a editar no lugar.
 4. **Given** um relatório pronto para conferência, **When** o backend monta a apresentação, **Then** a resposta traz as mensagens do texto das seções (divididas se passarem do limite do chat), a ação de enviar o PDF como documento e os botões de aprovar, alterar e cancelar, na ordem de hoje.
-5. **Given** o mesmo update (mesmo identificador de update) entregue duas vezes, **When** a segunda entrega chega, **Then** o estado da conversa não é processado de novo e a resposta traz as mesmas ações da primeira, para que o professor nunca fique sem resposta caso a primeira resposta tenha se perdido no caminho.
+5. **Given** o mesmo update (mesmo identificador de update) entregue duas vezes, **When** a segunda entrega chega, **Then** o estado da conversa não é processado de novo e a resposta traz apenas as ações da primeira entrega que o orquestrador ainda não confirmou como executadas (lista vazia se todas já foram confirmadas), para que o professor nunca fique sem resposta caso a primeira resposta tenha se perdido no caminho, e nunca receba a mesma mensagem duas vezes.
 
 ---
 
@@ -119,13 +129,14 @@ O áudio nunca passa pelo orquestrador: o update traz apenas a referência do ar
 
 - **Update de tipo não suportado ou mal formado**: o comportamento é o de hoje (tipos ignorados resultam em lista de ações vazia; grupos recebem a mensagem de que o bot só atende em conversa privada; corpo ilegível não gera erro para o Telegram).
 - **Erro inesperado ao interpretar o update**: a resposta ainda traz `ERRO_INTERNO` ao chat (e a confirmação do botão, se for um toque), para que toda mensagem receba resposta (FR-039).
-- **Mesmo `update_id` chegando em paralelo**: apenas um processamento ocorre; a outra chamada recebe as mesmas ações do primeiro.
-- **Orquestrador executa só parte das ações e cai**: as ações já executadas não são repetidas por quem reentrega; o contrato exige o identificador de cada ação para que o orquestrador registre o que já executou.
+- **Mesmo `update_id` chegando em paralelo**: apenas um processamento ocorre; a outra chamada recebe as ações do primeiro que ainda não foram confirmadas como executadas.
+- **Orquestrador executa só parte das ações e cai**: o backend registra a confirmação de cada ação executada (FR-007a); a repetição do update, ou a reentrega proativa, devolve só as não confirmadas, sem repetir as já executadas.
 - **Botão de mensagem antiga**: devolve `ACAO_EXPIRADA` e reapresenta a etapa, como hoje.
 - **Mensagem de etapa cuja mensagem anterior foi apagada pelo professor**: o orquestrador informa a falha de edição; o backend passa a enviar uma nova mensagem de etapa em vez de ficar sem informar o avanço.
+- **Edição que falha numa lista de ações (mensagem antiga demais, apagada ou sem alteração)**: o orquestrador continua com as ações seguintes, informa a falha com código de motivo (FR-007b) e o backend emite como compensação uma nova ação de mensagem com o mesmo conteúdo; a compensação recebe identificador próprio e segue as regras de confirmação e idempotência.
 - **Várias ações proativas para o mesmo chat ao mesmo tempo**: a ordem de execução no chat preserva a ordem de criação.
 - **Reentrega de ação de uma conversa cujo vínculo foi desfeito entretanto**: a ação é descartada com registro, sem enviar mensagem.
-- **Rotação do token de serviço**: a troca do token exige reconfiguração do backend e do orquestrador; nenhuma entrega pendente se perde por causa disso.
+- **Rotação do token de serviço**: com dois tokens aceitos ao mesmo tempo (FR-026a), a troca ocorre sem janela de recusas; nenhuma entrega pendente se perde por causa disso. Depois de removido o token antigo, chamadas com ele são recusadas.
 - **PDF muito grande ou indisponível no momento da busca**: o orquestrador recebe um erro claro e retenta; o backend nunca devolve conteúdo parcial.
 - **Chamada à API interna vinda de fora da rede de serviços**: a decisão de exposição pública é da infraestrutura (feature `003`), mas a API recusa tudo que não traga o token, mesmo se alcançada.
 
@@ -137,11 +148,14 @@ O áudio nunca passa pelo orquestrador: o update traz apenas a referência do ar
 
 - **FR-001**: O backend DEVE oferecer uma rota interna que recebe o update bruto do Telegram, exatamente como o Telegram o produziu, junto do cabeçalho de segredo do webhook, e devolve uma lista ordenada de ações a executar no chat.
 - **FR-002**: As ações devolvidas DEVEM espelhar as saídas que o interpretador de conversa produz hoje: mensagem, edição de mensagem, documento, resposta a toque em botão e mensagem de etapa. Cada ação DEVE carregar o necessário para ser executada sem lógica adicional no orquestrador (destino, texto já escapado para o formato do Telegram, botões com seus rótulos e dados, referência de documento, mensagem a editar).
-- **FR-003**: O formato da resposta DEVE ser versionado (v1) e identificar a versão no próprio corpo; uma mudança incompatível DEVE criar uma nova versão sem quebrar a anterior.
+- **FR-003**: O formato da resposta DEVE ser versionado (v1) e identificar a versão no próprio corpo. Mudanças aditivas (campo opcional novo, tipo de ação novo) PODEM permanecer na v1; remover ou mudar o significado de um campo, ou tornar obrigatório um campo existente, é mudança incompatível e DEVE criar uma nova versão. O backend DEVE continuar servindo a versão anterior enquanto o orquestrador não migrar.
+- **FR-003a**: O orquestrador DEVE ignorar campos desconhecidos de uma ação. Diante de um tipo de ação desconhecido, DEVE pulá-la, informar `ACAO_NAO_SUPORTADA` na confirmação de execução (FR-007b) e continuar com as ações seguintes, sem recusar a lista inteira.
 - **FR-004**: A ordem das ações na lista DEVE ser a ordem em que devem ser executadas no chat, igual à ordem em que o caminho atual as envia.
 - **FR-005**: O comportamento conversacional (estados, botões `v1:<acao>:<argumento>`, palavras-chave, retomada, semestral, histórico, avisos entre canais, textos e rótulos) DEVE ser idêntico ao descrito em `telegram-conversa.md` e `mensagens.md`; a nova rota NÃO DEVE conter regra de conversa própria, apenas reutilizar a mesma interpretação do caminho atual.
 - **FR-006**: O backend DEVE validar o segredo do webhook do Telegram em tempo constante, e recusar a chamada, sem corpo, se ele faltar ou não conferir.
-- **FR-007**: O backend DEVE deduplicar updates pelo `update_id`: um update repetido NÃO DEVE reprocessar o estado da conversa, e DEVE devolver as mesmas ações produzidas pela primeira entrega, para que uma resposta perdida no caminho não deixe o professor sem resposta.
+- **FR-007**: O backend DEVE deduplicar updates pelo `update_id`: um update repetido NÃO DEVE reprocessar o estado da conversa, e DEVE devolver apenas as ações produzidas pela primeira entrega que ainda não foram confirmadas como executadas (FR-007a), para que uma resposta perdida no caminho não deixe o professor sem resposta, sem duplicar mensagens já enviadas. Se todas já foram confirmadas, a lista devolvida é vazia.
+- **FR-007a**: Toda ação de resposta a um update DEVE ter um identificador estável, derivado de forma determinística do `update_id` e da posição da ação na lista, igual em todas as entregas do mesmo update. O backend DEVE oferecer uma rota interna de confirmação de execução, a mesma usada para as ações proativas (FR-017 e Assumptions), por meio da qual o orquestrador informa por identificador de ação o que já executou; o backend registra essa confirmação e a usa para filtrar as ações na repetição do update.
+- **FR-007b**: As ações de uma lista são independentes entre si; só a ordem de execução é garantida (FR-004). O orquestrador DEVE executar todas as ações em ordem, sem interromper a lista quando uma falhar, e DEVE informar ao backend, na confirmação de execução, o resultado de cada ação: sucesso ou falha com um código de motivo (por exemplo `MENSAGEM_NAO_EDITAVEL`, `CHAT_INDISPONIVEL`), sem texto de aluno. O orquestrador NÃO DEVE decidir compensações por conta própria; a compensação (por exemplo, enviar uma nova mensagem no lugar de uma edição que falhou) é decidida e emitida pelo backend como nova ação. A confirmação do toque em botão é executada independentemente do resultado das demais ações.
 - **FR-008**: Toda mensagem recebida DEVE receber ao menos uma ação de resposta, inclusive em erro inesperado (`ERRO_INTERNO`), e todo toque em botão DEVE receber a ação de confirmação do toque (FR-039 da feature 001).
 - **FR-009**: Tipos de update não suportados DEVEM resultar em lista de ações vazia, e updates de grupo DEVEM receber a resposta de atendimento apenas em conversa privada, como hoje.
 - **FR-010**: O backend NÃO DEVE enviar nenhuma mensagem ao Telegram para responder a um update recebido por esta rota; apenas devolver ações. O estado da conversa DEVE estar gravado antes de a resposta ser devolvida.
@@ -155,7 +169,7 @@ O áudio nunca passa pelo orquestrador: o update traz apenas a referência do ar
 - **FR-015**: A falha de entrega NÃO DEVE interromper nem reverter o processamento do relatório, nem alterar o estado do relatório.
 - **FR-016**: O backend DEVE preservar a ordem de execução das ações proativas de um mesmo chat conforme a ordem em que foram criadas.
 - **FR-017**: O backend DEVE receber do orquestrador o identificador da mensagem criada no Telegram quando uma ação for de mensagem de etapa, para que as etapas seguintes a editem no lugar, e DEVE tratar a falha de edição enviando uma nova mensagem de etapa.
-- **FR-018**: O prazo máximo de tentativas, os intervalos e o endereço do orquestrador DEVEM ser configuráveis por ambiente; ao esgotar o prazo, a ação DEVE ficar marcada como falha definitiva e DEVE ser registrada sem dados de aluno.
+- **FR-018**: O prazo máximo de tentativas, os intervalos e o endereço do orquestrador DEVEM ser configuráveis por ambiente. Os valores padrão são: intervalo inicial de 30 segundos, dobrando a cada nova tentativa até o teto de 15 minutos, e prazo total de 24 horas contado da criação da ação. Ao esgotar o prazo, a ação DEVE ficar marcada como falha definitiva e DEVE ser registrada sem dados de aluno.
 - **FR-019**: A escolha de qual caminho entrega as mensagens proativas (envio direto ao Telegram, como hoje, ou entrega ao orquestrador) DEVE ser configurável, com o caminho atual como padrão, e DEVE haver exatamente um caminho ativo por vez, sem envio duplicado nem perda.
 
 **PDF por identificador**
@@ -169,7 +183,8 @@ O áudio nunca passa pelo orquestrador: o update traz apenas a referência do ar
 
 - **FR-024**: Toda rota sob a área interna (`/interno/**`) DEVE exigir o cabeçalho `X-N8N-Service-Token` com o token do serviço, comparado em tempo constante; sem o cabeçalho ou com valor incorreto, a chamada DEVE ser recusada como não autenticada, sem corpo.
 - **FR-025**: A área interna NÃO DEVE aceitar a sessão por cookie do portal como credencial, e o token de serviço NÃO DEVE autenticar nenhuma rota do portal (`/api/v1/**`) nem qualquer outra área.
-- **FR-026**: O token de serviço DEVE vir do ambiente ou de um cofre de segredos, nunca do código versionado; se não estiver configurado, toda a área interna DEVE recusar todas as chamadas.
+- **FR-026**: O token de serviço DEVE vir do ambiente ou de um cofre de segredos, nunca do código versionado; se nenhum token estiver configurado, toda a área interna DEVE recusar todas as chamadas.
+- **FR-026a**: O backend DEVE aceitar até dois tokens de serviço válidos ao mesmo tempo (atual e próximo), para permitir a rotação sem janela de indisponibilidade: adicionar o novo, reconfigurar o orquestrador, remover o antigo. A comparação com cada token configurado DEVE ser em tempo constante, e a presença de um segundo token NÃO DEVE alterar o tempo de resposta de modo que revele qual token conferiu. Nenhum token DEVE aparecer em log, ação ou mensagem de erro.
 - **FR-027**: Os mecanismos de proteção do portal que valem para sessão de navegador (por exemplo, proteção contra requisições forjadas entre sites) NÃO DEVEM impedir o uso legítimo da área interna com token, e a área interna NÃO DEVE reduzir essas proteções nas rotas do portal.
 
 **Áudio**
@@ -186,11 +201,11 @@ O áudio nunca passa pelo orquestrador: o update traz apenas a referência do ar
 
 ### Key Entities *(include if feature involves data)*
 
-- **Update de entrada**: o evento bruto produzido pelo Telegram (mensagem ou toque em botão), identificado por um `update_id` único. Sua repetição não reprocessa o estado e reaproveita as ações produzidas da primeira vez.
-- **Ação de canal**: uma instrução do backend para o orquestrador executar no chat. Tipos: mensagem, edição, documento, resposta a toque em botão e mensagem de etapa. Tem destino, conteúdo já formatado, botões (rótulo + dados do botão), referência de documento (quando aplicável), ordem de execução e versão do formato (v1).
+- **Update de entrada**: o evento bruto produzido pelo Telegram (mensagem ou toque em botão), identificado por um `update_id` único. Sua repetição não reprocessa o estado e devolve apenas as ações da primeira vez ainda não confirmadas como executadas.
+- **Ação de canal**: uma instrução do backend para o orquestrador executar no chat. Tipos: mensagem, edição, documento, resposta a toque em botão e mensagem de etapa. Tem identificador estável, destino, conteúdo já formatado, botões (rótulo + dados do botão), referência de documento (quando aplicável), ordem de execução, versão do formato (v1) e estado de execução (pendente ou confirmada).
 - **Ação proativa pendente**: uma ação criada sem update do professor (resultado de processamento, etapa, aviso entre canais) com identificador estável, estado (pendente, entregue, falha definitiva), número de tentativas e momento da próxima tentativa. Existe para garantir entrega e idempotência.
 - **Documento disponível para o orquestrador**: um PDF já gerado, referenciado por identificador opaco e com validade, ligado a uma ação de documento.
-- **Credencial de serviço**: o token que identifica o orquestrador; vale somente na área interna.
+- **Credencial de serviço**: o token que identifica o orquestrador (até dois válidos ao mesmo tempo, para rotação); vale somente na área interna.
 - **Estado da conversa**: o já existente (vínculo, fluxo, etapa, relatório em foco, áudio pendente), que continua só no backend e permite reiniciar o orquestrador sem perda.
 
 ## Success Criteria *(mandatory)*
@@ -209,10 +224,10 @@ O áudio nunca passa pelo orquestrador: o update traz apenas a referência do ar
 ## Assumptions
 
 - O orquestrador é um consumidor confiável da rede interna de serviços, que fala com o backend por HTTP; a exposição pública e o proxy ficam para a feature `003`.
-- Um update repetido devolve as mesmas ações da primeira vez (entrega "pelo menos uma vez"). Isso evita que uma resposta perdida deixe o professor sem retorno, ao custo raro de repetir mensagens quando o orquestrador reexecuta ações; o contrato inclui o identificador de ação para o orquestrador mitigar isso.
+- Um update repetido devolve apenas as ações da primeira vez que o orquestrador ainda não confirmou como executadas. Isso evita que uma resposta perdida deixe o professor sem retorno e, ao mesmo tempo, que mensagens já enviadas sejam repetidas; o orquestrador não guarda estado de deduplicação, só confirma ao backend o que executou. Resta apenas a janela mínima entre executar uma ação no Telegram e a confirmação chegar ao backend.
 - O identificador de documento é válido por pelo menos o prazo máximo de tentativas de entrega, e o PDF obtido tem o mesmo conteúdo do que o portal entrega; a autorização de acesso a ele é dada pelo token de serviço, ficando a verificação de dono do relatório na geração do identificador.
 - O orquestrador informa o identificador da mensagem criada por meio de uma confirmação de execução enviada ao backend, que também registra a entrega como concluída.
-- O prazo máximo de tentativas padrão cobre pelo menos um dia de indisponibilidade do orquestrador; valores exatos de intervalos e prazo serão definidos no plano e ficam configuráveis.
+- O prazo máximo de tentativas padrão (24 h, FR-018) cobre um dia de indisponibilidade do orquestrador e é configurável. Se a entrega reaproveita a fila Postgres existente (`trabalho_processamento`) ou uma tabela própria é decisão do plano.
 - Por padrão (esta feature), as mensagens proativas continuam saindo pelo caminho atual; a ativação do caminho do orquestrador é uma configuração, a ser ligada pela feature `003` junto da troca do webhook.
 - O servidor local de API de bots do Telegram e o volume de arquivos compartilhado continuam como estão; a única mudança em relação a áudio é garantir que o orquestrador não o toque.
 - Fora de escopo, por decisão do pedido: criação de workflows do n8n, alteração de `compose`/proxy, troca do webhook registrado no Telegram e remoção do adaptador antigo (feature `003`).

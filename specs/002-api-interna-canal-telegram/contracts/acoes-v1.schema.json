@@ -1,0 +1,266 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://relatorios.felipeblaft.com.br/contratos/canal-telegram/acoes-v1.schema.json",
+  "title": "Canal Telegram interno: formato v1",
+  "description": "Fonte normativa dos corpos JSON do canal Telegram interno (feature 002). Cada definição em $defs é validada de forma independente nos testes de contrato (fragmento #/$defs/<Nome>). Os objetos produzidos pelo backend usam additionalProperties=false para que um campo acidental quebre o teste; o RECEPTOR (orquestrador) DEVE ignorar campos desconhecidos e responder ACAO_NAO_SUPORTADA a tipos de ação desconhecidos (FR-003a).",
+  "$defs": {
+    "Versao": {
+      "const": "v1"
+    },
+    "AcaoId": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 120,
+      "pattern": "^(u[0-9]+-(e?[0-9]+)(-c)?|p:[A-Za-z0-9:_.-]+:[0-9]+(-c)?)$",
+      "description": "Identificador estável da ação; igual em todas as entregas e tentativas. Respostas a update: u<update_id>-<posicao>. Proativas: p:<evento>:<posicao>. Compensação: sufixo -c."
+    },
+    "LoteId": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 120,
+      "pattern": "^(u[0-9]+|p:[A-Za-z0-9:_.-]+|c:[A-Za-z0-9:_.-]+)$"
+    },
+    "ChatId": {
+      "type": "integer",
+      "description": "Identificador do chat no Telegram (pode ser negativo)."
+    },
+    "MensagemId": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "Texto": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096,
+      "description": "Texto já escapado para parse_mode=HTML e já dividido no limite do Telegram; o orquestrador NUNCA reescreve nem divide."
+    },
+    "Botao": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rotulo", "dados"],
+      "properties": {
+        "rotulo": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "dados": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "description": "callback_data no formato v1:<acao>:<argumento> (contracts/telegram-conversa.md §3 da feature 001)."
+        }
+      }
+    },
+    "Teclado": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["linhas"],
+      "properties": {
+        "linhas": {
+          "type": "array",
+          "maxItems": 20,
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 8,
+            "items": { "$ref": "#/$defs/Botao" }
+          }
+        }
+      }
+    },
+    "AcaoMensagem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["acaoId", "tipo", "chatId", "texto"],
+      "properties": {
+        "acaoId": { "$ref": "#/$defs/AcaoId" },
+        "tipo": { "const": "MENSAGEM" },
+        "chatId": { "$ref": "#/$defs/ChatId" },
+        "texto": { "$ref": "#/$defs/Texto" },
+        "teclado": { "$ref": "#/$defs/Teclado" }
+      }
+    },
+    "AcaoEdicao": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["acaoId", "tipo", "chatId", "mensagemId", "texto"],
+      "properties": {
+        "acaoId": { "$ref": "#/$defs/AcaoId" },
+        "tipo": { "const": "EDICAO" },
+        "chatId": { "$ref": "#/$defs/ChatId" },
+        "mensagemId": { "$ref": "#/$defs/MensagemId" },
+        "texto": { "$ref": "#/$defs/Texto" },
+        "teclado": { "$ref": "#/$defs/Teclado" }
+      }
+    },
+    "AcaoDocumento": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["acaoId", "tipo", "chatId", "documentoId", "nomeArquivo", "tipoConteudo"],
+      "properties": {
+        "acaoId": { "$ref": "#/$defs/AcaoId" },
+        "tipo": { "const": "DOCUMENTO" },
+        "chatId": { "$ref": "#/$defs/ChatId" },
+        "documentoId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{43}$",
+          "description": "Identificador opaco; os bytes se obtêm em GET /interno/v1/canal/telegram/documentos/{documentoId}. Nunca é URL nem caminho."
+        },
+        "nomeArquivo": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "tipoConteudo": { "const": "application/pdf" },
+        "legenda": { "type": "string", "maxLength": 1024 }
+      }
+    },
+    "AcaoRespostaCallback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["acaoId", "tipo", "callbackId"],
+      "properties": {
+        "acaoId": { "$ref": "#/$defs/AcaoId" },
+        "tipo": { "const": "RESPOSTA_CALLBACK" },
+        "callbackId": { "type": "string", "minLength": 1, "maxLength": 128 }
+      }
+    },
+    "AcaoMensagemEtapa": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["acaoId", "tipo", "chatId", "texto", "trabalhoId"],
+      "properties": {
+        "acaoId": { "$ref": "#/$defs/AcaoId" },
+        "tipo": { "const": "MENSAGEM_ETAPA" },
+        "chatId": { "$ref": "#/$defs/ChatId" },
+        "texto": { "$ref": "#/$defs/Texto" },
+        "trabalhoId": { "type": "string", "format": "uuid" },
+        "editarMensagemId": {
+          "$ref": "#/$defs/MensagemId",
+          "description": "Se presente, edita essa mensagem no lugar; se ausente, envia mensagem nova. Em ambos os casos o orquestrador informa o mensagemId resultante na confirmação."
+        }
+      }
+    },
+    "Acao": {
+      "oneOf": [
+        { "$ref": "#/$defs/AcaoMensagem" },
+        { "$ref": "#/$defs/AcaoEdicao" },
+        { "$ref": "#/$defs/AcaoDocumento" },
+        { "$ref": "#/$defs/AcaoRespostaCallback" },
+        { "$ref": "#/$defs/AcaoMensagemEtapa" }
+      ]
+    },
+    "RespostaAtualizacao": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["versao", "updateId", "loteId", "acoes"],
+      "description": "Corpo 200 de POST /interno/v1/canal/telegram/atualizacao. Ações na ordem em que devem ser executadas; lista vazia = nada a executar (update ignorado, não suportado, ou já totalmente confirmado).",
+      "properties": {
+        "versao": { "$ref": "#/$defs/Versao" },
+        "updateId": { "type": ["integer", "null"] },
+        "loteId": { "type": ["string", "null"], "pattern": "^u[0-9]+$" },
+        "acoes": {
+          "type": "array",
+          "maxItems": 100,
+          "items": { "$ref": "#/$defs/Acao" }
+        }
+      }
+    },
+    "LoteEntrega": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["versao", "loteId", "origem", "criadoEm", "tentativa", "acoes"],
+      "description": "Corpo enviado pelo backend ao webhook do orquestrador (entrega proativa). Cabeçalhos: X-Canal-Entrega-Token e Idempotency-Key = loteId.",
+      "properties": {
+        "versao": { "$ref": "#/$defs/Versao" },
+        "loteId": { "$ref": "#/$defs/LoteId" },
+        "origem": { "enum": ["PROATIVA", "COMPENSACAO"] },
+        "criadoEm": { "type": "string", "format": "date-time" },
+        "tentativa": { "type": "integer", "minimum": 1 },
+        "acoes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "items": { "$ref": "#/$defs/Acao" }
+        }
+      }
+    },
+    "CodigoMotivo": {
+      "enum": [
+        "MENSAGEM_NAO_EDITAVEL",
+        "CHAT_INDISPONIVEL",
+        "ACAO_NAO_SUPORTADA",
+        "DOCUMENTO_INDISPONIVEL",
+        "LIMITE_DE_TAXA",
+        "ERRO_TELEGRAM"
+      ],
+      "description": "Motivo de falha informado pelo orquestrador; nunca contém texto de aluno."
+    },
+    "ResultadoAcao": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["acaoId", "situacao"],
+      "properties": {
+        "acaoId": { "$ref": "#/$defs/AcaoId" },
+        "situacao": { "enum": ["EXECUTADA", "FALHOU"] },
+        "codigoMotivo": { "$ref": "#/$defs/CodigoMotivo" },
+        "mensagemId": {
+          "$ref": "#/$defs/MensagemId",
+          "description": "Id da mensagem criada ou editada no Telegram; obrigatório para MENSAGEM_ETAPA executada."
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "situacao": { "const": "FALHOU" } }, "required": ["situacao"] },
+          "then": { "required": ["codigoMotivo"] }
+        }
+      ]
+    },
+    "RequisicaoConfirmacao": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["versao", "resultados"],
+      "description": "Corpo de POST /interno/v1/canal/telegram/confirmacoes. Este é um corpo RECEBIDO pelo backend: campos desconhecidos são ignorados (tolerância a evolução aditiva).",
+      "properties": {
+        "versao": { "$ref": "#/$defs/Versao" },
+        "resultados": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "items": { "$ref": "#/$defs/ResultadoAcao" }
+        }
+      }
+    },
+    "RespostaConfirmacao": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["versao", "aceitas", "ignoradas"],
+      "properties": {
+        "versao": { "$ref": "#/$defs/Versao" },
+        "aceitas": { "type": "integer", "minimum": 0 },
+        "ignoradas": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/AcaoId" },
+          "description": "Ids desconhecidos, descartados, vencidos ou com resultado divergente do já registrado. Não é erro."
+        }
+      }
+    },
+    "RespostaEstadoAcao": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["versao", "acaoId", "estado"],
+      "description": "Corpo 200 de GET /interno/v1/canal/telegram/acoes/{acaoId}. Permite ao n8n, sem estado próprio, pular uma execução já registrada (idempotência, FR-013).",
+      "properties": {
+        "versao": { "$ref": "#/$defs/Versao" },
+        "acaoId": { "$ref": "#/$defs/AcaoId" },
+        "estado": {
+          "enum": ["PENDENTE", "ENTREGUE", "EXECUTADA", "FALHOU", "FALHA_DEFINITIVA", "DESCARTADA"]
+        },
+        "codigoMotivo": { "type": "string", "maxLength": 40 }
+      }
+    },
+    "Erro": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["versao", "codigo"],
+      "description": "Corpo de erros 400/422 da área interna quando houver corpo. 401 e 404 NÃO têm corpo (FR-024, FR-022). Nunca contém dado de aluno nem eco do payload.",
+      "properties": {
+        "versao": { "$ref": "#/$defs/Versao" },
+        "codigo": { "enum": ["REQUISICAO_INVALIDA", "VERSAO_NAO_SUPORTADA"] }
+      }
+    }
+  }
+}
