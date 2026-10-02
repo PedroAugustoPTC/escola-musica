@@ -1,5 +1,36 @@
 <!--
 Sync Impact Report
+- Version change: 1.3.0 → 1.4.0
+- Rationale: MINOR — expansão material do Princípio II e de "Restrições Adicionais": o n8n passa a
+  ser admitido, e SOMENTE, como transporte do canal Telegram (recebe o update, repassa ao backend e
+  executa as ações devolvidas por ele). Reverte a decisão R-04 de
+  `specs/001-fluxo-relatorios/research.md` ("sem n8n; webhook direto no backend"). A proibição de
+  regra de negócio, autorização e persistência nos orquestradores é mantida e agora explicitada
+  para o n8n; todo o estado de conversa continua persistido no backend. Nenhum princípio removido.
+- Modified principles: II. Fonte Única da Verdade (título mantido; n8n explicitado como transporte
+  do Telegram, com limites do que ele pode e não pode fazer)
+- Modified sections: Restrições Adicionais ("Containerização e implantação": serviço n8n em
+  contêiner, imagem com versão fixada, no mesmo comando único, local e produção; novo item
+  "Orquestrador de canal (n8n)": workflows versionados como código, sem segredo nem ID de
+  credencial nos JSON)
+- Added sections: nenhuma
+- Removed sections: nenhuma
+- Princípios I e III–IX: inalterados
+- Complexity Tracking: a linha do contêiner `telegram-bot-api` (`plan.md`) permanece válida; o
+  servidor local da API de bots continua necessário para o limite de 50 MB (FR-015) e não é
+  substituído pelo n8n.
+- Templates verificados (`.specify/templates/`): `plan-template.md` (Constitution Check lê esta
+  constituição em tempo de execução), `spec-template.md`, `tasks-template.md`,
+  `checklist-template.md` e `constitution-template.md` — sem referência a n8n ou a orquestrador;
+  nenhum requer alteração.
+- Artefatos dependentes a revisar (fora do escopo desta emenda): `specs/001-fluxo-relatorios/`
+  (`research.md` R-04 e Alternativas consideradas, `plan.md` Summary/Technical Context/estrutura e
+  Complexity Tracking, `quickstart.md`, `tasks.md`) e `infra/` (`compose.yaml`, `compose.prod.yaml`,
+  scripts e READMEs) assumem "sem n8n" e deverão ser atualizados pela feature que reintroduzir o
+  serviço.
+- Deferred items: nenhum
+
+Histórico — v1.3.0 (2026-09-30)
 - Version change: 1.2.0 → 1.3.0
 - Rationale: MINOR — expansão material do Princípio I: Web e Telegram passam a ser canais de
   entrada equivalentes, com paridade funcional (tudo o que se faz em um se faz no outro, pelos
@@ -110,6 +141,10 @@ perder nenhuma funcionalidade.
 - Orquestradores, automações e integrações de canal NÃO DEVEM conter regra de negócio,
   autorização ou validação de domínio e NÃO DEVEM persistir dados de domínio; todo dado que
   entra por eles DEVE passar por um caso de uso do backend.
+- O n8n é admitido SOMENTE como transporte do canal Telegram: recebe o update do Telegram, o
+  repassa ao backend e executa as ações (ex.: enviar mensagem, botões, documento) que o backend
+  devolver. Ele NÃO DEVE decidir o que responder, interpretar a conversa, autorizar, validar,
+  chamar provedores de IA nem gravar dados de domínio; qualquer outro uso do n8n exige emenda.
 - O estado da conversa de qualquer canal DEVE ser persistido no backend; o orquestrador DEVE poder
   ser reiniciado sem perda de estado.
 - Identificadores de canal (ex.: ID de usuário do Telegram) NÃO DEVEM substituir autenticação e
@@ -264,8 +299,15 @@ recorrente.
   - A implantação definitiva DEVE ser feita em uma VPS da Hostinger, subindo os contêineres a partir
     das definições versionadas no repositório. Na VPS, apenas o ponto de entrada HTTPS DEVE ser
     exposto publicamente (Princípio IV).
+  - O ambiente local e a produção DEVEM incluir o serviço n8n em contêiner, com a versão da imagem
+    fixada (sem tag flutuante como `latest`), subido pelo mesmo comando único dos demais serviços.
   - As definições de contêiner e os scripts de implantação são artefatos de automação e DEVEM ser
     versionados (Princípio VIII).
+- **Orquestrador de canal (n8n)**: restrito ao papel de transporte do Telegram (Princípio II).
+  - Os workflows DEVEM ser versionados como código no repositório (Princípio VIII); o que estiver
+    na instância em execução DEVE ser reproduzível a partir deles.
+  - Os JSON dos workflows NÃO DEVEM conter segredos nem IDs de credencial; credenciais e segredos
+    DEVEM vir do ambiente ou de um cofre de segredos (Princípio IV).
 - **Referência do MVP**: o repositório `mvp-relatorios` é somente leitura e serve apenas como
   referência de comportamento; nenhuma alteração DEVE ser feita nele.
 
@@ -317,4 +359,4 @@ número de versão conforme a política abaixo, e (4) verificar se `spec-templat
 revisão; violações não justificadas bloqueiam o merge. Exceções DEVEM ser registradas na descrição
 do PR e aprovadas por outro revisor.
 
-**Version**: 1.3.0 | **Ratified**: 2026-09-30 | **Last Amended**: 2026-09-30
+**Version**: 1.4.0 | **Ratified**: 2026-09-30 | **Last Amended**: 2026-10-02
