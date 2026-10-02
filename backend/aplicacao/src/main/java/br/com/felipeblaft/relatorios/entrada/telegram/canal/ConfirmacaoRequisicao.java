@@ -8,7 +8,7 @@ import java.util.List;
  * <em>recebido</em>: campos desconhecidos são ignorados (evolução aditiva).
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record RequisicaoConfirmacao(String versao, List<ResultadoAcaoDto> resultados) {
+public record ConfirmacaoRequisicao(String versao, List<ResultadoAcaoDto> resultados) {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record ResultadoAcaoDto(

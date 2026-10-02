@@ -23,8 +23,8 @@ class MigracaoV6IT {
     private static final String ESQUEMA = "migracao_v6_teste";
 
     private final String url =
-            System.getenv().getOrDefault(
-                    "BANCO_URL", "jdbc:postgresql://localhost:5432/relatorios_teste");
+            System.getenv()
+                    .getOrDefault("BANCO_URL", "jdbc:postgresql://localhost:5432/relatorios_teste");
     private final String usuario = System.getenv().getOrDefault("BANCO_USUARIO", "relatorios");
     private final String senha = System.getenv().getOrDefault("BANCO_SENHA", "teste");
 
@@ -146,11 +146,14 @@ class MigracaoV6IT {
     @Test
     void outboxTemSequenciaIdentidadeERestricoes() throws Exception {
         flyway(null).migrate();
-        assertThat(atualizar(acao("u1-0", "ENTREGUE", "MENSAGEM", "RESPOSTA_UPDATE", "1"))).isEqualTo(1);
+        assertThat(atualizar(acao("u1-0", "ENTREGUE", "MENSAGEM", "RESPOSTA_UPDATE", "1")))
+                .isEqualTo(1);
         assertThat(atualizar(acao("u1-1", "PENDENTE", "EDICAO", "PROATIVA", "null"))).isEqualTo(1);
         try (Connection c = conexao();
                 Statement s = c.createStatement();
-                var r = s.executeQuery("select seq, versao, tentativas from acao_canal order by seq")) {
+                var r =
+                        s.executeQuery(
+                                "select seq, versao, tentativas from acao_canal order by seq")) {
             assertThat(r.next()).isTrue();
             long primeira = r.getLong("seq");
             assertThat(r.getInt("versao")).isZero();
@@ -164,9 +167,17 @@ class MigracaoV6IT {
         assertThatThrownBy(() -> atualizar(acao("x", "PENDENTE", "MENSAGEM", "OUTRA", "null")))
                 .hasMessageContaining("ck_acao_canal_origem");
         assertThatThrownBy(
-                        () -> atualizar(acao("x", "ENTREGUE", "MENSAGEM", "RESPOSTA_UPDATE", "null")))
+                        () ->
+                                atualizar(
+                                        acao(
+                                                "x",
+                                                "ENTREGUE",
+                                                "MENSAGEM",
+                                                "RESPOSTA_UPDATE",
+                                                "null")))
                 .hasMessageContaining("ck_acao_canal_resposta_update");
-        assertThatThrownBy(() -> atualizar(acao("u1-0", "PENDENTE", "MENSAGEM", "PROATIVA", "null")))
+        assertThatThrownBy(
+                        () -> atualizar(acao("u1-0", "PENDENTE", "MENSAGEM", "PROATIVA", "null")))
                 .hasMessageContaining("acao_canal_pkey");
         assertThatThrownBy(() -> executar("update acao_canal set seq = 99"))
                 .isInstanceOf(SQLException.class);
@@ -182,9 +193,14 @@ class MigracaoV6IT {
         String hash = "a".repeat(64);
         UUID id = UUID.randomUUID();
         assertThat(atualizar(String.format(base, hash, id, "AULA", id, "null"))).isEqualTo(1);
-        assertThatThrownBy(() -> atualizar(String.format(base, "b".repeat(64), id, "OUTRO", id, "null")))
+        assertThatThrownBy(
+                        () ->
+                                atualizar(
+                                        String.format(
+                                                base, "b".repeat(64), id, "OUTRO", id, "null")))
                 .hasMessageContaining("ck_documento_canal_tipo");
-        assertThatThrownBy(() -> atualizar(String.format(base, "c".repeat(64), id, "AULA", id, "0")))
+        assertThatThrownBy(
+                        () -> atualizar(String.format(base, "c".repeat(64), id, "AULA", id, "0")))
                 .hasMessageContaining("ck_documento_canal_versao");
         assertThatThrownBy(() -> atualizar(String.format(base, hash, id, "AULA", id, "1")))
                 .hasMessageContaining("documento_canal_pkey");

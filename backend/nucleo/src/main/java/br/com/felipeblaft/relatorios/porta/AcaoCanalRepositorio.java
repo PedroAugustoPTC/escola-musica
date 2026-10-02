@@ -9,8 +9,11 @@ import java.util.Optional;
 /** Outbox de ações de canal (data-model.md §1.2). */
 public interface AcaoCanalRepositorio {
 
-    /** Pendências para as métricas: quantidade e criação da ação pendente mais antiga. */
-    record Pendencias(long quantidade, Instant maisAntigaCriadaEm) {}
+    /**
+     * Pendências para as métricas: ações {@code PENDENTE} (e a criação da mais antiga) e ações
+     * {@code ENTREGUE} que seguem sem confirmação além do limite informado.
+     */
+    record Pendencias(long quantidade, Instant maisAntigaCriadaEm, long semConfirmacao) {}
 
     /** Resultado do expurgo: conteúdos zerados e registros removidos. */
     record Expurgo(int payloadsZerados, int registrosRemovidos) {}
@@ -30,13 +33,14 @@ public interface AcaoCanalRepositorio {
     List<AcaoCanal> buscarPorLote(String loteId);
 
     /**
-     * Reserva o próximo lote devido, sem disputar com outros despachantes: a reserva empurra a próxima
-     * tentativa para {@code leaseAte}, de modo que um despachante que morre deixa o lote reentregável
-     * quando o lease vence. Respeita a ordem por chat: ignora o chat que ainda tem ação anterior de
-     * outro lote {@code PENDENTE} ou {@code ENTREGUE} há menos de {@code confirmacaoMax}. Devolve o
-     * lote inteiro, na ordem de criação, ou lista vazia.
+     * Reserva o próximo lote devido, sem disputar com outros despachantes: a reserva empurra a
+     * próxima tentativa para {@code leaseAte}, de modo que um despachante que morre deixa o lote
+     * reentregável quando o lease vence. Respeita a ordem por chat: ignora o chat que ainda tem
+     * ação anterior de outro lote {@code PENDENTE} ou {@code ENTREGUE} há menos de {@code
+     * confirmacaoMax}. Devolve o lote inteiro, na ordem de criação, ou lista vazia.
      */
-    List<AcaoCanal> reservarProximoLoteDevido(Instant agora, Duration confirmacaoMax, Instant leaseAte);
+    List<AcaoCanal> reservarProximoLoteDevido(
+            Instant agora, Duration confirmacaoMax, Instant leaseAte);
 
     /**
      * Grava a ação só se a versão armazenada ainda for {@code versaoEsperada} (controle otimista);
@@ -50,5 +54,9 @@ public interface AcaoCanalRepositorio {
      */
     Expurgo expurgar(Instant payloadAte, Instant registroAte);
 
-    Pendencias pendencias();
+    /**
+     * @param entreguesAte entregues antes deste instante e ainda sem confirmação contam como
+     *     atrasadas
+     */
+    Pendencias pendencias(Instant entreguesAte);
 }

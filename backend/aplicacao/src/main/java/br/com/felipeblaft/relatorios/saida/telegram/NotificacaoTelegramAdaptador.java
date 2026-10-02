@@ -16,6 +16,7 @@ import br.com.felipeblaft.relatorios.dominio.trabalho.TrabalhoProcessamento;
 import br.com.felipeblaft.relatorios.entrada.telegram.ApresentacaoRelatorioAulaTelegram;
 import br.com.felipeblaft.relatorios.entrada.telegram.ApresentacaoRelatorioSemestralTelegram;
 import br.com.felipeblaft.relatorios.entrada.telegram.ApresentadorTelegram;
+import br.com.felipeblaft.relatorios.entrada.telegram.PublicacaoAcaoTelegramPorta;
 import br.com.felipeblaft.relatorios.entrada.telegram.SaidaTelegram;
 import br.com.felipeblaft.relatorios.entrada.telegram.SaidaTelegram.Mensagem;
 import br.com.felipeblaft.relatorios.entrada.telegram.SaidaTelegram.Teclado;
@@ -57,7 +58,7 @@ public class NotificacaoTelegramAdaptador implements NotificacaoProfessorPorta {
     private final ApresentacaoRelatorioAulaTelegram apresentacao;
     private final ApresentacaoRelatorioSemestralTelegram apresentacaoSemestral;
     private final ApresentadorTelegram apresentador;
-    private final MensageriaTelegramAdaptador mensageria;
+    private final PublicacaoAcaoTelegramPorta publicacao;
 
     public NotificacaoTelegramAdaptador(
             VinculoTelegramRepositorio vinculos,
@@ -66,14 +67,14 @@ public class NotificacaoTelegramAdaptador implements NotificacaoProfessorPorta {
             ApresentacaoRelatorioAulaTelegram apresentacao,
             ApresentacaoRelatorioSemestralTelegram apresentacaoSemestral,
             ApresentadorTelegram apresentador,
-            MensageriaTelegramAdaptador mensageria) {
+            PublicacaoAcaoTelegramPorta publicacao) {
         this.vinculos = vinculos;
         this.alunos = alunos;
         this.fila = fila;
         this.apresentacao = apresentacao;
         this.apresentacaoSemestral = apresentacaoSemestral;
         this.apresentador = apresentador;
-        this.mensageria = mensageria;
+        this.publicacao = publicacao;
     }
 
     // ------------------------------------------------------------------ etapas
@@ -87,18 +88,24 @@ public class NotificacaoTelegramAdaptador implements NotificacaoProfessorPorta {
         protegido(
                 "etapa",
                 () -> {
-                    Optional<Long> mensagemId = mensagemEtapa(trabalho);
                     Optional<VinculoTelegram> vinculo =
                             vinculos.buscarPorProfessorId(trabalho.professorId());
-                    if (mensagemId.isEmpty() || vinculo.isEmpty()) {
+                    if (vinculo.isEmpty()) {
                         return;
                     }
-                    mensageria.editar(
-                            new SaidaTelegram.Edicao(
-                                    vinculo.get().chatId(),
-                                    mensagemId.get(),
-                                    textoEtapa(trabalho),
-                                    Teclado.NENHUM));
+                    // a etapa edita a mensagem de etapa já conhecida do trabalho; sem ela, o envio
+                    // direto
+                    // nada faz e o despacho do orquestrador a resolve pelo trabalho no momento da
+                    // entrega
+                    publicacao.publicar(
+                            "etapa:" + trabalho.id() + ":" + trabalho.etapa().name(),
+                            trabalho.professorId(),
+                            List.of(
+                                    new SaidaTelegram.MensagemEtapa(
+                                            vinculo.get().chatId(),
+                                            mensagemEtapa(trabalho).orElse(null),
+                                            textoEtapa(trabalho),
+                                            trabalho.id())));
                 });
     }
 
@@ -142,10 +149,13 @@ public class NotificacaoTelegramAdaptador implements NotificacaoProfessorPorta {
                         vinculos.buscarPorProfessorId(trabalho.professorId())
                                 .ifPresent(
                                         vinculo ->
-                                                mensageria.enviar(
-                                                        apresentador.simples(
-                                                                vinculo.chatId(),
-                                                                "PROCESSAMENTO_DEMORADO"))));
+                                                publicacao.publicar(
+                                                        "demora:" + trabalho.id(),
+                                                        trabalho.professorId(),
+                                                        List.of(
+                                                                apresentador.simples(
+                                                                        vinculo.chatId(),
+                                                                        "PROCESSAMENTO_DEMORADO")))));
     }
 
     // ------------------------------------------------------------------ resultado
@@ -207,13 +217,20 @@ public class NotificacaoTelegramAdaptador implements NotificacaoProfessorPorta {
                                         Map.of(),
                                         "foco",
                                         (semestral ? "s" : "a") + trabalho.relatorioId()));
-        mensageria.enviar(
-                new Mensagem(
-                        vinculo.get().chatId(),
-                        apresentador.texto(
-                                codigo,
-                                Map.of("aluno", aluno, "versao", versao == null ? "" : versao)),
-                        teclado));
+        publicacao.publicar(
+                "resultado:" + trabalho.id(),
+                trabalho.professorId(),
+                List.of(
+                        new Mensagem(
+                                vinculo.get().chatId(),
+                                apresentador.texto(
+                                        codigo,
+                                        Map.of(
+                                                "aluno",
+                                                aluno,
+                                                "versao",
+                                                versao == null ? "" : versao)),
+                                teclado)));
     }
 
     /**
@@ -236,26 +253,28 @@ public class NotificacaoTelegramAdaptador implements NotificacaoProfessorPorta {
                 }
                 LOG.warn("telegram-foco-nao-gravado trabalhoId={}", trabalho.id());
             }
-            finalizarEtapa(trabalho, vinculo.get().chatId());
-            saidas.forEach(mensageria::enviar);
+            List<SaidaTelegram> todas = new ArrayList<>();
+            etapaPronta(trabalho, vinculo.get().chatId()).ifPresent(todas::add);
+            todas.addAll(saidas);
+            if (!todas.isEmpty()) {
+                publicacao.publicar("resultado:" + trabalho.id(), trabalho.professorId(), todas);
+            }
             return;
         }
     }
 
-    private void finalizarEtapa(TrabalhoProcessamento trabalho, long chatId) {
+    /** A mensagem de etapa vira "Pronto" (editada no lugar) antes das mensagens do resultado. */
+    private Optional<SaidaTelegram> etapaPronta(TrabalhoProcessamento trabalho, long chatId) {
         if (trabalho.resultado() != ResultadoTrabalho.PRONTO_PARA_CONFERENCIA
                 && trabalho.resultado() != ResultadoTrabalho.NOVA_VERSAO) {
-            return;
+            return Optional.empty();
         }
-        mensagemEtapa(trabalho)
-                .ifPresent(
-                        id ->
-                                mensageria.editar(
-                                        new SaidaTelegram.Edicao(
-                                                chatId,
-                                                id,
-                                                "<i>" + apresentador.texto("ETAPA_PRONTO") + "</i>",
-                                                Teclado.NENHUM)));
+        return Optional.of(
+                new SaidaTelegram.MensagemEtapa(
+                        chatId,
+                        mensagemEtapa(trabalho).orElse(null),
+                        "<i>" + apresentador.texto("ETAPA_PRONTO") + "</i>",
+                        trabalho.id()));
     }
 
     List<SaidaTelegram> saidasDoResultado(TrabalhoProcessamento trabalho, VinculoTelegram vinculo) {

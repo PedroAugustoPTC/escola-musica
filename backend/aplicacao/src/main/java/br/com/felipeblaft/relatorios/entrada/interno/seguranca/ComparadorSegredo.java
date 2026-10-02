@@ -10,8 +10,8 @@ import java.util.List;
  * Comparação de segredos em tempo constante (R-09): compara o SHA-256 do valor recebido com o do
  * configurado, sempre sobre digests de 32 bytes, de modo que o tempo não depende do tamanho do
  * segredo nem de quantos caracteres coincidem. Segredo não configurado (nulo ou vazio) é comparado
- * contra um digest-isca aleatório que nenhuma entrada reproduz: <em>fail-closed</em>. Com mais de um
- * segredo válido (rotação), todos são sempre avaliados, sem curto-circuito.
+ * contra um digest-isca aleatório que nenhuma entrada reproduz: <em>fail-closed</em>. Com mais de
+ * um segredo válido (rotação), todos são sempre avaliados, sem curto-circuito.
  */
 public final class ComparadorSegredo {
 
@@ -34,8 +34,8 @@ public final class ComparadorSegredo {
     }
 
     /**
-     * {@code true} se o recebido for igual a algum dos configurados. Todos são avaliados mesmo depois
-     * de um acerto.
+     * {@code true} se o recebido for igual a algum dos configurados. Todos são avaliados mesmo
+     * depois de um acerto.
      */
     public boolean contemAlgum(String recebido, List<String> configurados) {
         byte[] digestRecebido = digest(valor(recebido));
@@ -62,7 +62,8 @@ public final class ComparadorSegredo {
 
     private static byte[] digest(String texto) {
         try {
-            return MessageDigest.getInstance("SHA-256").digest(texto.getBytes(StandardCharsets.UTF_8));
+            return MessageDigest.getInstance("SHA-256")
+                    .digest(texto.getBytes(StandardCharsets.UTF_8));
         } catch (NoSuchAlgorithmException erro) {
             throw new IllegalStateException("SHA-256 indisponível", erro);
         }

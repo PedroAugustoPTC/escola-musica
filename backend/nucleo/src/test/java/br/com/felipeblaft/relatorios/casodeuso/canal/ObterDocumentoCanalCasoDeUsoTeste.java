@@ -66,7 +66,8 @@ class ObterDocumentoCanalCasoDeUsoTeste {
     @Test
     void oficialSaiPeloMesmoCasoDeUsoDoPortalComODonoGravado() {
         UUID professor = UUID.randomUUID();
-        String token = emitir.executar(professor, TipoRelatorio.AULA, UUID.randomUUID(), null, "o.pdf");
+        String token =
+                emitir.executar(professor, TipoRelatorio.AULA, UUID.randomUUID(), null, "o.pdf");
         DocumentoObtido obtido = obter.executar(token).orElseThrow();
         assertThat(obtido.conteudo()).containsExactly(9);
         assertThat(chamadas).containsExactly("oficial:" + professor);
@@ -75,14 +76,17 @@ class ObterDocumentoCanalCasoDeUsoTeste {
     @Test
     void conferenciaUsaONumeroDaVersao() {
         UUID professor = UUID.randomUUID();
-        String token = emitir.executar(professor, TipoRelatorio.AULA, UUID.randomUUID(), 3, "c.pdf");
+        String token =
+                emitir.executar(professor, TipoRelatorio.AULA, UUID.randomUUID(), 3, "c.pdf");
         assertThat(obter.executar(token).orElseThrow().nomeArquivo()).isEqualTo("conferencia.pdf");
         assertThat(chamadas).containsExactly("conferencia:" + professor + ":3");
     }
 
     @Test
     void repeticaoDentroDoPrazoContinuaValida() {
-        String token = emitir.executar(UUID.randomUUID(), TipoRelatorio.AULA, UUID.randomUUID(), null, "o.pdf");
+        String token =
+                emitir.executar(
+                        UUID.randomUUID(), TipoRelatorio.AULA, UUID.randomUUID(), null, "o.pdf");
         assertThat(obter.executar(token)).isPresent();
         cenario.relogio.avancar(Duration.ofHours(24));
         assertThat(obter.executar(token)).isPresent();
@@ -91,31 +95,43 @@ class ObterDocumentoCanalCasoDeUsoTeste {
     @Test
     void desconhecidoEVencidoSaoNaoEncontradoSemChamarOPortal() {
         assertThat(obter.executar("a".repeat(43))).isEmpty();
-        String token = emitir.executar(UUID.randomUUID(), TipoRelatorio.AULA, UUID.randomUUID(), null, "o.pdf");
+        String token =
+                emitir.executar(
+                        UUID.randomUUID(), TipoRelatorio.AULA, UUID.randomUUID(), null, "o.pdf");
         cenario.relogio.avancar(Duration.ofHours(25));
         assertThat(obter.executar(token)).isEmpty();
         assertThat(chamadas).isEmpty();
     }
 
     @Test
-    void documentoQueSumiuOuDeOutroDonoViraNaoEncontrado() {
-        String token = emitir.executar(UUID.randomUUID(), TipoRelatorio.AULA, UUID.randomUUID(), null, "o.pdf");
-        falha = new ExcecaoDominio(CodigoErro.RECURSO_NAO_ENCONTRADO);
-        assertThat(obter.executar(token)).isEmpty();
+    void documentoQueSumiuOuSemAssociacaoViraNaoEncontradoIndistinguivel() {
+        String token =
+                emitir.executar(
+                        UUID.randomUUID(), TipoRelatorio.AULA, UUID.randomUUID(), null, "o.pdf");
+        for (CodigoErro codigo :
+                List.of(
+                        CodigoErro.RECURSO_NAO_ENCONTRADO,
+                        CodigoErro.ALUNO_NAO_ASSOCIADO,
+                        CodigoErro.DADOS_INVALIDOS)) {
+            falha = new ExcecaoDominio(codigo);
+            assertThat(obter.executar(token)).as(codigo.name()).isEmpty();
+        }
     }
 
     @Test
-    void outrasExcecoesDeDominioEFalhasDeLeituraPropagam() {
-        String token = emitir.executar(UUID.randomUUID(), TipoRelatorio.AULA, UUID.randomUUID(), null, "o.pdf");
-        falha = new ExcecaoDominio(CodigoErro.DADOS_INVALIDOS);
-        assertThatThrownBy(() -> obter.executar(token)).isInstanceOf(ExcecaoDominio.class);
+    void falhaRealDeLeituraPropagaNuncaBytesParciais() {
+        String token =
+                emitir.executar(
+                        UUID.randomUUID(), TipoRelatorio.AULA, UUID.randomUUID(), null, "o.pdf");
         falha = new IllegalStateException("disco");
         assertThatThrownBy(() -> obter.executar(token)).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     void soOHashDoTokenEConsultado() {
-        String token = emitir.executar(UUID.randomUUID(), TipoRelatorio.AULA, UUID.randomUUID(), null, "o.pdf");
+        String token =
+                emitir.executar(
+                        UUID.randomUUID(), TipoRelatorio.AULA, UUID.randomUUID(), null, "o.pdf");
         assertThat(repositorio.dados).containsKey(DocumentoCanal.hashDoToken(token));
         assertThat(repositorio.dados).doesNotContainKey(token);
     }

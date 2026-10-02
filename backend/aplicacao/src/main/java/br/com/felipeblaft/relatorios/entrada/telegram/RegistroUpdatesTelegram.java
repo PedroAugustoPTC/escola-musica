@@ -16,12 +16,15 @@ public interface RegistroUpdatesTelegram {
     /**
      * Situação de um update já registrado.
      *
-     * @param totalAcoes nulo enquanto o update ainda está sendo processado (ou se a linha se perdeu)
+     * @param totalAcoes nulo enquanto o update ainda está sendo processado (ou se a linha se
+     *     perdeu)
      * @param interno {@code false} nas linhas do webhook antigo
      */
     record SituacaoUpdate(Integer totalAcoes, Instant recebidoEm, boolean interno) {}
 
-    /** Registra o update (webhook antigo); devolve {@code false} se ele já tinha sido processado. */
+    /**
+     * Registra o update (webhook antigo); devolve {@code false} se ele já tinha sido processado.
+     */
     boolean registrarSeNovo(long updateId, Instant agora);
 
     /** Registra o update com a origem informada; devolve {@code false} se ele já existia. */

@@ -18,7 +18,8 @@ import tools.jackson.databind.json.JsonMapper;
 @Component
 public class ProcessadorUpdateTelegramServico {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ProcessadorUpdateTelegramServico.class);
+    private static final Logger LOG =
+            LoggerFactory.getLogger(ProcessadorUpdateTelegramServico.class);
     private static final JsonMapper JSON =
             JsonMapper.builder().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).build();
 
@@ -53,7 +54,8 @@ public class ProcessadorUpdateTelegramServico {
 
     /** Update do webhook antigo: registra só o {@code update_id}. */
     public ResultadoUpdateTelegram processarWebhook(UpdateTelegram update) {
-        return processar(update, registroUpdates.registrarSeNovo(update.updateId(), relogio.agora()));
+        return processar(
+                update, registroUpdates.registrarSeNovo(update.updateId(), relogio.agora()));
     }
 
     /** Update da rota interna: registra também a origem, para reentregar as ações depois. */
@@ -61,7 +63,9 @@ public class ProcessadorUpdateTelegramServico {
         return processar(
                 update,
                 registroUpdates.registrarSeNovo(
-                        update.updateId(), relogio.agora(), RegistroUpdatesTelegram.ORIGEM_INTERNO));
+                        update.updateId(),
+                        relogio.agora(),
+                        RegistroUpdatesTelegram.ORIGEM_INTERNO));
     }
 
     private ResultadoUpdateTelegram processar(UpdateTelegram update, boolean novo) {

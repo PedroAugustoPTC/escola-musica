@@ -118,7 +118,11 @@ class ConfirmarExecucaoAcoesCanalCasoDeUsoTeste {
                                 new Resultado("u1-1", null, null, null), // sem situação
                                 new Resultado(null, Situacao.EXECUTADA, null, null),
                                 new Resultado("", Situacao.EXECUTADA, null, null),
-                                new Resultado("texto livre com espaços de aluno", Situacao.EXECUTADA, null, null),
+                                new Resultado(
+                                        "texto livre com espaços de aluno",
+                                        Situacao.EXECUTADA,
+                                        null,
+                                        null),
                                 null,
                                 ok("u1-1")));
         assertThat(resposta.aceitas()).isEqualTo(1);
@@ -130,7 +134,8 @@ class ConfirmarExecucaoAcoesCanalCasoDeUsoTeste {
     void itemInvalidoNaoDerrubaOsDemais() {
         resposta("u1-0", "u1-1");
         Resposta resposta =
-                confirmar.executar(List.of(new Resultado("u1-0", Situacao.FALHOU, " ", null), ok("u1-1")));
+                confirmar.executar(
+                        List.of(new Resultado("u1-0", Situacao.FALHOU, " ", null), ok("u1-1")));
         assertThat(resposta.aceitas()).isEqualTo(1);
         assertThat(repositorio.guardada("u1-0").estado()).isEqualTo(EstadoAcaoCanal.ENTREGUE);
         assertThat(repositorio.guardada("u1-1").estado()).isEqualTo(EstadoAcaoCanal.EXECUTADA);
@@ -143,8 +148,22 @@ class ConfirmarExecucaoAcoesCanalCasoDeUsoTeste {
                 OrigemAcaoCanal.PROATIVA,
                 null,
                 List.of(
-                        new NovaAcao("p:a:0", TipoAcaoCanal.MENSAGEM, 1L, UUID.randomUUID(), null, "{}", null),
-                        new NovaAcao("p:a:1", TipoAcaoCanal.MENSAGEM, 1L, UUID.randomUUID(), null, "{}", null)));
+                        new NovaAcao(
+                                "p:a:0",
+                                TipoAcaoCanal.MENSAGEM,
+                                1L,
+                                UUID.randomUUID(),
+                                null,
+                                "{}",
+                                null),
+                        new NovaAcao(
+                                "p:a:1",
+                                TipoAcaoCanal.MENSAGEM,
+                                1L,
+                                UUID.randomUUID(),
+                                null,
+                                "{}",
+                                null)));
         repositorio.guardada("p:a:0").descartar(relogio.agora());
         repositorio.guardada("p:a:1").expirar(relogio.agora().plus(Duration.ofHours(30)));
         Resposta resposta = confirmar.executar(List.of(ok("p:a:0"), ok("p:a:1")));
@@ -264,7 +283,8 @@ class ConfirmarExecucaoAcoesCanalCasoDeUsoTeste {
                         List.of(new Resultado("p:etapa:x:0", Situacao.EXECUTADA, null, 4321L)));
         assertThat(resposta.aceitas()).isEqualTo(1);
         assertThat(trabalho.parametro(TrabalhoProcessamento.MENSAGEM_ETAPA)).contains("4321");
-        assertThat(repositorio.guardada("p:etapa:x:0").estado()).isEqualTo(EstadoAcaoCanal.EXECUTADA);
+        assertThat(repositorio.guardada("p:etapa:x:0").estado())
+                .isEqualTo(EstadoAcaoCanal.EXECUTADA);
     }
 
     @Test
@@ -272,19 +292,23 @@ class ConfirmarExecucaoAcoesCanalCasoDeUsoTeste {
         TrabalhoProcessamento trabalho = etapa(UUID.randomUUID());
         etapaProativa(trabalho.id(), "p:etapa:x:0", null);
         gravar.executar(
-                "u1", OrigemAcaoCanal.RESPOSTA_UPDATE, 1L,
+                "u1",
+                OrigemAcaoCanal.RESPOSTA_UPDATE,
+                1L,
                 List.of(new NovaAcao("u1-0", TipoAcaoCanal.MENSAGEM, 1L, null, null, "{}", null)));
         for (Long invalido : new Long[] {null, 0L}) {
             Resposta resposta =
                     confirmar.executar(
                             List.of(
-                                    new Resultado("p:etapa:x:0", Situacao.EXECUTADA, null, invalido),
+                                    new Resultado(
+                                            "p:etapa:x:0", Situacao.EXECUTADA, null, invalido),
                                     ok("u1-0")));
             assertThat(resposta.violacaoDeContrato()).isTrue();
             assertThat(resposta.aceitas()).isLessThanOrEqualTo(1);
             assertThat(resposta.ignoradas()).contains("p:etapa:x:0");
         }
-        assertThat(repositorio.guardada("p:etapa:x:0").estado()).isEqualTo(EstadoAcaoCanal.PENDENTE);
+        assertThat(repositorio.guardada("p:etapa:x:0").estado())
+                .isEqualTo(EstadoAcaoCanal.PENDENTE);
         assertThat(trabalho.parametro(TrabalhoProcessamento.MENSAGEM_ETAPA)).isEmpty();
         assertThat(repositorio.guardada("u1-0").estado()).isEqualTo(EstadoAcaoCanal.EXECUTADA);
     }
@@ -307,7 +331,15 @@ class ConfirmarExecucaoAcoesCanalCasoDeUsoTeste {
                 "p:s",
                 OrigemAcaoCanal.PROATIVA,
                 null,
-                List.of(new NovaAcao("p:s:0", TipoAcaoCanal.MENSAGEM_ETAPA, 1L, UUID.randomUUID(), null, "{}", null)));
+                List.of(
+                        new NovaAcao(
+                                "p:s:0",
+                                TipoAcaoCanal.MENSAGEM_ETAPA,
+                                1L,
+                                UUID.randomUUID(),
+                                null,
+                                "{}",
+                                null)));
         assertThat(confirmar.executar(List.of(ok("p:s:0"))).aceitas()).isEqualTo(1);
     }
 
@@ -356,6 +388,7 @@ class ConfirmarExecucaoAcoesCanalCasoDeUsoTeste {
                         outra.definirVersao(outra.versao() + 1);
                     }
                 };
-        assertThat(confirmar.executar(List.of(falha("u1-0", "ERRO_TELEGRAM"))).aceitas()).isEqualTo(1);
+        assertThat(confirmar.executar(List.of(falha("u1-0", "ERRO_TELEGRAM"))).aceitas())
+                .isEqualTo(1);
     }
 }

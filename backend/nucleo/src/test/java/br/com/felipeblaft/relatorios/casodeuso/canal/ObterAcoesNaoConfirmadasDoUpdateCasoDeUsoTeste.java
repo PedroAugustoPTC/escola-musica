@@ -26,13 +26,14 @@ class ObterAcoesNaoConfirmadasDoUpdateCasoDeUsoTeste {
                         repositorio,
                         relogio,
                         new PoliticaRetentativa(
-                                Duration.ofSeconds(30), Duration.ofMinutes(15), Duration.ofHours(24)))
+                                Duration.ofSeconds(30),
+                                Duration.ofMinutes(15),
+                                Duration.ofHours(24)))
                 .executar(
                         "u5",
                         OrigemAcaoCanal.RESPOSTA_UPDATE,
                         5L,
-                        List.of(
-                                nova("u5-0"), nova("u5-1"), nova("u5-2")));
+                        List.of(nova("u5-0"), nova("u5-1"), nova("u5-2")));
     }
 
     private static NovaAcao nova(String id) {
@@ -42,8 +43,12 @@ class ObterAcoesNaoConfirmadasDoUpdateCasoDeUsoTeste {
     @Test
     void nadaConfirmadoDevolveTudoNaMesmaOrdemComOsMesmosIds() {
         gravarTres();
-        assertThat(obter.executar(5L)).extracting(AcaoCanal::id).containsExactly("u5-0", "u5-1", "u5-2");
-        assertThat(obter.executar(5L)).extracting(AcaoCanal::id).containsExactly("u5-0", "u5-1", "u5-2");
+        assertThat(obter.executar(5L))
+                .extracting(AcaoCanal::id)
+                .containsExactly("u5-0", "u5-1", "u5-2");
+        assertThat(obter.executar(5L))
+                .extracting(AcaoCanal::id)
+                .containsExactly("u5-0", "u5-1", "u5-2");
     }
 
     @Test
@@ -56,7 +61,13 @@ class ObterAcoesNaoConfirmadasDoUpdateCasoDeUsoTeste {
     @Test
     void tudoConfirmadoDevolveListaVazia() {
         gravarTres();
-        repositorio.todas().forEach(a -> repositorio.guardada(a.id()).confirmarFalha("ERRO_TELEGRAM", relogio.agora()));
+        repositorio
+                .todas()
+                .forEach(
+                        a ->
+                                repositorio
+                                        .guardada(a.id())
+                                        .confirmarFalha("ERRO_TELEGRAM", relogio.agora()));
         assertThat(obter.executar(5L)).isEmpty();
     }
 

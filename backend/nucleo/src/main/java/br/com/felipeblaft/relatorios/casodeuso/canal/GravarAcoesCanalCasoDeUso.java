@@ -18,7 +18,9 @@ import java.util.UUID;
  */
 public class GravarAcoesCanalCasoDeUso {
 
-    /** Ação já mapeada pelo adaptador de entrada; {@code payload} e {@code compensacao} são opacos. */
+    /**
+     * Ação já mapeada pelo adaptador de entrada; {@code payload} e {@code compensacao} são opacos.
+     */
     public record NovaAcao(
             String id,
             TipoAcaoCanal tipo,
@@ -40,7 +42,8 @@ public class GravarAcoesCanalCasoDeUso {
     }
 
     /**
-     * @param loteId evento de origem ({@code u<update_id>}, {@code p:<evento>} ou {@code c:<acaoId>})
+     * @param loteId evento de origem ({@code u<update_id>}, {@code p:<evento>} ou {@code
+     *     c:<acaoId>})
      * @param updateId obrigatório em {@link OrigemAcaoCanal#RESPOSTA_UPDATE}
      * @return quantas ações foram de fato gravadas (as já existentes não contam)
      */

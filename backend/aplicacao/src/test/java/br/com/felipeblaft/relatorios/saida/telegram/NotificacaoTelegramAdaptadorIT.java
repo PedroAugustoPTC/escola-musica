@@ -89,6 +89,23 @@ class NotificacaoTelegramAdaptadorIT extends TelegramConversaBase {
                 .isNull();
     }
 
+    /**
+     * V12, US5.3: no modo DIRETA (padrão) a mensagem sai só pela API de bots e nada entra na
+     * outbox.
+     */
+    @Test
+    void modoDiretoEnviaDiretoENadaEntraNaOutbox() throws Exception {
+        vincular(USUARIO_CLARA, CenarioIT.CODIGO_CLARA);
+
+        registrar.executar(clara.id(), matteo.id(), audioDaWeb(), Canal.WEB);
+        cenario.processarFila();
+
+        assertThat(ultimaMensagem().get("text").asString())
+                .isEqualTo("O relatório de Matteo Ferreira tem perguntas pendentes.");
+        assertThat(jdbc.queryForObject("select count(*) from acao_canal", Integer.class)).isZero();
+        assertThat(propriedades.canalTelegram().entregaProativa().name()).isEqualTo("DIRETA");
+    }
+
     @Test
     void trabalhoDaWebSemVinculoNaoEnviaNada() throws Exception {
         registrar.executar(clara.id(), matteo.id(), audioDaWeb(), Canal.WEB);

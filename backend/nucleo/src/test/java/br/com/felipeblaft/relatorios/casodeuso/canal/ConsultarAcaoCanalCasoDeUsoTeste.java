@@ -22,12 +22,22 @@ class ConsultarAcaoCanalCasoDeUsoTeste {
                         repositorio,
                         new RelogioFixo(),
                         new PoliticaRetentativa(
-                                Duration.ofSeconds(30), Duration.ofMinutes(15), Duration.ofHours(24)))
+                                Duration.ofSeconds(30),
+                                Duration.ofMinutes(15),
+                                Duration.ofHours(24)))
                 .executar(
                         "u1",
                         OrigemAcaoCanal.RESPOSTA_UPDATE,
                         1L,
-                        List.of(new NovaAcao("u1-0", TipoAcaoCanal.MENSAGEM, 1L, null, null, "{}", null)));
+                        List.of(
+                                new NovaAcao(
+                                        "u1-0",
+                                        TipoAcaoCanal.MENSAGEM,
+                                        1L,
+                                        null,
+                                        null,
+                                        "{}",
+                                        null)));
         ConsultarAcaoCanalCasoDeUso consultar = new ConsultarAcaoCanalCasoDeUso(repositorio);
 
         assertThat(consultar.executar("u1-0").orElseThrow().estado())

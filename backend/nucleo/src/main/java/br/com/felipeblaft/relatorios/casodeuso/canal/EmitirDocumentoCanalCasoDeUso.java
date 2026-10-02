@@ -13,9 +13,9 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * Emite o identificador opaco de um PDF para o orquestrador (R-08): token de 256 bits (Base64url, 43
- * caracteres), com só o hash SHA-256 guardado. Vale pelo prazo de entrega mais uma hora, para cobrir
- * todas as retentativas.
+ * Emite o identificador opaco de um PDF para o orquestrador (R-08): token de 256 bits (Base64url,
+ * 43 caracteres), com só o hash SHA-256 guardado. Vale pelo prazo de entrega mais uma hora, para
+ * cobrir todas as retentativas.
  */
 public class EmitirDocumentoCanalCasoDeUso {
 

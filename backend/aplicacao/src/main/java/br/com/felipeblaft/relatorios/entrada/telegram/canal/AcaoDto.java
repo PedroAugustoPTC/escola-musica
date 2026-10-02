@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
 
 /**
- * Ação v1 que o orquestrador executa no chat (contracts/acoes-v1.schema.json, {@code #/$defs/Acao}).
- * Discriminada pelo campo {@code tipo}. O formato é normativo: nenhum campo de mais, nenhum de menos;
- * campos nulos não são emitidos.
+ * Ação v1 que o orquestrador executa no chat (contracts/acoes-v1.schema.json, {@code
+ * #/$defs/Acao}). Discriminada pelo campo {@code tipo}. O formato é normativo: nenhum campo de
+ * mais, nenhum de menos; campos nulos não são emitidos.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public sealed interface AcaoDto {
@@ -26,7 +26,8 @@ public sealed interface AcaoDto {
 
     record TecladoDto(List<List<BotaoDto>> linhas) {}
 
-    record AcaoMensagemDto(String acaoId, String tipo, long chatId, String texto, TecladoDto teclado)
+    record AcaoMensagemDto(
+            String acaoId, String tipo, long chatId, String texto, TecladoDto teclado)
             implements AcaoDto {}
 
     record AcaoEdicaoDto(

@@ -113,7 +113,12 @@ public class AcaoCanalRepositorioEmMemoria implements AcaoCanalRepositorio {
     }
 
     @Override
-    public Pendencias pendencias() {
+    public Pendencias pendencias(Instant entreguesAte) {
+        long semConfirmacao =
+                dados.values().stream()
+                        .filter(a -> a.estado() == EstadoAcaoCanal.ENTREGUE)
+                        .filter(a -> a.entregueEm().isBefore(entreguesAte))
+                        .count();
         List<AcaoCanal> pendentes =
                 dados.values().stream()
                         .filter(a -> a.estado() == EstadoAcaoCanal.PENDENTE)
@@ -123,7 +128,7 @@ public class AcaoCanalRepositorioEmMemoria implements AcaoCanalRepositorio {
                         .map(AcaoCanal::criadoEm)
                         .min(Comparator.naturalOrder())
                         .orElse(null);
-        return new Pendencias(pendentes.size(), maisAntiga);
+        return new Pendencias(pendentes.size(), maisAntiga, semConfirmacao);
     }
 
     /** Estado guardado (não uma cópia) para asserções. */

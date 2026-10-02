@@ -16,9 +16,9 @@ import org.springframework.security.web.access.intercept.AuthorizationFilter;
 
 /**
  * Segunda cadeia de segurança, só para {@code /interno/**} (R-09, FR-024 a FR-027): sem sessão, sem
- * cookie de portal, sem CSRF (não há navegador), autenticada somente pelo token de serviço. Falha de
- * autenticação responde {@code 401} <strong>sem corpo</strong>. A cadeia do portal não muda além da
- * ordem ({@code @Order(2)}); o token de serviço não autentica nada nela.
+ * cookie de portal, sem CSRF (não há navegador), autenticada somente pelo token de serviço. Falha
+ * de autenticação responde {@code 401} <strong>sem corpo</strong>. A cadeia do portal não muda além
+ * da ordem ({@code @Order(2)}); o token de serviço não autentica nada nela.
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
@@ -28,14 +28,10 @@ public class SegurancaInternaConfiguracao {
 
     @Bean
     @Order(1)
-    SecurityFilterChain cadeiaSegurancaInterna(HttpSecurity http, PropriedadesAplicacao propriedades)
-            throws Exception {
+    SecurityFilterChain cadeiaSegurancaInterna(
+            HttpSecurity http, PropriedadesAplicacao propriedades) throws Exception {
         PropriedadesAplicacao.CanalTelegram canal = propriedades.canalTelegram();
-        if (vazio(canal.tokenAtual()) && vazio(canal.tokenProximo())) {
-            LOG.warn(
-                    "canal-telegram-sem-token-de-servico: a area /interno/** recusa todas as"
-                            + " requisicoes ate que CANAL_TELEGRAM_TOKEN_ATUAL seja definido");
-        }
+        avisarSeNaoHaToken(canal);
         http.securityMatcher("/interno/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
@@ -63,6 +59,15 @@ public class SegurancaInternaConfiguracao {
                                                                 HttpStatus.UNAUTHORIZED.value())))
                 .addFilterBefore(new TokenServicoFiltro(canal), AuthorizationFilter.class);
         return http.build();
+    }
+
+    /** Aviso na subida: sem token a área interna recusa tudo. Nunca imprime valor algum. */
+    static void avisarSeNaoHaToken(PropriedadesAplicacao.CanalTelegram canal) {
+        if (vazio(canal.tokenAtual()) && vazio(canal.tokenProximo())) {
+            LOG.warn(
+                    "canal-telegram-sem-token-de-servico: a area /interno/** recusa todas as"
+                            + " requisicoes ate que CANAL_TELEGRAM_TOKEN_ATUAL seja definido");
+        }
     }
 
     private static boolean vazio(String valor) {

@@ -58,7 +58,8 @@ class AcaoCanalTeste {
         assertThat(acao.proximaTentativaEm()).isNull();
         assertThat(acao.tentativas()).isZero();
         assertThat(acao.prazoEm()).isEqualTo(AGORA.plus(Duration.ofHours(24)));
-        assertThat(acao.canal()).isEqualTo(br.com.felipeblaft.relatorios.dominio.comum.Canal.TELEGRAM);
+        assertThat(acao.canal())
+                .isEqualTo(br.com.felipeblaft.relatorios.dominio.comum.Canal.TELEGRAM);
     }
 
     @Test
@@ -167,7 +168,8 @@ class AcaoCanalTeste {
     void confirmacaoDivergenteDeEstadoFinalEIgnorada() {
         AcaoCanal acao = resposta();
         acao.confirmarExecutada(AGORA);
-        assertThat(acao.confirmarFalha("ERRO_TELEGRAM", AGORA)).isEqualTo(ResultadoConfirmacao.DIVERGENTE);
+        assertThat(acao.confirmarFalha("ERRO_TELEGRAM", AGORA))
+                .isEqualTo(ResultadoConfirmacao.DIVERGENTE);
         assertThat(acao.estado()).isEqualTo(EstadoAcaoCanal.EXECUTADA);
         assertThat(acao.codigoMotivo()).isNull();
     }
@@ -191,7 +193,8 @@ class AcaoCanalTeste {
     @Test
     void confirmacaoChegandoAntesDoAceiteVaiDePendenteAoFinal() {
         AcaoCanal acao = proativa(TipoAcaoCanal.MENSAGEM, null);
-        assertThat(acao.confirmarFalha("LIMITE_DE_TAXA", AGORA)).isEqualTo(ResultadoConfirmacao.APLICADA);
+        assertThat(acao.confirmarFalha("LIMITE_DE_TAXA", AGORA))
+                .isEqualTo(ResultadoConfirmacao.APLICADA);
         assertThat(acao.estado()).isEqualTo(EstadoAcaoCanal.FALHOU);
         assertThat(acao.proximaTentativaEm()).isNull();
     }
@@ -201,7 +204,8 @@ class AcaoCanalTeste {
         AcaoCanal descartada = proativa(TipoAcaoCanal.MENSAGEM, null);
         descartada.descartar(AGORA);
         assertThat(descartada.confirmarExecutada(AGORA)).isEqualTo(ResultadoConfirmacao.DIVERGENTE);
-        assertThat(descartada.confirmarFalha("X", AGORA)).isEqualTo(ResultadoConfirmacao.DIVERGENTE);
+        assertThat(descartada.confirmarFalha("X", AGORA))
+                .isEqualTo(ResultadoConfirmacao.DIVERGENTE);
         assertThat(descartada.estado()).isEqualTo(EstadoAcaoCanal.DESCARTADA);
     }
 

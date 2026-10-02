@@ -24,10 +24,13 @@ public class TransacaoCasoDeUsoDecorador {
     static final String PACOTE_CASOS_DE_USO = "br.com.felipeblaft.relatorios.casodeuso";
 
     /**
-     * Casos de uso que fazem chamada de rede e por isso não podem segurar uma conexão do banco: cada
-     * gravação deles é atômica por si só (a entrega proativa ao orquestrador, FR-015).
+     * Casos de uso que ficam fora de uma transação única: a entrega proativa faz chamada de rede e
+     * não pode segurar uma conexão do banco (FR-015); a leitura de PDF por identificador opaco
+     * captura a exceção de outro caso de uso (que, dentro da mesma transação, a marcaria como
+     * só-reversão e faria o commit falhar). Cada gravação deles é atômica por si só.
      */
-    static final Set<String> SEM_TRANSACAO = Set.of("EntregarAcoesPendentesCasoDeUso");
+    static final Set<String> SEM_TRANSACAO =
+            Set.of("EntregarAcoesPendentesCasoDeUso", "ObterDocumentoCanalCasoDeUso");
 
     @Bean
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)

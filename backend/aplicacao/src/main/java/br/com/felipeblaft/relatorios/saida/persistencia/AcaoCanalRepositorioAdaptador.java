@@ -18,8 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Outbox no PostgreSQL (R-04 a R-06): gravação idempotente por id, reserva do lote devido com
  * {@code FOR UPDATE SKIP LOCKED} e lease, e atualização condicional pela coluna {@code versao}. As
- * leituras são destacadas do contexto de persistência para que uma releitura na mesma transação (ex.:
- * nova tentativa de uma confirmação) sempre veja o que está no banco.
+ * leituras são destacadas do contexto de persistência para que uma releitura na mesma transação
+ * (ex.: nova tentativa de uma confirmação) sempre veja o que está no banco.
  */
 @Repository
 class AcaoCanalRepositorioAdaptador implements AcaoCanalRepositorio {
@@ -128,9 +128,11 @@ class AcaoCanalRepositorioAdaptador implements AcaoCanalRepositorio {
 
     @Override
     @Transactional
-    public Pendencias pendencias() {
+    public Pendencias pendencias(Instant entreguesAte) {
         return new Pendencias(
-                jpa.contarPendentes(), jpa.criadaMaisAntigaPendente().orElse(null));
+                jpa.contarPendentes(),
+                jpa.criadaMaisAntigaPendente().orElse(null),
+                jpa.contarEntreguesDesde(entreguesAte));
     }
 
     private AcaoCanal ler(AcaoCanalEntidade e) {

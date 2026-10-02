@@ -40,7 +40,8 @@ public record DocumentoCanal(
     public static String hashDoToken(String token) {
         try {
             byte[] digest =
-                    MessageDigest.getInstance("SHA-256").digest(token.getBytes(StandardCharsets.UTF_8));
+                    MessageDigest.getInstance("SHA-256")
+                            .digest(token.getBytes(StandardCharsets.UTF_8));
             return HexFormat.of().formatHex(digest);
         } catch (NoSuchAlgorithmException erro) {
             throw new IllegalStateException("SHA-256 indisponível", erro);

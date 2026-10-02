@@ -19,7 +19,9 @@ import br.com.felipeblaft.relatorios.casodeuso.aula.TentarNovamenteRelatorioAula
 import br.com.felipeblaft.relatorios.casodeuso.canal.ConfirmarExecucaoAcoesCanalCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.canal.ConsultarAcaoCanalCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.canal.EmitirDocumentoCanalCasoDeUso;
+import br.com.felipeblaft.relatorios.casodeuso.canal.EntregarAcoesPendentesCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.canal.GravarAcoesCanalCasoDeUso;
+import br.com.felipeblaft.relatorios.casodeuso.canal.LimparAcoesCanalCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.canal.ObterAcoesNaoConfirmadasDoUpdateCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.canal.ObterDocumentoCanalCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.carga.CarregarCadastroInicialCasoDeUso;
@@ -54,6 +56,7 @@ import br.com.felipeblaft.relatorios.porta.InteracaoRelatorioRepositorio;
 import br.com.felipeblaft.relatorios.porta.LlmPorta;
 import br.com.felipeblaft.relatorios.porta.NormalizacaoAudioPorta;
 import br.com.felipeblaft.relatorios.porta.NotificacaoProfessorPorta;
+import br.com.felipeblaft.relatorios.porta.OrquestradorCanalPorta;
 import br.com.felipeblaft.relatorios.porta.ProfessorRepositorio;
 import br.com.felipeblaft.relatorios.porta.ProtecaoDadosPorta;
 import br.com.felipeblaft.relatorios.porta.RegistroCustoPorta;
@@ -586,6 +589,42 @@ public class CasosDeUsoConfiguracao {
             ObterDocumentoRelatorioCasoDeUso obterDocumento,
             RelogioPorta relogio) {
         return new ObterDocumentoCanalCasoDeUso(documentos, obterDocumento, relogio);
+    }
+
+    @Bean
+    EntregarAcoesPendentesCasoDeUso entregarAcoesPendentesCasoDeUso(
+            AcaoCanalRepositorio acoes,
+            OrquestradorCanalPorta orquestrador,
+            FilaTrabalhoPorta fila,
+            VinculoTelegramRepositorio vinculos,
+            RelogioPorta relogio,
+            PoliticaRetentativa politica,
+            PropriedadesAplicacao propriedades) {
+        PropriedadesAplicacao.CanalTelegram canal = propriedades.canalTelegram();
+        return new EntregarAcoesPendentesCasoDeUso(
+                acoes,
+                orquestrador,
+                fila,
+                vinculos,
+                relogio,
+                politica,
+                Duration.ofSeconds(canal.confirmacaoMaxSegundos()),
+                Duration.ofSeconds(canal.leaseSegundos()));
+    }
+
+    @Bean
+    LimparAcoesCanalCasoDeUso limparAcoesCanalCasoDeUso(
+            AcaoCanalRepositorio acoes,
+            DocumentoCanalRepositorio documentos,
+            RelogioPorta relogio,
+            PropriedadesAplicacao propriedades) {
+        PropriedadesAplicacao.CanalTelegram canal = propriedades.canalTelegram();
+        return new LimparAcoesCanalCasoDeUso(
+                acoes,
+                documentos,
+                relogio,
+                Duration.ofHours(canal.retencaoPayloadHoras()),
+                Duration.ofDays(canal.retencaoRegistroDias()));
     }
 
     // ---- Histórico (US5)

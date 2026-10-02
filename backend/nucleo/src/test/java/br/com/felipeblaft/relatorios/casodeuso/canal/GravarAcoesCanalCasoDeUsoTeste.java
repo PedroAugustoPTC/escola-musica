@@ -27,7 +27,8 @@ class GravarAcoesCanalCasoDeUsoTeste {
                             Duration.ofSeconds(30), Duration.ofMinutes(15), Duration.ofHours(24)));
 
     private static NovaAcao nova(String id, UUID professor) {
-        return new NovaAcao(id, TipoAcaoCanal.MENSAGEM, 77L, professor, null, "{\"texto\":\"a\"}", null);
+        return new NovaAcao(
+                id, TipoAcaoCanal.MENSAGEM, 77L, professor, null, "{\"texto\":\"a\"}", null);
     }
 
     @Test
@@ -41,19 +42,24 @@ class GravarAcoesCanalCasoDeUsoTeste {
         assertThat(gravadas).isEqualTo(2);
         List<AcaoCanal> acoes = repositorio.buscarPorUpdate(9L);
         assertThat(acoes).extracting(AcaoCanal::id).containsExactly("u9-0", "u9-1");
-        assertThat(acoes).allSatisfy(
-                acao -> {
-                    assertThat(acao.estado()).isEqualTo(EstadoAcaoCanal.ENTREGUE);
-                    assertThat(acao.loteId()).isEqualTo("u9");
-                    assertThat(acao.prazoEm()).isEqualTo(relogio.agora().plus(Duration.ofHours(24)));
-                });
+        assertThat(acoes)
+                .allSatisfy(
+                        acao -> {
+                            assertThat(acao.estado()).isEqualTo(EstadoAcaoCanal.ENTREGUE);
+                            assertThat(acao.loteId()).isEqualTo("u9");
+                            assertThat(acao.prazoEm())
+                                    .isEqualTo(relogio.agora().plus(Duration.ofHours(24)));
+                        });
     }
 
     @Test
     void proativaGravaPendenteDevidaAgora() {
         UUID professor = UUID.randomUUID();
         gravar.executar(
-                "p:resultado:t", OrigemAcaoCanal.PROATIVA, null, List.of(nova("p:resultado:t:0", professor)));
+                "p:resultado:t",
+                OrigemAcaoCanal.PROATIVA,
+                null,
+                List.of(nova("p:resultado:t:0", professor)));
         AcaoCanal acao = repositorio.buscarPorId("p:resultado:t:0").orElseThrow();
         assertThat(acao.estado()).isEqualTo(EstadoAcaoCanal.PENDENTE);
         assertThat(acao.proximaTentativaEm()).isEqualTo(relogio.agora());

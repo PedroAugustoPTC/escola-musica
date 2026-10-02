@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Entrada do canal Telegram (contracts/telegram-conversa.md §1): chamado pelo servidor local da API
  * de bots na rede interna. Valida o segredo em tempo constante, deixa o processamento (dedup e
- * interpretação) ao {@link ProcessadorUpdateTelegramServico} e responde sempre 200 depois de gravar o
- * estado; as mensagens do bot são enviadas depois de o estado estar gravado.
+ * interpretação) ao {@link ProcessadorUpdateTelegramServico} e responde sempre 200 depois de gravar
+ * o estado; as mensagens do bot são enviadas depois de o estado estar gravado.
  */
 @RestController
 public class TelegramWebhookControlador {

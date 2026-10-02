@@ -7,8 +7,9 @@ import java.util.UUID;
 
 /**
  * Ação de canal na outbox (data-model.md §1.2 e §2): o que o orquestrador deve executar no chat. O
- * {@code payload} e a {@code compensacao} são texto opaco para o núcleo (o formato v1 é conhecimento
- * do adaptador de entrada). Estado final nunca volta; confirmação repetida e idêntica é inócua.
+ * {@code payload} e a {@code compensacao} são texto opaco para o núcleo (o formato v1 é
+ * conhecimento do adaptador de entrada). Estado final nunca volta; confirmação repetida e idêntica
+ * é inócua.
  */
 public class AcaoCanal {
 
@@ -221,8 +222,8 @@ public class AcaoCanal {
     }
 
     /**
-     * Ação alternativa para quando esta não pôde ser executada: no máximo uma por ação (id
-     * {@code <id>-c}), no mesmo chat e com o mesmo professor/trabalho.
+     * Ação alternativa para quando esta não pôde ser executada: no máximo uma por ação (id {@code
+     * <id>-c}), no mesmo chat e com o mesmo professor/trabalho.
      */
     public AcaoCanal criarCompensacao(Instant agora, PoliticaRetentativa politica) {
         if (!temCompensacao()) {

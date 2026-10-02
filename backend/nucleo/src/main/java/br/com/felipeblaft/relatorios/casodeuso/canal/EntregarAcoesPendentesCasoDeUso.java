@@ -1,6 +1,7 @@
 package br.com.felipeblaft.relatorios.casodeuso.canal;
 
 import br.com.felipeblaft.relatorios.dominio.canal.AcaoCanal;
+import br.com.felipeblaft.relatorios.dominio.canal.OrigemAcaoCanal;
 import br.com.felipeblaft.relatorios.dominio.canal.PoliticaRetentativa;
 import br.com.felipeblaft.relatorios.dominio.canal.TipoAcaoCanal;
 import br.com.felipeblaft.relatorios.dominio.trabalho.TrabalhoProcessamento;
@@ -21,11 +22,11 @@ import java.util.Optional;
 /**
  * Despacha ao orquestrador os lotes de ações proativas devidos (FR-011, FR-012, FR-016, FR-018). Um
  * lote é entregue inteiro e fora de transação: o HTTP nunca segura conexão do banco. Toda gravação
- * é condicional à versão lida, de modo que uma confirmação que chegue durante o HTTP prevalece sobre
- * o aceite.
+ * é condicional à versão lida, de modo que uma confirmação que chegue durante o HTTP prevalece
+ * sobre o aceite.
  *
- * <p>Este caso de uso <strong>não</strong> roda dentro de uma transação única (ver
- * {@code TransacaoCasoDeUsoDecorador}).
+ * <p>Este caso de uso <strong>não</strong> roda dentro de uma transação única (ver {@code
+ * TransacaoCasoDeUsoDecorador}).
  */
 public class EntregarAcoesPendentesCasoDeUso {
 
@@ -36,7 +37,10 @@ public class EntregarAcoesPendentesCasoDeUso {
      * @param falhasDefinitivas ids das ações que venceram o prazo sem aceite
      */
     public record Ciclo(
-            int lotesAceitos, int lotesRecusados, int descartadas, List<String> falhasDefinitivas) {}
+            int lotesAceitos,
+            int lotesRecusados,
+            int descartadas,
+            List<String> falhasDefinitivas) {}
 
     private final AcaoCanalRepositorio acoes;
     private final OrquestradorCanalPorta orquestrador;
@@ -145,7 +149,11 @@ public class EntregarAcoesPendentesCasoDeUso {
 
     /** Id da mensagem de etapa já conhecida do trabalho (a etapa edita no lugar). */
     private Optional<Long> mensagemDaEtapa(AcaoCanal acao) {
-        if (acao.tipo() != TipoAcaoCanal.MENSAGEM_ETAPA || acao.trabalhoId() == null) {
+        // a compensação existe justamente porque a mensagem não pôde ser editada: envia mensagem
+        // nova
+        if (acao.tipo() != TipoAcaoCanal.MENSAGEM_ETAPA
+                || acao.trabalhoId() == null
+                || acao.origem() == OrigemAcaoCanal.COMPENSACAO) {
             return Optional.empty();
         }
         return fila.buscarPorId(acao.trabalhoId())

@@ -111,8 +111,12 @@ class AcaoCanalRepositorioAdaptadorIT extends IntegracaoBase {
                             politica));
         }
         acoes.gravarLote(respostas);
-        assertThat(acoes.buscarPorUpdate(7L)).extracting(AcaoCanal::id).containsExactly("u7-0", "u7-1", "u7-2");
-        assertThat(acoes.buscarPorLote("u7")).extracting(AcaoCanal::id).containsExactly("u7-0", "u7-1", "u7-2");
+        assertThat(acoes.buscarPorUpdate(7L))
+                .extracting(AcaoCanal::id)
+                .containsExactly("u7-0", "u7-1", "u7-2");
+        assertThat(acoes.buscarPorLote("u7"))
+                .extracting(AcaoCanal::id)
+                .containsExactly("u7-0", "u7-1", "u7-2");
         assertThat(acoes.buscarPorUpdate(8L)).isEmpty();
         assertThat(acoes.buscarPorUpdate(7L).get(0).estado()).isEqualTo(EstadoAcaoCanal.ENTREGUE);
         assertThat(acoes.buscarPorUpdate(7L).get(0).entregueEm()).isEqualTo(T0);
@@ -128,10 +132,14 @@ class AcaoCanalRepositorioAdaptadorIT extends IntegracaoBase {
         assertThat(reservado).extracting(AcaoCanal::id).containsExactly("p:a:0", "p:a:1", "p:a:2");
         assertThat(reservado).allSatisfy(a -> assertThat(a.versao()).isEqualTo(1));
         assertThat(reservado).allSatisfy(a -> assertThat(a.proximaTentativaEm()).isEqualTo(lease));
-        assertThat(acoes.reservarProximoLoteDevido(T0.plusSeconds(59), CONFIRMACAO, lease.plusSeconds(60)))
+        assertThat(
+                        acoes.reservarProximoLoteDevido(
+                                T0.plusSeconds(59), CONFIRMACAO, lease.plusSeconds(60)))
                 .isEmpty();
         // o lease venceu: o mesmo lote volta, com os mesmos ids
-        assertThat(acoes.reservarProximoLoteDevido(T0.plusSeconds(60), CONFIRMACAO, lease.plusSeconds(60)))
+        assertThat(
+                        acoes.reservarProximoLoteDevido(
+                                T0.plusSeconds(60), CONFIRMACAO, lease.plusSeconds(60)))
                 .extracting(AcaoCanal::id)
                 .containsExactly("p:a:0", "p:a:1", "p:a:2");
     }
@@ -139,7 +147,9 @@ class AcaoCanalRepositorioAdaptadorIT extends IntegracaoBase {
     @Test
     void naoReservaAcaoAindaNaoDevida() {
         acoes.gravarLote(lote("p:a", 1, 1));
-        assertThat(acoes.reservarProximoLoteDevido(T0.minusSeconds(1), CONFIRMACAO, T0.plusSeconds(60)))
+        assertThat(
+                        acoes.reservarProximoLoteDevido(
+                                T0.minusSeconds(1), CONFIRMACAO, T0.plusSeconds(60)))
                 .isEmpty();
     }
 
@@ -179,7 +189,9 @@ class AcaoCanalRepositorioAdaptadorIT extends IntegracaoBase {
                 assertThat(reservado).hasSize(3);
                 assertThat(reservado.stream().map(AcaoCanal::loteId).distinct()).hasSize(1);
                 for (AcaoCanal acao : reservado) {
-                    assertThat(ids.add(acao.id())).as("ação %s reservada duas vezes", acao.id()).isTrue();
+                    assertThat(ids.add(acao.id()))
+                            .as("ação %s reservada duas vezes", acao.id())
+                            .isTrue();
                 }
             }
         }
@@ -194,10 +206,12 @@ class AcaoCanalRepositorioAdaptadorIT extends IntegracaoBase {
         acoes.gravarLote(lote("p:b", 1, 1));
         acoes.gravarLote(lote("p:c", 2, 1));
 
-        List<AcaoCanal> primeiro = acoes.reservarProximoLoteDevido(T0, CONFIRMACAO, T0.plusSeconds(60));
+        List<AcaoCanal> primeiro =
+                acoes.reservarProximoLoteDevido(T0, CONFIRMACAO, T0.plusSeconds(60));
         assertThat(primeiro).extracting(AcaoCanal::loteId).containsExactly("p:a");
         // o chat 1 está atrás do lote A (ainda pendente); o chat 2 é independente
-        List<AcaoCanal> segundo = acoes.reservarProximoLoteDevido(T0, CONFIRMACAO, T0.plusSeconds(60));
+        List<AcaoCanal> segundo =
+                acoes.reservarProximoLoteDevido(T0, CONFIRMACAO, T0.plusSeconds(60));
         assertThat(segundo).extracting(AcaoCanal::loteId).containsExactly("p:c");
         assertThat(acoes.reservarProximoLoteDevido(T0, CONFIRMACAO, T0.plusSeconds(60))).isEmpty();
 
@@ -206,8 +220,11 @@ class AcaoCanalRepositorioAdaptadorIT extends IntegracaoBase {
         a.marcarEntregue(T0);
         assertThat(acoes.atualizarSeVersao(a, a.versao())).isTrue();
         Instant depoisDoLease = T0.plusSeconds(61);
-        assertThat(acoes.reservarProximoLoteDevido(T0.plusSeconds(30), CONFIRMACAO, depoisDoLease)).isEmpty();
-        assertThat(acoes.reservarProximoLoteDevido(depoisDoLease, CONFIRMACAO, depoisDoLease.plusSeconds(60)))
+        assertThat(acoes.reservarProximoLoteDevido(T0.plusSeconds(30), CONFIRMACAO, depoisDoLease))
+                .isEmpty();
+        assertThat(
+                        acoes.reservarProximoLoteDevido(
+                                depoisDoLease, CONFIRMACAO, depoisDoLease.plusSeconds(60)))
                 .extracting(AcaoCanal::loteId)
                 .containsExactly("p:b");
     }
@@ -223,7 +240,9 @@ class AcaoCanalRepositorioAdaptadorIT extends IntegracaoBase {
         a.confirmarExecutada(T0.plusSeconds(2));
         assertThat(acoes.atualizarSeVersao(a, a.versao())).isTrue();
 
-        assertThat(acoes.reservarProximoLoteDevido(T0.plusSeconds(3), CONFIRMACAO, T0.plusSeconds(63)))
+        assertThat(
+                        acoes.reservarProximoLoteDevido(
+                                T0.plusSeconds(3), CONFIRMACAO, T0.plusSeconds(63)))
                 .extracting(AcaoCanal::loteId)
                 .containsExactly("p:b");
     }
@@ -251,10 +270,14 @@ class AcaoCanalRepositorioAdaptadorIT extends IntegracaoBase {
     @Test
     void releituraSempreVeOEstadoDoBanco() {
         acoes.gravarLote(lote("p:a", 1, 1));
-        jdbc.update("update acao_canal set estado = 'EXECUTADA', versao = versao + 1 where id = 'p:a:0'");
-        assertThat(acoes.buscarPorId("p:a:0").orElseThrow().estado()).isEqualTo(EstadoAcaoCanal.EXECUTADA);
-        jdbc.update("update acao_canal set estado = 'FALHOU', versao = versao + 1 where id = 'p:a:0'");
-        assertThat(acoes.buscarPorId("p:a:0").orElseThrow().estado()).isEqualTo(EstadoAcaoCanal.FALHOU);
+        jdbc.update(
+                "update acao_canal set estado = 'EXECUTADA', versao = versao + 1 where id = 'p:a:0'");
+        assertThat(acoes.buscarPorId("p:a:0").orElseThrow().estado())
+                .isEqualTo(EstadoAcaoCanal.EXECUTADA);
+        jdbc.update(
+                "update acao_canal set estado = 'FALHOU', versao = versao + 1 where id = 'p:a:0'");
+        assertThat(acoes.buscarPorId("p:a:0").orElseThrow().estado())
+                .isEqualTo(EstadoAcaoCanal.FALHOU);
     }
 
     @Test
@@ -267,7 +290,8 @@ class AcaoCanalRepositorioAdaptadorIT extends IntegracaoBase {
         b.expirar(T0.plus(Duration.ofHours(25)));
         acoes.atualizarSeVersao(b, 0);
 
-        assertThat(acoes.buscarPorId("p:a:0").orElseThrow().codigoMotivo()).isEqualTo("VINCULO_DESFEITO");
+        assertThat(acoes.buscarPorId("p:a:0").orElseThrow().codigoMotivo())
+                .isEqualTo("VINCULO_DESFEITO");
         AcaoCanal falha = acoes.buscarPorId("p:a:1").orElseThrow();
         assertThat(falha.estado()).isEqualTo(EstadoAcaoCanal.FALHA_DEFINITIVA);
         assertThat(falha.codigoMotivo()).isEqualTo("PRAZO_VENCIDO");
@@ -300,15 +324,19 @@ class AcaoCanalRepositorioAdaptadorIT extends IntegracaoBase {
 
     @Test
     void pendenciasContamSoAsPendentesEInformamAMaisAntiga() {
-        assertThat(acoes.pendencias())
-                .isEqualTo(new AcaoCanalRepositorio.Pendencias(0, null));
-        acoes.gravarLote(lote("p:a", 1, 2));
+        assertThat(acoes.pendencias(T0)).isEqualTo(new AcaoCanalRepositorio.Pendencias(0, null, 0));
+        acoes.gravarLote(lote("p:a", 1, 3));
         AcaoCanal f = acoes.buscarPorId("p:a:0").orElseThrow();
         f.confirmarExecutada(T0);
         acoes.atualizarSeVersao(f, 0);
-        AcaoCanalRepositorio.Pendencias pendencias = acoes.pendencias();
+        AcaoCanal e = acoes.buscarPorId("p:a:1").orElseThrow();
+        e.marcarEntregue(T0);
+        acoes.atualizarSeVersao(e, 0);
+        AcaoCanalRepositorio.Pendencias pendencias = acoes.pendencias(T0.plusSeconds(60));
         assertThat(pendencias.quantidade()).isEqualTo(1);
         assertThat(pendencias.maisAntigaCriadaEm()).isEqualTo(T0);
+        assertThat(pendencias.semConfirmacao()).isEqualTo(1);
+        assertThat(acoes.pendencias(T0).semConfirmacao()).isZero();
     }
 
     @Test
@@ -318,7 +346,14 @@ class AcaoCanalRepositorioAdaptadorIT extends IntegracaoBase {
         String hash = DocumentoCanal.hashDoToken("token-de-teste");
         documentos.emitir(
                 new DocumentoCanal(
-                        hash, professor, TipoRelatorio.SEMESTRAL, relatorio, 3, "s-v3.pdf", T0, T0.plusSeconds(100)));
+                        hash,
+                        professor,
+                        TipoRelatorio.SEMESTRAL,
+                        relatorio,
+                        3,
+                        "s-v3.pdf",
+                        T0,
+                        T0.plusSeconds(100)));
         documentos.emitir(
                 new DocumentoCanal(
                         DocumentoCanal.hashDoToken("outro"),

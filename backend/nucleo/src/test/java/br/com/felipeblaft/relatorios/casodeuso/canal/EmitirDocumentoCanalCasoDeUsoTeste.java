@@ -33,7 +33,8 @@ class EmitirDocumentoCanalCasoDeUsoTeste {
 
         assertThat(token).matches("^[A-Za-z0-9_-]{43}$");
         assertThat(repositorio.dados).doesNotContainKey(token);
-        DocumentoCanal gravado = repositorio.buscarPorHash(DocumentoCanal.hashDoToken(token)).orElseThrow();
+        DocumentoCanal gravado =
+                repositorio.buscarPorHash(DocumentoCanal.hashDoToken(token)).orElseThrow();
         assertThat(gravado.tokenHash()).hasSize(64).isNotEqualTo(token);
         assertThat(gravado.professorId()).isEqualTo(professor);
         assertThat(gravado.relatorioId()).isEqualTo(relatorio);
@@ -44,8 +45,15 @@ class EmitirDocumentoCanalCasoDeUsoTeste {
 
     @Test
     void validadeEPrazoDeEntregaMaisUmaHora() {
-        String token = emitir.executar(UUID.randomUUID(), TipoRelatorio.SEMESTRAL, UUID.randomUUID(), null, "s.pdf");
-        DocumentoCanal gravado = repositorio.buscarPorHash(DocumentoCanal.hashDoToken(token)).orElseThrow();
+        String token =
+                emitir.executar(
+                        UUID.randomUUID(),
+                        TipoRelatorio.SEMESTRAL,
+                        UUID.randomUUID(),
+                        null,
+                        "s.pdf");
+        DocumentoCanal gravado =
+                repositorio.buscarPorHash(DocumentoCanal.hashDoToken(token)).orElseThrow();
         assertThat(gravado.oficial()).isTrue();
         assertThat(gravado.expiraEm()).isEqualTo(relogio.agora().plus(Duration.ofHours(25)));
         assertThat(gravado.valido(relogio.agora().plus(Duration.ofHours(24)))).isTrue();
@@ -56,7 +64,13 @@ class EmitirDocumentoCanalCasoDeUsoTeste {
     void tokensSaoUnicos() {
         Set<String> tokens = new HashSet<>();
         for (int i = 0; i < 200; i++) {
-            tokens.add(emitir.executar(UUID.randomUUID(), TipoRelatorio.AULA, UUID.randomUUID(), null, "x.pdf"));
+            tokens.add(
+                    emitir.executar(
+                            UUID.randomUUID(),
+                            TipoRelatorio.AULA,
+                            UUID.randomUUID(),
+                            null,
+                            "x.pdf"));
         }
         assertThat(tokens).hasSize(200);
     }

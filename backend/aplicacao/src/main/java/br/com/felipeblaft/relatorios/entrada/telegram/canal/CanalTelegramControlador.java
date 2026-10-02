@@ -21,6 +21,7 @@ import br.com.felipeblaft.relatorios.entrada.telegram.UpdateTelegram;
 import br.com.felipeblaft.relatorios.entrada.telegram.canal.AcaoCanalMapeador.AcaoMapeada;
 import br.com.felipeblaft.relatorios.porta.RelogioPorta;
 import br.com.felipeblaft.relatorios.porta.TransacaoPorta;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
@@ -80,6 +81,7 @@ public class CanalTelegramControlador {
     private final ObterDocumentoCanalCasoDeUso obterDocumento;
     private final TransacaoPorta transacao;
     private final RelogioPorta relogio;
+    private final MeterRegistry metricas;
 
     @SuppressWarnings("java:S107")
     public CanalTelegramControlador(
@@ -93,7 +95,8 @@ public class CanalTelegramControlador {
             ConsultarAcaoCanalCasoDeUso consultar,
             ObterDocumentoCanalCasoDeUso obterDocumento,
             TransacaoPorta transacao,
-            RelogioPorta relogio) {
+            RelogioPorta relogio,
+            MeterRegistry metricas) {
         this.segredoWebhook = propriedades.telegram().segredoWebhook();
         this.processador = processador;
         this.registroUpdates = registroUpdates;
@@ -105,12 +108,13 @@ public class CanalTelegramControlador {
         this.obterDocumento = obterDocumento;
         this.transacao = transacao;
         this.relogio = relogio;
+        this.metricas = metricas;
     }
 
     // ------------------------------------------------------------------ POST /atualizacao
 
     @PostMapping("/atualizacao")
-    public ResponseEntity<RespostaAtualizacao> atualizacao(
+    public ResponseEntity<AtualizacaoResposta> atualizacao(
             @RequestHeader(name = CABECALHO_SEGREDO, required = false) String segredoRecebido,
             @RequestBody(required = false) String corpo) {
         if (!comparador.igual(segredoRecebido, segredoWebhook)) {
@@ -118,7 +122,7 @@ public class CanalTelegramControlador {
         }
         Optional<UpdateTelegram> lido = processador.ler(corpo);
         if (lido.isEmpty()) {
-            return ResponseEntity.ok(RespostaAtualizacao.vazia());
+            return ResponseEntity.ok(AtualizacaoResposta.vazia());
         }
         UpdateTelegram update = lido.get();
         ResultadoUpdateTelegram resultado = processador.processarInterno(update);
@@ -129,10 +133,8 @@ public class CanalTelegramControlador {
     }
 
     /** Mapeia, grava na outbox e marca o update como concluído, tudo na mesma transação. */
-    private RespostaAtualizacao registrarAcoes(
-            UpdateTelegram update,
-            List<SaidaTelegram> saidas,
-            boolean perdido) {
+    private AtualizacaoResposta registrarAcoes(
+            UpdateTelegram update, List<SaidaTelegram> saidas, boolean perdido) {
         long id = update.updateId();
         long chat = chatDe(update);
         List<AcaoMapeada> acoes;
@@ -140,8 +142,13 @@ public class CanalTelegramControlador {
             acoes = mapeador.mapear(saidas, chat, idsDeResposta(id, perdido));
         } catch (RuntimeException erro) {
             // toda mensagem recebida traz ao menos uma ação, mesmo se o mapeamento falhar (FR-039)
-            LOG.error("canal-erro-mapeamento updateId={} tipo={}", id, erro.getClass().getSimpleName());
-            acoes = mapeador.mapear(processador.respostaDeErro(update), chat, idsDeResposta(id, true));
+            LOG.error(
+                    "canal-erro-mapeamento updateId={} tipo={}",
+                    id,
+                    erro.getClass().getSimpleName());
+            acoes =
+                    mapeador.mapear(
+                            processador.respostaDeErro(update), chat, idsDeResposta(id, true));
         }
         List<AcaoMapeada> finais = acoes;
         transacao.executar(
@@ -153,7 +160,8 @@ public class CanalTelegramControlador {
                             finais.stream().map(a -> a.paraNovaAcao(null)).toList());
                     registroUpdates.concluir(id, finais.size());
                 });
-        return RespostaAtualizacao.de(id, finais.stream().map(a -> (JsonNode) a.noResposta()).toList());
+        return AtualizacaoResposta.de(
+                id, finais.stream().map(a -> (JsonNode) a.noResposta()).toList());
     }
 
     /**
@@ -161,11 +169,11 @@ public class CanalTelegramControlador {
      * processamento ainda está em curso, espera um pouco; se a linha ficou sem conclusão por muito
      * tempo, o processamento se perdeu e o professor recebe {@code ERRO_INTERNO}.
      */
-    private RespostaAtualizacao reentregar(UpdateTelegram update) {
+    private AtualizacaoResposta reentregar(UpdateTelegram update) {
         long id = update.updateId();
         Optional<SituacaoUpdate> situacao = registroUpdates.situacao(id);
         if (situacao.isEmpty() || !situacao.get().interno()) {
-            return RespostaAtualizacao.de(id, List.of());
+            return AtualizacaoResposta.de(id, List.of());
         }
         SituacaoUpdate atual = situacao.get();
         long limite = System.nanoTime() + ESPERA_PROCESSAMENTO.toNanos();
@@ -186,10 +194,10 @@ public class CanalTelegramControlador {
                             > 0;
             return perdida
                     ? registrarAcoes(update, processador.respostaDeErro(update), true)
-                    : RespostaAtualizacao.de(id, List.of());
+                    : AtualizacaoResposta.de(id, List.of());
         }
         List<AcaoCanal> pendentes = obterNaoConfirmadas.executar(id);
-        return RespostaAtualizacao.de(
+        return AtualizacaoResposta.de(
                 id,
                 pendentes.stream()
                         .map(a -> (JsonNode) AcaoCanalMapeador.comAcaoId(a.id(), a.payload()))
@@ -230,19 +238,19 @@ public class CanalTelegramControlador {
 
     @PostMapping("/confirmacoes")
     public ResponseEntity<Object> confirmacoes(@RequestBody(required = false) String corpo) {
-        RequisicaoConfirmacao requisicao;
+        ConfirmacaoRequisicao requisicao;
         try {
-            requisicao = corpo == null ? null : JSON.readValue(corpo, RequisicaoConfirmacao.class);
+            requisicao = corpo == null ? null : JSON.readValue(corpo, ConfirmacaoRequisicao.class);
         } catch (RuntimeException ilegivel) {
             return invalida();
         }
         if (requisicao == null || requisicao.versao() == null) {
             return invalida();
         }
-        if (!RespostaAtualizacao.VERSAO.equals(requisicao.versao())) {
+        if (!AtualizacaoResposta.VERSAO.equals(requisicao.versao())) {
             return ResponseEntity.badRequest().body(ErroCanalResposta.versaoNaoSuportada());
         }
-        List<RequisicaoConfirmacao.ResultadoAcaoDto> itens = requisicao.resultados();
+        List<ConfirmacaoRequisicao.ResultadoAcaoDto> itens = requisicao.resultados();
         if (itens == null || itens.isEmpty() || itens.size() > MAXIMO_RESULTADOS) {
             return invalida();
         }
@@ -259,13 +267,37 @@ public class CanalTelegramControlador {
                                                         item.mensagemId()))
                         .toList();
         ConfirmarExecucaoAcoesCanalCasoDeUso.Resposta resposta = confirmar.executar(resultados);
+        contarConfirmacoes(resultados);
         if (resposta.violacaoDeContrato()) {
             LOG.warn("canal-confirmacao-sem-mensagem-id-em-etapa");
             return invalida();
         }
         return ResponseEntity.ok(
-                new RespostaConfirmacao(
-                        RespostaAtualizacao.VERSAO, resposta.aceitas(), resposta.ignoradas()));
+                new ConfirmacaoResposta(
+                        AtualizacaoResposta.VERSAO, resposta.aceitas(), resposta.ignoradas()));
+    }
+
+    /**
+     * Métrica sem dado de aluno: só a situação e o código (valor desconhecido vira ERRO_TELEGRAM).
+     */
+    private void contarConfirmacoes(List<Resultado> resultados) {
+        for (Resultado resultado : resultados) {
+            if (resultado.situacao() == null) {
+                continue;
+            }
+            String codigo =
+                    resultado.situacao() == Situacao.EXECUTADA || resultado.codigoMotivo() == null
+                            ? "NENHUM"
+                            : ConfirmarExecucaoAcoesCanalCasoDeUso.normalizar(
+                                    resultado.codigoMotivo());
+            metricas.counter(
+                            "canal_confirmacoes_total",
+                            "situacao",
+                            resultado.situacao().name(),
+                            "codigo",
+                            codigo)
+                    .increment();
+        }
     }
 
     private static Situacao situacaoDe(String texto) {
@@ -286,7 +318,7 @@ public class CanalTelegramControlador {
     // ------------------------------------------------------------------ GET /acoes/{acaoId}
 
     @GetMapping("/acoes/{acaoId}")
-    public ResponseEntity<RespostaEstadoAcao> estadoDaAcao(@PathVariable String acaoId) {
+    public ResponseEntity<EstadoAcaoResposta> estadoDaAcao(@PathVariable String acaoId) {
         if (!FORMATO_ACAO_ID.matcher(acaoId).matches()) {
             return ResponseEntity.notFound().build();
         }
@@ -295,8 +327,8 @@ public class CanalTelegramControlador {
                 .map(
                         acao ->
                                 ResponseEntity.ok(
-                                        new RespostaEstadoAcao(
-                                                RespostaAtualizacao.VERSAO,
+                                        new EstadoAcaoResposta(
+                                                AtualizacaoResposta.VERSAO,
                                                 acao.id(),
                                                 acao.estado().name(),
                                                 acao.codigoMotivo())))

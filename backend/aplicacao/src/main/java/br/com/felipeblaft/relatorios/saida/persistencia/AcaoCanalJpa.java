@@ -128,4 +128,10 @@ interface AcaoCanalJpa extends JpaRepository<AcaoCanalEntidade, String> {
 
     @Query("select min(a.criadoEm) from AcaoCanalEntidade a where a.estado = 'PENDENTE'")
     Optional<Instant> criadaMaisAntigaPendente();
+
+    /** Ações entregues antes do limite e ainda sem confirmação. */
+    @Query(
+            "select count(a) from AcaoCanalEntidade a where a.estado = 'ENTREGUE'"
+                    + " and a.entregueEm < :limite")
+    long contarEntreguesDesde(Instant limite);
 }

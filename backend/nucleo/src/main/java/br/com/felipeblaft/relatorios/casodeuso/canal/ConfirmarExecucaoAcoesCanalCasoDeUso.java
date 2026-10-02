@@ -42,7 +42,8 @@ public class ConfirmarExecucaoAcoesCanalCasoDeUso {
         FALHOU
     }
 
-    public record Resultado(String acaoId, Situacao situacao, String codigoMotivo, Long mensagemId) {}
+    public record Resultado(
+            String acaoId, Situacao situacao, String codigoMotivo, Long mensagemId) {}
 
     /**
      * @param aceitas confirmações aplicadas ou idênticas às já registradas
@@ -98,7 +99,8 @@ public class ConfirmarExecucaoAcoesCanalCasoDeUso {
                 || resultado.acaoId().isBlank()
                 || resultado.situacao() == null
                 || (resultado.situacao() == Situacao.FALHOU
-                        && (resultado.codigoMotivo() == null || resultado.codigoMotivo().isBlank()))) {
+                        && (resultado.codigoMotivo() == null
+                                || resultado.codigoMotivo().isBlank()))) {
             return Desfecho.IGNORADA;
         }
         for (int tentativa = 0; tentativa < TENTATIVAS_DE_GRAVACAO; tentativa++) {
@@ -124,7 +126,9 @@ public class ConfirmarExecucaoAcoesCanalCasoDeUso {
         return Desfecho.IGNORADA;
     }
 
-    /** @return {@code null} se a gravação perdeu a disputa e deve ser refeita */
+    /**
+     * @return {@code null} se a gravação perdeu a disputa e deve ser refeita
+     */
     private Desfecho executada(AcaoCanal acao, Resultado resultado, int versaoLida, Instant agora) {
         boolean etapaComTrabalho =
                 acao.tipo() == TipoAcaoCanal.MENSAGEM_ETAPA && acao.trabalhoId() != null;
@@ -142,13 +146,16 @@ public class ConfirmarExecucaoAcoesCanalCasoDeUso {
             return null;
         }
         if (etapaComTrabalho) {
-            // grava o id da mensagem de etapa no trabalho; as próximas etapas editam a mesma mensagem
+            // grava o id da mensagem de etapa no trabalho; as próximas etapas editam a mesma
+            // mensagem
             fila.registrarMensagemEtapa(acao.trabalhoId(), resultado.mensagemId());
         }
         return Desfecho.ACEITA;
     }
 
-    /** @return {@code null} se a gravação perdeu a disputa e deve ser refeita */
+    /**
+     * @return {@code null} se a gravação perdeu a disputa e deve ser refeita
+     */
     private Desfecho falhou(AcaoCanal acao, Resultado resultado, int versaoLida, Instant agora) {
         String codigo = normalizar(resultado.codigoMotivo());
         ResultadoConfirmacao efeito = acao.confirmarFalha(codigo, agora);
@@ -168,8 +175,11 @@ public class ConfirmarExecucaoAcoesCanalCasoDeUso {
         return Desfecho.ACEITA;
     }
 
-    /** Código novo do orquestrador (ou texto livre) nunca é gravado como veio: vira {@code ERRO_TELEGRAM}. */
-    private static String normalizar(String codigo) {
+    /**
+     * Código novo do orquestrador (ou texto livre) nunca é gravado como veio: vira {@code
+     * ERRO_TELEGRAM}.
+     */
+    public static String normalizar(String codigo) {
         String limpo = codigo.trim();
         return CODIGOS_CONHECIDOS.contains(limpo) && FORMATO_CODIGO.matcher(limpo).matches()
                 ? limpo

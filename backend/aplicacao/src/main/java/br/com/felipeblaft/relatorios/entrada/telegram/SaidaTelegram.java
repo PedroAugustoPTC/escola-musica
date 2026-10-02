@@ -30,8 +30,8 @@ public sealed interface SaidaTelegram {
             implements SaidaTelegram {}
 
     /**
-     * PDF para o chat. O envio direto usa os bytes em {@code conteudo}; a rota interna do canal usa só
-     * a {@code referencia} (o orquestrador obtém os bytes por identificador opaco).
+     * PDF para o chat. O envio direto usa os bytes em {@code conteudo}; a rota interna do canal usa
+     * só a {@code referencia} (o orquestrador obtém os bytes por identificador opaco).
      */
     record Documento(
             long chatId,

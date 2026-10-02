@@ -50,7 +50,8 @@ public class AcaoCanalMapeador {
 
         /** Ação pronta para a outbox. */
         public NovaAcao paraNovaAcao(UUID professorId) {
-            return new NovaAcao(acaoId, tipo, chatId, professorId, trabalhoId, payload, compensacao);
+            return new NovaAcao(
+                    acaoId, tipo, chatId, professorId, trabalhoId, payload, compensacao);
         }
     }
 
@@ -119,7 +120,11 @@ public class AcaoCanalMapeador {
         String acaoId = id.apply(acoes.size());
         AcaoMensagemDto compensacao =
                 new AcaoMensagemDto(
-                        null, AcaoDto.TIPO_MENSAGEM, e.chatId(), e.texto(), teclado(e.teclado(), false));
+                        null,
+                        AcaoDto.TIPO_MENSAGEM,
+                        e.chatId(),
+                        e.texto(),
+                        teclado(e.teclado(), false));
         acoes.add(
                 montar(
                         new AcaoEdicaoDto(
@@ -166,7 +171,9 @@ public class AcaoCanalMapeador {
 
     private void etapa(
             List<AcaoMapeada> acoes, SaidaTelegram.MensagemEtapa e, IntFunction<String> id) {
-        // editarMensagemId só é preenchido no despacho (o trabalho conhece a mensagem mais recente)
+        // Numa resposta a update o interpretador já sabe a mensagem a editar (a dos botões); numa
+        // ação
+        // proativa o despacho a resolve de novo pelo trabalho (a mais recente).
         AcaoMensagemEtapaDto dto =
                 new AcaoMensagemEtapaDto(
                         id.apply(acoes.size()),
@@ -174,15 +181,23 @@ public class AcaoCanalMapeador {
                         e.chatId(),
                         e.texto(),
                         e.trabalhoId().toString(),
-                        null);
+                        e.editarMensagemId());
         // a compensação é a mesma ação sem editarMensagemId: envia mensagem nova e regrava o id
+        AcaoMensagemEtapaDto semEdicao =
+                new AcaoMensagemEtapaDto(
+                        null,
+                        AcaoDto.TIPO_MENSAGEM_ETAPA,
+                        e.chatId(),
+                        e.texto(),
+                        e.trabalhoId().toString(),
+                        null);
         acoes.add(
                 montar(
                         dto,
                         TipoAcaoCanal.MENSAGEM_ETAPA,
                         e.chatId(),
                         e.trabalhoId(),
-                        semAcaoId(dto)));
+                        semAcaoId(semEdicao)));
     }
 
     private void callback(

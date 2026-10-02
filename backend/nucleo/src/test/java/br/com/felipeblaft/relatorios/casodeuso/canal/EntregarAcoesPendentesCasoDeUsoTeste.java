@@ -102,7 +102,9 @@ class EntregarAcoesPendentesCasoDeUsoTeste {
         assertThat(recebido.loteId()).isEqualTo("p:r:1");
         assertThat(recebido.origem()).isEqualTo(OrigemAcaoCanal.PROATIVA);
         assertThat(recebido.tentativa()).isEqualTo(1);
-        assertThat(recebido.acoes()).extracting(LoteEntrega.Acao::acaoId).containsExactly("p:r:1:0", "p:r:1:1");
+        assertThat(recebido.acoes())
+                .extracting(LoteEntrega.Acao::acaoId)
+                .containsExactly("p:r:1:0", "p:r:1:1");
         assertThat(recebido.acoes().get(0).payload()).contains("p:r:1:0");
     }
 
@@ -135,10 +137,10 @@ class EntregarAcoesPendentesCasoDeUsoTeste {
         relogio.avancar(Duration.ofSeconds(60));
         assertThat(entregar.executar(10).lotesAceitos()).isEqualTo(1);
         assertThat(estado("p:r:1:0")).isEqualTo(EstadoAcaoCanal.ENTREGUE);
+        assertThat(orquestrador.recebidos).extracting(LoteEntrega::loteId).containsOnly("p:r:1");
         assertThat(orquestrador.recebidos)
-                .extracting(LoteEntrega::loteId)
-                .containsOnly("p:r:1");
-        assertThat(orquestrador.recebidos).extracting(LoteEntrega::tentativa).containsExactly(1, 2, 3);
+                .extracting(LoteEntrega::tentativa)
+                .containsExactly(1, 2, 3);
     }
 
     // ---- prazo
@@ -203,13 +205,22 @@ class EntregarAcoesPendentesCasoDeUsoTeste {
         Ciclo primeiro = entregar.executar(10);
 
         assertThat(primeiro.lotesAceitos()).isEqualTo(2);
-        assertThat(orquestrador.recebidos).extracting(LoteEntrega::loteId).containsExactly("p:1", "p:3");
+        assertThat(orquestrador.recebidos)
+                .extracting(LoteEntrega::loteId)
+                .containsExactly("p:1", "p:3");
         assertThat(estado("p:2:0")).isEqualTo(EstadoAcaoCanal.PENDENTE);
 
         confirmar.executar(
-                List.of(new ConfirmarExecucaoAcoesCanalCasoDeUso.Resultado("p:1:0", ConfirmarExecucaoAcoesCanalCasoDeUso.Situacao.EXECUTADA, null, null)));
+                List.of(
+                        new ConfirmarExecucaoAcoesCanalCasoDeUso.Resultado(
+                                "p:1:0",
+                                ConfirmarExecucaoAcoesCanalCasoDeUso.Situacao.EXECUTADA,
+                                null,
+                                null)));
         assertThat(entregar.executar(10).lotesAceitos()).isEqualTo(1);
-        assertThat(orquestrador.recebidos).extracting(LoteEntrega::loteId).containsExactly("p:1", "p:3", "p:2");
+        assertThat(orquestrador.recebidos)
+                .extracting(LoteEntrega::loteId)
+                .containsExactly("p:1", "p:3", "p:2");
     }
 
     @Test
@@ -226,7 +237,9 @@ class EntregarAcoesPendentesCasoDeUsoTeste {
 
         relogio.avancar(Duration.ofSeconds(1));
         entregar.executar(10);
-        assertThat(orquestrador.recebidos).extracting(LoteEntrega::loteId).containsExactly("p:1", "p:2");
+        assertThat(orquestrador.recebidos)
+                .extracting(LoteEntrega::loteId)
+                .containsExactly("p:1", "p:2");
     }
 
     @Test
@@ -236,7 +249,9 @@ class EntregarAcoesPendentesCasoDeUsoTeste {
                 "u5",
                 OrigemAcaoCanal.RESPOSTA_UPDATE,
                 5L,
-                List.of(new NovaAcao("u5-0", TipoAcaoCanal.MENSAGEM, CHAT_A, null, null, "{}", null)));
+                List.of(
+                        new NovaAcao(
+                                "u5-0", TipoAcaoCanal.MENSAGEM, CHAT_A, null, null, "{}", null)));
         lote("p:1", CHAT_A, a, "p:1:0");
 
         entregar.executar(10);
@@ -282,7 +297,8 @@ class EntregarAcoesPendentesCasoDeUsoTeste {
                                 List.of(
                                         new ConfirmarExecucaoAcoesCanalCasoDeUso.Resultado(
                                                 "p:1:0",
-                                                ConfirmarExecucaoAcoesCanalCasoDeUso.Situacao.EXECUTADA,
+                                                ConfirmarExecucaoAcoesCanalCasoDeUso.Situacao
+                                                        .EXECUTADA,
                                                 null,
                                                 null)));
 
@@ -303,7 +319,8 @@ class EntregarAcoesPendentesCasoDeUsoTeste {
                                 List.of(
                                         new ConfirmarExecucaoAcoesCanalCasoDeUso.Resultado(
                                                 "p:1:0",
-                                                ConfirmarExecucaoAcoesCanalCasoDeUso.Situacao.FALHOU,
+                                                ConfirmarExecucaoAcoesCanalCasoDeUso.Situacao
+                                                        .FALHOU,
                                                 "ERRO_TELEGRAM",
                                                 null)));
         Ciclo ciclo = entregar.executar(10);
@@ -318,7 +335,9 @@ class EntregarAcoesPendentesCasoDeUsoTeste {
         // outro despachante reservou o lote e morreu antes de entregar
         assertThat(
                         repositorio.reservarProximoLoteDevido(
-                                relogio.agora(), Duration.ofSeconds(60), relogio.agora().plusSeconds(60)))
+                                relogio.agora(),
+                                Duration.ofSeconds(60),
+                                relogio.agora().plusSeconds(60)))
                 .hasSize(1);
 
         entregar.executar(10);
@@ -377,17 +396,92 @@ class EntregarAcoesPendentesCasoDeUsoTeste {
                 OrigemAcaoCanal.PROATIVA,
                 null,
                 List.of(
-                        new NovaAcao("p:e:0", TipoAcaoCanal.MENSAGEM_ETAPA, CHAT_A, a, trabalho.id(), "{}", null),
-                        new NovaAcao("p:e:1", TipoAcaoCanal.MENSAGEM_ETAPA, CHAT_A, a, semMensagem.id(), "{}", null),
-                        new NovaAcao("p:e:2", TipoAcaoCanal.MENSAGEM_ETAPA, CHAT_A, a, invalido.id(), "{}", null),
-                        new NovaAcao("p:e:3", TipoAcaoCanal.MENSAGEM_ETAPA, CHAT_A, a, UUID.randomUUID(), "{}", null),
-                        new NovaAcao("p:e:4", TipoAcaoCanal.MENSAGEM, CHAT_A, a, trabalho.id(), "{}", null)));
+                        new NovaAcao(
+                                "p:e:0",
+                                TipoAcaoCanal.MENSAGEM_ETAPA,
+                                CHAT_A,
+                                a,
+                                trabalho.id(),
+                                "{}",
+                                null),
+                        new NovaAcao(
+                                "p:e:1",
+                                TipoAcaoCanal.MENSAGEM_ETAPA,
+                                CHAT_A,
+                                a,
+                                semMensagem.id(),
+                                "{}",
+                                null),
+                        new NovaAcao(
+                                "p:e:2",
+                                TipoAcaoCanal.MENSAGEM_ETAPA,
+                                CHAT_A,
+                                a,
+                                invalido.id(),
+                                "{}",
+                                null),
+                        new NovaAcao(
+                                "p:e:3",
+                                TipoAcaoCanal.MENSAGEM_ETAPA,
+                                CHAT_A,
+                                a,
+                                UUID.randomUUID(),
+                                "{}",
+                                null),
+                        new NovaAcao(
+                                "p:e:4",
+                                TipoAcaoCanal.MENSAGEM,
+                                CHAT_A,
+                                a,
+                                trabalho.id(),
+                                "{}",
+                                null)));
 
         entregar.executar(10);
 
         List<LoteEntrega.Acao> acoes = orquestrador.recebidos.get(0).acoes();
-        assertThat(acoes).extracting(LoteEntrega.Acao::editarMensagemId).containsExactly(555L, null, null, null, null);
+        assertThat(acoes)
+                .extracting(LoteEntrega.Acao::editarMensagemId)
+                .containsExactly(555L, null, null, null, null);
         assertThat(acoes.get(0).trabalhoId()).isEqualTo(trabalho.id());
+    }
+
+    @Test
+    void compensacaoDeEtapaNaoLevaOIdDaMensagemQueNaoPodeSerEditada() {
+        UUID a = professorVinculado(CHAT_A);
+        TrabalhoProcessamento trabalho =
+                TrabalhoProcessamento.novo(
+                        TipoTrabalho.REGISTRO_AULA,
+                        a,
+                        UUID.randomUUID(),
+                        null,
+                        null,
+                        Canal.TELEGRAM,
+                        Meio.AUDIO,
+                        EtapaTrabalho.ENVIANDO,
+                        relogio.agora());
+        trabalho.definirParametro(TrabalhoProcessamento.MENSAGEM_ETAPA, "555");
+        fila.enfileirar(trabalho);
+        AcaoCanal etapa =
+                AcaoCanal.nova(
+                        "p:e:0",
+                        "p:e",
+                        OrigemAcaoCanal.PROATIVA,
+                        null,
+                        CHAT_A,
+                        a,
+                        trabalho.id(),
+                        TipoAcaoCanal.MENSAGEM_ETAPA,
+                        "{}",
+                        "{}",
+                        relogio.agora(),
+                        politica);
+        repositorio.gravarLote(List.of(etapa.criarCompensacao(relogio.agora(), politica)));
+
+        entregar.executar(10);
+
+        assertThat(orquestrador.recebidos.get(0).acoes().get(0).acaoId()).isEqualTo("p:e:0-c");
+        assertThat(orquestrador.recebidos.get(0).acoes().get(0).editarMensagemId()).isNull();
     }
 
     @Test

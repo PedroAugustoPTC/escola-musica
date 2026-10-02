@@ -31,7 +31,9 @@ class LimparAcoesCanalCasoDeUsoTeste {
                         acoes,
                         relogio,
                         new PoliticaRetentativa(
-                                Duration.ofSeconds(30), Duration.ofMinutes(15), Duration.ofHours(24)))
+                                Duration.ofSeconds(30),
+                                Duration.ofMinutes(15),
+                                Duration.ofHours(24)))
                 .executar(
                         "p:" + id,
                         OrigemAcaoCanal.PROATIVA,
@@ -74,12 +76,22 @@ class LimparAcoesCanalCasoDeUsoTeste {
                         acoes,
                         relogio,
                         new PoliticaRetentativa(
-                                Duration.ofSeconds(30), Duration.ofMinutes(15), Duration.ofDays(30)))
+                                Duration.ofSeconds(30),
+                                Duration.ofMinutes(15),
+                                Duration.ofDays(30)))
                 .executar(
                         "p:b",
                         OrigemAcaoCanal.PROATIVA,
                         null,
-                        List.of(new NovaAcao("p:b:0", TipoAcaoCanal.MENSAGEM, 1L, UUID.randomUUID(), null, "{}", null)));
+                        List.of(
+                                new NovaAcao(
+                                        "p:b:0",
+                                        TipoAcaoCanal.MENSAGEM,
+                                        1L,
+                                        UUID.randomUUID(),
+                                        null,
+                                        "{}",
+                                        null)));
         relogio.avancar(Duration.ofDays(10));
         limpar.executar();
         assertThat(acoes.guardada("p:b:0")).isNotNull();
@@ -106,7 +118,6 @@ class LimparAcoesCanalCasoDeUsoTeste {
 
     @Test
     void semNadaParaLimparDevolveZeros() {
-        assertThat(limpar.executar())
-                .isEqualTo(new LimparAcoesCanalCasoDeUso.Resultado(0, 0, 0));
+        assertThat(limpar.executar()).isEqualTo(new LimparAcoesCanalCasoDeUso.Resultado(0, 0, 0));
     }
 }

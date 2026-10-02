@@ -10,10 +10,10 @@ public record ErroCanalResposta(String versao, String codigo) {
     public static final String VERSAO_NAO_SUPORTADA = "VERSAO_NAO_SUPORTADA";
 
     public static ErroCanalResposta requisicaoInvalida() {
-        return new ErroCanalResposta(RespostaAtualizacao.VERSAO, REQUISICAO_INVALIDA);
+        return new ErroCanalResposta(AtualizacaoResposta.VERSAO, REQUISICAO_INVALIDA);
     }
 
     public static ErroCanalResposta versaoNaoSuportada() {
-        return new ErroCanalResposta(RespostaAtualizacao.VERSAO, VERSAO_NAO_SUPORTADA);
+        return new ErroCanalResposta(AtualizacaoResposta.VERSAO, VERSAO_NAO_SUPORTADA);
     }
 }

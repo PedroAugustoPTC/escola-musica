@@ -35,10 +35,16 @@ class PoliticaRetentativaTeste {
     void jitterAplicaAte10PorCentoParaMaisOuParaMenos() {
         PoliticaRetentativa maisUm =
                 new PoliticaRetentativa(
-                        Duration.ofSeconds(100), Duration.ofHours(1), Duration.ofHours(24), () -> 1.0);
+                        Duration.ofSeconds(100),
+                        Duration.ofHours(1),
+                        Duration.ofHours(24),
+                        () -> 1.0);
         PoliticaRetentativa menosUm =
                 new PoliticaRetentativa(
-                        Duration.ofSeconds(100), Duration.ofHours(1), Duration.ofHours(24), () -> -1.0);
+                        Duration.ofSeconds(100),
+                        Duration.ofHours(1),
+                        Duration.ofHours(24),
+                        () -> -1.0);
         assertThat(Duration.between(AGORA, maisUm.proximaTentativa(1, AGORA)))
                 .isEqualTo(Duration.ofSeconds(110));
         assertThat(Duration.between(AGORA, menosUm.proximaTentativa(1, AGORA)))
@@ -49,7 +55,10 @@ class PoliticaRetentativaTeste {
     void jitterForaDoIntervaloEProtegido() {
         PoliticaRetentativa exagerada =
                 new PoliticaRetentativa(
-                        Duration.ofSeconds(100), Duration.ofHours(1), Duration.ofHours(24), () -> 50.0);
+                        Duration.ofSeconds(100),
+                        Duration.ofHours(1),
+                        Duration.ofHours(24),
+                        () -> 50.0);
         assertThat(Duration.between(AGORA, exagerada.proximaTentativa(1, AGORA)))
                 .isEqualTo(Duration.ofSeconds(110));
     }
