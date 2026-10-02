@@ -62,9 +62,12 @@ está gravado quando a resposta sai, e o envio é do orquestrador.
 - Corpo: `RequisicaoConfirmacao`: lista de `{acaoId, situacao, codigoMotivo?, mensagemId?}`.
 - `mensagemId` é **obrigatório** para `MENSAGEM_ETAPA` com `EXECUTADA`: o backend o grava no trabalho
   para as próximas etapas editarem a mesma mensagem (FR-017).
-- `FALHOU` exige `codigoMotivo` (enum `CodigoMotivo`, sem texto livre). Com `MENSAGEM_NAO_EDITAVEL`, o
+- `FALHOU` exige `codigoMotivo` (código em caixa alta, sem texto livre; valor desconhecido é aceito e tratado como `ERRO_TELEGRAM`). Com `MENSAGEM_NAO_EDITAVEL`, o
   backend decide a compensação e a entrega como **nova ação** (`<acaoId>-c`) pelo mesmo caminho das
   proativas (FR-007b).
+- Cada resultado é validado isoladamente: um item inválido vai para `ignoradas` e não impede os demais.
+- Concorrência: a confirmação nunca é perdida nem sobrescrita pelo despachante; se chegar enquanto o
+  backend ainda grava o aceite HTTP, o estado final (`EXECUTADA`/`FALHOU`) prevalece (data-model §1.2.2, invariante 6).
 - Idempotente: repetir a mesma confirmação não tem efeito. `acaoId` desconhecido, descartado, vencido
   ou com resultado divergente do já registrado volta em `ignoradas` (`200`, não é erro).
 - Pode ser enviada em lote (várias ações) ou uma a uma; a ordem entre elas não importa.
@@ -130,8 +133,9 @@ Content-Type: application/json
 6. **Tolerar evolução (FR-003a)**: ignorar campos desconhecidos; para `tipo` desconhecido, pular a
    ação, confirmar `FALHOU` com `ACAO_NAO_SUPORTADA` e seguir com as demais.
 7. **Documento**: para `DOCUMENTO`, obter os bytes em `GET /documentos/{documentoId}` com o mesmo
-   token, anexar ao envio e **nunca** montar URL a partir de outro campo. `404`/`5xx` → `FALHOU`
-   (`DOCUMENTO_INDISPONIVEL`) ou nova tentativa dentro do prazo da ação.
+   token, anexar ao envio e **nunca** montar URL a partir de outro campo. Faz **uma única** tentativa de
+   `GET`; `404`/`5xx` → `FALHOU` com `DOCUMENTO_INDISPONIVEL`, sem nova tentativa por conta própria
+   (quem decide o que fazer depois é o backend, item 4).
 8. **Áudio nunca passa pelo n8n** (FR-028): o update traz só o `file_id`; o backend baixa o arquivo
    pelo servidor local da API de bots. O workflow não chama `getFile` nem baixa o áudio.
 9. **Responder `2xx` às entregas só depois de aceitar a ação** (não é necessário ter executado; a
@@ -148,6 +152,23 @@ Content-Type: application/json
 | `RESPOSTA_CALLBACK` | `answerCallbackQuery` | `callback_query_id` = `callbackId` |
 | `MENSAGEM_ETAPA` | `editMessageText` se há `editarMensagemId`, senão `sendMessage` | confirmar com o `message_id` resultante |
 
+### Erro do Telegram → resultado informado ao backend
+
+O orquestrador só **classifica** a resposta da API de bots; nenhuma outra decisão é dele (item 4).
+
+| Resposta do Telegram | `situacao` | `codigoMotivo` | Efeito no backend |
+|---|---|---|---|
+| sucesso | `EXECUTADA` | — | segue |
+| `editMessageText` com "message is not modified" | `EXECUTADA` | — | segue; **não** gera compensação (é o que o envio direto faz hoje: ignora, sem mensagem nova) |
+| `editMessageText` com mensagem inexistente, apagada ou antiga demais para editar | `FALHOU` | `MENSAGEM_NAO_EDITAVEL` | compensação `<acaoId>-c` se a ação tiver uma |
+| chat bloqueado, bot removido, usuário inativo (`403`, "chat not found") | `FALHOU` | `CHAT_INDISPONIVEL` | só registra |
+| `429` | `FALHOU` | `LIMITE_DE_TAXA` | só registra |
+| `GET /documentos/{id}` `404`/`5xx` | `FALHOU` | `DOCUMENTO_INDISPONIVEL` | só registra (compensação em aberto, ver research R-07) |
+| qualquer outro erro da API de bots | `FALHOU` | `ERRO_TELEGRAM` | só registra |
+
+`codigoMotivo` desconhecido recebido pelo backend é tratado como `ERRO_TELEGRAM` (nunca `400`), para que
+um código novo do orquestrador não derrube as demais confirmações do lote (§5, evolução aditiva).
+
 ## 5. Versionamento
 
 - **Aditivo (permanece na v1)**: campo opcional novo; tipo de ação novo; valor novo em enum de
@@ -161,8 +182,9 @@ Content-Type: application/json
 ## 6. Privacidade e logs (FR-029)
 
 Logs, métricas e corpos de erro desta área trazem só identificadores técnicos (`updateId`, `acaoId`,
-`loteId`), estados e códigos. Nunca CPF, nome de aluno, texto de relatório, transcrição, áudio, token ou
-o payload recebido. O texto das ações existe no banco só enquanto necessário e é zerado após a retenção
+`loteId`), estados e códigos. Nunca CPF, nome de aluno, texto de relatório, transcrição, áudio, token, o
+payload recebido, mensagens de exceção de parsing, a URL do orquestrador (pode conter segredo no caminho)
+nem o `documentoId` (credencial ao portador, válido por cerca de 25 h; vale também para logs de `404`). O texto das ações existe no banco só enquanto necessário e é zerado após a retenção
 (R-11).
 
 ## 7. Cenários do contrato (base dos testes, `FR-031`)

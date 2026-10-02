@@ -57,6 +57,7 @@ Uma linha por **ação** (R-05). Respostas a update, proativas e compensações 
 | `tentativas` | integer | não | tentativas de entrega ao orquestrador (0 nas respostas a update) |
 | `proxima_tentativa_em` | timestamptz | sim | próxima tentativa; durante a reserva é empurrada para o futuro (lease) |
 | `prazo_em` | timestamptz | não | `criado_em` + prazo total (24 h por padrão); depois dele, `FALHA_DEFINITIVA` |
+| `versao` | integer | não | controle otimista (padrão 0); toda gravação faz `WHERE versao = ?` e incrementa, para que a confirmação e o despachante nunca se sobrescrevam |
 | `criado_em` | timestamptz | não | |
 | `entregue_em` | timestamptz | sim | aceite HTTP do orquestrador, ou criação nas respostas a update |
 | `finalizado_em` | timestamptz | sim | momento do estado final (base da retenção) |
@@ -118,7 +119,11 @@ Os ids não contêm CPF, nome nem texto (FR-029).
 **Invariantes**: (1) estado final nunca volta; (2) confirmação repetida e idêntica é inócua,
 divergente é ignorada e contada; (3) `PENDENTE` só existe para `PROATIVA`/`COMPENSACAO`;
 (4) um lote é entregue inteiro ou não é entregue; (5) para um mesmo chat, nenhum lote é reservado
-enquanto houver ação anterior `PENDENTE` ou `ENTREGUE` há menos de `confirmacao-max-segundos`.
+enquanto houver ação anterior `PENDENTE` ou `ENTREGUE` há menos de `confirmacao-max-segundos`;
+(6) toda mudança de estado é condicional à `versao` lida: se o despachante terminar o HTTP e a ação já tiver
+sido confirmada (`EXECUTADA`/`FALHOU`) por outro ator, a gravação do aceite é descartada e o estado final
+prevalece; (7) a reserva (lease) dura `lease-segundos` e deve exceder conexão + resposta; um despachante
+que morre deixa o lote reentregável quando o lease vence, com os mesmos ids.
 
 **Política de retentativa** (`PoliticaRetentativa`, pura): após a *n*-ésima falha,
 `proxima = agora + min(teto, inicial × 2^(n−1)) × (1 ± jitter)`; com `inicial=30 s`, `teto=15 min`,
@@ -184,6 +189,7 @@ Lida do ambiente por `PropriedadesAplicacao.CanalTelegram` (novo `record`), padr
 | `conexao-timeout-ms`, `resposta-timeout-ms` | `CANAL_TELEGRAM_CONEXAO_TIMEOUT_MS`, `CANAL_TELEGRAM_RESPOSTA_TIMEOUT_MS` | 3000, 10000 | cliente HTTP |
 | `retentativa-inicial-segundos`, `retentativa-teto-segundos`, `prazo-horas` | `CANAL_TELEGRAM_RETENTATIVA_INICIAL_S`, `…_TETO_S`, `CANAL_TELEGRAM_PRAZO_H` | 30, 900, 24 | FR-018 |
 | `confirmacao-max-segundos` | `CANAL_TELEGRAM_CONFIRMACAO_MAX_S` | 60 | portão de ordem |
+| `lease-segundos` | `CANAL_TELEGRAM_LEASE_S` | 60 | reserva do lote; deve ser maior que `conexao-timeout-ms` + `resposta-timeout-ms` (validado na subida) |
 | `intervalo-despacho-ms`, `lote-max-por-ciclo` | `CANAL_TELEGRAM_INTERVALO_DESPACHO_MS`, `CANAL_TELEGRAM_LOTE_MAX` | 2000, 20 | despachante |
 | `retencao-payload-horas`, `retencao-registro-dias` | `CANAL_TELEGRAM_RETENCAO_PAYLOAD_H`, `CANAL_TELEGRAM_RETENCAO_REGISTRO_D` | 24, 7 | R-11 |
 

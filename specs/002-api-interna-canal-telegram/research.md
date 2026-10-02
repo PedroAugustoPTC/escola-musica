@@ -191,6 +191,12 @@ Justificativa / Alternativas consideradas. A constituição vigente é a v1.4.0.
     `compensacao`, cria **uma** nova ação (`<acaoId>-c`, origem `COMPENSACAO`, novo lote) com esse
     conteúdo. Demais códigos (`CHAT_INDISPONIVEL`, `ACAO_NAO_SUPORTADA`, `DOCUMENTO_INDISPONIVEL`,
     `ERRO_TELEGRAM`) só são registrados e contados.
+  - Concorrência: gravações de estado são condicionais a `versao` (data-model §1.2.2, invariante 6);
+    a confirmação que chega durante o HTTP do despacho prevalece sobre o aceite.
+  - `codigoMotivo` desconhecido é tratado como `ERRO_TELEGRAM`; "message is not modified" é classificado
+    pelo orquestrador como `EXECUTADA` (contrato §4), igual ao envio direto atual, que ignora esse erro.
+  - **Em aberto (dono do produto)**: `DOCUMENTO_INDISPONIVEL` não tem compensação; o professor pode ficar
+    sem o PDF sem aviso (igual ao envio direto de hoje). Avisar exige texto novo em `mensagens.md`.
   - Idempotente: repetir a mesma confirmação não muda nada; confirmação divergente da já registrada é
     ignorada e contada; `acaoId` desconhecido, `DESCARTADA` ou `FALHA_DEFINITIVA` vai para a lista
     `ignoradas` da resposta, sem erro.
@@ -216,7 +222,10 @@ Justificativa / Alternativas consideradas. A constituição vigente é a v1.4.0.
 - **Decisão**: tabela `documento_canal` (V6). O identificador é um token aleatório de 256 bits
   (`SecureRandom`, Base64url sem preenchimento, 43 caracteres); só o **hash SHA-256** fica no banco
   (como `sessao_web`). A linha guarda a referência ao documento (`professor_id`, `relatorio_tipo`,
-  `relatorio_id`, `versao` nula para o oficial), o nome do arquivo e `expira_em`. Emissão: o mapeador
+  `relatorio_id`, `versao` nula para o oficial), o nome do arquivo e `expira_em`. **Nota**: o token bruto
+  também existe no `payload` da ação (necessário para reentregar com o mesmo id) até a retenção de R-11
+  (24 h); o hash protege a tabela `documento_canal`, não o payload. Aceito: quem lê o payload já lê o
+  texto do relatório, e o payload é zerado depois da retenção. Emissão: o mapeador
   emite um token por ação `DOCUMENTO`, com validade = prazo de entrega + 1 h (24 h + 1 h por padrão),
   cobrindo todas as tentativas (US4, cenário 4). Rota:
   `GET /interno/v1/canal/telegram/documentos/{documentoId}` → `ObterDocumentoRelatorioCasoDeUso`

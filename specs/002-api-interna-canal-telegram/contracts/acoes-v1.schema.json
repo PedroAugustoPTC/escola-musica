@@ -179,15 +179,9 @@
       }
     },
     "CodigoMotivo": {
-      "enum": [
-        "MENSAGEM_NAO_EDITAVEL",
-        "CHAT_INDISPONIVEL",
-        "ACAO_NAO_SUPORTADA",
-        "DOCUMENTO_INDISPONIVEL",
-        "LIMITE_DE_TAXA",
-        "ERRO_TELEGRAM"
-      ],
-      "description": "Motivo de falha informado pelo orquestrador; nunca contém texto de aluno."
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]{1,39}$",
+      "description": "Motivo de falha informado pelo orquestrador; nunca contém texto de aluno. Codigos conhecidos: MENSAGEM_NAO_EDITAVEL, CHAT_INDISPONIVEL, ACAO_NAO_SUPORTADA, DOCUMENTO_INDISPONIVEL, LIMITE_DE_TAXA, ERRO_TELEGRAM. Aberto de proposito (evolucao aditiva, contracts/canal-telegram-interno.md secao 5): o backend trata um codigo desconhecido como ERRO_TELEGRAM em vez de recusar o lote."
     },
     "ResultadoAcao": {
       "type": "object",
