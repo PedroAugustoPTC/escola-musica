@@ -25,6 +25,11 @@ relatorios:
     segredo-webhook: segredo-webhook-teste
     api-url: http://localhost:1
     arquivos-dir: ${java.io.tmpdir}/relatorios-teste/telegram
+  canal-telegram:
+    token-atual: token-servico-atual-teste
+    token-proximo: token-servico-proximo-teste
+    entrega-proativa: DIRETA
+    orquestrador-url: ""
   provedores:
     modo: simulado
   trabalhos:

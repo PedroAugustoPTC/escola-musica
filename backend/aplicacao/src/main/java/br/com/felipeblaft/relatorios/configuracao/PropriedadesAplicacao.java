@@ -18,6 +18,7 @@ public record PropriedadesAplicacao(
         Seguranca seguranca,
         Documentos documentos,
         Telegram telegram,
+        CanalTelegram canalTelegram,
         Provedores provedores,
         Trabalhos trabalhos) {
 
@@ -58,6 +59,50 @@ public record PropriedadesAplicacao(
         @Override
         public String toString() {
             return "Telegram[habilitado=" + habilitado + ", apiUrl=" + apiUrl + "]";
+        }
+    }
+
+    /** Quem entrega as mensagens proativas ao Telegram (R-10): exatamente um caminho fica ativo. */
+    public enum EntregaProativa {
+        DIRETA,
+        ORQUESTRADOR
+    }
+
+    /**
+     * API interna do canal Telegram (feature 002): tokens de serviço, entrega ao orquestrador,
+     * retentativa e retenção da outbox (data-model.md §4).
+     */
+    public record CanalTelegram(
+            EntregaProativa entregaProativa,
+            String tokenAtual,
+            String tokenProximo,
+            String orquestradorUrl,
+            String orquestradorToken,
+            int conexaoTimeoutMs,
+            int respostaTimeoutMs,
+            int retentativaInicialSegundos,
+            int retentativaTetoSegundos,
+            int prazoHoras,
+            int confirmacaoMaxSegundos,
+            int leaseSegundos,
+            long intervaloDespachoMs,
+            int loteMaxPorCiclo,
+            int retencaoPayloadHoras,
+            int retencaoRegistroDias) {
+
+        public CanalTelegram {
+            if (entregaProativa == null) {
+                entregaProativa = EntregaProativa.DIRETA;
+            }
+        }
+
+        public boolean orquestradorConfigurado() {
+            return orquestradorUrl != null && !orquestradorUrl.isBlank();
+        }
+
+        @Override
+        public String toString() {
+            return "CanalTelegram[entregaProativa=" + entregaProativa + ", ***]";
         }
     }
 

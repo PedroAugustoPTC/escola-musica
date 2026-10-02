@@ -31,7 +31,8 @@ class RegrasArquiteturaTeste {
                     "openhtmltopdf",
                     "thymeleaf",
                     "postgres",
-                    "spring");
+                    "spring",
+                    "n8n");
 
     private final JavaClasses nucleo =
             new ClassFileImporter()

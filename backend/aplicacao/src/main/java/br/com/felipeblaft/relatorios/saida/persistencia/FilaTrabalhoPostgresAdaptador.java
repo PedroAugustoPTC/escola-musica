@@ -73,6 +73,7 @@ public class FilaTrabalhoPostgresAdaptador implements FilaTrabalhoPorta {
     }
 
     /** Grava o id da mensagem de etapa do Telegram sem disputar com a gravação do worker. */
+    @Override
     @Transactional
     public void registrarMensagemEtapa(UUID trabalhoId, long mensagemId) {
         jpa.definirParametro(
