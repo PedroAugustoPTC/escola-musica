@@ -2,6 +2,7 @@ package br.com.felipeblaft.relatorios.saida.persistencia;
 
 import br.com.felipeblaft.relatorios.entrada.telegram.RegistroUpdatesTelegram;
 import java.time.Instant;
+import java.util.Optional;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,30 @@ class RegistroUpdatesTelegramAdaptador implements RegistroUpdatesTelegram {
     @Transactional
     public boolean registrarSeNovo(long updateId, Instant agora) {
         return jpa.registrarSeNovo(updateId, agora) > 0;
+    }
+
+    @Override
+    @Transactional
+    public boolean registrarSeNovo(long updateId, Instant agora, String origem) {
+        return jpa.registrarSeNovoComOrigem(updateId, agora, origem) > 0;
+    }
+
+    @Override
+    @Transactional
+    public void concluir(long updateId, int totalAcoes) {
+        jpa.concluir(updateId, totalAcoes);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<SituacaoUpdate> situacao(long updateId) {
+        return jpa.findById(updateId)
+                .map(
+                        e ->
+                                new SituacaoUpdate(
+                                        e.getTotalAcoes(),
+                                        e.getRecebidoEm(),
+                                        ORIGEM_INTERNO.equals(e.getOrigem())));
     }
 
     @Override

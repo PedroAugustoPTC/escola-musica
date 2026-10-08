@@ -134,6 +134,32 @@
                     <!-- Usa as classes (e não o jar reempacotado) no classpath dos testes de integração. -->
                     <classesDirectory>${project.build.outputDirectory}</classesDirectory>
                 </configuration>
+                <executions>
+                    <!--
+                        Feature 002 (R-13): os testes de conversa e de paridade rodam duas vezes, sem mudar
+                        nenhuma expectativa: pelo webhook direto (execução padrão) e pela API interna do canal,
+                        com o executor simulado do orquestrador (telegram.transporte=interno). Ambas precisam
+                        passar para o build passar.
+                    -->
+                    <execution>
+                        <id>transporte-interno</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                        <configuration>
+                            <includes>
+                                <include>**/entrada/telegram/*ConversaIT.java</include>
+                                <include>**/paridade/RoteiroParidade*IT.java</include>
+                                <include>**/privacidade/NaoRetencaoAudioIT.java</include>
+                                <include>**/privacidade/LogSemDadosSensiveisIT.java</include>
+                            </includes>
+                            <systemPropertyVariables>
+                                <telegram.transporte>interno</telegram.transporte>
+                            </systemPropertyVariables>
+                            <reportNameSuffix>interno</reportNameSuffix>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
@@ -160,6 +186,13 @@
                             </includes>
                             <excludes combine.self="override"/>
                         </configuration>
+                        <executions>
+                            <!-- a suíte com IA real não repete os testes de conversa pelo transporte interno -->
+                            <execution>
+                                <id>transporte-interno</id>
+                                <phase>none</phase>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>

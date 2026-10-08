@@ -150,7 +150,16 @@ public class ApresentacaoRelatorioAulaTelegram {
                             relatorio.id(),
                             relatorio.versaoVigente());
             return Optional.of(
-                    new Documento(chatId, documento.conteudo(), documento.nomeArquivo(), null));
+                    new Documento(
+                            chatId,
+                            documento.conteudo(),
+                            documento.nomeArquivo(),
+                            null,
+                            ReferenciaDocumento.conferencia(
+                                    professorId,
+                                    TipoRelatorio.AULA,
+                                    relatorio.id(),
+                                    relatorio.versaoVigente())));
         } catch (ExcecaoDominio semDocumento) {
             return Optional.empty();
         }

@@ -313,6 +313,15 @@ public final class DublesProcessamento {
         }
 
         @Override
+        public void registrarMensagemEtapa(UUID trabalhoId, long mensagemId) {
+            TrabalhoProcessamento trabalho = trabalhos.get(trabalhoId);
+            if (trabalho != null) {
+                trabalho.definirParametro(
+                        TrabalhoProcessamento.MENSAGEM_ETAPA, Long.toString(mensagemId));
+            }
+        }
+
+        @Override
         public boolean marcarAvisoDemora(UUID trabalhoId) {
             TrabalhoProcessamento trabalho = trabalhos.get(trabalhoId);
             if (trabalho == null || trabalho.avisoDemoraEnviado()) {

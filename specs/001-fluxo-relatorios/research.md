@@ -62,6 +62,10 @@ e exige que as escolhas sejam registradas e justificadas aqui.
 
 ## R-04. Entrada do canal Telegram: webhook direto no backend, sem orquestrador
 
+> **Nota (feature 002, sem reescrever histórico):** o transporte do Telegram agora é feito via n8n
+> (constituição v1.4.0); ver `specs/002-api-interna-canal-telegram/research.md` R-01. O texto abaixo
+> registra a decisão original da 001.
+
 - **Decisão**: o backend recebe os updates do Telegram por webhook, num adaptador de entrada
   (`adaptadores.entrada.telegram`) que apenas traduz cada update para os mesmos casos de uso da Web.
   Não há n8n nem outro orquestrador. O webhook é registrado com `secret_token`, validado em tempo

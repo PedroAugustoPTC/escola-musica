@@ -50,6 +50,13 @@ public abstract class TelegramConversaBase extends IntegracaoBase {
     private static final AtomicLong UPDATES = new AtomicLong(1000);
     private static final AtomicLong MENSAGENS = new AtomicLong(1);
 
+    /**
+     * Transporte exercitado pelos testes de conversa: {@code webhook} (padrão) ou {@code interno}.
+     */
+    public static final String TRANSPORTE = System.getProperty("telegram.transporte", "webhook");
+
+    public static final String TOKEN_SERVICO = "token-servico-atual-teste";
+
     @Autowired protected MockMvc mvc;
 
     @Autowired protected CenarioIT cenario;
@@ -81,6 +88,10 @@ public abstract class TelegramConversaBase extends IntegracaoBase {
     }
 
     protected void enviarUpdate(String json) throws Exception {
+        if ("interno".equals(TRANSPORTE)) {
+            enviarPeloCanalInterno(json);
+            return;
+        }
         mvc.perform(
                         org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
                                         "/telegram/webhook")
@@ -88,6 +99,33 @@ public abstract class TelegramConversaBase extends IntegracaoBase {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(json))
                 .andExpect(status().isOk());
+    }
+
+    /**
+     * Modo {@code interno}: o update vai à API interna do canal (token de serviço e segredo do
+     * webhook), a resposta é validada contra o esquema v1 e o executor simulado faz o que o n8n
+     * fará, traduzindo as ações para as mesmas chamadas à API de bots que o envio direto faria.
+     */
+    private void enviarPeloCanalInterno(String json) throws Exception {
+        var resultado =
+                mvc.perform(
+                                org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                                        .post("/interno/v1/canal/telegram/atualizacao")
+                                        .header("X-N8N-Service-Token", TOKEN_SERVICO)
+                                        .header("X-Telegram-Bot-Api-Secret-Token", SEGREDO)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(json))
+                        .andExpect(status().isOk())
+                        .andReturn();
+        String corpo = resultado.getResponse().getContentAsString();
+        EsquemaAcoesV1.exigir("RespostaAtualizacao", corpo);
+        executorDoOrquestrador().executar(JSON.readTree(corpo).get("acoes"));
+    }
+
+    /** O "n8n" dos testes, ligado ao MockMvc e à API de bots simulada. */
+    protected ExecutorAcoesSimuladoTeste executorDoOrquestrador() {
+        return new ExecutorAcoesSimuladoTeste(
+                new ClienteInternoMockMvc(mvc, TOKEN_SERVICO), API_BOTS.baseUrl() + "/bot" + TOKEN);
     }
 
     protected static String mensagemJson(long updateId, long usuario, String campoEConteudo) {

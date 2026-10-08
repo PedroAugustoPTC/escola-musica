@@ -35,6 +35,12 @@ public interface FilaTrabalhoPorta {
      */
     boolean marcarAvisoDemora(UUID trabalhoId);
 
+    /**
+     * Grava o id da mensagem de etapa do canal no trabalho, sem disputar com a gravação do worker;
+     * as etapas seguintes editam essa mensagem (FR-017).
+     */
+    void registrarMensagemEtapa(UUID trabalhoId, long mensagemId);
+
     /** Consolidação semestral ainda em curso para o trio professor–aluno–período (FR-034). */
     Optional<TrabalhoProcessamento> buscarConsolidacaoEmCurso(
             UUID professorId, UUID alunoId, String periodoChave);

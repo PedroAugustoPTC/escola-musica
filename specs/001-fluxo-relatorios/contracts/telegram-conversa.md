@@ -10,6 +10,11 @@ resultado. Não há regra de negócio no adaptador (Princípio I) e nenhum estad
 
 ## 1. Transporte
 
+> **Nota (feature 002, sem reescrever histórico):** o transporte do Telegram agora é feito via n8n
+> (constituição v1.4.0); ver `specs/002-api-interna-canal-telegram/research.md` R-01. A rota
+> `/interno/v1/canal/telegram/**` (contrato da 002) passa a ser o caminho usado pelo n8n; o webhook
+> `/telegram/webhook` descrito abaixo segue disponível.
+
 | Item | Contrato |
 |---|---|
 | Entrada | `POST /telegram/webhook` (rede interna), chamado pelo servidor local `telegram-bot-api`. Cabeçalho `X-Telegram-Bot-Api-Secret-Token` obrigatório, comparado em tempo constante; se não bater, 401 sem corpo. |

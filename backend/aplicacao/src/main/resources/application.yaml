@@ -77,6 +77,24 @@ relatorios:
     webhook-url: ${TELEGRAM_WEBHOOK_URL:http://backend:8080/telegram/webhook}
     arquivos-dir: ${TELEGRAM_ARQUIVOS_DIR:/var/lib/telegram-bot-api}
     audio-pendente-minutos: ${AUDIO_PENDENTE_MINUTOS:30}
+  canal-telegram:
+    # DIRETA = envio direto à API de bots (padrão); ORQUESTRADOR = outbox entregue ao n8n (feature 003)
+    entrega-proativa: ${CANAL_TELEGRAM_ENTREGA:DIRETA}
+    token-atual: ${CANAL_TELEGRAM_TOKEN_ATUAL:}
+    token-proximo: ${CANAL_TELEGRAM_TOKEN_PROXIMO:}
+    orquestrador-url: ${CANAL_TELEGRAM_ORQUESTRADOR_URL:}
+    orquestrador-token: ${CANAL_TELEGRAM_ORQUESTRADOR_TOKEN:}
+    conexao-timeout-ms: ${CANAL_TELEGRAM_CONEXAO_TIMEOUT_MS:3000}
+    resposta-timeout-ms: ${CANAL_TELEGRAM_RESPOSTA_TIMEOUT_MS:10000}
+    retentativa-inicial-segundos: ${CANAL_TELEGRAM_RETENTATIVA_INICIAL_S:30}
+    retentativa-teto-segundos: ${CANAL_TELEGRAM_RETENTATIVA_TETO_S:900}
+    prazo-horas: ${CANAL_TELEGRAM_PRAZO_H:24}
+    confirmacao-max-segundos: ${CANAL_TELEGRAM_CONFIRMACAO_MAX_S:60}
+    lease-segundos: ${CANAL_TELEGRAM_LEASE_S:60}
+    intervalo-despacho-ms: ${CANAL_TELEGRAM_INTERVALO_DESPACHO_MS:2000}
+    lote-max-por-ciclo: ${CANAL_TELEGRAM_LOTE_MAX:20}
+    retencao-payload-horas: ${CANAL_TELEGRAM_RETENCAO_PAYLOAD_H:24}
+    retencao-registro-dias: ${CANAL_TELEGRAM_RETENCAO_REGISTRO_D:7}
   provedores:
     modo: ${PROVEDORES_IA:simulado}
     transcricao:

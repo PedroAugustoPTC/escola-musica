@@ -39,6 +39,32 @@ class RegistroAulaConversaIT extends TelegramConversaBase {
         API_BOTS.resetRequests();
     }
 
+    /**
+     * V15, FR-028 (US5.1): pela API interna o áudio nunca passa pelo orquestrador: a ação não traz
+     * bytes, caminho de arquivo nem endereço de download, e ninguém pede o arquivo à API de bots no
+     * recebimento. Só faz sentido no transporte interno.
+     */
+    @Test
+    void audioNoTransporteInternoNaoTrazBytesCaminhoNemEndereco() throws Exception {
+        org.junit.jupiter.api.Assumptions.assumeTrue("interno".equals(TRANSPORTE));
+        prepararArquivoTelegram("voz-ok", NormalizacaoAudioTeste.AUDIO_COM_FALA);
+        escolherMatteo();
+
+        enviarVoz(USUARIO_CLARA, "voz-ok", 1000);
+
+        String acoes =
+                String.join(
+                        "\n",
+                        jdbc.queryForList("select payload::text from acao_canal", String.class));
+        assertThat(acoes)
+                .isNotBlank()
+                .doesNotContain(propriedades.telegram().arquivosDir().toString())
+                .doesNotContain(
+                        "file_path", "file_id", ".oga", "http://", "https://", "AUDIO-DE-AULA");
+        assertThat(ultimaMensagem().get("text").asString()).startsWith("Áudio recebido");
+        API_BOTS.verify(0, postRequestedFor(urlPathMatching(".*/getFile")));
+    }
+
     private int trabalhos() {
         return jdbc.queryForObject("select count(*) from trabalho_processamento", Integer.class);
     }

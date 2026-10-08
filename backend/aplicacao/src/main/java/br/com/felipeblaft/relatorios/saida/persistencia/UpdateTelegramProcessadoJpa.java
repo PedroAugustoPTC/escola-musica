@@ -17,6 +17,23 @@ interface UpdateTelegramProcessadoJpa
             nativeQuery = true)
     int registrarSeNovo(long updateId, Instant agora);
 
+    /** Como {@link #registrarSeNovo}, gravando a origem (rota interna do canal). */
+    @Modifying
+    @Query(
+            value =
+                    "insert into update_telegram_processado (update_id, recebido_em, origem)"
+                            + " values (:updateId, :agora, :origem) on conflict (update_id) do nothing",
+            nativeQuery = true)
+    int registrarSeNovoComOrigem(long updateId, Instant agora, String origem);
+
+    @Modifying
+    @Query(
+            value =
+                    "update update_telegram_processado set total_acoes = :totalAcoes"
+                            + " where update_id = :updateId",
+            nativeQuery = true)
+    int concluir(long updateId, int totalAcoes);
+
     @Modifying
     @Query("delete from UpdateTelegramProcessadoEntidade u where u.recebidoEm < :limite")
     int removerAntigos(Instant limite);

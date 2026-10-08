@@ -69,6 +69,48 @@ class RegrasAdaptadoresTeste {
                 .check(aplicacao);
     }
 
+    /** Feature 002 (FR-033): a nova porta de entrada segue a mesma nomenclatura do portal. */
+    @Test
+    void controladoresDoCanalInternoTerminamEmControlador() {
+        classes()
+                .that()
+                .resideInAPackage(BASE + ".entrada.telegram.canal..")
+                .and()
+                .areAnnotatedWith(RestController.class)
+                .should()
+                .haveSimpleNameEndingWith("Controlador")
+                .check(aplicacao);
+    }
+
+    @Test
+    void objetosDeBordaDoCanalInternoTerminamEmDtoRequisicaoOuResposta() {
+        classes()
+                .that()
+                .resideInAPackage(BASE + ".entrada.telegram.canal")
+                .and()
+                .areRecords()
+                .and()
+                .areTopLevelClasses()
+                .should()
+                .haveSimpleNameEndingWith("Dto")
+                .orShould()
+                .haveSimpleNameEndingWith("Requisicao")
+                .orShould()
+                .haveSimpleNameEndingWith("Resposta")
+                .check(aplicacao);
+    }
+
+    @Test
+    void aAreaInternaDeServicoNaoDependeDaSaida() {
+        noClasses()
+                .that()
+                .resideInAnyPackage(BASE + ".entrada.interno..", BASE + ".entrada.telegram.canal..")
+                .should()
+                .dependOnClassesThat()
+                .resideInAPackage(BASE + ".saida..")
+                .check(aplicacao);
+    }
+
     @Test
     void entradaNaoAcessaSaidaDiretamente() {
         noClasses()

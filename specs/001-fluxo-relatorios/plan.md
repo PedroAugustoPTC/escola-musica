@@ -6,6 +6,10 @@
 
 ## Summary
 
+> **Nota (feature 002, sem reescrever histórico):** o transporte do Telegram agora é feito via n8n
+> (constituição v1.4.0); ver `specs/002-api-interna-canal-telegram/research.md` R-01. O resumo abaixo
+> registra o plano original da 001.
+
 O professor registra uma aula por áudio (gravação no navegador, arquivo, mensagem de voz ou vídeo
 de até 50 MB) pela **Web ou pelo Telegram, com paridade funcional**. O sistema transcreve, estrutura
 o relatório em 5 seções com IA e faz até 2 rodadas de perguntas, que podem ser respondidas por texto
@@ -78,7 +82,7 @@ Constituição v1.3.0. Avaliação **antes** da pesquisa e **refeita depois** do
 | Princípio / Restrição | Como o plano atende | Pré | Pós |
 |---|---|---|---|
 | **I. Domínio independente de canal e fornecedor** | Módulo `nucleo` (domínio → casos de uso → portas) sem Spring nem SDK, com dependência imposta pelo Maven; ArchUnit para camadas e para proibir nomes de fornecedor. Web (`*Controlador` REST) e Telegram (`TelegramWebhookControlador` + `InterpretadorConversaTelegram`) só traduzem para os **mesmos** casos de uso. Paridade: tabela da spec coberta por [api-portal.openapi.yaml](./contracts/api-portal.openapi.yaml) × [telegram-conversa.md](./contracts/telegram-conversa.md), verificada por roteiro de paridade. Provedores atrás de `TranscricaoPorta`, `LlmPorta`, `GeracaoPdfPorta`, `ArmazenamentoDocumentoPorta`, `NotificacaoProfessorPorta`. | ✅ | ✅ |
-| **II. Fonte única da verdade** | Sem orquestrador: só o backend escreve no banco. Estado da conversa em `vinculo_telegram` (FR-036); reiniciar o contêiner não perde nada. O `from.id` do Telegram só identifica; a autorização é decidida nos casos de uso. | ✅ | ✅ |
+| **II. Fonte única da verdade** | Sem orquestrador *(nota da 002: o n8n passa a ser admitido, só como transporte do Telegram; ver 002 R-01)*: só o backend escreve no banco. Estado da conversa em `vinculo_telegram` (FR-036); reiniciar o contêiner não perde nada. O `from.id` do Telegram só identifica; a autorização é decidida nos casos de uso. | ✅ | ✅ |
 | **III. Humano no controle da IA** | Aprovação exige `versaoConfirmada = versao_vigente` e confirmação no canal; `VersaoRelatorio` imutável; PDF por versão; o áudio de alteração **nunca** aprova nem cancela (`pedidoDeAcao` só gera mensagem); prompts "não inventar" + schema; Informações Gerais do semestral preenchidas pelo sistema. | ✅ | ✅ |
 | **IV. Privacidade desde o design** | `EntradaTarefa` tipada impede enviar nome, CPF ou data de nascimento à IA; áudio só no `tmpfs` e apagado no `finally`; no Telegram, só o `file_id` fica guardado antes da confirmação; CPF com AES-256-GCM + HMAC; código de acesso e token de sessão guardados só como hash; segredos em `.env`; logs JSON sem dados sensíveis; autorização por associação em todo caso de uso; só o Caddy (HTTPS) exposto; `telegram-bot-api`, `postgres` e `backend` na rede interna. | ✅ | ✅ |
 | **V. Qualidade obrigatória** | JaCoCo ≥ 90% de linha e branch no `nucleo`, bloqueando o build e o CI; testes de contrato da API e da conversa; dublês para os provedores; suíte de IA real fora da cobertura. | ✅ | ✅ |
@@ -190,6 +194,10 @@ infraestrutura em `infra/`. O backend fica dividido em `nucleo`, sem framework, 
 (Spring Boot com todos os adaptadores). O canal Telegram é um adaptador de entrada **dentro** de
 `aplicacao`, e não um serviço separado. Assim, os dois canais chamam os mesmos casos de uso no mesmo
 processo (Princípio I) e nenhum outro componente escreve no banco (Princípio II).
+
+> **Nota (feature 002):** o transporte do Telegram agora é feito via n8n; ver
+> `specs/002-api-interna-canal-telegram/research.md` R-01. O adaptador de entrada continua dentro de
+> `aplicacao`; o n8n só transporta.
 
 ## Fases seguintes
 
