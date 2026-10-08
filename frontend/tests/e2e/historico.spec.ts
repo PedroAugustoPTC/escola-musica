@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { entrar, registrarAulaAprovada, semear, type Semeadura } from './suporte';
 
 /** Quickstart V10 e V11 na Web: histórico, PDF oficial e acesso cruzado (US5). */
@@ -22,16 +22,22 @@ test('lista o aprovado e abre o PDF oficial numa nova aba', async ({ page }) => 
   await expect(item).toContainText(/Aula de \d{2}\/\d{2}\/\d{4}/);
   await expect(item).toContainText(/Aprovado em \d{2}\/\d{2}\/\d{4} às \d{2}:\d{2}/);
 
+  // o Chromium sem interface baixa o PDF em vez de exibi-lo e a aba segue em about:blank; por isso
+  // os destinos são observados desde a criação da aba (sem corrida) e em qualquer página do contexto
+  const destinos: string[] = [];
+  const observar = (alvo: Page) => {
+    alvo.on('download', (download) => destinos.push(download.url()));
+    alvo.on('framenavigated', (quadro) => destinos.push(quadro.url()));
+  };
+  observar(page);
+  page.context().on('page', observar);
+
   const [aba] = await Promise.all([
     page.waitForEvent('popup'),
     item.getByRole('button', { name: /Abrir PDF/ }).click(),
   ]);
-  // o Chromium sem interface baixa o PDF em vez de exibi-lo: vale o blob aberto ou baixado na aba
-  const destino = await aba
-    .waitForEvent('download', { timeout: 20_000 })
-    .then((download) => download.url())
-    .catch(() => aba.url());
-  expect(destino).toMatch(/^blob:/);
+  expect(aba).toBeTruthy();
+  await expect.poll(() => destinos.some((destino) => destino.startsWith('blob:'))).toBe(true);
 });
 
 test('aluno e relatório de outro professor não são revelados', async ({ page }) => {
