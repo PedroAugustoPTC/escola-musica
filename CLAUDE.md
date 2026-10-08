@@ -8,7 +8,12 @@ acentos.
 
 Cada estrutura tem o próprio `CLAUDE.md`, que descreve o que ela é e as regras locais. **Ao trabalhar
 em uma estrutura, leia o `CLAUDE.md` dela.** Este arquivo raiz guarda apenas o que vale para o
-repositório inteiro; ao criar uma estrutura nova, crie também o `CLAUDE.md` dela.
+repositório inteiro.
+
+**Toda estrutura nova DEVE nascer com o seu `CLAUDE.md`** (pasta de primeiro nível, módulo ou
+subprojeto, como um novo módulo do `backend/`). No mesmo PR que a cria:
+1. crie o `CLAUDE.md` dela, dizendo o que ela é, o que contém e as regras locais;
+2. acrescente uma linha na tabela abaixo.
 
 | Estrutura | O que é |
 |---|---|
