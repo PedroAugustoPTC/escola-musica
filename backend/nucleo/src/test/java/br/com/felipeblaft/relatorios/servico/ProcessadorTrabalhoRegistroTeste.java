@@ -140,6 +140,23 @@ class ProcessadorTrabalhoRegistroTeste {
     }
 
     @Test
+    void provedorForaDoArDepoisDeJaTerConsumidoRegistraOQueFoiGasto() {
+        c.transcricao.programar("x");
+        c.llm.programar(
+                TarefaLlm.ESTRUTURACAO_AULA,
+                new ProvedorIndisponivelExcecao("503", 1000, 500, new BigDecimal("0.006")));
+
+        registrarEProcessar(Canal.WEB);
+
+        ChamadaIa falha = c.custos.chamadas.getLast();
+        assertThat(falha.sucesso()).isFalse();
+        assertThat(falha.codigoErro()).isEqualTo("PROVEDOR_INDISPONIVEL");
+        assertThat(falha.tokensEntrada()).isEqualTo(1000);
+        assertThat(falha.tokensSaida()).isEqualTo(500);
+        assertThat(falha.custoEstimadoUsd()).isEqualByComparingTo("0.006");
+    }
+
+    @Test
     void provedorIndisponivelNaoTemTokensNemCusto() {
         c.transcricao.programar("x");
         c.llm.programar(TarefaLlm.ESTRUTURACAO_AULA, new ProvedorIndisponivelExcecao("503"));

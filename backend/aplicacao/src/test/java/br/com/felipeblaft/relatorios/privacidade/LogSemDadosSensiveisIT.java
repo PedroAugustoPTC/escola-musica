@@ -1,6 +1,8 @@
 package br.com.felipeblaft.relatorios.privacidade;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -9,6 +11,13 @@ import br.com.felipeblaft.relatorios.casodeuso.carga.ArquivoCarga;
 import br.com.felipeblaft.relatorios.casodeuso.carga.CarregarCadastroInicialCasoDeUso;
 import br.com.felipeblaft.relatorios.dominio.cadastro.Aluno;
 import br.com.felipeblaft.relatorios.dominio.cadastro.Professor;
+import br.com.felipeblaft.relatorios.dominio.comum.Canal;
+import br.com.felipeblaft.relatorios.dominio.comum.Meio;
+import br.com.felipeblaft.relatorios.dominio.trabalho.EtapaTrabalho;
+import br.com.felipeblaft.relatorios.dominio.trabalho.TipoTrabalho;
+import br.com.felipeblaft.relatorios.dominio.trabalho.TrabalhoProcessamento;
+import br.com.felipeblaft.relatorios.saida.fila.TrabalhoWorker;
+import br.com.felipeblaft.relatorios.servico.ProcessadorTrabalhoServico;
 import br.com.felipeblaft.relatorios.suporte.CenarioIT;
 import br.com.felipeblaft.relatorios.suporte.NormalizacaoAudioTeste;
 import br.com.felipeblaft.relatorios.suporte.TelegramConversaBase;
@@ -30,6 +39,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MvcResult;
 
 /**
@@ -44,6 +55,9 @@ class LogSemDadosSensiveisIT extends TelegramConversaBase {
     private static final String CPF = "52998224725";
 
     @Autowired private CarregarCadastroInicialCasoDeUso carga;
+    @Autowired private TrabalhoWorker worker;
+
+    @MockitoSpyBean private ProcessadorTrabalhoServico processador;
 
     private final ListAppender<ILoggingEvent> eventos = new ListAppender<>();
     private Logger raiz;
@@ -119,6 +133,41 @@ class LogSemDadosSensiveisIT extends TelegramConversaBase {
                         .with(csrf().asHeader())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(corpo));
+    }
+
+    @Test
+    void excecaoNoProcessamentoDoTrabalhoNaoLevaMensagemCausaNemPilhaParaOLog() {
+        doThrow(
+                        new IllegalStateException(
+                                "Matteo Ferreira CPF " + CPF + " transcrição: " + RESPOSTA,
+                                new IllegalArgumentException("causa com " + ALTERACAO)))
+                .when(processador)
+                .processar(any());
+        TrabalhoProcessamento trabalho =
+                TrabalhoProcessamento.novo(
+                        TipoTrabalho.REGISTRO_AULA,
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        null,
+                        null,
+                        Canal.WEB,
+                        Meio.AUDIO,
+                        EtapaTrabalho.ENVIANDO,
+                        relogio.agora());
+
+        ReflectionTestUtils.invokeMethod(worker, "executar", trabalho);
+
+        String logs = textoDosLogs();
+        assertThat(logs)
+                .contains("trabalho-falhou tipo=REGISTRO_AULA")
+                .contains("IllegalStateException");
+        assertThat(logs).doesNotContain("Matteo", CPF, RESPOSTA, ALTERACAO, "causa com", "\tat ");
+        assertThat(
+                        eventos.list.stream()
+                                .filter(e -> e.getFormattedMessage().contains("trabalho-falhou"))
+                                .allMatch(e -> e.getThrowableProxy() == null))
+                .as("sem a exceção anexada ao evento")
+                .isTrue();
     }
 
     @Test

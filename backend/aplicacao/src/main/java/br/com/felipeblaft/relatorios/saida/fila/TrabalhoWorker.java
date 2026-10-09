@@ -82,6 +82,22 @@ public class TrabalhoWorker {
         }
     }
 
+    /**
+     * Primeiro ponto do código da aplicação na pilha, para depurar sem expor o conteúdo do erro.
+     */
+    private static String localDe(Throwable erro) {
+        for (StackTraceElement ponto : erro.getStackTrace()) {
+            if (ponto.getClassName().startsWith("br.com.felipeblaft")) {
+                return ponto.getClassName()
+                        + "."
+                        + ponto.getMethodName()
+                        + ":"
+                        + ponto.getLineNumber();
+            }
+        }
+        return "desconhecido";
+    }
+
     void executar(TrabalhoProcessamento trabalho) {
         MDC.put("trabalhoId", trabalho.id().toString());
         MDC.put("canal", trabalho.canalSolicitacao().name());
@@ -94,8 +110,15 @@ public class TrabalhoWorker {
                     trabalho.resultado(),
                     System.currentTimeMillis() - inicio);
         } catch (RuntimeException | Error erro) {
-            // o executor descartaria o erro em silêncio: registra sempre (sem dados do relatório)
-            LOG.error("trabalho-falhou tipo={}", trabalho.tipo(), erro);
+            // o executor descartaria o erro em silêncio: registra sempre, mas só o tipo do
+            // trabalho,
+            // o da exceção e o ponto do código; a mensagem e a causa podem trazer SQL, texto de
+            // relatório ou dado de aluno (FR-055)
+            LOG.error(
+                    "trabalho-falhou tipo={} erro={} local={}",
+                    trabalho.tipo(),
+                    erro.getClass().getName(),
+                    localDe(erro));
         } finally {
             MDC.clear();
             vagas.release();
