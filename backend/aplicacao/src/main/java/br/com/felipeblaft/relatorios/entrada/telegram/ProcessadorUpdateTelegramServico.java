@@ -77,7 +77,11 @@ public class ProcessadorUpdateTelegramServico {
         try {
             saidas = interpretador.interpretar(update);
         } catch (RuntimeException erro) {
-            LOG.error("telegram-erro-interpretacao updateId={}", update.updateId(), erro);
+            // só o tipo: a mensagem e a causa podem trazer dado de aluno (FR-029)
+            LOG.error(
+                    "telegram-erro-interpretacao updateId={} tipo={}",
+                    update.updateId(),
+                    erro.getClass().getSimpleName());
             saidas = respostaDeErro(update);
         }
         return ResultadoUpdateTelegram.novo(update.updateId(), saidas);

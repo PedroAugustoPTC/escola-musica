@@ -1,10 +1,14 @@
 package br.com.felipeblaft.relatorios.entrada.telegram.canal;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 import br.com.felipeblaft.relatorios.dominio.cadastro.Professor;
+import br.com.felipeblaft.relatorios.entrada.telegram.InterpretadorConversaTelegram;
 import br.com.felipeblaft.relatorios.suporte.CenarioIT;
 import br.com.felipeblaft.relatorios.suporte.ContratoCanalOpenApi;
 import br.com.felipeblaft.relatorios.suporte.EsquemaAcoesV1;
@@ -17,6 +21,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MvcResult;
 import tools.jackson.databind.JsonNode;
 
@@ -28,6 +33,12 @@ import tools.jackson.databind.JsonNode;
 class CanalTelegramContratoIT extends TelegramConversaBase {
 
     private static final String BASE = "/interno/v1/canal/telegram";
+    private static final String TEXTO_ERRO_INTERNO =
+            "Ocorreu um erro inesperado. Tente novamente mais tarde.";
+
+    @MockitoSpyBean InterpretadorConversaTelegram interpretador;
+
+    @MockitoSpyBean AcaoCanalMapeador mapeador;
 
     private MvcResult atualizacao(String json) throws Exception {
         MvcResult resultado =
@@ -122,6 +133,80 @@ class CanalTelegramContratoIT extends TelegramConversaBase {
         }
     }
 
+    // ---- erro inesperado (FR-008, FR-039)
+
+    @Test
+    void interpretadorQueLancaDevolveErroInternoParaTextoEParaToqueERepeticaoDevolveAMesmaResposta()
+            throws Exception {
+        doThrow(new IllegalStateException("falha com o aluno Matteo Ferreira"))
+                .when(interpretador)
+                .interpretar(any());
+
+        long idTexto = proximoUpdate();
+        String texto = mensagemJson(idTexto, USUARIO_CLARA, "\"text\": \"oi\"");
+        JsonNode porTexto = acoes(atualizacao(texto));
+        assertThat(porTexto).hasSize(1);
+        assertThat(porTexto.get(0).path("tipo").asString()).isEqualTo("MENSAGEM");
+        assertThat(porTexto.get(0).path("texto").asString()).isEqualTo(TEXTO_ERRO_INTERNO);
+        assertThat(porTexto.get(0).path("chatId").asLong()).isEqualTo(USUARIO_CLARA);
+        assertThat(porTexto.get(0).path("acaoId").asString()).isEqualTo("u" + idTexto + "-0");
+        assertThat(acoes(atualizacao(texto))).isEqualTo(porTexto);
+
+        long idToque = proximoUpdate();
+        String toque =
+                """
+                {"update_id": %d, "callback_query": {"id": "cb%d", "data": "v1:inicio:",
+                 "from": {"id": %d, "is_bot": false, "first_name": "Teste"},
+                 "message": {"message_id": 55, "date": 1, "chat": {"id": %d, "type": "private"}}}}
+                """
+                        .formatted(idToque, idToque, USUARIO_CLARA, USUARIO_CLARA);
+        JsonNode porToque = acoes(atualizacao(toque));
+        assertThat(porToque).hasSize(2);
+        assertThat(porToque.get(0).path("tipo").asString()).isEqualTo("RESPOSTA_CALLBACK");
+        assertThat(porToque.get(0).path("callbackId").asString()).isEqualTo("cb" + idToque);
+        assertThat(porToque.get(1).path("texto").asString()).isEqualTo(TEXTO_ERRO_INTERNO);
+        assertThat(porToque.get(0).path("acaoId").asString()).isEqualTo("u" + idToque + "-0");
+        assertThat(porToque.get(1).path("acaoId").asString()).isEqualTo("u" + idToque + "-1");
+        assertThat(acoes(atualizacao(toque))).isEqualTo(porToque);
+    }
+
+    @Test
+    void mapeamentoQueLancaDevolveErroInternoComIdsEstaveisEMesmaRespostaNaRepeticao()
+            throws Exception {
+        doThrow(new IllegalStateException("falha com o aluno Matteo Ferreira"))
+                .doCallRealMethod()
+                .when(mapeador)
+                .mapear(any(), anyLong(), any());
+        long idTexto = proximoUpdate();
+        String texto = mensagemJson(idTexto, USUARIO_CLARA, "\"text\": \"oi\"");
+
+        JsonNode porTexto = acoes(atualizacao(texto));
+        assertThat(porTexto).hasSize(1);
+        assertThat(porTexto.get(0).path("texto").asString()).isEqualTo(TEXTO_ERRO_INTERNO);
+        assertThat(porTexto.get(0).path("acaoId").asString()).isEqualTo("u" + idTexto + "-e0");
+        assertThat(acoes(atualizacao(texto))).isEqualTo(porTexto);
+
+        doThrow(new IllegalStateException("falha com o aluno Matteo Ferreira"))
+                .doCallRealMethod()
+                .when(mapeador)
+                .mapear(any(), anyLong(), any());
+        long idToque = proximoUpdate();
+        String toque =
+                """
+                {"update_id": %d, "callback_query": {"id": "cb%d", "data": "v1:inicio:",
+                 "from": {"id": %d, "is_bot": false, "first_name": "Teste"},
+                 "message": {"message_id": 55, "date": 1, "chat": {"id": %d, "type": "private"}}}}
+                """
+                        .formatted(idToque, idToque, USUARIO_CLARA, USUARIO_CLARA);
+        JsonNode porToque = acoes(atualizacao(toque));
+        assertThat(porToque).hasSize(2);
+        assertThat(porToque.get(0).path("tipo").asString()).isEqualTo("RESPOSTA_CALLBACK");
+        assertThat(porToque.get(0).path("acaoId").asString()).isEqualTo("u" + idToque + "-e0");
+        assertThat(porToque.get(1).path("texto").asString()).isEqualTo(TEXTO_ERRO_INTERNO);
+        assertThat(porToque.get(1).path("acaoId").asString()).isEqualTo("u" + idToque + "-e1");
+        assertThat(acoes(atualizacao(toque))).isEqualTo(porToque);
+    }
+
     // ---- C2
 
     @Test
@@ -176,6 +261,68 @@ class CanalTelegramContratoIT extends TelegramConversaBase {
         List<String> ids = new ArrayList<>();
         acoes.forEach(a -> ids.add(a.path("acaoId").asString()));
         assertThat(ids).doesNotHaveDuplicates();
+    }
+
+    private JsonNode compensacaoDaAcao(String acaoId) throws Exception {
+        String json =
+                jdbc.queryForObject(
+                        "select compensacao::text from acao_canal where id = ?",
+                        String.class,
+                        acaoId);
+        assertThat(json).as("compensação gravada para " + acaoId).isNotNull();
+        return JSON.readTree(json);
+    }
+
+    @Test
+    void pdfDeConferenciaGuardaAvisoComOBotaoVerPdfParaPedirDeNovo() throws Exception {
+        UUID relatorio = prepararConferencia();
+
+        JsonNode acoes = acoes(callback(USUARIO_CLARA, "v1:foco:a" + relatorio));
+
+        JsonNode pdf = null;
+        for (JsonNode acao : acoes) {
+            if ("DOCUMENTO".equals(acao.path("tipo").asString())) {
+                pdf = acao;
+            }
+        }
+        assertThat(pdf).as("ação de documento").isNotNull();
+        JsonNode compensacao = compensacaoDaAcao(pdf.path("acaoId").asString());
+        assertThat(compensacao.path("tipo").asString()).isEqualTo("MENSAGEM");
+        assertThat(compensacao.path("chatId").asLong()).isEqualTo(USUARIO_CLARA);
+        assertThat(compensacao.path("texto").asString())
+                .isEqualTo(
+                        "Não consegui enviar o PDF agora. Toque no botão abaixo para pedir de novo.");
+        assertThat(compensacao.path("teclado").path("linhas")).hasSize(1);
+        assertThat(compensacao.path("teclado").toString())
+                .contains("\"rotulo\":\"Ver PDF\"", "\"dados\":\"v1:pdf:\"");
+        assertThat(compensacao.toString())
+                .doesNotContain("documentoId", "Matteo", pdf.path("documentoId").asString());
+    }
+
+    @Test
+    void pdfOficialDoHistoricoGuardaAvisoComOBotaoDoItem() throws Exception {
+        Professor clara = cenario.clara();
+        cenario.aulaAprovada(
+                clara,
+                cenario.aluno(clara, "Matteo Ferreira", "Piano"),
+                java.time.LocalDate.of(2026, 3, 1),
+                "Aula");
+        vincular(USUARIO_CLARA, CenarioIT.CODIGO_CLARA);
+        enviarTexto(USUARIO_CLARA, "histórico");
+        enviarTexto(USUARIO_CLARA, "Matteo");
+
+        JsonNode acoes = acoes(callback(USUARIO_CLARA, "v1:hitem:0"));
+
+        JsonNode pdf = acoes.get(acoes.size() - 1);
+        assertThat(pdf.path("tipo").asString()).isEqualTo("DOCUMENTO");
+        JsonNode compensacao = compensacaoDaAcao(pdf.path("acaoId").asString());
+        assertThat(compensacao.path("texto").asString())
+                .isEqualTo(
+                        "Não consegui enviar o PDF agora. Toque no botão abaixo para pedir de novo.");
+        assertThat(compensacao.path("teclado").toString())
+                .contains("\"rotulo\":\"Ver PDF\"", "\"dados\":\"v1:hitem:0\"")
+                .doesNotContain("v1:pdf:");
+        assertThat(compensacao.toString()).doesNotContain("documentoId");
     }
 
     @Test

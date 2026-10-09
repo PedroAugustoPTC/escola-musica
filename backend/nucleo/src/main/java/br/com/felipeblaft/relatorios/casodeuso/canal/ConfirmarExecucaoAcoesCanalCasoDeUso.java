@@ -18,11 +18,13 @@ import java.util.regex.Pattern;
 /**
  * Recebe o resultado da execução de cada ação pelo orquestrador (FR-007b, FR-017). Idempotente;
  * cada resultado é validado isoladamente; o backend decide a compensação quando uma edição falha
- * por mensagem não editável. O orquestrador só classifica o erro: o que fazer depois é daqui.
+ * por mensagem não editável ou um documento fica indisponível. O orquestrador só classifica o erro:
+ * o que fazer depois é daqui.
  */
 public class ConfirmarExecucaoAcoesCanalCasoDeUso {
 
-    public static final String MENSAGEM_NAO_EDITAVEL = "MENSAGEM_NAO_EDITAVEL";
+    public static final String MENSAGEM_NAO_EDITAVEL = AcaoCanal.CODIGO_MENSAGEM_NAO_EDITAVEL;
+    public static final String DOCUMENTO_INDISPONIVEL = AcaoCanal.CODIGO_DOCUMENTO_INDISPONIVEL;
     public static final String ERRO_TELEGRAM = "ERRO_TELEGRAM";
 
     private static final Set<String> CODIGOS_CONHECIDOS =
@@ -30,7 +32,7 @@ public class ConfirmarExecucaoAcoesCanalCasoDeUso {
                     MENSAGEM_NAO_EDITAVEL,
                     "CHAT_INDISPONIVEL",
                     "ACAO_NAO_SUPORTADA",
-                    "DOCUMENTO_INDISPONIVEL",
+                    DOCUMENTO_INDISPONIVEL,
                     "LIMITE_DE_TAXA",
                     ERRO_TELEGRAM);
     private static final Pattern FORMATO_CODIGO = Pattern.compile("^[A-Z][A-Z0-9_]{1,39}$");
@@ -168,7 +170,7 @@ public class ConfirmarExecucaoAcoesCanalCasoDeUso {
         if (!acoes.atualizarSeVersao(acao, versaoLida)) {
             return null;
         }
-        if (MENSAGEM_NAO_EDITAVEL.equals(codigo) && acao.temCompensacao()) {
+        if (acao.compensaPor(codigo)) {
             // uma só compensação por ação (id <acaoId>-c); uma compensação que falha não gera outra
             acoes.gravarLote(List.of(acao.criarCompensacao(agora, politica)));
         }

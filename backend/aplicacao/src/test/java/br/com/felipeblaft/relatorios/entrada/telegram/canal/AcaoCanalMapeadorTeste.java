@@ -207,6 +207,58 @@ class AcaoCanalMapeadorTeste {
     }
 
     @Test
+    void documentoGuardaACompensacaoComAvisoEBotaoSemDocumentoNemTextoDoRelatorio()
+            throws Exception {
+        AcaoMapeada acao =
+                mapear(
+                                new SaidaTelegram.Documento(
+                                        7L,
+                                        "%PDF-conteudo-do-relatorio".getBytes(),
+                                        "relatorio-aula.pdf",
+                                        "Segue o relatório do Matteo",
+                                        ReferenciaDocumento.conferencia(
+                                                UUID.randomUUID(),
+                                                TipoRelatorio.AULA,
+                                                UUID.randomUUID(),
+                                                2),
+                                        new SaidaTelegram.Mensagem(
+                                                7L,
+                                                "Não consegui enviar o PDF agora.",
+                                                Teclado.de(new Botao("Ver PDF", "v1:pdf:")))))
+                        .get(0);
+
+        JsonNode compensacao = JSON.readTree(acao.compensacao());
+        assertThat(compensacao.path("tipo").asString()).isEqualTo("MENSAGEM");
+        assertThat(compensacao.path("chatId").asLong()).isEqualTo(7L);
+        assertThat(compensacao.path("texto").asString())
+                .isEqualTo("Não consegui enviar o PDF agora.");
+        assertThat(
+                        compensacao
+                                .path("teclado")
+                                .path("linhas")
+                                .get(0)
+                                .get(0)
+                                .path("dados")
+                                .asString())
+                .isEqualTo("v1:pdf:");
+        assertThat(
+                        compensacao
+                                .path("teclado")
+                                .path("linhas")
+                                .get(0)
+                                .get(0)
+                                .path("rotulo")
+                                .asString())
+                .isEqualTo("Ver PDF");
+        assertThat(compensacao.has("acaoId")).isFalse();
+        assertThat(acao.compensacao())
+                .doesNotContain("documentoId", "nomeArquivo", "legenda", "Matteo", "PDF-conteudo");
+        // a resposta ao orquestrador continua sendo só o documento
+        assertThat(acao.noResposta().has("compensacao")).isFalse();
+        assertThat(acao.noResposta().path("tipo").asString()).isEqualTo("DOCUMENTO");
+    }
+
+    @Test
     void documentoOficialNaoLevaVersaoENaoTemLegendaQuandoNula() {
         AcaoMapeada acao =
                 mapear(

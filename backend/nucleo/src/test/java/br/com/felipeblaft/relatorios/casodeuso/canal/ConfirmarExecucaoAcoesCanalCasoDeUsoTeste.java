@@ -229,6 +229,63 @@ class ConfirmarExecucaoAcoesCanalCasoDeUsoTeste {
         assertThat(repositorio.guardada("p:e:0-c").estado()).isEqualTo(EstadoAcaoCanal.FALHOU);
     }
 
+    private void documentoComCompensacao(String id, String compensacao) {
+        gravar.executar(
+                "p:d",
+                OrigemAcaoCanal.PROATIVA,
+                null,
+                List.of(
+                        new NovaAcao(
+                                id,
+                                TipoAcaoCanal.DOCUMENTO,
+                                1L,
+                                UUID.randomUUID(),
+                                null,
+                                "{\"documentoId\":\"abc\",\"nomeArquivo\":\"a.pdf\"}",
+                                compensacao)));
+    }
+
+    @Test
+    void documentoIndisponivelGeraUmaSoCompensacaoSemODocumento() {
+        documentoComCompensacao("p:d:0", "{\"tipo\":\"MENSAGEM\",\"texto\":\"aviso\"}");
+        confirmar.executar(List.of(falha("p:d:0", "DOCUMENTO_INDISPONIVEL")));
+
+        AcaoCanal compensacao = repositorio.buscarPorId("p:d:0-c").orElseThrow();
+        assertThat(compensacao.origem()).isEqualTo(OrigemAcaoCanal.COMPENSACAO);
+        assertThat(compensacao.estado()).isEqualTo(EstadoAcaoCanal.PENDENTE);
+        assertThat(compensacao.tipo()).isEqualTo(TipoAcaoCanal.MENSAGEM);
+        assertThat(compensacao.loteId()).isEqualTo("c:p:d:0");
+        assertThat(compensacao.payload()).isEqualTo("{\"tipo\":\"MENSAGEM\",\"texto\":\"aviso\"}");
+        assertThat(compensacao.payload()).doesNotContain("documentoId");
+        assertThat(repositorio.guardada("p:d:0").codigoMotivo())
+                .isEqualTo("DOCUMENTO_INDISPONIVEL");
+
+        // repetir a confirmação não cria outra
+        confirmar.executar(List.of(falha("p:d:0", "DOCUMENTO_INDISPONIVEL")));
+        assertThat(repositorio.todas()).hasSize(2);
+    }
+
+    @Test
+    void compensacaoDeDocumentoQueFalhaNaoGeraOutra() {
+        documentoComCompensacao("p:d:0", "{\"texto\":\"aviso\"}");
+        confirmar.executar(List.of(falha("p:d:0", "DOCUMENTO_INDISPONIVEL")));
+        confirmar.executar(List.of(falha("p:d:0-c", "DOCUMENTO_INDISPONIVEL")));
+        assertThat(repositorio.todas()).hasSize(2);
+        assertThat(repositorio.guardada("p:d:0-c").estado()).isEqualTo(EstadoAcaoCanal.FALHOU);
+    }
+
+    @Test
+    void documentoSoCompensaPorDocumentoIndisponivelEPrecisaTerAlternativaGravada() {
+        documentoComCompensacao("p:d:0", "{\"texto\":\"aviso\"}");
+        confirmar.executar(List.of(falha("p:d:0", "MENSAGEM_NAO_EDITAVEL")));
+        assertThat(repositorio.buscarPorId("p:d:0-c")).isEmpty();
+
+        documentoComCompensacao("p:d:1", null);
+        confirmar.executar(List.of(falha("p:d:1", "DOCUMENTO_INDISPONIVEL")));
+        assertThat(repositorio.buscarPorId("p:d:1-c")).isEmpty();
+        assertThat(repositorio.todas()).hasSize(2);
+    }
+
     @Test
     void demaisCodigosSoRegistramSemCompensar() {
         int i = 0;

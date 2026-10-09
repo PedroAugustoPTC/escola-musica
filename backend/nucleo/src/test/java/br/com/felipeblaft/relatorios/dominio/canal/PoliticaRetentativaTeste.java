@@ -32,6 +32,14 @@ class PoliticaRetentativaTeste {
     }
 
     @Test
+    void proximaTentativaComPrazoNuncaPassaDoPrazo() {
+        Instant prazo = AGORA.plusSeconds(100);
+        assertThat(politica.proximaTentativa(1, AGORA, prazo)).isEqualTo(AGORA.plusSeconds(30));
+        assertThat(politica.proximaTentativa(3, AGORA, prazo)).isEqualTo(prazo);
+        assertThat(politica.proximaTentativa(6, AGORA.plusSeconds(99), prazo)).isEqualTo(prazo);
+    }
+
+    @Test
     void jitterAplicaAte10PorCentoParaMaisOuParaMenos() {
         PoliticaRetentativa maisUm =
                 new PoliticaRetentativa(

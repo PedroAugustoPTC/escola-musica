@@ -166,7 +166,9 @@ public class FluxoHistoricoTelegram implements FluxoTelegram {
                                 ReferenciaDocumento.oficial(
                                         contexto.professor().id(),
                                         tipo,
-                                        UUID.fromString(item.substring(1)))));
+                                        UUID.fromString(item.substring(1))),
+                                apresentador.avisoPdfIndisponivel(
+                                        contexto.chatId(), "hitem", Integer.toString(numero))));
                 return true;
             }
             default -> {

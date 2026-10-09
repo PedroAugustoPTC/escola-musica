@@ -1,15 +1,20 @@
 package br.com.felipeblaft.relatorios.entrada.telegram;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 
 import br.com.felipeblaft.relatorios.dominio.cadastro.Professor;
 import br.com.felipeblaft.relatorios.suporte.CenarioIT;
 import br.com.felipeblaft.relatorios.suporte.TelegramConversaBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 /** Início, busca de aluno (#10), sair (#2), ajuda, tipo não suportado e botão antigo. */
 class InicioBuscaConversaIT extends TelegramConversaBase {
+
+    @MockitoSpyBean InterpretadorConversaTelegram interpretador;
 
     @BeforeEach
     void carregar() throws Exception {
@@ -20,6 +25,37 @@ class InicioBuscaConversaIT extends TelegramConversaBase {
         cenario.aluno(clara, "Miguel de Castro Torrente", "Violino");
         cenario.aluno(bruno, "Helena Prado", "Flauta");
         vincular(USUARIO_CLARA, CenarioIT.CODIGO_CLARA);
+    }
+
+    @Test
+    void erroInesperadoRespondeErroInternoENaoReenviaNaRepeticaoDoUpdate() throws Exception {
+        doThrow(new IllegalStateException("falha com o aluno Matteo Mafra"))
+                .when(interpretador)
+                .interpretar(any());
+
+        String texto = mensagemJson(proximoUpdate(), USUARIO_CLARA, "\"text\": \"oi\"");
+        enviarUpdate(texto);
+        assertThat(textosEnviados())
+                .containsExactly("Ocorreu um erro inesperado. Tente novamente mais tarde.");
+        enviarUpdate(texto);
+        assertThat(textosEnviados()).hasSize(1);
+
+        long idToque = proximoUpdate();
+        String toque =
+                """
+                {"update_id": %d, "callback_query": {"id": "cb%d", "data": "v1:inicio:",
+                 "from": {"id": %d, "is_bot": false, "first_name": "Teste"},
+                 "message": {"message_id": 55, "date": 1, "chat": {"id": %d, "type": "private"}}}}
+                """
+                        .formatted(idToque, idToque, USUARIO_CLARA, USUARIO_CLARA);
+        enviarUpdate(toque);
+        assertThat(chamadas("answerCallbackQuery")).hasSize(1);
+        assertThat(textosEnviados()).hasSize(2);
+        assertThat(ultimaMensagem().get("text").asString())
+                .isEqualTo("Ocorreu um erro inesperado. Tente novamente mais tarde.");
+        enviarUpdate(toque);
+        assertThat(chamadas("answerCallbackQuery")).hasSize(1);
+        assertThat(textosEnviados()).hasSize(2);
     }
 
     @Test
