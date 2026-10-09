@@ -15,6 +15,9 @@ public class AcaoCanal {
 
     public static final String CODIGO_VINCULO_DESFEITO = "VINCULO_DESFEITO";
     public static final String CODIGO_PRAZO_VENCIDO = "PRAZO_VENCIDO";
+    public static final String CODIGO_SEM_CONFIRMACAO = "SEM_CONFIRMACAO";
+    public static final String CODIGO_MENSAGEM_NAO_EDITAVEL = "MENSAGEM_NAO_EDITAVEL";
+    public static final String CODIGO_DOCUMENTO_INDISPONIVEL = "DOCUMENTO_INDISPONIVEL";
     public static final String SUFIXO_COMPENSACAO = "-c";
 
     private final String id;
@@ -143,7 +146,7 @@ public class AcaoCanal {
             finalizar(EstadoAcaoCanal.FALHA_DEFINITIVA, CODIGO_PRAZO_VENCIDO, agora);
             return;
         }
-        proximaTentativaEm = politica.proximaTentativa(tentativas, agora);
+        proximaTentativaEm = politica.proximaTentativa(tentativas, agora, prazoEm);
     }
 
     /**
@@ -206,6 +209,19 @@ public class AcaoCanal {
         }
     }
 
+    /**
+     * Encerra uma ação {@code ENTREGUE} que o orquestrador nunca confirmou até o prazo (FR-029):
+     * estado final, sem reentrega, para que o conteúdo entre na retenção. Não é falha de entrega e
+     * por isso não conta como falha definitiva nas métricas. Só age sobre {@code ENTREGUE}.
+     */
+    public boolean expirarSemConfirmacao(Instant agora) {
+        if (estado != EstadoAcaoCanal.ENTREGUE || !vencida(agora)) {
+            return false;
+        }
+        finalizar(EstadoAcaoCanal.FALHA_DEFINITIVA, CODIGO_SEM_CONFIRMACAO, agora);
+        return true;
+    }
+
     public boolean vencida(Instant agora) {
         return !estado.finalizado() && !agora.isBefore(prazoEm);
     }
@@ -215,6 +231,20 @@ public class AcaoCanal {
     /** Só ações que não são elas mesmas compensação e que têm alternativa gravada. */
     public boolean temCompensacao() {
         return origem != OrigemAcaoCanal.COMPENSACAO && compensacao != null;
+    }
+
+    /**
+     * A falha informada pelo orquestrador pede a compensação desta ação: edição ou etapa que não
+     * pôde ser editada ({@code MENSAGEM_NAO_EDITAVEL}) ou documento que não pôde ser buscado
+     * ({@code DOCUMENTO_INDISPONIVEL}), desde que haja alternativa gravada (FR-007b, FR-007c).
+     */
+    public boolean compensaPor(String codigo) {
+        if (!temCompensacao()) {
+            return false;
+        }
+        return tipo == TipoAcaoCanal.DOCUMENTO
+                ? CODIGO_DOCUMENTO_INDISPONIVEL.equals(codigo)
+                : CODIGO_MENSAGEM_NAO_EDITAVEL.equals(codigo);
     }
 
     public String idDaCompensacao() {

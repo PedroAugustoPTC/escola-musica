@@ -49,6 +49,12 @@ public interface AcaoCanalRepositorio {
     boolean atualizarSeVersao(AcaoCanal acao, int versaoEsperada);
 
     /**
+     * Encerra, com o código {@code SEM_CONFIRMACAO}, as ações {@code ENTREGUE} que o orquestrador
+     * nunca confirmou e cujo prazo já venceu (FR-029); devolve quantas foram encerradas.
+     */
+    int expirarEntreguesVencidas(Instant agora);
+
+    /**
      * Zera o conteúdo das ações finais anteriores a {@code payloadAte} e remove os registros finais
      * anteriores a {@code registroAte}.
      */

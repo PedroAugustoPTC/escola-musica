@@ -31,15 +31,28 @@ public sealed interface SaidaTelegram {
 
     /**
      * PDF para o chat. O envio direto usa os bytes em {@code conteudo}; a rota interna do canal usa
-     * só a {@code referencia} (o orquestrador obtém os bytes por identificador opaco).
+     * só a {@code referencia} (o orquestrador obtém os bytes por identificador opaco) e, se o PDF
+     * ficar indisponível, a {@code compensacao}: aviso curto com o botão para pedi-lo de novo
+     * (FR-007c).
      */
     record Documento(
             long chatId,
             byte[] conteudo,
             String nomeArquivo,
             String legenda,
-            ReferenciaDocumento referencia)
-            implements SaidaTelegram {}
+            ReferenciaDocumento referencia,
+            Mensagem compensacao)
+            implements SaidaTelegram {
+
+        public Documento(
+                long chatId,
+                byte[] conteudo,
+                String nomeArquivo,
+                String legenda,
+                ReferenciaDocumento referencia) {
+            this(chatId, conteudo, nomeArquivo, legenda, referencia, null);
+        }
+    }
 
     /**
      * Mensagem de etapa do processamento (sequência 5.2, passo 4): enviada (ou editada no lugar, se

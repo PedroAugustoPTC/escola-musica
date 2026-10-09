@@ -241,6 +241,68 @@ class AcaoCanalTeste {
     }
 
     @Test
+    void falhaDeEntregaNuncaAgendaDepoisDoPrazo() {
+        AcaoCanal acao = proativa(TipoAcaoCanal.MENSAGEM, null);
+        Instant prazo = AGORA.plus(Duration.ofHours(24));
+        acao.registrarFalhaEntrega(prazo.minusSeconds(10), politica);
+        assertThat(acao.estado()).isEqualTo(EstadoAcaoCanal.PENDENTE);
+        assertThat(acao.proximaTentativaEm()).isEqualTo(prazo);
+
+        acao.expirar(prazo);
+        assertThat(acao.estado()).isEqualTo(EstadoAcaoCanal.FALHA_DEFINITIVA);
+        assertThat(acao.codigoMotivo()).isEqualTo(AcaoCanal.CODIGO_PRAZO_VENCIDO);
+        assertThat(acao.finalizadoEm()).isEqualTo(prazo);
+    }
+
+    @Test
+    void falhaDeEntregaAntesDoPrazoMantemAEsperaDaPolitica() {
+        AcaoCanal acao = proativa(TipoAcaoCanal.MENSAGEM, null);
+        acao.registrarFalhaEntrega(AGORA, politica);
+        assertThat(acao.proximaTentativaEm()).isEqualTo(AGORA.plusSeconds(30));
+    }
+
+    @Test
+    void entregueSemConfirmacaoExpiraNoPrazoComCodigoProprio() {
+        AcaoCanal acao = resposta();
+        Instant prazo = AGORA.plus(Duration.ofHours(24));
+        assertThat(acao.expirarSemConfirmacao(prazo.minusSeconds(1))).isFalse();
+        assertThat(acao.estado()).isEqualTo(EstadoAcaoCanal.ENTREGUE);
+
+        assertThat(acao.expirarSemConfirmacao(prazo)).isTrue();
+        assertThat(acao.estado()).isEqualTo(EstadoAcaoCanal.FALHA_DEFINITIVA);
+        assertThat(acao.codigoMotivo()).isEqualTo(AcaoCanal.CODIGO_SEM_CONFIRMACAO);
+        assertThat(acao.finalizadoEm()).isEqualTo(prazo);
+        assertThat(acao.proximaTentativaEm()).isNull();
+
+        acao.zerarPayload();
+        assertThat(acao.payload()).isNull();
+        assertThat(acao.compensacao()).isNull();
+    }
+
+    @Test
+    void expirarSemConfirmacaoSoAgeEmEntregue() {
+        Instant muitoDepois = AGORA.plus(Duration.ofDays(3));
+        AcaoCanal pendente = proativa(TipoAcaoCanal.MENSAGEM, null);
+        assertThat(pendente.expirarSemConfirmacao(muitoDepois)).isFalse();
+        assertThat(pendente.estado()).isEqualTo(EstadoAcaoCanal.PENDENTE);
+
+        AcaoCanal executada = resposta();
+        executada.confirmarExecutada(AGORA);
+        assertThat(executada.expirarSemConfirmacao(muitoDepois)).isFalse();
+        assertThat(executada.estado()).isEqualTo(EstadoAcaoCanal.EXECUTADA);
+        assertThat(executada.codigoMotivo()).isNull();
+    }
+
+    @Test
+    void confirmacaoTardiaDeAcaoExpiradaEDivergente() {
+        AcaoCanal acao = resposta();
+        acao.expirarSemConfirmacao(AGORA.plus(Duration.ofHours(24)));
+        assertThat(acao.confirmarExecutada(AGORA.plus(Duration.ofHours(25))))
+                .isEqualTo(ResultadoConfirmacao.DIVERGENTE);
+        assertThat(acao.codigoMotivo()).isEqualTo(AcaoCanal.CODIGO_SEM_CONFIRMACAO);
+    }
+
+    @Test
     void compensacaoDeEdicaoViraMensagemNoMesmoChat() {
         AcaoCanal edicao = proativa(TipoAcaoCanal.EDICAO, "{\"texto\":\"alternativa\"}");
         assertThat(edicao.temCompensacao()).isTrue();
@@ -255,6 +317,53 @@ class AcaoCanalTeste {
         assertThat(compensacao.professorId()).isEqualTo(PROFESSOR);
         assertThat(compensacao.estado()).isEqualTo(EstadoAcaoCanal.PENDENTE);
         assertThat(compensacao.temCompensacao()).isFalse();
+    }
+
+    @Test
+    void documentoCompensaSoPorDocumentoIndisponivelEEdicaoSoPorMensagemNaoEditavel() {
+        AcaoCanal documento = proativa(TipoAcaoCanal.DOCUMENTO, "{\"texto\":\"aviso\"}");
+        assertThat(documento.compensaPor("DOCUMENTO_INDISPONIVEL")).isTrue();
+        assertThat(documento.compensaPor("MENSAGEM_NAO_EDITAVEL")).isFalse();
+        assertThat(documento.compensaPor("ERRO_TELEGRAM")).isFalse();
+
+        AcaoCanal edicao = proativa(TipoAcaoCanal.EDICAO, "{\"texto\":\"x\"}");
+        assertThat(edicao.compensaPor("MENSAGEM_NAO_EDITAVEL")).isTrue();
+        assertThat(edicao.compensaPor("DOCUMENTO_INDISPONIVEL")).isFalse();
+
+        assertThat(proativa(TipoAcaoCanal.DOCUMENTO, null).compensaPor("DOCUMENTO_INDISPONIVEL"))
+                .isFalse();
+        assertThat(
+                        documento
+                                .criarCompensacao(AGORA, politica)
+                                .compensaPor("DOCUMENTO_INDISPONIVEL"))
+                .isFalse();
+    }
+
+    @Test
+    void compensacaoDeDocumentoViraMensagemNoMesmoChatSemTrazerODocumento() {
+        AcaoCanal documento =
+                AcaoCanal.nova(
+                        "p:resultado:x:3",
+                        "p:resultado:x",
+                        OrigemAcaoCanal.PROATIVA,
+                        null,
+                        10L,
+                        PROFESSOR,
+                        TRABALHO,
+                        TipoAcaoCanal.DOCUMENTO,
+                        "{\"documentoId\":\"abc\",\"nomeArquivo\":\"a.pdf\"}",
+                        "{\"tipo\":\"MENSAGEM\",\"chatId\":10,\"texto\":\"Aviso\"}",
+                        AGORA,
+                        politica);
+        AcaoCanal compensacao = documento.criarCompensacao(AGORA, politica);
+        assertThat(compensacao.id()).isEqualTo("p:resultado:x:3-c");
+        assertThat(compensacao.loteId()).isEqualTo("c:p:resultado:x:3");
+        assertThat(compensacao.origem()).isEqualTo(OrigemAcaoCanal.COMPENSACAO);
+        assertThat(compensacao.tipo()).isEqualTo(TipoAcaoCanal.MENSAGEM);
+        assertThat(compensacao.payload()).doesNotContain("documentoId", "a.pdf");
+        assertThat(compensacao.chatId()).isEqualTo(10L);
+        assertThat(compensacao.professorId()).isEqualTo(PROFESSOR);
+        assertThat(compensacao.estado()).isEqualTo(EstadoAcaoCanal.PENDENTE);
     }
 
     @Test

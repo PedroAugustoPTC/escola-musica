@@ -89,6 +89,18 @@ public class ApresentadorTelegram {
                 DadosCallbackCodificador.codificar(acao, argumento));
     }
 
+    /**
+     * Aviso de que o PDF não pôde ser enviado, com o botão que o pede de novo: {@code acao} e
+     * {@code argumento} são os da ação que gerou o PDF (FR-007c).
+     */
+    public Mensagem avisoPdfIndisponivel(long chatId, String acao, String argumento) {
+        Botao pedirDeNovo =
+                argumento == null
+                        ? botao("BOTAO_VER_PDF", acao)
+                        : botao("BOTAO_VER_PDF", Map.of(), acao, argumento);
+        return new Mensagem(chatId, texto("PDF_INDISPONIVEL_AVISO"), Teclado.de(pedirDeNovo));
+    }
+
     public Teclado acoesInicio() {
         return new Teclado(
                 List.of(

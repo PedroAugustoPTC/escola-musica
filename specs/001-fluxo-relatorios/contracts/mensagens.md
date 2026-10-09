@@ -83,6 +83,7 @@
 | `CONFERENCIA_TITULO` | — | Confira o relatório antes de aprovar |
 | `CONFERENCIA_VERSAO` | — | Versão {versao} |
 | `CONFERENCIA_PDF_GERANDO` | — | O PDF ainda está sendo gerado. |
+| `PDF_INDISPONIVEL_AVISO` | — | Não consegui enviar o PDF agora. Toque no botão abaixo para pedir de novo. |
 | `PEDIDO_ALTERACAO_ROTULO` | — | Precisa ajustar algo? Descreva a alteração com suas palavras, digitando ou gravando. |
 | `ALTERACAO_VAZIA` | 400 | Descreva a alteração antes de enviar. |
 | `ALTERACAO_EM_APLICACAO` | — | Aplicando a alteração… |

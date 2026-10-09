@@ -159,7 +159,8 @@ public class ApresentacaoRelatorioAulaTelegram {
                                     professorId,
                                     TipoRelatorio.AULA,
                                     relatorio.id(),
-                                    relatorio.versaoVigente())));
+                                    relatorio.versaoVigente()),
+                            apresentador.avisoPdfIndisponivel(chatId, "pdf", null)));
         } catch (ExcecaoDominio semDocumento) {
             return Optional.empty();
         }
