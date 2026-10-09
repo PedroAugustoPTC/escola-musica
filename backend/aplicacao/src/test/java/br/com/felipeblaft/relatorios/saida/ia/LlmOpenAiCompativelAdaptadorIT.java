@@ -166,6 +166,44 @@ class LlmOpenAiCompativelAdaptadorIT {
     }
 
     @Test
+    void provedorForaDoArNaChamadaDeCorrecaoLevaOConsumoDaPrimeiraChamada() {
+        SERVIDOR.stubFor(
+                post(urlEqualTo(CAMINHO))
+                        .inScenario("correcao-fora-do-ar")
+                        .whenScenarioStateIs(Scenario.STARTED)
+                        .willReturn(aResponse().withBody(resposta("{\"evolucao\": 3}")))
+                        .willSetStateTo("fora"));
+        SERVIDOR.stubFor(
+                post(urlEqualTo(CAMINHO))
+                        .inScenario("correcao-fora-do-ar")
+                        .whenScenarioStateIs("fora")
+                        .willReturn(aResponse().withStatus(503)));
+
+        assertThatThrownBy(this::estruturar)
+                .isInstanceOfSatisfying(
+                        ProvedorIndisponivelExcecao.class,
+                        falha -> {
+                            assertThat(falha.tokensEntrada()).isEqualTo(1000);
+                            assertThat(falha.tokensSaida()).isEqualTo(500);
+                            // 1000 × 2 + 500 × 8 = 6000 por milhão
+                            assertThat(falha.custoEstimado()).isEqualByComparingTo("0.006");
+                        });
+    }
+
+    @Test
+    void provedorForaDoArNaPrimeiraChamadaNaoTemConsumo() {
+        SERVIDOR.stubFor(post(urlEqualTo(CAMINHO)).willReturn(aResponse().withStatus(503)));
+
+        assertThatThrownBy(this::estruturar)
+                .isInstanceOfSatisfying(
+                        ProvedorIndisponivelExcecao.class,
+                        falha -> {
+                            assertThat(falha.tokensEntrada()).isNull();
+                            assertThat(falha.custoEstimado()).isNull();
+                        });
+    }
+
+    @Test
     void erro429TemUmaNovaTentativa() {
         SERVIDOR.stubFor(
                 post(urlEqualTo(CAMINHO))

@@ -375,7 +375,7 @@ se inicia um segundo registro para o mesmo aluno.
 | id | uuid | PK |
 | trabalho_id | uuid | FK |
 | relatorio_tipo, relatorio_id | | nulos se a chamada falhou antes da criação |
-| tarefa | enum | `TRANSCRICAO`, `ESTRUTURACAO`, `INCORPORACAO_RESPOSTAS`, `REVISAO`, `CONSOLIDACAO`, `CORRECAO_JSON` |
+| tarefa | enum | `TRANSCRICAO`, `ESTRUTURACAO`, `INCORPORACAO_RESPOSTAS`, `REVISAO`, `CONSOLIDACAO` (a chamada de correção do JSON não tem linha própria: seus tokens e custo somam-se à chamada que a exigiu, inclusive quando a saída continua inválida ou o provedor cai na correção) |
 | provedor, modelo | texto | valores de configuração (nunca no núcleo) |
 | segundos_audio | numeric | transcrição |
 | tokens_entrada, tokens_saida | int | LLM |

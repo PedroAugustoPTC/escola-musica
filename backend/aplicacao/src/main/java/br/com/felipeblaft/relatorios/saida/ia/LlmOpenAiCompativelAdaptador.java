@@ -104,7 +104,17 @@ public class LlmOpenAiCompativelAdaptador implements LlmPorta {
                             "user",
                             "content",
                             prompt("correcao-json.v1") + "\n" + String.join("\n", erros)));
-            Chamada correcao = chamar(mensagens);
+            Chamada correcao;
+            try {
+                correcao = chamar(mensagens);
+            } catch (ProvedorIndisponivelExcecao fora) {
+                // a primeira chamada já foi cobrada: o consumo segue na exceção (FR-056)
+                throw new ProvedorIndisponivelExcecao(
+                        fora.getMessage(),
+                        tokensEntrada,
+                        tokensSaida,
+                        custo(tokensEntrada, tokensSaida));
+            }
             tokensEntrada += correcao.tokensEntrada();
             tokensSaida += correcao.tokensSaida();
             conteudo = limpar(correcao.conteudo());

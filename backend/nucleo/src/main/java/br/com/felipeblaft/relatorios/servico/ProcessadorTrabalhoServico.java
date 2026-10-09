@@ -614,7 +614,14 @@ public class ProcessadorTrabalhoServico {
                     falha.custoEstimado());
             return Optional.empty();
         } catch (ProvedorIndisponivelExcecao falha) {
-            registrarFalhaIa(trabalho, tarefaIa, codigoDaFalha(falha), inicio);
+            registrarFalhaIa(
+                    trabalho,
+                    tarefaIa,
+                    codigoDaFalha(falha),
+                    inicio,
+                    falha.tokensEntrada(),
+                    falha.tokensSaida(),
+                    falha.custoEstimado());
             return Optional.empty();
         }
     }
