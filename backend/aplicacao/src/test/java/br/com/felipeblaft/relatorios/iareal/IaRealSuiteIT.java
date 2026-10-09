@@ -72,6 +72,20 @@ class IaRealSuiteIT extends IntegracaoBase {
 
     private final List<Medida> medidas = new ArrayList<>();
 
+    /** O que mudou no relatório quando a IA incorporou a resposta às perguntas (FR-025). */
+    private record Incorporacao(
+            String arquivo, List<String> secoesAlteradas, boolean respostaSoNasObservacoes) {
+
+        boolean adequada() {
+            return !secoesAlteradas.isEmpty() && !respostaSoNasObservacoes;
+        }
+    }
+
+    private static final List<String> SECOES_SEM_OBSERVACOES =
+            List.of("conteudosTrabalhados", "evolucao", "dificuldades", "atividadesPropostas");
+
+    private final List<Incorporacao> incorporacoes = new ArrayList<>();
+
     @Test
     void gravacoesDoClienteComIaReal() throws Exception {
         assumeTrue(
@@ -109,6 +123,12 @@ class IaRealSuiteIT extends IntegracaoBase {
         assertThat(medidas)
                 .filteredOn(m -> m.etapa().equals("Registro até a conferência"))
                 .allSatisfy(m -> assertThat(m.resultado()).isEqualTo("AGUARDANDO_CONFERENCIA"));
+        // FR-025: a resposta entrou nas seções adequadas, não só anexada às observações
+        assertThat(incorporacoes).as("ao menos uma gravação teve perguntas").isNotEmpty();
+        assertThat(incorporacoes)
+                .filteredOn(i -> !i.adequada())
+                .as("incorporações que só anexaram a resposta às observações")
+                .isEmpty();
     }
 
     // ------------------------------------------------------------------ etapas
@@ -142,10 +162,12 @@ class IaRealSuiteIT extends IntegracaoBase {
         cenario.processarFila();
         UUID relatorio = relatorioDoAluno(aluno);
         if (relatorio != null && "AGUARDANDO_RESPOSTAS".equals(status(relatorio))) {
+            JsonNode antes = conteudo(relatorio);
             postar(
                     "/api/v1/relatorios-aula/" + relatorio + "/respostas",
                     Map.of("texto", RESPOSTA));
             cenario.processarFila();
+            incorporacoes.add(incorporacao(nome(gravacao), antes, conteudo(relatorio)));
         }
         String resultado = relatorio == null ? resultadoDoUltimoTrabalho() : status(relatorio);
         medidas.add(
@@ -157,6 +179,25 @@ class IaRealSuiteIT extends IntegracaoBase {
                         custo(relatorio),
                         resultado));
         return "AGUARDANDO_CONFERENCIA".equals(resultado) ? relatorio : null;
+    }
+
+    private JsonNode conteudo(UUID relatorio) {
+        return JSON.readTree(
+                jdbc.queryForObject(
+                        "select conteudo::text from relatorio_aula where id = ?",
+                        String.class,
+                        relatorio));
+    }
+
+    private static Incorporacao incorporacao(String arquivo, JsonNode antes, JsonNode depois) {
+        List<String> alteradas =
+                SECOES_SEM_OBSERVACOES.stream()
+                        .filter(secao -> !antes.path(secao).equals(depois.path(secao)))
+                        .toList();
+        String observacoes = depois.path("observacoes").asString("");
+        boolean soAnexou =
+                alteradas.isEmpty() && !observacoes.equals(antes.path("observacoes").asString(""));
+        return new Incorporacao(arquivo, alteradas, soAnexou);
     }
 
     private void alterarPorTexto(UUID relatorio) throws Exception {
@@ -302,6 +343,22 @@ class IaRealSuiteIT extends IntegracaoBase {
                         medidas.stream()
                                 .map(Medida::custo)
                                 .reduce(BigDecimal.ZERO, BigDecimal::add)));
+        md.append("\n## Incorporação das respostas às perguntas (FR-025)\n\n");
+        md.append("| Arquivo | Seções alteradas além de `observacoes` | Resultado |\n");
+        md.append("|---|---|---|\n");
+        for (Incorporacao i : incorporacoes) {
+            md.append(
+                    String.format(
+                            Locale.ROOT,
+                            "| %s | %s | %s |%n",
+                            i.arquivo(),
+                            i.secoesAlteradas().isEmpty()
+                                    ? "—"
+                                    : String.join(", ", i.secoesAlteradas()),
+                            i.adequada()
+                                    ? "incorporada nas seções"
+                                    : "apenas anexada às observações"));
+        }
         Path destino = Path.of("target", "ia-real", "relatorio.md");
         Files.createDirectories(destino.getParent());
         Files.writeString(destino, md);

@@ -1,5 +1,13 @@
 import { expect, test } from '@playwright/test';
-import { aprovar, enviarAudio, entrar, responderPerguntas, semear, type Semeadura } from './suporte';
+import {
+  aprovar,
+  audioDeTeste,
+  enviarAudio,
+  entrar,
+  responderPerguntas,
+  semear,
+  type Semeadura,
+} from './suporte';
 
 /** Quickstart V1, V3 e V15 na Web: acesso, registro com perguntas, alteração, aprovação e saída. */
 let dados: Semeadura;
@@ -29,7 +37,17 @@ test('registra a aula, responde às perguntas, altera e aprova', async ({ page }
   await page.getByRole('button', { name: 'Solicitar alteração' }).click();
   await expect(page.getByText('Alteração aplicada. Confira a versão 2.')).toBeVisible();
 
-  await aprovar(page, 2);
+  // pedido de alteração por arquivo de áudio (FR-027a): transcrito, aplicado e mostrado como entendido
+  await page.getByLabel('Arquivo de áudio').setInputFiles({
+    name: 'pedido.wav',
+    mimeType: 'audio/wav',
+    buffer: audioDeTeste(),
+  });
+  await page.getByRole('button', { name: 'Solicitar alteração' }).click();
+  await expect(page.getByText('Alteração aplicada. Confira a versão 3.')).toBeVisible();
+  await expect(page.getByText(/^Entendi: /)).toBeVisible();
+
+  await aprovar(page, 3);
   await expect(page.getByText(/Ele já consta no histórico do aluno\./)).toBeVisible();
   await page.getByRole('button', { name: 'Ver histórico' }).click();
   await expect(page).toHaveURL(new RegExp(`/alunos/${dados.alunos.matteo}/historico$`));

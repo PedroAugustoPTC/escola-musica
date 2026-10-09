@@ -180,6 +180,8 @@ public class ProcessadorSemestralServico implements ProcessadorComplementar {
                                                 agora);
                                 semestrais.salvar(relatorio);
                                 trabalho.vincularRelatorio(TipoRelatorio.SEMESTRAL, relatorio.id());
+                                apoio.vincularCustos(
+                                        trabalho, TipoRelatorio.SEMESTRAL, relatorio.id());
                                 criarVersao(
                                         relatorio,
                                         OrigemVersao.CONSOLIDACAO,

@@ -149,6 +149,23 @@ class LlmOpenAiCompativelAdaptadorIT {
     }
 
     @Test
+    void saidaInvalidaDuasVezesLevaOConsumoDasDuasChamadas() {
+        SERVIDOR.stubFor(
+                post(urlEqualTo(CAMINHO))
+                        .willReturn(aResponse().withBody(resposta("isto não é JSON"))));
+
+        assertThatThrownBy(this::estruturar)
+                .isInstanceOfSatisfying(
+                        SaidaIaInvalidaExcecao.class,
+                        falha -> {
+                            assertThat(falha.tokensEntrada()).isEqualTo(2000);
+                            assertThat(falha.tokensSaida()).isEqualTo(1000);
+                            // 2000 × 2 + 1000 × 8 = 12000 por milhão
+                            assertThat(falha.custoEstimado()).isEqualByComparingTo("0.012");
+                        });
+    }
+
+    @Test
     void erro429TemUmaNovaTentativa() {
         SERVIDOR.stubFor(
                 post(urlEqualTo(CAMINHO))

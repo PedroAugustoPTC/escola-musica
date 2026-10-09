@@ -117,8 +117,25 @@ public class TratadorErrosControlador {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErroResposta> inesperado(Exception erro) {
-        LOG.error("erro-inesperado tipo={}", erro.getClass().getName(), erro);
+        // sem a mensagem nem a causa: podem trazer SQL, caminhos ou dados de aluno (FR-054, FR-055)
+        LOG.error("erro-inesperado tipo={} local={}", erro.getClass().getName(), localDe(erro));
         return resposta(CodigoErro.ERRO_INTERNO, Map.of());
+    }
+
+    /**
+     * Primeiro ponto do código da aplicação na pilha, para depurar sem expor o conteúdo do erro.
+     */
+    private static String localDe(Throwable erro) {
+        for (StackTraceElement ponto : erro.getStackTrace()) {
+            if (ponto.getClassName().startsWith("br.com.felipeblaft")) {
+                return ponto.getClassName()
+                        + "."
+                        + ponto.getMethodName()
+                        + ":"
+                        + ponto.getLineNumber();
+            }
+        }
+        return "desconhecido";
     }
 
     ResponseEntity<ErroResposta> resposta(CodigoErro codigo, Map<String, Object> detalhes) {

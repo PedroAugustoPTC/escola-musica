@@ -44,6 +44,12 @@ public class CenarioIT {
 
     private int sequenciaCpf;
 
+    /**
+     * Tempo que cada trabalho leva, simulado avançando o relógio ajustável durante o processamento;
+     * zero (o padrão) mantém o relógio parado. Quem altera restaura o zero ao terminar.
+     */
+    public volatile Duration tempoPorTrabalho = Duration.ZERO;
+
     public CenarioIT(
             ProfessorRepositorio professores,
             AlunoRepositorio alunos,
@@ -68,6 +74,9 @@ public class CenarioIT {
         int processados = 0;
         Optional<TrabalhoProcessamento> proximo;
         while ((proximo = fila.reservarProximo(relogio.agora())).isPresent()) {
+            if (!tempoPorTrabalho.isZero() && relogio instanceof RelogioAjustavel ajustavel) {
+                ajustavel.avancar(tempoPorTrabalho);
+            }
             processador.processar(proximo.get());
             processados++;
         }

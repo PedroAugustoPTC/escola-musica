@@ -1,6 +1,8 @@
 package br.com.felipeblaft.relatorios.paridade;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -8,18 +10,24 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import br.com.felipeblaft.relatorios.configuracao.CatalogoMensagens;
 import br.com.felipeblaft.relatorios.dominio.cadastro.Aluno;
 import br.com.felipeblaft.relatorios.dominio.cadastro.Professor;
+import br.com.felipeblaft.relatorios.porta.LlmPorta;
 import br.com.felipeblaft.relatorios.suporte.CenarioIT;
+import br.com.felipeblaft.relatorios.suporte.LlmProgramavelTeste;
 import br.com.felipeblaft.relatorios.suporte.NormalizacaoAudioTeste;
 import br.com.felipeblaft.relatorios.suporte.TelegramConversaBase;
 import jakarta.servlet.http.Cookie;
+import java.math.BigDecimal;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 /**
  * Paridade do relatório de aula (R-16, SC-006): o mesmo roteiro — enviar áudio, responder, alterar
@@ -30,6 +38,8 @@ import org.springframework.mock.web.MockMultipartFile;
 class RoteiroParidadeRelatorioAulaIT extends TelegramConversaBase {
 
     @Autowired CatalogoMensagens catalogo;
+
+    @MockitoSpyBean LlmPorta llm;
 
     private Aluno matteo;
     private Aluno helena;
@@ -54,6 +64,24 @@ class RoteiroParidadeRelatorioAulaIT extends TelegramConversaBase {
         Professor clara = cenario.clara();
         matteo = cenario.aluno(clara, "Matteo Ferreira", "Piano");
         helena = cenario.aluno(clara, "Helena Prado", "Violino");
+        cenario.tempoPorTrabalho = Duration.ofSeconds(2);
+    }
+
+    @AfterEach
+    void restaurarRelogio() {
+        cenario.tempoPorTrabalho = Duration.ZERO;
+    }
+
+    /** Uma linha por tarefa de IA do relatório: quantas chamadas e se os dados de custo vieram. */
+    private List<String> custos(Aluno aluno) {
+        return jdbc.queryForList(
+                "select tarefa || ' x' || count(*) || ' sucesso=' || bool_and(sucesso)"
+                        + " || ' duracao=' || bool_and(duracao_ms is not null)"
+                        + " || ' custo=' || bool_and(custo_estimado_usd is not null)"
+                        + " from chamada_ia where relatorio_tipo = 'AULA' and relatorio_id = ?"
+                        + " group by tarefa order by tarefa",
+                String.class,
+                relatorioDe(aluno));
     }
 
     // ---------------------------------------------------------------- consultas neutras
@@ -67,7 +95,8 @@ class RoteiroParidadeRelatorioAulaIT extends TelegramConversaBase {
     private String resultado(Aluno aluno, String tipo, String meio) {
         return jdbc.queryForObject(
                 "select resultado_codigo from trabalho_processamento"
-                        + " where aluno_id = ? and tipo = ? and meio = ?",
+                        + " where aluno_id = ? and tipo = ? and meio = ?"
+                        + " order by concluido_em desc limit 1",
                 String.class,
                 aluno.id(),
                 tipo,
@@ -87,8 +116,10 @@ class RoteiroParidadeRelatorioAulaIT extends TelegramConversaBase {
         List<String> linhas = new ArrayList<>();
         linhas.add(
                 jdbc.queryForObject(
-                        "select status || ' vigente=' || versao_vigente || ' aprovada=' || versao_aprovada"
-                                + " || ' canalOrigem=' || canal_origem || ' canalAprovacao=' || canal_aprovacao"
+                        "select status || ' vigente=' || versao_vigente"
+                                + " || ' aprovada=' || coalesce(versao_aprovada::text, '-')"
+                                + " || ' canalOrigem=' || canal_origem"
+                                + " || ' canalAprovacao=' || coalesce(canal_aprovacao, '-')"
                                 + " from relatorio_aula where id = ?",
                         String.class,
                         id));
@@ -339,6 +370,107 @@ class RoteiroParidadeRelatorioAulaIT extends TelegramConversaBase {
                 .anySatisfy(l -> assertThat(l).startsWith("ALTERACAO TEXTO APLICADA base=1"))
                 .anySatisfy(l -> assertThat(l).startsWith("ALTERACAO AUDIO APLICADA base=2"))
                 .anySatisfy(l -> assertThat(l).startsWith("pdfs=").contains("OFICIAL"));
+
+        // FR-056: uma linha por chamada de IA, todas ligadas ao relatório, nos dois canais
+        List<String> custosWeb = custos(matteo);
+        assertThat(custos(helena)).containsExactlyElementsOf(custosWeb);
+        assertThat(custosWeb)
+                .containsExactly(
+                        "ESTRUTURACAO x1 sucesso=true duracao=true custo=true",
+                        "INCORPORACAO_RESPOSTAS x1 sucesso=true duracao=true custo=true",
+                        "REVISAO x2 sucesso=true duracao=true custo=true",
+                        "TRANSCRICAO x2 sucesso=true duracao=true custo=true");
+        assertThat(
+                        jdbc.queryForObject(
+                                "select count(*) from chamada_ia where relatorio_id is null",
+                                Integer.class))
+                .as("chamadas sem relatório")
+                .isZero();
+        for (Aluno aluno : List.of(matteo, helena)) {
+            assertThat(
+                            jdbc.queryForObject(
+                                    "select sum(custo_estimado_usd) from chamada_ia where relatorio_id = ?",
+                                    BigDecimal.class,
+                                    relatorioDe(aluno)))
+                    .as("custo total do relatório")
+                    .isNotNull();
+            assertThat(
+                            jdbc.queryForObject(
+                                    "select tempo_processamento_ms from relatorio_aula where id = ?",
+                                    Long.class,
+                                    relatorioDe(aluno)))
+                    .as("tempo de processamento")
+                    .isGreaterThan(0L);
+        }
+    }
+
+    private static RoteiroParidade roteiroDeDuasRodadas(CanalRelatorio canal) {
+        return new RoteiroParidade()
+                .passo("enviar áudio", c -> canal.registrar())
+                .passo("1ª resposta", c -> canal.responder("Foi o Czerny."))
+                .passo("2ª resposta", c -> canal.responder("Escala de Dó maior."));
+    }
+
+    /** Rodada e resultado de cada resposta às perguntas, na ordem em que foram dadas. */
+    private List<String> rodadas(Aluno aluno) {
+        return jdbc.queryForList(
+                "select 'rodada ' || rodada || ' ' || resultado from interacao_relatorio"
+                        + " where relatorio_id = ? and tipo = 'RESPOSTA_PERGUNTAS' order by rodada",
+                String.class,
+                relatorioDe(aluno));
+    }
+
+    @Test
+    void duasRodadasDePerguntasEATerceiraIgnoradaNosDoisCanais() throws Exception {
+        LlmProgramavelTeste programavel =
+                new LlmProgramavelTeste()
+                        .perguntasNasIncorporacoes(
+                                List.of("E a escala?"),
+                                List.of("Mais alguma coisa?"),
+                                List.of("E a escala?"),
+                                List.of("Mais alguma coisa?"));
+        doAnswer(programavel).when(llm).gerarJson(any(), any(), any());
+        Cookie sessao = entrarNaWeb();
+        vincular(USUARIO_CLARA, CenarioIT.CODIGO_CLARA);
+
+        List<String> naWeb = roteiroDeDuasRodadas(web(sessao, matteo)).executar(null);
+        List<String> noBot = roteiroDeDuasRodadas(telegram(helena)).executar(null);
+
+        assertThat(noBot).containsExactlyElementsOf(naWeb);
+        assertThat(naWeb)
+                .containsExactly(
+                        "enviar áudio = PERGUNTAS_PENDENTES",
+                        "1ª resposta = PERGUNTAS_PENDENTES",
+                        "2ª resposta = PRONTO_PARA_CONFERENCIA");
+        List<String> resumoWeb = resumo(matteo, "WEB");
+        assertThat(resumo(helena, "TELEGRAM")).containsExactlyElementsOf(resumoWeb);
+        assertThat(resumoWeb.getFirst())
+                .isEqualTo(
+                        "AGUARDANDO_CONFERENCIA vigente=1 aprovada=- canalOrigem=CANAL canalAprovacao=-");
+        assertThat(resumoWeb)
+                .contains("versão 1 RESPOSTA_PERGUNTAS canal=CANAL")
+                .noneMatch(l -> l.startsWith("versão 2"));
+        for (Aluno aluno : List.of(matteo, helena)) {
+            assertThat(rodadas(aluno)).containsExactly("rodada 1 APLICADA", "rodada 2 APLICADA");
+            assertThat(
+                            jdbc.queryForObject(
+                                    "select rodadas_perguntas from relatorio_aula where id = ?",
+                                    Integer.class,
+                                    relatorioDe(aluno)))
+                    .isEqualTo(2);
+            assertThat(
+                            jdbc.queryForObject(
+                                    "select jsonb_array_length(perguntas_pendentes)"
+                                            + " from relatorio_aula where id = ?",
+                                    Integer.class,
+                                    relatorioDe(aluno)))
+                    .as("as perguntas da 3ª rodada são ignoradas")
+                    .isZero();
+        }
+        // a IA recebeu a 2ª rodada com as perguntas da 1ª incorporação, em cada canal
+        assertThat(programavel.incorporacoes()).hasSize(4);
+        assertThat(programavel.incorporacoes().get(1).perguntas()).containsExactly("E a escala?");
+        assertThat(programavel.incorporacoes().get(3).perguntas()).containsExactly("E a escala?");
     }
 
     private Cookie entrarNaWeb() throws Exception {
