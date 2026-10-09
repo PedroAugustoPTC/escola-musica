@@ -72,8 +72,10 @@ services:
 
   # Servidor local da API de bots (R-05): arquivos de até 50 MB, sem expor o backend à internet.
   # A imagem aiogram/telegram-bot-api empacota o servidor oficial tdlib/telegram-bot-api (--local).
+  # Versão fixada (nunca latest): o limite de 50 MB nos dois canais depende deste servidor. Para
+  # atualizar, siga a seção "Versão do servidor local da API de bots" de infra/README.md.
   telegram-bot-api:
-    image: aiogram/telegram-bot-api:latest
+    image: aiogram/telegram-bot-api:10.3
     environment:
       TELEGRAM_API_ID: ${TELEGRAM_API_ID}
       TELEGRAM_API_HASH: ${TELEGRAM_API_HASH}

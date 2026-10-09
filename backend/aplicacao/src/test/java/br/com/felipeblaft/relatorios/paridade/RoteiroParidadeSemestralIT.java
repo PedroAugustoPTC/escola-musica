@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +57,7 @@ class RoteiroParidadeSemestralIT extends TelegramConversaBase {
             cenario.aulaAprovada(clara, aluno, LocalDate.of(2026, 5, 20), "Estudo nº 5");
         }
         vincular(USUARIO_CLARA, CenarioIT.CODIGO_CLARA);
+        cenario.tempoPorTrabalho = java.time.Duration.ofSeconds(2);
         MvcResult entrada =
                 mvc.perform(
                                 post("/api/v1/sessao")
@@ -65,6 +67,23 @@ class RoteiroParidadeSemestralIT extends TelegramConversaBase {
                         .andReturn();
         Cookie cookie = entrada.getResponse().getCookie("sessao");
         sessao = new Cookie(cookie.getName(), cookie.getValue());
+    }
+
+    @AfterEach
+    void restaurarRelogio() {
+        cenario.tempoPorTrabalho = java.time.Duration.ZERO;
+    }
+
+    /** Uma linha por tarefa de IA do relatório: quantas chamadas e se os dados de custo vieram. */
+    private List<String> custos(Aluno aluno) {
+        return jdbc.queryForList(
+                "select tarefa || ' x' || count(*) || ' sucesso=' || bool_and(sucesso)"
+                        + " || ' duracao=' || bool_and(duracao_ms is not null)"
+                        + " || ' custo=' || bool_and(custo_estimado_usd is not null)"
+                        + " from chamada_ia where relatorio_tipo = 'SEMESTRAL' and relatorio_id = ?"
+                        + " group by tarefa order by tarefa",
+                String.class,
+                semestral(aluno));
     }
 
     private UUID semestral(Aluno aluno) {
@@ -279,5 +298,34 @@ class RoteiroParidadeSemestralIT extends TelegramConversaBase {
                                 + " parecer=Parecer: excelente semestre.");
         assertThat(resumoWeb)
                 .contains("versão 2 ALTERACAO OFICIAL", "versão 1 CONSOLIDACAO CONFERENCIA");
+
+        // FR-056: a consolidação e a revisão ligadas ao relatório, nos dois canais
+        List<String> custosWeb = custos(matteo);
+        assertThat(custos(helena)).containsExactlyElementsOf(custosWeb);
+        assertThat(custosWeb)
+                .containsExactly(
+                        "CONSOLIDACAO x1 sucesso=true duracao=true custo=true",
+                        "REVISAO x1 sucesso=true duracao=true custo=true");
+        assertThat(
+                        jdbc.queryForObject(
+                                "select count(*) from chamada_ia where relatorio_id is null",
+                                Integer.class))
+                .as("chamadas sem relatório")
+                .isZero();
+        for (Aluno aluno : List.of(matteo, helena)) {
+            assertThat(
+                            jdbc.queryForObject(
+                                    "select sum(custo_estimado_usd) from chamada_ia where relatorio_id = ?",
+                                    java.math.BigDecimal.class,
+                                    semestral(aluno)))
+                    .isNotNull();
+            assertThat(
+                            jdbc.queryForObject(
+                                    "select tempo_processamento_ms from relatorio_semestral where id = ?",
+                                    Long.class,
+                                    semestral(aluno)))
+                    .as("tempo de processamento")
+                    .isGreaterThan(0L);
+        }
     }
 }

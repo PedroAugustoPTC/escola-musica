@@ -13,16 +13,20 @@ import br.com.felipeblaft.relatorios.dominio.semestral.ConteudoRelatorioSemestra
 import br.com.felipeblaft.relatorios.dominio.semestral.InformacoesGerais;
 import br.com.felipeblaft.relatorios.dominio.semestral.PeriodoSemestral;
 import br.com.felipeblaft.relatorios.dominio.semestral.RelatorioSemestral;
+import br.com.felipeblaft.relatorios.dominio.trabalho.ChamadaIa;
 import br.com.felipeblaft.relatorios.dominio.trabalho.EtapaTrabalho;
 import br.com.felipeblaft.relatorios.dominio.trabalho.ResultadoTrabalho;
 import br.com.felipeblaft.relatorios.dominio.trabalho.StatusTrabalho;
+import br.com.felipeblaft.relatorios.dominio.trabalho.TarefaIa;
 import br.com.felipeblaft.relatorios.dominio.trabalho.TipoTrabalho;
 import br.com.felipeblaft.relatorios.dominio.trabalho.TrabalhoProcessamento;
 import br.com.felipeblaft.relatorios.dubles.CenarioRelatorio;
 import br.com.felipeblaft.relatorios.porta.AudioNaoProcessavelExcecao;
 import br.com.felipeblaft.relatorios.porta.ProvedorIndisponivelExcecao;
+import br.com.felipeblaft.relatorios.porta.SaidaIaInvalidaExcecao;
 import br.com.felipeblaft.relatorios.porta.SaidaRelatorioSemestralIa;
 import br.com.felipeblaft.relatorios.porta.TarefaLlm;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -50,6 +54,42 @@ class ProcessadorSemestralTeste {
                 .ultima(TipoRelatorio.SEMESTRAL, relatorio.id())
                 .orElseThrow()
                 .resultado();
+    }
+
+    @Test
+    void consolidacaoFicaVinculadaAoRelatorioSemestralCriado() {
+        RelatorioSemestral relatorio = emConferencia();
+
+        assertThat(c.custos.chamadas)
+                .singleElement()
+                .satisfies(
+                        chamada -> {
+                            assertThat(chamada.tarefa()).isEqualTo(TarefaIa.CONSOLIDACAO);
+                            assertThat(chamada.sucesso()).isTrue();
+                            assertThat(chamada.relatorioTipo()).isEqualTo(TipoRelatorio.SEMESTRAL);
+                            assertThat(chamada.relatorioId()).isEqualTo(relatorio.id());
+                        });
+    }
+
+    @Test
+    void consolidacaoQueFalhaSemRelatorioContinuaSemVinculoEGuardaTokensECusto() {
+        c.aulaAprovada(c.matteo, LocalDate.of(2026, 3, 10), "Escala");
+        c.llm.programar(
+                TarefaLlm.CONSOLIDACAO_SEMESTRAL,
+                new SaidaIaInvalidaExcecao("schema", 900, 120, new BigDecimal("0.0042")));
+        c.gerarSemestral.executar(c.clara.id(), c.matteo.id(), "2026-1", false, Canal.WEB);
+
+        c.processarFila();
+
+        assertThat(ultimo().resultado()).isEqualTo(ResultadoTrabalho.FALHA_CONSOLIDACAO);
+        assertThat(c.semestrais.relatorios).isEmpty();
+        ChamadaIa falha = c.custos.chamadas.getLast();
+        assertThat(falha.sucesso()).isFalse();
+        assertThat(falha.codigoErro()).isEqualTo("SAIDA_INVALIDA");
+        assertThat(falha.relatorioId()).isNull();
+        assertThat(falha.tokensEntrada()).isEqualTo(900);
+        assertThat(falha.tokensSaida()).isEqualTo(120);
+        assertThat(falha.custoEstimadoUsd()).isEqualByComparingTo("0.0042");
     }
 
     @Test

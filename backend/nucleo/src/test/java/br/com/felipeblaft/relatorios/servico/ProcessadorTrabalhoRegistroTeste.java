@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import br.com.felipeblaft.relatorios.dominio.comum.Canal;
+import br.com.felipeblaft.relatorios.dominio.comum.TipoRelatorio;
 import br.com.felipeblaft.relatorios.dominio.relatorio.OrigemVersao;
 import br.com.felipeblaft.relatorios.dominio.relatorio.RelatorioAula;
 import br.com.felipeblaft.relatorios.dominio.relatorio.StatusRelatorio;
@@ -22,6 +23,7 @@ import br.com.felipeblaft.relatorios.porta.ProvedorIndisponivelExcecao;
 import br.com.felipeblaft.relatorios.porta.ReferenciaArquivoCanal;
 import br.com.felipeblaft.relatorios.porta.SaidaIaInvalidaExcecao;
 import br.com.felipeblaft.relatorios.porta.TarefaLlm;
+import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -80,6 +82,75 @@ class ProcessadorTrabalhoRegistroTeste {
                 .containsExactly(TarefaIa.TRANSCRICAO, TarefaIa.ESTRUTURACAO);
         assertThat(c.custos.chamadas).allMatch(ChamadaIa::sucesso);
         assertThat(relatorio.tempoProcessamentoMs()).isGreaterThanOrEqualTo(0);
+    }
+
+    @Test
+    void transcricaoInicialFicaVinculadaAoRelatorioCriado() {
+        c.transcricao.programar("Hoje trabalhamos o Czerny com o aluno.");
+        c.llm.programar(TarefaLlm.ESTRUTURACAO_AULA, CenarioRelatorio.saida("x", List.of()));
+
+        TrabalhoProcessamento trabalho = registrarEProcessar(Canal.WEB);
+
+        assertThat(trabalho.relatorioId()).isNotNull();
+        assertThat(c.custos.chamadas)
+                .extracting(ChamadaIa::tarefa)
+                .containsExactly(TarefaIa.TRANSCRICAO, TarefaIa.ESTRUTURACAO);
+        assertThat(c.custos.chamadas)
+                .allSatisfy(
+                        chamada -> {
+                            assertThat(chamada.relatorioTipo()).isEqualTo(TipoRelatorio.AULA);
+                            assertThat(chamada.relatorioId()).isEqualTo(trabalho.relatorioId());
+                        });
+    }
+
+    @Test
+    void transcricaoQueFalhaSemRelatorioContinuaSemVinculo() {
+        c.normalizacao.falharCom(new FormatoNaoSuportadoExcecao());
+
+        TrabalhoProcessamento trabalho = registrarEProcessar(Canal.WEB);
+
+        assertThat(trabalho.relatorioId()).isNull();
+        assertThat(c.custos.chamadas)
+                .singleElement()
+                .satisfies(
+                        chamada -> {
+                            assertThat(chamada.relatorioTipo()).isNull();
+                            assertThat(chamada.relatorioId()).isNull();
+                        });
+    }
+
+    @Test
+    void saidaInvalidaRegistraTokensECustoDasChamadasAoModelo() {
+        c.transcricao.programar("Transcrição preservada.");
+        c.llm.programar(
+                TarefaLlm.ESTRUTURACAO_AULA,
+                new SaidaIaInvalidaExcecao("schema", 1200, 340, new BigDecimal("0.0123")));
+
+        TrabalhoProcessamento trabalho = registrarEProcessar(Canal.WEB);
+
+        assertThat(trabalho.resultado()).isEqualTo(ResultadoTrabalho.FALHA_ESTRUTURACAO);
+        ChamadaIa falha = c.custos.chamadas.getLast();
+        assertThat(falha.tarefa()).isEqualTo(TarefaIa.ESTRUTURACAO);
+        assertThat(falha.sucesso()).isFalse();
+        assertThat(falha.codigoErro()).isEqualTo("SAIDA_INVALIDA");
+        assertThat(falha.tokensEntrada()).isEqualTo(1200);
+        assertThat(falha.tokensSaida()).isEqualTo(340);
+        assertThat(falha.custoEstimadoUsd()).isEqualByComparingTo("0.0123");
+        assertThat(falha.relatorioId()).isEqualTo(trabalho.relatorioId());
+    }
+
+    @Test
+    void provedorIndisponivelNaoTemTokensNemCusto() {
+        c.transcricao.programar("x");
+        c.llm.programar(TarefaLlm.ESTRUTURACAO_AULA, new ProvedorIndisponivelExcecao("503"));
+
+        registrarEProcessar(Canal.WEB);
+
+        ChamadaIa falha = c.custos.chamadas.getLast();
+        assertThat(falha.codigoErro()).isEqualTo("PROVEDOR_INDISPONIVEL");
+        assertThat(falha.tokensEntrada()).isNull();
+        assertThat(falha.tokensSaida()).isNull();
+        assertThat(falha.custoEstimadoUsd()).isEqualByComparingTo("0");
     }
 
     @Test

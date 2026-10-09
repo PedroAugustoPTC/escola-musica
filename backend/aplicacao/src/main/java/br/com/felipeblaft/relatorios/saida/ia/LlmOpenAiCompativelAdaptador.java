@@ -109,14 +109,22 @@ public class LlmOpenAiCompativelAdaptador implements LlmPorta {
             tokensSaida += correcao.tokensSaida();
             conteudo = limpar(correcao.conteudo());
             if (!validar(definicao.schema(), conteudo).isEmpty()) {
-                throw new SaidaIaInvalidaExcecao("saida-fora-do-schema");
+                throw new SaidaIaInvalidaExcecao(
+                        "saida-fora-do-schema",
+                        tokensEntrada,
+                        tokensSaida,
+                        custo(tokensEntrada, tokensSaida));
             }
         }
         T saida;
         try {
             saida = JSON.readValue(conteudo, tipoSaida);
         } catch (JacksonException erro) {
-            throw new SaidaIaInvalidaExcecao("saida-nao-desserializavel");
+            throw new SaidaIaInvalidaExcecao(
+                    "saida-nao-desserializavel",
+                    tokensEntrada,
+                    tokensSaida,
+                    custo(tokensEntrada, tokensSaida));
         }
         return new RespostaLlm<>(
                 saida,

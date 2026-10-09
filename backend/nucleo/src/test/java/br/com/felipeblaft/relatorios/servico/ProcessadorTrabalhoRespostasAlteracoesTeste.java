@@ -90,6 +90,51 @@ class ProcessadorTrabalhoRespostasAlteracoesTeste {
     }
 
     @Test
+    void segundaRespostaComNovasPerguntasIncorporaIgnoraOExcedenteEVaiParaConferencia() {
+        RelatorioAula relatorio = c.relatorioComPerguntas();
+        c.llm.programar(
+                TarefaLlm.INCORPORACAO_RESPOSTAS,
+                CenarioRelatorio.saida("Primeira rodada.", List.of("E a escala?")),
+                CenarioRelatorio.saida("Segunda rodada.", List.of("Mais uma pergunta?")));
+
+        TrabalhoProcessamento primeira =
+                c.responder.responderTexto(
+                        c.clara.id(), relatorio.id(), "Foi o Czerny.", Canal.WEB);
+        assertThat(resultado(primeira)).isEqualTo(ResultadoTrabalho.PERGUNTAS_PENDENTES);
+        assertThat(relatorio.status()).isEqualTo(StatusRelatorio.AGUARDANDO_RESPOSTAS);
+        assertThat(relatorio.rodadasPerguntas()).isEqualTo(2);
+        assertThat(c.versoes.versoes).isEmpty();
+
+        TrabalhoProcessamento segunda =
+                c.responder.responderTexto(
+                        c.clara.id(), relatorio.id(), "Escala de Dó maior.", Canal.WEB);
+
+        assertThat(resultado(segunda)).isEqualTo(ResultadoTrabalho.PRONTO_PARA_CONFERENCIA);
+        assertThat(relatorio.status()).isEqualTo(StatusRelatorio.AGUARDANDO_CONFERENCIA);
+        assertThat(relatorio.rodadasPerguntas()).isEqualTo(2);
+        assertThat(relatorio.perguntasPendentes()).isEmpty();
+        assertThat(relatorio.conteudo().evolucao()).isEqualTo("Segunda rodada.");
+        assertThat(relatorio.versaoVigente()).isEqualTo(1);
+        assertThat(c.versoes.versoes)
+                .singleElement()
+                .satisfies(
+                        v -> {
+                            assertThat(v.numero()).isEqualTo(1);
+                            assertThat(v.origem()).isEqualTo(OrigemVersao.RESPOSTA_PERGUNTAS);
+                        });
+        assertThat(c.documentosPdf.documentos.values()).hasSize(1);
+        assertThat(c.interacoes.interacoes)
+                .extracting(InteracaoRelatorio::rodada)
+                .containsExactly(1, 2);
+        assertThat(c.interacoes.interacoes)
+                .allMatch(i -> i.resultado() == ResultadoInteracao.APLICADA);
+        EntradaTarefa.IncorporacaoRespostas entrada =
+                (EntradaTarefa.IncorporacaoRespostas) c.llm.entradas.getLast();
+        assertThat(entrada.rodada()).isEqualTo(2);
+        assertThat(entrada.perguntas()).containsExactly("E a escala?");
+    }
+
+    @Test
     void transcricaoDaRespostaFalhaSemInteracaoESemConsumirRodada() {
         RelatorioAula relatorio = c.relatorioComPerguntas();
         c.transcricao.programar(

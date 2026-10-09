@@ -34,6 +34,25 @@ public record ChamadaIa(
         Objects.requireNonNull(criadoEm);
     }
 
+    /** A mesma chamada vinculada a um relatório. */
+    public ChamadaIa comRelatorio(TipoRelatorio tipo, UUID idDoRelatorio) {
+        return new ChamadaIa(
+                id,
+                trabalhoId,
+                tipo,
+                idDoRelatorio,
+                tarefa,
+                provedorModelo,
+                segundosAudio,
+                tokensEntrada,
+                tokensSaida,
+                duracaoMs,
+                custoEstimadoUsd,
+                sucesso,
+                codigoErro,
+                criadoEm);
+    }
+
     public static ChamadaIa nova(
             UUID trabalhoId,
             TipoRelatorio relatorioTipo,

@@ -75,6 +75,24 @@ docker compose -f infra/compose.yaml -f infra/compose.dev.yaml up -d --build
 O portal responde em `https://localhost` (CA interna do Caddy). O backend registra o webhook no
 servidor local da API de bots ao iniciar (log `webhook-registrado`).
 
+### Massa de demonstração
+
+`local.sh subir --massa=true` carrega `carga/demonstracao.json` e cria relatórios e PDFs de exemplo
+pelo comando `massa` do backend. É uma ferramenta **só do ambiente local**, mantida para a revisão
+visual e as validações manuais (justificativa em "Complexity Tracking" de
+`specs/001-fluxo-relatorios/plan.md`). Os dados são todos fictícios (nomes, CPFs e responsáveis
+inventados, e-mails `@exemplo.test`); o comando só roda no perfil `carga` e com o banco vazio, para
+nunca misturar dados fictícios com reais, e a implantação na VPS não o chama.
+
+### Versão do servidor local da API de bots
+
+O `telegram-bot-api` usa a imagem `aiogram/telegram-bot-api:10.3` (verificada em 08/10/2026, quando
+era também a `latest`). A versão é fixa porque o limite de 50 MB de arquivo nos dois canais (FR-015)
+depende do modo `--local` deste servidor, e uma atualização silenciosa poderia mudar esse
+comportamento. Para atualizar: troque a tag em `infra/compose.yaml`, suba em ambiente local com o
+bot de teste e envie o MP4 de 31 MB pelo Telegram (checklist `validacao-quickstart.md`, V5) antes de
+implantar.
+
 ### Bot de testes já usado na nuvem
 
 O servidor local da API de bots só assume um bot que não esteja logado na API da nuvem. Faça

@@ -45,6 +45,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Executa os trabalhos da fila (R-06): registro de aula, nova tentativa, resposta às perguntas e
@@ -86,6 +87,12 @@ public class ProcessadorTrabalhoServico {
                 TarefaIa tarefaIa,
                 EntradaTarefa entrada,
                 Class<T> tipoSaida);
+
+        /**
+         * Vincula ao relatório recém-criado as chamadas de IA do trabalho feitas antes dele
+         * (FR-056); deve ser chamado na transação que cria o relatório.
+         */
+        void vincularCustos(TrabalhoProcessamento trabalho, TipoRelatorio tipo, UUID relatorioId);
     }
 
     private final ApoioProcessamento apoio =
@@ -119,6 +126,12 @@ public class ProcessadorTrabalhoServico {
                         Class<T> tipoSaida) {
                     return ProcessadorTrabalhoServico.this.chamarLlmTipado(
                             trabalho, tarefa, tarefaIa, entrada, tipoSaida);
+                }
+
+                @Override
+                public void vincularCustos(
+                        TrabalhoProcessamento trabalho, TipoRelatorio tipo, UUID relatorioId) {
+                    custos.vincularRelatorio(trabalho.id(), tipo, relatorioId);
                 }
             };
 
@@ -221,6 +234,8 @@ public class ProcessadorTrabalhoServico {
                                             agora);
                             relatorios.salvar(novo);
                             trabalho.vincularRelatorio(TipoRelatorio.AULA, novo.id());
+                            // a transcrição foi registrada antes de o relatório existir (FR-056)
+                            custos.vincularRelatorio(trabalho.id(), TipoRelatorio.AULA, novo.id());
                             trabalho.avancar(EtapaTrabalho.ESTRUTURANDO);
                             fila.atualizar(trabalho);
                             return novo;
@@ -588,7 +603,17 @@ public class ProcessadorTrabalhoServico {
                             null,
                             relogio.agora()));
             return Optional.of(resposta);
-        } catch (SaidaIaInvalidaExcecao | ProvedorIndisponivelExcecao falha) {
+        } catch (SaidaIaInvalidaExcecao falha) {
+            registrarFalhaIa(
+                    trabalho,
+                    tarefaIa,
+                    codigoDaFalha(falha),
+                    inicio,
+                    falha.tokensEntrada(),
+                    falha.tokensSaida(),
+                    falha.custoEstimado());
+            return Optional.empty();
+        } catch (ProvedorIndisponivelExcecao falha) {
             registrarFalhaIa(trabalho, tarefaIa, codigoDaFalha(falha), inicio);
             return Optional.empty();
         }
@@ -605,6 +630,18 @@ public class ProcessadorTrabalhoServico {
 
     private void registrarFalhaIa(
             TrabalhoProcessamento trabalho, TarefaIa tarefa, String codigo, long inicio) {
+        registrarFalhaIa(trabalho, tarefa, codigo, inicio, null, null, null);
+    }
+
+    /** O consumo das chamadas que falharam por saída inválida também custa (FR-056). */
+    private void registrarFalhaIa(
+            TrabalhoProcessamento trabalho,
+            TarefaIa tarefa,
+            String codigo,
+            long inicio,
+            Integer tokensEntrada,
+            Integer tokensSaida,
+            BigDecimal custoEstimado) {
         custos.registrar(
                 ChamadaIa.nova(
                         trabalho.id(),
@@ -613,10 +650,10 @@ public class ProcessadorTrabalhoServico {
                         tarefa,
                         null,
                         null,
-                        null,
-                        null,
+                        tokensEntrada,
+                        tokensSaida,
                         decorrido(inicio),
-                        BigDecimal.ZERO,
+                        custoEstimado == null ? BigDecimal.ZERO : custoEstimado,
                         false,
                         codigo,
                         relogio.agora()));

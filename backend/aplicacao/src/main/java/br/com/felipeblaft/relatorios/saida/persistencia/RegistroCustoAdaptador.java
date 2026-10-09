@@ -1,9 +1,12 @@
 package br.com.felipeblaft.relatorios.saida.persistencia;
 
+import br.com.felipeblaft.relatorios.dominio.comum.TipoRelatorio;
 import br.com.felipeblaft.relatorios.dominio.trabalho.ChamadaIa;
 import br.com.felipeblaft.relatorios.porta.RegistroCustoPorta;
 import br.com.felipeblaft.relatorios.saida.persistencia.RelatorioEntidades.ChamadaIaEntidade;
+import java.util.UUID;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Custo e tempo por chamada de IA na tabela {@code chamada_ia} (FR-056); sem prompt nem resposta.
@@ -35,5 +38,11 @@ class RegistroCustoAdaptador implements RegistroCustoPorta {
         e.codigoErro = c.codigoErro();
         e.criadoEm = c.criadoEm();
         jpa.save(e);
+    }
+
+    @Override
+    @Transactional
+    public void vincularRelatorio(UUID trabalhoId, TipoRelatorio tipo, UUID relatorioId) {
+        jpa.vincularRelatorio(trabalhoId, tipo.name(), relatorioId);
     }
 }

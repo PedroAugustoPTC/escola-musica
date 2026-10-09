@@ -228,6 +228,15 @@ public final class DublesProcessamento {
         public void registrar(ChamadaIa chamada) {
             chamadas.add(chamada);
         }
+
+        @Override
+        public void vincularRelatorio(UUID trabalhoId, TipoRelatorio tipo, UUID relatorioId) {
+            chamadas.replaceAll(
+                    c ->
+                            c.trabalhoId().equals(trabalhoId) && c.relatorioId() == null
+                                    ? c.comRelatorio(tipo, relatorioId)
+                                    : c);
+        }
     }
 
     /** Executa o trecho diretamente (os repositórios em memória não têm transação). */
