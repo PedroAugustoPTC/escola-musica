@@ -59,6 +59,15 @@ public final class PoliticaRetentativa {
         return agora.plusMillis(Math.max(milissegundos, 0));
     }
 
+    /**
+     * Próxima tentativa nunca depois do prazo: a falha definitiva é registrada no prazo, não até o
+     * teto de espera depois dele.
+     */
+    public Instant proximaTentativa(int tentativas, Instant agora, Instant prazoEm) {
+        Instant proxima = proximaTentativa(tentativas, agora);
+        return proxima.isAfter(prazoEm) ? prazoEm : proxima;
+    }
+
     public Instant prazoDe(Instant criadoEm) {
         return criadoEm.plus(prazo);
     }

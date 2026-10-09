@@ -1,6 +1,8 @@
 package br.com.felipeblaft.relatorios.privacidade;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -8,6 +10,7 @@ import br.com.felipeblaft.relatorios.casodeuso.canal.GravarAcoesCanalCasoDeUso;
 import br.com.felipeblaft.relatorios.casodeuso.canal.GravarAcoesCanalCasoDeUso.NovaAcao;
 import br.com.felipeblaft.relatorios.dominio.canal.OrigemAcaoCanal;
 import br.com.felipeblaft.relatorios.dominio.canal.TipoAcaoCanal;
+import br.com.felipeblaft.relatorios.entrada.telegram.InterpretadorConversaTelegram;
 import br.com.felipeblaft.relatorios.suporte.CenarioIT;
 import br.com.felipeblaft.relatorios.suporte.EntregaOrquestradorBase;
 import br.com.felipeblaft.relatorios.suporte.NormalizacaoAudioTeste;
@@ -25,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MvcResult;
 import tools.jackson.databind.JsonNode;
 
@@ -42,6 +46,8 @@ class LogCanalInternoSemDadosSensiveisIT extends EntregaOrquestradorBase {
     private static final String BASE = "/interno/v1/canal/telegram";
 
     @Autowired GravarAcoesCanalCasoDeUso gravar;
+
+    @MockitoSpyBean InterpretadorConversaTelegram interpretador;
 
     private final ListAppender<ILoggingEvent> eventos = new ListAppender<>();
     private Logger raiz;
@@ -103,6 +109,42 @@ class LogCanalInternoSemDadosSensiveisIT extends EntregaOrquestradorBase {
         JsonNode corpo = JSON.readTree(resultado.getResponse().getContentAsString());
         executorDoOrquestrador().executar(corpo.get("acoes"));
         return corpo.get("acoes");
+    }
+
+    @Test
+    void excecaoDoInterpretadorComDadosDoAlunoNaoApareceNosLogsNemNaResposta() throws Exception {
+        doThrow(
+                        new IllegalStateException(
+                                "Matteo Ferreira CPF 123.456.789-09 Czerny e a valsa",
+                                new IllegalArgumentException("causa: Matteo " + RESPOSTA)))
+                .when(interpretador)
+                .interpretar(any());
+        long update = proximoUpdate();
+
+        MvcResult resultado =
+                atualizacao(
+                        mensagemJson(update, USUARIO_CLARA, "\"text\": \"oi\""),
+                        TOKEN_SERVICO,
+                        SEGREDO);
+
+        String resposta = resultado.getResponse().getContentAsString();
+        assertThat(resultado.getResponse().getStatus()).isEqualTo(200);
+        assertThat(resposta).contains("Ocorreu um erro inesperado");
+        String logs = textoDosLogs();
+        assertThat(logs)
+                .contains("telegram-erro-interpretacao updateId=" + update)
+                .contains("IllegalStateException");
+        for (String proibido :
+                List.of("Matteo", "123.456.789-09", "Czerny", "valsa", RESPOSTA, "causa:")) {
+            assertThat(logs).as("log sem " + proibido).doesNotContain(proibido);
+            assertThat(resposta).as("resposta sem " + proibido).doesNotContain(proibido);
+        }
+        assertThat(
+                        eventos.list.stream()
+                                .filter(e -> e.getFormattedMessage().contains("erro-interpretacao"))
+                                .allMatch(e -> e.getThrowableProxy() == null))
+                .as("sem stack trace")
+                .isTrue();
     }
 
     @Test

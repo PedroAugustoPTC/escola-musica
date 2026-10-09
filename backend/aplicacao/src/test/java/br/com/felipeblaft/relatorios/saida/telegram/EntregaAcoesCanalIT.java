@@ -178,6 +178,40 @@ class EntregaAcoesCanalIT extends EntregaOrquestradorBase {
         assertThat(entregas()).hasSize(4);
     }
 
+    @Test
+    void proximaTentativaNuncaPassaDoPrazoEAFalhaDefinitivaVemNoPrazo() throws Exception {
+        vincular(USUARIO_CLARA, CenarioIT.CODIGO_CLARA);
+        gerarAvisoDe(matteo);
+        String acaoId = idsDasAcoes().get(0);
+
+        responder(500);
+        tarefa.despachar();
+        relogio.avancar(Duration.ofHours(24).minusSeconds(10));
+        tarefa.despachar();
+
+        // a espera de 1 min passaria do prazo: a próxima tentativa é o próprio prazo
+        assertThat(estado(acaoId)).isEqualTo("PENDENTE");
+        assertThat(
+                        jdbc.queryForObject(
+                                "select proxima_tentativa_em = prazo_em from acao_canal where id = ?",
+                                Boolean.class,
+                                acaoId))
+                .isTrue();
+
+        relogio.avancar(Duration.ofSeconds(10));
+        tarefa.despachar();
+
+        assertThat(estado(acaoId)).isEqualTo("FALHA_DEFINITIVA");
+        assertThat(
+                        jdbc.queryForObject(
+                                "select finalizado_em = prazo_em and codigo_motivo = 'PRAZO_VENCIDO'"
+                                        + " from acao_canal where id = ?",
+                                Boolean.class,
+                                acaoId))
+                .isTrue();
+        assertThat(contador("canal_acoes_falha_definitiva_total")).isEqualTo(1);
+    }
+
     // ---- V9: ordem por chat, portão de confirmação, chats independentes
 
     @Test

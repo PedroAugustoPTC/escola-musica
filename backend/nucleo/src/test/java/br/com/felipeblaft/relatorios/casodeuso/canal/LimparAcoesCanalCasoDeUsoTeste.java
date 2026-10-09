@@ -3,7 +3,9 @@ package br.com.felipeblaft.relatorios.casodeuso.canal;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import br.com.felipeblaft.relatorios.casodeuso.canal.GravarAcoesCanalCasoDeUso.NovaAcao;
+import br.com.felipeblaft.relatorios.dominio.canal.AcaoCanal;
 import br.com.felipeblaft.relatorios.dominio.canal.DocumentoCanal;
+import br.com.felipeblaft.relatorios.dominio.canal.EstadoAcaoCanal;
 import br.com.felipeblaft.relatorios.dominio.canal.OrigemAcaoCanal;
 import br.com.felipeblaft.relatorios.dominio.canal.PoliticaRetentativa;
 import br.com.felipeblaft.relatorios.dominio.canal.TipoAcaoCanal;
@@ -48,6 +50,70 @@ class LimparAcoesCanalCasoDeUsoTeste {
                                         "{\"texto\":\"segredo\"}",
                                         "{\"texto\":\"alt\"}")));
         acoes.guardada(id).confirmarExecutada(relogio.agora());
+    }
+
+    private void respostaEntregue(String id, long updateId) {
+        new GravarAcoesCanalCasoDeUso(
+                        acoes,
+                        relogio,
+                        new PoliticaRetentativa(
+                                Duration.ofSeconds(30),
+                                Duration.ofMinutes(15),
+                                Duration.ofHours(24)))
+                .executar(
+                        "u" + updateId,
+                        OrigemAcaoCanal.RESPOSTA_UPDATE,
+                        updateId,
+                        List.of(
+                                new NovaAcao(
+                                        id,
+                                        TipoAcaoCanal.MENSAGEM,
+                                        1L,
+                                        null,
+                                        null,
+                                        "{\"texto\":\"nome do aluno\"}",
+                                        "{\"texto\":\"alt\"}")));
+    }
+
+    @Test
+    void entregueNuncaConfirmadaExpiraNoPrazoEEntraNaRetencao() {
+        respostaEntregue("u1-e0", 1L);
+
+        relogio.avancar(Duration.ofHours(23));
+        assertThat(limpar.executar().acoesExpiradas()).isZero();
+        assertThat(acoes.guardada("u1-e0").estado()).isEqualTo(EstadoAcaoCanal.ENTREGUE);
+        assertThat(acoes.guardada("u1-e0").payload()).isNotNull();
+
+        relogio.avancar(Duration.ofHours(1));
+        assertThat(limpar.executar().acoesExpiradas()).isEqualTo(1);
+        assertThat(acoes.guardada("u1-e0").estado()).isEqualTo(EstadoAcaoCanal.FALHA_DEFINITIVA);
+        assertThat(acoes.guardada("u1-e0").codigoMotivo())
+                .isEqualTo(AcaoCanal.CODIGO_SEM_CONFIRMACAO);
+        // o conteúdo só some depois da retenção, contada a partir da expiração
+        assertThat(acoes.guardada("u1-e0").payload()).isNotNull();
+
+        relogio.avancar(Duration.ofHours(24).plusSeconds(1));
+        LimparAcoesCanalCasoDeUso.Resultado zerada = limpar.executar();
+        assertThat(zerada.acoesExpiradas()).isZero();
+        assertThat(zerada.payloadsZerados()).isEqualTo(1);
+        assertThat(acoes.guardada("u1-e0").payload()).isNull();
+        assertThat(acoes.guardada("u1-e0").compensacao()).isNull();
+
+        relogio.avancar(Duration.ofDays(7));
+        assertThat(limpar.executar().registrosRemovidos()).isEqualTo(1);
+        assertThat(acoes.guardada("u1-e0")).isNull();
+    }
+
+    @Test
+    void naoExpiraAcaoConfirmadaNemPendente() {
+        respostaEntregue("u1-e0", 1L);
+        acoes.guardada("u1-e0").confirmarExecutada(relogio.agora());
+        acaoFinalizada("p:a:0");
+        relogio.avancar(Duration.ofHours(30));
+
+        assertThat(limpar.executar().acoesExpiradas()).isZero();
+        assertThat(acoes.guardada("u1-e0").estado()).isEqualTo(EstadoAcaoCanal.EXECUTADA);
+        assertThat(acoes.guardada("p:a:0").estado()).isEqualTo(EstadoAcaoCanal.EXECUTADA);
     }
 
     @Test
@@ -118,6 +184,7 @@ class LimparAcoesCanalCasoDeUsoTeste {
 
     @Test
     void semNadaParaLimparDevolveZeros() {
-        assertThat(limpar.executar()).isEqualTo(new LimparAcoesCanalCasoDeUso.Resultado(0, 0, 0));
+        assertThat(limpar.executar())
+                .isEqualTo(new LimparAcoesCanalCasoDeUso.Resultado(0, 0, 0, 0));
     }
 }

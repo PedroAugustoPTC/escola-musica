@@ -120,6 +120,12 @@ class AcaoCanalRepositorioAdaptador implements AcaoCanalRepositorio {
 
     @Override
     @Transactional
+    public int expirarEntreguesVencidas(Instant agora) {
+        return jpa.expirarEntreguesVencidas(agora);
+    }
+
+    @Override
+    @Transactional
     public Expurgo expurgar(Instant payloadAte, Instant registroAte) {
         int zerados = jpa.zerarConteudoFinalizadoAte(payloadAte);
         int removidos = jpa.removerFinalizadasAte(registroAte);

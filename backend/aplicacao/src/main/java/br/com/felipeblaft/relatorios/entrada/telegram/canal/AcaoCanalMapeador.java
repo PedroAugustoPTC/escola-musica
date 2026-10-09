@@ -166,7 +166,25 @@ public class AcaoCanalMapeador {
                         TipoAcaoCanal.DOCUMENTO,
                         d.chatId(),
                         null,
-                        null));
+                        compensacaoDoDocumento(d)));
+    }
+
+    /**
+     * Alternativa para {@code DOCUMENTO_INDISPONIVEL} (FR-007c): só o aviso e o botão, sem o
+     * documento nem o texto do relatório.
+     */
+    private static String compensacaoDoDocumento(SaidaTelegram.Documento d) {
+        SaidaTelegram.Mensagem aviso = d.compensacao();
+        if (aviso == null) {
+            return null;
+        }
+        return semAcaoId(
+                new AcaoMensagemDto(
+                        null,
+                        AcaoDto.TIPO_MENSAGEM,
+                        aviso.chatId(),
+                        aviso.texto(),
+                        teclado(aviso.teclado(), false)));
     }
 
     private void etapa(

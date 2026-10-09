@@ -123,8 +123,67 @@ class LimpezaAcoesCanalIT extends IntegracaoBase {
     }
 
     @Test
+    void entregueNuncaConfirmadaExpiraNoPrazoEOConteudoSomeNaRetencao() {
+        String loteId = "u900";
+        gravar.executar(
+                loteId,
+                OrigemAcaoCanal.RESPOSTA_UPDATE,
+                900L,
+                List.of(
+                        new NovaAcao(
+                                "u900-e0",
+                                TipoAcaoCanal.MENSAGEM,
+                                1L,
+                                null,
+                                null,
+                                "{\"texto\":\"Matteo foi bem\"}",
+                                "{\"texto\":\"alternativa sigilosa\"}")));
+
+        // dentro do prazo continua entregue e reentregável pelo update repetido
+        relogio.avancar(Duration.ofHours(23));
+        tarefa.limpar();
+        assertThat(
+                        jdbc.queryForObject(
+                                "select estado from acao_canal where id = 'u900-e0'", String.class))
+                .isEqualTo("ENTREGUE");
+        assertThat(acoes.buscarPorUpdate(900L)).hasSize(1);
+
+        // vencido o prazo: estado final SEM_CONFIRMACAO, ainda com o conteúdo (retenção de 24 h)
+        relogio.avancar(Duration.ofHours(1));
+        tarefa.limpar();
+        assertThat(
+                        jdbc.queryForObject(
+                                "select estado || '/' || codigo_motivo from acao_canal where id = 'u900-e0'",
+                                String.class))
+                .isEqualTo("FALHA_DEFINITIVA/SEM_CONFIRMACAO");
+        assertThat(
+                        jdbc.queryForObject(
+                                "select payload is not null from acao_canal where id = 'u900-e0'",
+                                Boolean.class))
+                .isTrue();
+
+        // depois da retenção do conteúdo: payload e compensação zerados
+        relogio.avancar(Duration.ofHours(25));
+        tarefa.limpar();
+        assertThat(
+                        jdbc.queryForObject(
+                                "select payload is null and compensacao is null from acao_canal where id = 'u900-e0'",
+                                Boolean.class))
+                .isTrue();
+
+        // depois da retenção do registro: a linha some
+        relogio.avancar(Duration.ofDays(7));
+        tarefa.limpar();
+        assertThat(
+                        jdbc.queryForObject(
+                                "select count(*) from acao_canal where id = 'u900-e0'",
+                                Integer.class))
+                .isZero();
+    }
+
+    @Test
     void semNadaParaLimparNaoFalha() {
         LimparAcoesCanalCasoDeUso.Resultado resultado = limpar.executar();
-        assertThat(resultado).isEqualTo(new LimparAcoesCanalCasoDeUso.Resultado(0, 0, 0));
+        assertThat(resultado).isEqualTo(new LimparAcoesCanalCasoDeUso.Resultado(0, 0, 0, 0));
     }
 }

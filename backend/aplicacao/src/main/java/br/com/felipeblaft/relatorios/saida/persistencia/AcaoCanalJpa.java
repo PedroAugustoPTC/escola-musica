@@ -106,6 +106,17 @@ interface AcaoCanalJpa extends JpaRepository<AcaoCanalEntidade, String> {
             String payload,
             String compensacao);
 
+    /** Entregues cujo prazo venceu sem confirmação: estado final {@code SEM_CONFIRMACAO}. */
+    @Modifying
+    @Query(
+            value =
+                    "update acao_canal set estado = 'FALHA_DEFINITIVA',"
+                            + " codigo_motivo = 'SEM_CONFIRMACAO', finalizado_em = :agora,"
+                            + " proxima_tentativa_em = null, versao = versao + 1"
+                            + " where estado = 'ENTREGUE' and prazo_em <= :agora",
+            nativeQuery = true)
+    int expirarEntreguesVencidas(Instant agora);
+
     @Modifying
     @Query(
             value =

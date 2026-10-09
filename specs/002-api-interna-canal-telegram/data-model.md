@@ -52,7 +52,7 @@ Uma linha por **ação** (R-05). Respostas a update, proativas e compensações 
 | `trabalho_id` | uuid | sim | preenchido em `MENSAGEM_ETAPA`; liga a confirmação ao id da mensagem de etapa |
 | `tipo` | varchar(20) | não | `MENSAGEM`, `EDICAO`, `DOCUMENTO`, `RESPOSTA_CALLBACK`, `MENSAGEM_ETAPA` |
 | `payload` | jsonb | sim | a ação v1 serializada (sem `acaoId`); **zerado** após a retenção (R-11) |
-| `compensacao` | jsonb | sim | a ação v1 alternativa se a edição falhar (R-07); zerada com o `payload` |
+| `compensacao` | jsonb | sim | a ação v1 alternativa (R-07): para `EDICAO`/`MENSAGEM_ETAPA`, a mesma mensagem como nova se a edição falhar (`MENSAGEM_NAO_EDITAVEL`); para `DOCUMENTO`, só o aviso curto com o botão para pedir o PDF de novo, sem `documentoId` nem texto do relatório (`DOCUMENTO_INDISPONIVEL`, FR-007c); zerada com o `payload` |
 | `estado` | varchar(18) | não | ver 1.2.2 |
 | `tentativas` | integer | não | tentativas de entrega ao orquestrador (0 nas respostas a update) |
 | `proxima_tentativa_em` | timestamptz | sim | próxima tentativa; durante a reserva é empurrada para o futuro (lease) |
@@ -104,7 +104,8 @@ Os ids não contêm CPF, nome nem texto (FR-029).
       └──(confirmação chegou antes do 2xx)──────▶ EXECUTADA | FALHOU
 
  ENTREGUE ──(confirmação EXECUTADA)──▶ EXECUTADA
- ENTREGUE ──(confirmação FALHOU)─────▶ FALHOU   (+ compensação se MENSAGEM_NAO_EDITAVEL)
+ ENTREGUE ──(confirmação FALHOU)─────▶ FALHOU   (+ compensação se MENSAGEM_NAO_EDITAVEL ou DOCUMENTO_INDISPONIVEL)
+ ENTREGUE ──(agora ≥ prazo, sem confirmação)──▶ FALHA_DEFINITIVA com SEM_CONFIRMACAO
 ```
 
 | Estado | Final? | Quem o produz | Observação |
@@ -113,7 +114,7 @@ Os ids não contêm CPF, nome nem texto (FR-029).
 | `ENTREGUE` | não | aceite HTTP; **criação das respostas a update** | aguarda confirmação; conta no portão de ordem por `confirmacao-max-segundos` |
 | `EXECUTADA` | sim | confirmação `EXECUTADA` | para `MENSAGEM_ETAPA`, só depois de gravar o `mensagemId` no trabalho |
 | `FALHOU` | sim | confirmação `FALHOU` | com `codigo_motivo`; compensação criada pelo núcleo se aplicável |
-| `FALHA_DEFINITIVA` | sim | prazo vencido sem aceite | log + métrica sem dado de aluno (FR-018) |
+| `FALHA_DEFINITIVA` | sim | prazo vencido sem aceite (`PRAZO_VENCIDO`) ou entregue nunca confirmada (`SEM_CONFIRMACAO`) | `PRAZO_VENCIDO`: log + métrica `canal_acoes_falha_definitiva_total` sem dado de aluno (FR-018). `SEM_CONFIRMACAO`: expiração da retenção (FR-029), produzida pela limpeza diária, fora dessa métrica e sem alterar o estado do relatório |
 | `DESCARTADA` | sim | vínculo desfeito antes da entrega | só `PROATIVA`/`COMPENSACAO` com `professor_id` |
 
 **Invariantes**: (1) estado final nunca volta; (2) confirmação repetida e idêntica é inócua,
@@ -128,7 +129,8 @@ que morre deixa o lote reentregável quando o lease vence, com os mesmos ids.
 **Política de retentativa** (`PoliticaRetentativa`, pura): após a *n*-ésima falha,
 `proxima = agora + min(teto, inicial × 2^(n−1)) × (1 ± jitter)`; com `inicial=30 s`, `teto=15 min`,
 `prazo=24 h` (padrões), a sequência é 30 s, 1 min, 2 min, 4 min, 8 min, 15 min, 15 min… (cerca de 100
-tentativas em 24 h). `agora ≥ prazo_em` encerra em `FALHA_DEFINITIVA` na próxima visita.
+tentativas em 24 h). A próxima tentativa nunca passa de `prazo_em`; `agora ≥ prazo_em` encerra em
+`FALHA_DEFINITIVA` (`PRAZO_VENCIDO`) na visita seguinte, sem esperar o teto de 15 min.
 
 ### 1.3 Tabela `documento_canal`
 
@@ -153,7 +155,7 @@ pode ser apagado/anulado; nesse caso a leitura devolve `404`).
 
 | Tipo | Pacote | Papel |
 |---|---|---|
-| `AcaoCanal` | `dominio.canal` | entidade da ação: `id`, `loteId`, `origem`, `chatId`, `tipo`, `payload`, `compensacao`, `estado`, `tentativas`, `proximaTentativaEm`, `prazoEm`…; métodos `registrarFalhaEntrega(agora, politica)`, `marcarEntregue(agora)`, `confirmarExecutada(agora)`, `confirmarFalha(codigo, agora)`, `descartar(agora)`, `vencida(agora)`, `criarCompensacao()` |
+| `AcaoCanal` | `dominio.canal` | entidade da ação: `id`, `loteId`, `origem`, `chatId`, `tipo`, `payload`, `compensacao`, `estado`, `tentativas`, `proximaTentativaEm`, `prazoEm`…; métodos `registrarFalhaEntrega(agora, politica)`, `marcarEntregue(agora)`, `confirmarExecutada(agora)`, `confirmarFalha(codigo, agora)`, `descartar(agora)`, `expirarSemConfirmacao(agora)`, `vencida(agora)`, `compensaPor(codigo)`, `criarCompensacao()` |
 | `EstadoAcaoCanal`, `OrigemAcaoCanal`, `TipoAcaoCanal` | `dominio.canal` | enums |
 | `PoliticaRetentativa` | `dominio.canal` | intervalo inicial, teto, prazo, jitter; `proximaTentativa(tentativas, agora)` |
 | `DocumentoCanal` | `dominio.canal` | referência + validade; `valido(agora)` |

@@ -96,6 +96,18 @@ public class AcaoCanalRepositorioEmMemoria implements AcaoCanalRepositorio {
     }
 
     @Override
+    public int expirarEntreguesVencidas(Instant agora) {
+        int expiradas = 0;
+        for (AcaoCanal acao : dados.values()) {
+            if (acao.expirarSemConfirmacao(agora)) {
+                acao.definirVersao(acao.versao() + 1);
+                expiradas++;
+            }
+        }
+        return expiradas;
+    }
+
+    @Override
     public Expurgo expurgar(Instant payloadAte, Instant registroAte) {
         int zerados = 0;
         for (AcaoCanal acao : dados.values()) {

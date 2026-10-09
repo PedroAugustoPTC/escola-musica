@@ -116,6 +116,75 @@ class ConfirmacaoCompensacaoIT extends EntregaOrquestradorBase {
                 .isEqualTo(edicao + "-c");
     }
 
+    /** PDF proativo de um documento que não existe mais, com o aviso e o botão como alternativa. */
+    private String publicarDocumentoIndisponivel() {
+        gravar.executar(
+                "p:pdf:1",
+                OrigemAcaoCanal.PROATIVA,
+                null,
+                List.of(
+                        new NovaAcao(
+                                "p:pdf:1:0",
+                                TipoAcaoCanal.DOCUMENTO,
+                                USUARIO_CLARA,
+                                clara.id(),
+                                null,
+                                "{\"tipo\":\"DOCUMENTO\",\"chatId\":"
+                                        + USUARIO_CLARA
+                                        + ",\"documentoId\":\""
+                                        + "Z".repeat(43)
+                                        + "\",\"nomeArquivo\":\"relatorio.pdf\","
+                                        + "\"tipoConteudo\":\"application/pdf\"}",
+                                "{\"tipo\":\"MENSAGEM\",\"chatId\":"
+                                        + USUARIO_CLARA
+                                        + ",\"texto\":\"Não consegui enviar o PDF agora.\","
+                                        + "\"teclado\":{\"linhas\":[[{\"rotulo\":\"Ver PDF\","
+                                        + "\"dados\":\"v1:pdf:\"}]]}}")));
+        return "p:pdf:1:0";
+    }
+
+    @Test
+    void pdfIndisponivelEntregaOAvisoComOBotaoUmaSoVezSemReenviarODocumento() throws Exception {
+        vincular(USUARIO_CLARA, CenarioIT.CODIGO_CLARA);
+        String documento = publicarDocumentoIndisponivel();
+
+        drenar(6);
+
+        assertThat(estado(documento)).isEqualTo("FALHOU");
+        assertThat(
+                        jdbc.queryForObject(
+                                "select codigo_motivo from acao_canal where id = ?",
+                                String.class,
+                                documento))
+                .isEqualTo("DOCUMENTO_INDISPONIVEL");
+        assertThat(estado(documento + "-c")).isEqualTo("EXECUTADA");
+        assertThat(textosEnviados()).containsExactly("Não consegui enviar o PDF agora.");
+        assertThat(botoes(ultimaMensagem())).containsExactly("v1:pdf:");
+        assertThat(chamadas("sendDocument")).isEmpty();
+        // a compensação é um lote próprio, entregue uma só vez e sem o documento
+        assertThat(entregas()).hasSize(2);
+        assertThat(corpo(entregas().get(1)).path("origem").asString()).isEqualTo("COMPENSACAO");
+        assertThat(corpo(entregas().get(1)).get("acoes").get(0).path("acaoId").asString())
+                .isEqualTo(documento + "-c");
+        assertThat(corpo(entregas().get(1)).toString()).doesNotContain("documentoId");
+    }
+
+    @Test
+    void compensacaoDePdfQueFalhaNaoGeraOutra() throws Exception {
+        vincular(USUARIO_CLARA, CenarioIT.CODIGO_CLARA);
+        stubTelegram(
+                "sendMessage",
+                403,
+                "{\"ok\":false,\"description\":\"Forbidden: bot was blocked by the user\"}");
+        String documento = publicarDocumentoIndisponivel();
+
+        drenar(8);
+
+        assertThat(estado(documento + "-c")).isEqualTo("FALHOU");
+        assertThat(jdbc.queryForObject("select count(*) from acao_canal", Integer.class))
+                .isEqualTo(2);
+    }
+
     @Test
     void mensagemNaoModificadaEExecutadaESemCompensacao() throws Exception {
         vincular(USUARIO_CLARA, CenarioIT.CODIGO_CLARA);

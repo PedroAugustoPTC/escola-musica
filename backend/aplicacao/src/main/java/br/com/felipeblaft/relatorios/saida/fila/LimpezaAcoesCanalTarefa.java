@@ -27,7 +27,8 @@ public class LimpezaAcoesCanalTarefa {
     public void limpar() {
         LimparAcoesCanalCasoDeUso.Resultado resultado = limpar.executar();
         LOG.info(
-                "limpeza-canal conteudos={} registros={} documentos={}",
+                "limpeza-canal expiradas={} conteudos={} registros={} documentos={}",
+                resultado.acoesExpiradas(),
                 resultado.payloadsZerados(),
                 resultado.registrosRemovidos(),
                 resultado.documentosRemovidos());
