@@ -163,11 +163,13 @@ O orquestrador só **classifica** a resposta da API de bots; nenhuma outra decis
 | `editMessageText` com mensagem inexistente, apagada ou antiga demais para editar | `FALHOU` | `MENSAGEM_NAO_EDITAVEL` | compensação `<acaoId>-c` se a ação tiver uma |
 | chat bloqueado, bot removido, usuário inativo (`403`, "chat not found") | `FALHOU` | `CHAT_INDISPONIVEL` | só registra |
 | `429` | `FALHOU` | `LIMITE_DE_TAXA` | só registra |
-| `GET /documentos/{id}` `404`/`5xx` | `FALHOU` | `DOCUMENTO_INDISPONIVEL` | só registra (compensação em aberto, ver research R-07) |
+| `GET /documentos/{id}` `404`/`5xx` | `FALHOU` | `DOCUMENTO_INDISPONIVEL` | compensação `<acaoId>-c`: aviso curto ao professor com o botão para pedir o PDF de novo (FR-007c; decidido em 2026-10-08) |
 | qualquer outro erro da API de bots | `FALHOU` | `ERRO_TELEGRAM` | só registra |
 
 `codigoMotivo` desconhecido recebido pelo backend é tratado como `ERRO_TELEGRAM` (nunca `400`), para que
-um código novo do orquestrador não derrube as demais confirmações do lote (§5, evolução aditiva).
+um código novo do orquestrador não derrube as demais confirmações do lote (§5, evolução aditiva). A lista
+acima está fechada na v1 (decidido em 2026-10-08); o código `SEM_CONFIRMACAO` é só do backend (ação
+entregue e nunca confirmada até o prazo) e o orquestrador nunca o envia.
 
 ## 5. Versionamento
 
@@ -185,7 +187,8 @@ Logs, métricas e corpos de erro desta área trazem só identificadores técnico
 `loteId`), estados e códigos. Nunca CPF, nome de aluno, texto de relatório, transcrição, áudio, token, o
 payload recebido, mensagens de exceção de parsing, a URL do orquestrador (pode conter segredo no caminho)
 nem o `documentoId` (credencial ao portador, válido por cerca de 25 h; vale também para logs de `404`). O texto das ações existe no banco só enquanto necessário e é zerado após a retenção
-(R-11).
+(R-11); ação entregue e nunca confirmada expira no prazo de entrega e também é zerada (decidido em
+2026-10-08).
 
 ## 7. Cenários do contrato (base dos testes, `FR-031`)
 

@@ -195,8 +195,9 @@ Justificativa / Alternativas consideradas. A constituição vigente é a v1.4.0.
     a confirmação que chega durante o HTTP do despacho prevalece sobre o aceite.
   - `codigoMotivo` desconhecido é tratado como `ERRO_TELEGRAM`; "message is not modified" é classificado
     pelo orquestrador como `EXECUTADA` (contrato §4), igual ao envio direto atual, que ignora esse erro.
-  - **Em aberto (dono do produto)**: `DOCUMENTO_INDISPONIVEL` não tem compensação; o professor pode ficar
-    sem o PDF sem aviso (igual ao envio direto de hoje). Avisar exige texto novo em `mensagens.md`.
+  - **Decidido (dono do produto, 2026-10-08)**: `DOCUMENTO_INDISPONIVEL` gera compensação com aviso curto
+    e o botão para pedir o PDF de novo (FR-007c), com texto novo e aditivo em `mensagens.md`. Substitui a
+    leitura anterior (só registrar, igual ao envio direto de hoje).
   - Idempotente: repetir a mesma confirmação não muda nada; confirmação divergente da já registrada é
     ignorada e contada; `acaoId` desconhecido, `DESCARTADA` ou `FALHA_DEFINITIVA` vai para a lista
     `ignoradas` da resposta, sem erro.
@@ -321,12 +322,12 @@ Justificativa / Alternativas consideradas. A constituição vigente é a v1.4.0.
   igual a `update_telegram_processado`); (c) `documento_canal` guarda só referência e hash, nunca
   bytes; (d) o filtro `MascaramentoDadosSensiveisConversor` já existente continua como defesa em
   profundidade e um teste (`LogSemDadosSensiveisIT` estendido) varre os logs desta feature.
-- **Ponto para o dono do produto** (registrado, sem bloqueio): a redação literal de FR-029 ("nenhuma
-  **ação** ou **entrega pendente** … contém nome de aluno") é incompatível com entregar a mensagem, que
-  precisa do texto. Este plano a lê como "nenhum dado de aluno **fora do que a própria mensagem exige**,
-  nada em logs e retenção mínima". Se a leitura estiver errada, a alternativa é guardar só referências
-  (tipo + `trabalhoId`) e **renderizar no despacho**, o que reabre o estado da conversa já gravado
-  (foco) e foi rejeitado em R-04.
+- **Decidido (dono do produto, 2026-10-08)**: a leitura acima foi confirmada e FR-029 foi emendado na
+  spec: nada de dado de aluno em logs, métricas e erros; o payload pode conter o texto que a mensagem
+  exige, só enquanto necessário e zerado após a retenção; ação entregue e nunca confirmada expira no
+  prazo de entrega (código `SEM_CONFIRMACAO`) e também é zerada. A alternativa de guardar só referências
+  (tipo + `trabalhoId`) e **renderizar no despacho** foi rejeitada: reabre o estado da conversa já
+  gravado (foco), como já em R-04.
 - **Justificativa**: o dado já está no banco do próprio sistema (relatórios), sob as mesmas proteções;
   o risco novo é duplicação e retenção, que (b) limita.
 - **Alternativas consideradas**: *cifrar o payload em repouso* (acrescenta gestão de chave sem reduzir
