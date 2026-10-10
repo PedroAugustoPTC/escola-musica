@@ -1,5 +1,50 @@
 <!--
 Sync Impact Report
+- Version change: 1.4.0 → 2.0.0
+- Rationale: MAJOR — redefinição incompatível do Princípio VI: identificadores de código, nomes de
+  arquivo e pasta, tabelas e colunas, rotas e campos de API, códigos de erro, chaves de catálogos,
+  variáveis de ambiente, nomes de scripts e de workflows de CI e classes CSS passam de português do
+  Brasil sem acentos para INGLÊS; textos mostrados ao usuário e mensagens de log passam a ser
+  explicitamente em português do Brasil acentuado; documentação, specs, planos, tasks, comentários,
+  commits e Pull Requests permanecem em português. Sufixos padronizados passam a ser em inglês e o
+  princípio ganha um glossário de domínio pt→en. Segunda mudança, de menor impacto: a hospedagem de
+  produção deixa de ser "VPS da Hostinger" e passa a ser "uma VPS Linux genérica, de qualquer
+  provedor", com exigências neutras de provedor.
+- Modified principles: VI. Nomenclatura Previsível e Linguagem Ubíqua → VI. Nomenclatura Previsível,
+  Linguagem Ubíqua e Idioma (nova regra de idioma; sufixos e exemplos em inglês; glossário do
+  domínio; regra de transição)
+- Modified sections: Restrições Adicionais ("Containerização e implantação": VPS da Hostinger →
+  VPS Linux genérica, com exigências neutras de provedor)
+- Added sections: nenhuma (o "Glossário do domínio" e a "Regra de transição" são subpartes do
+  Princípio VI)
+- Removed sections: nenhuma
+- Princípios I a V, VII, VIII e IX: inalterados
+- Histórico: os textos das versões anteriores foram preservados; só a menção a Hostinger da v1.2.0
+  recebeu uma nota de que foi superada, para não induzir a erro.
+- Templates verificados (`.specify/templates/`): `plan-template.md` (Constitution Check lê esta
+  constituição em tempo de execução, sem texto fixo sobre idioma ou provedor), `spec-template.md`,
+  `tasks-template.md`, `checklist-template.md` e `constitution-template.md` — nenhuma menção a
+  idioma de identificadores, sufixos ou Hostinger; nenhum requer alteração.
+- Artefatos dependentes a revisar (fora do escopo desta emenda):
+  - Feature 003 (migração do código existente para inglês): ainda NÃO existe spec; DEVE ser criada
+    (`/speckit-specify`) e cobrir backend, frontend, banco (tabelas, colunas e valores de
+    enumerações persistidas, com migração de dados), contratos e rotas das APIs, workflows do n8n,
+    ações e dados de botões do Telegram, chaves de catálogos de mensagens, variáveis de ambiente,
+    scripts e workflows de CI e classes CSS. Até ela ser mesclada, nenhuma feature nova pode ser
+    iniciada (regra de transição do Princípio VI).
+  - Atualização dos `CLAUDE.md`, que ainda afirmam "código e identificadores em português do Brasil,
+    sem acentos": o da raiz, `.specify/CLAUDE.md`, `backend/CLAUDE.md`, `backend/nucleo/CLAUDE.md`,
+    `backend/aplicacao/CLAUDE.md`, `frontend/CLAUDE.md`, `infra/CLAUDE.md`, `specs/CLAUDE.md`,
+    `.github/CLAUDE.md`, `assets/CLAUDE.md` e `portal-do-professor-design-system/CLAUDE.md`
+    (revisar cada um e ajustar o que citar idioma, nomenclatura ou Hostinger).
+  - Menções a "VPS da Hostinger" (sem requisito real de provedor) em `infra/`
+    (`README.md`, `compose.yaml`, `compose.prod.yaml`, `scripts/implantar.sh`, `CLAUDE.md`),
+    `.github/` (`workflows/implantar.yml`, `CLAUDE.md`), `specs/001-fluxo-relatorios/`
+    (`plan.md`, `research.md`, `quickstart.md`, `tasks.md`), `specs/002-api-interna-canal-telegram/plan.md`
+    e `PLANO_EXECUCAO_SPECKIT.md`.
+- Deferred items: nenhum
+
+Histórico — v1.4.0 (2026-10-02)
 - Version change: 1.3.0 → 1.4.0
 - Rationale: MINOR — expansão material do Princípio II e de "Restrições Adicionais": o n8n passa a
   ser admitido, e SOMENTE, como transporte do canal Telegram (recebe o update, repassa ao backend e
@@ -54,7 +99,8 @@ Histórico — v1.2.0 (2026-09-30)
 - Version change: 1.1.0 → 1.2.0
 - Rationale: MINOR — expansão material de "Restrições Adicionais": o item "Ambiente reproduzível"
   vira "Containerização e implantação" (todos os serviços em contêiner, localmente, nos testes e
-  em produção; implantação definitiva em VPS da Hostinger). "Stack agnóstica" passa a abrir
+  em produção; implantação definitiva em VPS da Hostinger — superado na v2.0.0, que exige apenas
+  uma VPS Linux genérica, de qualquer provedor). "Stack agnóstica" passa a abrir
   exceção apenas para a hospedagem de produção. Nenhum princípio removido ou redefinido.
 - Modified principles: nenhum (Princípios I–IX inalterados)
 - Modified sections: Restrições Adicionais ("Ambiente reproduzível" → "Containerização e
@@ -204,29 +250,70 @@ risco legal (LGPD) e perda de confiança que inviabiliza o produto.
 **Justificativa**: saídas de IA não são determinísticas e alimentam documentos oficiais; testes
 rigorosos no núcleo são a rede de segurança contra regressões silenciosas.
 
-### VI. Nomenclatura Previsível e Linguagem Ubíqua
+### VI. Nomenclatura Previsível, Linguagem Ubíqua e Idioma
 
-- Código e identificadores (tipos, funções, variáveis, módulos, arquivos, tabelas, campos e rotas)
-  DEVEM ser escritos em português do Brasil, sem acentos nem cedilha (ex.: `Servico`,
-  `Relatorio`, `Aprovacao`).
-- Os nomes DEVEM usar a linguagem ubíqua do domínio (Professor, Aluno, Aula, RelatorioAula,
-  RelatorioSemestral, VinculoTelegram etc.); NÃO DEVEM existir sinônimos para o mesmo conceito.
+**Idioma por tipo de artefato**
+
+- Em **inglês** DEVEM ser escritos: pacotes, módulos, tipos, funções, variáveis, constantes, nomes
+  de arquivo e de pasta, tabelas e colunas do banco, valores de enumerações persistidas, rotas e
+  campos das APIs e dos contratos, códigos de erro, ações e dados de botões do Telegram, chaves de
+  catálogos de mensagens, variáveis de ambiente, nomes de scripts e de workflows de CI, classes e
+  variáveis CSS (ex.: `LessonReport`, `lesson_report`, `/lesson-reports`, `LESSON_NOT_FOUND`).
+- Em **português do Brasil, com acentuação correta**, DEVEM ser escritos: todo texto mostrado ao
+  usuário (telas Web, mensagens e botões do bot, PDFs e e-mails, se houver) e todas as mensagens de
+  log. As palavras-chave que o usuário digita no bot (ex.: "aprovar", "cancelar", "início")
+  continuam em português.
+- Em **português** DEVEM ser escritos: documentação, specs, planos, tasks, comentários de código e
+  mensagens de commit e de Pull Request.
+
+**Linguagem ubíqua e sufixos**
+
+- Os nomes DEVEM usar a linguagem ubíqua do domínio, nos termos canônicos do glossário abaixo;
+  NÃO DEVEM existir sinônimos para o mesmo conceito.
 - Os nomes DEVEM indicar camada e responsabilidade por meio dos sufixos padronizados:
-  - Entidades de domínio: substantivo de negócio, sem sufixo técnico (ex.: `Aluno`, `Aula`).
-  - `*CasoDeUso`: uma ação de negócio (ex.: `AprovarRelatorioAulaCasoDeUso`).
-  - `*Controlador`: adaptador de entrada (ex.: `RelatorioAulaControlador`).
-  - `*Servico`: serviço de aplicação que apoia casos de uso sem substituí-los.
-  - `*Repositorio`: porta de persistência (ex.: `AlunoRepositorio`).
-  - `*Porta`: porta de saída para provedor externo (ex.: `TranscricaoPorta`, `LlmPorta`).
-  - `*Adaptador`: implementação concreta de uma porta ou repositório
-    (ex.: `AlunoRepositorioAdaptador`).
-  - `*Mapeador`: conversão entre objetos de transporte e de domínio.
-  - `*Dto`, `*Requisicao`, `*Resposta`: objetos de transporte na borda.
+  - Entidades de domínio: substantivo de negócio, sem sufixo técnico (ex.: `Student`, `Lesson`).
+  - `*UseCase`: uma ação de negócio (ex.: `ApproveLessonReportUseCase`).
+  - `*Controller`: adaptador de entrada (ex.: `LessonReportController`).
+  - `*Service`: serviço de aplicação que apoia casos de uso sem substituí-los.
+  - `*Repository`: porta de persistência (ex.: `StudentRepository`).
+  - `*Port`: porta de saída para provedor externo (ex.: `TranscriptionPort`, `LlmPort`).
+  - `*Adapter`: implementação concreta de uma porta ou repositório
+    (ex.: `StudentRepositoryAdapter`).
+  - `*Mapper`: conversão entre objetos de transporte e de domínio.
+  - `*Dto`, `*Request`, `*Response`: objetos de transporte na borda.
 - Exceções permitidas, e somente estas: palavras reservadas da linguagem, APIs de terceiros, nomes
   exigidos por ferramentas ou frameworks e siglas consagradas (PDF, LLM, HTTP, DTO).
 
+**Glossário do domínio (pt → en)**
+
+Os termos abaixo são os canônicos; o equivalente em inglês é o único nome admitido no código.
+
+| Termo do domínio (pt) | Termo canônico (en) |
+|---|---|
+| Professor | `Teacher` |
+| Aluno | `Student` |
+| Aula | `Lesson` |
+| RelatorioAula | `LessonReport` |
+| RelatorioSemestral | `SemesterReport` |
+| VinculoTelegram | `TelegramLink` |
+| Administrador | `Administrator` |
+| CodigoDeAcesso | `AccessCode` |
+| Associação professor-aluno | `TeacherStudentAssignment` |
+| Rascunho | `Draft` |
+| Versão | `Version` |
+| Aprovação | `Approval` |
+
+**Regra de transição**
+
+- O código existente ainda está em português e constitui **dívida registrada** em relação a este
+  princípio, a ser quitada pela **feature 003** (migração para inglês).
+- Enquanto a feature 003 não for mesclada, **nenhuma feature nova pode ser iniciada**; a própria
+  003 é a única exceção.
+
 **Justificativa**: nomes previsíveis tornam a arquitetura autoexplicativa e impedem que regra de
-negócio escape para a camada errada; um único idioma elimina a inconsistência vista no MVP.
+negócio escape para a camada errada. Identificadores em inglês seguem o idioma das linguagens,
+frameworks e ferramentas usados, evitando a mistura de idiomas no código; o texto voltado a
+pessoas (usuários, equipe e logs) permanece em português do Brasil, idioma de quem lê.
 
 ### VII. Simplicidade e Foco
 
@@ -296,9 +383,14 @@ recorrente.
     dependência além do runtime de contêineres.
   - Local e produção DEVEM usar as mesmas definições de imagem, variando apenas a configuração
     (variáveis de ambiente e segredos). Segredos NÃO DEVEM ser embutidos nas imagens.
-  - A implantação definitiva DEVE ser feita em uma VPS da Hostinger, subindo os contêineres a partir
-    das definições versionadas no repositório. Na VPS, apenas o ponto de entrada HTTPS DEVE ser
-    exposto publicamente (Princípio IV).
+  - A implantação definitiva DEVE ser feita em uma VPS Linux genérica, de qualquer provedor, com
+    exigências neutras de provedor:
+    - Linux com Docker Engine 27+ e Docker Compose v2 como únicas dependências do servidor;
+    - os contêineres DEVEM subir a partir das definições versionadas no repositório;
+    - apenas o ponto de entrada HTTPS DEVE ser exposto publicamente (Princípio IV), além do SSH
+      para administração, que DEVE ser restrito;
+    - nenhum recurso exclusivo de um provedor (painel, snapshot proprietário, DNS ou rede
+      específicos) NÃO DEVE ser requisito para implantar ou operar o sistema.
   - O ambiente local e a produção DEVEM incluir o serviço n8n em contêiner, com a versão da imagem
     fixada (sem tag flutuante como `latest`), subido pelo mesmo comando único dos demais serviços.
   - As definições de contêiner e os scripts de implantação são artefatos de automação e DEVEM ser
@@ -359,4 +451,4 @@ número de versão conforme a política abaixo, e (4) verificar se `spec-templat
 revisão; violações não justificadas bloqueiam o merge. Exceções DEVEM ser registradas na descrição
 do PR e aprovadas por outro revisor.
 
-**Version**: 1.4.0 | **Ratified**: 2026-09-30 | **Last Amended**: 2026-10-02
+**Version**: 2.0.0 | **Ratified**: 2026-09-30 | **Last Amended**: 2026-10-10
