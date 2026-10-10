@@ -5,7 +5,7 @@ Automação do GitHub, versionada no repositório (Princípio VIII).
 - `workflows/ci.yml` — três jobs, todos em contêiner via `infra/compose.test.yaml`: **Backend** (unitários,
   arquitetura, integração, contrato, cobertura), **Frontend** (lint, tipos, Vitest) e **Ponta a ponta +
   acessibilidade** (Playwright + axe).
-- `workflows/implantar.yml` — implantação na VPS Hostinger (usa `infra/scripts/implantar.sh`).
+- `workflows/implantar.yml` — implantação na VPS (usa `infra/scripts/implantar.sh`).
 
 Regras:
 

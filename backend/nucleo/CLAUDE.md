@@ -19,4 +19,6 @@ Regras:
 - Autorização por professor (só os próprios alunos) é decidida aqui, em todo caso de uso que lê ou altera aluno.
 - Relatório gerado por IA só vira oficial com aprovação explícita da versão vigente; toda alteração cria nova versão.
 - Testes unitários cobrem sucesso, erro e borda, com dublês no lugar de provedores; mantenha ≥ 90% de cobertura.
-- Nomes seguem os sufixos padronizados da constituição (Princípio VI).
+- Nomes seguem os sufixos padronizados da constituição (Princípio VI), que desde a 2.0.0 são em
+  inglês (`*UseCase`, `*Port`, `*Repository`, `*Service`). Os pacotes e sufixos listados acima
+  refletem o código atual, ainda em português; a migração é da feature 003, até lá não renomeie.

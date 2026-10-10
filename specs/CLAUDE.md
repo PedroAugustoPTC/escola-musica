@@ -15,6 +15,9 @@ Schema, mensagens) e `checklists/`.
 Regras:
 
 - Não implemente sem spec aprovada; use as skills `speckit-*` (em `.claude/skills/`).
+- Idioma (Princípio VI): specs, planos, tasks e demais documentos em **português**; nomes de contratos
+  (rotas, campos, códigos de erro) em **inglês**. Os contratos e as specs 001 e 002 ainda usam
+  português, dívida da feature 003. Até a 003 ser mesclada, nenhuma feature nova pode ser iniciada.
 - Os `contracts/` são fonte de verdade: o backend os implementa e o frontend gera tipos a partir deles
   (`001-fluxo-relatorios/contracts/api-portal.openapi.yaml`). Mudança de API começa pelo contrato.
 - Specs descrevem comportamento de negócio, sem fixar stack; a stack é decidida e justificada no `plan.md`.

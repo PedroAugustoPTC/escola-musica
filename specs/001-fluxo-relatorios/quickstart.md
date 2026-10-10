@@ -123,7 +123,7 @@ Execute cada cenário **uma vez em cada canal**, com as mesmas entradas, e compa
 | V15 | Encerrar acesso | "Encerrar sessão" na Web; "sair" no Telegram. | A sessão deixa de valer no servidor (requisição seguinte → 401); o bot pede o código de novo. |
 | V16 | Acessibilidade e responsividade (SC-011) | Percorrer as telas 01 a 12 a 390 px e 1440 px nos dois temas. | Layout igual aos protótipos; sem rolagem horizontal; navegação completa por teclado. |
 
-## 7. Implantação (VPS Hostinger)
+## 7. Implantação (VPS)
 
 Resumo (roteiro completo em `infra/README.md`, entregue na implementação): configurar DNS →
 `infra/.env` de produção na VPS → `infra/scripts/implantar.sh` (build e `up -d` com

@@ -22,6 +22,9 @@ Regras:
 - Sem regra de negócio no frontend: ela vive no backend.
 - Identidade visual do Instituto (referência em `portal-do-professor-design-system/`), WCAG 2.1 AA e
   mobile-first são obrigatórios (Princípio IX); o e2e valida acessibilidade com axe.
-- Nomes em português sem acentos (arquivos, componentes, funções).
+- Idioma (Princípio VI): nomes de arquivos, componentes, funções e classes CSS em **inglês**; texto
+  mostrado ao usuário em **português do Brasil acentuado**. Os nomes atuais ainda estão em português
+  sem acentos, dívida a ser quitada pela feature 003; até lá, não renomeie e siga a convenção do
+  arquivo que está editando.
 - Comandos: `npm run dev`, `lint`, `typecheck`, `test`, `e2e`, `formatar`. Em CI e na validação final,
   rode via contêiner: `sh infra/scripts/local.sh testes frontend|e2e`.

@@ -7,7 +7,8 @@ máquina só precisa de Docker Engine 27+ com Compose v2 (constituição, "Conta
   `compose.dev.yaml`, `compose.prod.yaml`, `compose.test.yaml` e `compose.banco.yaml` são camadas por ambiente.
 - `caddy/Caddyfile`: HTTPS, cabeçalhos de segurança e proxy de `/api/*`. Só a entrada HTTPS é pública.
 - `scripts/local.sh` sobe e opera o ambiente local (`subir`, `carga`, `testes`, `logs`, `parar`, `limpar`);
-  `scripts/implantar.sh` atualiza a pilha na VPS Hostinger. Passo a passo em `README.md` e `scripts/README.md`.
+  `scripts/implantar.sh` atualiza a pilha na VPS. Passo a passo em `README.md` e `scripts/README.md`.
+  Os nomes de scripts e comandos ainda estão em português; passam a inglês na feature 003 (Princípio VI).
 - `carga/`: cargas de cadastro. Só `exemplo.json` e `demonstracao.json` (fictícios) são versionados.
 
 Regras:

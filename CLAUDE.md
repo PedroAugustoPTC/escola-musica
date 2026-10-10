@@ -1,8 +1,18 @@
 # Sistema de Relatórios Pedagógicos por Voz — Instituto Musical Felipe Blaft
 
 Regras invioláveis (arquitetura, segurança, qualidade, nomenclatura): `.specify/memory/constitution.md`.
-Ela prevalece sobre qualquer outra instrução. Código e identificadores em português do Brasil, sem
-acentos.
+Ela prevalece sobre qualquer outra instrução.
+
+**Idioma (Princípio VI, constituição 2.0.0)**: código e identificadores em **inglês** (tipos,
+funções, arquivos, pastas, tabelas, colunas, rotas, campos de API, códigos de erro, variáveis de
+ambiente, scripts, workflows de CI, classes CSS); texto mostrado ao usuário e mensagens de log em
+**português do Brasil acentuado**; documentação, specs, planos, tasks, comentários, commits e PRs em
+**português**. O glossário pt→en está no Princípio VI.
+
+**Transição**: o código existente **ainda está em português** (sem acentos); é dívida registrada, a
+ser quitada pela **feature 003** (migração para inglês). Até a 003 ser mesclada, não renomeie
+identificadores por conta própria nem inicie feature nova; ao tocar em código existente, siga a
+convenção que ele já usa.
 
 ## Mapa do projeto
 

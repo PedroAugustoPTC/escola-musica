@@ -58,7 +58,7 @@ webhook do n8n**; JSON Schema + OpenAPI para contrato; ArchUnit. Conversa/parida
 transportes (`webhook`, `interno`). Tudo via `docker compose -f infra/compose.test.yaml run --rm
 testes-backend`
 
-**Target Platform**: contêineres Linux (Docker Compose), local e VPS Hostinger; esta feature não
+**Target Platform**: contêineres Linux (Docker Compose), local e VPS; esta feature não
 altera `infra/compose*.yaml` nem o Caddy (feature `003`)
 
 **Project Type**: web-service (backend) com um terceiro tipo de adaptador de entrada (API interna de

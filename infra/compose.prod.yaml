@@ -1,4 +1,4 @@
-# Produção na VPS Hostinger: só o `web` (Caddy, HTTPS) publica portas; os demais ficam na rede interna.
+# Produção na VPS: só o `web` (Caddy, HTTPS) publica portas; os demais ficam na rede interna.
 services:
   web:
     ports:

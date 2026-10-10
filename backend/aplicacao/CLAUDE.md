@@ -20,6 +20,9 @@ aplicada), `ia/schemas` (JSON Schema das saídas de IA) e `ia/simulado`.
 
 Regras:
 
+- Nomes seguem o Princípio VI: sufixos em inglês (`*Controller`, `*Adapter`, `*Mapper`, `*Request`,
+  `*Response`). Os pacotes e sufixos listados acima refletem o código atual, ainda em português; a
+  migração é da feature 003, até lá não renomeie.
 - Adaptador de entrada só traduz requisição → caso de uso; nenhuma regra de negócio aqui.
 - Provedores de IA (transcrição, LLM) são trocáveis por configuração; o provedor real fica atrás da porta.
 - Contratos: a API do Portal segue `specs/001-fluxo-relatorios/contracts/api-portal.openapi.yaml` e a API

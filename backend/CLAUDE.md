@@ -11,6 +11,10 @@ A dependência aponta sempre para dentro: `aplicacao` → `nucleo`, nunca o cont
 Princípio I). Testes ArchUnit em `*/src/test/.../arquitetura` verificam isso e quebram o build.
 
 - Pacote raiz: `br.com.felipeblaft.relatorios`.
+- Idioma (Princípio VI): identificadores, tabelas, colunas e rotas em **inglês**; mensagens ao usuário
+  e de log em **português do Brasil acentuado**. Os nomes atuais (pacotes, classes, sufixos como
+  `*CasoDeUso`, `*Controlador`, `*Repositorio`) ainda estão em português, dívida a ser quitada pela
+  feature 003; até lá, não renomeie.
 - Cobertura mínima de 90% (linha e branch) na regra de negócio, medida pelo JaCoCo (Princípio V).
 - Formatação: Spotless com google-java-format (estilo AOSP) configurado no `pom.xml`.
 - Testes rodam em contêiner: `sh infra/scripts/local.sh testes backend` (ver `infra/CLAUDE.md`).

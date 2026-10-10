@@ -1,5 +1,5 @@
 #!/bin/sh
-# Implantação na VPS Hostinger (R-15): atualiza o código, reconstrói as imagens e sobe a pilha de
+# Implantação na VPS (R-15): atualiza o código, reconstrói as imagens e sobe a pilha de
 # produção. Roda na própria VPS, na raiz do repositório, com infra/.env de produção já preenchido.
 #   infra/scripts/implantar.sh            # branch atual
 #   infra/scripts/implantar.sh main       # troca para a branch indicada antes de atualizar

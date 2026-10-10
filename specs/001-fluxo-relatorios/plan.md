@@ -29,7 +29,7 @@ consultáveis pelos dois canais. O FFmpeg normaliza o áudio num `tmpfs`, que é
 transcrição. Provedores de transcrição e LLM compatíveis com a API da OpenAI (Groq por padrão)
 ficam atrás de portas. O PDF é gerado de HTML/CSS com a identidade visual (OpenHTMLtoPDF). O
 frontend é React 19 + Vite fiel aos protótipos. Tudo roda em contêineres (Caddy, backend, Postgres
-18, telegram-bot-api), localmente e na VPS Hostinger.
+18, telegram-bot-api), localmente e na VPS.
 
 ## Technical Context
 
@@ -53,7 +53,7 @@ Spring Boot Test + WireMock (integração, IA e API de bots simuladas); swagger-
 (contrato da API); testes de conversa do Telegram; roteiro de paridade Web × Telegram; Vitest +
 Testing Library; Playwright + axe-core (e2e e WCAG AA). Tudo via `infra/compose.test.yaml`.
 
-**Target Platform**: contêineres Linux (Docker Compose), local e em produção numa VPS Hostinger;
+**Target Platform**: contêineres Linux (Docker Compose), local e em produção numa VPS;
 portal em navegadores modernos de celular (a partir de 390 px) e de computador; Telegram em chat
 privado
 
@@ -90,7 +90,7 @@ Constituição v1.3.0. Avaliação **antes** da pesquisa e **refeita depois** do
 | **VII. Simplicidade e foco** | Sem broker (fila no Postgres), sem orquestrador, sem armazenamento de objetos, PDF em processo, polling em vez de WebSocket. Os acréscimos exigidos pela spec estão justificados em "Complexity Tracking". Itens de roadmap (secretaria, WhatsApp, envio às famílias) ficam fora. | ✅ | ✅ |
 | **VIII. Fluxo de trabalho** | Branch dedicada `001-fluxo-relatorios`; commit e PR para a `main` ao concluir cada etapa, sem merge pelo autor nem auto-merge; CI (GitHub Actions) e definições de contêiner e implantação versionados em `.github/` e `infra/`. | ✅ | ✅ |
 | **IX. Identidade visual e acessibilidade** | Tokens, tipografia e telas dos protótipos; PDF segundo o `Modelo PDF.dc.html`; bot com o monograma e a terminologia do portal; WCAG AA verificado por axe a 390 e 1440 px nos dois temas. | ✅ | ✅ |
-| **Restrições: stack, provedores, contêineres, Hostinger, MVP só leitura** | Stack registrada e justificada (R-01 a R-03); IA por configuração (R-08); 4 serviços em contêiner, um comando local, mesmas imagens, testes em contêiner, implantação na VPS Hostinger (R-15); MVP usado só como referência. | ✅ | ✅ |
+| **Restrições: stack, provedores, contêineres, VPS genérica, MVP só leitura** | Stack registrada e justificada (R-01 a R-03); IA por configuração (R-08); 4 serviços em contêiner, um comando local, mesmas imagens, testes em contêiner, implantação na VPS (R-15); MVP usado só como referência. | ✅ | ✅ |
 | **Quality gate: paridade** | Nenhuma funcionalidade fica restrita a um canal; nenhum desvio a justificar. | ✅ | ✅ |
 
 **Resultado**: aprovado antes e depois do desenho, sem violações. A pendência registrada no Sync
@@ -179,7 +179,7 @@ infra/
 ├── compose.yaml                              # web, backend, postgres, telegram-bot-api
 ├── compose.dev.yaml                          # portas em loopback, certificado local
 ├── compose.test.yaml                         # testes-backend, testes-frontend, testes-e2e, testes-ia-real
-├── compose.prod.yaml                         # VPS Hostinger: só 80/443 no `web`
+├── compose.prod.yaml                         # VPS: só 80/443 no `web`
 ├── caddy/Caddyfile
 ├── carga/exemplo.json                        # fictício (demais arquivos de carga no .gitignore)
 ├── scripts/implantar.sh

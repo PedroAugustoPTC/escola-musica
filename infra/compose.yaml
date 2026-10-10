@@ -1,5 +1,5 @@
 # Definição base dos serviços (R-15). Local:  compose.yaml + compose.dev.yaml
-#                                     Produção: compose.yaml + compose.prod.yaml (VPS Hostinger)
+#                                     Produção: compose.yaml + compose.prod.yaml (VPS)
 name: relatorios
 
 services:
