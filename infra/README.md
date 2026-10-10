@@ -1,7 +1,7 @@
 # Infraestrutura — Sistema de Relatórios Pedagógicos
 
-Roteiro de operação: subir o ambiente local, carregar cadastros, rodar os testes e implantar na VPS
-Hostinger. Tudo roda em contêineres; a máquina só precisa de **Docker Engine 27+ com Compose v2**.
+Roteiro de operação: subir o ambiente local, carregar cadastros, rodar os testes e implantar numa VPS
+Linux genérica, de qualquer provedor. Tudo roda em contêineres; a máquina só precisa de **Docker Engine 27+ com Compose v2**.
 A validação funcional completa está em
 [`specs/001-fluxo-relatorios/quickstart.md`](../specs/001-fluxo-relatorios/quickstart.md).
 
@@ -152,11 +152,15 @@ docker compose -f infra/compose.test.yaml run --rm --build testes-e2e
 
 Para desmontar a pilha de testes: `docker compose -f infra/compose.test.yaml down -v`.
 
-## 4. Implantação na VPS Hostinger
+## 4. Implantação na VPS
+
+Qualquer VPS Linux serve, de qualquer provedor: as únicas dependências são Docker Engine 27+ e
+Compose v2, e nenhum recurso exclusivo do provedor (painel, snapshot, DNS ou rede específicos) é
+requisito.
 
 ### 4.1 Preparação (uma vez)
 
-1. **VPS**: Ubuntu LTS com Docker Engine e o plugin Compose; usuário sem senha de root para a
+1. **VPS**: Linux (ex.: Ubuntu LTS) com Docker Engine 27+ e Compose v2; usuário sem senha de root para a
    implantação, com acesso por chave SSH; firewall liberando só 22 (SSH), 80 e 443.
 2. **DNS**: registro `A` (e `AAAA`, se houver IPv6) do domínio do portal apontando para o IP da
    VPS. O Caddy obtém o certificado automaticamente na primeira subida (portas 80 e 443 abertas).

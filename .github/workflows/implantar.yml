@@ -1,4 +1,4 @@
-# Implantação manual na VPS Hostinger (infra/README.md). O ambiente "producao" deve exigir aprovação
+# Implantação manual na VPS (infra/README.md). O ambiente "producao" deve exigir aprovação
 # (Settings → Environments → Required reviewers) e guardar os segredos de SSH abaixo.
 name: Implantar
 

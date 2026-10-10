@@ -291,13 +291,13 @@ e exige que as escolhas sejam registradas e justificadas aqui.
   (imagem Eclipse Temurin 25 JRE + FFmpeg), `postgres` (18), `telegram-bot-api` (servidor local,
   R-05). Arquivos: `infra/compose.yaml` (base), `infra/compose.dev.yaml` (portas em loopback, bot de
   testes), `infra/compose.test.yaml` (execução dos testes em contêiner), `infra/compose.prod.yaml`
-  (VPS Hostinger: só o Caddy publica 80/443). Os segredos ficam em `.env` fora do Git, e
+  (VPS: só o Caddy publica 80/443). Os segredos ficam em `.env` fora do Git, e
   `infra/.env.example` é versionado. A implantação usa um script versionado
   (`infra/scripts/implantar.sh`) que faz `git pull`, `docker compose build` e `up -d`, rodado na VPS
   via SSH a partir do GitHub Actions, com aprovação manual.
 - **Justificativa**: é exatamente o que pedem as "Restrições Adicionais" da constituição: tudo em
   contêiner, um único comando local, mesmas imagens em todos os ambientes, só HTTPS exposto e VPS
-  Hostinger. O Caddy resolve o certificado sem configuração extra e unifica a origem (R-12).
+  genérica. O Caddy resolve o certificado sem configuração extra e unifica a origem (R-12).
 - **Alternativas consideradas**: *Nginx + Certbot* (dois componentes para o mesmo resultado);
   *Kubernetes* (desproporcional para uma VPS).
 
