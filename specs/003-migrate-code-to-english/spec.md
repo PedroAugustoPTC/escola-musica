@@ -24,8 +24,11 @@ o código legível por qualquer desenvolvedor, sem mistura de idiomas.
 
 ### Session 2026-10-10
 
-Nenhuma ainda. As decisões M1 a M10 do plano de execução estão registradas em *Assumptions* como
-padrões adotados e devem ser confirmadas em `/speckit-clarify`.
+- Q: Confirma as decisões M1, M2, M3, M4, M5, M6, M8, M9 e M10 como recomendadas no plano de execução? → A: Sim, todas confirmadas como recomendadas (M7 tratada na pergunta seguinte).
+- Q: A migração do banco deve converter os documentos JSON já gravados (chaves e valores em português) ou os dados de desenvolvimento e teste podem ser descartados? → A: A nova migração converte, em SQL, as chaves e os valores dentro dos JSONs já gravados (opção A); nenhum dado é descartado.
+- Q: Os nomes dos campos que o LLM devolve (esquemas, prompts, respostas simuladas) passam para inglês, mantendo em português as instruções e o conteúdo gerado? → A: Sim (opção A): só os nomes dos campos e dos arquivos de prompt e esquema mudam; antes do merge, uma verificação manual com o LLM real é feita e registrada.
+- Q: Você aprova a tabela de termos técnicos complementares ao glossário da constituição? → A: Sim (opção A); a tabela está em *Assumptions* e deve ser registrada no glossário e servir de fonte ao teste guardião.
+- Q: A migração é entregue em um único Pull Request com um commit por fatia, ou em vários Pull Requests mesclados em sequência? → A: Um único PR com 7 commits, cada um verde (opção A); a `main` só recebe a migração inteira.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -165,6 +168,9 @@ canais.
   regra e entram na lista de exceções documentada, cada uma com o motivo.
 - **Um mesmo conceito com nomes diferentes em camadas diferentes** (ex.: o banco usa um termo e o código
   outro): é defeito da migração; o glossário exige um único nome.
+- **Prompts e esquemas do LLM**: só os nomes dos campos mudam. Se a verificação manual com o LLM real
+  mostrar queda de qualidade atribuível aos novos nomes, o fato é reportado antes do merge e não é
+  "corrigido" mudando texto de instrução dentro desta feature.
 - **Defeito de comportamento descoberto durante a migração**: não é corrigido nesta feature; é anotado e
   tratado em trabalho separado.
 - **Termos do domínio que o glossário da constituição não cobre** (ex.: substantivos de menor uso):
@@ -213,18 +219,24 @@ canais.
 
 - **FR-013**: A migração do esquema DEVE ocorrer por **nova migração versionada**, sem editar as
   migrações já existentes, e DEVE preservar os dados existentes dos ambientes de desenvolvimento e de
-  teste (renomeação, não recriação).
+  teste (renomeação, não recriação). Isso inclui converter, dentro dos documentos JSON já gravados
+  (conteúdo de relatórios, dados de conversa do Telegram, parâmetros de trabalhos, cargas de ações do
+  canal), as chaves e os valores de enumeração em português para os novos nomes em inglês.
 - **FR-014**: O esquema final DEVE ser idêntico, em estrutura e em regras (chaves, unicidades,
   restrições, índices), ao esquema anterior, mudando somente os nomes.
 - **FR-015**: A migração DEVE funcionar tanto em banco criado do zero quanto em banco que já estava no
-  esquema anterior.
+  esquema anterior **e já continha dados**; DEVE haver verificação automatizada de que um relatório,
+  uma conversa e uma ação do canal gravados antes da migração continuam legíveis e com o mesmo
+  conteúdo depois dela.
 
 **Vocabulário único**
 
 - **FR-016**: O glossário pt→en da constituição 2.0.0 DEVE ser a fonte de verdade dos nomes; cada
   conceito do domínio DEVE ter um único nome em inglês em todas as camadas, sem sinônimos.
-- **FR-017**: Termos do domínio ou técnicos que não constem do glossário DEVEM ser definidos e
-  registrados no glossário (com um único equivalente em inglês) antes do uso.
+- **FR-017**: Termos do domínio ou técnicos que não constem do glossário da constituição nem da tabela
+  de termos complementares aprovada (*Assumptions*) DEVEM ser definidos e registrados no glossário (com
+  um único equivalente em inglês) antes do uso. A tabela aprovada DEVE ser incorporada ao glossário
+  oficial do projeto.
 - **FR-018**: Os sufixos padronizados da constituição (`*UseCase`, `*Controller`, `*Service`,
   `*Repository`, `*Port`, `*Adapter`, `*Mapper`, `*Dto`, `*Request`, `*Response`) DEVEM ser aplicados a
   todo o código migrado.
@@ -243,6 +255,20 @@ canais.
 - **FR-023**: O teste guardião NÃO DEVE alcançar textos mostrados ao usuário, mensagens de log,
   documentação, specs, comentários nem as palavras digitadas pelo professor, que permanecem em
   português.
+
+- **FR-035**: Durante a execução em fatias, o teste guardião DEVE poder usar uma lista de exclusões
+  **temporárias** por fatia ainda não migrada, que só existe dentro da branch da feature, encolhe a cada
+  commit e DEVE estar vazia no estado final. A `main` NUNCA DEVE receber o guardião com exclusões
+  temporárias.
+
+**Provedores de IA**
+
+- **FR-033**: Os nomes dos campos dos esquemas, dos prompts e das respostas simuladas do LLM e da
+  transcrição, e os nomes dos arquivos de prompt e de esquema, DEVEM passar para inglês. As instruções
+  dos prompts e o conteúdo gerado DEVEM continuar em português, sem nenhuma outra alteração de texto.
+- **FR-034**: Como a suíte usa respostas simuladas e não detecta mudança de comportamento do LLM real,
+  DEVE ser feita, antes do merge, uma verificação manual do fluxo de aula e do semestral com o LLM real
+  configurado, com o resultado registrado no Pull Request.
 
 **Fim da compatibilidade e bordas**
 
@@ -268,8 +294,9 @@ canais.
 
 **Execução em fatias verificáveis**
 
-- **FR-031**: A migração DEVE ser entregue em fatias que, ao fim de cada uma, compilam e passam em
-  todas as suítes aplicáveis, cada uma com commit próprio, na ordem: glossário e teste guardião;
+- **FR-031**: A migração DEVE ser entregue em **um único Pull Request** (branch própria, a partir da
+  `main` atualizada), composto por fatias que, ao fim de cada uma, compilam e passam em todas as suítes
+  aplicáveis, cada uma com commit próprio, na ordem: glossário e teste guardião;
   núcleo; aplicação (incluindo banco e configuração); contratos e tipos gerados do frontend; frontend;
   infraestrutura, CI e scripts; documentação.
 - **FR-032**: A renomeação DEVE ser feita por ferramenta de refatoração com análise semântica, e não por
@@ -311,31 +338,58 @@ envolvidos, com seu nome canônico em inglês pela constituição, são:
   camadas (zero sinônimos).
 - **SC-007**: Um desenvolvedor novo, só com os `CLAUDE.md` e READMEs atualizados, localiza qualquer
   estrutura descrita neles sem encontrar nomes que não existem mais (zero referências quebradas).
-- **SC-008**: Ao fim da feature, o bloqueio "nenhuma feature nova pode ser iniciada" é suspenso, e as
+- **SC-008**: A verificação manual com o LLM real (FR-034) está registrada no Pull Request antes do
+  merge, e a migração chega à `main` em um único Pull Request revisado (FR-031).
+- **SC-009**: Ao fim da feature, o bloqueio "nenhuma feature nova pode ser iniciada" é suspenso, e as
   features seguintes (a partir da 004) podem ser especificadas sem exceção de transição.
 
 ## Assumptions
 
-- **Decisões M1 a M10** do plano de execução são adotadas como padrão e serão confirmadas em
-  `/speckit-clarify`:
-  - M1: valores de status persistidos e expostos passam para inglês; a interface mostra o rótulo em
-    português pelo catálogo.
-  - M2: códigos de erro da API passam para inglês; as mensagens ao usuário seguem em português.
-  - M3: ações dos botões do Telegram passam para inglês; não há botão antigo em circulação a suportar.
-  - M4: palavras digitadas pelo professor no bot continuam em português.
-  - M5: nome do PDF mostrado ao usuário continua em português; nome interno de armazenamento em inglês.
-  - M6: rotas da SPA passam para inglês.
-  - M7: o banco é migrado por uma **nova** migração, sem editar as já aplicadas.
-  - M8: variáveis de ambiente passam para inglês; quem tem configuração local antiga precisa regerá-la.
-  - M9: o teste guardião cobre código do backend, do frontend e artefatos de dados e configuração.
-  - M10: scripts e workflows passam para inglês, com o README atualizado.
+- **Decisões M1 a M10** do plano de execução. M1 a M6 e M8 a M10 estão **confirmadas** (sessão de
+  clarificação de 2026-10-10):
+  - M1 (confirmada): valores de status persistidos e expostos passam para inglês; a interface mostra o
+    rótulo em português pelo catálogo.
+  - M2 (confirmada): códigos de erro da API passam para inglês; as mensagens ao usuário seguem em
+    português.
+  - M3 (confirmada): ações dos botões do Telegram passam para inglês (`v1:approve:<id>`); botão no
+    formato antigo é tratado como ação desconhecida.
+  - M4 (confirmada): palavras digitadas pelo professor no bot continuam em português.
+  - M5 (confirmada): nome do PDF mostrado ao usuário continua em português; nome interno de
+    armazenamento em inglês.
+  - M6 (confirmada): rotas da SPA passam para inglês.
+  - M7 (confirmada): o banco é migrado por uma **nova** migração, sem editar as já aplicadas; a
+    migração também converte o conteúdo dos documentos JSON já gravados.
+  - M8 (confirmada): variáveis de ambiente passam para inglês; quem tem configuração local antiga
+    precisa regerá-la.
+  - M9 (confirmada): o teste guardião cobre código do backend (Java), do frontend (TypeScript) e
+    artefatos de dados e configuração (SQL, YAML, JSON), com lista de exceções documentada.
+  - M10 (confirmada): scripts e workflows passam para inglês, com o README atualizado.
 - Não há produção nem dados reais; portanto não há período de compatibilidade, e os dados existentes
   nos ambientes de desenvolvimento e teste são preservados pela renomeação, mas não precisam de
   retrocompatibilidade de interface.
-- O glossário da constituição 2.0.0 cobre os conceitos centrais do domínio; os termos técnicos e de
-  menor uso (nomes de pacotes, camadas, portas e adaptadores, pastas do frontend) serão definidos no
-  plano, registrados no glossário e validados por `/speckit-clarify`, mantendo um único equivalente por
-  conceito.
+- O glossário da constituição 2.0.0 cobre os conceitos centrais do domínio. Os termos complementares
+  abaixo foram **aprovados** na clarificação de 2026-10-10 e DEVEM ser registrados no glossário e usados
+  como fonte pelo teste guardião. Termos pontuais que o plano ainda descobrir DEVEM ser registrados
+  antes do uso (FR-017):
+
+  | Português (código atual) | Inglês aprovado |
+  |---|---|
+  | Pacote base `br.com.felipeblaft.relatorios` | `br.com.felipeblaft.reports` (`br.com.felipeblaft` é nome de organização: exceção) |
+  | Módulos `nucleo` / `aplicacao` | `core` / `application` |
+  | Camadas `dominio`, `casodeuso`, `porta`, `servico` | `domain`, `usecase`, `port`, `service` |
+  | Adaptadores `entrada` / `saida` | `inbound` / `outbound` |
+  | `configuracao`, `persistencia`, `armazenamento`, `seguranca`, `fila`, `ia`, `carga` | `config`, `persistence`, `storage`, `security`, `queue`, `ai`, `seed` |
+  | `cadastro` (professor, aluno, associação) | `registry` |
+  | Frontend `componentes`, `estilos`, `mensagens`, `paginas`, `servicos` | `components`, `styles`, `messages`, `pages`, `services` |
+  | Relatório / RelatorioEmAberto | `Report` / `OpenReport` |
+  | TrabalhoProcessamento / TarefaIa / ChamadaIa | `ProcessingJob` / `AiTask` / `AiCall` |
+  | Canal / AcaoCanal / DocumentoCanal / PoliticaRetentativa | `Channel` / `ChannelAction` / `ChannelDocument` / `RetryPolicy` |
+  | SessaoWeb / TentativaAcesso | `WebSession` / `AccessAttempt` |
+  | Conversa / Fluxo / Etapa / AudioPendente / RelatorioFoco | `Conversation` / `Flow` / `Step` / `PendingAudio` / `FocusedReport` |
+  | Período semestral / `periodoChave` / InformacoesGerais | `SemesterPeriod` / `periodKey` / `GeneralInformation` |
+  | Responsável / nome do responsável / instrumento / data de nascimento | `Guardian` / `guardianName` / `instrument` / `birthDate` |
+  | Cancelamento / Descarte / Prévia / Histórico / Transcrição | `Cancellation` / `Discard` / `Preview` / `History` / `Transcription` |
+  | Siglas e termos que permanecem | `CPF`, `PDF`, `LLM`, `HTTP`, `DTO`, `Telegram`, `n8n`, `HMAC`, `JWT` |
 - A suíte e as ferramentas de verificação existentes são confiáveis e suficientes para provar a
   preservação do comportamento; este trabalho não os amplia, salvo o teste guardião.
 - Os workflows do n8n ainda não existem no repositório (são da feature 004); portanto não há workflow
