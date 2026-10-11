@@ -171,6 +171,12 @@ canais.
 - **Prompts e esquemas do LLM**: só os nomes dos campos mudam. Se a verificação manual com o LLM real
   mostrar queda de qualidade atribuível aos novos nomes, o fato é reportado antes do merge e não é
   "corrigido" mudando texto de instrução dentro desta feature.
+- **Preferências guardadas no navegador e sessão**: o valor do tema guardado em `localStorage`
+  (`claro`/`escuro`) e o cookie de sessão mudam de nome; quem tinha o valor antigo volta ao tema padrão do
+  sistema e precisa entrar de novo. É consequência aceita da ausência de compatibilidade (FR-024), sem
+  usuários reais.
+- **Nome do PDF baixado**: o nome mostrado ao usuário (`relatorio-aula-…`, `relatorio-semestral-…`)
+  continua em português e é exceção documentada do guardião; só o nome interno de armazenamento muda.
 - **Defeito de comportamento descoberto durante a migração**: não é corrigido nesta feature; é anotado e
   tratado em trabalho separado.
 - **Termos do domínio que o glossário da constituição não cobre** (ex.: substantivos de menor uso):
@@ -217,7 +223,8 @@ canais.
 
 **Banco de dados**
 
-- **FR-013**: A migração do esquema DEVE ocorrer por **nova migração versionada**, sem editar as
+- **FR-013**: A migração do esquema DEVE ocorrer por **novas migrações versionadas** (o plano usa duas: `V7`
+  para a estrutura e `V8` para os valores, ver `research.md` R-01), sem editar as
   migrações já existentes, e DEVE preservar os dados existentes dos ambientes de desenvolvimento e de
   teste (renomeação, não recriação). Isso inclui converter, dentro dos documentos JSON já gravados
   (conteúdo de relatórios, dados de conversa do Telegram, parâmetros de trabalhos, cargas de ações do
@@ -275,14 +282,18 @@ canais.
 - **FR-024**: Não DEVE haver período de compatibilidade: rotas, campos, códigos de erro, ações de botão e
   variáveis de ambiente antigos deixam de existir, sem alias nem redirecionamento.
 - **FR-025**: Ao receber uma ação de botão no formato antigo, o sistema NÃO DEVE falhar de modo
-  inesperado; DEVE tratá-la como uma ação inválida, do mesmo modo que trata qualquer ação desconhecida.
+  inesperado; DEVE tratá-la como uma ação inválida, do mesmo modo que trata qualquer ação desconhecida. Se a
+  verificação mostrar que o tratamento atual de ação desconhecida já falha (o que contradiria o
+  comportamento esperado), isso é um defeito pré-existente: não é corrigido nesta feature (FR-005), é
+  registrado em trabalho separado e o fato é descrito no Pull Request.
 - **FR-026**: O nome do arquivo PDF mostrado ao usuário (download e documento enviado no chat) DEVE
   permanecer em português; o nome interno de armazenamento DEVE ser em inglês.
 
 **Documentação e operação**
 
 - **FR-027**: Os `CLAUDE.md` de cada estrutura, os READMEs, os scripts, o `.env.example` e os
-  quickstarts DEVEM ser atualizados, no mesmo trabalho, para os novos nomes, e as afirmações de que "o
+  quickstarts vigentes DEVEM ser atualizados (os das specs 001 e 002 são histórico e só recebem a nota
+  de FR-029), no mesmo trabalho, para os novos nomes, e as afirmações de que "o
   código ainda está em português" e as regras de transição DEVEM ser removidas ou reescritas.
 - **FR-028**: As referências a "feature 003" que significam o orquestrador n8n, nas specs 001 e 002 e na
   constituição, DEVEM passar a "feature 004". A constituição DEVE ser atualizada para registrar a quitação
@@ -396,6 +407,13 @@ envolvidos, com seu nome canônico em inglês pela constituição, são:
   de orquestração a migrar aqui, apenas a correção das referências à numeração.
 - Os nomes das pastas das specs 001 e 002 permanecem como estão (histórico); a pasta desta feature já
   nasce em inglês.
+- **Exceções ao Princípio VI além das quatro categorias fechadas da constituição** (palavras reservadas,
+  APIs de terceiros, nomes exigidos por ferramentas, siglas): o nome da organização
+  (`br.com.felipeblaft`), o prefixo `fb-` dos ativos de marca, o domínio público do `$id`, as pastas de
+  referência do cliente e de histórico (`assets/`, `portal-do-professor-design-system/`, `specs/001-…`,
+  `specs/002-…`) e os documentos de planejamento da raiz. Elas são propostas na emenda 2.1.0 como a
+  categoria "nomes próprios e material de referência", dependem da aprovação do dono do produto e são
+  listadas na descrição do Pull Request (Governança da constituição).
 - Os Pull Requests e commits seguem o Princípio VIII: branch própria a partir da `main` atualizada, PR
   aberto ao concluir, merge somente pelo usuário após revisão.
 - Dependência: esta feature é pré-requisito das features 004 (n8n), 005 e 006 (secretaria) e 007

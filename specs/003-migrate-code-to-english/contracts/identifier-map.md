@@ -216,7 +216,7 @@ seção *Pontos de decisão*.
 | `ia/simulado/estruturacao-aula.json`, `consolidacao-semestral.json`, `transcricao.txt` | `ai/simulated/lesson-structuring.json`, `semester-consolidation.json`, `transcription.txt` |
 | `mensagens/mensagens_pt_BR.properties` | `messages/messages_pt_BR.properties` (o sufixo `pt_BR` é a localidade, não um nome) |
 | `pdf/relatorio-aula.html`, `relatorio-semestral.html`, `estilos-pdf.css`, `fontes/`, `imagens/` | `pdf/lesson-report.html`, `semester-report.html`, `pdf-styles.css`, `fonts/`, `images/` |
-| `frontend/public/marca/fb-*-marfim.png` (`ouro`, `ouroclaro`, `preto`, `metal`, `monograma`, `filete`, `wordmark`) | `frontend/public/brand/fb-*-ivory.png` (`gold`, `lightgold`, `black`, `metal`, `monogram`, `rule`, `wordmark`) |
+| `frontend/public/marca/fb-*-marfim.png` (`ouro`, `ouroclaro`, `preto`, `metal`, `monograma`, `filete`, `wordmark`) | `frontend/public/brand/fb-*-ivory.png` (`gold`, `lightgold`, `black`, `metal`, `monogram`, `divider`, `wordmark`) |
 | `frontend/src/{app,paginas,componentes,servicos,estilos,mensagens}` | `frontend/src/{app,pages,components,services,styles,messages}` |
 | `frontend/tests/{componentes,paginas,e2e}` | `frontend/tests/{components,pages,e2e}` |
 | `Tela*.tsx` (`TelaPainel`, `TelaAlunos`, …) | `*Screen.tsx` (`DashboardScreen`, `StudentsScreen`, …), um por fluxo |
@@ -226,3 +226,23 @@ CSS: classes e variáveis seguem a BEM atual com o vocabulário trocado (`.pagin
 `.page--narrow`, `.menu-professor__item` → `.teacher-menu__item`, `.girador` → `.spinner`). As variáveis de
 `tokens.css` com siglas (`--gd`, `--gs`) não mudam. O inventário das classes sai do verificador de
 renomeação (R-02), não de lista manual.
+
+## 9. Termos polissêmicos (resolvidos por contexto em `glossary.json`, seção `contextual`)
+
+| Termo | Contexto → inglês |
+|---|---|
+| `inicio` | tela inicial (rota/API `Home`, `Comando.INICIO`→`HOME`, pacote `usecase.inicio`→`usecase.home`, `services/inicio.ts`→`services/home.ts`, ação de botão `v1:inicio`→`v1:home`) → `home`; início de período (`periodoInicio`) → `start` |
+| `registro` | ato de registrar uma aula (`REGISTRO_AULA`→`LESSON_REGISTRATION`, `FluxoRegistroAula…`) → `registration`; linha/log de dados (`RegistroCustoPorta`, `registroUpdates`, `RETENCAO_REGISTRO_D`→`RECORD_RETENTION_D`) → `record` |
+| `gravar` | persistir (`GravarAcoesCanal…`, `gravarLote`) → `save`; gravar áudio usa `gravador`→`recorder`, `gravando`→`recording`, `gravacao`→`recording` |
+| `filete` | ativo de marca → `divider` (`regra` continua `rule`) |
+
+Homônimos aceitos, sempre dentro de compostos que os distinguem: `request` (pedido do usuário × sufixo HTTP),
+`home` (tela × `homeStudyRegularity`), `port`, `support`, `page`/`screen` (ver `notes` do glossário).
+
+## 10. Nomes de PDF (FR-026)
+
+| O quê | Antes → depois |
+|---|---|
+| Nome mostrado ao usuário (download no Portal e documento no Telegram) | **não muda**: `relatorio-aula-<data>[-v<n>].pdf`, `relatorio-semestral-<período>[-v<n>].pdf` (exceção `download-file-name`) |
+| Nome interno de armazenamento (`storage_key`) de documentos **novos** | `oficial.pdf` → `official.pdf`; `v<n>.pdf` não muda; pasta por tipo de relatório `AULA`/`SEMESTRAL` → `LESSON`/`SEMESTER` (vem da enumeração, fatia 4) |
+| `storage_key` de documentos **já gravados** | não muda (dado opaco, lido do próprio registro); nenhum arquivo é movido |

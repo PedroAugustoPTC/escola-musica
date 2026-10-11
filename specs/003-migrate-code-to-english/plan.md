@@ -77,7 +77,7 @@ palavras distintas em identificadores (inventário, R-05).
 | **III. Humano no controle da IA** | **PASS** | Aprovação por versão, versionamento e "IA não inventa" intactos; só os nomes dos campos da IA mudam (R-07), com verificação manual no LLM real antes do merge (FR-034). |
 | **IV. Privacidade desde o design** | **PASS** | Nenhum dado novo circula. O guardião, o verificador e a `V8` imprimem **nomes**, nunca valores de texto/CPF/aluno. O `pg_dump` do caminho com dados existentes é local e descartável. Segredos continuam só no ambiente; a regeração do `.env` é orientada, sem registrar valores. |
 | **V. Qualidade obrigatória** (cobertura mantida) | **PASS** | Cobertura de linha e branch do `core` **medida antes e depois, por commit**, e nunca abaixo de 90% nem da base (R-02, R-10). Nenhum teste é removido; só os identificadores deles migram. Nenhuma expectativa de texto muda (provado por literal idêntico byte a byte). Testes de contrato continuam (contrato novo adotado no mesmo commit do fio novo). Chamadas reais a provedores continuam fora da cobertura unitária (`iareal`). O CI continua bloqueando o merge por teste vermelho ou cobertura baixa; o guardião entra como verificação obrigatória sem workflow novo (roda nos contêineres que o CI já exige). |
-| **VI. Nomenclatura, linguagem ubíqua e idioma (v2.0.0)** | **PASS — é o objeto da feature** | Código/identificadores/dados/rotas/variáveis/scripts/CSS em **inglês** pelo glossário (constituição + tabela complementar aprovada, FR-016/FR-017, sem sinônimos); textos para usuário e logs em português acentuado, **intocados**; documentação, specs, planos, tasks, comentários, commits e PR em português. Sufixos padronizados aplicados a tudo (FR-018). Exceções só as permitidas pela constituição (siglas, terceiros, nomes impostos por ferramenta), cada uma com motivo no `glossary.json`. A regra de transição é cumprida por esta feature (a única permitida); a emenda 2.1.0 (fatia 7) registra a quitação e suspende o bloqueio. |
+| **VI. Nomenclatura, linguagem ubíqua e idioma (v2.0.0)** | **PASS com ressalva — é o objeto da feature; as exceções de nomes próprios exigem ratificação (ver *Complexity Tracking*)** | Código/identificadores/dados/rotas/variáveis/scripts/CSS em **inglês** pelo glossário (constituição + tabela complementar aprovada, FR-016/FR-017, sem sinônimos); textos para usuário e logs em português acentuado, **intocados**; documentação, specs, planos, tasks, comentários, commits e PR em português. Sufixos padronizados aplicados a tudo (FR-018). Exceções com motivo e categoria no `glossary.json`: as de terceiros, ferramentas, siglas e texto do usuário estão na lista fechada da constituição; **as de nomes próprios e material de referência (`br.com.felipeblaft`, prefixo `fb-`, domínio público, `assets/`, `portal-do-professor-design-system/`, pastas `specs/001-…` e `002-…`) NÃO estão** e são tratadas em *Complexity Tracking*. Termos polissêmicos (`inicio`, `registro`, `gravar`) são resolvidos por contexto na seção `contextual` do glossário; sufixos fora da lista da constituição (`*Entity`, `*Command`, `*Filter`, `*Converter`, `*Codec`, `*Config`) entram na emenda 2.1.0. A regra de transição é cumprida por esta feature (a única permitida); a emenda 2.1.0 (fatia 7) registra a quitação e suspende o bloqueio. |
 | **VII. Simplicidade e foco** | **PASS** | **Nenhuma abstração, camada, porta ou integração de produção é criada.** Código novo é só de teste (guardiões, migração) e uma ferramenta pontual de verificação fora do build. A alternativa de camada de compatibilidade (`@JsonProperty` com nomes antigos, conversor de enumeração) foi rejeitada por ser abstração nova (R-01). A função auxiliar da migração é `pg_temp` (some com a sessão). |
 | **VIII. Fluxo de trabalho** | **PASS** | Branch `spec/003-migrate-code-to-english` criada da `main` atualizada; um PR com sete commits (um por fatia) aberto ao concluir; **sem merge e sem auto-merge**; `code-review-graph build` depois de criar o PR; automações (CI, scripts, compose) versionadas. |
 | **IX. Identidade visual consistente e acessível** | **PASS** | Nenhuma mudança visual. Classes e variáveis CSS mudam de nome com o mesmo estilo; o e2e com axe (WCAG 2.1 AA) segue na suíte e verde em todos os commits; ativos de marca renomeados sem alterar o conteúdo. |
@@ -90,7 +90,7 @@ inalterado.
 **Quality gates.** O PR comprova, na descrição: paridade Web ≡ Telegram (suíte `parity` verde), cobertura,
 revisão de privacidade (nenhum dado novo), ciclo de relatório (suíte verde), identidade visual (e2e axe).
 
-**Resultado do portão**: **PASS**, sem violações; *Complexity Tracking* vazio.
+**Resultado do portão**: **PASS com ressalva**: uma exceção de categoria nova ao Princípio VI, registrada em *Complexity Tracking* e a ratificar pelo dono do produto na emenda 2.1.0.
 
 **Reavaliação pós-design (Fase 1)**: **PASS**. O design (contratos, mapa de tabelas, V7/V8, guardiões) não
 introduz camada, porta nem dependência de produção; as dependências novas (OpenRewrite, ts-morph) são de
@@ -163,13 +163,13 @@ está em [identifier-map.md](./contracts/identifier-map.md) §7–§8 e o de tab
 |---|---|---|---|
 | 1 | Glossário e guardião | as 3 suítes + guardiões com exclusões temporárias cobrindo tudo ainda em português; autotestes de cada guardião; passo do CI | n/a (só adiciona) |
 | 2 | `core` | backend (unidade, ArchUnit, integração, contrato, paridade, privacidade, cobertura) + frontend + e2e | `rename-check` core+testes; JaCoCo antes/depois |
-| 3 | `application` + `V7` | idem + testes de migração (V7) | `rename-check`; catálogo do esquema; contratos de IA; prompts por palavra |
+| 3 | `application` + `V7` (inclui nome interno de armazenamento de PDF novo, FR-026) | idem + testes de migração (V7) | `rename-check`; catálogo do esquema; contratos de IA; prompts por palavra |
 | 4 | Contratos + corte do fio + `V8` | idem + testes de migração (V8) + contratos formais novos + `typecheck` | `rename-check` (backend e frontend); catálogo de mensagens byte a byte; contratos 0 forma |
 | 5 | Frontend | idem | `rename-check` do frontend e CSS |
 | 6 | Infra, scripts, CI | idem + subida do zero (`quickstart.md`) | `rename-check` de YAML/shell |
 | 7 | Documentação e emenda | idem; guardião sem exclusões; `ci.yml` sem arquivo de exclusões | links e nomes citados existem (SC-007) |
 
-A ordem interna de cada fatia: **mapa/contrato → ferramenta → compilação → suíte → verificador → commit**.
+A ordem interna de cada fatia: **mapa completo de identificadores gerado e revisado (não é palavra a palavra: o português inverte a ordem substantivo-adjetivo) → ferramenta → compilação → suíte → verificador → commit**. Literais com espaço que são **código embutido** (JPQL/SQL em `@Query`, JSON em *text blocks* de teste) são verificados token a token pelo mapa, não tratados como texto para pessoas; o nome do PDF mostrado ao usuário é exceção documentada (FR-026).
 Dependências entre tarefas: 1 → 2 → 3 → 4 → 5 → 6 → 7 (cada uma parte do estado verde da anterior).
 
 ## Pontos de decisão (para confirmação do dono do produto)
@@ -192,13 +192,28 @@ Resolvidos no plano com a opção recomendada; mudam o tamanho do trabalho se fo
 4. **Fora de escopo, nomes mantidos**: `portal-do-professor-design-system/`, `assets/`, e os documentos
    `HANDOFF_MVP_Relatorios_Escola_Musica.md`/`PLANO_EXECUCAO_SPECKIT.md` (material de referência do cliente e
    documentação, FR-023). *Alternativa:* renomear as pastas (quebra links nas specs).
-5. **Domínio público no `$id` do esquema** (`relatorios.felipeblaft.com.br`): mantido como exceção, só o
+5. **Termos polissêmicos e sufixos novos** (decididos no glossário v2; confirmar): `inicio` = `home` para a tela e `start` para período; `registro` = `registration` (aula) e `record` (linha/log); `gravar` = `save` (persistir) e áudio = `recorder`/`recording`; `filete` = `divider` (não `rule`); sufixos `*Entity`, `*Command`, `*Filter`, `*Converter`, `*Codec`, `*Config`. Mudar qualquer um altera contratos e a `V8`.
+6. **Domínio público no `$id` do esquema** (`relatorios.felipeblaft.com.br`): mantido como exceção, só o
    caminho muda. Se o domínio real for outro, ajustar antes da fatia 4.
-6. **Ferramenta Java**: OpenRewrite se o spike da fatia 2 passar com Java 25; senão renomeação da IDE por
+7. **Ferramenta Java**: OpenRewrite se o spike da fatia 2 passar com Java 25; senão renomeação da IDE por
    pacote. O resultado passa pelo mesmo verificador; só o esforço muda.
 
 ## Complexity Tracking
 
-Sem violações da constituição a justificar. As três decisões que acrescentam trabalho (V8, divisão do
-frontend, ferramenta de verificação) estão em *Pontos de decisão* e em R-01/R-02; nenhuma adiciona abstração
-de produção.
+As três decisões que acrescentam trabalho (V8, divisão do frontend, ferramenta de verificação) estão em
+*Pontos de decisão* e em R-01/R-02; nenhuma adiciona abstração de produção.
+
+**Exceção ao Princípio VI** (a constituição v2.0.0 diz "exceções permitidas, e somente estas": palavras
+reservadas, APIs de terceiros, nomes exigidos por ferramentas e siglas). A spec aprova, nas *Assumptions*,
+exceções de **nomes próprios e material de referência** que essa lista não prevê:
+
+| Exceção (glossário) | Por que não dá para evitar | Alternativa rejeitada |
+|---|---|---|
+| `br.com.felipeblaft` (`org-name`) | domínio reverso da organização, identidade do `groupId` | renomear a organização |
+| prefixo `fb-` dos ativos (`brand-prefix`) | sigla da marca nos arquivos entregues pelo cliente | renomear a sigla da marca |
+| `relatorios.felipeblaft.com.br` (`public-domain`) | endereço público, não identificador | trocar o domínio |
+| `assets/`, `portal-do-professor-design-system/`, `HANDOFF_…`, `PLANO_EXECUCAO_SPECKIT.md`, pastas `specs/001-…` e `002-…` (`out-of-scope-folders`) | material do cliente e histórico; renomear quebra links das specs | renomear pastas (ver *Pontos de decisão* 4) |
+
+**Ratificação**: a emenda 2.1.0 (fatia 7) acrescenta a categoria "nomes próprios e material de referência" ao
+Princípio VI, depende da aprovação do dono do produto (Governança) e as exceções são listadas na descrição do
+Pull Request. O guardião registra a categoria de cada exceção (`constitutionCategory`).
