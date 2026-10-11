@@ -1,0 +1,24 @@
+{
+  "description": "Fatia dona de cada exclusão temporária (FR-035), por prefixo de caminho; vale o prefixo mais longo. O prefixo \"catalog:\" identifica objetos do catálogo do banco (tabelas, colunas…), dono = fatia 3 (V7). Termos retidos B1/B2/B3 (termos dentro de arquivos já migrados) têm dono = fatia 4 (corte do fio).",
+  "rules": [
+    { "prefix": "backend/nucleo", "slice": 2 },
+    { "prefix": "backend/core", "slice": 2 },
+    { "prefix": "backend/pom.xml", "slice": 2 },
+    { "prefix": "backend/aplicacao", "slice": 3 },
+    { "prefix": "backend/application", "slice": 3 },
+    { "prefix": "backend/.dockerignore", "slice": 3 },
+    { "prefix": "backend/aplicacao/src/main/resources/mensagens", "slice": 4 },
+    { "prefix": "backend/application/src/main/resources/messages", "slice": 4 },
+    { "prefix": "catalog:", "slice": 3 },
+    { "prefix": "specs/", "slice": 4 },
+    { "prefix": "frontend", "slice": 5 },
+    { "prefix": "frontend/src/mensagens", "slice": 4 },
+    { "prefix": "frontend/src/messages", "slice": 4 },
+    { "prefix": "infra", "slice": 6 },
+    { "prefix": ".github", "slice": 6 },
+    { "prefix": ".gitignore", "slice": 6 },
+    { "prefix": ".dockerignore", "slice": 6 }
+  ],
+  "heldBackTermSlice": 4,
+  "defaultSlice": 6
+}

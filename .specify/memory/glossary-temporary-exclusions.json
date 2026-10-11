@@ -1,0 +1,4407 @@
+{
+  "version": 1,
+  "description": "Exclusões temporárias do teste guardião de idioma (feature 003, FR-035). Só existe na branch da feature, é regerada por specs/003-migrate-code-to-english/tools/gen-exclusions.mjs, só encolhe a cada fatia e DEVE ser apagada na fatia 7. \"files\": arquivos ainda em português; \"terms\": termos retidos (B1/B2/B3) dentro de arquivos já migrados. \"slice\" é a fatia que quita a entrada.",
+  "files": [
+    {
+      "path": ".dockerignore",
+      "slice": 6
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "slice": 6
+    },
+    {
+      "path": ".github/workflows/implantar.yml",
+      "slice": 6
+    },
+    {
+      "path": ".gitignore",
+      "slice": 6
+    },
+    {
+      "path": "backend/aplicacao",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/docker-entrypoint.sh",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/Dockerfile",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/pom.xml",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/configuracao",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/configuracao/CanalTelegramConfiguracao.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/configuracao/CasosDeUsoConfiguracao.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/configuracao/CatalogoMensagens.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/configuracao/FormatacaoMensagens.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/configuracao/log/MascaramentoDadosSensiveisConversor.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/configuracao/PropriedadesAplicacao.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/configuracao/ProvedoresIaConfiguracao.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/configuracao/SecoesRelatorioSemestral.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/configuracao/TelegramConfiguracao.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/configuracao/TransacaoCasoDeUsoDecorador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/carga",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/carga/ArgumentosComando.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/carga/CargaComando.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/carga/ComandosCargaExecutor.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/carga/ConteudosDemonstracao.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/carga/EmitirCodigoComando.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/carga/MassaDemonstracaoComando.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/interno",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/interno/seguranca",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/interno/seguranca/ComparadorSegredo.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/interno/seguranca/SegurancaInternaConfiguracao.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/interno/seguranca/TokenServicoFiltro.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/ApresentacaoRelatorioAulaTelegram.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/ApresentacaoRelatorioSemestralTelegram.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/ApresentadorTelegram.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/canal",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/canal/AcaoCanalMapeador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/canal/AcaoDto.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/canal/AtualizacaoResposta.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/canal/CanalTelegramControlador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/canal/ConfirmacaoRequisicao.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/canal/ConfirmacaoResposta.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/canal/ErroCanalResposta.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/canal/EstadoAcaoResposta.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/canal/LoteEntregaDto.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/ContextoTelegram.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/DadosCallbackCodificador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/EnvioTelegram.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/FluxoHistoricoTelegram.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/FluxoRegistroAulaTelegram.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/FluxoRelatorioAulaTelegram.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/FluxoRetomadaTelegram.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/FluxoSemestralTelegram.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/FluxoTelegram.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/InterpretadorConversaTelegram.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/PalavrasChaveTelegram.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/ProcessadorUpdateTelegramServico.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/PublicacaoAcaoTelegramPorta.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/ReferenciaDocumento.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/RegistroUpdatesTelegram.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/ResultadoUpdateTelegram.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/SaidaTelegram.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/TelegramWebhookControlador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/telegram/UpdateTelegram.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/web/AlunoControlador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/web/AlunoResumoDto.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/web/BuscaAlunosDto.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/web/DocumentoControlador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/web/EntrarRequisicao.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/web/ErroResposta.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/web/HistoricoControlador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/web/InicioControlador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/web/InicioDto.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/web/InicioMapeador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/web/ProfessorResumoDto.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/web/RecepcaoAudioWeb.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/web/RelatorioAulaControlador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/web/RelatorioAulaDtos.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/web/RelatorioAulaMapeador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/web/RelatorioEmAbertoDto.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/web/RelatorioSemestralControlador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/web/seguranca",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/web/seguranca/CookieSessao.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/web/seguranca/OrigemRequisicaoResolvedor.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/web/seguranca/ProfessorAutenticado.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/web/seguranca/SegurancaConfiguracao.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/web/seguranca/SessaoCookieFiltro.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/web/SessaoControlador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/web/SessaoDto.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/web/TrabalhoControlador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/entrada/web/TratadorErrosControlador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/RelatoriosAplicacao.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/armazenamento",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/armazenamento/SistemaArquivosArmazenamentoDocumentoAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/audio/ArquivoTelegramAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/audio/FfmpegNormalizacaoAudioAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/audio/LimpezaAudiosTemporariosTarefa.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/fila",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/fila/AvisoDemoraTarefa.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/fila/EntregaAcoesCanalTarefa.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/fila/LimpezaAcoesCanalTarefa.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/fila/TrabalhoWorker.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/ia",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/ia/ClienteHttpIa.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/ia/LlmOpenAiCompativelAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/ia/simulado",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/ia/simulado/LlmSimuladoAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/ia/simulado/TranscricaoSimuladaAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/ia/TranscricaoOpenAiCompativelAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/pdf/OpenHtmlToPdfGeracaoPdfAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/AcaoCanalEntidade.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/AcaoCanalJpa.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/AcaoCanalRepositorioAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/AlunoEntidade.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/AlunoJpa.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/AlunoRepositorioAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/AssociacaoRepositorioAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/AulaJpa.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/CadastroMapeador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/ChamadaIaJpa.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/DocumentoCanalEntidade.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/DocumentoCanalJpa.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/DocumentoCanalRepositorioAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/DocumentoPdfJpa.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/DocumentoPdfRepositorioAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/FilaTrabalhoPostgresAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/InteracaoRelatorioJpa.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/InteracaoRelatorioRepositorioAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/JsonPersistencia.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/ProfessorAlunoEntidade.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/ProfessorAlunoJpa.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/ProfessorEntidade.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/ProfessorJpa.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/ProfessorRepositorioAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/RegistroCustoAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/RegistroUpdatesTelegramAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/RelatorioAulaJpa.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/RelatorioAulaMapeador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/RelatorioAulaRepositorioAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/RelatorioEntidades.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/RelatoriosEmAbertoConsultaAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/RelatorioSemestralEntidade.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/RelatorioSemestralJpa.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/RelatorioSemestralRepositorioAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/SessaoWebEntidade.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/SessaoWebJpa.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/SessaoWebRepositorioAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/TentativaAcessoEntidade.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/TentativaAcessoJpa.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/TentativaAcessoRepositorioAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/TrabalhoProcessamentoJpa.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/TransacaoAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/UpdateTelegramProcessadoEntidade.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/UpdateTelegramProcessadoJpa.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/VarreduraAcessoTarefa.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/VersaoRelatorioJpa.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/VersaoRelatorioRepositorioAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/VinculoTelegramEntidade.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/VinculoTelegramJpa.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/VinculoTelegramMapeador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/persistencia/VinculoTelegramRepositorioAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/seguranca",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/seguranca/GeradorCodigoAcessoAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/seguranca/ProtecaoDadosAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/seguranca/RelogioSistemaAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/telegram/MensageriaTelegramAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/telegram/NotificacaoTelegramAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/telegram/OrquestradorN8nAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/telegram/PublicacaoDiretaTelegramAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/java/br/com/felipeblaft/relatorios/saida/telegram/PublicacaoOutboxTelegramAdaptador.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/resources/application.yaml",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/resources/ia",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/resources/ia/schemas/relatorio-aula.schema.json",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/resources/ia/schemas/relatorio-semestral.schema.json",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/resources/ia/simulado",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/resources/ia/simulado/consolidacao-semestral.json",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/resources/ia/simulado/estruturacao-aula.json",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/resources/ia/simulado/transcricao.txt",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/resources/logback-spring.xml",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/resources/mensagens",
+      "slice": 4
+    },
+    {
+      "path": "backend/aplicacao/src/main/resources/mensagens/mensagens_pt_BR.properties",
+      "slice": 4
+    },
+    {
+      "path": "backend/aplicacao/src/main/resources/pdf/estilos-pdf.css",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/resources/pdf/fontes",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/resources/pdf/imagens",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/resources/pdf/imagens/fb-filete-preto.png",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/resources/pdf/imagens/fb-logo-preto.png",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/resources/pdf/imagens/fb-wordmark-preto.png",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/resources/pdf/relatorio-aula.html",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/resources/pdf/relatorio-semestral.html",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/resources/prompts/consolidacao-semestral.v1.txt",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/resources/prompts/correcao-json.v1.txt",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/resources/prompts/estruturacao-aula.v1.txt",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/resources/prompts/incorporacao-respostas.v1.txt",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/resources/prompts/revisao-aula.v1.txt",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/main/resources/prompts/revisao-semestral.v1.txt",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/arquitetura",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/arquitetura/RegrasAdaptadoresTeste.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/configuracao",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/configuracao/CanalTelegramConfiguracaoTeste.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/configuracao/CatalogoMensagensTeste.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada/carga",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada/carga/CargaComandoIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada/carga/MassaDemonstracaoIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada/interno",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada/interno/seguranca",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada/interno/seguranca/ComparadorSegredoTeste.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada/interno/seguranca/SegurancaInternaConfiguracaoTeste.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada/interno/seguranca/SegurancaInternaIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada/interno/seguranca/SegurancaInternaSemTokenIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada/telegram/canal",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada/telegram/canal/AcaoCanalMapeadorTeste.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada/telegram/canal/AtualizacaoIdempotenciaIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada/telegram/canal/CanalTelegramContratoIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada/telegram/canal/DocumentoCanalContratoIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada/telegram/ConferenciaConversaIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada/telegram/HistoricoConversaIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada/telegram/InicioBuscaConversaIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada/telegram/RegistroAulaConversaIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada/telegram/RespostaEmAteCincoSegundosIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada/telegram/RetomadaConversaIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada/telegram/SemestralConversaIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada/telegram/VinculacaoConversaIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada/web/AcessoContratoIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada/web/DocumentoConferenciaContratoIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada/web/HistoricoContratoIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada/web/InicioAlunosContratoIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada/web/RelatorioAulaContratoIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada/web/RelatorioSemestralContratoIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada/web/RetomadaContratoIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/entrada/web/TratadorErrosIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/iareal",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/iareal/IaRealSuiteIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/paridade",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/paridade/CanalDriver.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/paridade/CanalTelegramDriver.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/paridade/CanalWebDriver.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/paridade/RoteiroParidade.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/paridade/RoteiroParidadeAcessoIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/paridade/RoteiroParidadeHistoricoIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/paridade/RoteiroParidadeRelatorioAulaIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/paridade/RoteiroParidadeRetomadaIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/paridade/RoteiroParidadeSemestralIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/privacidade",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/privacidade/LogCanalInternoSemDadosSensiveisIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/privacidade/LogSemDadosSensiveisIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/privacidade/NaoRetencaoAudioIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/saida",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/saida/audio/FfmpegNormalizacaoAudioAdaptadorIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/saida/fila",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/saida/fila/FilaTrabalhoPostgresAdaptadorIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/saida/ia",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/saida/ia/LlmOpenAiCompativelAdaptadorIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/saida/ia/TranscricaoOpenAiCompativelAdaptadorIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/saida/pdf/PdfRelatorioAulaIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/saida/pdf/PdfRelatorioSemestralIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/saida/persistencia",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/saida/persistencia/AcaoCanalRepositorioAdaptadorIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/saida/persistencia/CadastroPersistenciaIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/saida/persistencia/LimpezaAcoesCanalIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/saida/persistencia/MigracaoV6IT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/saida/persistencia/RegistroCustoPersistenciaIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/saida/persistencia/RelatorioAulaConcorrenciaIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/saida/persistencia/TentativaAcessoIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/saida/seguranca",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/saida/seguranca/AcessoDecifragem.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/saida/telegram/ConfirmacaoCompensacaoIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/saida/telegram/EntregaAcoesCanalIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/saida/telegram/NotificacaoTelegramAdaptadorIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/saida/telegram/NotificacaoTelegramOrquestradorIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/seguranca",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/seguranca/AcessoCruzadoIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/suporte",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/suporte/CenarioIT.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/suporte/ClienteInternoMockMvc.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/suporte/ConfiguracaoTeste.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/suporte/ContratoApiBase.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/suporte/ContratoCanalOpenApi.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/suporte/EntregaOrquestradorBase.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/suporte/EsquemaAcoesV1.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/suporte/ExecutorAcoesSimuladoTeste.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/suporte/ExecutorAcoesSimuladoVerificacaoTeste.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/suporte/IntegracaoBase.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/suporte/LlmProgramavelTeste.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/suporte/NormalizacaoAudioTeste.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/suporte/RelogioAjustavel.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/java/br/com/felipeblaft/relatorios/suporte/TelegramConversaBase.java",
+      "slice": 3
+    },
+    {
+      "path": "backend/aplicacao/src/test/resources/application-teste.yaml",
+      "slice": 3
+    },
+    {
+      "path": "backend/nucleo",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/pom.xml",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/acesso",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/acesso/AtualizarConversaTelegramCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/acesso/ConsultarVinculoTelegramCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/acesso/EncerrarSessaoWebCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/acesso/EncerrarVinculoTelegramCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/acesso/EntrarPortalCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/acesso/IdentificarProfessorTelegramCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/acesso/ValidarSessaoWebCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/acesso/VincularTelegramCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/aula",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/aula/AprovarRelatorioAulaCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/aula/CancelarRelatorioAulaCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/aula/ObterRelatorioAulaCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/aula/ObterRelatorioEmAbertoCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/aula/RegistrarAulaPorAudioCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/aula/ResponderPerguntasCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/aula/SolicitarAlteracaoRelatorioAulaCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/aula/TentarNovamenteRelatorioAulaCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/canal",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConsultarAcaoCanalCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/canal/EmitirDocumentoCanalCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/canal/EntregarAcoesPendentesCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/canal/GravarAcoesCanalCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/canal/LimparAcoesCanalCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/canal/ObterAcoesNaoConfirmadasDoUpdateCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/canal/ObterDocumentoCanalCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/carga",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/carga/ArquivoCarga.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/carga/EmitirCodigoAcessoCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/carga/ResultadoCarga.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/documento",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/documento/ObterDocumentoRelatorioCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/historico",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/historico/ConsultarHistoricoAlunoCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/inicio",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/inicio/AlunoResumo.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/inicio/BuscarAlunosCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/inicio/ObterInicioProfessorCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/inicio/ObterResumoAlunoCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/inicio/ResumosAlunos.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/semestral",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/semestral/AprovarRelatorioSemestralCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/semestral/CancelarRelatorioSemestralCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/semestral/GerarRelatorioSemestralCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/semestral/ListarSemestresDisponiveisCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/semestral/ObterPreviaSemestralCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/semestral/ObterRelatorioSemestralCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/semestral/SolicitarAlteracaoRelatorioSemestralCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/trabalho",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/trabalho/ConsultarTrabalhoCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/trabalho/DescartarRegistroEmProcessamentoCasoDeUso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/acesso",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/acesso/CodigoAcesso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/acesso/SessaoWeb.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/acesso/TentativaAcesso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/cadastro",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/cadastro/Aluno.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/cadastro/BuscaAluno.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/cadastro/Cpf.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/cadastro/Professor.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/cadastro/ProfessorAluno.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/canal",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/canal/AcaoCanal.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/canal/DocumentoCanal.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/canal/EstadoAcaoCanal.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/canal/OrigemAcaoCanal.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/canal/PoliticaRetentativa.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/canal/ResultadoConfirmacao.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/canal/TipoAcaoCanal.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/comum",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/comum/Canal.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/comum/CodigoErro.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/comum/ExcecaoDominio.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/comum/GeradorId.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/comum/Meio.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/comum/ParametrosNegocio.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/comum/TipoRelatorio.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/Aula.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/ConteudoRelatorioAula.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/ConteudoVersao.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/DocumentoPdf.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/EtapaRelatorio.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/InteracaoRelatorio.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/OrigemVersao.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/RelatorioAula.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/RelatorioEmAberto.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/ResultadoInteracao.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/StatusRelatorio.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/TipoDocumento.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/TipoInteracao.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/VersaoRelatorio.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/semestral",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/semestral/ConteudoRelatorioSemestral.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/semestral/InformacoesGerais.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/semestral/PeriodoSemestral.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/semestral/RelatorioSemestral.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/telegram/AudioPendente.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/telegram/ConversaTelegram.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/telegram/EtapaFluxoConversa.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/telegram/FluxoConversa.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/telegram/RelatorioFoco.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/telegram/VinculoTelegram.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/trabalho",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/trabalho/ChamadaIa.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/trabalho/EtapaTrabalho.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/trabalho/ResultadoTrabalho.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/trabalho/StatusTrabalho.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/trabalho/TarefaIa.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/trabalho/TipoTrabalho.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/trabalho/TrabalhoProcessamento.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/AcaoCanalRepositorio.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/AlunoRepositorio.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/ArmazenamentoDocumentoPorta.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/ArquivoCanalPorta.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/ArquivoTemporario.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/AssociacaoRepositorio.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/AudioNaoProcessavelExcecao.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/AudioNormalizado.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/ConflitoConcorrenciaExcecao.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/DocumentoCanalRepositorio.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/DocumentoPdfRepositorio.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/EntradaAudio.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/EntradaConsolidacaoSemestral.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/EntradaRevisaoSemestral.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/EntradaTarefa.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/EntradaTarefaSemestral.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/FilaTrabalhoPorta.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/FormatoNaoSuportadoExcecao.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/GeracaoPdfPorta.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/GeradorCodigoAcessoPorta.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/InteracaoRelatorioRepositorio.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/LlmPorta.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/LoteEntrega.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/NormalizacaoAudioPorta.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/NotificacaoProfessorPorta.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/OrquestradorCanalPorta.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/ProfessorRepositorio.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/ProtecaoDadosPorta.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/ProvedorIndisponivelExcecao.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/ReferenciaArquivoCanal.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/RegistroCustoPorta.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/RelatorioAulaRepositorio.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/RelatoriosEmAbertoConsultaPorta.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/RelatorioSemestralRepositorio.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/RelogioPorta.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/RespostaLlm.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/ResultadoEntrega.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/ResultadoTranscricao.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/SaidaIaInvalidaExcecao.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/SaidaRelatorioAulaIa.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/SaidaRelatorioSemestralIa.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/SessaoWebRepositorio.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/TarefaLlm.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/TentativaAcessoRepositorio.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/TransacaoPorta.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/TranscricaoPorta.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/VersaoRelatorioRepositorio.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/VinculoTelegramRepositorio.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/servico",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/servico/AcessoRelatorioServico.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/servico/AcessoSemestralServico.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/servico/AudioTemporarioServico.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/servico/AutenticacaoCodigoServico.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/servico/AutorizacaoServico.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/servico/ControleTentativasAcessoServico.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/servico/EmissaoCodigoAcessoServico.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/servico/EnvioAudioServico.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/servico/GeracaoDocumentoServico.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/servico/ProcessadorSemestralServico.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/servico/ProcessadorTrabalhoServico.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/servico/RenovacaoAcessoServico.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/arquitetura",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/arquitetura/RegrasArquiteturaTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/acesso",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/acesso/EntrarPortalCasoDeUsoTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/acesso/SessaoWebCasosDeUsoTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/acesso/VincularTelegramCasoDeUsoTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/aula",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/aula/CasosDeUsoRelatorioAulaTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/aula/ObterRelatorioEmAbertoCasoDeUsoTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/aula/RegistrarAulaPorAudioCasoDeUsoTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUsoTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConsultarAcaoCanalCasoDeUsoTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/EmitirDocumentoCanalCasoDeUsoTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/EntregarAcoesPendentesCasoDeUsoTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/GravarAcoesCanalCasoDeUsoTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/LimparAcoesCanalCasoDeUsoTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ObterAcoesNaoConfirmadasDoUpdateCasoDeUsoTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ObterDocumentoCanalCasoDeUsoTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/carga",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUsoTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/carga/EmitirCodigoAcessoCasoDeUsoTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/historico",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/historico/ConsultarHistoricoAlunoCasoDeUsoTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/inicio",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/inicio/InicioCasosDeUsoTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/semestral",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/semestral/CasosDeUsoSemestralTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/trabalho",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/trabalho/DescartarRegistroEmProcessamentoCasoDeUsoTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/acesso",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/acesso/CodigoAcessoTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/acesso/SessaoWebTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/acesso/TentativaAcessoTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/cadastro",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/cadastro/AlunoTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/cadastro/BuscaAlunoTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/cadastro/CpfTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/cadastro/ProfessorTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/canal",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/canal/AcaoCanalTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/canal/DocumentoCanalTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/canal/PoliticaRetentativaTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/comum",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/comum/ComumTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/relatorio",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/relatorio/DominioRelatorioTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/relatorio/RelatorioAulaTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/semestral",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/semestral/SemestralDominioTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/telegram/ConversaTelegramTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/telegram/VinculoTelegramTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/trabalho",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/trabalho/TrabalhoProcessamentoTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dubles",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dubles/AcaoCanalRepositorioEmMemoria.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dubles/AlunoRepositorioEmMemoria.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dubles/AssociacaoRepositorioEmMemoria.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dubles/CenarioAcesso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dubles/CenarioRelatorio.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dubles/DocumentoCanalRepositorioEmMemoria.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dubles/DublesProcessamento.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dubles/GeradorCodigoAcessoFixo.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dubles/OrquestradorCanalFalso.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dubles/ProfessorRepositorioEmMemoria.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dubles/ProtecaoDadosFalsa.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dubles/RelatoriosEmAbertoConsultaFalsa.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dubles/RelogioFixo.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dubles/SessaoWebRepositorioEmMemoria.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dubles/TentativaAcessoRepositorioEmMemoria.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dubles/VinculoTelegramRepositorioEmMemoria.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/servico",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/servico/AutorizacaoServicoTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/servico/ProcessadorSemestralTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/servico/ProcessadorTrabalhoRegistroTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/servico/ProcessadorTrabalhoRespostasAlteracoesTeste.java",
+      "slice": 2
+    },
+    {
+      "path": "backend/pom.xml",
+      "slice": 2
+    },
+    {
+      "path": "catalog:column:acao_canal.canal",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:acao_canal.codigo_motivo",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:acao_canal.compensacao",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:acao_canal.criado_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:acao_canal.entregue_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:acao_canal.estado",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:acao_canal.finalizado_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:acao_canal.lote_id",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:acao_canal.origem",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:acao_canal.prazo_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:acao_canal.professor_id",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:acao_canal.proxima_tentativa_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:acao_canal.tentativas",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:acao_canal.tipo",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:acao_canal.trabalho_id",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:acao_canal.versao",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:aluno.ativo",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:aluno.atualizado_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:aluno.cpf_cifrado",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:aluno.criado_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:aluno.data_nascimento",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:aluno.instrumento",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:aluno.nome",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:aluno.nome_responsavel",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:aula.aluno_id",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:aula.criado_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:aula.data_aula",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:aula.professor_id",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:chamada_ia.codigo_erro",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:chamada_ia.criado_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:chamada_ia.custo_estimado_usd",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:chamada_ia.duracao_ms",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:chamada_ia.provedor_modelo",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:chamada_ia.relatorio_id",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:chamada_ia.relatorio_tipo",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:chamada_ia.segundos_audio",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:chamada_ia.sucesso",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:chamada_ia.tarefa",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:chamada_ia.tokens_entrada",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:chamada_ia.tokens_saida",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:chamada_ia.trabalho_id",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:documento_canal.criado_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:documento_canal.expira_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:documento_canal.nome_arquivo",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:documento_canal.professor_id",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:documento_canal.relatorio_id",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:documento_canal.relatorio_tipo",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:documento_canal.versao",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:documento_pdf.chave_armazenamento",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:documento_pdf.gerado_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:documento_pdf.tamanho_bytes",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:documento_pdf.tipo",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:documento_pdf.versao_id",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:interacao_relatorio.canal",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:interacao_relatorio.criado_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:interacao_relatorio.meio",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:interacao_relatorio.relatorio_id",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:interacao_relatorio.relatorio_tipo",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:interacao_relatorio.resultado",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:interacao_relatorio.rodada",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:interacao_relatorio.texto",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:interacao_relatorio.tipo",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:interacao_relatorio.versao_base",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:interacao_relatorio.versao_resultante",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:professor_aluno.aluno_id",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:professor_aluno.criado_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:professor_aluno.professor_id",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:professor.ativo",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:professor.atualizado_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:professor.codigo_acesso_expira_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:professor.codigo_acesso_hash",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:professor.codigo_acesso_renovado_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:professor.criado_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:professor.nome",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_aula.aluno_id",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_aula.aprovado_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_aula.atualizado_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_aula.aula_id",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_aula.bloqueio_otimista",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_aula.canal_aprovacao",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_aula.canal_origem",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_aula.cancelado_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_aula.conteudo",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_aula.criado_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_aula.etapa_processamento",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_aula.motivo_falha",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_aula.perguntas_pendentes",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_aula.professor_id",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_aula.rodadas_perguntas",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_aula.tempo_processamento_ms",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_aula.transcricao",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_aula.versao_aprovada",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_aula.versao_vigente",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_semestral.aluno_id",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_semestral.aprovado_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_semestral.atualizado_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_semestral.bloqueio_otimista",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_semestral.canal_aprovacao",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_semestral.canal_origem",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_semestral.cancelado_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_semestral.conteudo",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_semestral.criado_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_semestral.etapa_processamento",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_semestral.informacoes_gerais",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_semestral.periodo_chave",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_semestral.periodo_fim",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_semestral.periodo_inicio",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_semestral.professor_id",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_semestral.quantidade_aulas_consideradas",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_semestral.quantidade_relatorios_em_aberto",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_semestral.tempo_processamento_ms",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_semestral.versao_aprovada",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:relatorio_semestral.versao_vigente",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:sessao_web.criada_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:sessao_web.expira_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:sessao_web.professor_id",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:sessao_web.ultimo_uso_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:tentativa_acesso.atualizado_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:tentativa_acesso.bloqueado_ate",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:tentativa_acesso.canal",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:tentativa_acesso.origem_hash",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:tentativa_acesso.tentativas_incorretas",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:trabalho_processamento.aluno_id",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:trabalho_processamento.arquivo_temporario",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:trabalho_processamento.aviso_demora_enviado",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:trabalho_processamento.canal_solicitacao",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:trabalho_processamento.concluido_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:trabalho_processamento.criado_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:trabalho_processamento.etapa",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:trabalho_processamento.iniciado_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:trabalho_processamento.meio",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:trabalho_processamento.parametros",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:trabalho_processamento.professor_id",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:trabalho_processamento.relatorio_id",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:trabalho_processamento.relatorio_resultante_id",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:trabalho_processamento.relatorio_tipo",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:trabalho_processamento.resultado_codigo",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:trabalho_processamento.tentativas",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:trabalho_processamento.tipo",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:update_telegram_processado.origem",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:update_telegram_processado.recebido_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:update_telegram_processado.total_acoes",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:versao_relatorio.canal",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:versao_relatorio.conteudo",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:versao_relatorio.criada_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:versao_relatorio.interacao_id",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:versao_relatorio.numero",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:versao_relatorio.origem",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:versao_relatorio.prompt_versao",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:versao_relatorio.relatorio_id",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:versao_relatorio.relatorio_tipo",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:vinculo_telegram.aluno_selecionado_id",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:vinculo_telegram.atualizado_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:vinculo_telegram.audio_pendente_file_id",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:vinculo_telegram.audio_pendente_file_unique_id",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:vinculo_telegram.audio_pendente_mime",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:vinculo_telegram.audio_pendente_recebido_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:vinculo_telegram.audio_pendente_tamanho",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:vinculo_telegram.bloqueio_otimista",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:vinculo_telegram.dados_fluxo",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:vinculo_telegram.etapa_fluxo",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:vinculo_telegram.fluxo",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:vinculo_telegram.professor_id",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:vinculo_telegram.relatorio_foco_id",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:vinculo_telegram.relatorio_foco_tipo",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:vinculo_telegram.telegram_usuario_id",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:vinculo_telegram.versao_apresentada",
+      "slice": 3
+    },
+    {
+      "path": "catalog:column:vinculo_telegram.vinculado_em",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:acao_canal_canal_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:acao_canal_chat_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:acao_canal_criado_em_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:acao_canal_estado_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:acao_canal_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:acao_canal_lote_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:acao_canal_origem_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:acao_canal_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:acao_canal_prazo_em_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:acao_canal_seq_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:acao_canal_tentativas_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:acao_canal_tipo_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:acao_canal_versao_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:aluno_ativo_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:aluno_atualizado_em_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:aluno_cpf_cifrado_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:aluno_cpf_hash_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:aluno_criado_em_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:aluno_data_nascimento_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:aluno_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:aluno_nome_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:aluno_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:aula_aluno_id_fkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:aula_aluno_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:aula_criado_em_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:aula_data_aula_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:aula_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:aula_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:aula_professor_id_fkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:aula_professor_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:chamada_ia_criado_em_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:chamada_ia_duracao_ms_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:chamada_ia_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:chamada_ia_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:chamada_ia_sucesso_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:chamada_ia_tarefa_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:chamada_ia_trabalho_id_fkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:chamada_ia_trabalho_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:ck_acao_canal_estado",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:ck_acao_canal_origem",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:ck_acao_canal_resposta_update",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:ck_acao_canal_tentativas",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:ck_acao_canal_tipo",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:ck_documento_canal_tipo",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:ck_documento_canal_versao",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:ck_professor_email_minusculo",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:ck_relatorio_aula_rodadas",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:ck_relatorio_semestral_aulas",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:ck_relatorio_semestral_em_aberto",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:ck_relatorio_semestral_periodo",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:ck_tentativa_acesso_positiva",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:ck_update_telegram_origem",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:ck_update_telegram_total_acoes",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:ck_versao_relatorio_numero",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:documento_canal_criado_em_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:documento_canal_expira_em_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:documento_canal_nome_arquivo_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:documento_canal_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:documento_canal_professor_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:documento_canal_relatorio_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:documento_canal_relatorio_tipo_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:documento_canal_token_hash_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:documento_pdf_chave_armazenamento_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:documento_pdf_gerado_em_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:documento_pdf_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:documento_pdf_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:documento_pdf_sha256_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:documento_pdf_tamanho_bytes_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:documento_pdf_tipo_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:documento_pdf_versao_id_fkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:documento_pdf_versao_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:interacao_relatorio_canal_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:interacao_relatorio_criado_em_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:interacao_relatorio_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:interacao_relatorio_meio_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:interacao_relatorio_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:interacao_relatorio_relatorio_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:interacao_relatorio_relatorio_tipo_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:interacao_relatorio_resultado_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:interacao_relatorio_texto_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:interacao_relatorio_tipo_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:interacao_relatorio_versao_base_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:professor_aluno_aluno_id_fkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:professor_aluno_aluno_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:professor_aluno_criado_em_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:professor_aluno_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:professor_aluno_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:professor_aluno_professor_id_fkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:professor_aluno_professor_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:professor_ativo_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:professor_atualizado_em_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:professor_criado_em_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:professor_email_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:professor_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:professor_nome_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:professor_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_aula_aluno_id_fkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_aula_aluno_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_aula_atualizado_em_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_aula_aula_id_fkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_aula_aula_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_aula_bloqueio_otimista_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_aula_canal_origem_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_aula_conteudo_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_aula_criado_em_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_aula_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_aula_perguntas_pendentes_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_aula_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_aula_professor_id_fkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_aula_professor_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_aula_rodadas_perguntas_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_aula_status_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_aula_tempo_processamento_ms_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_aula_transcricao_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_aula_versao_vigente_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_semestral_aluno_id_fkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_semestral_aluno_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_semestral_atualizado_em_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_semestral_bloqueio_otimista_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_semestral_canal_origem_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_semestral_conteudo_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_semestral_criado_em_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_semestral_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_semestral_informacoes_gerais_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_semestral_periodo_chave_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_semestral_periodo_fim_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_semestral_periodo_inicio_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_semestral_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_semestral_professor_id_fkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_semestral_professor_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_semestral_quantidade_aulas_consideradas_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_semestral_quantidade_relatorios_em_aberto_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_semestral_status_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_semestral_tempo_processamento_ms_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:relatorio_semestral_versao_vigente_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:sessao_web_criada_em_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:sessao_web_expira_em_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:sessao_web_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:sessao_web_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:sessao_web_professor_id_fkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:sessao_web_professor_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:sessao_web_token_hash_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:sessao_web_ultimo_uso_em_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:tentativa_acesso_atualizado_em_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:tentativa_acesso_canal_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:tentativa_acesso_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:tentativa_acesso_origem_hash_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:tentativa_acesso_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:tentativa_acesso_tentativas_incorretas_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:trabalho_processamento_aluno_id_fkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:trabalho_processamento_aluno_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:trabalho_processamento_aviso_demora_enviado_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:trabalho_processamento_canal_solicitacao_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:trabalho_processamento_criado_em_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:trabalho_processamento_etapa_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:trabalho_processamento_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:trabalho_processamento_meio_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:trabalho_processamento_parametros_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:trabalho_processamento_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:trabalho_processamento_professor_id_fkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:trabalho_processamento_professor_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:trabalho_processamento_status_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:trabalho_processamento_tentativas_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:trabalho_processamento_tipo_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:uk_acao_canal_seq",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:uk_aluno_cpf_hash",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:uk_documento_pdf",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:uk_professor_aluno",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:uk_professor_email",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:uk_relatorio_aula_aula",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:uk_sessao_web_token",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:uk_tentativa_acesso_origem",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:uk_versao_relatorio",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:uk_vinculo_telegram_professor",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:uk_vinculo_telegram_usuario",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:update_telegram_processado_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:update_telegram_processado_recebido_em_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:update_telegram_processado_update_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:versao_relatorio_canal_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:versao_relatorio_conteudo_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:versao_relatorio_criada_em_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:versao_relatorio_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:versao_relatorio_interacao_id_fkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:versao_relatorio_numero_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:versao_relatorio_origem_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:versao_relatorio_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:versao_relatorio_relatorio_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:versao_relatorio_relatorio_tipo_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:vinculo_telegram_aluno_selecionado_id_fkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:vinculo_telegram_atualizado_em_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:vinculo_telegram_bloqueio_otimista_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:vinculo_telegram_chat_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:vinculo_telegram_dados_fluxo_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:vinculo_telegram_etapa_fluxo_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:vinculo_telegram_fluxo_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:vinculo_telegram_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:vinculo_telegram_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:vinculo_telegram_professor_id_fkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:vinculo_telegram_professor_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:vinculo_telegram_telegram_usuario_id_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:constraint:vinculo_telegram_vinculado_em_not_null",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:acao_canal_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:aluno_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:aula_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:chamada_ia_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:documento_canal_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:documento_pdf_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:interacao_relatorio_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:ix_acao_canal_chat_vivas",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:ix_acao_canal_entrega",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:ix_acao_canal_expurgo",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:ix_acao_canal_lote",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:ix_acao_canal_update",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:ix_aula_professor_aluno",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:ix_aula_professor_aluno_data",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:ix_chamada_ia_relatorio",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:ix_documento_canal_expira",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:ix_interacao_relatorio",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:ix_professor_aluno_aluno",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:ix_relatorio_aula_aprovados",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:ix_sessao_web_expira",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:ix_trabalho_pendente",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:ix_trabalho_relatorio",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:ix_update_telegram_recebido",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:professor_aluno_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:professor_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:relatorio_aula_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:relatorio_semestral_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:sessao_web_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:tentativa_acesso_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:trabalho_processamento_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:uk_acao_canal_seq",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:uk_aluno_cpf_hash",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:uk_documento_pdf",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:uk_professor_aluno",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:uk_professor_codigo_acesso_hash",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:uk_professor_email",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:uk_relatorio_aula_aula",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:uk_relatorio_aula_em_aberto",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:uk_relatorio_semestral_aprovado",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:uk_relatorio_semestral_em_aberto",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:uk_sessao_web_token",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:uk_tentativa_acesso_origem",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:uk_trabalho_consolidacao_em_curso",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:uk_trabalho_registro_em_curso",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:uk_versao_relatorio",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:uk_vinculo_telegram_professor",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:uk_vinculo_telegram_usuario",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:update_telegram_processado_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:versao_relatorio_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:index:vinculo_telegram_pkey",
+      "slice": 3
+    },
+    {
+      "path": "catalog:table:acao_canal",
+      "slice": 3
+    },
+    {
+      "path": "catalog:table:aluno",
+      "slice": 3
+    },
+    {
+      "path": "catalog:table:aula",
+      "slice": 3
+    },
+    {
+      "path": "catalog:table:chamada_ia",
+      "slice": 3
+    },
+    {
+      "path": "catalog:table:documento_canal",
+      "slice": 3
+    },
+    {
+      "path": "catalog:table:documento_pdf",
+      "slice": 3
+    },
+    {
+      "path": "catalog:table:interacao_relatorio",
+      "slice": 3
+    },
+    {
+      "path": "catalog:table:professor",
+      "slice": 3
+    },
+    {
+      "path": "catalog:table:professor_aluno",
+      "slice": 3
+    },
+    {
+      "path": "catalog:table:relatorio_aula",
+      "slice": 3
+    },
+    {
+      "path": "catalog:table:relatorio_semestral",
+      "slice": 3
+    },
+    {
+      "path": "catalog:table:sessao_web",
+      "slice": 3
+    },
+    {
+      "path": "catalog:table:tentativa_acesso",
+      "slice": 3
+    },
+    {
+      "path": "catalog:table:trabalho_processamento",
+      "slice": 3
+    },
+    {
+      "path": "catalog:table:update_telegram_processado",
+      "slice": 3
+    },
+    {
+      "path": "catalog:table:versao_relatorio",
+      "slice": 3
+    },
+    {
+      "path": "catalog:table:vinculo_telegram",
+      "slice": 3
+    },
+    {
+      "path": "frontend/.prettierignore",
+      "slice": 5
+    },
+    {
+      "path": "frontend/Dockerfile",
+      "slice": 5
+    },
+    {
+      "path": "frontend/eslint.config.js",
+      "slice": 5
+    },
+    {
+      "path": "frontend/index.html",
+      "slice": 5
+    },
+    {
+      "path": "frontend/package.json",
+      "slice": 5
+    },
+    {
+      "path": "frontend/public/marca",
+      "slice": 5
+    },
+    {
+      "path": "frontend/public/marca/fb-filete-marfim.png",
+      "slice": 5
+    },
+    {
+      "path": "frontend/public/marca/fb-filete-ouro.png",
+      "slice": 5
+    },
+    {
+      "path": "frontend/public/marca/fb-filete-ouroclaro.png",
+      "slice": 5
+    },
+    {
+      "path": "frontend/public/marca/fb-filete-preto.png",
+      "slice": 5
+    },
+    {
+      "path": "frontend/public/marca/fb-logo-marfim.png",
+      "slice": 5
+    },
+    {
+      "path": "frontend/public/marca/fb-logo-ouro.png",
+      "slice": 5
+    },
+    {
+      "path": "frontend/public/marca/fb-logo-preto.png",
+      "slice": 5
+    },
+    {
+      "path": "frontend/public/marca/fb-monograma-marfim.png",
+      "slice": 5
+    },
+    {
+      "path": "frontend/public/marca/fb-monograma-ouro.png",
+      "slice": 5
+    },
+    {
+      "path": "frontend/public/marca/fb-monograma-ouroclaro.png",
+      "slice": 5
+    },
+    {
+      "path": "frontend/public/marca/fb-monograma-preto.png",
+      "slice": 5
+    },
+    {
+      "path": "frontend/public/marca/fb-wordmark-marfim.png",
+      "slice": 5
+    },
+    {
+      "path": "frontend/public/marca/fb-wordmark-ouro.png",
+      "slice": 5
+    },
+    {
+      "path": "frontend/public/marca/fb-wordmark-preto.png",
+      "slice": 5
+    },
+    {
+      "path": "frontend/scripts/gerar-mensagens.mjs",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/app/App.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/app/GuardaSessao.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/app/rotas.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/app/TemaProvedor.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/app/useEhMovel.ts",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/componentes",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/componentes/Botao.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/componentes/Cabecalho.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/componentes/CartaoAluno.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/componentes/DialogoConfirmacao.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/componentes/EstadoCarregando.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/componentes/EstadoErro.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/componentes/EstadoVazio.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/componentes/Estrutura.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/componentes/EtapasProcessamento.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/componentes/GravadorAudio.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/componentes/Icone.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/componentes/SecoesRelatorio.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/componentes/SecoesSemestral.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/componentes/VisualizadorPdf.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/estilos",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/estilos/base.css",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/estilos/fontes",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/estilos/fontes.css",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/estilos/fontes/icones-incluidos.txt",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/estilos/registro-aula.css",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/estilos/tipografia.css",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/estilos/tokens.css",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/main.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/mensagens",
+      "slice": 4
+    },
+    {
+      "path": "frontend/src/mensagens/mensagens.ts",
+      "slice": 4
+    },
+    {
+      "path": "frontend/src/paginas",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/paginas/TelaAlunos.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/paginas/TelaAprovado.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/paginas/TelaConferencia.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/paginas/TelaConferenciaSemestral.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/paginas/TelaEntrar.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/paginas/TelaGravacao.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/paginas/TelaHistorico.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/paginas/TelaPainel.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/paginas/TelaPerguntas.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/paginas/TelaProcessando.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/paginas/TelaRelatorioEmAberto.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/paginas/TelaSemestral.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/servicos",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/servicos/alunos.ts",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/servicos/clienteApi.ts",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/servicos/formatacao.ts",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/servicos/historico.ts",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/servicos/inicio.ts",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/servicos/pdf.ts",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/servicos/relatoriosAula.ts",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/servicos/semestral.ts",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/servicos/sessao.ts",
+      "slice": 5
+    },
+    {
+      "path": "frontend/src/servicos/trabalhos.ts",
+      "slice": 5
+    },
+    {
+      "path": "frontend/tests/componentes",
+      "slice": 5
+    },
+    {
+      "path": "frontend/tests/componentes/ComponentesComuns.test.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/tests/componentes/GravadorAudio.test.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/tests/configuracao.ts",
+      "slice": 5
+    },
+    {
+      "path": "frontend/tests/e2e/acessibilidade.spec.ts",
+      "slice": 5
+    },
+    {
+      "path": "frontend/tests/e2e/fluxo-aula.spec.ts",
+      "slice": 5
+    },
+    {
+      "path": "frontend/tests/e2e/fluxo-semestral.spec.ts",
+      "slice": 5
+    },
+    {
+      "path": "frontend/tests/e2e/historico.spec.ts",
+      "slice": 5
+    },
+    {
+      "path": "frontend/tests/e2e/retomada.spec.ts",
+      "slice": 5
+    },
+    {
+      "path": "frontend/tests/e2e/suporte.ts",
+      "slice": 5
+    },
+    {
+      "path": "frontend/tests/paginas",
+      "slice": 5
+    },
+    {
+      "path": "frontend/tests/paginas/AudioPerguntasConferencia.test.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/tests/paginas/RegistroAula.test.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/tests/paginas/TelaAlunos.test.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/tests/paginas/TelaConferenciaSemestral.test.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/tests/paginas/TelaEntrar.test.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/tests/paginas/TelaHistorico.test.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/tests/paginas/TelaPainel.test.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/tests/paginas/TelaRelatorioEmAberto.test.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/tests/paginas/TelaSemestral.test.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/tests/utilitarios.tsx",
+      "slice": 5
+    },
+    {
+      "path": "frontend/vite.config.ts",
+      "slice": 5
+    },
+    {
+      "path": "infra/.env.example",
+      "slice": 6
+    },
+    {
+      "path": "infra/caddy/Caddyfile",
+      "slice": 6
+    },
+    {
+      "path": "infra/carga",
+      "slice": 6
+    },
+    {
+      "path": "infra/carga/demonstracao.json",
+      "slice": 6
+    },
+    {
+      "path": "infra/carga/exemplo.json",
+      "slice": 6
+    },
+    {
+      "path": "infra/compose.banco.yaml",
+      "slice": 6
+    },
+    {
+      "path": "infra/compose.dev.yaml",
+      "slice": 6
+    },
+    {
+      "path": "infra/compose.test.yaml",
+      "slice": 6
+    },
+    {
+      "path": "infra/compose.yaml",
+      "slice": 6
+    },
+    {
+      "path": "infra/scripts/implantar.sh",
+      "slice": 6
+    },
+    {
+      "path": "infra/scripts/local.sh",
+      "slice": 6
+    },
+    {
+      "path": "specs/001-fluxo-relatorios/contracts/api-portal.openapi.yaml",
+      "slice": 4
+    },
+    {
+      "path": "specs/002-api-interna-canal-telegram/contracts/acoes-v1.schema.json",
+      "slice": 4
+    },
+    {
+      "path": "specs/002-api-interna-canal-telegram/contracts/canal-telegram-interno.openapi.yaml",
+      "slice": 4
+    }
+  ],
+  "terms": []
+}

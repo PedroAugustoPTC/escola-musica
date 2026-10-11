@@ -18,6 +18,10 @@ jobs:
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v5
+      # FR-035 (feature 003): a main nunca recebe o guardião de idioma com exclusões temporárias. Enquanto a
+      # migração não termina (fatia 7 apaga o arquivo), este passo mantém o PR vermelho de propósito.
+      - name: Garantir que não há exclusões temporárias do guardião
+        run: test ! -e .specify/memory/glossary-temporary-exclusions.json
       - name: Testes do backend
         run: docker compose -f infra/compose.test.yaml run --rm testes-backend
       - name: Relatório de cobertura do núcleo

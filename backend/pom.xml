@@ -64,8 +64,10 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <configuration>
-                        <!-- Convenção do projeto: testes unitários terminam em `Teste` (Princípio VI). -->
+                        <!-- Convenção do projeto: testes unitários terminam em `Test` (Princípio VI, inglês). Até as
+                             fatias 2 e 3 da feature 003 migrarem as classes existentes, `*Teste` continua aceito. -->
                         <includes>
+                            <include>**/*Test.java</include>
                             <include>**/*Teste.java</include>
                         </includes>
                         <excludes>
