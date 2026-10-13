@@ -34,6 +34,11 @@ const init = flag('--init');
 const allowNew = flag('--allow-new');
 const heldBackPath = option('--held-back');
 const existingList = option('--existing');
+// Fatia que MOVE arquivos: `--remap de=>para,…` reescreve, em ordem, o início dos caminhos da lista anterior;
+// `--migrated-prefix p1,p2` marca a área já migrada: ali só podem sobrar literais (a receita nunca os altera) e
+// identificadores da lista de retenção (B1/B2); qualquer outro identificador é erro.
+const remaps = (option('--remap') ?? '').split(',').filter(Boolean).map((pair) => pair.split('=>'));
+const migratedPrefixes = (option('--migrated-prefix') ?? '').split(',').filter(Boolean);
 
 const owners = JSON.parse(readFileSync(join(here, 'slice-owners.json'), 'utf8'));
 function ownerOf(path) {
@@ -45,6 +50,7 @@ function ownerOf(path) {
 
 // violações atuais, agrupadas por caminho
 const violations = new Map();
+const details = new Map(); // caminho → [{ term, kind, text }]
 for (const reportPath of reportPaths) {
   if (!existsSync(reportPath)) {
     console.error(`relatório ausente: ${reportPath} (rode o guardião com GUARD_REPORT=1)`);
@@ -53,19 +59,26 @@ for (const reportPath of reportPaths) {
   for (const violation of JSON.parse(readFileSync(reportPath, 'utf8'))) {
     if (!violations.has(violation.path)) violations.set(violation.path, new Set());
     violations.get(violation.path).add(violation.term);
+    if (!details.has(violation.path)) details.set(violation.path, []);
+    details.get(violation.path).push({ term: violation.term, kind: violation.kind, text: violation.text });
   }
 }
 
 const heldBack = new Map();
+const heldTexts = new Set(); // nomes retidos: constantes (B1), componentes de record (B2) e chaves literais (B3)
 if (heldBackPath) {
-  for (const item of JSON.parse(readFileSync(resolve(root, heldBackPath), 'utf8')).items) {
-    heldBack.set(item.path, new Set(item.terms));
-  }
+  const held = JSON.parse(readFileSync(resolve(root, heldBackPath), 'utf8'));
+  for (const item of held.items ?? []) heldBack.set(item.path, new Set(item.terms));
+  for (const group of [held.B1, held.B2]) for (const entry of Object.values(group ?? {})) for (const member of entry.members) heldTexts.add(member);
+  for (const literal of Object.keys(held.B3 ?? {})) heldTexts.add(literal);
 }
 
 const previous = !init && existsSync(outPath)
   ? JSON.parse(readFileSync(outPath, 'utf8'))
   : { version: 1, files: [], terms: [] };
+const remap = (path) => remaps.reduce((current, [from, to]) => (current.startsWith(from) ? to + current.slice(from.length) : current), path);
+previous.files = previous.files.map((entry) => ({ ...entry, path: remap(entry.path) }));
+previous.terms = previous.terms.map((entry) => ({ ...entry, path: remap(entry.path) }));
 const existingFiles = existingList ? new Set(readFileSync(resolve(root, existingList), 'utf8').split(/\r?\n/).filter(Boolean)) : null;
 
 const next = { files: [], terms: [] };
@@ -89,15 +102,32 @@ if (init) {
     if (held && [...current].every((term) => held.has(term))) {
       for (const term of [...current].sort()) next.terms.push({ path, term, slice: owners.heldBackTermSlice });
     } else {
-      next.files.push({ path, slice });
+      next.files.push({ path, slice: ownerOf(path) }); // o dono vem sempre das regras atuais
     }
   }
   for (const entry of previous.terms) {
     if (violations.get(entry.path)?.has(entry.term)) next.terms.push(entry);
   }
+  // área migrada: literais e identificadores retidos viram termos (dono = fatia dos termos retidos)
+  const migratedHandled = new Set();
+  for (const [path, entries] of details) {
+    if (!migratedPrefixes.some((prefix) => path.startsWith(prefix))) continue;
+    migratedHandled.add(path);
+    const seenTerms = new Set();
+    for (const { term, kind, text } of entries) {
+      const retained = kind === 'literal' || heldTexts.has(text);
+      if (!retained) {
+        rejected.push(`${path}: ${kind} "${text}" (${term}) não está na lista de retenção`);
+        continue;
+      }
+      if (seenTerms.has(term)) continue;
+      seenTerms.add(term);
+      next.terms.push({ path, term, slice: owners.heldBackTermSlice });
+    }
+  }
   const listedTerms = new Set(next.terms.map(({ path, term }) => `${path}\u0000${term}`));
   for (const [path, terms] of violations) {
-    if (listedFiles.has(path)) continue;
+    if (listedFiles.has(path) || migratedHandled.has(path)) continue;
     for (const term of terms) {
       if (listedTerms.has(`${path}\u0000${term}`)) continue;
       if (allowNew) next.terms.push({ path, term, slice: ownerOf(path) });

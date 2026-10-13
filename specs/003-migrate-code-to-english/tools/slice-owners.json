@@ -3,7 +3,7 @@
   "rules": [
     { "prefix": "backend/nucleo", "slice": 2 },
     { "prefix": "backend/core", "slice": 2 },
-    { "prefix": "backend/pom.xml", "slice": 2 },
+    { "prefix": "backend/pom.xml", "slice": 3 },
     { "prefix": "backend/aplicacao", "slice": 3 },
     { "prefix": "backend/application", "slice": 3 },
     { "prefix": "backend/.dockerignore", "slice": 3 },

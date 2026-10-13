@@ -4,10 +4,10 @@
 FROM maven:3.9-eclipse-temurin-25 AS build
 WORKDIR /build
 COPY pom.xml .
-COPY nucleo/pom.xml nucleo/
+COPY core/pom.xml core/
 COPY aplicacao/pom.xml aplicacao/
 RUN --mount=type=cache,target=/root/.m2 mvn -B -ntp -q dependency:go-offline -pl aplicacao -am || true
-COPY nucleo/src nucleo/src
+COPY core/src core/src
 COPY aplicacao/src aplicacao/src
 RUN --mount=type=cache,target=/root/.m2 mvn -B -ntp -q -DskipTests -Djacoco.skip=true package
 

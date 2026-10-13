@@ -1,0 +1,210 @@
+{
+  "descricao": "Exceções ao mapa de identificadores (tools/maps/slice-<N>.json), usadas pelo rename-check e pelos geradores de receita. Cada par foi conferido contra .specify/memory/glossary.json (inclusive 'contextual') e contracts/identifier-map.md §9. Só entram aqui as exceções; o resto vem do mapa. methodIdentifiers/variableIdentifiers: o mesmo nome antigo vira nomes diferentes por papel quando o mapa geral cairia em palavra reservada do Java (novo/nova/padrao). qualifiedMethods: \"TipoAntigo#metodoAntigo\" → nome novo, quando o mesmo nome antigo precisa de nomes diferentes conforme o tipo dono (aqui: emAberto). tokenEdits: troca manual de identificador (arquivo, from, to, reason) que não é renomeação pelo mapa, permitida só no arquivo indicado e sempre com motivo.",
+  "packageSegments": {
+    "inicio": "home"
+  },
+  "pathSegments": {},
+  "identifiers": {},
+  "literals": [
+    {
+      "file": "core/src/test/java/br/com/felipeblaft/reports/architecture/ArchitectureRulesTest.java",
+      "from": "br.com.felipeblaft.relatorios",
+      "to": "br.com.felipeblaft.reports",
+      "reason": "regra ArchUnit: pacote-base do núcleo (T039)"
+    },
+    {
+      "file": "core/src/test/java/br/com/felipeblaft/reports/architecture/ArchitectureRulesTest.java",
+      "from": ".dominio..",
+      "to": ".domain..",
+      "reason": "regra ArchUnit: camada domínio → domain (T039)"
+    },
+    {
+      "file": "core/src/test/java/br/com/felipeblaft/reports/architecture/ArchitectureRulesTest.java",
+      "from": ".casodeuso..",
+      "to": ".usecase..",
+      "reason": "regra ArchUnit: camada casos de uso → usecase (T039)"
+    },
+    {
+      "file": "core/src/test/java/br/com/felipeblaft/reports/architecture/ArchitectureRulesTest.java",
+      "from": ".servico..",
+      "to": ".service..",
+      "reason": "regra ArchUnit: camada serviços → service (T039)"
+    },
+    {
+      "file": "core/src/test/java/br/com/felipeblaft/reports/architecture/ArchitectureRulesTest.java",
+      "from": ".porta..",
+      "to": ".port..",
+      "reason": "regra ArchUnit: camada portas → port (T039)"
+    },
+    {
+      "file": "core/src/test/java/br/com/felipeblaft/reports/architecture/ArchitectureRulesTest.java",
+      "from": "CasoDeUso",
+      "to": "UseCase",
+      "reason": "regra ArchUnit: sufixo do tipo renomeado (T039)"
+    },
+    {
+      "file": "core/src/test/java/br/com/felipeblaft/reports/architecture/ArchitectureRulesTest.java",
+      "from": "Servico",
+      "to": "Service",
+      "reason": "regra ArchUnit: sufixo do tipo renomeado (T039)"
+    },
+    {
+      "file": "core/src/test/java/br/com/felipeblaft/reports/architecture/ArchitectureRulesTest.java",
+      "from": "Porta",
+      "to": "Port",
+      "reason": "regra ArchUnit: sufixo do tipo renomeado (T039)"
+    },
+    {
+      "file": "core/src/test/java/br/com/felipeblaft/reports/architecture/ArchitectureRulesTest.java",
+      "from": "Repositorio",
+      "to": "Repository",
+      "reason": "regra ArchUnit: sufixo do tipo renomeado (T039)"
+    },
+    {
+      "file": "core/src/test/java/br/com/felipeblaft/reports/architecture/ArchitectureRulesTest.java",
+      "from": "Entrada",
+      "to": "Input",
+      "reason": "regra ArchUnit: os tipos de dados de entrada passaram de prefixo Entrada a sufixo Input (T039)"
+    },
+    {
+      "file": "aplicacao/src/test/java/br/com/felipeblaft/reports/architecture/RegrasAdaptadoresTeste.java",
+      "from": "br.com.felipeblaft.relatorios",
+      "to": "br.com.felipeblaft.reports",
+      "reason": "regra ArchUnit da aplicacao: pacote-base (T041)"
+    },
+    {
+      "file": "aplicacao/src/test/java/br/com/felipeblaft/reports/architecture/RegrasAdaptadoresTeste.java",
+      "from": ".porta",
+      "to": ".port",
+      "reason": "regra ArchUnit da aplicacao: pacote das portas do core (T041)"
+    },
+    {
+      "file": "aplicacao/src/main/java/br/com/felipeblaft/reports/configuracao/TransacaoCasoDeUsoDecorador.java",
+      "from": "br.com.felipeblaft.relatorios.casodeuso",
+      "to": "br.com.felipeblaft.reports.usecase",
+      "reason": "decorador casa os casos de uso pelo nome do pacote (T041)"
+    },
+    {
+      "file": "aplicacao/src/main/java/br/com/felipeblaft/reports/configuracao/TransacaoCasoDeUsoDecorador.java",
+      "from": "EntregarAcoesPendentesCasoDeUso",
+      "to": "DeliverPendingActionsUseCase",
+      "reason": "decorador casa casos de uso pelo nome simples da classe (T041)"
+    },
+    {
+      "file": "aplicacao/src/main/java/br/com/felipeblaft/reports/configuracao/TransacaoCasoDeUsoDecorador.java",
+      "from": "ObterDocumentoCanalCasoDeUso",
+      "to": "GetChannelDocumentUseCase",
+      "reason": "decorador casa casos de uso pelo nome simples da classe (T041)"
+    },
+    {
+      "file": "aplicacao/src/main/java/br/com/felipeblaft/reports/configuracao/TransacaoCasoDeUsoDecorador.java",
+      "from": "CasoDeUso",
+      "to": "UseCase",
+      "reason": "decorador casa casos de uso pelo sufixo do nome da classe (T041)"
+    }
+  ],
+  "methodIdentifiers": {
+    "novo": "create",
+    "nova": "create",
+    "padrao": "defaults"
+  },
+  "variableIdentifiers": {
+    "novo": "created",
+    "nova": "created",
+    "novas": "newActions",
+    "padrao": "defaults",
+    "vincular": "linkUseCase"
+  },
+  "qualifiedMethods": {
+    "StatusRelatorio#emAberto": "isOpen",
+    "InicioCasosDeUsoTeste#emAberto": "openReport"
+  },
+  "tokenEdits": [
+    {
+      "file": "core/src/test/java/br/com/felipeblaft/reports/architecture/ArchitectureRulesTest.java",
+      "from": "startsWith",
+      "to": "endsWith",
+      "reason": "o prefixo Entrada virou o sufixo Input; a asserção exclui os mesmos tipos (T039)",
+      "occurrence": 1
+    }
+  ],
+  "textEdits": [
+    {
+      "file": "aplicacao/src/main/resources/logback-spring.xml",
+      "from": "br.com.felipeblaft.relatorios.configuracao.log.",
+      "to": "br.com.felipeblaft.reports.configuracao.log.",
+      "reason": "FQCN do conversor de máscara: só a base do pacote muda nesta fatia (T041)"
+    },
+    {
+      "file": "aplicacao/src/main/resources/logback-spring.xml",
+      "from": "<logger name=\"br.com.felipeblaft.relatorios\"",
+      "to": "<logger name=\"br.com.felipeblaft.reports\"",
+      "reason": "nome do logger raiz = pacote-base (T041)"
+    }
+  ],
+  "acceptedCollisions": [
+    {
+      "file": "usecase/semester/GetSemesterPreviewUseCase.java",
+      "novo": "approvedLessons",
+      "antigos": [
+        "aprovadas",
+        "aulasAprovadas"
+      ],
+      "reason": "revisada: o código compila, então as declarações estão em escopos distintos (métodos diferentes); sem sombreamento"
+    },
+    {
+      "file": "domain/telegram/TelegramConversation.java",
+      "novo": "data",
+      "antigos": [
+        "dado",
+        "dados"
+      ],
+      "reason": "sobrecarga legal: data(String key) e data() — mesma assinatura do original (dado(String) e dados())"
+    },
+    {
+      "file": "domain/job/AiCall.java",
+      "novo": "reportId",
+      "antigos": [
+        "idDoRelatorio",
+        "relatorioId"
+      ],
+      "reason": "revisada: o código compila, então as declarações estão em escopos distintos (métodos diferentes); sem sombreamento"
+    },
+    {
+      "file": "service/SemesterProcessorService.java",
+      "novo": "created",
+      "antigos": [
+        "criado",
+        "nova"
+      ],
+      "reason": "revisada: o código compila, então as declarações estão em escopos distintos (métodos diferentes); sem sombreamento"
+    },
+    {
+      "file": "service/JobProcessorService.java",
+      "novo": "created",
+      "antigos": [
+        "nova",
+        "novo"
+      ],
+      "reason": "revisada: o código compila, então as declarações estão em escopos distintos (métodos diferentes); sem sombreamento"
+    },
+    {
+      "file": "doubles/InMemoryChannelActionRepository.java",
+      "novo": "saved",
+      "antigos": [
+        "gravada",
+        "gravadas"
+      ],
+      "reason": "revisada: o código compila, então as declarações estão em escopos distintos (métodos diferentes); sem sombreamento"
+    },
+    {
+      "file": "doubles/ProcessingDoubles.java",
+      "novo": "next",
+      "antigos": [
+        "proxima",
+        "proximo"
+      ],
+      "reason": "revisada: o código compila, então as declarações estão em escopos distintos (métodos diferentes); sem sombreamento"
+    }
+  ]
+}

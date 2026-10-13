@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- O parent do Spring Boot só gerencia versões e plugins; o módulo `nucleo` não declara nenhuma
+    <!-- O parent do Spring Boot só gerencia versões e plugins; o módulo `core` não declara nenhuma
          dependência de Spring (Princípio I). -->
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -13,14 +13,14 @@
         <relativePath/>
     </parent>
 
-    <groupId>br.com.felipeblaft.relatorios</groupId>
-    <artifactId>relatorios</artifactId>
+    <groupId>br.com.felipeblaft.reports</groupId>
+    <artifactId>reports</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Relatórios Pedagógicos por Voz</name>
 
     <modules>
-        <module>nucleo</module>
+        <module>core</module>
         <module>aplicacao</module>
     </modules>
 
@@ -45,8 +45,8 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>br.com.felipeblaft.relatorios</groupId>
-                <artifactId>nucleo</artifactId>
+                <groupId>br.com.felipeblaft.reports</groupId>
+                <artifactId>core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

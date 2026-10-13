@@ -27,11 +27,11 @@
                     <rootCauseFirst>true</rootCauseFirst>
                 </throwableConverter>
                 <jsonGeneratorDecorator class="net.logstash.logback.mask.MaskingJsonGeneratorDecorator">
-                    <valueMasker class="br.com.felipeblaft.relatorios.configuracao.log.MascaramentoDadosSensiveisConversor"/>
+                    <valueMasker class="br.com.felipeblaft.reports.configuracao.log.MascaramentoDadosSensiveisConversor"/>
                 </jsonGeneratorDecorator>
             </encoder>
         </appender>
-        <logger name="br.com.felipeblaft.relatorios" level="INFO"/>
+        <logger name="br.com.felipeblaft.reports" level="INFO"/>
         <logger name="org.hibernate.SQL" level="WARN"/>
         <root level="INFO">
             <appender-ref ref="JSON"/>

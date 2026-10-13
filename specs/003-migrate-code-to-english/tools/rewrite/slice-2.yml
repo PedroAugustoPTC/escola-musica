@@ -1,0 +1,197 @@
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: br.com.felipeblaft.migration.Slice2.Packages
+displayName: "Fatia 2 — pacotes"
+description: "Base relatorios→reports nos dois módulos; camadas e subpacotes do core pelo mapa."
+recipeList:
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios
+      newPackageName: br.com.felipeblaft.reports
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.arquitetura
+      newPackageName: br.com.felipeblaft.reports.architecture
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.casodeuso.acesso
+      newPackageName: br.com.felipeblaft.reports.usecase.access
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.casodeuso.aula
+      newPackageName: br.com.felipeblaft.reports.usecase.lesson
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.casodeuso.canal
+      newPackageName: br.com.felipeblaft.reports.usecase.channel
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.casodeuso.carga
+      newPackageName: br.com.felipeblaft.reports.usecase.seed
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.casodeuso.documento
+      newPackageName: br.com.felipeblaft.reports.usecase.document
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.casodeuso.historico
+      newPackageName: br.com.felipeblaft.reports.usecase.history
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.casodeuso.inicio
+      newPackageName: br.com.felipeblaft.reports.usecase.home
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.casodeuso.semestral
+      newPackageName: br.com.felipeblaft.reports.usecase.semester
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.casodeuso.trabalho
+      newPackageName: br.com.felipeblaft.reports.usecase.job
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.configuracao
+      newPackageName: br.com.felipeblaft.reports.configuracao
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.configuracao.log
+      newPackageName: br.com.felipeblaft.reports.configuracao.log
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.dominio.acesso
+      newPackageName: br.com.felipeblaft.reports.domain.access
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.dominio.cadastro
+      newPackageName: br.com.felipeblaft.reports.domain.registry
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.dominio.canal
+      newPackageName: br.com.felipeblaft.reports.domain.channel
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.dominio.comum
+      newPackageName: br.com.felipeblaft.reports.domain.common
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.dominio.relatorio
+      newPackageName: br.com.felipeblaft.reports.domain.report
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.dominio.semestral
+      newPackageName: br.com.felipeblaft.reports.domain.semester
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.dominio.telegram
+      newPackageName: br.com.felipeblaft.reports.domain.telegram
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.dominio.trabalho
+      newPackageName: br.com.felipeblaft.reports.domain.job
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.dubles
+      newPackageName: br.com.felipeblaft.reports.doubles
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.entrada.carga
+      newPackageName: br.com.felipeblaft.reports.entrada.carga
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.entrada.interno.seguranca
+      newPackageName: br.com.felipeblaft.reports.entrada.interno.seguranca
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.entrada.telegram
+      newPackageName: br.com.felipeblaft.reports.entrada.telegram
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.entrada.telegram.canal
+      newPackageName: br.com.felipeblaft.reports.entrada.telegram.canal
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.entrada.web
+      newPackageName: br.com.felipeblaft.reports.entrada.web
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.entrada.web.seguranca
+      newPackageName: br.com.felipeblaft.reports.entrada.web.seguranca
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.iareal
+      newPackageName: br.com.felipeblaft.reports.iareal
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.paridade
+      newPackageName: br.com.felipeblaft.reports.paridade
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.porta
+      newPackageName: br.com.felipeblaft.reports.port
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.privacidade
+      newPackageName: br.com.felipeblaft.reports.privacidade
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.saida.armazenamento
+      newPackageName: br.com.felipeblaft.reports.saida.armazenamento
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.saida.audio
+      newPackageName: br.com.felipeblaft.reports.saida.audio
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.saida.fila
+      newPackageName: br.com.felipeblaft.reports.saida.fila
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.saida.ia
+      newPackageName: br.com.felipeblaft.reports.saida.ia
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.saida.ia.simulado
+      newPackageName: br.com.felipeblaft.reports.saida.ia.simulado
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.saida.pdf
+      newPackageName: br.com.felipeblaft.reports.saida.pdf
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.saida.persistencia
+      newPackageName: br.com.felipeblaft.reports.saida.persistencia
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.saida.seguranca
+      newPackageName: br.com.felipeblaft.reports.saida.seguranca
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.saida.telegram
+      newPackageName: br.com.felipeblaft.reports.saida.telegram
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.seguranca
+      newPackageName: br.com.felipeblaft.reports.seguranca
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.servico
+      newPackageName: br.com.felipeblaft.reports.service
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.relatorios.suporte
+      newPackageName: br.com.felipeblaft.reports.suporte
+      recursive: false
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: br.com.felipeblaft.migration.Slice2.Members
+displayName: "Fatia 2 — membros"
+description: "Métodos, campos, parâmetros, variáveis e componentes de record do core pelo mapa, menos a retenção."
+recipeList:
+  - br.com.felipeblaft.migration.rewrite.RenameMembersByMap
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: br.com.felipeblaft.migration.Slice2.All
+displayName: "Fatia 2 — tudo"
+description: "Tipos e membros (receita Java própria, com os tipos ainda íntegros) e depois pacotes (ChangePackage)."
+recipeList:
+  - br.com.felipeblaft.migration.Slice2.Members
+  - br.com.felipeblaft.migration.Slice2.Packages

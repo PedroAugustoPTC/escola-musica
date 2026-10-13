@@ -273,10 +273,17 @@ function* walk(directory) {
 }
 
 /** Identificadores candidatos de um texto: palavras de código e segmentos de caminho, sem comentários. */
-function identifiersOf(text) {
+function identifiersOf(text, extension = '') {
   const withoutComments = text.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:])\/\/.*$/gm, '$1 ');
+  // Em Java, texto para pessoas dentro de literais (espaço, acento, maiúscula isolada) não é identificador: só ficam
+  // os literais de uma palavra (chaves, valores de código) e as constantes em caixa alta.
+  const code =
+    extension === '.java'
+      ? withoutComments.replace(/"(?:[^"\\\n]|\\.)*"/g, (literal) =>
+          /^"(?:[a-z][A-Za-z0-9_.-]*|[A-Z][A-Z0-9_]*)"$/.test(literal) ? literal : ' ')
+      : withoutComments;
   const found = new Set();
-  for (const match of withoutComments.matchAll(/[A-Za-z_$][A-Za-z0-9_$]*(?:-[A-Za-z0-9_$]+)*/g)) found.add(match[0]);
+  for (const match of code.matchAll(/[A-Za-z_$][A-Za-z0-9_$]*(?:-[A-Za-z0-9_$]+)*/g)) found.add(match[0]);
   return found;
 }
 
@@ -304,7 +311,7 @@ function main() {
       const relativePath = relative(root, file).split(sep).join('/');
       for (const segment of relativePath.split('/')) for (const part of segment.split('.')) if (part) add(part, relativePath);
       if (CODE_EXTENSIONS.has(extname(file)) && statSync(file).size < 2_000_000) {
-        for (const identifier of identifiersOf(readFileSync(file, 'utf8'))) add(identifier, relativePath);
+        for (const identifier of identifiersOf(readFileSync(file, 'utf8'), extname(file))) add(identifier, relativePath);
       }
     }
   }
@@ -314,11 +321,48 @@ function main() {
     if (!result || result.novo === identifier) continue;
     map.push({ antigo: identifier, novo: result.novo, needsReview: result.needsReview, motivo: result.motivo, exemplos: [...where] });
   }
+  // Revisão humana (T032): `maps/slice-<N>.review.json` = { "antigo": "novo" | null }. O valor substitui a sugestão
+  // e encerra o `needsReview`; `null` diz "revisado: não renomear". Chave fora da sugestão entra no mapa.
+  // A revisão pode ser dividida em partes (`slice-<N>.review.*.json`), lidas em ordem de nome.
+  const mapsDirectory = resolve(root, 'specs/003-migrate-code-to-english/tools/maps');
+  const reviewFiles = option('--review')
+    ? [resolve(root, option('--review'))]
+    : existsSync(mapsDirectory)
+      ? readdirSync(mapsDirectory).filter((name) => new RegExp(`^slice-${slice}\\.review(\\..+)?\\.json$`).test(name)).sort().map((name) => join(mapsDirectory, name))
+      : [];
+  const reviewed = {};
+  for (const reviewFile of reviewFiles) {
+    for (const [antigo, novo] of Object.entries(JSON.parse(readFileSync(reviewFile, 'utf8')))) {
+      if (Object.hasOwn(reviewed, antigo) && reviewed[antigo] !== novo) {
+        console.error(`Revisão conflitante para "${antigo}" em ${relative(root, reviewFile)}`);
+        process.exit(1);
+      }
+      reviewed[antigo] = novo;
+    }
+  }
+  const known = new Set(map.map((item) => item.antigo));
+  for (const [antigo, novo] of Object.entries(reviewed)) {
+    if (novo === '=' && !known.has(antigo)) {
+      console.error(`"=" em "${antigo}", que não está na sugestão do gerador`);
+      process.exit(1);
+    }
+    if (!known.has(antigo)) map.push({ antigo, novo: novo ?? antigo, needsReview: false, motivo: 'revisado', exemplos: [] });
+  }
+  for (const item of map) {
+    if (!Object.hasOwn(reviewed, item.antigo)) continue;
+    item.sugestao = item.novo;
+    // "=" aceita a sugestão como está (revisada); null deixa o nome como está
+    item.novo = reviewed[item.antigo] === '=' ? item.novo : (reviewed[item.antigo] ?? item.antigo);
+    item.needsReview = false;
+    item.revisado = true;
+  }
+  const finalMap = map.filter((item) => item.novo !== item.antigo || item.needsReview);
   const outPath = resolve(root, option('--out', `specs/003-migrate-code-to-english/tools/maps/slice-${slice}.json`));
   mkdirSync(dirname(outPath), { recursive: true });
-  writeFileSync(outPath, JSON.stringify(map, null, 2) + '\n');
-  const review = map.filter((item) => item.needsReview).length;
-  console.log(`${map.length} identificadores no mapa; ${review} precisam de revisão (needsReview) → ${relative(root, outPath)}`);
+  writeFileSync(outPath, JSON.stringify(finalMap, null, 2) + '\n');
+  const review = finalMap.filter((item) => item.needsReview).length;
+  console.log(`${finalMap.length} identificadores no mapa; ${review} precisam de revisão (needsReview) → ${relative(root, outPath)}`);
+  if (args.includes('--strict') && review > 0) process.exit(1);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main();

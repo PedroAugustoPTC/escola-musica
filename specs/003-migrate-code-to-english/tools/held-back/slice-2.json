@@ -1,0 +1,931 @@
+{
+  "gerado_por": "tools/held-back/gen-slice-2.mjs (T026)",
+  "regra": "Retido = permanece IGUAL nesta fatia. B1/B2: identificadores (a receita não os renomeia). B3: literais (a receita nunca altera literais). Dono das exclusões no guardião: fatia 4 (T044).",
+  "B1": {
+    "AudioNaoProcessavelExcecao.Motivo": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/AudioNaoProcessavelExcecao.java",
+      "members": [
+        "SEM_FALA",
+        "FORMATO",
+        "VAZIO"
+      ]
+    },
+    "BuscaAluno.TipoResultado": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/cadastro/BuscaAluno.java",
+      "members": [
+        "TODOS",
+        "ENCONTRADOS",
+        "NENHUM"
+      ]
+    },
+    "Canal": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/comum/Canal.java",
+      "members": [
+        "WEB",
+        "TELEGRAM"
+      ]
+    },
+    "CodigoErro": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/comum/CodigoErro.java",
+      "members": [
+        "CODIGO_INVALIDO",
+        "CODIGO_EXPIRADO",
+        "BLOQUEADO_TEMPORARIAMENTE",
+        "TELEGRAM_JA_VINCULADO",
+        "PROFESSOR_JA_VINCULADO",
+        "SESSAO_EXPIRADA",
+        "NAO_AUTENTICADO",
+        "ALUNO_NAO_ASSOCIADO",
+        "RECURSO_NAO_ENCONTRADO",
+        "PROCESSAMENTO_EM_ANDAMENTO",
+        "AUDIO_MUITO_GRANDE",
+        "FORMATO_NAO_SUPORTADO",
+        "AUDIO_NAO_PROCESSAVEL",
+        "RESPOSTA_VAZIA",
+        "ALTERACAO_VAZIA",
+        "VERSAO_DESATUALIZADA",
+        "RELATORIO_JA_APROVADO",
+        "RELATORIO_CANCELADO",
+        "ACAO_NAO_PERMITIDA_NA_ETAPA",
+        "RELATORIO_EM_ABERTO",
+        "SEM_AULAS_APROVADAS_NO_PERIODO",
+        "HA_RELATORIOS_EM_ABERTO",
+        "SEMESTRAL_JA_APROVADO",
+        "EMAIL_INVALIDO",
+        "EMAIL_DUPLICADO_NO_ARQUIVO",
+        "NOME_OBRIGATORIO",
+        "CPF_INVALIDO",
+        "CPF_DUPLICADO_NO_ARQUIVO",
+        "DATA_NASCIMENTO_INVALIDA",
+        "RESPONSAVEL_OBRIGATORIO",
+        "PROFESSOR_INEXISTENTE",
+        "DADOS_INVALIDOS",
+        "ERRO_INTERNO",
+        "SERVICO_INDISPONIVEL"
+      ]
+    },
+    "ConfirmarExecucaoAcoesCanalCasoDeUso.Desfecho": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUso.java",
+      "members": [
+        "ACEITA",
+        "IGNORADA",
+        "VIOLACAO"
+      ]
+    },
+    "ConfirmarExecucaoAcoesCanalCasoDeUso.Situacao": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUso.java",
+      "members": [
+        "EXECUTADA",
+        "FALHOU"
+      ]
+    },
+    "EstadoAcaoCanal": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/canal/EstadoAcaoCanal.java",
+      "members": [
+        "PENDENTE",
+        "ENTREGUE",
+        "EXECUTADA",
+        "FALHOU",
+        "FALHA_DEFINITIVA",
+        "DESCARTADA"
+      ]
+    },
+    "EtapaFluxoConversa": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/telegram/EtapaFluxoConversa.java",
+      "members": [
+        "NENHUMA",
+        "ESCOLHENDO_ALUNO",
+        "AGUARDANDO_AUDIO",
+        "CONFIRMANDO_ALUNO_DO_AUDIO",
+        "AVISO_RELATORIO_EM_ABERTO",
+        "ESCOLHENDO_SEMESTRE",
+        "CONFIRMANDO_GERACAO_SEMESTRAL",
+        "ESCOLHENDO_ITEM_HISTORICO"
+      ]
+    },
+    "EtapaRelatorio": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/EtapaRelatorio.java",
+      "members": [
+        "ESTRUTURANDO",
+        "INCORPORANDO_RESPOSTAS",
+        "TRANSCREVENDO_PEDIDO",
+        "APLICANDO_ALTERACAO",
+        "GERANDO_PDF"
+      ]
+    },
+    "EtapaTrabalho": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/trabalho/EtapaTrabalho.java",
+      "members": [
+        "ENVIANDO",
+        "TRANSCREVENDO",
+        "ESTRUTURANDO",
+        "INCORPORANDO_RESPOSTAS",
+        "TRANSCREVENDO_PEDIDO",
+        "APLICANDO_ALTERACAO",
+        "CONSOLIDANDO",
+        "GERANDO_PDF",
+        "PRONTO"
+      ]
+    },
+    "FluxoConversa": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/telegram/FluxoConversa.java",
+      "members": [
+        "NENHUM",
+        "REGISTRO_AULA",
+        "SEMESTRAL",
+        "HISTORICO"
+      ]
+    },
+    "GeracaoPdfPorta.SituacaoDocumento": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/GeracaoPdfPorta.java",
+      "members": [
+        "CONFERENCIA",
+        "OFICIAL"
+      ]
+    },
+    "Meio": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/comum/Meio.java",
+      "members": [
+        "TEXTO",
+        "AUDIO"
+      ]
+    },
+    "OrigemAcaoCanal": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/canal/OrigemAcaoCanal.java",
+      "members": [
+        "RESPOSTA_UPDATE",
+        "PROATIVA",
+        "COMPENSACAO"
+      ]
+    },
+    "OrigemVersao": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/OrigemVersao.java",
+      "members": [
+        "ESTRUTURACAO_INICIAL",
+        "RESPOSTA_PERGUNTAS",
+        "ALTERACAO",
+        "CONSOLIDACAO"
+      ]
+    },
+    "ResultadoConfirmacao": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/canal/ResultadoConfirmacao.java",
+      "members": [
+        "APLICADA",
+        "REPETIDA",
+        "DIVERGENTE"
+      ]
+    },
+    "ResultadoInteracao": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/ResultadoInteracao.java",
+      "members": [
+        "APLICADA",
+        "SEM_ALTERACAO_DE_CONTEUDO",
+        "PEDIDO_DE_ACAO_IGNORADO",
+        "FALHOU",
+        "RECUSADA_VERSAO_DESATUALIZADA"
+      ]
+    },
+    "ResultadoTrabalho": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/trabalho/ResultadoTrabalho.java",
+      "members": [
+        "PRONTO_PARA_CONFERENCIA",
+        "PERGUNTAS_PENDENTES",
+        "NOVA_VERSAO",
+        "SEM_ALTERACAO_DE_CONTEUDO",
+        "PEDIDO_DE_ACAO_IGNORADO",
+        "VERSAO_DESATUALIZADA",
+        "AUDIO_NAO_PROCESSAVEL",
+        "FALHA_ESTRUTURACAO",
+        "FALHA_ALTERACAO",
+        "FALHA_RESPOSTA",
+        "FALHA_CONSOLIDACAO",
+        "DESCARTADO"
+      ]
+    },
+    "StatusRelatorio": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/StatusRelatorio.java",
+      "members": [
+        "EM_PROCESSAMENTO",
+        "FALHA_PROCESSAMENTO",
+        "AGUARDANDO_RESPOSTAS",
+        "AGUARDANDO_CONFERENCIA",
+        "APROVADO",
+        "CANCELADO"
+      ]
+    },
+    "StatusTrabalho": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/trabalho/StatusTrabalho.java",
+      "members": [
+        "PENDENTE",
+        "EM_EXECUCAO",
+        "CONCLUIDO",
+        "FALHOU",
+        "DESCARTADO"
+      ]
+    },
+    "TarefaIa": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/trabalho/TarefaIa.java",
+      "members": [
+        "TRANSCRICAO",
+        "ESTRUTURACAO",
+        "INCORPORACAO_RESPOSTAS",
+        "REVISAO",
+        "CONSOLIDACAO"
+      ]
+    },
+    "TarefaLlm": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/TarefaLlm.java",
+      "members": [
+        "ESTRUTURACAO_AULA",
+        "INCORPORACAO_RESPOSTAS",
+        "REVISAO_AULA",
+        "CONSOLIDACAO_SEMESTRAL",
+        "REVISAO_SEMESTRAL"
+      ]
+    },
+    "TipoAcaoCanal": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/canal/TipoAcaoCanal.java",
+      "members": [
+        "MENSAGEM",
+        "EDICAO",
+        "DOCUMENTO",
+        "RESPOSTA_CALLBACK",
+        "MENSAGEM_ETAPA"
+      ]
+    },
+    "TipoDocumento": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/TipoDocumento.java",
+      "members": [
+        "CONFERENCIA",
+        "OFICIAL"
+      ]
+    },
+    "TipoInteracao": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/TipoInteracao.java",
+      "members": [
+        "RESPOSTA_PERGUNTAS",
+        "ALTERACAO"
+      ]
+    },
+    "TipoRelatorio": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/comum/TipoRelatorio.java",
+      "members": [
+        "AULA",
+        "SEMESTRAL"
+      ]
+    },
+    "TipoTrabalho": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/trabalho/TipoTrabalho.java",
+      "members": [
+        "REGISTRO_AULA",
+        "NOVA_TENTATIVA",
+        "RESPOSTA_PERGUNTAS",
+        "ALTERACAO",
+        "CONSOLIDACAO_SEMESTRAL"
+      ]
+    }
+  },
+  "B2": {
+    "SaidaRelatorioAulaIa": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/SaidaRelatorioAulaIa.java",
+      "members": [
+        "conteudosTrabalhados",
+        "evolucao",
+        "dificuldades",
+        "atividadesPropostas",
+        "observacoes",
+        "perguntasPendentes",
+        "semAlteracaoDeConteudo",
+        "pedidoDeAcao"
+      ],
+      "via": "raiz"
+    },
+    "SaidaRelatorioSemestralIa": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/SaidaRelatorioSemestralIa.java",
+      "members": [
+        "frequenciaEEstudo",
+        "tecnica",
+        "musicalidade",
+        "leituraEMemorizacao",
+        "pontosDeAtencao",
+        "estrategiasPedagogicas",
+        "acompanhamentoFamiliar",
+        "planejamentoProximoSemestre",
+        "parecerFinal",
+        "semAlteracaoDeConteudo",
+        "pedidoDeAcao"
+      ],
+      "via": "raiz"
+    },
+    "ConteudoRelatorioSemestral.FrequenciaEEstudo": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/semestral/ConteudoRelatorioSemestral.java",
+      "members": [
+        "frequenciaAulas",
+        "regularidadeEstudoEmCasa",
+        "engajamento",
+        "comentarioGeral"
+      ],
+      "via": "SaidaRelatorioSemestralIa"
+    },
+    "ConteudoRelatorioSemestral.Tecnica": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/semestral/ConteudoRelatorioSemestral.java",
+      "members": [
+        "conteudosTrabalhados",
+        "evolucaoTecnica",
+        "pontosADesenvolver",
+        "estudosRealizados"
+      ],
+      "via": "SaidaRelatorioSemestralIa"
+    },
+    "ConteudoRelatorioSemestral.Musicalidade": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/semestral/ConteudoRelatorioSemestral.java",
+      "members": [
+        "repertorioEstudado",
+        "som",
+        "ritmo",
+        "fraseado",
+        "articulacao",
+        "estilo",
+        "comentarioMusical"
+      ],
+      "via": "SaidaRelatorioSemestralIa"
+    },
+    "ConteudoRelatorioSemestral.LeituraEMemorizacao": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/semestral/ConteudoRelatorioSemestral.java",
+      "members": [
+        "avaliacao",
+        "comentario"
+      ],
+      "via": "SaidaRelatorioSemestralIa"
+    },
+    "ConteudoRelatorioSemestral.Itens": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/semestral/ConteudoRelatorioSemestral.java",
+      "members": [
+        "itens"
+      ],
+      "via": "SaidaRelatorioSemestralIa"
+    },
+    "ConteudoRelatorioSemestral.AcompanhamentoFamiliar": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/semestral/ConteudoRelatorioSemestral.java",
+      "members": [
+        "nivelDePresenca",
+        "observacaoDoProfessor"
+      ],
+      "via": "SaidaRelatorioSemestralIa"
+    },
+    "ConteudoRelatorioSemestral.PlanejamentoProximoSemestre": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/semestral/ConteudoRelatorioSemestral.java",
+      "members": [
+        "metasTecnicas",
+        "metasMusicais",
+        "habitosDeEstudo",
+        "repertorioProposto",
+        "estudosTecnicos",
+        "leituraETeoria",
+        "projetoDoSemestre"
+      ],
+      "via": "SaidaRelatorioSemestralIa"
+    },
+    "ConteudoRelatorioAula": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/ConteudoRelatorioAula.java",
+      "members": [
+        "conteudosTrabalhados",
+        "evolucao",
+        "dificuldades",
+        "atividadesPropostas",
+        "observacoes"
+      ],
+      "via": "raiz"
+    },
+    "ConteudoRelatorioSemestral": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/semestral/ConteudoRelatorioSemestral.java",
+      "members": [
+        "frequenciaEEstudo",
+        "tecnica",
+        "musicalidade",
+        "leituraEMemorizacao",
+        "pontosDeAtencao",
+        "estrategiasPedagogicas",
+        "acompanhamentoFamiliar",
+        "planejamentoProximoSemestre",
+        "parecerFinal"
+      ],
+      "via": "raiz"
+    },
+    "InformacoesGerais": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/semestral/InformacoesGerais.java",
+      "members": [
+        "nome",
+        "idade",
+        "instrumento",
+        "professor",
+        "periodoChave",
+        "periodoInicio",
+        "periodoFim",
+        "quantidadeAulasConsideradas"
+      ],
+      "via": "raiz"
+    },
+    "ArquivoCarga": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/carga/ArquivoCarga.java",
+      "members": [
+        "professores",
+        "alunos"
+      ],
+      "via": "raiz"
+    },
+    "ArquivoCarga.ProfessorCarga": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/carga/ArquivoCarga.java",
+      "members": [
+        "email",
+        "nome",
+        "ativo"
+      ],
+      "via": "ArquivoCarga"
+    },
+    "ArquivoCarga.AlunoCarga": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/carga/ArquivoCarga.java",
+      "members": [
+        "cpf",
+        "nome",
+        "dataNascimento",
+        "nomeResponsavel",
+        "instrumento",
+        "professores"
+      ],
+      "via": "ArquivoCarga"
+    },
+    "EntradaTarefa.EstruturacaoAula": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/EntradaTarefa.java",
+      "members": [
+        "transcricao"
+      ],
+      "via": "EntradaTarefa"
+    },
+    "EntradaTarefa.IncorporacaoRespostas": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/EntradaTarefa.java",
+      "members": [
+        "conteudoAtual",
+        "perguntas",
+        "resposta",
+        "rodada"
+      ],
+      "via": "EntradaTarefa"
+    },
+    "EntradaTarefa.RevisaoAula": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/EntradaTarefa.java",
+      "members": [
+        "conteudoAtual",
+        "pedido"
+      ],
+      "via": "EntradaTarefa"
+    },
+    "EntradaConsolidacaoSemestral": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/EntradaConsolidacaoSemestral.java",
+      "members": [
+        "aulas",
+        "quantidadeAulas",
+        "periodoInicio",
+        "periodoFim"
+      ],
+      "via": "raiz"
+    },
+    "EntradaConsolidacaoSemestral.AulaConsolidada": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/EntradaConsolidacaoSemestral.java",
+      "members": [
+        "dataAula",
+        "relatorio"
+      ],
+      "via": "EntradaConsolidacaoSemestral"
+    },
+    "EntradaRevisaoSemestral": {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/EntradaRevisaoSemestral.java",
+      "members": [
+        "conteudoAtual",
+        "pedido"
+      ],
+      "via": "raiz"
+    }
+  },
+  "B3": {
+    "relatorioEmAberto": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/aula/RegistrarAulaPorAudioCasoDeUso.java:85",
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/semestral/GerarRelatorioSemestralCasoDeUso.java:75",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/aula/RegistrarAulaPorAudioCasoDeUsoTeste.java:101"
+    ],
+    "ERRO_TELEGRAM": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUso.java:28",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUsoTeste.java:115",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUsoTeste.java:186",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUsoTeste.java:187",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUsoTeste.java:298",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUsoTeste.java:448",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/EntregarAcoesPendentesCasoDeUsoTeste.java:324",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ObterAcoesNaoConfirmadasDoUpdateCasoDeUsoTeste.java:70",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/canal/AcaoCanalTeste.java:171",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/canal/AcaoCanalTeste.java:186",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/canal/AcaoCanalTeste.java:327"
+    ],
+    "CHAT_INDISPONIVEL": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUso.java:33",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUsoTeste.java:89",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUsoTeste.java:95",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUsoTeste.java:294",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/canal/AcaoCanalTeste.java:180",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/canal/AcaoCanalTeste.java:183",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/canal/AcaoCanalTeste.java:184",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/canal/AcaoCanalTeste.java:190"
+    ],
+    "ACAO_NAO_SUPORTADA": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUso.java:34",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUsoTeste.java:296"
+    ],
+    "LIMITE_DE_TAXA": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUso.java:36",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUsoTeste.java:295",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/canal/AcaoCanalTeste.java:196"
+    ],
+    "professores": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUso.java:196",
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUso.java:200",
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUso.java:203",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUsoTeste.java:249",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUsoTeste.java:250",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUsoTeste.java:251",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUsoTeste.java:252"
+    ],
+    "nome": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUso.java:203",
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUso.java:226",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUsoTeste.java:250",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUsoTeste.java:254"
+    ],
+    "alunos": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUso.java:226",
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUso.java:234",
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUso.java:237",
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUso.java:243",
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUso.java:253",
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUso.java:269",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUsoTeste.java:253",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUsoTeste.java:254",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUsoTeste.java:255",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUsoTeste.java:256",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUsoTeste.java:257",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUsoTeste.java:258",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUsoTeste.java:259",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUsoTeste.java:260",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUsoTeste.java:261"
+    ],
+    "dataNascimento": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUso.java:245",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUsoTeste.java:256",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUsoTeste.java:260",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUsoTeste.java:261"
+    ],
+    "nomeResponsavel": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUso.java:255",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUsoTeste.java:258"
+    ],
+    "quantidade": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/semestral/GerarRelatorioSemestralCasoDeUso.java:83",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/semestral/CasosDeUsoSemestralTeste.java:120"
+    ],
+    "VINCULO_DESFEITO": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/canal/AcaoCanal.java:16"
+    ],
+    "PRAZO_VENCIDO": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/canal/AcaoCanal.java:17"
+    ],
+    "SEM_CONFIRMACAO": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/canal/AcaoCanal.java:18"
+    ],
+    "MENSAGEM_NAO_EDITAVEL": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/canal/AcaoCanal.java:19",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUsoTeste.java:212",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUsoTeste.java:219",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUsoTeste.java:226",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUsoTeste.java:227",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUsoTeste.java:280",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUsoTeste.java:311",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUsoTeste.java:377",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/canal/AcaoCanalTeste.java:326",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/canal/AcaoCanalTeste.java:330"
+    ],
+    "DOCUMENTO_INDISPONIVEL": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/canal/AcaoCanal.java:20",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUsoTeste.java:251",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUsoTeste.java:261",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUsoTeste.java:264",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUsoTeste.java:271",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUsoTeste.java:272",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUsoTeste.java:284",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUsoTeste.java:297",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/canal/AcaoCanalTeste.java:325",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/canal/AcaoCanalTeste.java:331",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/canal/AcaoCanalTeste.java:333",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/canal/AcaoCanalTeste.java:338"
+    ],
+    "RELATORIO_CANCELADO_ERRO": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/comum/CodigoErro.java:34",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/comum/ComumTeste.java:51"
+    ],
+    "FALHA_ESTRUTURACAO": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/RelatorioAula.java:23"
+    ],
+    "etapa": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/RelatorioAula.java:138",
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/RelatorioEmAberto.java:44",
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/semestral/RelatorioSemestral.java:138",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/inicio/InicioCasosDeUsoTeste.java:142"
+    ],
+    "versaoVigente": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/RelatorioAula.java:165",
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/semestral/RelatorioSemestral.java:145",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/aula/CasosDeUsoRelatorioAulaTeste.java:101",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/comum/ComumTeste.java:38",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/comum/ComumTeste.java:41",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/relatorio/RelatorioAulaTeste.java:124"
+    ],
+    "tipo": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/RelatorioEmAberto.java:38"
+    ],
+    "relatorioId": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/RelatorioEmAberto.java:39",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/inicio/InicioCasosDeUsoTeste.java:139"
+    ],
+    "trabalhoId": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/RelatorioEmAberto.java:40",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/inicio/InicioCasosDeUsoTeste.java:140"
+    ],
+    "alunoId": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/RelatorioEmAberto.java:41",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/inicio/InicioCasosDeUsoTeste.java:137"
+    ],
+    "alunoNome": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/RelatorioEmAberto.java:42"
+    ],
+    "periodoChave": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/RelatorioEmAberto.java:45",
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/trabalho/TrabalhoProcessamento.java:35",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/inicio/InicioCasosDeUsoTeste.java:143"
+    ],
+    "canalOrigem": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/RelatorioEmAberto.java:46",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/aula/RegistrarAulaPorAudioCasoDeUsoTeste.java:103",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/inicio/InicioCasosDeUsoTeste.java:136"
+    ],
+    "atualizadoEm": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/relatorio/RelatorioEmAberto.java:47",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/aula/RegistrarAulaPorAudioCasoDeUsoTeste.java:104",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/inicio/InicioCasosDeUsoTeste.java:144"
+    ],
+    "confirmacao": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/telegram/ConversaTelegram.java:20"
+    ],
+    "texto": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/trabalho/TrabalhoProcessamento.java:27"
+    ],
+    "versaoBase": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/trabalho/TrabalhoProcessamento.java:28",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/aula/CasosDeUsoRelatorioAulaTeste.java:122",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/trabalho/TrabalhoProcessamentoTeste.java:88"
+    ],
+    "textoEntendido": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/trabalho/TrabalhoProcessamento.java:29",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/servico/ProcessadorTrabalhoRespostasAlteracoesTeste.java:84",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/servico/ProcessadorTrabalhoRespostasAlteracoesTeste.java:217"
+    ],
+    "arquivoCanal": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/trabalho/TrabalhoProcessamento.java:30",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/aula/RegistrarAulaPorAudioCasoDeUsoTeste.java:53"
+    ],
+    "arquivoCanalUnico": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/trabalho/TrabalhoProcessamento.java:31",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/aula/RegistrarAulaPorAudioCasoDeUsoTeste.java:54"
+    ],
+    "arquivoMime": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/trabalho/TrabalhoProcessamento.java:32",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/aula/RegistrarAulaPorAudioCasoDeUsoTeste.java:55"
+    ],
+    "arquivoTamanho": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/trabalho/TrabalhoProcessamento.java:33",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/aula/RegistrarAulaPorAudioCasoDeUsoTeste.java:39"
+    ],
+    "mensagemEtapa": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/trabalho/TrabalhoProcessamento.java:34"
+    ],
+    "confirmarMesmoComEmAberto": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/dominio/trabalho/TrabalhoProcessamento.java:36"
+    ],
+    "FORMATO_NAO_SUPORTADO": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/FormatoNaoSuportadoExcecao.java:7",
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/servico/ProcessadorTrabalhoServico.java:632",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/servico/ProcessadorTrabalhoRegistroTeste.java:227"
+    ],
+    "ACEITO": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/ResultadoEntrega.java:10"
+    ],
+    "NENHUM": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/porta/SaidaRelatorioAulaIa.java:20",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dubles/CenarioRelatorio.java:206",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dubles/CenarioRelatorio.java:325",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/servico/ProcessadorSemestralTeste.java:184",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/servico/ProcessadorTrabalhoRespostasAlteracoesTeste.java:176",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/servico/ProcessadorTrabalhoRespostasAlteracoesTeste.java:205",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/servico/ProcessadorTrabalhoRespostasAlteracoesTeste.java:246",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/servico/ProcessadorTrabalhoRespostasAlteracoesTeste.java:263"
+    ],
+    "segundosRestantes": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/servico/ControleTentativasAcessoServico.java:53",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/acesso/EntrarPortalCasoDeUsoTeste.java:90"
+    ],
+    "limiteMb": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/servico/EnvioAudioServico.java:30",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/aula/RegistrarAulaPorAudioCasoDeUsoTeste.java:141"
+    ],
+    "oficial.pdf": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/servico/GeracaoDocumentoServico.java:102",
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/servico/GeracaoDocumentoServico.java:133",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ObterDocumentoCanalCasoDeUsoTeste.java:53"
+    ],
+    "SAIDA_INVALIDA": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/servico/ProcessadorTrabalhoServico.java:633",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/servico/ProcessadorSemestralTeste.java:88",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/servico/ProcessadorTrabalhoRegistroTeste.java:135",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/servico/ProcessadorTrabalhoRespostasAlteracoesTeste.java:303"
+    ],
+    "PROVEDOR_INDISPONIVEL": [
+      "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/servico/ProcessadorTrabalhoServico.java:634",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/servico/ProcessadorTrabalhoRegistroTeste.java:153",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/servico/ProcessadorTrabalhoRegistroTeste.java:167",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/servico/ProcessadorTrabalhoRegistroTeste.java:249"
+    ],
+    "curto": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/acesso/EntrarPortalCasoDeUsoTeste.java:59"
+    ],
+    "outro-ip": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/acesso/EntrarPortalCasoDeUsoTeste.java:93"
+    ],
+    "inventado": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/acesso/SessaoWebCasosDeUsoTeste.java:74"
+    ],
+    "desconhecido": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/acesso/SessaoWebCasosDeUsoTeste.java:96"
+    ],
+    "resposta": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/aula/CasosDeUsoRelatorioAulaTeste.java:54"
+    ],
+    "mudar": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/aula/CasosDeUsoRelatorioAulaTeste.java:167"
+    ],
+    "semestral.pdf": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/aula/CasosDeUsoRelatorioAulaTeste.java:279"
+    ],
+    "CODIGO_NOVO_DO_N8N": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUsoTeste.java:182"
+    ],
+    "documentoId": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ConfirmarExecucaoAcoesCanalCasoDeUsoTeste.java:259",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/canal/AcaoCanalTeste.java:363"
+    ],
+    "nao-e-numero": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/EntregarAcoesPendentesCasoDeUsoTeste.java:392"
+    ],
+    "conferencia.pdf": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ObterDocumentoCanalCasoDeUsoTeste.java:43",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ObterDocumentoCanalCasoDeUsoTeste.java:81"
+    ],
+    "disco": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/canal/ObterDocumentoCanalCasoDeUsoTeste.java:126"
+    ],
+    "sem-arroba": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/carga/CarregarCadastroInicialCasoDeUsoTeste.java:196"
+    ],
+    "teste": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/semestral/CasosDeUsoSemestralTeste.java:171",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/servico/ProcessadorSemestralTeste.java:183"
+    ],
+    "APROVAR": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/semestral/CasosDeUsoSemestralTeste.java:193",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/servico/ProcessadorTrabalhoRespostasAlteracoesTeste.java:228"
+    ],
+    "OFICIAL": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/semestral/CasosDeUsoSemestralTeste.java:234"
+    ],
+    "aula.webm": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/trabalho/DescartarRegistroEmProcessamentoCasoDeUsoTeste.java:22"
+    ],
+    "origem": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/acesso/TentativaAcessoTeste.java:17",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/acesso/TentativaAcessoTeste.java:28",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/acesso/TentativaAcessoTeste.java:33",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/acesso/TentativaAcessoTeste.java:50"
+    ],
+    "relatorio.pdf": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/canal/DocumentoCanalTeste.java:22"
+    ],
+    "VERSAO_DESATUALIZADA": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/comum/ComumTeste.java:40"
+    ],
+    "CODIGO_INVALIDO": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/comum/ComumTeste.java:49"
+    ],
+    "SEMESTRAL": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/comum/ComumTeste.java:80"
+    ],
+    "estruturacao-aula.v1": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/relatorio/DominioRelatorioTeste.java:61",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/servico/ProcessadorTrabalhoRegistroTeste.java:65"
+    ],
+    "troque": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/relatorio/DominioRelatorioTeste.java:95"
+    ],
+    "ALTERACAO": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/relatorio/DominioRelatorioTeste.java:95"
+    ],
+    "GERANDO_PDF": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/relatorio/DominioRelatorioTeste.java:119"
+    ],
+    "opcoes": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/telegram/ConversaTelegramTeste.java:36",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/telegram/ConversaTelegramTeste.java:37",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/telegram/ConversaTelegramTeste.java:38",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/telegram/ConversaTelegramTeste.java:39"
+    ],
+    "pagina": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/telegram/ConversaTelegramTeste.java:99"
+    ],
+    "REGISTRO_AULA": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dominio/trabalho/TrabalhoProcessamentoTeste.java:48"
+    ],
+    "aula.ogg": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dubles/CenarioRelatorio.java:237",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dubles/CenarioRelatorio.java:251",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/servico/ProcessadorTrabalhoRegistroTeste.java:41"
+    ],
+    "demora": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dubles/DublesProcessamento.java:220"
+    ],
+    "relatorio_semestral": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/dubles/DublesProcessamento.java:479"
+    ],
+    "pedido.ogg": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/servico/ProcessadorSemestralTeste.java:147"
+    ],
+    "mudo.ogg": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/servico/ProcessadorSemestralTeste.java:168"
+    ],
+    "grande.ogg": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/servico/ProcessadorSemestralTeste.java:269"
+    ],
+    "AUDIO_SEM_FALA": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/servico/ProcessadorTrabalhoRegistroTeste.java:227",
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/servico/ProcessadorTrabalhoRegistroTeste.java:227"
+    ],
+    "fora": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/servico/ProcessadorTrabalhoRegistroTeste.java:341"
+    ],
+    "mantenha": [
+      "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/servico/ProcessadorTrabalhoRespostasAlteracoesTeste.java:253"
+    ]
+  },
+  "permanent": [
+    {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/documento/ObterDocumentoRelatorioCasoDeUso.java",
+      "line": 88,
+      "literal": "relatorio-aula-",
+      "exception": "download-file-name"
+    },
+    {
+      "file": "backend/nucleo/src/main/java/br/com/felipeblaft/relatorios/casodeuso/semestral/ObterRelatorioSemestralCasoDeUso.java",
+      "line": 96,
+      "literal": "relatorio-semestral-",
+      "exception": "download-file-name"
+    },
+    {
+      "file": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/aula/CasosDeUsoRelatorioAulaTeste.java",
+      "line": 236,
+      "literal": "relatorio-aula-2026-09-21-v1.pdf",
+      "exception": "download-file-name"
+    },
+    {
+      "file": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/aula/CasosDeUsoRelatorioAulaTeste.java",
+      "line": 258,
+      "literal": "relatorio-aula-2026-09-21.pdf",
+      "exception": "download-file-name"
+    },
+    {
+      "file": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/semestral/CasosDeUsoSemestralTeste.java",
+      "line": 237,
+      "literal": "relatorio-semestral-2026-1.pdf",
+      "exception": "download-file-name"
+    },
+    {
+      "file": "backend/nucleo/src/test/java/br/com/felipeblaft/relatorios/casodeuso/semestral/CasosDeUsoSemestralTeste.java",
+      "line": 262,
+      "literal": "relatorio-semestral-2026-1-v1.pdf",
+      "exception": "download-file-name"
+    }
+  ]
+}

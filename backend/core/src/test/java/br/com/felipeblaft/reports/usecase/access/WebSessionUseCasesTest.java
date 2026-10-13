@@ -1,0 +1,98 @@
+package br.com.felipeblaft.reports.usecase.access;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import br.com.felipeblaft.reports.domain.common.DomainException;
+import br.com.felipeblaft.reports.domain.common.ErrorCode;
+import br.com.felipeblaft.reports.domain.registry.Teacher;
+import br.com.felipeblaft.reports.doubles.AccessScenario;
+import java.time.Duration;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
+import org.junit.jupiter.api.Test;
+
+/** ValidarSessaoWebCasoDeUso e EncerrarSessaoWebCasoDeUso. */
+class WebSessionUseCasesTest {
+
+    private final AccessScenario c = new AccessScenario();
+    private final SignInPortalUseCase signIn =
+            new SignInPortalUseCase(
+                    c.authentication,
+                    c.renewal,
+                    c.sessions,
+                    c.links,
+                    c.protection,
+                    c.clock,
+                    c.parameters);
+    private final ValidateSessionWebUseCase validate =
+            new ValidateSessionWebUseCase(
+                    c.sessions, c.teachers, c.renewal, c.protection, c.clock, c.parameters);
+    private final EndWebSessionUseCase end = new EndWebSessionUseCase(c.sessions, c.protection);
+    private final Teacher clara = c.teacher("Clara Souza", "clara@exemplo.test", "K7QM2XPA");
+
+    private static void failWith(ThrowingCallable action, ErrorCode code) {
+        assertThatThrownBy(action)
+                .isInstanceOf(DomainException.class)
+                .extracting(e -> ((DomainException) e).code())
+                .isEqualTo(code);
+    }
+
+    @Test
+    void validSessionIdentifiesTeacherAndRenewsSliding() {
+        String token = signIn.run("K7QM2XPA", "ip").token();
+        c.clock.advance(Duration.ofHours(11));
+
+        ValidateSessionWebUseCase.Result result = validate.run(token);
+
+        assertThat(result.teacher().id()).isEqualTo(clara.id());
+        assertThat(result.session().expiresAt())
+                .isEqualTo(c.clock.now().plus(Duration.ofHours(12)));
+        c.clock.advance(Duration.ofHours(11));
+        assertThat(validate.run(token).teacher().id()).isEqualTo(clara.id());
+    }
+
+    @Test
+    void useWithSessionRenewsCodeAndCodeExpiryDoesNotEndSession() {
+        String token = signIn.run("K7QM2XPA", "ip").token();
+        for (int use = 0; use < 20; use++) {
+            c.clock.advance(Duration.ofHours(11));
+            validate.run(token);
+        }
+        Teacher read = c.teachers.searchById(clara.id()).orElseThrow();
+        assertThat(read.validCodeAt(c.clock.now())).isTrue();
+    }
+
+    @Test
+    void withoutTokenNotAuthenticated() {
+        failWith(() -> validate.run(null), ErrorCode.NAO_AUTENTICADO);
+        failWith(() -> validate.run(" "), ErrorCode.NAO_AUTENTICADO);
+    }
+
+    @Test
+    void unknownOrExpiredToken() {
+        failWith(() -> validate.run("inventado"), ErrorCode.SESSAO_EXPIRADA);
+        String token = signIn.run("K7QM2XPA", "ip").token();
+        c.clock.advance(Duration.ofHours(12));
+        failWith(() -> validate.run(token), ErrorCode.SESSAO_EXPIRADA);
+        assertThat(c.sessions.all()).isEmpty();
+    }
+
+    @Test
+    void deactivatedTeacherLosesSession() {
+        String token = signIn.run("K7QM2XPA", "ip").token();
+        clara.updateRegistry(clara.name(), false, c.clock.now());
+        failWith(() -> validate.run(token), ErrorCode.SESSAO_EXPIRADA);
+        assertThat(c.sessions.all()).isEmpty();
+    }
+
+    @Test
+    void endRevokesOnServer() {
+        String token = signIn.run("K7QM2XPA", "ip").token();
+        end.run(token);
+        failWith(() -> validate.run(token), ErrorCode.SESSAO_EXPIRADA);
+        end.run(null);
+        end.run("");
+        end.run("desconhecido");
+        assertThat(c.sessions.all()).isEmpty();
+    }
+}

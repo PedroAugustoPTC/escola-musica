@@ -1,0 +1,34 @@
+rename-check — fatia 2: 449 arquivos Java pareados, 248843 tokens alinhados
+0 pares fora do mapa
+0 literais de texto alterados
+0 arquivos sem par
+0 colisões
+0 outras divergências (tokens, tipo de token, imports, retido alterado)
+(informativo) 1436 pares distintos aplicados, 0 literais de uma palavra pelo mapa, 11 comentários alterados
+(informativo) 7 colisões aceitas em explicit-pairs.json (revisadas, com motivo)
+(informativo) 25 edições manuais de literal permitidas em explicit-pairs.json
+manual: backend/core/src/test/java/br/com/felipeblaft/reports/architecture/ArchitectureRulesTest.java:21 "br.com.felipeblaft.relatorios" → "br.com.felipeblaft.reports" (regra ArchUnit: pacote-base do núcleo (T039))
+manual: backend/core/src/test/java/br/com/felipeblaft/reports/architecture/ArchitectureRulesTest.java:55 ".dominio.." → ".domain.." (regra ArchUnit: camada domínio → domain (T039))
+manual: backend/core/src/test/java/br/com/felipeblaft/reports/architecture/ArchitectureRulesTest.java:58 ".casodeuso.." → ".usecase.." (regra ArchUnit: camada casos de uso → usecase (T039))
+manual: backend/core/src/test/java/br/com/felipeblaft/reports/architecture/ArchitectureRulesTest.java:58 ".servico.." → ".service.." (regra ArchUnit: camada serviços → service (T039))
+manual: backend/core/src/test/java/br/com/felipeblaft/reports/architecture/ArchitectureRulesTest.java:58 ".porta.." → ".port.." (regra ArchUnit: camada portas → port (T039))
+manual: backend/core/src/test/java/br/com/felipeblaft/reports/architecture/ArchitectureRulesTest.java:66 ".porta.." → ".port.." (regra ArchUnit: camada portas → port (T039))
+manual: backend/core/src/test/java/br/com/felipeblaft/reports/architecture/ArchitectureRulesTest.java:69 ".casodeuso.." → ".usecase.." (regra ArchUnit: camada casos de uso → usecase (T039))
+manual: backend/core/src/test/java/br/com/felipeblaft/reports/architecture/ArchitectureRulesTest.java:69 ".servico.." → ".service.." (regra ArchUnit: camada serviços → service (T039))
+manual: backend/core/src/test/java/br/com/felipeblaft/reports/architecture/ArchitectureRulesTest.java:77 ".servico.." → ".service.." (regra ArchUnit: camada serviços → service (T039))
+manual: backend/core/src/test/java/br/com/felipeblaft/reports/architecture/ArchitectureRulesTest.java:80 ".casodeuso.." → ".usecase.." (regra ArchUnit: camada casos de uso → usecase (T039))
+manual: backend/core/src/test/java/br/com/felipeblaft/reports/architecture/ArchitectureRulesTest.java:88 ".casodeuso.." → ".usecase.." (regra ArchUnit: camada casos de uso → usecase (T039))
+manual: backend/core/src/test/java/br/com/felipeblaft/reports/architecture/ArchitectureRulesTest.java:91 "CasoDeUso" → "UseCase" (regra ArchUnit: sufixo do tipo renomeado (T039))
+manual: backend/core/src/test/java/br/com/felipeblaft/reports/architecture/ArchitectureRulesTest.java:99 ".servico.." → ".service.." (regra ArchUnit: camada serviços → service (T039))
+manual: backend/core/src/test/java/br/com/felipeblaft/reports/architecture/ArchitectureRulesTest.java:102 "Servico" → "Service" (regra ArchUnit: sufixo do tipo renomeado (T039))
+manual: backend/core/src/test/java/br/com/felipeblaft/reports/architecture/ArchitectureRulesTest.java:110 ".porta.." → ".port.." (regra ArchUnit: camada portas → port (T039))
+manual: backend/core/src/test/java/br/com/felipeblaft/reports/architecture/ArchitectureRulesTest.java:120 "startsWith" → "endsWith" (o prefixo Entrada virou o sufixo Input; a asserção exclui os mesmos tipos (T039))
+manual: backend/core/src/test/java/br/com/felipeblaft/reports/architecture/ArchitectureRulesTest.java:120 "Entrada" → "Input" (regra ArchUnit: os tipos de dados de entrada passaram de prefixo Entrada a sufixo Input (T039))
+manual: backend/core/src/test/java/br/com/felipeblaft/reports/architecture/ArchitectureRulesTest.java:122 "Porta" → "Port" (regra ArchUnit: sufixo do tipo renomeado (T039))
+manual: backend/core/src/test/java/br/com/felipeblaft/reports/architecture/ArchitectureRulesTest.java:124 "Repositorio" → "Repository" (regra ArchUnit: sufixo do tipo renomeado (T039))
+manual: backend/aplicacao/src/main/java/br/com/felipeblaft/reports/configuracao/TransacaoCasoDeUsoDecorador.java:24 "br.com.felipeblaft.relatorios.casodeuso" → "br.com.felipeblaft.reports.usecase" (decorador casa os casos de uso pelo nome do pacote (T041))
+manual: backend/aplicacao/src/main/java/br/com/felipeblaft/reports/configuracao/TransacaoCasoDeUsoDecorador.java:33 "EntregarAcoesPendentesCasoDeUso" → "DeliverPendingActionsUseCase" (decorador casa casos de uso pelo nome simples da classe (T041))
+manual: backend/aplicacao/src/main/java/br/com/felipeblaft/reports/configuracao/TransacaoCasoDeUsoDecorador.java:33 "ObterDocumentoCanalCasoDeUso" → "GetChannelDocumentUseCase" (decorador casa casos de uso pelo nome simples da classe (T041))
+manual: backend/aplicacao/src/main/java/br/com/felipeblaft/reports/configuracao/TransacaoCasoDeUsoDecorador.java:54 "CasoDeUso" → "UseCase" (decorador casa casos de uso pelo sufixo do nome da classe (T041))
+manual: backend/aplicacao/src/test/java/br/com/felipeblaft/reports/architecture/RegrasAdaptadoresTeste.java:15 "br.com.felipeblaft.relatorios" → "br.com.felipeblaft.reports" (regra ArchUnit da aplicacao: pacote-base (T041))
+manual: backend/aplicacao/src/test/java/br/com/felipeblaft/reports/architecture/RegrasAdaptadoresTeste.java:46 ".porta" → ".port" (regra ArchUnit da aplicacao: pacote das portas do core (T041))
