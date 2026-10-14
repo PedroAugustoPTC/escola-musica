@@ -36,8 +36,8 @@ public class TelegramConversation {
             FocusReport focusReport,
             Integer presentedVersion) {
         this.selectedStudentId = selectedStudentId;
-        this.flow = flow == null ? ConversationFlow.NENHUM : flow;
-        this.step = step == null ? ConversationFlowStep.NENHUMA : step;
+        this.flow = flow == null ? ConversationFlow.NONE : flow;
+        this.step = step == null ? ConversationFlowStep.NONE : step;
         this.data = new LinkedHashMap<>(data == null ? Map.of() : data);
         this.pendingAudio = pendingAudio;
         this.focusReport = focusReport;
@@ -73,7 +73,7 @@ public class TelegramConversation {
     }
 
     public void endFlow() {
-        startFlow(ConversationFlow.NENHUM, ConversationFlowStep.NENHUMA);
+        startFlow(ConversationFlow.NONE, ConversationFlowStep.NONE);
     }
 
     public void store(String key, String value) {

@@ -45,10 +45,10 @@ public class CodeAuthenticationService {
                         .filter(Teacher::active);
         if (teacher.isEmpty()) {
             attempts.registerFailure(channel, origin);
-            throw new DomainException(ErrorCode.CODIGO_INVALIDO);
+            throw new DomainException(ErrorCode.INVALID_CODE);
         }
         if (!teacher.get().validCodeAt(now)) {
-            throw new DomainException(ErrorCode.CODIGO_EXPIRADO);
+            throw new DomainException(ErrorCode.EXPIRED_CODE);
         }
         attempts.registerSuccess(channel, origin);
         return teacher.get();

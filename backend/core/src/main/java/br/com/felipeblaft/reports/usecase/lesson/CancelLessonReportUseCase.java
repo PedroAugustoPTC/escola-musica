@@ -46,7 +46,7 @@ public class CancelLessonReportUseCase {
         Instant now = clock.now();
         report.cancel(now, discard);
         reports.save(report);
-        queue.searchInProgressByReport(ReportType.AULA, reportId)
+        queue.searchInProgressByReport(ReportType.LESSON, reportId)
                 .ifPresent(
                         job -> {
                             job.discard(now);

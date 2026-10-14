@@ -34,7 +34,7 @@ import org.springframework.test.web.servlet.MvcResult;
  */
 class ChannelDocumentContractIT extends TelegramConversationBase {
 
-    private static final String BASE = "/interno/v1/canal/telegram/documentos/";
+    private static final String BASE = "/internal/v1/channel/telegram/documents/";
 
     @Autowired EmitChannelDocumentUseCase emit;
 
@@ -48,12 +48,12 @@ class ChannelDocumentContractIT extends TelegramConversationBase {
     private Cookie signIn() throws Exception {
         MvcResult input =
                 mvc.perform(
-                                post("/api/v1/sessao")
+                                post("/api/v1/session")
                                         .with(csrf().asHeader())
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .content("{\"codigo\":\"" + ScenarioIT.CODE_CLARA + "\"}"))
+                                        .content("{\"code\":\"" + ScenarioIT.CODE_CLARA + "\"}"))
                         .andReturn();
-        Cookie cookie = input.getResponse().getCookie("sessao");
+        Cookie cookie = input.getResponse().getCookie("session");
         return new Cookie(cookie.getName(), cookie.getValue());
     }
 
@@ -74,10 +74,10 @@ class ChannelDocumentContractIT extends TelegramConversationBase {
         clara = scenario.clara();
         scenario.student(clara, "Matteo Ferreira", "Piano");
         link(USER_CLARA, ScenarioIT.CODE_CLARA);
-        prepareTelegramFile("aula", AudioNormalizationTest.AUDIO_WITH_SPEECH);
+        prepareTelegramFile("lesson", AudioNormalizationTest.AUDIO_WITH_SPEECH);
         sendText(USER_CLARA, "Matteo");
-        sendVoice(USER_CLARA, "aula", 1000);
-        sendCallback(USER_CLARA, "v1:confal:");
+        sendVoice(USER_CLARA, "lesson", 1000);
+        sendCallback(USER_CLARA, "v1:confirm-student:");
         scenario.processQueue();
         sendText(USER_CLARA, "Estudou bem; vai preparar a valsa.");
         scenario.processQueue();
@@ -88,7 +88,7 @@ class ChannelDocumentContractIT extends TelegramConversationBase {
     @Test
     void officialPdfGoesOutIdenticalToPortalOneWithNoCacheHeaders() throws Exception {
         LessonReport report = official();
-        String id = emit.run(clara.id(), ReportType.AULA, report.id(), null, "oficial.pdf");
+        String id = emit.run(clara.id(), ReportType.LESSON, report.id(), null, "official.pdf");
 
         MvcResult result = search(id);
 
@@ -100,7 +100,7 @@ class ChannelDocumentContractIT extends TelegramConversationBase {
                 .startsWith("inline")
                 .contains("filename=");
         assertThat(response.getContentAsByteArray())
-                .isEqualTo(doPortal("/api/v1/relatorios-aula/" + report.id() + "/pdf-oficial"));
+                .isEqualTo(doPortal("/api/v1/lesson-reports/" + report.id() + "/official-pdf"));
         assertThat(response.getContentAsByteArray()).startsWith("%PDF".getBytes());
         ChannelOpenApiContract.requireReply(result);
     }
@@ -108,18 +108,18 @@ class ChannelDocumentContractIT extends TelegramConversationBase {
     @Test
     void reviewPdfGoesOutIdenticalToPortalOne() throws Exception {
         UUID report = review();
-        String id = emit.run(clara.id(), ReportType.AULA, report, 1, "conferencia.pdf");
+        String id = emit.run(clara.id(), ReportType.LESSON, report, 1, "review.pdf");
 
         byte[] channel = search(id).getResponse().getContentAsByteArray();
 
         assertThat(channel)
-                .isEqualTo(doPortal("/api/v1/relatorios-aula/" + report + "/versoes/1/pdf"));
+                .isEqualTo(doPortal("/api/v1/lesson-reports/" + report + "/versions/1/pdf"));
     }
 
     @Test
     void repetitionWithinDeadlineStaysValid() throws Exception {
         LessonReport report = official();
-        String id = emit.run(clara.id(), ReportType.AULA, report.id(), null, "oficial.pdf");
+        String id = emit.run(clara.id(), ReportType.LESSON, report.id(), null, "official.pdf");
 
         assertThat(search(id).getResponse().getStatus()).isEqualTo(200);
         clock.advance(Duration.ofHours(24));
@@ -130,10 +130,10 @@ class ChannelDocumentContractIT extends TelegramConversationBase {
     @Test
     void invalidIdentifiersBecome404WithoutBodyAndWithoutObservableDifference() throws Exception {
         LessonReport report = official();
-        String expired = emit.run(clara.id(), ReportType.AULA, report.id(), null, "oficial.pdf");
+        String expired = emit.run(clara.id(), ReportType.LESSON, report.id(), null, "official.pdf");
         clock.advance(Duration.ofHours(26));
         String withoutAssignment =
-                emit.run(clara.id(), ReportType.AULA, report.id(), null, "oficial.pdf");
+                emit.run(clara.id(), ReportType.LESSON, report.id(), null, "official.pdf");
         jdbc.update("delete from teacher_student_assignment");
 
         List<String> ids =
@@ -142,7 +142,7 @@ class ChannelDocumentContractIT extends TelegramConversationBase {
                         expired, // vencido
                         withoutAssignment, // dono sem associação ao aluno: checagem repetida na
                         // leitura
-                        "curto",
+                        "short",
                         "A".repeat(44),
                         "A".repeat(42) + "+",
                         "http:localhost:" + API_BOTS.port() + ":x",
@@ -188,7 +188,7 @@ class ChannelDocumentContractIT extends TelegramConversationBase {
     @Test
     void withoutServiceTokenIs401() throws Exception {
         LessonReport report = official();
-        String id = emit.run(clara.id(), ReportType.AULA, report.id(), null, "oficial.pdf");
+        String id = emit.run(clara.id(), ReportType.LESSON, report.id(), null, "official.pdf");
         MvcResult result = mvc.perform(get(BASE + id)).andReturn();
         assertThat(result.getResponse().getStatus()).isEqualTo(401);
         assertThat(result.getResponse().getContentAsByteArray()).isEmpty();
@@ -197,7 +197,7 @@ class ChannelDocumentContractIT extends TelegramConversationBase {
     @Test
     void onlyHashStaysInDatabaseAndNeverIdentifier() throws Exception {
         LessonReport report = official();
-        String id = emit.run(clara.id(), ReportType.AULA, report.id(), null, "oficial.pdf");
+        String id = emit.run(clara.id(), ReportType.LESSON, report.id(), null, "official.pdf");
         List<String> hashes =
                 jdbc.queryForList("select token_hash from channel_document", String.class);
         assertThat(hashes).hasSize(1);

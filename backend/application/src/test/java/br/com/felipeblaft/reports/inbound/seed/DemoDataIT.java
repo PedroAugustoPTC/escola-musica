@@ -75,24 +75,24 @@ class DemoDataIT extends IntegrationBase {
         String output = run();
 
         assertThat(output).startsWith("0\n").contains("Massa de demonstração criada");
-        assertThat(output).contains("clara@exemplo.test → ").contains("bruno@exemplo.test → ");
+        assertThat(output).contains("clara@example.test → ").contains("bruno@example.test → ");
         assertThat(jdbc.queryForObject("select count(*) from teacher", Integer.class)).isEqualTo(2);
         assertThat(jdbc.queryForObject("select count(*) from student", Integer.class)).isEqualTo(8);
 
         Map<String, Integer> lessons = statusOf("lesson_report");
-        assertThat(lessons.get("APROVADO")).isGreaterThan(30);
+        assertThat(lessons.get("APPROVED")).isGreaterThan(30);
         assertThat(lessons)
-                .containsEntry("AGUARDANDO_CONFERENCIA", 1)
-                .containsEntry("AGUARDANDO_RESPOSTAS", 1);
+                .containsEntry("AWAITING_REVIEW", 1)
+                .containsEntry("AWAITING_ANSWERS", 1);
         assertThat(statusOf("semester_report"))
-                .containsEntry("APROVADO", 1)
-                .containsEntry("AGUARDANDO_CONFERENCIA", 1);
+                .containsEntry("APPROVED", 1)
+                .containsEntry("AWAITING_REVIEW", 1);
 
         // cada aula aprovada tem PDF de conferência e oficial; o semestral aprovado, os dois também
         Integer official =
                 jdbc.queryForObject(
-                        "select count(*) from pdf_document where type = 'OFICIAL'", Integer.class);
-        assertThat(official).isEqualTo(lessons.get("APROVADO") + 1);
+                        "select count(*) from pdf_document where type = 'OFFICIAL'", Integer.class);
+        assertThat(official).isEqualTo(lessons.get("APPROVED") + 1);
         assertThat(output)
                 .contains(
                         "PDFs gerados: "

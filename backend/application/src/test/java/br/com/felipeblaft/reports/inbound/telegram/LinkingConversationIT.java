@@ -46,7 +46,8 @@ class LinkingConversationIT extends TelegramConversationBase {
                 .contains("Nenhum relatório em aberto.")
                 .contains("2 aluno(s) associado(s)")
                 .contains("• Matteo Mafra · Piano");
-        assertThat(buttons(lastMessage())).containsExactly("v1:reg:", "v1:sem:", "v1:hist:");
+        assertThat(buttons(lastMessage()))
+                .containsExactly("v1:register:", "v1:semester:", "v1:history:");
         assertThat(lastMessage().get("parse_mode").asString()).isEqualTo("HTML");
         assertThat(lastMessage().get("chat_id").asLong()).isEqualTo(USER_CLARA);
         assertThat(
@@ -86,7 +87,7 @@ class LinkingConversationIT extends TelegramConversationBase {
     void wrongSecretAndRepeatedUpdate() throws Exception {
         mvc.perform(
                         post("/telegram/webhook")
-                                .header("X-Telegram-Bot-Api-Secret-Token", "errado")
+                                .header("X-Telegram-Bot-Api-Secret-Token", "wrong")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("{}"))
                 .andExpect(status().isUnauthorized());
@@ -110,7 +111,7 @@ class LinkingConversationIT extends TelegramConversationBase {
                 .isEqualTo("Eu só atendo em conversa privada. Fale comigo diretamente.");
         sendUpdate(messageJson(nextUpdate(), USER_CLARA, "\"sticker\": {\"file_id\": \"x\"}"));
         assertThat(lastMessage().get("text").asString()).startsWith("Olá! Para usar o bot");
-        sendCallback(USER_CLARA, "v1:reg:");
+        sendCallback(USER_CLARA, "v1:register:");
         assertThat(calls("answerCallbackQuery")).hasSize(1);
         assertThat(lastMessage().get("text").asString()).startsWith("Olá! Para usar o bot");
         assertThat(jdbc.queryForObject("select count(*) from telegram_link", Integer.class))

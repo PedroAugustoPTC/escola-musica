@@ -35,20 +35,19 @@ class CommonTest {
     @Test
     void domainExceptionCarriesCodeAndImmutableDetails() {
         DomainException error =
-                new DomainException(ErrorCode.VERSAO_DESATUALIZADA, Map.of("versaoVigente", 3));
-        assertThat(error.code()).isEqualTo(ErrorCode.VERSAO_DESATUALIZADA);
-        assertThat(error.getMessage()).isEqualTo("VERSAO_DESATUALIZADA");
-        assertThat(error.details()).containsEntry("versaoVigente", 3);
+                new DomainException(ErrorCode.STALE_VERSION, Map.of("currentVersion", 3));
+        assertThat(error.code()).isEqualTo(ErrorCode.STALE_VERSION);
+        assertThat(error.getMessage()).isEqualTo("STALE_VERSION");
+        assertThat(error.details()).containsEntry("currentVersion", 3);
         assertThatThrownBy(() -> error.details().put("x", 1))
                 .isInstanceOf(UnsupportedOperationException.class);
-        assertThat(new DomainException(ErrorCode.ERRO_INTERNO).details()).isEmpty();
+        assertThat(new DomainException(ErrorCode.INTERNAL_ERROR).details()).isEmpty();
     }
 
     @Test
     void codeMessageKey() {
-        assertThat(ErrorCode.CODIGO_INVALIDO.messageKey()).isEqualTo("CODIGO_INVALIDO");
-        assertThat(ErrorCode.RELATORIO_CANCELADO.messageKey())
-                .isEqualTo("RELATORIO_CANCELADO_ERRO");
+        assertThat(ErrorCode.INVALID_CODE.messageKey()).isEqualTo("INVALID_CODE");
+        assertThat(ErrorCode.REPORT_CANCELLED.messageKey()).isEqualTo("REPORT_CANCELLED_ERROR");
     }
 
     @Test
@@ -77,6 +76,6 @@ class CommonTest {
     void channelEnumerations() {
         assertThat(Channel.values()).containsExactly(Channel.WEB, Channel.TELEGRAM);
         assertThat(Medium.valueOf("AUDIO")).isEqualTo(Medium.AUDIO);
-        assertThat(ReportType.valueOf("SEMESTRAL")).isEqualTo(ReportType.SEMESTRAL);
+        assertThat(ReportType.valueOf("SEMESTER")).isEqualTo(ReportType.SEMESTER);
     }
 }

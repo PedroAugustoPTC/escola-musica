@@ -15,20 +15,20 @@ import type { ResultadoNavegacao } from './TelaProcessando';
 
 /** Rota da etapa atual de um relatório de aula (usada quando a tela aberta não é a da etapa). */
 export function rotaDaEtapa(relatorio: {
-  relatorioId: string;
+  reportId: string;
   status: string;
-  trabalhoEmCursoId?: string | null;
+  activeJobId?: string | null;
 }): string {
-  if (relatorio.trabalhoEmCursoId) return `/trabalhos/${relatorio.trabalhoEmCursoId}`;
+  if (relatorio.activeJobId) return `/trabalhos/${relatorio.activeJobId}`;
   switch (relatorio.status) {
-    case 'AGUARDANDO_RESPOSTAS':
-      return `/relatorios-aula/${relatorio.relatorioId}/perguntas`;
-    case 'APROVADO':
-      return `/relatorios-aula/${relatorio.relatorioId}/aprovado`;
-    case 'CANCELADO':
+    case 'AWAITING_ANSWERS':
+      return `/relatorios-aula/${relatorio.reportId}/perguntas`;
+    case 'APPROVED':
+      return `/relatorios-aula/${relatorio.reportId}/aprovado`;
+    case 'CANCELLED':
       return '/';
     default:
-      return `/relatorios-aula/${relatorio.relatorioId}`;
+      return `/relatorios-aula/${relatorio.reportId}`;
   }
 }
 
@@ -52,14 +52,14 @@ export function TelaPerguntas() {
 
   const dados = relatorio.data;
   useEffect(() => {
-    if (dados && (dados.status !== 'AGUARDANDO_RESPOSTAS' || dados.trabalhoEmCursoId)) {
+    if (dados && (dados.status !== 'AWAITING_ANSWERS' || dados.activeJobId)) {
       navegar(rotaDaEtapa(dados), { replace: true });
     }
   }, [dados, navegar]);
 
   const contexto = {
     sobretitulo: 'Relatório de aula',
-    titulo: dados?.alunoNome ?? '',
+    titulo: dados?.studentName ?? '',
     voltarPara: '/',
   };
 
@@ -82,17 +82,17 @@ export function TelaPerguntas() {
   const enviar = async () => {
     if (!relatorioId) return;
     if (!audio && !texto.trim()) {
-      setErroLocal(msg('RESPOSTA_VAZIA'));
+      setErroLocal(msg('EMPTY_ANSWER'));
       return;
     }
     setErroLocal(null);
     setErro(null);
     setEnviando(true);
     try {
-      const { trabalhoId } = audio
+      const { jobId } = audio
         ? await relatoriosAula.responderAudio(relatorioId, audio)
         : await relatoriosAula.responderTexto(relatorioId, texto.trim());
-      navegar(`/trabalhos/${trabalhoId}`);
+      navegar(`/trabalhos/${jobId}`);
     } catch (falha) {
       setErro(falha);
       setEnviando(false);
@@ -120,7 +120,7 @@ export function TelaPerguntas() {
       barraAcoes={
         <>
           <Botao variante="link-perigo" onClick={() => setConfirmarCancelamento(true)} disabled={enviando}>
-            {msg('BOTAO_CANCELAR_RELATORIO')}
+            {msg('CANCEL_REPORT_BUTTON')}
           </Botao>
           <Botao tamanho="grande" icone="send" carregando={enviando} onClick={() => void enviar()}>
             Enviar resposta
@@ -130,21 +130,21 @@ export function TelaPerguntas() {
     >
       <div className="pagina pagina--estreita">
         <div>
-          <div className="sobretitulo">Relatório de aula · {formatarData(dados.dataAula)}</div>
+          <div className="sobretitulo">Relatório de aula · {formatarData(dados.lessonDate)}</div>
           <h1 className="titulo-pagina">Faltam algumas informações</h1>
           <p className="subtitulo">
-            Faltam algumas informações para concluir o relatório de {dados.alunoNome}. Responda com suas
+            Faltam algumas informações para concluir o relatório de {dados.studentName}. Responda com suas
             palavras, tudo em uma única mensagem.
           </p>
         </div>
-        {resultado === 'FALHA_RESPOSTA' ? (
+        {resultado === 'ANSWER_FAILED' ? (
           <div role="alert" className="alerta alerta--erro">
             <Icone nome="error" />
-            <div className="alerta__texto">{msg('FALHA_RESPOSTA')}</div>
+            <div className="alerta__texto">{msg('ANSWER_FAILED')}</div>
           </div>
         ) : null}
         <ol className="perguntas">
-          {dados.perguntasPendentes.map((pergunta, indice) => (
+          {dados.pendingQuestions.map((pergunta, indice) => (
             <li key={`${indice}-${pergunta}`} className="perguntas__item">
               <span className="perguntas__numero">{indice + 1}</span>
               <span>{pergunta}</span>
@@ -179,7 +179,7 @@ export function TelaPerguntas() {
         </div>
         <GravadorAudio
           compacto
-          limiteMb={inicio.data?.limiteAudioMb ?? 50}
+          limiteMb={inicio.data?.audioLimitMb ?? 50}
           aoMudar={setAudio}
           desabilitado={enviando}
         />
@@ -190,8 +190,8 @@ export function TelaPerguntas() {
         perigo
         icone="block"
         titulo="Cancelar este relatório?"
-        texto={msg('CONFIRMAR_CANCELAMENTO')}
-        rotuloConfirmar={msg('BOTAO_CONFIRMAR_CANCELAMENTO')}
+        texto={msg('CONFIRM_CANCELLATION')}
+        rotuloConfirmar={msg('CONFIRM_CANCELLATION_BUTTON')}
         carregando={cancelando}
         erro={erroCancelamento ? textoDoErro(erroCancelamento) : undefined}
         aoConfirmar={() => void cancelar()}

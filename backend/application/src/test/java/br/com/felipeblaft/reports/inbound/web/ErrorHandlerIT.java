@@ -73,13 +73,13 @@ class ErrorHandlerIT extends ContractApiBase {
         Cookie session = signIn(ScenarioIT.CODE_CLARA);
         doThrow(new IllegalStateException(INTERNAL_DETAIL)).when(getHome).run(any());
 
-        MvcResult result = mvc.perform(get("/api/v1/inicio").cookie(session)).andReturn();
+        MvcResult result = mvc.perform(get("/api/v1/home").cookie(session)).andReturn();
 
         assertThat(result.getResponse().getStatus()).isEqualTo(500);
         String body = result.getResponse().getContentAsString();
         JsonNode json = JSON_READER.readTree(body);
-        assertThat(json.path("codigo").asString()).isEqualTo("ERRO_INTERNO");
-        assertThat(json.path("mensagem").asString())
+        assertThat(json.path("code").asString()).isEqualTo("INTERNAL_ERROR");
+        assertThat(json.path("message").asString())
                 .isEqualTo("Ocorreu um erro inesperado. Tente novamente mais tarde.");
         assertThat(body)
                 .doesNotContain(
@@ -100,11 +100,11 @@ class ErrorHandlerIT extends ContractApiBase {
         Cookie session = signIn(ScenarioIT.CODE_CLARA);
         doThrow(new IllegalStateException(INTERNAL_DETAIL)).when(getHome).run(any());
 
-        mvc.perform(get("/api/v1/inicio").cookie(session)).andReturn();
+        mvc.perform(get("/api/v1/home").cookie(session)).andReturn();
 
         String logs = logText();
-        assertThat(logs).contains("erro-inesperado").contains("IllegalStateException");
-        assertThat(logs).doesNotContain("Matteo", "SELECT", "Repositorio.java", "/app/");
+        assertThat(logs).contains("unexpected-error").contains("IllegalStateException");
+        assertThat(logs).doesNotContain("Matteo", "SELECT", "Repository.java", "/app/");
     }
 
     private static final tools.jackson.databind.json.JsonMapper JSON_READER =

@@ -1,7 +1,7 @@
 {
   "teachers": [
-    { "email": "clara@exemplo.test", "name": "Clara Souza", "active": true },
-    { "email": "bruno@exemplo.test", "name": "Bruno Lima", "active": true }
+    { "email": "clara@example.test", "name": "Clara Souza", "active": true },
+    { "email": "bruno@example.test", "name": "Bruno Lima", "active": true }
   ],
   "students": [
     {
@@ -10,14 +10,14 @@
       "birthDate": "2014-05-10",
       "guardianName": "Responsável Fictício de Matteo",
       "instrument": "Piano",
-      "teachers": ["clara@exemplo.test"]
+      "teachers": ["clara@example.test"]
     },
     {
       "cpf": "123.456.789-09",
       "name": "Olavo Torrente",
       "birthDate": "1998-02-01",
       "instrument": "Violão",
-      "teachers": ["clara@exemplo.test"]
+      "teachers": ["clara@example.test"]
     },
     {
       "cpf": "704.512.836-35",
@@ -25,7 +25,7 @@
       "birthDate": "2016-08-20",
       "guardianName": "Responsável Fictício de Miguel",
       "instrument": "Violino",
-      "teachers": ["clara@exemplo.test"]
+      "teachers": ["clara@example.test"]
     },
     {
       "cpf": "318.264.597-82",
@@ -33,7 +33,7 @@
       "birthDate": "2010-11-03",
       "guardianName": "Responsável Fictício de Helena",
       "instrument": "Flauta",
-      "teachers": ["bruno@exemplo.test"]
+      "teachers": ["bruno@example.test"]
     }
   ]
 }

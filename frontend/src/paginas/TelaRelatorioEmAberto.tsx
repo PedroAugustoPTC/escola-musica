@@ -15,12 +15,12 @@ import { relatoriosAula } from '../servicos/relatoriosAula';
 
 /** Para onde "Continuar de onde parei" leva, conforme o status e a etapa (US3). */
 export function rotaDeContinuacao(aberto: RelatorioEmAbertoDto): string {
-  if (!aberto.relatorioId) {
-    return aberto.trabalhoId ? `/trabalhos/${aberto.trabalhoId}` : '/';
+  if (!aberto.reportId) {
+    return aberto.jobId ? `/trabalhos/${aberto.jobId}` : '/';
   }
-  if (aberto.tipo === 'SEMESTRAL') return `/relatorios-semestrais/${aberto.relatorioId}`;
-  if (aberto.status === 'AGUARDANDO_RESPOSTAS') return `/relatorios-aula/${aberto.relatorioId}/perguntas`;
-  return `/relatorios-aula/${aberto.relatorioId}`;
+  if (aberto.type === 'SEMESTER') return `/relatorios-semestrais/${aberto.reportId}`;
+  if (aberto.status === 'AWAITING_ANSWERS') return `/relatorios-aula/${aberto.reportId}/perguntas`;
+  return `/relatorios-aula/${aberto.reportId}`;
 }
 
 /** Tela 04 — Relatório em aberto (04b confirmação de descarte), FR-034. */
@@ -33,7 +33,7 @@ export function TelaRelatorioEmAberto() {
   const consulta = useQuery<RelatorioEmAbertoDto | null>({
     queryKey: ['relatorio-em-aberto', alunoId],
     queryFn: async ({ signal }) =>
-      (await api.get<RelatorioEmAbertoDto | undefined>(`/alunos/${alunoId}/relatorio-em-aberto`, signal)) ??
+      (await api.get<RelatorioEmAbertoDto | undefined>(`/students/${alunoId}/open-report`, signal)) ??
       null,
     gcTime: 0,
     enabled: Boolean(alunoId),
@@ -60,17 +60,17 @@ export function TelaRelatorioEmAberto() {
     return <Navigate to={`/alunos/${alunoId}/nova-aula`} replace />;
   }
 
-  const canal = msg(aberto.canalOrigem === 'TELEGRAM' ? 'CANAL_ORIGEM_TELEGRAM' : 'CANAL_ORIGEM_WEB');
-  const quando = `${dataDoInstante(aberto.atualizadoEm)} às ${horaDoInstante(aberto.atualizadoEm)}`;
+  const canal = msg(aberto.originChannel === 'TELEGRAM' ? 'TELEGRAM_ORIGIN_CHANNEL' : 'WEB_ORIGIN_CHANNEL');
+  const quando = `${dataDoInstante(aberto.updatedAt)} às ${horaDoInstante(aberto.updatedAt)}`;
 
   const descartar = async () => {
     setDescartando(true);
     setErro(null);
     try {
-      if (aberto.relatorioId) {
-        await relatoriosAula.cancelar(aberto.relatorioId);
-      } else if (aberto.trabalhoId) {
-        await api.post<void>(`/trabalhos/${aberto.trabalhoId}/descarte`);
+      if (aberto.reportId) {
+        await relatoriosAula.cancelar(aberto.reportId);
+      } else if (aberto.jobId) {
+        await api.post<void>(`/jobs/${aberto.jobId}/discard`);
       }
       navegar(`/alunos/${alunoId}/nova-aula`, { replace: true });
     } catch (falha) {
@@ -87,7 +87,7 @@ export function TelaRelatorioEmAberto() {
             <Icone nome="edit_note" />
           </span>
           <div>
-            <div className="sobretitulo">{aberto.alunoNome}</div>
+            <div className="sobretitulo">{aberto.studentName}</div>
             <h1 className="titulo-pagina titulo-pagina--menor">Você tem um relatório em aberto</h1>
             <p className="subtitulo">
               Este aluno já tem um relatório iniciado {canal} e ainda não concluído (última alteração em{' '}
@@ -96,10 +96,10 @@ export function TelaRelatorioEmAberto() {
           </div>
           <div className="pilha-acoes">
             <Botao tamanho="grande" onClick={() => navegar(rotaDeContinuacao(aberto))}>
-              {msg('BOTAO_CONTINUAR')}
+              {msg('CONTINUE_BUTTON')}
             </Botao>
             <Botao variante="perigo" tamanho="grande" onClick={() => setConfirmar(true)}>
-              {msg('BOTAO_DESCARTAR')}
+              {msg('DISCARD_BUTTON')}
             </Botao>
           </div>
         </div>
@@ -109,8 +109,8 @@ export function TelaRelatorioEmAberto() {
         perigo
         icone="delete"
         titulo="Descartar o relatório em aberto?"
-        texto={msg('CONFIRMAR_DESCARTE')}
-        rotuloConfirmar={msg('BOTAO_CONFIRMAR_DESCARTE')}
+        texto={msg('CONFIRM_DISCARD')}
+        rotuloConfirmar={msg('CONFIRM_DISCARD_BUTTON')}
         carregando={descartando}
         erro={erro ? textoDoErro(erro) : undefined}
         aoConfirmar={() => void descartar()}

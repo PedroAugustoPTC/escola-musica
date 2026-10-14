@@ -28,7 +28,7 @@ class AuthorizationServiceTest {
         assignments.assign(bruno, matteo);
         assertThatThrownBy(() -> service.requireAssignment(clara, matteo))
                 .isInstanceOf(DomainException.class)
-                .hasMessage(ErrorCode.ALUNO_NAO_ASSOCIADO.name());
+                .hasMessage(ErrorCode.STUDENT_NOT_ASSIGNED.name());
     }
 
     @Test
@@ -36,6 +36,6 @@ class AuthorizationServiceTest {
         assertThatCode(() -> service.requireOwner(clara, clara)).doesNotThrowAnyException();
         assertThatThrownBy(() -> service.requireOwner(clara, bruno))
                 .isInstanceOf(DomainException.class)
-                .hasMessage(ErrorCode.RECURSO_NAO_ENCONTRADO.name());
+                .hasMessage(ErrorCode.RESOURCE_NOT_FOUND.name());
     }
 }

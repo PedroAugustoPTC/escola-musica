@@ -46,7 +46,7 @@ class ResumptionConversationIT extends TelegramConversationBase {
 
     private UUID reportId() {
         return jdbc.queryForObject(
-                "select id from lesson_report where status <> 'CANCELADO'", UUID.class);
+                "select id from lesson_report where status <> 'CANCELLED'", UUID.class);
     }
 
     /** Relatório iniciado na Web e deixado na conferência (versão 1). */
@@ -69,7 +69,7 @@ class ResumptionConversationIT extends TelegramConversationBase {
         assertThat(lastMessage().get("text").asString())
                 .isEqualTo(
                         "Você tem um relatório em aberto. Este aluno já tem um relatório iniciado pelo portal e ainda não concluído (última alteração em 21/09/2026 às 10:00).");
-        assertThat(buttons(lastMessage())).containsExactly("v1:cont:", "v1:desc:");
+        assertThat(buttons(lastMessage())).containsExactly("v1:continue:", "v1:discard:");
     }
 
     @Test
@@ -81,12 +81,12 @@ class ResumptionConversationIT extends TelegramConversationBase {
         sendText(USER_CLARA, "Matteo");
         API_BOTS.resetRequests();
 
-        sendCallback(USER_CLARA, "v1:cont:");
+        sendCallback(USER_CLARA, "v1:continue:");
 
         assertThat(String.join("\n", sentTexts()))
                 .contains("Confira o relatório antes de aprovar")
                 .contains("Versão 2");
-        assertThat(buttons(lastMessage())).contains("v1:aprov:2");
+        assertThat(buttons(lastMessage())).contains("v1:approve:2");
         assertThat(jdbc.queryForObject("select focused_report_id from telegram_link", UUID.class))
                 .isEqualTo(id);
         assertThat(
@@ -115,7 +115,7 @@ class ResumptionConversationIT extends TelegramConversationBase {
         sendText(USER_CLARA, "Matteo");
         API_BOTS.resetRequests();
 
-        sendCallback(USER_CLARA, "v1:cont:");
+        sendCallback(USER_CLARA, "v1:continue:");
 
         assertThat(lastMessage().get("text").asString())
                 .startsWith("Este relatório ainda está sendo processado");
@@ -128,49 +128,49 @@ class ResumptionConversationIT extends TelegramConversationBase {
         sendText(USER_CLARA, "registrar aula");
         sendText(USER_CLARA, "Matteo");
 
-        sendCallback(USER_CLARA, "v1:desc:");
+        sendCallback(USER_CLARA, "v1:discard:");
         assertThat(lastMessage().get("text").asString())
                 .isEqualTo(
                         "Descartar o relatório em aberto? Ele deixará de aparecer para você e não poderá ser recuperado.");
-        assertThat(buttons(lastMessage())).containsExactly("v1:descok:", "v1:inicio:");
+        assertThat(buttons(lastMessage())).containsExactly("v1:discard-ok:", "v1:home:");
         API_BOTS.resetRequests();
 
-        sendCallback(USER_CLARA, "v1:descok:");
+        sendCallback(USER_CLARA, "v1:discard-ok:");
 
         assertThat(sentTexts()).contains("Relatório cancelado.");
         assertThat(lastMessage().get("text").asString())
                 .startsWith("Aula de hoje, 21/09/2026, com Matteo Ferreira.");
         assertThat(jdbc.queryForObject("select status from lesson_report", String.class))
-                .isEqualTo("CANCELADO");
+                .isEqualTo("CANCELLED");
     }
 
     @Test
     void discardWithValidPendingAudioReusesAudio() throws Exception {
         register.run(clara.id(), matteo.id(), webAudio(), Channel.WEB);
         scenario.processQueue();
-        prepareTelegramFile("reaproveitado", AudioNormalizationTest.AUDIO_WITH_SPEECH);
-        sendVoice(USER_CLARA, "reaproveitado", 1000);
-        sendCallback(USER_CLARA, "v1:aluno:0");
+        prepareTelegramFile("reused", AudioNormalizationTest.AUDIO_WITH_SPEECH);
+        sendVoice(USER_CLARA, "reused", 1000);
+        sendCallback(USER_CLARA, "v1:student:0");
         assertThat(lastMessage().get("text").asString())
                 .startsWith("Você tem um relatório em aberto.");
 
-        sendCallback(USER_CLARA, "v1:desc:");
+        sendCallback(USER_CLARA, "v1:discard:");
         sendText(USER_CLARA, "sim");
 
         assertThat(
                         jdbc.queryForObject(
-                                "select count(*) from processing_job where type = 'REGISTRO_AULA' and status = 'PENDENTE'",
+                                "select count(*) from processing_job where type = 'LESSON_REGISTRATION' and status = 'PENDING'",
                                 Integer.class))
                 .isEqualTo(1);
         assertThat(
                         jdbc.queryForObject(
-                                "select parameters->>'channelFile' from processing_job where status = 'PENDENTE'",
+                                "select parameters->>'channelFile' from processing_job where status = 'PENDING'",
                                 String.class))
-                .isEqualTo("reaproveitado");
+                .isEqualTo("reused");
         scenario.processQueue();
         assertThat(
                         jdbc.queryForObject(
-                                "select count(*) from lesson_report where status = 'AGUARDANDO_RESPOSTAS'",
+                                "select count(*) from lesson_report where status = 'AWAITING_ANSWERS'",
                                 Integer.class))
                 .isEqualTo(1);
     }
@@ -181,7 +181,7 @@ class ResumptionConversationIT extends TelegramConversationBase {
 
         sendText(USER_CLARA, "início");
 
-        assertThat(buttons(lastMessage())).contains("v1:foco:a" + id);
+        assertThat(buttons(lastMessage())).contains("v1:focus:a" + id);
         assertThat(buttonLabels(lastMessage())).contains("Continuar: Matteo Ferreira (21/09/2026)");
     }
 }

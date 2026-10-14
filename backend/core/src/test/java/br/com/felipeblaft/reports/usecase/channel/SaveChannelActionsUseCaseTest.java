@@ -29,7 +29,7 @@ class SaveChannelActionsUseCaseTest {
 
     private static NewAction create(String id, UUID teacher) {
         return new NewAction(
-                id, ChannelActionType.MENSAGEM, 77L, teacher, null, "{\"texto\":\"a\"}", null);
+                id, ChannelActionType.MESSAGE, 77L, teacher, null, "{\"text\":\"a\"}", null);
     }
 
     @Test
@@ -37,7 +37,7 @@ class SaveChannelActionsUseCaseTest {
         int saved =
                 save.run(
                         "u9",
-                        ChannelActionOrigin.RESPOSTA_UPDATE,
+                        ChannelActionOrigin.UPDATE_REPLY,
                         9L,
                         List.of(create("u9-0", null), create("u9-1", null)));
         assertThat(saved).isEqualTo(2);
@@ -46,7 +46,7 @@ class SaveChannelActionsUseCaseTest {
         assertThat(actions)
                 .allSatisfy(
                         action -> {
-                            assertThat(action.state()).isEqualTo(ChannelActionState.ENTREGUE);
+                            assertThat(action.state()).isEqualTo(ChannelActionState.DELIVERED);
                             assertThat(action.batchId()).isEqualTo("u9");
                             assertThat(action.deadlineAt())
                                     .isEqualTo(clock.now().plus(Duration.ofHours(24)));
@@ -57,28 +57,24 @@ class SaveChannelActionsUseCaseTest {
     void proactiveSavesPendingDueNow() {
         UUID teacher = UUID.randomUUID();
         save.run(
-                "p:resultado:t",
-                ChannelActionOrigin.PROATIVA,
+                "p:result:t",
+                ChannelActionOrigin.PROACTIVE,
                 null,
-                List.of(create("p:resultado:t:0", teacher)));
-        ChannelAction action = repository.searchById("p:resultado:t:0").orElseThrow();
-        assertThat(action.state()).isEqualTo(ChannelActionState.PENDENTE);
+                List.of(create("p:result:t:0", teacher)));
+        ChannelAction action = repository.searchById("p:result:t:0").orElseThrow();
+        assertThat(action.state()).isEqualTo(ChannelActionState.PENDING);
         assertThat(action.nextAttemptAt()).isEqualTo(clock.now());
         assertThat(action.teacherId()).isEqualTo(teacher);
     }
 
     @Test
     void sameIdDoesNotOverwriteNorDuplicate() {
-        save.run("u9", ChannelActionOrigin.RESPOSTA_UPDATE, 9L, List.of(create("u9-0", null)));
+        save.run("u9", ChannelActionOrigin.UPDATE_REPLY, 9L, List.of(create("u9-0", null)));
         repository.stored("u9-0").confirmExecuted(clock.now());
         int second =
-                save.run(
-                        "u9",
-                        ChannelActionOrigin.RESPOSTA_UPDATE,
-                        9L,
-                        List.of(create("u9-0", null)));
+                save.run("u9", ChannelActionOrigin.UPDATE_REPLY, 9L, List.of(create("u9-0", null)));
         assertThat(second).isZero();
         assertThat(repository.all()).hasSize(1);
-        assertThat(repository.stored("u9-0").state()).isEqualTo(ChannelActionState.EXECUTADA);
+        assertThat(repository.stored("u9-0").state()).isEqualTo(ChannelActionState.EXECUTED);
     }
 }

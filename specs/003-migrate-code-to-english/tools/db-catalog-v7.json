@@ -1,0 +1,3135 @@
+{
+  "tables": [
+    {
+      "name": "access_attempt",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "channel",
+          "type": "character varying(12)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "source_hash",
+          "type": "character varying(64)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "failed_attempts",
+          "type": "integer",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "blocked_until",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    },
+    {
+      "name": "ai_call",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "job_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "report_type",
+          "type": "character varying(12)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "report_id",
+          "type": "uuid",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "task",
+          "type": "character varying(30)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "provider_model",
+          "type": "character varying(120)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "audio_seconds",
+          "type": "numeric(10,2)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "input_tokens",
+          "type": "integer",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "output_tokens",
+          "type": "integer",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "duration_ms",
+          "type": "bigint",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "estimated_cost_usd",
+          "type": "numeric(12,6)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "success",
+          "type": "boolean",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "error_code",
+          "type": "character varying(60)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    },
+    {
+      "name": "channel_action",
+      "columns": [
+        {
+          "name": "id",
+          "type": "character varying(120)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "seq",
+          "type": "bigint",
+          "notNull": true,
+          "default": null,
+          "identity": "a",
+          "generated": ""
+        },
+        {
+          "name": "batch_id",
+          "type": "character varying(120)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "channel",
+          "type": "character varying(12)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "origin",
+          "type": "character varying(16)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "update_id",
+          "type": "bigint",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "chat_id",
+          "type": "bigint",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "teacher_id",
+          "type": "uuid",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "job_id",
+          "type": "uuid",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "type",
+          "type": "character varying(20)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "payload",
+          "type": "jsonb",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "compensation",
+          "type": "jsonb",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "state",
+          "type": "character varying(18)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "attempts",
+          "type": "integer",
+          "notNull": true,
+          "default": "0",
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "next_attempt_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "deadline_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "version",
+          "type": "integer",
+          "notNull": true,
+          "default": "0",
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "delivered_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "finalized_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "reason_code",
+          "type": "character varying(40)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    },
+    {
+      "name": "channel_document",
+      "columns": [
+        {
+          "name": "token_hash",
+          "type": "character(64)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "teacher_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "report_type",
+          "type": "character varying(12)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "report_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "version",
+          "type": "integer",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "file_name",
+          "type": "character varying(120)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    },
+    {
+      "name": "lesson",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "teacher_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "student_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "lesson_date",
+          "type": "date",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    },
+    {
+      "name": "lesson_report",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "lesson_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "teacher_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "student_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "transcription",
+          "type": "text",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "content",
+          "type": "jsonb",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "pending_questions",
+          "type": "jsonb",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "question_rounds",
+          "type": "integer",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "status",
+          "type": "character varying(30)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "processing_step",
+          "type": "character varying(30)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "current_version",
+          "type": "integer",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "origin_channel",
+          "type": "character varying(12)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "failure_reason",
+          "type": "character varying(40)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "approved_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "approved_version",
+          "type": "integer",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "approval_channel",
+          "type": "character varying(12)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "cancelled_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "processing_time_ms",
+          "type": "bigint",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "lock_version",
+          "type": "bigint",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    },
+    {
+      "name": "pdf_document",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "version_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "type",
+          "type": "character varying(12)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "storage_key",
+          "type": "character varying(255)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "size_bytes",
+          "type": "bigint",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "sha256",
+          "type": "character varying(64)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "generated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    },
+    {
+      "name": "processed_telegram_update",
+      "columns": [
+        {
+          "name": "update_id",
+          "type": "bigint",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "received_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "total_actions",
+          "type": "integer",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "origin",
+          "type": "character varying(10)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    },
+    {
+      "name": "processing_job",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "type",
+          "type": "character varying(30)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "teacher_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "student_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "report_type",
+          "type": "character varying(12)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "report_id",
+          "type": "uuid",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "request_channel",
+          "type": "character varying(12)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "medium",
+          "type": "character varying(10)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "parameters",
+          "type": "jsonb",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "temporary_file",
+          "type": "character varying(255)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "status",
+          "type": "character varying(20)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "step",
+          "type": "character varying(30)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "result_code",
+          "type": "character varying(60)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "resulting_report_id",
+          "type": "uuid",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "attempts",
+          "type": "integer",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "delay_notice_sent",
+          "type": "boolean",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "started_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "completed_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    },
+    {
+      "name": "report_interaction",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "report_type",
+          "type": "character varying(12)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "report_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "type",
+          "type": "character varying(30)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "channel",
+          "type": "character varying(12)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "medium",
+          "type": "character varying(10)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "text",
+          "type": "text",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "base_version",
+          "type": "integer",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "round",
+          "type": "integer",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "result",
+          "type": "character varying(40)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "resulting_version",
+          "type": "integer",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    },
+    {
+      "name": "report_version",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "report_type",
+          "type": "character varying(12)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "report_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "number",
+          "type": "integer",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "content",
+          "type": "jsonb",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "origin",
+          "type": "character varying(30)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "interaction_id",
+          "type": "uuid",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "channel",
+          "type": "character varying(12)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "prompt_version",
+          "type": "character varying(40)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    },
+    {
+      "name": "semester_report",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "teacher_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "student_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "period_key",
+          "type": "character varying(6)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "period_start",
+          "type": "date",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "period_end",
+          "type": "date",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "considered_lesson_count",
+          "type": "integer",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "open_report_count",
+          "type": "integer",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "general_information",
+          "type": "jsonb",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "content",
+          "type": "jsonb",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "status",
+          "type": "character varying(30)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "processing_step",
+          "type": "character varying(30)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "current_version",
+          "type": "integer",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "origin_channel",
+          "type": "character varying(12)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "approved_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "approved_version",
+          "type": "integer",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "approval_channel",
+          "type": "character varying(12)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "cancelled_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "processing_time_ms",
+          "type": "bigint",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "lock_version",
+          "type": "bigint",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    },
+    {
+      "name": "student",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "name",
+          "type": "character varying(255)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "birth_date",
+          "type": "date",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "cpf_encrypted",
+          "type": "bytea",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "cpf_hash",
+          "type": "character varying(64)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "guardian_name",
+          "type": "character varying(255)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "instrument",
+          "type": "character varying(80)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    },
+    {
+      "name": "teacher",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "name",
+          "type": "character varying(255)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "email",
+          "type": "character varying(255)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "access_code_hash",
+          "type": "character varying(64)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "access_code_expires_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "access_code_renewed_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    },
+    {
+      "name": "teacher_student_assignment",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "teacher_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "student_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    },
+    {
+      "name": "telegram_link",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "teacher_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "telegram_user_id",
+          "type": "bigint",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "chat_id",
+          "type": "bigint",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "linked_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "selected_student_id",
+          "type": "uuid",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "flow",
+          "type": "character varying(20)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "flow_step",
+          "type": "character varying(40)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "flow_data",
+          "type": "jsonb",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "pending_audio_file_id",
+          "type": "character varying(255)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "pending_audio_file_unique_id",
+          "type": "character varying(64)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "pending_audio_mime",
+          "type": "character varying(100)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "pending_audio_size",
+          "type": "bigint",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "pending_audio_received_at",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "focused_report_type",
+          "type": "character varying(12)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "focused_report_id",
+          "type": "uuid",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "presented_version",
+          "type": "integer",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "lock_version",
+          "type": "bigint",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    },
+    {
+      "name": "web_session",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "teacher_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "token_hash",
+          "type": "character varying(64)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "last_used_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    }
+  ],
+  "constraints": [
+    {
+      "table": "access_attempt",
+      "name": "access_attempt_channel_not_null",
+      "type": "n",
+      "definition": "NOT NULL channel"
+    },
+    {
+      "table": "access_attempt",
+      "name": "access_attempt_failed_attempts_not_null",
+      "type": "n",
+      "definition": "NOT NULL failed_attempts"
+    },
+    {
+      "table": "access_attempt",
+      "name": "access_attempt_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table": "access_attempt",
+      "name": "access_attempt_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "access_attempt",
+      "name": "access_attempt_source_hash_not_null",
+      "type": "n",
+      "definition": "NOT NULL source_hash"
+    },
+    {
+      "table": "access_attempt",
+      "name": "access_attempt_updated_at_not_null",
+      "type": "n",
+      "definition": "NOT NULL updated_at"
+    },
+    {
+      "table": "access_attempt",
+      "name": "ck_access_attempt_positive",
+      "type": "c",
+      "definition": "CHECK ((failed_attempts >= 0))"
+    },
+    {
+      "table": "access_attempt",
+      "name": "uk_access_attempt_source",
+      "type": "u",
+      "definition": "UNIQUE (channel, source_hash)"
+    },
+    {
+      "table": "ai_call",
+      "name": "ai_call_created_at_not_null",
+      "type": "n",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table": "ai_call",
+      "name": "ai_call_duration_ms_not_null",
+      "type": "n",
+      "definition": "NOT NULL duration_ms"
+    },
+    {
+      "table": "ai_call",
+      "name": "ai_call_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table": "ai_call",
+      "name": "ai_call_job_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (job_id) REFERENCES processing_job(id)"
+    },
+    {
+      "table": "ai_call",
+      "name": "ai_call_job_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL job_id"
+    },
+    {
+      "table": "ai_call",
+      "name": "ai_call_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "ai_call",
+      "name": "ai_call_success_not_null",
+      "type": "n",
+      "definition": "NOT NULL success"
+    },
+    {
+      "table": "ai_call",
+      "name": "ai_call_task_not_null",
+      "type": "n",
+      "definition": "NOT NULL task"
+    },
+    {
+      "table": "channel_action",
+      "name": "channel_action_attempts_not_null",
+      "type": "n",
+      "definition": "NOT NULL attempts"
+    },
+    {
+      "table": "channel_action",
+      "name": "channel_action_batch_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL batch_id"
+    },
+    {
+      "table": "channel_action",
+      "name": "channel_action_channel_not_null",
+      "type": "n",
+      "definition": "NOT NULL channel"
+    },
+    {
+      "table": "channel_action",
+      "name": "channel_action_chat_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL chat_id"
+    },
+    {
+      "table": "channel_action",
+      "name": "channel_action_created_at_not_null",
+      "type": "n",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table": "channel_action",
+      "name": "channel_action_deadline_at_not_null",
+      "type": "n",
+      "definition": "NOT NULL deadline_at"
+    },
+    {
+      "table": "channel_action",
+      "name": "channel_action_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table": "channel_action",
+      "name": "channel_action_origin_not_null",
+      "type": "n",
+      "definition": "NOT NULL origin"
+    },
+    {
+      "table": "channel_action",
+      "name": "channel_action_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "channel_action",
+      "name": "channel_action_seq_not_null",
+      "type": "n",
+      "definition": "NOT NULL seq"
+    },
+    {
+      "table": "channel_action",
+      "name": "channel_action_state_not_null",
+      "type": "n",
+      "definition": "NOT NULL state"
+    },
+    {
+      "table": "channel_action",
+      "name": "channel_action_type_not_null",
+      "type": "n",
+      "definition": "NOT NULL type"
+    },
+    {
+      "table": "channel_action",
+      "name": "channel_action_version_not_null",
+      "type": "n",
+      "definition": "NOT NULL version"
+    },
+    {
+      "table": "channel_action",
+      "name": "ck_channel_action_attempts",
+      "type": "c",
+      "definition": "CHECK ((attempts >= 0))"
+    },
+    {
+      "table": "channel_action",
+      "name": "ck_channel_action_origin",
+      "type": "c",
+      "definition": "CHECK (((origin)::text = ANY ((ARRAY['RESPOSTA_UPDATE'::character varying, 'PROATIVA'::character varying, 'COMPENSACAO'::character varying])::text[])))"
+    },
+    {
+      "table": "channel_action",
+      "name": "ck_channel_action_state",
+      "type": "c",
+      "definition": "CHECK (((state)::text = ANY ((ARRAY['PENDENTE'::character varying, 'ENTREGUE'::character varying, 'EXECUTADA'::character varying, 'FALHOU'::character varying, 'FALHA_DEFINITIVA'::character varying, 'DESCARTADA'::character varying])::text[])))"
+    },
+    {
+      "table": "channel_action",
+      "name": "ck_channel_action_type",
+      "type": "c",
+      "definition": "CHECK (((type)::text = ANY ((ARRAY['MENSAGEM'::character varying, 'EDICAO'::character varying, 'DOCUMENTO'::character varying, 'RESPOSTA_CALLBACK'::character varying, 'MENSAGEM_ETAPA'::character varying])::text[])))"
+    },
+    {
+      "table": "channel_action",
+      "name": "ck_channel_action_update_reply",
+      "type": "c",
+      "definition": "CHECK ((((origin)::text <> 'RESPOSTA_UPDATE'::text) OR (update_id IS NOT NULL)))"
+    },
+    {
+      "table": "channel_action",
+      "name": "uk_channel_action_seq",
+      "type": "u",
+      "definition": "UNIQUE (seq)"
+    },
+    {
+      "table": "channel_document",
+      "name": "channel_document_created_at_not_null",
+      "type": "n",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table": "channel_document",
+      "name": "channel_document_expires_at_not_null",
+      "type": "n",
+      "definition": "NOT NULL expires_at"
+    },
+    {
+      "table": "channel_document",
+      "name": "channel_document_file_name_not_null",
+      "type": "n",
+      "definition": "NOT NULL file_name"
+    },
+    {
+      "table": "channel_document",
+      "name": "channel_document_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (token_hash)"
+    },
+    {
+      "table": "channel_document",
+      "name": "channel_document_report_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL report_id"
+    },
+    {
+      "table": "channel_document",
+      "name": "channel_document_report_type_not_null",
+      "type": "n",
+      "definition": "NOT NULL report_type"
+    },
+    {
+      "table": "channel_document",
+      "name": "channel_document_teacher_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL teacher_id"
+    },
+    {
+      "table": "channel_document",
+      "name": "channel_document_token_hash_not_null",
+      "type": "n",
+      "definition": "NOT NULL token_hash"
+    },
+    {
+      "table": "channel_document",
+      "name": "ck_channel_document_type",
+      "type": "c",
+      "definition": "CHECK (((report_type)::text = ANY ((ARRAY['AULA'::character varying, 'SEMESTRAL'::character varying])::text[])))"
+    },
+    {
+      "table": "channel_document",
+      "name": "ck_channel_document_version",
+      "type": "c",
+      "definition": "CHECK (((version IS NULL) OR (version > 0)))"
+    },
+    {
+      "table": "lesson",
+      "name": "lesson_created_at_not_null",
+      "type": "n",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table": "lesson",
+      "name": "lesson_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table": "lesson",
+      "name": "lesson_lesson_date_not_null",
+      "type": "n",
+      "definition": "NOT NULL lesson_date"
+    },
+    {
+      "table": "lesson",
+      "name": "lesson_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "lesson",
+      "name": "lesson_student_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (student_id) REFERENCES student(id)"
+    },
+    {
+      "table": "lesson",
+      "name": "lesson_student_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL student_id"
+    },
+    {
+      "table": "lesson",
+      "name": "lesson_teacher_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (teacher_id) REFERENCES teacher(id)"
+    },
+    {
+      "table": "lesson",
+      "name": "lesson_teacher_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL teacher_id"
+    },
+    {
+      "table": "lesson_report",
+      "name": "ck_lesson_report_question_rounds",
+      "type": "c",
+      "definition": "CHECK (((question_rounds >= 0) AND (question_rounds <= 2)))"
+    },
+    {
+      "table": "lesson_report",
+      "name": "lesson_report_content_not_null",
+      "type": "n",
+      "definition": "NOT NULL content"
+    },
+    {
+      "table": "lesson_report",
+      "name": "lesson_report_created_at_not_null",
+      "type": "n",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table": "lesson_report",
+      "name": "lesson_report_current_version_not_null",
+      "type": "n",
+      "definition": "NOT NULL current_version"
+    },
+    {
+      "table": "lesson_report",
+      "name": "lesson_report_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table": "lesson_report",
+      "name": "lesson_report_lesson_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (lesson_id) REFERENCES lesson(id)"
+    },
+    {
+      "table": "lesson_report",
+      "name": "lesson_report_lesson_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL lesson_id"
+    },
+    {
+      "table": "lesson_report",
+      "name": "lesson_report_lock_version_not_null",
+      "type": "n",
+      "definition": "NOT NULL lock_version"
+    },
+    {
+      "table": "lesson_report",
+      "name": "lesson_report_origin_channel_not_null",
+      "type": "n",
+      "definition": "NOT NULL origin_channel"
+    },
+    {
+      "table": "lesson_report",
+      "name": "lesson_report_pending_questions_not_null",
+      "type": "n",
+      "definition": "NOT NULL pending_questions"
+    },
+    {
+      "table": "lesson_report",
+      "name": "lesson_report_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "lesson_report",
+      "name": "lesson_report_processing_time_ms_not_null",
+      "type": "n",
+      "definition": "NOT NULL processing_time_ms"
+    },
+    {
+      "table": "lesson_report",
+      "name": "lesson_report_question_rounds_not_null",
+      "type": "n",
+      "definition": "NOT NULL question_rounds"
+    },
+    {
+      "table": "lesson_report",
+      "name": "lesson_report_status_not_null",
+      "type": "n",
+      "definition": "NOT NULL status"
+    },
+    {
+      "table": "lesson_report",
+      "name": "lesson_report_student_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (student_id) REFERENCES student(id)"
+    },
+    {
+      "table": "lesson_report",
+      "name": "lesson_report_student_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL student_id"
+    },
+    {
+      "table": "lesson_report",
+      "name": "lesson_report_teacher_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (teacher_id) REFERENCES teacher(id)"
+    },
+    {
+      "table": "lesson_report",
+      "name": "lesson_report_teacher_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL teacher_id"
+    },
+    {
+      "table": "lesson_report",
+      "name": "lesson_report_transcription_not_null",
+      "type": "n",
+      "definition": "NOT NULL transcription"
+    },
+    {
+      "table": "lesson_report",
+      "name": "lesson_report_updated_at_not_null",
+      "type": "n",
+      "definition": "NOT NULL updated_at"
+    },
+    {
+      "table": "lesson_report",
+      "name": "uk_lesson_report_lesson",
+      "type": "u",
+      "definition": "UNIQUE (lesson_id)"
+    },
+    {
+      "table": "pdf_document",
+      "name": "pdf_document_generated_at_not_null",
+      "type": "n",
+      "definition": "NOT NULL generated_at"
+    },
+    {
+      "table": "pdf_document",
+      "name": "pdf_document_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table": "pdf_document",
+      "name": "pdf_document_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "pdf_document",
+      "name": "pdf_document_sha256_not_null",
+      "type": "n",
+      "definition": "NOT NULL sha256"
+    },
+    {
+      "table": "pdf_document",
+      "name": "pdf_document_size_bytes_not_null",
+      "type": "n",
+      "definition": "NOT NULL size_bytes"
+    },
+    {
+      "table": "pdf_document",
+      "name": "pdf_document_storage_key_not_null",
+      "type": "n",
+      "definition": "NOT NULL storage_key"
+    },
+    {
+      "table": "pdf_document",
+      "name": "pdf_document_type_not_null",
+      "type": "n",
+      "definition": "NOT NULL type"
+    },
+    {
+      "table": "pdf_document",
+      "name": "pdf_document_version_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (version_id) REFERENCES report_version(id)"
+    },
+    {
+      "table": "pdf_document",
+      "name": "pdf_document_version_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL version_id"
+    },
+    {
+      "table": "pdf_document",
+      "name": "uk_pdf_document",
+      "type": "u",
+      "definition": "UNIQUE (version_id, type)"
+    },
+    {
+      "table": "processed_telegram_update",
+      "name": "ck_processed_telegram_update_origin",
+      "type": "c",
+      "definition": "CHECK (((origin IS NULL) OR ((origin)::text = 'INTERNO'::text)))"
+    },
+    {
+      "table": "processed_telegram_update",
+      "name": "ck_processed_telegram_update_total_actions",
+      "type": "c",
+      "definition": "CHECK (((total_actions IS NULL) OR (total_actions >= 0)))"
+    },
+    {
+      "table": "processed_telegram_update",
+      "name": "processed_telegram_update_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (update_id)"
+    },
+    {
+      "table": "processed_telegram_update",
+      "name": "processed_telegram_update_received_at_not_null",
+      "type": "n",
+      "definition": "NOT NULL received_at"
+    },
+    {
+      "table": "processed_telegram_update",
+      "name": "processed_telegram_update_update_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL update_id"
+    },
+    {
+      "table": "processing_job",
+      "name": "processing_job_attempts_not_null",
+      "type": "n",
+      "definition": "NOT NULL attempts"
+    },
+    {
+      "table": "processing_job",
+      "name": "processing_job_created_at_not_null",
+      "type": "n",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table": "processing_job",
+      "name": "processing_job_delay_notice_sent_not_null",
+      "type": "n",
+      "definition": "NOT NULL delay_notice_sent"
+    },
+    {
+      "table": "processing_job",
+      "name": "processing_job_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table": "processing_job",
+      "name": "processing_job_medium_not_null",
+      "type": "n",
+      "definition": "NOT NULL medium"
+    },
+    {
+      "table": "processing_job",
+      "name": "processing_job_parameters_not_null",
+      "type": "n",
+      "definition": "NOT NULL parameters"
+    },
+    {
+      "table": "processing_job",
+      "name": "processing_job_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "processing_job",
+      "name": "processing_job_request_channel_not_null",
+      "type": "n",
+      "definition": "NOT NULL request_channel"
+    },
+    {
+      "table": "processing_job",
+      "name": "processing_job_status_not_null",
+      "type": "n",
+      "definition": "NOT NULL status"
+    },
+    {
+      "table": "processing_job",
+      "name": "processing_job_step_not_null",
+      "type": "n",
+      "definition": "NOT NULL step"
+    },
+    {
+      "table": "processing_job",
+      "name": "processing_job_student_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (student_id) REFERENCES student(id)"
+    },
+    {
+      "table": "processing_job",
+      "name": "processing_job_student_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL student_id"
+    },
+    {
+      "table": "processing_job",
+      "name": "processing_job_teacher_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (teacher_id) REFERENCES teacher(id)"
+    },
+    {
+      "table": "processing_job",
+      "name": "processing_job_teacher_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL teacher_id"
+    },
+    {
+      "table": "processing_job",
+      "name": "processing_job_type_not_null",
+      "type": "n",
+      "definition": "NOT NULL type"
+    },
+    {
+      "table": "report_interaction",
+      "name": "report_interaction_base_version_not_null",
+      "type": "n",
+      "definition": "NOT NULL base_version"
+    },
+    {
+      "table": "report_interaction",
+      "name": "report_interaction_channel_not_null",
+      "type": "n",
+      "definition": "NOT NULL channel"
+    },
+    {
+      "table": "report_interaction",
+      "name": "report_interaction_created_at_not_null",
+      "type": "n",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table": "report_interaction",
+      "name": "report_interaction_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table": "report_interaction",
+      "name": "report_interaction_medium_not_null",
+      "type": "n",
+      "definition": "NOT NULL medium"
+    },
+    {
+      "table": "report_interaction",
+      "name": "report_interaction_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "report_interaction",
+      "name": "report_interaction_report_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL report_id"
+    },
+    {
+      "table": "report_interaction",
+      "name": "report_interaction_report_type_not_null",
+      "type": "n",
+      "definition": "NOT NULL report_type"
+    },
+    {
+      "table": "report_interaction",
+      "name": "report_interaction_result_not_null",
+      "type": "n",
+      "definition": "NOT NULL result"
+    },
+    {
+      "table": "report_interaction",
+      "name": "report_interaction_text_not_null",
+      "type": "n",
+      "definition": "NOT NULL text"
+    },
+    {
+      "table": "report_interaction",
+      "name": "report_interaction_type_not_null",
+      "type": "n",
+      "definition": "NOT NULL type"
+    },
+    {
+      "table": "report_version",
+      "name": "ck_report_version_number",
+      "type": "c",
+      "definition": "CHECK ((number >= 1))"
+    },
+    {
+      "table": "report_version",
+      "name": "report_version_channel_not_null",
+      "type": "n",
+      "definition": "NOT NULL channel"
+    },
+    {
+      "table": "report_version",
+      "name": "report_version_content_not_null",
+      "type": "n",
+      "definition": "NOT NULL content"
+    },
+    {
+      "table": "report_version",
+      "name": "report_version_created_at_not_null",
+      "type": "n",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table": "report_version",
+      "name": "report_version_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table": "report_version",
+      "name": "report_version_interaction_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (interaction_id) REFERENCES report_interaction(id)"
+    },
+    {
+      "table": "report_version",
+      "name": "report_version_number_not_null",
+      "type": "n",
+      "definition": "NOT NULL number"
+    },
+    {
+      "table": "report_version",
+      "name": "report_version_origin_not_null",
+      "type": "n",
+      "definition": "NOT NULL origin"
+    },
+    {
+      "table": "report_version",
+      "name": "report_version_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "report_version",
+      "name": "report_version_report_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL report_id"
+    },
+    {
+      "table": "report_version",
+      "name": "report_version_report_type_not_null",
+      "type": "n",
+      "definition": "NOT NULL report_type"
+    },
+    {
+      "table": "report_version",
+      "name": "uk_report_version",
+      "type": "u",
+      "definition": "UNIQUE (report_type, report_id, number)"
+    },
+    {
+      "table": "semester_report",
+      "name": "ck_semester_report_lessons",
+      "type": "c",
+      "definition": "CHECK ((considered_lesson_count >= 1))"
+    },
+    {
+      "table": "semester_report",
+      "name": "ck_semester_report_open",
+      "type": "c",
+      "definition": "CHECK ((open_report_count >= 0))"
+    },
+    {
+      "table": "semester_report",
+      "name": "ck_semester_report_period",
+      "type": "c",
+      "definition": "CHECK (((period_key)::text ~ '^[0-9]{4}-[12]$'::text))"
+    },
+    {
+      "table": "semester_report",
+      "name": "semester_report_considered_lesson_count_not_null",
+      "type": "n",
+      "definition": "NOT NULL considered_lesson_count"
+    },
+    {
+      "table": "semester_report",
+      "name": "semester_report_content_not_null",
+      "type": "n",
+      "definition": "NOT NULL content"
+    },
+    {
+      "table": "semester_report",
+      "name": "semester_report_created_at_not_null",
+      "type": "n",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table": "semester_report",
+      "name": "semester_report_current_version_not_null",
+      "type": "n",
+      "definition": "NOT NULL current_version"
+    },
+    {
+      "table": "semester_report",
+      "name": "semester_report_general_information_not_null",
+      "type": "n",
+      "definition": "NOT NULL general_information"
+    },
+    {
+      "table": "semester_report",
+      "name": "semester_report_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table": "semester_report",
+      "name": "semester_report_lock_version_not_null",
+      "type": "n",
+      "definition": "NOT NULL lock_version"
+    },
+    {
+      "table": "semester_report",
+      "name": "semester_report_open_report_count_not_null",
+      "type": "n",
+      "definition": "NOT NULL open_report_count"
+    },
+    {
+      "table": "semester_report",
+      "name": "semester_report_origin_channel_not_null",
+      "type": "n",
+      "definition": "NOT NULL origin_channel"
+    },
+    {
+      "table": "semester_report",
+      "name": "semester_report_period_end_not_null",
+      "type": "n",
+      "definition": "NOT NULL period_end"
+    },
+    {
+      "table": "semester_report",
+      "name": "semester_report_period_key_not_null",
+      "type": "n",
+      "definition": "NOT NULL period_key"
+    },
+    {
+      "table": "semester_report",
+      "name": "semester_report_period_start_not_null",
+      "type": "n",
+      "definition": "NOT NULL period_start"
+    },
+    {
+      "table": "semester_report",
+      "name": "semester_report_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "semester_report",
+      "name": "semester_report_processing_time_ms_not_null",
+      "type": "n",
+      "definition": "NOT NULL processing_time_ms"
+    },
+    {
+      "table": "semester_report",
+      "name": "semester_report_status_not_null",
+      "type": "n",
+      "definition": "NOT NULL status"
+    },
+    {
+      "table": "semester_report",
+      "name": "semester_report_student_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (student_id) REFERENCES student(id)"
+    },
+    {
+      "table": "semester_report",
+      "name": "semester_report_student_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL student_id"
+    },
+    {
+      "table": "semester_report",
+      "name": "semester_report_teacher_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (teacher_id) REFERENCES teacher(id)"
+    },
+    {
+      "table": "semester_report",
+      "name": "semester_report_teacher_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL teacher_id"
+    },
+    {
+      "table": "semester_report",
+      "name": "semester_report_updated_at_not_null",
+      "type": "n",
+      "definition": "NOT NULL updated_at"
+    },
+    {
+      "table": "student",
+      "name": "student_active_not_null",
+      "type": "n",
+      "definition": "NOT NULL active"
+    },
+    {
+      "table": "student",
+      "name": "student_birth_date_not_null",
+      "type": "n",
+      "definition": "NOT NULL birth_date"
+    },
+    {
+      "table": "student",
+      "name": "student_cpf_encrypted_not_null",
+      "type": "n",
+      "definition": "NOT NULL cpf_encrypted"
+    },
+    {
+      "table": "student",
+      "name": "student_cpf_hash_not_null",
+      "type": "n",
+      "definition": "NOT NULL cpf_hash"
+    },
+    {
+      "table": "student",
+      "name": "student_created_at_not_null",
+      "type": "n",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table": "student",
+      "name": "student_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table": "student",
+      "name": "student_name_not_null",
+      "type": "n",
+      "definition": "NOT NULL name"
+    },
+    {
+      "table": "student",
+      "name": "student_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "student",
+      "name": "student_updated_at_not_null",
+      "type": "n",
+      "definition": "NOT NULL updated_at"
+    },
+    {
+      "table": "student",
+      "name": "uk_student_cpf_hash",
+      "type": "u",
+      "definition": "UNIQUE (cpf_hash)"
+    },
+    {
+      "table": "teacher",
+      "name": "ck_teacher_email_lowercase",
+      "type": "c",
+      "definition": "CHECK (((email)::text = lower((email)::text)))"
+    },
+    {
+      "table": "teacher",
+      "name": "teacher_active_not_null",
+      "type": "n",
+      "definition": "NOT NULL active"
+    },
+    {
+      "table": "teacher",
+      "name": "teacher_created_at_not_null",
+      "type": "n",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table": "teacher",
+      "name": "teacher_email_not_null",
+      "type": "n",
+      "definition": "NOT NULL email"
+    },
+    {
+      "table": "teacher",
+      "name": "teacher_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table": "teacher",
+      "name": "teacher_name_not_null",
+      "type": "n",
+      "definition": "NOT NULL name"
+    },
+    {
+      "table": "teacher",
+      "name": "teacher_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "teacher",
+      "name": "teacher_updated_at_not_null",
+      "type": "n",
+      "definition": "NOT NULL updated_at"
+    },
+    {
+      "table": "teacher",
+      "name": "uk_teacher_email",
+      "type": "u",
+      "definition": "UNIQUE (email)"
+    },
+    {
+      "table": "teacher_student_assignment",
+      "name": "teacher_student_assignment_created_at_not_null",
+      "type": "n",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table": "teacher_student_assignment",
+      "name": "teacher_student_assignment_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table": "teacher_student_assignment",
+      "name": "teacher_student_assignment_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "teacher_student_assignment",
+      "name": "teacher_student_assignment_student_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (student_id) REFERENCES student(id)"
+    },
+    {
+      "table": "teacher_student_assignment",
+      "name": "teacher_student_assignment_student_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL student_id"
+    },
+    {
+      "table": "teacher_student_assignment",
+      "name": "teacher_student_assignment_teacher_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (teacher_id) REFERENCES teacher(id)"
+    },
+    {
+      "table": "teacher_student_assignment",
+      "name": "teacher_student_assignment_teacher_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL teacher_id"
+    },
+    {
+      "table": "teacher_student_assignment",
+      "name": "uk_teacher_student_assignment",
+      "type": "u",
+      "definition": "UNIQUE (teacher_id, student_id)"
+    },
+    {
+      "table": "telegram_link",
+      "name": "telegram_link_chat_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL chat_id"
+    },
+    {
+      "table": "telegram_link",
+      "name": "telegram_link_flow_data_not_null",
+      "type": "n",
+      "definition": "NOT NULL flow_data"
+    },
+    {
+      "table": "telegram_link",
+      "name": "telegram_link_flow_not_null",
+      "type": "n",
+      "definition": "NOT NULL flow"
+    },
+    {
+      "table": "telegram_link",
+      "name": "telegram_link_flow_step_not_null",
+      "type": "n",
+      "definition": "NOT NULL flow_step"
+    },
+    {
+      "table": "telegram_link",
+      "name": "telegram_link_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table": "telegram_link",
+      "name": "telegram_link_linked_at_not_null",
+      "type": "n",
+      "definition": "NOT NULL linked_at"
+    },
+    {
+      "table": "telegram_link",
+      "name": "telegram_link_lock_version_not_null",
+      "type": "n",
+      "definition": "NOT NULL lock_version"
+    },
+    {
+      "table": "telegram_link",
+      "name": "telegram_link_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "telegram_link",
+      "name": "telegram_link_selected_student_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (selected_student_id) REFERENCES student(id)"
+    },
+    {
+      "table": "telegram_link",
+      "name": "telegram_link_teacher_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (teacher_id) REFERENCES teacher(id)"
+    },
+    {
+      "table": "telegram_link",
+      "name": "telegram_link_teacher_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL teacher_id"
+    },
+    {
+      "table": "telegram_link",
+      "name": "telegram_link_telegram_user_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL telegram_user_id"
+    },
+    {
+      "table": "telegram_link",
+      "name": "telegram_link_updated_at_not_null",
+      "type": "n",
+      "definition": "NOT NULL updated_at"
+    },
+    {
+      "table": "telegram_link",
+      "name": "uk_telegram_link_teacher",
+      "type": "u",
+      "definition": "UNIQUE (teacher_id)"
+    },
+    {
+      "table": "telegram_link",
+      "name": "uk_telegram_link_user",
+      "type": "u",
+      "definition": "UNIQUE (telegram_user_id)"
+    },
+    {
+      "table": "web_session",
+      "name": "uk_web_session_token",
+      "type": "u",
+      "definition": "UNIQUE (token_hash)"
+    },
+    {
+      "table": "web_session",
+      "name": "web_session_created_at_not_null",
+      "type": "n",
+      "definition": "NOT NULL created_at"
+    },
+    {
+      "table": "web_session",
+      "name": "web_session_expires_at_not_null",
+      "type": "n",
+      "definition": "NOT NULL expires_at"
+    },
+    {
+      "table": "web_session",
+      "name": "web_session_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table": "web_session",
+      "name": "web_session_last_used_at_not_null",
+      "type": "n",
+      "definition": "NOT NULL last_used_at"
+    },
+    {
+      "table": "web_session",
+      "name": "web_session_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "web_session",
+      "name": "web_session_teacher_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (teacher_id) REFERENCES teacher(id)"
+    },
+    {
+      "table": "web_session",
+      "name": "web_session_teacher_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL teacher_id"
+    },
+    {
+      "table": "web_session",
+      "name": "web_session_token_hash_not_null",
+      "type": "n",
+      "definition": "NOT NULL token_hash"
+    }
+  ],
+  "indexes": [
+    {
+      "table": "access_attempt",
+      "name": "access_attempt_pkey",
+      "definition": "CREATE UNIQUE INDEX access_attempt_pkey ON public.access_attempt USING btree (id)"
+    },
+    {
+      "table": "access_attempt",
+      "name": "uk_access_attempt_source",
+      "definition": "CREATE UNIQUE INDEX uk_access_attempt_source ON public.access_attempt USING btree (channel, source_hash)"
+    },
+    {
+      "table": "ai_call",
+      "name": "ai_call_pkey",
+      "definition": "CREATE UNIQUE INDEX ai_call_pkey ON public.ai_call USING btree (id)"
+    },
+    {
+      "table": "ai_call",
+      "name": "ix_ai_call_report",
+      "definition": "CREATE INDEX ix_ai_call_report ON public.ai_call USING btree (report_type, report_id)"
+    },
+    {
+      "table": "channel_action",
+      "name": "channel_action_pkey",
+      "definition": "CREATE UNIQUE INDEX channel_action_pkey ON public.channel_action USING btree (id)"
+    },
+    {
+      "table": "channel_action",
+      "name": "ix_channel_action_batch",
+      "definition": "CREATE INDEX ix_channel_action_batch ON public.channel_action USING btree (batch_id, seq)"
+    },
+    {
+      "table": "channel_action",
+      "name": "ix_channel_action_delivery",
+      "definition": "CREATE INDEX ix_channel_action_delivery ON public.channel_action USING btree (next_attempt_at) WHERE ((state)::text = 'PENDENTE'::text)"
+    },
+    {
+      "table": "channel_action",
+      "name": "ix_channel_action_live_chat",
+      "definition": "CREATE INDEX ix_channel_action_live_chat ON public.channel_action USING btree (chat_id, seq) WHERE ((state)::text = ANY ((ARRAY['PENDENTE'::character varying, 'ENTREGUE'::character varying])::text[]))"
+    },
+    {
+      "table": "channel_action",
+      "name": "ix_channel_action_purge",
+      "definition": "CREATE INDEX ix_channel_action_purge ON public.channel_action USING btree (finalized_at) WHERE (finalized_at IS NOT NULL)"
+    },
+    {
+      "table": "channel_action",
+      "name": "ix_channel_action_update",
+      "definition": "CREATE INDEX ix_channel_action_update ON public.channel_action USING btree (update_id, seq) WHERE (update_id IS NOT NULL)"
+    },
+    {
+      "table": "channel_action",
+      "name": "uk_channel_action_seq",
+      "definition": "CREATE UNIQUE INDEX uk_channel_action_seq ON public.channel_action USING btree (seq)"
+    },
+    {
+      "table": "channel_document",
+      "name": "channel_document_pkey",
+      "definition": "CREATE UNIQUE INDEX channel_document_pkey ON public.channel_document USING btree (token_hash)"
+    },
+    {
+      "table": "channel_document",
+      "name": "ix_channel_document_expires",
+      "definition": "CREATE INDEX ix_channel_document_expires ON public.channel_document USING btree (expires_at)"
+    },
+    {
+      "table": "lesson",
+      "name": "ix_lesson_teacher_student",
+      "definition": "CREATE INDEX ix_lesson_teacher_student ON public.lesson USING btree (teacher_id, student_id, lesson_date)"
+    },
+    {
+      "table": "lesson",
+      "name": "ix_lesson_teacher_student_date",
+      "definition": "CREATE INDEX ix_lesson_teacher_student_date ON public.lesson USING btree (teacher_id, student_id, lesson_date)"
+    },
+    {
+      "table": "lesson",
+      "name": "lesson_pkey",
+      "definition": "CREATE UNIQUE INDEX lesson_pkey ON public.lesson USING btree (id)"
+    },
+    {
+      "table": "lesson_report",
+      "name": "ix_lesson_report_approved",
+      "definition": "CREATE INDEX ix_lesson_report_approved ON public.lesson_report USING btree (teacher_id, student_id) WHERE ((status)::text = 'APROVADO'::text)"
+    },
+    {
+      "table": "lesson_report",
+      "name": "lesson_report_pkey",
+      "definition": "CREATE UNIQUE INDEX lesson_report_pkey ON public.lesson_report USING btree (id)"
+    },
+    {
+      "table": "lesson_report",
+      "name": "uk_lesson_report_lesson",
+      "definition": "CREATE UNIQUE INDEX uk_lesson_report_lesson ON public.lesson_report USING btree (lesson_id)"
+    },
+    {
+      "table": "lesson_report",
+      "name": "uk_lesson_report_open",
+      "definition": "CREATE UNIQUE INDEX uk_lesson_report_open ON public.lesson_report USING btree (teacher_id, student_id) WHERE ((status)::text = ANY ((ARRAY['EM_PROCESSAMENTO'::character varying, 'FALHA_PROCESSAMENTO'::character varying, 'AGUARDANDO_RESPOSTAS'::character varying, 'AGUARDANDO_CONFERENCIA'::character varying])::text[]))"
+    },
+    {
+      "table": "pdf_document",
+      "name": "pdf_document_pkey",
+      "definition": "CREATE UNIQUE INDEX pdf_document_pkey ON public.pdf_document USING btree (id)"
+    },
+    {
+      "table": "pdf_document",
+      "name": "uk_pdf_document",
+      "definition": "CREATE UNIQUE INDEX uk_pdf_document ON public.pdf_document USING btree (version_id, type)"
+    },
+    {
+      "table": "processed_telegram_update",
+      "name": "ix_processed_telegram_update_received",
+      "definition": "CREATE INDEX ix_processed_telegram_update_received ON public.processed_telegram_update USING btree (received_at)"
+    },
+    {
+      "table": "processed_telegram_update",
+      "name": "processed_telegram_update_pkey",
+      "definition": "CREATE UNIQUE INDEX processed_telegram_update_pkey ON public.processed_telegram_update USING btree (update_id)"
+    },
+    {
+      "table": "processing_job",
+      "name": "ix_processing_job_pending",
+      "definition": "CREATE INDEX ix_processing_job_pending ON public.processing_job USING btree (created_at) WHERE ((status)::text = 'PENDENTE'::text)"
+    },
+    {
+      "table": "processing_job",
+      "name": "ix_processing_job_report",
+      "definition": "CREATE INDEX ix_processing_job_report ON public.processing_job USING btree (report_type, report_id)"
+    },
+    {
+      "table": "processing_job",
+      "name": "processing_job_pkey",
+      "definition": "CREATE UNIQUE INDEX processing_job_pkey ON public.processing_job USING btree (id)"
+    },
+    {
+      "table": "processing_job",
+      "name": "uk_processing_job_registration_running",
+      "definition": "CREATE UNIQUE INDEX uk_processing_job_registration_running ON public.processing_job USING btree (teacher_id, student_id) WHERE (((type)::text = 'REGISTRO_AULA'::text) AND ((status)::text = ANY ((ARRAY['PENDENTE'::character varying, 'EM_EXECUCAO'::character varying])::text[])))"
+    },
+    {
+      "table": "processing_job",
+      "name": "uk_processing_job_semester_consolidation_running",
+      "definition": "CREATE UNIQUE INDEX uk_processing_job_semester_consolidation_running ON public.processing_job USING btree (teacher_id, student_id, ((parameters ->> 'periodKey'::text))) WHERE (((type)::text = 'CONSOLIDACAO_SEMESTRAL'::text) AND ((status)::text = ANY ((ARRAY['PENDENTE'::character varying, 'EM_EXECUCAO'::character varying])::text[])))"
+    },
+    {
+      "table": "report_interaction",
+      "name": "ix_report_interaction",
+      "definition": "CREATE INDEX ix_report_interaction ON public.report_interaction USING btree (report_type, report_id, created_at)"
+    },
+    {
+      "table": "report_interaction",
+      "name": "report_interaction_pkey",
+      "definition": "CREATE UNIQUE INDEX report_interaction_pkey ON public.report_interaction USING btree (id)"
+    },
+    {
+      "table": "report_version",
+      "name": "report_version_pkey",
+      "definition": "CREATE UNIQUE INDEX report_version_pkey ON public.report_version USING btree (id)"
+    },
+    {
+      "table": "report_version",
+      "name": "uk_report_version",
+      "definition": "CREATE UNIQUE INDEX uk_report_version ON public.report_version USING btree (report_type, report_id, number)"
+    },
+    {
+      "table": "semester_report",
+      "name": "semester_report_pkey",
+      "definition": "CREATE UNIQUE INDEX semester_report_pkey ON public.semester_report USING btree (id)"
+    },
+    {
+      "table": "semester_report",
+      "name": "uk_semester_report_approved",
+      "definition": "CREATE UNIQUE INDEX uk_semester_report_approved ON public.semester_report USING btree (teacher_id, student_id, period_key) WHERE ((status)::text = 'APROVADO'::text)"
+    },
+    {
+      "table": "semester_report",
+      "name": "uk_semester_report_open",
+      "definition": "CREATE UNIQUE INDEX uk_semester_report_open ON public.semester_report USING btree (teacher_id, student_id, period_key) WHERE ((status)::text = 'AGUARDANDO_CONFERENCIA'::text)"
+    },
+    {
+      "table": "student",
+      "name": "student_pkey",
+      "definition": "CREATE UNIQUE INDEX student_pkey ON public.student USING btree (id)"
+    },
+    {
+      "table": "student",
+      "name": "uk_student_cpf_hash",
+      "definition": "CREATE UNIQUE INDEX uk_student_cpf_hash ON public.student USING btree (cpf_hash)"
+    },
+    {
+      "table": "teacher",
+      "name": "teacher_pkey",
+      "definition": "CREATE UNIQUE INDEX teacher_pkey ON public.teacher USING btree (id)"
+    },
+    {
+      "table": "teacher",
+      "name": "uk_teacher_access_code_hash",
+      "definition": "CREATE UNIQUE INDEX uk_teacher_access_code_hash ON public.teacher USING btree (access_code_hash) WHERE (access_code_hash IS NOT NULL)"
+    },
+    {
+      "table": "teacher",
+      "name": "uk_teacher_email",
+      "definition": "CREATE UNIQUE INDEX uk_teacher_email ON public.teacher USING btree (email)"
+    },
+    {
+      "table": "teacher_student_assignment",
+      "name": "ix_teacher_student_assignment_student",
+      "definition": "CREATE INDEX ix_teacher_student_assignment_student ON public.teacher_student_assignment USING btree (student_id)"
+    },
+    {
+      "table": "teacher_student_assignment",
+      "name": "teacher_student_assignment_pkey",
+      "definition": "CREATE UNIQUE INDEX teacher_student_assignment_pkey ON public.teacher_student_assignment USING btree (id)"
+    },
+    {
+      "table": "teacher_student_assignment",
+      "name": "uk_teacher_student_assignment",
+      "definition": "CREATE UNIQUE INDEX uk_teacher_student_assignment ON public.teacher_student_assignment USING btree (teacher_id, student_id)"
+    },
+    {
+      "table": "telegram_link",
+      "name": "telegram_link_pkey",
+      "definition": "CREATE UNIQUE INDEX telegram_link_pkey ON public.telegram_link USING btree (id)"
+    },
+    {
+      "table": "telegram_link",
+      "name": "uk_telegram_link_teacher",
+      "definition": "CREATE UNIQUE INDEX uk_telegram_link_teacher ON public.telegram_link USING btree (teacher_id)"
+    },
+    {
+      "table": "telegram_link",
+      "name": "uk_telegram_link_user",
+      "definition": "CREATE UNIQUE INDEX uk_telegram_link_user ON public.telegram_link USING btree (telegram_user_id)"
+    },
+    {
+      "table": "web_session",
+      "name": "ix_web_session_expires",
+      "definition": "CREATE INDEX ix_web_session_expires ON public.web_session USING btree (expires_at)"
+    },
+    {
+      "table": "web_session",
+      "name": "uk_web_session_token",
+      "definition": "CREATE UNIQUE INDEX uk_web_session_token ON public.web_session USING btree (token_hash)"
+    },
+    {
+      "table": "web_session",
+      "name": "web_session_pkey",
+      "definition": "CREATE UNIQUE INDEX web_session_pkey ON public.web_session USING btree (id)"
+    }
+  ],
+  "sequences": [
+    {
+      "name": "channel_action_seq_seq",
+      "dataType": "bigint",
+      "start": 1,
+      "increment": 1,
+      "cycle": false,
+      "ownedBy": "channel_action.seq"
+    }
+  ]
+}

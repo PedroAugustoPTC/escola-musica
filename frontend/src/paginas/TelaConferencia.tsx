@@ -39,18 +39,18 @@ export function avisoDoResultado(
   textoEntendido: string | null,
   versao: number,
 ): Aviso | null {
-  const entendido = textoEntendido ? [msg('TEXTO_ENTENDIDO', { texto: textoEntendido })] : [];
+  const entendido = textoEntendido ? [msg('UNDERSTOOD_TEXT', { text: textoEntendido })] : [];
   switch (resultado) {
-    case 'NOVA_VERSAO':
-      return { tipo: 'ok', linhas: [msg('ALTERACAO_APLICADA', { versao }), ...entendido] };
-    case 'SEM_ALTERACAO_DE_CONTEUDO':
-    case 'PEDIDO_DE_ACAO_IGNORADO':
-      return { tipo: 'info', linhas: [msg(resultado, { versao }), ...entendido] };
-    case 'FALHA_ALTERACAO':
-      return { tipo: 'erro', linhas: [msg('FALHA_ALTERACAO', { versao }), ...entendido] };
-    case 'PRONTO_PARA_CONFERENCIA':
+    case 'NEW_VERSION':
+      return { tipo: 'ok', linhas: [msg('CHANGE_APPLIED', { version: versao }), ...entendido] };
+    case 'NO_CONTENT_CHANGE':
+    case 'ACTION_REQUEST_IGNORED':
+      return { tipo: 'info', linhas: [msg(resultado, { version: versao }), ...entendido] };
+    case 'CHANGE_FAILED':
+      return { tipo: 'erro', linhas: [msg('CHANGE_FAILED', { version: versao }), ...entendido] };
+    case 'READY_FOR_REVIEW':
       return textoEntendido
-        ? { tipo: 'ok', linhas: [msg('RESPOSTA_INCORPORADA', { texto: textoEntendido })] }
+        ? { tipo: 'ok', linhas: [msg('ANSWER_INCORPORATED', { text: textoEntendido })] }
         : null;
     default:
       return null;
@@ -87,7 +87,7 @@ export function TelaConferencia() {
   const [erroDialogo, setErroDialogo] = useState<unknown>(null);
 
   const dados = relatorio.data;
-  const trabalhoEmCurso = trabalhoAlteracao ?? dados?.trabalhoEmCursoId ?? null;
+  const trabalhoEmCurso = trabalhoAlteracao ?? dados?.activeJobId ?? null;
   const polling = usePollingTrabalho(trabalhoEmCurso ?? undefined);
 
   // até haver um aviso desta tela, vale o resultado trazido do processamento (respostas incorporadas)
@@ -95,13 +95,13 @@ export function TelaConferencia() {
     avisoAtual !== undefined
       ? avisoAtual
       : dados && estadoInicial?.resultado
-        ? avisoDoResultado(estadoInicial.resultado, estadoInicial.textoEntendido, dados.versaoVigente)
+        ? avisoDoResultado(estadoInicial.resultado, estadoInicial.textoEntendido, dados.currentVersion)
         : null;
 
   // relatório que não está em conferência vai para a tela da etapa
   useEffect(() => {
     if (!dados || trabalhoEmCurso) return;
-    if (dados.status !== 'AGUARDANDO_CONFERENCIA') {
+    if (dados.status !== 'AWAITING_REVIEW') {
       navegar(rotaDaEtapa(dados), { replace: true });
     }
   }, [dados, trabalhoEmCurso, navegar]);
@@ -118,9 +118,9 @@ export function TelaConferencia() {
       });
       setAviso(
         avisoDoResultado(
-          concluido.resultadoCodigo ?? null,
-          concluido.textoEntendido ?? null,
-          atualizado.versaoVigente,
+          concluido.resultCode ?? null,
+          concluido.understoodText ?? null,
+          atualizado.currentVersion,
         ),
       );
       setTrabalhoAlteracao(null);
@@ -130,7 +130,7 @@ export function TelaConferencia() {
 
   const contexto = {
     sobretitulo: 'Relatório de aula',
-    titulo: dados?.alunoNome ?? '',
+    titulo: dados?.studentName ?? '',
     voltarPara: '/',
   };
 
@@ -151,7 +151,7 @@ export function TelaConferencia() {
   if (!dados) return null;
 
   const aplicando = trabalhoEmCurso !== null;
-  const versao = dados.versaoVigente;
+  const versao = dados.currentVersion;
   const podeAjustar = !aplicando && !enviandoAjuste && (ajuste.trim() !== '' || audio !== null);
 
   const recarregar = async () => {
@@ -160,7 +160,7 @@ export function TelaConferencia() {
   };
 
   const tratarConflito = (falha: unknown): boolean => {
-    if (falha instanceof ErroApi && falha.codigo === 'VERSAO_DESATUALIZADA') {
+    if (falha instanceof ErroApi && falha.codigo === 'STALE_VERSION') {
       setDesatualizada(true);
       void relatorio.refetch();
       return true;
@@ -174,10 +174,10 @@ export function TelaConferencia() {
     setErroAjuste(null);
     setAviso(null);
     try {
-      const { trabalhoId } = audio
+      const { jobId } = audio
         ? await relatoriosAula.alterarAudio(relatorioId, audio, versao)
         : await relatoriosAula.alterarTexto(relatorioId, ajuste.trim(), versao);
-      setTrabalhoAlteracao(trabalhoId);
+      setTrabalhoAlteracao(jobId);
       setAjuste('');
       setAudio(null);
       setChaveGravador((chave) => chave + 1);
@@ -221,7 +221,7 @@ export function TelaConferencia() {
       barraAcoes={
         <>
           <Botao variante="link-perigo" disabled={aplicando} onClick={() => setDialogo('cancelar')}>
-            {msg('BOTAO_CANCELAR_RELATORIO')}
+            {msg('CANCEL_REPORT_BUTTON')}
           </Botao>
           <Botao
             tamanho="grande"
@@ -229,7 +229,7 @@ export function TelaConferencia() {
             disabled={aplicando || desatualizada}
             onClick={() => setDialogo('aprovar')}
           >
-            {msg('BOTAO_APROVAR')} · versão {versao}
+            {msg('APPROVE_BUTTON')} · versão {versao}
           </Botao>
         </>
       }
@@ -237,27 +237,27 @@ export function TelaConferencia() {
       <div className="pagina pagina--conferencia">
         <div>
           <div className="sobretitulo">Relatório de aula</div>
-          <h1 className="titulo-pagina">{msg('CONFERENCIA_TITULO')}</h1>
+          <h1 className="titulo-pagina">{msg('REVIEW_TITLE')}</h1>
           <div className="conferencia__chips">
             <span className="chip chip--aviso">
               <Icone nome="schedule" tamanho="pequeno" />
-              {msg('STATUS_AGUARDANDO_CONFERENCIA')}
+              {msg('STATUS_AWAITING_REVIEW')}
             </span>
-            <span className="chip chip--contorno">{msg('CONFERENCIA_VERSAO', { versao })}</span>
+            <span className="chip chip--contorno">{msg('REVIEW_VERSION', { version: versao })}</span>
           </div>
         </div>
         <dl className="dados-relatorio">
           <div>
             <dt>ALUNO</dt>
-            <dd>{dados.alunoNome}</dd>
+            <dd>{dados.studentName}</dd>
           </div>
           <div>
             <dt>PROFESSOR</dt>
-            <dd>{dados.professorNome}</dd>
+            <dd>{dados.teacherName}</dd>
           </div>
           <div>
             <dt>DATA DA AULA</dt>
-            <dd>{formatarData(dados.dataAula)}</dd>
+            <dd>{formatarData(dados.lessonDate)}</dd>
           </div>
         </dl>
         {desatualizada ? (
@@ -276,7 +276,7 @@ export function TelaConferencia() {
           <div role="status" className="alerta alerta--info">
             <span className="girador" aria-hidden="true" />
             <div className="alerta__texto">
-              <strong>{msg('ALTERACAO_EM_APLICACAO')}</strong> Uma nova versão será gerada em instantes.
+              <strong>{msg('CHANGE_BEING_APPLIED')}</strong> Uma nova versão será gerada em instantes.
             </div>
           </div>
         ) : null}
@@ -324,10 +324,10 @@ export function TelaConferencia() {
               aria-labelledby={movel ? 'aba-texto' : undefined}
               className="conferencia__texto"
             >
-              <SecoesRelatorio conteudo={dados.conteudo} esmaecido={aplicando} />
+              <SecoesRelatorio conteudo={dados.content} esmaecido={aplicando} />
               <div className="campo">
                 <label htmlFor={idAjuste} className="campo__rotulo">
-                  {msg('PEDIDO_ALTERACAO_ROTULO')}
+                  {msg('CHANGE_REQUEST_LABEL')}
                 </label>
                 <textarea
                   id={idAjuste}
@@ -343,7 +343,7 @@ export function TelaConferencia() {
               <GravadorAudio
                 key={chaveGravador}
                 compacto
-                limiteMb={inicio.data?.limiteAudioMb ?? 50}
+                limiteMb={inicio.data?.audioLimitMb ?? 50}
                 aoMudar={setAudio}
                 desabilitado={aplicando || enviandoAjuste}
               />
@@ -356,7 +356,7 @@ export function TelaConferencia() {
                 carregando={enviandoAjuste}
                 onClick={() => void solicitarAlteracao()}
               >
-                {msg('BOTAO_SOLICITAR_ALTERACAO')}
+                {msg('REQUEST_CHANGE_BUTTON')}
               </Botao>
             </div>
           ) : null}
@@ -367,10 +367,10 @@ export function TelaConferencia() {
               aria-labelledby={movel ? 'aba-pdf' : undefined}
             >
               <VisualizadorPdf
-                caminho={caminhoPdfConferencia(dados.relatorioId, versao)}
+                caminho={caminhoPdfConferencia(dados.reportId, versao)}
                 versao={versao}
-                disponivel={Boolean(dados.pdfDisponivel) && !aplicando}
-                nomeArquivo={`relatorio-aula-${dados.dataAula}-v${versao}.pdf`}
+                disponivel={Boolean(dados.pdfAvailable) && !aplicando}
+                nomeArquivo={`relatorio-aula-${dados.lessonDate}-v${versao}.pdf`}
               />
             </div>
           ) : null}
@@ -380,8 +380,8 @@ export function TelaConferencia() {
         aberto={dialogo === 'aprovar'}
         icone="verified"
         titulo={`Aprovar a versão ${versao}?`}
-        texto={msg('CONFIRMAR_APROVACAO', { versao })}
-        rotuloConfirmar={msg('BOTAO_CONFIRMAR_APROVACAO', { versao })}
+        texto={msg('CONFIRM_APPROVAL', { version: versao })}
+        rotuloConfirmar={msg('CONFIRM_APPROVAL_BUTTON', { version: versao })}
         carregando={confirmando}
         erro={erroDialogo ? textoDoErro(erroDialogo) : undefined}
         aoConfirmar={() => void confirmar()}
@@ -395,8 +395,8 @@ export function TelaConferencia() {
         perigo
         icone="block"
         titulo="Cancelar este relatório?"
-        texto={msg('CONFIRMAR_CANCELAMENTO')}
-        rotuloConfirmar={msg('BOTAO_CONFIRMAR_CANCELAMENTO')}
+        texto={msg('CONFIRM_CANCELLATION')}
+        rotuloConfirmar={msg('CONFIRM_CANCELLATION_BUTTON')}
         carregando={confirmando}
         erro={erroDialogo ? textoDoErro(erroDialogo) : undefined}
         aoConfirmar={() => void confirmar()}

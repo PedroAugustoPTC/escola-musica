@@ -36,9 +36,10 @@ final class LessonReportMapper {
     static final Map<ReportType, Function<String, VersionContent>> READERS = new HashMap<>();
 
     static {
-        READERS.put(ReportType.AULA, json -> JsonPersistence.read(json, LessonReportContent.class));
         READERS.put(
-                ReportType.SEMESTRAL,
+                ReportType.LESSON, json -> JsonPersistence.read(json, LessonReportContent.class));
+        READERS.put(
+                ReportType.SEMESTER,
                 json ->
                         JsonPersistence.read(
                                 json,

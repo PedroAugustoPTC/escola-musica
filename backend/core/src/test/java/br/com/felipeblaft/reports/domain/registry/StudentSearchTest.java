@@ -34,9 +34,9 @@ class StudentSearchTest {
     @Test
     void emptySearchReturnsAll() {
         StudentSearch.Result result = StudentSearch.search(students, "   ");
-        assertThat(result.type()).isEqualTo(ResultType.TODOS);
+        assertThat(result.type()).isEqualTo(ResultType.ALL);
         assertThat(result.students()).hasSize(4);
-        assertThat(StudentSearch.search(students, null).type()).isEqualTo(ResultType.TODOS);
+        assertThat(StudentSearch.search(students, null).type()).isEqualTo(ResultType.ALL);
     }
 
     @Test
@@ -51,13 +51,13 @@ class StudentSearchTest {
         assertThat(search("torr")).containsExactly(olavo, miguel);
         assertThat(search("miguel torr")).containsExactly(miguel);
         assertThat(search("afra")).containsExactly(matteo);
-        assertThat(StudentSearch.search(students, "torr").type()).isEqualTo(ResultType.ENCONTRADOS);
+        assertThat(StudentSearch.search(students, "torr").type()).isEqualTo(ResultType.FOUND);
     }
 
     @Test
     void withoutMatchReturnsAllAsNone() {
         StudentSearch.Result result = StudentSearch.search(students, "Beethoven");
-        assertThat(result.type()).isEqualTo(ResultType.NENHUM);
+        assertThat(result.type()).isEqualTo(ResultType.NONE);
         assertThat(result.students()).hasSize(4);
     }
 

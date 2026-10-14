@@ -36,15 +36,16 @@ public class DiscardRegistrationInProcessingUseCase {
         ProcessingJob job =
                 queue.searchById(jobId)
                         .filter(t -> t.teacherId().equals(teacherId))
-                        .orElseThrow(() -> new DomainException(ErrorCode.RECURSO_NAO_ENCONTRADO));
+                        .orElseThrow(() -> new DomainException(ErrorCode.RESOURCE_NOT_FOUND));
         boolean registrationOrConsolidation =
-                job.type() == JobType.REGISTRO_AULA || job.type() == JobType.CONSOLIDACAO_SEMESTRAL;
+                job.type() == JobType.LESSON_REGISTRATION
+                        || job.type() == JobType.SEMESTER_CONSOLIDATION;
         if (!registrationOrConsolidation || job.reportId() != null) {
-            throw new DomainException(ErrorCode.ACAO_NAO_PERMITIDA_NA_ETAPA);
+            throw new DomainException(ErrorCode.ACTION_NOT_ALLOWED_AT_STEP);
         }
-        boolean pending = job.status() == JobStatus.PENDENTE;
+        boolean pending = job.status() == JobStatus.PENDING;
         if (!job.discard(clock.now())) {
-            throw new DomainException(ErrorCode.ACAO_NAO_PERMITIDA_NA_ETAPA);
+            throw new DomainException(ErrorCode.ACTION_NOT_ALLOWED_AT_STEP);
         }
         if (pending && job.temporaryFile() != null) {
             audio.discard(new TemporaryFile(Path.of(job.temporaryFile()), 0, null));

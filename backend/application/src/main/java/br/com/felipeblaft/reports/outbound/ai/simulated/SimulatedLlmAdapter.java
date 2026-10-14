@@ -28,7 +28,7 @@ import tools.jackson.databind.json.JsonMapper;
  */
 public class SimulatedLlmAdapter implements LlmPort {
 
-    public static final String PROVIDER = "simulado/llm";
+    public static final String PROVIDER = "simulated/llm";
 
     private static final JsonMapper JSON =
             JsonMapper.builder().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).build();
@@ -90,11 +90,11 @@ public class SimulatedLlmAdapter implements LlmPort {
     private static AiSemesterReportOutput semesterRevision(SemesterRevisionInput input) {
         String request = StudentSearch.normalize(input.request());
         SemesterReportContent current = input.currentContent();
-        if (request.contains("aprovar") || request.contains("aprova")) {
-            return AiSemesterReportOutput.of(current, true, "APROVAR");
+        if (request.contains("aprovar") || request.contains("approves")) {
+            return AiSemesterReportOutput.of(current, true, "APPROVE");
         }
-        if (request.contains("cancelar") || request.contains("descarta")) {
-            return AiSemesterReportOutput.of(current, true, "CANCELAR");
+        if (request.contains("cancelar") || request.contains("discards")) {
+            return AiSemesterReportOutput.of(current, true, "CANCEL");
         }
         SemesterReportContent changed =
                 new SemesterReportContent(
@@ -113,19 +113,19 @@ public class SimulatedLlmAdapter implements LlmPort {
     private static AiLessonReportOutput incorporation(TaskInput.AnswerIncorporation input) {
         LessonReportContent current = input.currentContent();
         String observations = join(current.observations(), input.response());
-        return output(current, observations, false, "NENHUM");
+        return output(current, observations, false, "NONE");
     }
 
     private static AiLessonReportOutput revision(TaskInput.LessonRevision input) {
         String request = StudentSearch.normalize(input.request());
         LessonReportContent current = input.currentContent();
-        if (request.contains("aprovar") || request.contains("aprova")) {
-            return output(current, current.observations(), true, "APROVAR");
+        if (request.contains("aprovar") || request.contains("approves")) {
+            return output(current, current.observations(), true, "APPROVE");
         }
-        if (request.contains("cancelar") || request.contains("descarta")) {
-            return output(current, current.observations(), true, "CANCELAR");
+        if (request.contains("cancelar") || request.contains("discards")) {
+            return output(current, current.observations(), true, "CANCEL");
         }
-        return output(current, input.request().strip(), false, "NENHUM");
+        return output(current, input.request().strip(), false, "NONE");
     }
 
     private static AiLessonReportOutput output(

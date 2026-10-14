@@ -49,8 +49,8 @@ class LoadInitialRegistryUseCaseTest {
     private static SeedFile example() {
         return new SeedFile(
                 List.of(
-                        new SeedTeacher("Clara@Exemplo.test", "Clara Souza", true),
-                        new SeedTeacher("bruno@exemplo.test", "Bruno Lima", null)),
+                        new SeedTeacher("Clara@Example.test", "Clara Souza", true),
+                        new SeedTeacher("bruno@example.test", "Bruno Lima", null)),
                 List.of(
                         new SeedStudent(
                                 CPF_MATTEO,
@@ -58,7 +58,7 @@ class LoadInitialRegistryUseCaseTest {
                                 "2014-05-10",
                                 "Responsável Fictício",
                                 "Piano",
-                                List.of("clara@exemplo.test")),
+                                List.of("clara@example.test")),
                         new SeedStudent(
                                 CPF_OLAVO,
                                 "Olavo Torrente",
@@ -66,9 +66,9 @@ class LoadInitialRegistryUseCaseTest {
                                 null,
                                 " ",
                                 List.of(
-                                        "clara@exemplo.test",
-                                        "CLARA@exemplo.test",
-                                        "bruno@exemplo.test"))));
+                                        "clara@example.test",
+                                        "CLARA@example.test",
+                                        "bruno@example.test"))));
     }
 
     @Test
@@ -84,21 +84,21 @@ class LoadInitialRegistryUseCaseTest {
                 .extracting(c -> c.email(), c -> c.code(), c -> c.validUntil())
                 .containsExactly(
                         tuple(
-                                "clara@exemplo.test",
+                                "clara@example.test",
                                 "K7QM2XPA",
                                 clock.now().plus(Duration.ofDays(7))),
                         tuple(
-                                "bruno@exemplo.test",
+                                "bruno@example.test",
                                 "BRUN2XPA",
                                 clock.now().plus(Duration.ofDays(7))));
         assertThat(result.issuedCodes().getFirst().toString()).doesNotContain("K7QM2XPA");
 
-        Teacher clara = teachers.searchByEmail("clara@exemplo.test").orElseThrow();
-        assertThat(clara.accessCodeHash()).isEqualTo("codigo:K7QM2XPA");
-        assertThat(teachers.searchByEmail("bruno@exemplo.test").orElseThrow().active()).isTrue();
+        Teacher clara = teachers.searchByEmail("clara@example.test").orElseThrow();
+        assertThat(clara.accessCodeHash()).isEqualTo("code:K7QM2XPA");
+        assertThat(teachers.searchByEmail("bruno@example.test").orElseThrow().active()).isTrue();
 
         Student matteo = students.searchByCpfHash("cpf:52998224725").orElseThrow();
-        assertThat(new String(matteo.encryptedCpf())).isEqualTo("cifrado:52742289925");
+        assertThat(new String(matteo.encryptedCpf())).isEqualTo("encrypted:52742289925");
         assertThat(matteo.guardianName()).isEqualTo("Responsável Fictício");
         Student olavo = students.searchByCpfHash("cpf:12345678909").orElseThrow();
         assertThat(olavo.instrument()).isNull();
@@ -127,7 +127,7 @@ class LoadInitialRegistryUseCaseTest {
         useCase.run(example(), false);
         SeedFile change =
                 new SeedFile(
-                        List.of(new SeedTeacher("clara@exemplo.test", "Clara S. Souza", false)),
+                        List.of(new SeedTeacher("clara@example.test", "Clara S. Souza", false)),
                         List.of(
                                 new SeedStudent(
                                         CPF_MATTEO,
@@ -135,14 +135,14 @@ class LoadInitialRegistryUseCaseTest {
                                         "2014-05-10",
                                         "Responsável Fictício",
                                         "Violão",
-                                        List.of("bruno@exemplo.test"))));
+                                        List.of("bruno@example.test"))));
 
         SeedResult result = useCase.run(change, false);
 
         assertThat(result.teachers()).isEqualTo(new Count(0, 1, 0));
         assertThat(result.students()).isEqualTo(new Count(0, 1, 0));
         assertThat(result.createdAssignments()).isEqualTo(1);
-        assertThat(teachers.searchByEmail("clara@exemplo.test").orElseThrow().active()).isFalse();
+        assertThat(teachers.searchByEmail("clara@example.test").orElseThrow().active()).isFalse();
     }
 
     @Test
@@ -165,7 +165,7 @@ class LoadInitialRegistryUseCaseTest {
         useCase.run(example(), false);
         SeedFile change =
                 new SeedFile(
-                        List.of(new SeedTeacher("clara@exemplo.test", "Outro Nome", true)),
+                        List.of(new SeedTeacher("clara@example.test", "Outro Nome", true)),
                         List.of(
                                 new SeedStudent(
                                         CPF_MATTEO,
@@ -173,7 +173,7 @@ class LoadInitialRegistryUseCaseTest {
                                         "2014-05-10",
                                         "R",
                                         null,
-                                        List.of("bruno@exemplo.test"))));
+                                        List.of("bruno@example.test"))));
         int recordings = teachers.recordings();
 
         SeedResult result = useCase.run(change, true);
@@ -190,9 +190,9 @@ class LoadInitialRegistryUseCaseTest {
         SeedFile file =
                 new SeedFile(
                         List.of(
-                                new SeedTeacher("clara@exemplo.test", "Clara", true),
-                                new SeedTeacher("CLARA@exemplo.test", " ", true),
-                                new SeedTeacher("sem-arroba", "X", true),
+                                new SeedTeacher("clara@example.test", "Clara", true),
+                                new SeedTeacher("CLARA@example.test", " ", true),
+                                new SeedTeacher("without-at-sign", "X", true),
                                 new SeedTeacher(null, "Y", true)),
                         List.of(
                                 new SeedStudent(
@@ -201,7 +201,7 @@ class LoadInitialRegistryUseCaseTest {
                                         "2014-05-10",
                                         "Resp",
                                         null,
-                                        List.of("clara@exemplo.test")),
+                                        List.of("clara@example.test")),
                                 new SeedStudent(
                                         "529.982.247-25",
                                         "Duplicado",
@@ -215,7 +215,7 @@ class LoadInitialRegistryUseCaseTest {
                                         "2030-01-01",
                                         null,
                                         null,
-                                        List.of("ninguem@exemplo.test")),
+                                        List.of("nobody@example.test")),
                                 new SeedStudent(
                                         CPF_OLAVO,
                                         "Menor",
@@ -244,19 +244,19 @@ class LoadInitialRegistryUseCaseTest {
         assertThat(result.errors())
                 .extracting(SeedError::section, SeedError::index, SeedError::field, SeedError::code)
                 .containsExactlyInAnyOrder(
-                        tuple("teachers", 1, "email", ErrorCode.EMAIL_DUPLICADO_NO_ARQUIVO),
-                        tuple("teachers", 1, "name", ErrorCode.NOME_OBRIGATORIO),
-                        tuple("teachers", 2, "email", ErrorCode.EMAIL_INVALIDO),
-                        tuple("teachers", 3, "email", ErrorCode.EMAIL_INVALIDO),
-                        tuple("students", 1, "cpf", ErrorCode.CPF_DUPLICADO_NO_ARQUIVO),
-                        tuple("students", 2, "name", ErrorCode.NOME_OBRIGATORIO),
-                        tuple("students", 2, "cpf", ErrorCode.CPF_INVALIDO),
-                        tuple("students", 2, "birthDate", ErrorCode.DATA_NASCIMENTO_INVALIDA),
-                        tuple("students", 2, "teachers[0]", ErrorCode.PROFESSOR_INEXISTENTE),
-                        tuple("students", 3, "guardianName", ErrorCode.RESPONSAVEL_OBRIGATORIO),
-                        tuple("students", 3, "teachers[0]", ErrorCode.PROFESSOR_INEXISTENTE),
-                        tuple("students", 4, "birthDate", ErrorCode.DATA_NASCIMENTO_INVALIDA),
-                        tuple("students", 5, "birthDate", ErrorCode.DATA_NASCIMENTO_INVALIDA));
+                        tuple("teachers", 1, "email", ErrorCode.DUPLICATE_EMAIL_IN_FILE),
+                        tuple("teachers", 1, "name", ErrorCode.NAME_REQUIRED),
+                        tuple("teachers", 2, "email", ErrorCode.INVALID_EMAIL),
+                        tuple("teachers", 3, "email", ErrorCode.INVALID_EMAIL),
+                        tuple("students", 1, "cpf", ErrorCode.DUPLICATE_CPF_IN_FILE),
+                        tuple("students", 2, "name", ErrorCode.NAME_REQUIRED),
+                        tuple("students", 2, "cpf", ErrorCode.INVALID_CPF),
+                        tuple("students", 2, "birthDate", ErrorCode.INVALID_BIRTH_DATE),
+                        tuple("students", 2, "teachers[0]", ErrorCode.TEACHER_NOT_FOUND),
+                        tuple("students", 3, "guardianName", ErrorCode.GUARDIAN_REQUIRED),
+                        tuple("students", 3, "teachers[0]", ErrorCode.TEACHER_NOT_FOUND),
+                        tuple("students", 4, "birthDate", ErrorCode.INVALID_BIRTH_DATE),
+                        tuple("students", 5, "birthDate", ErrorCode.INVALID_BIRTH_DATE));
         assertThat(result.errors().toString()).doesNotContain("52998224725", "529.982");
         assertThat(result.teachers()).isEqualTo(new Count(0, 0, 0));
         assertThat(result.issuedCodes()).isEmpty();
@@ -277,7 +277,7 @@ class LoadInitialRegistryUseCaseTest {
                                         "2012-03-03",
                                         "Resp",
                                         "Violino",
-                                        List.of("clara@exemplo.test"))));
+                                        List.of("clara@example.test"))));
 
         SeedResult result = useCase.run(onlyStudent, false);
 

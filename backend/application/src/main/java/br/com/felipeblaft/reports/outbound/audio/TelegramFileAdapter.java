@@ -43,7 +43,7 @@ public class TelegramFileAdapter implements ChannelFilePort {
         String path = file.path("file_path").asString("");
         Path original = Path.of(path).isAbsolute() ? Path.of(path) : filesTelegram.resolve(path);
         if (path.isBlank() || !original.normalize().startsWith(filesTelegram.normalize())) {
-            throw new ProviderUnavailableException("telegram-caminho-inesperado");
+            throw new ProviderUnavailableException("telegram-unexpected-path");
         }
         Path destination =
                 temporaries.resolve("telegram-" + UUID.randomUUID() + extension(original));
@@ -58,7 +58,7 @@ public class TelegramFileAdapter implements ChannelFilePort {
             } catch (IOException ignored) {
                 // a varredura periódica remove a sobra
             }
-            throw new ProviderUnavailableException("telegram-arquivo-indisponivel");
+            throw new ProviderUnavailableException("telegram-file-unavailable");
         }
     }
 

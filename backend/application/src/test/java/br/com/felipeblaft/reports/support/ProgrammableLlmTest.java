@@ -37,7 +37,7 @@ public class ProgrammableLlmTest implements Answer<Object> {
     public Object answer(InvocationOnMock invocation) throws Throwable {
         Object real = invocation.callRealMethod();
         TaskLlm task = invocation.getArgument(0);
-        if (task != TaskLlm.INCORPORACAO_RESPOSTAS) {
+        if (task != TaskLlm.ANSWER_INCORPORATION) {
             return real;
         }
         incorporations.add((TaskInput.AnswerIncorporation) invocation.getArgument(1));

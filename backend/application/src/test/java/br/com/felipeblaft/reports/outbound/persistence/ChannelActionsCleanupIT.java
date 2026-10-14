@@ -34,17 +34,17 @@ class ChannelActionsCleanupIT extends IntegrationBase {
     private void finalizedAction(String id) {
         save.run(
                 "p:" + id,
-                ChannelActionOrigin.PROATIVA,
+                ChannelActionOrigin.PROACTIVE,
                 null,
                 List.of(
                         new NewAction(
                                 id,
-                                ChannelActionType.MENSAGEM,
+                                ChannelActionType.MESSAGE,
                                 1L,
                                 UUID.randomUUID(),
                                 null,
-                                "{\"texto\":\"conteúdo sigiloso\"}",
-                                "{\"texto\":\"alternativa sigilosa\"}")));
+                                "{\"text\":\"conteúdo sigiloso\"}",
+                                "{\"text\":\"alternativa sigilosa\"}")));
         ChannelAction action = actions.searchById(id).orElseThrow();
         action.confirmExecuted(clock.now());
         assertThat(actions.updateIfVersion(action, action.version())).isTrue();
@@ -55,22 +55,22 @@ class ChannelActionsCleanupIT extends IntegrationBase {
         finalizedAction("p:a:0");
         save.run(
                 "p:b",
-                ChannelActionOrigin.PROATIVA,
+                ChannelActionOrigin.PROACTIVE,
                 null,
                 List.of(
                         new NewAction(
                                 "p:b:0",
-                                ChannelActionType.MENSAGEM,
+                                ChannelActionType.MESSAGE,
                                 1L,
                                 UUID.randomUUID(),
                                 null,
-                                "{\"texto\":\"ainda pendente\"}",
+                                "{\"text\":\"ainda pendente\"}",
                                 null)));
         documents.emit(
                 new ChannelDocument(
                         "a".repeat(64),
                         UUID.randomUUID(),
-                        ReportType.AULA,
+                        ReportType.LESSON,
                         UUID.randomUUID(),
                         null,
                         "x.pdf",
@@ -98,7 +98,7 @@ class ChannelActionsCleanupIT extends IntegrationBase {
                         jdbc.queryForObject(
                                 "select state from channel_action where id = 'p:a:0'",
                                 String.class))
-                .isEqualTo("EXECUTADA");
+                .isEqualTo("EXECUTED");
         // a pendente não é tocada; o documento venceu (25 h)
         assertThat(
                         jdbc.queryForObject(
@@ -128,17 +128,17 @@ class ChannelActionsCleanupIT extends IntegrationBase {
         String batchId = "u900";
         save.run(
                 batchId,
-                ChannelActionOrigin.RESPOSTA_UPDATE,
+                ChannelActionOrigin.UPDATE_REPLY,
                 900L,
                 List.of(
                         new NewAction(
                                 "u900-e0",
-                                ChannelActionType.MENSAGEM,
+                                ChannelActionType.MESSAGE,
                                 1L,
                                 null,
                                 null,
-                                "{\"texto\":\"Matteo foi bem\"}",
-                                "{\"texto\":\"alternativa sigilosa\"}")));
+                                "{\"text\":\"Matteo foi bem\"}",
+                                "{\"text\":\"alternativa sigilosa\"}")));
 
         // dentro do prazo continua entregue e reentregável pelo update repetido
         clock.advance(Duration.ofHours(23));
@@ -147,7 +147,7 @@ class ChannelActionsCleanupIT extends IntegrationBase {
                         jdbc.queryForObject(
                                 "select state from channel_action where id = 'u900-e0'",
                                 String.class))
-                .isEqualTo("ENTREGUE");
+                .isEqualTo("DELIVERED");
         assertThat(actions.searchByUpdate(900L)).hasSize(1);
 
         // vencido o prazo: estado final SEM_CONFIRMACAO, ainda com o conteúdo (retenção de 24 h)
@@ -157,7 +157,7 @@ class ChannelActionsCleanupIT extends IntegrationBase {
                         jdbc.queryForObject(
                                 "select state || '/' || reason_code from channel_action where id = 'u900-e0'",
                                 String.class))
-                .isEqualTo("FALHA_DEFINITIVA/SEM_CONFIRMACAO");
+                .isEqualTo("PERMANENTLY_FAILED/NO_CONFIRMATION");
         assertThat(
                         jdbc.queryForObject(
                                 "select payload is not null from channel_action where id = 'u900-e0'",

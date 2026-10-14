@@ -55,7 +55,7 @@ public class JobWorker {
     public void onStart() {
         int recovered = queuePostgres.recoverStuck(clock.now());
         if (recovered > 0) {
-            LOG.info("trabalhos-recuperados quantidade={}", recovered);
+            LOG.info("jobs-recovered quantity={}", recovered);
         }
     }
 
@@ -70,7 +70,7 @@ public class JobWorker {
                 next = queue.reserveNext(clock.now());
             } catch (RuntimeException error) {
                 slots.release();
-                LOG.warn("fila-indisponivel tipo={}", error.getClass().getSimpleName());
+                LOG.warn("queue-unavailable type={}", error.getClass().getSimpleName());
                 return;
             }
             if (next.isEmpty()) {
@@ -95,17 +95,17 @@ public class JobWorker {
                         + point.getLineNumber();
             }
         }
-        return "desconhecido";
+        return "unknown";
     }
 
     void run(ProcessingJob job) {
-        MDC.put("trabalhoId", job.id().toString());
-        MDC.put("canal", job.requestChannel().name());
+        MDC.put("jobId", job.id().toString());
+        MDC.put("channel", job.requestChannel().name());
         long start = System.currentTimeMillis();
         try {
             processor.process(job);
             LOG.info(
-                    "trabalho-concluido tipo={} resultado={} duracaoMs={}",
+                    "job-completed type={} result={} durationMs={}",
                     job.type(),
                     job.result(),
                     System.currentTimeMillis() - start);
@@ -115,7 +115,7 @@ public class JobWorker {
             // o da exceção e o ponto do código; a mensagem e a causa podem trazer SQL, texto de
             // relatório ou dado de aluno (FR-055)
             LOG.error(
-                    "trabalho-falhou tipo={} erro={} local={}",
+                    "job-failed type={} error={} local={}",
                     job.type(),
                     error.getClass().getName(),
                     localOf(error));

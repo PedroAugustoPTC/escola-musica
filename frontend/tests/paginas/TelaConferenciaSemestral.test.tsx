@@ -8,71 +8,71 @@ const ID = '0190a000-0000-7000-8000-0000000000s1';
 
 function relatorio(sobrescrever: Record<string, unknown> = {}) {
   return {
-    relatorioId: ID,
-    alunoId: '0190a000-0000-7000-8000-00000000000a',
-    periodoChave: '2026-1',
-    status: 'AGUARDANDO_CONFERENCIA',
-    etapa: null,
-    trabalhoEmCursoId: null,
-    versaoVigente: 1,
-    canalOrigem: 'WEB',
-    informacoesGerais: {
-      nome: 'Matteo Mafra',
-      idade: 14,
-      instrumento: 'Piano',
-      professor: 'Clara Souza',
-      periodoRotulo: '1º semestre 2026',
-      periodoInicio: '2026-01-01',
-      periodoFim: '2026-06-30',
-      quantidadeAulasConsideradas: 12,
+    reportId: ID,
+    studentId: '0190a000-0000-7000-8000-00000000000a',
+    periodKey: '2026-1',
+    status: 'AWAITING_REVIEW',
+    step: null,
+    activeJobId: null,
+    currentVersion: 1,
+    originChannel: 'WEB',
+    generalInformation: {
+      name: 'Matteo Mafra',
+      age: 14,
+      instrument: 'Piano',
+      teacher: 'Clara Souza',
+      periodLabel: '1º semestre 2026',
+      periodStart: '2026-01-01',
+      periodEnd: '2026-06-30',
+      consideredLessonCount: 12,
     },
-    conteudo: {
-      frequenciaEEstudo: {
+    content: {
+      attendanceAndStudy: {
         frequenciaAulas: 'Regular',
         regularidadeEstudoEmCasa: '',
         engajamento: '',
         comentarioGeral: '',
       },
-      tecnica: {
-        conteudosTrabalhados: ['Escalas'],
+      technique: {
+        workedTopics: ['Escalas'],
         evolucaoTecnica: '',
         pontosADesenvolver: [],
         estudosRealizados: [],
       },
-      musicalidade: {},
-      leituraEMemorizacao: {},
-      pontosDeAtencao: { itens: [] },
-      estrategiasPedagogicas: { itens: [] },
-      acompanhamentoFamiliar: {},
-      planejamentoProximoSemestre: {},
-      parecerFinal: 'Bom semestre.',
+      musicality: {},
+      readingAndMemorization: {},
+      attentionPoints: { items: [] },
+      pedagogicalStrategies: { items: [] },
+      familySupport: {},
+      nextSemesterPlan: {},
+      finalOpinion: 'Bom semestre.',
     },
-    quantidadeRelatoriosEmAberto: 2,
-    ultimaInteracao: null,
-    pdfDisponivel: true,
-    aprovadoEm: null,
-    atualizadoEm: '2026-09-21T13:00:00Z',
+    openReportCount: 2,
+    lastInteraction: null,
+    pdfAvailable: true,
+    approvedAt: null,
+    updatedAt: '2026-09-21T13:00:00Z',
     ...sobrescrever,
   };
 }
 
 const BASE = {
-  'GET /api/v1/sessao': { corpo: SESSAO_CLARA },
-  'GET /api/v1/inicio': {
+  'GET /api/v1/session': { corpo: SESSAO_CLARA },
+  'GET /api/v1/home': {
     corpo: {
-      professor: SESSAO_CLARA.professor,
-      totalAlunos: 1,
-      alunos: [],
-      relatoriosEmAberto: [],
-      limiteAudioMb: 50,
+      teacher: SESSAO_CLARA.teacher,
+      totalStudents: 1,
+      students: [],
+      openReports: [],
+      audioLimitMb: 50,
     },
   },
-  [`GET /api/v1/relatorios-semestrais/${ID}/versoes/1/pdf`]: { corpo: new Blob(['%PDF-']) },
+  [`GET /api/v1/semester-reports/${ID}/versions/1/pdf`]: { corpo: new Blob(['%PDF-']) },
 };
 
 describe('TelaConferenciaSemestral (11)', () => {
   it('mostra as aulas consideradas, o aviso de em aberto e as 10 seções com Informações Gerais', async () => {
-    simularApi({ ...BASE, [`GET /api/v1/relatorios-semestrais/${ID}`]: { corpo: relatorio() } });
+    simularApi({ ...BASE, [`GET /api/v1/semester-reports/${ID}`]: { corpo: relatorio() } });
     renderizarRotas(rotas, `/relatorios-semestrais/${ID}`);
 
     expect(
@@ -91,9 +91,9 @@ describe('TelaConferenciaSemestral (11)', () => {
   it('aprova citando a versão e vai para a tela de aprovado', async () => {
     const api = simularApi({
       ...BASE,
-      [`GET /api/v1/relatorios-semestrais/${ID}`]: { corpo: relatorio() },
-      [`POST /api/v1/relatorios-semestrais/${ID}/aprovacao`]: {
-        corpo: { relatorioId: ID, status: 'APROVADO', versaoAprovada: 1, aprovadoEm: '2026-09-21T13:00:00Z' },
+      [`GET /api/v1/semester-reports/${ID}`]: { corpo: relatorio() },
+      [`POST /api/v1/semester-reports/${ID}/approval`]: {
+        corpo: { reportId: ID, status: 'APPROVED', approvedVersion: 1, approvedAt: '2026-09-21T13:00:00Z' },
       },
     });
     const usuario = userEvent.setup();
@@ -105,32 +105,32 @@ describe('TelaConferenciaSemestral (11)', () => {
     await waitFor(() =>
       expect(roteador.state.location.pathname).toBe(`/relatorios-semestrais/${ID}/aprovado`),
     );
-    const envio = api.chamadas.find((c) => c.url.endsWith('/aprovacao'))!;
-    expect(JSON.parse(envio.init.body as string)).toEqual({ versaoConfirmada: 1 });
+    const envio = api.chamadas.find((c) => c.url.endsWith('/approval'))!;
+    expect(JSON.parse(envio.init.body as string)).toEqual({ confirmedVersion: 1 });
   });
 
   it('alteração por texto envia a versão base e mostra a nova versão', async () => {
     let versao = 1;
     simularApi({
       ...BASE,
-      [`GET /api/v1/relatorios-semestrais/${ID}`]: () => ({ corpo: relatorio({ versaoVigente: versao }) }),
-      [`GET /api/v1/relatorios-semestrais/${ID}/versoes/2/pdf`]: { corpo: new Blob(['%PDF-']) },
-      [`POST /api/v1/relatorios-semestrais/${ID}/alteracoes`]: (_url, init) => {
-        expect(JSON.parse(init.body as string)).toEqual({ texto: 'Inclua o recital.', versaoBase: 1 });
+      [`GET /api/v1/semester-reports/${ID}`]: () => ({ corpo: relatorio({ currentVersion: versao }) }),
+      [`GET /api/v1/semester-reports/${ID}/versions/2/pdf`]: { corpo: new Blob(['%PDF-']) },
+      [`POST /api/v1/semester-reports/${ID}/changes`]: (_url, init) => {
+        expect(JSON.parse(init.body as string)).toEqual({ text: 'Inclua o recital.', baseVersion: 1 });
         versao = 2;
-        return { status: 202, corpo: { trabalhoId: 't9' } };
+        return { status: 202, corpo: { jobId: 't9' } };
       },
-      'GET /api/v1/trabalhos/t9': {
+      'GET /api/v1/jobs/t9': {
         corpo: {
-          trabalhoId: 't9',
-          tipo: 'ALTERACAO',
-          status: 'CONCLUIDO',
-          etapa: 'PRONTO',
-          demorando: false,
-          resultadoCodigo: 'NOVA_VERSAO',
-          relatorioTipo: 'SEMESTRAL',
-          relatorioId: ID,
-          textoEntendido: 'Inclua o recital.',
+          jobId: 't9',
+          type: 'CHANGE',
+          status: 'COMPLETED',
+          step: 'READY',
+          delayed: false,
+          resultCode: 'NEW_VERSION',
+          reportType: 'SEMESTER',
+          reportId: ID,
+          understoodText: 'Inclua o recital.',
         },
       },
     });
@@ -147,8 +147,8 @@ describe('TelaConferenciaSemestral (11)', () => {
   it('semestral aprovado mostra a variação do 09', async () => {
     simularApi({
       ...BASE,
-      [`GET /api/v1/relatorios-semestrais/${ID}`]: {
-        corpo: relatorio({ status: 'APROVADO', aprovadoEm: '2026-09-21T21:42:00Z' }),
+      [`GET /api/v1/semester-reports/${ID}`]: {
+        corpo: relatorio({ status: 'APPROVED', approvedAt: '2026-09-21T21:42:00Z' }),
       },
     });
     renderizarRotas(rotas, `/relatorios-semestrais/${ID}/aprovado`);

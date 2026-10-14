@@ -17,7 +17,7 @@ public record AiLessonReportOutput(
         Boolean noContentChange,
         String actionRequest) {
 
-    public static final String NONE = "NENHUM";
+    public static final String NONE = "NONE";
 
     public AiLessonReportOutput {
         pendingQuestions = pendingQuestions == null ? List.of() : pendingQuestions;

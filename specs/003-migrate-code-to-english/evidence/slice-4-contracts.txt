@@ -1,0 +1,7 @@
+  specs/001-fluxo-relatorios/contracts/api-portal.openapi.yaml: idêntico byte a byte à cópia de specs/003
+api-portal: 0 diferenças de forma, 216 nomes trocados (specs/001-fluxo-relatorios/contracts/api-portal.openapi.yaml × specs/003-migrate-code-to-english/contracts/api-portal.openapi.yaml)
+  specs/002-api-interna-canal-telegram/contracts/actions-v1.schema.json: idêntico byte a byte à cópia de specs/003
+actions: 0 diferenças de forma, 63 nomes trocados (specs/002-api-interna-canal-telegram/contracts/acoes-v1.schema.json × specs/003-migrate-code-to-english/contracts/actions-v1.schema.json)
+  specs/002-api-interna-canal-telegram/contracts/telegram-channel-internal.openapi.yaml: idêntico byte a byte à cópia de specs/003
+telegram-channel-internal: 0 diferenças de forma, 29 nomes trocados (specs/002-api-interna-canal-telegram/contracts/canal-telegram-interno.openapi.yaml × specs/003-migrate-code-to-english/contracts/telegram-channel-internal.openapi.yaml)
+0 nomes com mais de um destino (informativo; revisar se o antigo é o mesmo conceito)

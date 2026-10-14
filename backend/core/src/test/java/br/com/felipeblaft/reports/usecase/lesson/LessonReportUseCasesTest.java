@@ -47,15 +47,15 @@ class LessonReportUseCasesTest {
         LessonReport report = c.reportWithQuestions();
         failWith(
                 () -> c.answer.answerText(c.clara.id(), report.id(), "  ", Channel.WEB),
-                ErrorCode.RESPOSTA_VAZIA);
+                ErrorCode.EMPTY_ANSWER);
         failWith(
                 () -> c.answer.answerText(c.bruno.id(), report.id(), "x", Channel.WEB),
-                ErrorCode.RECURSO_NAO_ENCONTRADO);
-        c.answer.answerText(c.clara.id(), report.id(), "resposta", Channel.WEB);
-        assertThat(report.step()).isEqualTo(ReportStep.INCORPORANDO_RESPOSTAS);
+                ErrorCode.RESOURCE_NOT_FOUND);
+        c.answer.answerText(c.clara.id(), report.id(), "response", Channel.WEB);
+        assertThat(report.step()).isEqualTo(ReportStep.INCORPORATING_ANSWERS);
         failWith(
                 () -> c.answer.answerText(c.clara.id(), report.id(), "de novo", Channel.WEB),
-                ErrorCode.PROCESSAMENTO_EM_ANDAMENTO);
+                ErrorCode.PROCESSING_IN_PROGRESS);
         failWith(
                 () ->
                         c.answer.answerAudio(
@@ -63,7 +63,7 @@ class LessonReportUseCasesTest {
                                 report.id(),
                                 ReportScenario.file("r.ogg", 1),
                                 Channel.WEB),
-                ErrorCode.PROCESSAMENTO_EM_ANDAMENTO);
+                ErrorCode.PROCESSING_IN_PROGRESS);
         assertThat(c.normalization.deleted).contains(Path.of("/tmp/audios/r.ogg"));
     }
 
@@ -78,7 +78,7 @@ class LessonReportUseCasesTest {
                                 new ChannelFileReference(
                                         "f", null, null, c.parameters.audioLimitBytes() + 1),
                                 Channel.TELEGRAM),
-                ErrorCode.AUDIO_MUITO_GRANDE);
+                ErrorCode.AUDIO_TOO_LARGE);
         assertThat(report.step()).isNull();
     }
 
@@ -87,17 +87,17 @@ class LessonReportUseCasesTest {
         LessonReport report = c.reportInReview();
         failWith(
                 () -> c.change.changeByText(c.clara.id(), report.id(), " ", 1, Channel.WEB),
-                ErrorCode.ALTERACAO_VAZIA);
+                ErrorCode.EMPTY_CHANGE);
         assertThatThrownBy(
                         () -> c.change.changeByText(c.clara.id(), report.id(), "x", 3, Channel.WEB))
                 .isInstanceOf(DomainException.class)
                 .satisfies(
                         e ->
                                 assertThat(((DomainException) e).details())
-                                        .containsEntry("versaoVigente", 1));
+                                        .containsEntry("currentVersion", 1));
         failWith(
                 () -> c.change.changeByText(c.bruno.id(), report.id(), "x", 1, Channel.WEB),
-                ErrorCode.RECURSO_NAO_ENCONTRADO);
+                ErrorCode.RESOURCE_NOT_FOUND);
         failWith(
                 () ->
                         c.change.changeByAudio(
@@ -106,13 +106,13 @@ class LessonReportUseCasesTest {
                                 ReportScenario.file("a.ogg", 1),
                                 2,
                                 Channel.WEB),
-                ErrorCode.VERSAO_DESATUALIZADA);
+                ErrorCode.STALE_VERSION);
         assertThat(c.normalization.deleted).contains(Path.of("/tmp/audios/a.ogg"));
         ProcessingJob job =
                 c.change.changeByAudio(
                         c.clara.id(), report.id(), ReportScenario.file("b.ogg", 1), 1, Channel.WEB);
         assertThat(job.parameters()).containsEntry("baseVersion", "1");
-        assertThat(report.step()).isEqualTo(ReportStep.TRANSCREVENDO_PEDIDO);
+        assertThat(report.step()).isEqualTo(ReportStep.TRANSCRIBING_REQUEST);
     }
 
     @Test
@@ -126,13 +126,15 @@ class LessonReportUseCasesTest {
         assertThat(approval.approvedVersion()).isEqualTo(1);
         assertThat(approval.approvedAt()).isEqualTo(c.clock.now());
         assertThat(report.approvalChannel()).isEqualTo(Channel.TELEGRAM);
-        assertThat(c.pdf.models.getLast().status()).isEqualTo(DocumentStatus.OFICIAL);
+        assertThat(c.pdf.models.getLast().status()).isEqualTo(DocumentStatus.OFFICIAL);
         assertThat(c.pdf.models.getLast().approval().teacherName()).isEqualTo("Clara Souza");
-        assertThat(c.storage.files).containsKey("relatorios/aula/" + report.id() + "/official.pdf");
+        assertThat(c.storage.files).containsKey("reports/lesson/" + report.id() + "/official.pdf");
         failWith(
                 () -> c.approve.run(c.clara.id(), report.id(), 1, Channel.WEB),
-                ErrorCode.RELATORIO_JA_APROVADO);
-        failWith(() -> c.cancel.cancel(c.clara.id(), report.id()), ErrorCode.RELATORIO_JA_APROVADO);
+                ErrorCode.REPORT_ALREADY_APPROVED);
+        failWith(
+                () -> c.cancel.cancel(c.clara.id(), report.id()),
+                ErrorCode.REPORT_ALREADY_APPROVED);
     }
 
     @Test
@@ -140,28 +142,28 @@ class LessonReportUseCasesTest {
         LessonReport report = c.reportInReview();
         failWith(
                 () -> c.approve.run(c.clara.id(), report.id(), 2, Channel.WEB),
-                ErrorCode.VERSAO_DESATUALIZADA);
+                ErrorCode.STALE_VERSION);
         failWith(
                 () -> c.approve.run(c.bruno.id(), report.id(), 1, Channel.WEB),
-                ErrorCode.RECURSO_NAO_ENCONTRADO);
+                ErrorCode.RESOURCE_NOT_FOUND);
         failWith(
                 () -> c.approve.run(c.clara.id(), UUID.randomUUID(), 1, Channel.WEB),
-                ErrorCode.RECURSO_NAO_ENCONTRADO);
+                ErrorCode.RESOURCE_NOT_FOUND);
     }
 
     @Test
     void cancelDiscardsJobInProgress() {
         LessonReport report = c.reportInReview();
         ProcessingJob job =
-                c.change.changeByText(c.clara.id(), report.id(), "mudar", 1, Channel.WEB);
+                c.change.changeByText(c.clara.id(), report.id(), "change", 1, Channel.WEB);
         report.completeStep(c.clock.now());
 
         c.cancel.cancel(c.clara.id(), report.id());
 
-        assertThat(report.status()).isEqualTo(ReportStatus.CANCELADO);
+        assertThat(report.status()).isEqualTo(ReportStatus.CANCELLED);
         assertThat(c.queue.searchById(job.id()).orElseThrow().status())
-                .isEqualTo(JobStatus.DESCARTADO);
-        failWith(() -> c.cancel.cancel(c.clara.id(), report.id()), ErrorCode.RELATORIO_CANCELADO);
+                .isEqualTo(JobStatus.DISCARDED);
+        failWith(() -> c.cancel.cancel(c.clara.id(), report.id()), ErrorCode.REPORT_CANCELLED);
     }
 
     @Test
@@ -169,7 +171,7 @@ class LessonReportUseCasesTest {
         LessonReport report = c.reportInReview();
         failWith(
                 () -> c.retry.run(c.clara.id(), report.id(), Channel.WEB),
-                ErrorCode.ACAO_NAO_PERMITIDA_NA_ETAPA);
+                ErrorCode.ACTION_NOT_ALLOWED_AT_STEP);
     }
 
     @Test
@@ -185,7 +187,7 @@ class LessonReportUseCasesTest {
 
         ProcessingJob job = c.change.changeByText(c.clara.id(), report.id(), "x", 1, Channel.WEB);
         assertThat(c.get.run(c.clara.id(), report.id()).jobInProgress()).contains(job);
-        failWith(() -> c.get.run(c.bruno.id(), report.id()), ErrorCode.RECURSO_NAO_ENCONTRADO);
+        failWith(() -> c.get.run(c.bruno.id(), report.id()), ErrorCode.RESOURCE_NOT_FOUND);
 
         assertThat(c.get.run(c.clara.id(), withQuestions.id()).pdfAvailable()).isFalse();
     }
@@ -200,57 +202,56 @@ class LessonReportUseCasesTest {
         assertThat(view.understoodText()).contains("texto digitado");
         c.clock.advance(Duration.ofMinutes(3));
         assertThat(c.queryJob.run(c.clara.id(), job.id()).delayed()).isTrue();
-        failWith(() -> c.queryJob.run(c.bruno.id(), job.id()), ErrorCode.RECURSO_NAO_ENCONTRADO);
+        failWith(() -> c.queryJob.run(c.bruno.id(), job.id()), ErrorCode.RESOURCE_NOT_FOUND);
     }
 
     @Test
     void reviewAndOfficialDocuments() {
         LessonReport report = c.reportInReview();
         GetReportDocumentUseCase.ObtainedDocument review =
-                c.getDocument.review(c.clara.id(), ReportType.AULA, report.id(), 1);
-        assertThat(new String(review.content(), StandardCharsets.UTF_8))
-                .isEqualTo("PDF CONFERENCIA v1");
+                c.getDocument.review(c.clara.id(), ReportType.LESSON, report.id(), 1);
+        assertThat(new String(review.content(), StandardCharsets.UTF_8)).isEqualTo("PDF REVIEW v1");
         assertThat(review.fileName())
                 .isEqualTo("relatorio-aula-2026-09-21-v1.pdf")
                 .doesNotContain(report.id().toString());
 
         failWith(
-                () -> c.getDocument.official(c.clara.id(), ReportType.AULA, report.id()),
-                ErrorCode.RECURSO_NAO_ENCONTRADO);
+                () -> c.getDocument.official(c.clara.id(), ReportType.LESSON, report.id()),
+                ErrorCode.RESOURCE_NOT_FOUND);
         failWith(
-                () -> c.getDocument.review(c.clara.id(), ReportType.AULA, report.id(), 2),
-                ErrorCode.RECURSO_NAO_ENCONTRADO);
+                () -> c.getDocument.review(c.clara.id(), ReportType.LESSON, report.id(), 2),
+                ErrorCode.RESOURCE_NOT_FOUND);
         failWith(
-                () -> c.getDocument.review(c.bruno.id(), ReportType.AULA, report.id(), 1),
-                ErrorCode.RECURSO_NAO_ENCONTRADO);
+                () -> c.getDocument.review(c.bruno.id(), ReportType.LESSON, report.id(), 1),
+                ErrorCode.RESOURCE_NOT_FOUND);
 
         c.approve.run(c.clara.id(), report.id(), 1, Channel.WEB);
         GetReportDocumentUseCase.ObtainedDocument official =
-                c.getDocument.official(c.clara.id(), ReportType.AULA, report.id());
+                c.getDocument.official(c.clara.id(), ReportType.LESSON, report.id());
         assertThat(new String(official.content(), StandardCharsets.UTF_8))
-                .isEqualTo("PDF OFICIAL v1");
+                .isEqualTo("PDF OFFICIAL v1");
         assertThat(official.fileName()).isEqualTo("relatorio-aula-2026-09-21.pdf");
         assertThat(c.pdfDocuments.documents.values())
                 .extracting(d -> d.type())
-                .containsExactlyInAnyOrder(DocumentType.CONFERENCIA, DocumentType.OFICIAL);
+                .containsExactlyInAnyOrder(DocumentType.REVIEW, DocumentType.OFFICIAL);
 
         failWith(
-                () -> c.getDocument.official(c.clara.id(), ReportType.SEMESTRAL, report.id()),
-                ErrorCode.RECURSO_NAO_ENCONTRADO);
+                () -> c.getDocument.official(c.clara.id(), ReportType.SEMESTER, report.id()),
+                ErrorCode.RESOURCE_NOT_FOUND);
         failWith(
-                () -> c.getDocument.review(c.clara.id(), ReportType.SEMESTRAL, report.id(), 1),
-                ErrorCode.RECURSO_NAO_ENCONTRADO);
+                () -> c.getDocument.review(c.clara.id(), ReportType.SEMESTER, report.id(), 1),
+                ErrorCode.RESOURCE_NOT_FOUND);
     }
 
     @Test
     void registeredSemesterSource() {
         var obtained =
-                new GetReportDocumentUseCase.ObtainedDocument(new byte[] {1}, "semestral.pdf");
+                new GetReportDocumentUseCase.ObtainedDocument(new byte[] {1}, "semester.pdf");
         c.getDocument.registerSemesterSource(
                 new GetReportDocumentUseCase.DocumentSource() {
                     @Override
                     public ReportType type() {
-                        return ReportType.SEMESTRAL;
+                        return ReportType.SEMESTER;
                     }
 
                     @Override
@@ -263,9 +264,9 @@ class LessonReportUseCasesTest {
                         return obtained;
                     }
                 });
-        assertThat(c.getDocument.official(c.clara.id(), ReportType.SEMESTRAL, UUID.randomUUID()))
+        assertThat(c.getDocument.official(c.clara.id(), ReportType.SEMESTER, UUID.randomUUID()))
                 .isSameAs(obtained);
-        assertThat(c.getDocument.review(c.clara.id(), ReportType.SEMESTRAL, UUID.randomUUID(), 1))
+        assertThat(c.getDocument.review(c.clara.id(), ReportType.SEMESTER, UUID.randomUUID(), 1))
                 .isSameAs(obtained);
         assertThat(List.of()).isEmpty();
         assertThat(TaskLlm.values()).isNotEmpty();

@@ -77,7 +77,7 @@ public final class ProcessingDoubles {
                     (String) next,
                     audio.durationSeconds(),
                     new BigDecimal("0.001"),
-                    "provedor/modelo");
+                    "provider/model");
         }
     }
 
@@ -96,7 +96,7 @@ public final class ProcessingDoubles {
             if (!failures.isEmpty()) {
                 throw failures.poll();
             }
-            Path path = Path.of(original.path() + ".normalizado.ogg");
+            Path path = Path.of(original.path() + ".normalized.ogg");
             normalized.add(path);
             return new NormalizedAudio(path, 42.0);
         }
@@ -119,7 +119,7 @@ public final class ProcessingDoubles {
         public TemporaryFile getFile(ChannelFileReference reference) {
             obtained.add(reference);
             return new TemporaryFile(
-                    Path.of("/tmp/audios/canal-" + reference.id()),
+                    Path.of("/tmp/audios/channel-" + reference.id()),
                     reference.size(),
                     reference.mime());
         }
@@ -153,7 +153,7 @@ public final class ProcessingDoubles {
                     100,
                     50,
                     new BigDecimal("0.0001"),
-                    "provedor/modelo",
+                    "provider/model",
                     10);
         }
     }
@@ -176,7 +176,7 @@ public final class ProcessingDoubles {
         public GeneratedDocument generateSemesterReport(SemesterReportPdfModel model) {
             semesterModels.add(model);
             byte[] bytes =
-                    ("PDF SEMESTRAL " + model.status() + " v" + model.version())
+                    ("PDF SEMESTER " + model.status() + " v" + model.version())
                             .getBytes(StandardCharsets.UTF_8);
             return new GeneratedDocument(bytes, "sha-s" + semesterModels.size(), bytes.length);
         }
@@ -206,17 +206,17 @@ public final class ProcessingDoubles {
 
         @Override
         public void notifyStep(ProcessingJob job) {
-            events.add("etapa:" + job.step());
+            events.add("step:" + job.step());
         }
 
         @Override
         public void notifyResult(ProcessingJob job) {
-            events.add("resultado:" + job.result());
+            events.add("result:" + job.result());
         }
 
         @Override
         public void notifyDelay(ProcessingJob job) {
-            events.add("demora");
+            events.add("delay");
         }
     }
 
@@ -254,7 +254,7 @@ public final class ProcessingDoubles {
 
         @Override
         public void enqueue(ProcessingJob job) {
-            if (job.type() == JobType.REGISTRO_AULA
+            if (job.type() == JobType.LESSON_REGISTRATION
                     && searchRegistrationInProgress(job.teacherId(), job.studentId()).isPresent()) {
                 throw new ConcurrencyConflictException("registro em curso");
             }
@@ -264,7 +264,7 @@ public final class ProcessingDoubles {
         @Override
         public void update(ProcessingJob job) {
             ProcessingJob current = jobs.get(job.id());
-            if (current != null && current != job && current.status() == JobStatus.DESCARTADO) {
+            if (current != null && current != job && current.status() == JobStatus.DISCARDED) {
                 return;
             }
             jobs.put(job.id(), job);
@@ -279,7 +279,7 @@ public final class ProcessingDoubles {
         public Optional<ProcessingJob> searchConsolidationInProgress(
                 UUID teacherId, UUID studentId, String periodKey) {
             return jobs.values().stream()
-                    .filter(t -> t.type() == JobType.CONSOLIDACAO_SEMESTRAL)
+                    .filter(t -> t.type() == JobType.SEMESTER_CONSOLIDATION)
                     .filter(t -> t.teacherId().equals(teacherId) && t.studentId().equals(studentId))
                     .filter(
                             t ->
@@ -292,9 +292,7 @@ public final class ProcessingDoubles {
         @Override
         public Optional<ProcessingJob> reserveNext(Instant now) {
             Optional<ProcessingJob> next =
-                    jobs.values().stream()
-                            .filter(t -> t.status() == JobStatus.PENDENTE)
-                            .findFirst();
+                    jobs.values().stream().filter(t -> t.status() == JobStatus.PENDING).findFirst();
             next.ifPresent(t -> t.start(now));
             return next;
         }
@@ -406,7 +404,7 @@ public final class ProcessingDoubles {
                             r ->
                                     r.status()
                                             == br.com.felipeblaft.reports.domain.report.ReportStatus
-                                                    .APROVADO)
+                                                    .APPROVED)
                     .filter(r -> !data(r).isBefore(start) && !data(r).isAfter(end))
                     .sorted(java.util.Comparator.comparing(this::data))
                     .map(r -> new ApprovedLesson(r.id(), data(r), r.content(), r.approvedAt()))
@@ -462,14 +460,14 @@ public final class ProcessingDoubles {
                                                     && (r.status()
                                                                     == br.com.felipeblaft.reports
                                                                             .domain.report
-                                                                            .ReportStatus.APROVADO
+                                                                            .ReportStatus.APPROVED
                                                             || r.status()
                                                                     == br.com.felipeblaft.reports
                                                                             .domain.report
                                                                             .ReportStatus
-                                                                            .AGUARDANDO_CONFERENCIA));
+                                                                            .AWAITING_REVIEW));
             if (conflict) {
-                throw new ConcurrencyConflictException("relatorio_semestral");
+                throw new ConcurrencyConflictException("semester_report");
             }
             reports.put(report.id(), report);
         }
@@ -506,7 +504,7 @@ public final class ProcessingDoubles {
                     teacherId,
                     studentId,
                     periodKey,
-                    s -> s == br.com.felipeblaft.reports.domain.report.ReportStatus.APROVADO);
+                    s -> s == br.com.felipeblaft.reports.domain.report.ReportStatus.APPROVED);
         }
 
         @Override
@@ -528,7 +526,7 @@ public final class ProcessingDoubles {
                             r ->
                                     r.status()
                                             == br.com.felipeblaft.reports.domain.report.ReportStatus
-                                                    .APROVADO)
+                                                    .APPROVED)
                     .toList();
         }
     }

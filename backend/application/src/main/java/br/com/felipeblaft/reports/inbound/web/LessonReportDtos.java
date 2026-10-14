@@ -13,55 +13,55 @@ public final class LessonReportDtos {
 
     private LessonReportDtos() {}
 
-    public record JobRefDto(UUID trabalhoId) {}
+    public record JobRefDto(UUID jobId) {}
 
     public record JobDto(
-            UUID trabalhoId,
-            String tipo,
+            UUID jobId,
+            String type,
             String status,
-            String etapa,
-            boolean demorando,
-            String resultadoCodigo,
-            String relatorioTipo,
-            UUID relatorioId,
-            String textoEntendido) {}
+            String step,
+            boolean delayed,
+            String resultCode,
+            String reportType,
+            UUID reportId,
+            String understoodText) {}
 
     public record LessonReportContentDto(
-            List<String> conteudosTrabalhados,
-            String evolucao,
-            List<String> dificuldades,
-            List<String> atividadesPropostas,
-            String observacoes) {}
+            List<String> workedTopics,
+            String progress,
+            List<String> difficulties,
+            List<String> proposedActivities,
+            String observations) {}
 
     public record InteractionDto(
-            String tipo, String canal, String meio, String texto, Instant criadoEm) {}
+            String type, String channel, String medium, String text, Instant createdAt) {}
 
     public record LessonReportDto(
-            UUID relatorioId,
-            UUID alunoId,
-            String alunoNome,
-            String professorNome,
-            LocalDate dataAula,
+            UUID reportId,
+            UUID studentId,
+            String studentName,
+            String teacherName,
+            LocalDate lessonDate,
             String status,
-            String etapa,
-            UUID trabalhoEmCursoId,
-            int versaoVigente,
-            String canalOrigem,
-            LessonReportContentDto conteudo,
-            List<String> perguntasPendentes,
-            int rodadasPerguntas,
-            InteractionDto ultimaInteracao,
-            boolean pdfDisponivel,
-            Instant aprovadoEm,
-            Instant atualizadoEm) {}
+            String step,
+            UUID activeJobId,
+            int currentVersion,
+            String originChannel,
+            LessonReportContentDto content,
+            List<String> pendingQuestions,
+            int questionRounds,
+            InteractionDto lastInteraction,
+            boolean pdfAvailable,
+            Instant approvedAt,
+            Instant updatedAt) {}
 
-    public record TextAnswerRequest(@Size(max = 4000) String texto) {}
+    public record TextAnswerRequest(@Size(max = 4000) String text) {}
 
     public record ChangeTextRequest(
-            @Size(max = 4000) String texto, @NotNull @Min(1) Integer versaoBase) {}
+            @Size(max = 4000) String text, @NotNull @Min(1) Integer baseVersion) {}
 
-    public record ApprovalRequest(@NotNull @Min(1) Integer versaoConfirmada) {}
+    public record ApprovalRequest(@NotNull @Min(1) Integer confirmedVersion) {}
 
     public record ApprovalDto(
-            UUID relatorioId, String status, int versaoAprovada, Instant aprovadoEm) {}
+            UUID reportId, String status, int approvedVersion, Instant approvedAt) {}
 }

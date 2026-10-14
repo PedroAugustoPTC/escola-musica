@@ -45,9 +45,9 @@ test('aluno e relatório de outro professor não são revelados', async ({ page 
   await expect(page.getByText('Este aluno não está associado a você.')).toBeVisible();
   await expect(page.getByText('Helena Prado')).toHaveCount(0);
 
-  const historico = await page.request.get(`/api/v1/alunos/${dados.alunos.helena}/historico`);
+  const historico = await page.request.get(`/api/v1/students/${dados.alunos.helena}/history`);
   expect(historico.status()).toBe(403);
-  expect((await historico.json()).codigo).toBe('ALUNO_NAO_ASSOCIADO');
-  const pdf = await page.request.get(`/api/v1/relatorios-aula/${randomUUID()}/pdf-oficial`);
+  expect((await historico.json()).code).toBe('STUDENT_NOT_ASSIGNED');
+  const pdf = await page.request.get(`/api/v1/lesson-reports/${randomUUID()}/official-pdf`);
   expect(pdf.status()).toBe(404);
 });

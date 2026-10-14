@@ -30,7 +30,7 @@ class AccessContractIT extends ContractApiBase {
     private org.springframework.test.web.servlet.ResultActions retry(String code, String ip)
             throws Exception {
         return mvc.perform(
-                post("/api/v1/sessao")
+                post("/api/v1/session")
                         .with(csrf().asHeader())
                         .with(
                                 r -> {
@@ -39,7 +39,7 @@ class AccessContractIT extends ContractApiBase {
                                 })
                         .header("X-Forwarded-For", ip)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"codigo\":\"" + code + "\"}"));
+                        .content("{\"code\":\"" + code + "\"}"));
     }
 
     @Test
@@ -47,9 +47,9 @@ class AccessContractIT extends ContractApiBase {
         retry("k7qm-2xpa", "200.1.1.1")
                 .andExpect(status().isOk())
                 .andExpect(followsContract())
-                .andExpect(jsonPath("$.professor.nome").value("Clara Souza"))
-                .andExpect(jsonPath("$.telegramVinculado").value(false))
-                .andExpect(header().string("Set-Cookie", containsString("sessao=")))
+                .andExpect(jsonPath("$.teacher.name").value("Clara Souza"))
+                .andExpect(jsonPath("$.telegramLinked").value(false))
+                .andExpect(header().string("Set-Cookie", containsString("session=")))
                 .andExpect(header().string("Set-Cookie", containsString("HttpOnly")))
                 .andExpect(header().string("Set-Cookie", containsString("Secure")))
                 .andExpect(header().string("Set-Cookie", containsString("SameSite=Strict")))
@@ -64,30 +64,30 @@ class AccessContractIT extends ContractApiBase {
     void currentSessionAndEnding() throws Exception {
         Cookie session = signIn(ScenarioIT.CODE_CLARA);
 
-        mvc.perform(get("/api/v1/sessao").cookie(session))
+        mvc.perform(get("/api/v1/session").cookie(session))
                 .andExpect(status().isOk())
                 .andExpect(followsContract())
-                .andExpect(jsonPath("$.professor.nome").value("Clara Souza"));
+                .andExpect(jsonPath("$.teacher.name").value("Clara Souza"));
 
-        mvc.perform(authenticated(delete("/api/v1/sessao"), session))
+        mvc.perform(authenticated(delete("/api/v1/session"), session))
                 .andExpect(status().isNoContent())
                 .andExpect(followsContract())
-                .andExpect(cookie().maxAge("sessao", 0));
+                .andExpect(cookie().maxAge("session", 0));
 
-        mvc.perform(get("/api/v1/sessao").cookie(session))
+        mvc.perform(get("/api/v1/session").cookie(session))
                 .andExpect(status().isUnauthorized())
                 .andExpect(followsContract())
-                .andExpect(jsonPath("$.codigo").value("SESSAO_EXPIRADA"));
+                .andExpect(jsonPath("$.code").value("SESSION_EXPIRED"));
     }
 
     @Test
     void withoutCookieAndNotAuthenticated() throws Exception {
-        mvc.perform(get("/api/v1/sessao"))
+        mvc.perform(get("/api/v1/session"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(followsContract())
-                .andExpect(jsonPath("$.codigo").value("NAO_AUTENTICADO"))
+                .andExpect(jsonPath("$.code").value("NOT_AUTHENTICATED"))
                 .andExpect(
-                        jsonPath("$.mensagem")
+                        jsonPath("$.message")
                                 .value("Entre com o seu código de acesso para continuar."));
     }
 
@@ -95,9 +95,9 @@ class AccessContractIT extends ContractApiBase {
     void sessionExpiresAfterTwelveHoursWithoutUse() throws Exception {
         Cookie session = signIn(ScenarioIT.CODE_CLARA);
         clock.advance(Duration.ofHours(12));
-        mvc.perform(get("/api/v1/inicio").cookie(session))
+        mvc.perform(get("/api/v1/home").cookie(session))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.codigo").value("SESSAO_EXPIRADA"));
+                .andExpect(jsonPath("$.code").value("SESSION_EXPIRED"));
     }
 
     @Test
@@ -105,7 +105,7 @@ class AccessContractIT extends ContractApiBase {
         retry("ZZZZZZZZ", "200.1.1.9")
                 .andExpect(status().isUnauthorized())
                 .andExpect(followsContract())
-                .andExpect(jsonPath("$.codigo").value("CODIGO_INVALIDO"));
+                .andExpect(jsonPath("$.code").value("INVALID_CODE"));
         for (int i = 0; i < 4; i++) {
             retry("ZZZZZZZZ", "200.1.1.9").andExpect(status().isUnauthorized());
         }
@@ -113,9 +113,9 @@ class AccessContractIT extends ContractApiBase {
                 .andExpect(status().isTooManyRequests())
                 .andExpect(followsContract())
                 .andExpect(header().string("Retry-After", "900"))
-                .andExpect(jsonPath("$.codigo").value("BLOQUEADO_TEMPORARIAMENTE"))
+                .andExpect(jsonPath("$.code").value("TEMPORARILY_BLOCKED"))
                 .andExpect(jsonPath("$.retryAfterSeconds").value(900))
-                .andExpect(jsonPath("$.mensagem").value(containsString("15 minuto(s)")));
+                .andExpect(jsonPath("$.message").value(containsString("15 minuto(s)")));
         // outra origem segue livre
         retry(ScenarioIT.CODE_CLARA, "200.1.1.10").andExpect(status().isOk());
         clock.advance(Duration.ofMinutes(15));
@@ -127,22 +127,22 @@ class AccessContractIT extends ContractApiBase {
         clock.advance(Duration.ofDays(7));
         retry(ScenarioIT.CODE_CLARA, "200.1.1.3")
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.codigo").value("CODIGO_EXPIRADO"));
+                .andExpect(jsonPath("$.code").value("EXPIRED_CODE"));
         mvc.perform(
-                        post("/api/v1/sessao")
+                        post("/api/v1/session")
                                 .with(csrf().asHeader())
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"codigo\":\"\"}"))
+                                .content("{\"code\":\"\"}"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.codigo").value("DADOS_INVALIDOS"));
+                .andExpect(jsonPath("$.code").value("INVALID_DATA"));
     }
 
     @Test
     void withoutCsrfChangeIsRefused() throws Exception {
         mvc.perform(
-                        post("/api/v1/sessao")
+                        post("/api/v1/session")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"codigo\":\"K7QM2XPA\"}"))
+                                .content("{\"code\":\"K7QM2XPA\"}"))
                 .andExpect(status().isForbidden());
     }
 }

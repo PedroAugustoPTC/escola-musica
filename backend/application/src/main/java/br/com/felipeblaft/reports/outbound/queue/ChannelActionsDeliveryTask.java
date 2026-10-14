@@ -51,20 +51,20 @@ public class ChannelActionsDeliveryTask {
         this.batchMaxPerCycle = channel.batchMaxPerCycle();
         this.confirmationMax = Duration.ofSeconds(channel.confirmationMaxSeconds());
         this.acceptedDeliveries =
-                Counter.builder("canal_entregas_total")
-                        .tag("resultado", "aceita")
+                Counter.builder("channel_deliveries_total")
+                        .tag("result", "accepts")
                         .register(registration);
         this.refusedDeliveries =
-                Counter.builder("canal_entregas_total")
-                        .tag("resultado", "recusada")
+                Counter.builder("channel_deliveries_total")
+                        .tag("result", "refused")
                         .register(registration);
         this.permanentFailures =
-                Counter.builder("canal_acoes_falha_definitiva_total").register(registration);
-        Gauge.builder("canal_acoes_pendentes", this, t -> t.pending().quantity())
+                Counter.builder("channel_permanent_failure_actions_total").register(registration);
+        Gauge.builder("channel_pending_actions", this, t -> t.pending().quantity())
                 .description("Ações do canal aguardando entrega ao orquestrador")
                 .register(registration);
         Gauge.builder(
-                        "canal_acao_pendente_mais_antiga_segundos",
+                        "channel_oldest_pending_action_seconds",
                         this,
                         t -> {
                             Instant created = t.pending().oldestCreatedAt();
@@ -77,7 +77,7 @@ public class ChannelActionsDeliveryTask {
                 .description("Idade da ação pendente mais antiga")
                 .register(registration);
         Gauge.builder(
-                        "canal_acoes_sem_confirmacao_total",
+                        "channel_unconfirmed_actions_total",
                         this,
                         t -> t.pending().withoutConfirmation())
                 .description("Ações entregues e ainda sem confirmação além da espera máxima")
@@ -99,10 +99,10 @@ public class ChannelActionsDeliveryTask {
             for (String actionId : cycle.permanentFailures()) {
                 permanentFailures.increment();
                 // sem dado de aluno: só o identificador técnico (FR-018, FR-029)
-                LOG.warn("canal-acao-falha-definitiva acaoId={}", actionId);
+                LOG.warn("channel-action-permanent-failure actionId={}", actionId);
             }
         } catch (RuntimeException error) {
-            LOG.error("canal-despacho-falhou tipo={}", error.getClass().getSimpleName());
+            LOG.error("channel-dispatch-failed type={}", error.getClass().getSimpleName());
         }
     }
 }

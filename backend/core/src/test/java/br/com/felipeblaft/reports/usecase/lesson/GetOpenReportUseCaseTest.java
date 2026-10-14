@@ -27,12 +27,12 @@ class GetOpenReportUseCaseTest {
     void returnsReportWithChannelAndLastChange() {
         OpenReport openReport =
                 new OpenReport(
-                        ReportType.AULA,
+                        ReportType.LESSON,
                         UUID.randomUUID(),
                         null,
                         c.matteo.id(),
                         "Matteo Mafra",
-                        ReportStatus.AGUARDANDO_CONFERENCIA,
+                        ReportStatus.AWAITING_REVIEW,
                         null,
                         null,
                         Channel.TELEGRAM,
@@ -47,6 +47,6 @@ class GetOpenReportUseCaseTest {
         assertThatThrownBy(() -> c.getOpen.run(c.clara.id(), c.helena.id()))
                 .isInstanceOfSatisfying(
                         DomainException.class,
-                        e -> assertThat(e.code()).isEqualTo(ErrorCode.ALUNO_NAO_ASSOCIADO));
+                        e -> assertThat(e.code()).isEqualTo(ErrorCode.STUDENT_NOT_ASSIGNED));
     }
 }

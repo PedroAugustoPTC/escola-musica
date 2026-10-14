@@ -4,13 +4,13 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record OpenReportDto(
-        String tipo,
-        UUID relatorioId,
-        UUID trabalhoId,
-        UUID alunoId,
-        String alunoNome,
+        String type,
+        UUID reportId,
+        UUID jobId,
+        UUID studentId,
+        String studentName,
         String status,
-        String etapa,
-        String periodoChave,
-        String canalOrigem,
-        Instant atualizadoEm) {}
+        String step,
+        String periodKey,
+        String originChannel,
+        Instant updatedAt) {}

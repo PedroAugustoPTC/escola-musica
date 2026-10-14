@@ -41,14 +41,14 @@ class ChannelActionRepositoryAdapterIT extends IntegrationBase {
         return ChannelAction.create(
                 batchId + ":" + pos,
                 batchId,
-                ChannelActionOrigin.PROATIVA,
+                ChannelActionOrigin.PROACTIVE,
                 null,
                 chatId,
                 UUID.randomUUID(),
                 null,
-                ChannelActionType.MENSAGEM,
-                "{\"texto\":\"" + batchId + pos + "\"}",
-                "{\"texto\":\"alt\"}",
+                ChannelActionType.MESSAGE,
+                "{\"text\":\"" + batchId + pos + "\"}",
+                "{\"text\":\"alt\"}",
                 T0,
                 policy);
     }
@@ -69,13 +69,13 @@ class ChannelActionRepositoryAdapterIT extends IntegrationBase {
                 ChannelAction.create(
                         "p:a:0",
                         "p:a",
-                        ChannelActionOrigin.PROATIVA,
+                        ChannelActionOrigin.PROACTIVE,
                         null,
                         1,
                         UUID.randomUUID(),
                         null,
-                        ChannelActionType.MENSAGEM,
-                        "{\"texto\":\"diferente\"}",
+                        ChannelActionType.MESSAGE,
+                        "{\"text\":\"diferente\"}",
                         null,
                         T0.plusSeconds(5),
                         policy);
@@ -84,10 +84,10 @@ class ChannelActionRepositoryAdapterIT extends IntegrationBase {
         ChannelAction read = actions.searchById("p:a:0").orElseThrow();
         assertThat(read.payload()).contains("p:a0");
         assertThat(read.compensation()).contains("alt");
-        assertThat(read.state()).isEqualTo(ChannelActionState.PENDENTE);
+        assertThat(read.state()).isEqualTo(ChannelActionState.PENDING);
         assertThat(read.createdAt()).isEqualTo(T0);
         assertThat(read.version()).isZero();
-        assertThat(actions.searchById("inexistente")).isEmpty();
+        assertThat(actions.searchById("missing")).isEmpty();
     }
 
     @Test
@@ -98,12 +98,12 @@ class ChannelActionRepositoryAdapterIT extends IntegrationBase {
                     ChannelAction.create(
                             "u7-" + i,
                             "u7",
-                            ChannelActionOrigin.RESPOSTA_UPDATE,
+                            ChannelActionOrigin.UPDATE_REPLY,
                             7L,
                             55,
                             null,
                             null,
-                            ChannelActionType.MENSAGEM,
+                            ChannelActionType.MESSAGE,
                             "{}",
                             null,
                             T0,
@@ -118,7 +118,7 @@ class ChannelActionRepositoryAdapterIT extends IntegrationBase {
                 .containsExactly("u7-0", "u7-1", "u7-2");
         assertThat(actions.searchByUpdate(8L)).isEmpty();
         assertThat(actions.searchByUpdate(7L).get(0).state())
-                .isEqualTo(ChannelActionState.ENTREGUE);
+                .isEqualTo(ChannelActionState.DELIVERED);
         assertThat(actions.searchByUpdate(7L).get(0).deliveredAt()).isEqualTo(T0);
     }
 
@@ -262,7 +262,7 @@ class ChannelActionRepositoryAdapterIT extends IntegrationBase {
         assertThat(concurrent.version()).isZero();
 
         ChannelAction saved = actions.searchById("p:a:0").orElseThrow();
-        assertThat(saved.state()).isEqualTo(ChannelActionState.EXECUTADA);
+        assertThat(saved.state()).isEqualTo(ChannelActionState.EXECUTED);
         assertThat(saved.version()).isEqualTo(1);
         assertThat(saved.finalizedAt()).isEqualTo(T0);
     }
@@ -271,13 +271,13 @@ class ChannelActionRepositoryAdapterIT extends IntegrationBase {
     void rereadAlwaysSeesDatabaseState() {
         actions.saveBatch(batch("p:a", 1, 1));
         jdbc.update(
-                "update channel_action set state = 'EXECUTADA', version = version + 1 where id = 'p:a:0'");
+                "update channel_action set state = 'EXECUTED', version = version + 1 where id = 'p:a:0'");
         assertThat(actions.searchById("p:a:0").orElseThrow().state())
-                .isEqualTo(ChannelActionState.EXECUTADA);
+                .isEqualTo(ChannelActionState.EXECUTED);
         jdbc.update(
-                "update channel_action set state = 'FALHOU', version = version + 1 where id = 'p:a:0'");
+                "update channel_action set state = 'FAILED', version = version + 1 where id = 'p:a:0'");
         assertThat(actions.searchById("p:a:0").orElseThrow().state())
-                .isEqualTo(ChannelActionState.FALHOU);
+                .isEqualTo(ChannelActionState.FAILED);
     }
 
     @Test
@@ -290,11 +290,10 @@ class ChannelActionRepositoryAdapterIT extends IntegrationBase {
         b.expire(T0.plus(Duration.ofHours(25)));
         actions.updateIfVersion(b, 0);
 
-        assertThat(actions.searchById("p:a:0").orElseThrow().reasonCode())
-                .isEqualTo("VINCULO_DESFEITO");
+        assertThat(actions.searchById("p:a:0").orElseThrow().reasonCode()).isEqualTo("LINK_UNDONE");
         ChannelAction failure = actions.searchById("p:a:1").orElseThrow();
-        assertThat(failure.state()).isEqualTo(ChannelActionState.FALHA_DEFINITIVA);
-        assertThat(failure.reasonCode()).isEqualTo("PRAZO_VENCIDO");
+        assertThat(failure.state()).isEqualTo(ChannelActionState.PERMANENTLY_FAILED);
+        assertThat(failure.reasonCode()).isEqualTo("DEADLINE_EXPIRED");
         assertThat(failure.nextAttemptAt()).isNull();
     }
 
@@ -344,12 +343,12 @@ class ChannelActionRepositoryAdapterIT extends IntegrationBase {
     void channelDocumentIssuesSearchesByHashAndPurgesExpired() {
         UUID teacher = UUID.randomUUID();
         UUID report = UUID.randomUUID();
-        String hash = ChannelDocument.hashDoToken("token-de-teste");
+        String hash = ChannelDocument.hashDoToken("test-token");
         documents.emit(
                 new ChannelDocument(
                         hash,
                         teacher,
-                        ReportType.SEMESTRAL,
+                        ReportType.SEMESTER,
                         report,
                         3,
                         "s-v3.pdf",
@@ -357,9 +356,9 @@ class ChannelActionRepositoryAdapterIT extends IntegrationBase {
                         T0.plusSeconds(100)));
         documents.emit(
                 new ChannelDocument(
-                        ChannelDocument.hashDoToken("outro"),
+                        ChannelDocument.hashDoToken("other"),
                         teacher,
-                        ReportType.AULA,
+                        ReportType.LESSON,
                         report,
                         null,
                         "a.pdf",
@@ -368,19 +367,19 @@ class ChannelActionRepositoryAdapterIT extends IntegrationBase {
 
         ChannelDocument read = documents.searchByHash(hash).orElseThrow();
         assertThat(read.teacherId()).isEqualTo(teacher);
-        assertThat(read.reportType()).isEqualTo(ReportType.SEMESTRAL);
+        assertThat(read.reportType()).isEqualTo(ReportType.SEMESTER);
         assertThat(read.version()).isEqualTo(3);
         assertThat(read.expiresAt()).isEqualTo(T0.plusSeconds(100));
         assertThat(documents.searchByHash("x".repeat(64))).isEmpty();
         assertThat(
                         documents
-                                .searchByHash(ChannelDocument.hashDoToken("outro"))
+                                .searchByHash(ChannelDocument.hashDoToken("other"))
                                 .orElseThrow()
                                 .official())
                 .isTrue();
 
         assertThat(documents.purgeExpired(T0.plusSeconds(50))).isEqualTo(1);
-        assertThat(documents.searchByHash(ChannelDocument.hashDoToken("outro"))).isEmpty();
+        assertThat(documents.searchByHash(ChannelDocument.hashDoToken("other"))).isEmpty();
         assertThat(documents.searchByHash(hash)).isPresent();
     }
 }

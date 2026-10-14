@@ -27,7 +27,7 @@ public class ChannelActionsCleanupTask {
     public void clean() {
         CleanChannelActionsUseCase.Result result = clean.run();
         LOG.info(
-                "limpeza-canal expiradas={} conteudos={} registros={} documentos={}",
+                "channel-cleanup expired={} contents={} registrations={} documents={}",
                 result.expiredActions(),
                 result.resetPayloads(),
                 result.removedRegistrations(),

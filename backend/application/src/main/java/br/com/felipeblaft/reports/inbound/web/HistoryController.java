@@ -20,15 +20,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class HistoryController {
 
     public record HistoryItemDto(
-            String tipo,
-            UUID relatorioId,
-            String rotulo,
-            LocalDate dataAula,
-            LocalDate periodoInicio,
-            LocalDate periodoFim,
-            Instant aprovadoEm) {}
+            String type,
+            UUID reportId,
+            String label,
+            LocalDate lessonDate,
+            LocalDate periodStart,
+            LocalDate periodEnd,
+            Instant approvedAt) {}
 
-    public record HistoryDto(StudentSummaryDto aluno, List<HistoryItemDto> itens) {}
+    public record HistoryDto(StudentSummaryDto student, List<HistoryItemDto> items) {}
 
     private final QueryStudentHistoryUseCase query;
     private final MessageFormatting formatting;
@@ -38,17 +38,17 @@ public class HistoryController {
         this.formatting = formatting;
     }
 
-    @GetMapping("/api/v1/alunos/{alunoId}/historico")
+    @GetMapping("/api/v1/students/{studentId}/history")
     public HistoryDto history(
-            @AuthenticationPrincipal AuthenticatedTeacher teacher, @PathVariable UUID alunoId) {
-        History history = query.run(teacher.id(), alunoId);
+            @AuthenticationPrincipal AuthenticatedTeacher teacher, @PathVariable UUID studentId) {
+        History history = query.run(teacher.id(), studentId);
         return new HistoryDto(
                 HomeMapper.student(history.student()),
                 history.items().stream().map(this::item).toList());
     }
 
     private HistoryItemDto item(HistoryItem item) {
-        return item.type() == ReportType.AULA
+        return item.type() == ReportType.LESSON
                 ? new HistoryItemDto(
                         item.type().name(),
                         item.reportId(),

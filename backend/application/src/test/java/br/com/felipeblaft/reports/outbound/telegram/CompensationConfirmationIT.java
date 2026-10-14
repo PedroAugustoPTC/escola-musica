@@ -48,35 +48,34 @@ class CompensationConfirmationIT extends OrchestratorDeliveryBase {
     private MvcResult confirm(String resultsJson) throws Exception {
         return mvc.perform(
                         org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
-                                        "/interno/v1/canal/telegram/confirmacoes")
+                                        "/internal/v1/channel/telegram/confirmations")
                                 .header("X-N8N-Service-Token", TOKEN_SERVICE)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(
-                                        "{\"versao\":\"v1\",\"resultados\":[" + resultsJson + "]}"))
+                                .content("{\"version\":\"v1\",\"results\":[" + resultsJson + "]}"))
                 .andReturn();
     }
 
     /** Edição proativa de uma mensagem do professor, com a alternativa de mensagem nova. */
     private String publishEdit() {
         save.run(
-                "p:edicao:1",
-                ChannelActionOrigin.PROATIVA,
+                "p:edit:1",
+                ChannelActionOrigin.PROACTIVE,
                 null,
                 List.of(
                         new NewAction(
-                                "p:edicao:1:0",
-                                ChannelActionType.EDICAO,
+                                "p:edit:1:0",
+                                ChannelActionType.EDIT,
                                 USER_CLARA,
                                 clara.id(),
                                 null,
-                                "{\"tipo\":\"EDICAO\",\"chatId\":"
+                                "{\"type\":\"EDIT\",\"chatId\":"
                                         + USER_CLARA
-                                        + ",\"mensagemId\":900,\"texto\":\"Texto da edição\","
-                                        + "\"teclado\":{\"linhas\":[]}}",
-                                "{\"tipo\":\"MENSAGEM\",\"chatId\":"
+                                        + ",\"messageId\":900,\"text\":\"Texto da edição\","
+                                        + "\"keyboard\":{\"rows\":[]}}",
+                                "{\"type\":\"MESSAGE\",\"chatId\":"
                                         + USER_CLARA
-                                        + ",\"texto\":\"Texto da edição\"}")));
-        return "p:edicao:1:0";
+                                        + ",\"text\":\"Texto da edição\"}")));
+        return "p:edit:1:0";
     }
 
     @Test
@@ -91,14 +90,14 @@ class CompensationConfirmationIT extends OrchestratorDeliveryBase {
 
         drain(6);
 
-        assertThat(state(edit)).isEqualTo("FALHOU");
+        assertThat(state(edit)).isEqualTo("FAILED");
         assertThat(
                         jdbc.queryForObject(
                                 "select reason_code from channel_action where id = ?",
                                 String.class,
                                 edit))
-                .isEqualTo("MENSAGEM_NAO_EDITAVEL");
-        assertThat(state(edit + "-c")).isEqualTo("EXECUTADA");
+                .isEqualTo("MESSAGE_NOT_EDITABLE");
+        assertThat(state(edit + "-c")).isEqualTo("EXECUTED");
         assertThat(
                         jdbc.queryForObject(
                                 "select batch_id from channel_action where id = ?",
@@ -109,8 +108,8 @@ class CompensationConfirmationIT extends OrchestratorDeliveryBase {
         assertThat(sentTexts()).containsExactly("Texto da edição");
         // a compensação foi entregue uma só vez, como lote próprio
         assertThat(deliveries()).hasSize(2);
-        assertThat(body(deliveries().get(1)).path("origem").asString()).isEqualTo("COMPENSACAO");
-        assertThat(body(deliveries().get(1)).get("acoes").get(0).path("acaoId").asString())
+        assertThat(body(deliveries().get(1)).path("origin").asString()).isEqualTo("COMPENSATION");
+        assertThat(body(deliveries().get(1)).get("actions").get(0).path("actionId").asString())
                 .isEqualTo(edit + "-c");
     }
 
@@ -118,26 +117,26 @@ class CompensationConfirmationIT extends OrchestratorDeliveryBase {
     private String publishUnavailableDocument() {
         save.run(
                 "p:pdf:1",
-                ChannelActionOrigin.PROATIVA,
+                ChannelActionOrigin.PROACTIVE,
                 null,
                 List.of(
                         new NewAction(
                                 "p:pdf:1:0",
-                                ChannelActionType.DOCUMENTO,
+                                ChannelActionType.DOCUMENT,
                                 USER_CLARA,
                                 clara.id(),
                                 null,
-                                "{\"tipo\":\"DOCUMENTO\",\"chatId\":"
+                                "{\"type\":\"DOCUMENT\",\"chatId\":"
                                         + USER_CLARA
-                                        + ",\"documentoId\":\""
+                                        + ",\"documentId\":\""
                                         + "Z".repeat(43)
-                                        + "\",\"nomeArquivo\":\"relatorio.pdf\","
-                                        + "\"tipoConteudo\":\"application/pdf\"}",
-                                "{\"tipo\":\"MENSAGEM\",\"chatId\":"
+                                        + "\",\"fileName\":\"report.pdf\","
+                                        + "\"contentType\":\"application/pdf\"}",
+                                "{\"type\":\"MESSAGE\",\"chatId\":"
                                         + USER_CLARA
-                                        + ",\"texto\":\"Não consegui enviar o PDF agora.\","
-                                        + "\"teclado\":{\"linhas\":[[{\"rotulo\":\"Ver PDF\","
-                                        + "\"dados\":\"v1:pdf:\"}]]}}")));
+                                        + ",\"text\":\"Não consegui enviar o PDF agora.\","
+                                        + "\"keyboard\":{\"rows\":[[{\"label\":\"Ver PDF\","
+                                        + "\"data\":\"v1:pdf:\"}]]}}")));
         return "p:pdf:1:0";
     }
 
@@ -148,23 +147,23 @@ class CompensationConfirmationIT extends OrchestratorDeliveryBase {
 
         drain(6);
 
-        assertThat(state(document)).isEqualTo("FALHOU");
+        assertThat(state(document)).isEqualTo("FAILED");
         assertThat(
                         jdbc.queryForObject(
                                 "select reason_code from channel_action where id = ?",
                                 String.class,
                                 document))
-                .isEqualTo("DOCUMENTO_INDISPONIVEL");
-        assertThat(state(document + "-c")).isEqualTo("EXECUTADA");
+                .isEqualTo("DOCUMENT_UNAVAILABLE");
+        assertThat(state(document + "-c")).isEqualTo("EXECUTED");
         assertThat(sentTexts()).containsExactly("Não consegui enviar o PDF agora.");
         assertThat(buttons(lastMessage())).containsExactly("v1:pdf:");
         assertThat(calls("sendDocument")).isEmpty();
         // a compensação é um lote próprio, entregue uma só vez e sem o documento
         assertThat(deliveries()).hasSize(2);
-        assertThat(body(deliveries().get(1)).path("origem").asString()).isEqualTo("COMPENSACAO");
-        assertThat(body(deliveries().get(1)).get("acoes").get(0).path("acaoId").asString())
+        assertThat(body(deliveries().get(1)).path("origin").asString()).isEqualTo("COMPENSATION");
+        assertThat(body(deliveries().get(1)).get("actions").get(0).path("actionId").asString())
                 .isEqualTo(document + "-c");
-        assertThat(body(deliveries().get(1)).toString()).doesNotContain("documentoId");
+        assertThat(body(deliveries().get(1)).toString()).doesNotContain("documentId");
     }
 
     @Test
@@ -178,7 +177,7 @@ class CompensationConfirmationIT extends OrchestratorDeliveryBase {
 
         drain(8);
 
-        assertThat(state(document + "-c")).isEqualTo("FALHOU");
+        assertThat(state(document + "-c")).isEqualTo("FAILED");
         assertThat(jdbc.queryForObject("select count(*) from channel_action", Integer.class))
                 .isEqualTo(2);
     }
@@ -194,7 +193,7 @@ class CompensationConfirmationIT extends OrchestratorDeliveryBase {
 
         drain(6);
 
-        assertThat(state(edit)).isEqualTo("EXECUTADA");
+        assertThat(state(edit)).isEqualTo("EXECUTED");
         assertThat(jdbc.queryForObject("select count(*) from channel_action", Integer.class))
                 .isEqualTo(1);
         assertThat(sentTexts()).isEmpty();
@@ -215,13 +214,13 @@ class CompensationConfirmationIT extends OrchestratorDeliveryBase {
 
         drain(8);
 
-        assertThat(state(edit + "-c")).isEqualTo("FALHOU");
+        assertThat(state(edit + "-c")).isEqualTo("FAILED");
         assertThat(
                         jdbc.queryForObject(
                                 "select reason_code from channel_action where id = ?",
                                 String.class,
                                 edit + "-c"))
-                .isEqualTo("CHAT_INDISPONIVEL");
+                .isEqualTo("CHAT_UNAVAILABLE");
         assertThat(jdbc.queryForObject("select count(*) from channel_action", Integer.class))
                 .isEqualTo(2);
     }
@@ -231,18 +230,18 @@ class CompensationConfirmationIT extends OrchestratorDeliveryBase {
         link(USER_CLARA, ScenarioIT.CODE_CLARA);
         ProcessingJob job =
                 ProcessingJob.create(
-                        JobType.REGISTRO_AULA,
+                        JobType.LESSON_REGISTRATION,
                         clara.id(),
                         matteo.id(),
                         null,
                         null,
                         Channel.TELEGRAM,
                         Medium.AUDIO,
-                        JobStep.ENVIANDO,
+                        JobStep.UPLOADING,
                         clock.now());
         job.defineParameter(ProcessingJob.STEP_MESSAGE, "55");
         queue.enqueue(job);
-        job.advance(JobStep.TRANSCREVENDO);
+        job.advance(JobStep.TRANSCRIBING);
         // a mensagem de etapa 55 foi apagada pelo professor: a edição vai falhar
         stubTelegram(
                 "editMessageText",
@@ -254,22 +253,22 @@ class CompensationConfirmationIT extends OrchestratorDeliveryBase {
         drain(6);
 
         String step = actionIds().get(0);
-        assertThat(step).startsWith("p:etapa:" + job.id() + ":TRANSCREVENDO:");
-        assertThat(state(step)).isEqualTo("FALHOU");
-        assertThat(body(deliveries().get(0)).get("acoes").get(0).path("editarMensagemId").asLong())
+        assertThat(step).startsWith("p:step:" + job.id() + ":TRANSCRIBING:");
+        assertThat(state(step)).isEqualTo("FAILED");
+        assertThat(body(deliveries().get(0)).get("actions").get(0).path("editMessageId").asLong())
                 .isEqualTo(55L);
-        assertThat(state(step + "-c")).isEqualTo("EXECUTADA");
+        assertThat(state(step + "-c")).isEqualTo("EXECUTED");
         assertThat(stepMessage(job.id())).isEqualTo("777");
 
         // a etapa seguinte edita a mensagem NOVA, sem abrir outra
         stubTelegram("editMessageText", 200, "{\"ok\":true,\"result\":true}");
         API_BOTS.resetRequests();
-        job.advance(JobStep.ESTRUTURANDO);
+        job.advance(JobStep.STRUCTURING);
         notification.notifyStep(job);
         drain(6);
 
         JsonNode next = body(deliveries().get(deliveries().size() - 1));
-        assertThat(next.get("acoes").get(0).path("editarMensagemId").asLong()).isEqualTo(777L);
+        assertThat(next.get("actions").get(0).path("editMessageId").asLong()).isEqualTo(777L);
         assertThat(calls("sendMessage")).isEmpty();
         assertThat(calls("editMessageText")).hasSize(1);
         assertThat(calls("editMessageText").get(0).path("message_id").asLong()).isEqualTo(777L);
@@ -287,14 +286,14 @@ class CompensationConfirmationIT extends OrchestratorDeliveryBase {
         link(USER_CLARA, ScenarioIT.CODE_CLARA);
         ProcessingJob job =
                 ProcessingJob.create(
-                        JobType.REGISTRO_AULA,
+                        JobType.LESSON_REGISTRATION,
                         clara.id(),
                         matteo.id(),
                         null,
                         null,
                         Channel.TELEGRAM,
                         Medium.AUDIO,
-                        JobStep.TRANSCREVENDO,
+                        JobStep.TRANSCRIBING,
                         clock.now());
         generateNoticeOf(helena);
         queue.enqueue(job); // depois do processamento da fila: este trabalho não tem áudio
@@ -302,22 +301,22 @@ class CompensationConfirmationIT extends OrchestratorDeliveryBase {
         task.dispatch();
         task.dispatch();
         List<String> ids = actionIds();
-        String step = ids.stream().filter(i -> i.startsWith("p:etapa:")).findFirst().orElseThrow();
+        String step = ids.stream().filter(i -> i.startsWith("p:step:")).findFirst().orElseThrow();
         String notice =
-                ids.stream().filter(i -> i.startsWith("p:resultado:")).findFirst().orElseThrow();
+                ids.stream().filter(i -> i.startsWith("p:result:")).findFirst().orElseThrow();
 
         MvcResult result =
                 confirm(
-                        "{\"acaoId\":\""
+                        "{\"actionId\":\""
                                 + step
-                                + "\",\"situacao\":\"EXECUTADA\"},"
-                                + "{\"acaoId\":\""
+                                + "\",\"outcome\":\"EXECUTED\"},"
+                                + "{\"actionId\":\""
                                 + notice
-                                + "\",\"situacao\":\"EXECUTADA\"}");
+                                + "\",\"outcome\":\"EXECUTED\"}");
 
         assertThat(result.getResponse().getStatus()).isEqualTo(400);
-        assertThat(state(step)).isNotEqualTo("EXECUTADA");
-        assertThat(state(notice)).isEqualTo("EXECUTADA");
+        assertThat(state(step)).isNotEqualTo("EXECUTED");
+        assertThat(state(notice)).isEqualTo("EXECUTED");
     }
 
     @Test
@@ -330,21 +329,21 @@ class CompensationConfirmationIT extends OrchestratorDeliveryBase {
 
         MvcResult result =
                 confirm(
-                        "{\"acaoId\":\""
+                        "{\"actionId\":\""
                                 + first
-                                + "\",\"situacao\":\"FALHOU\",\"codigoMotivo\":\"NOVO_CODIGO_DO_N8N\"},"
-                                + "{\"acaoId\":\"u1-9\",\"situacao\":\"EXECUTADA\"}");
+                                + "\",\"outcome\":\"FAILED\",\"reasonCode\":\"NEW_CODE_FROM_N8N\"},"
+                                + "{\"actionId\":\"u1-9\",\"outcome\":\"EXECUTED\"}");
 
         assertThat(result.getResponse().getStatus()).isEqualTo(200);
         JsonNode body = JSON.readTree(result.getResponse().getContentAsString());
-        assertThat(body.path("aceitas").asInt()).isEqualTo(1);
-        assertThat(body.path("ignoradas")).hasSize(1);
+        assertThat(body.path("accepted").asInt()).isEqualTo(1);
+        assertThat(body.path("ignored")).hasSize(1);
         assertThat(
                         jdbc.queryForObject(
                                 "select reason_code from channel_action where id = ?",
                                 String.class,
                                 first))
-                .isEqualTo("ERRO_TELEGRAM");
+                .isEqualTo("TELEGRAM_ERROR");
     }
 
     @Test
@@ -354,10 +353,10 @@ class CompensationConfirmationIT extends OrchestratorDeliveryBase {
         task.dispatch();
         String action = actionIds().get(0);
 
-        String ok = "{\"acaoId\":\"" + action + "\",\"situacao\":\"EXECUTADA\"}";
+        String ok = "{\"actionId\":\"" + action + "\",\"outcome\":\"EXECUTED\"}";
         assertThat(
                         JSON.readTree(confirm(ok).getResponse().getContentAsString())
-                                .path("aceitas")
+                                .path("accepted")
                                 .asInt())
                 .isEqualTo(1);
         // repetida idêntica: sem efeito; divergente e desconhecida: ignoradas
@@ -365,15 +364,15 @@ class CompensationConfirmationIT extends OrchestratorDeliveryBase {
                 JSON.readTree(
                         confirm(
                                         ok
-                                                + ",{\"acaoId\":\""
+                                                + ",{\"actionId\":\""
                                                 + action
-                                                + "\",\"situacao\":\"FALHOU\",\"codigoMotivo\":\"ERRO_TELEGRAM\"},"
-                                                + "{\"acaoId\":\"p:nao:existe:0\",\"situacao\":\"EXECUTADA\"}")
+                                                + "\",\"outcome\":\"FAILED\",\"reasonCode\":\"TELEGRAM_ERROR\"},"
+                                                + "{\"actionId\":\"p:missing:none:0\",\"outcome\":\"EXECUTED\"}")
                                 .getResponse()
                                 .getContentAsString());
-        assertThat(second.path("aceitas").asInt()).isEqualTo(1);
-        assertThat(second.path("ignoradas")).hasSize(2);
-        assertThat(state(action)).isEqualTo("EXECUTADA");
+        assertThat(second.path("accepted").asInt()).isEqualTo(1);
+        assertThat(second.path("ignored")).hasSize(2);
+        assertThat(state(action)).isEqualTo("EXECUTED");
         assertThat(API_BOTS.findAll(postRequestedFor(urlPathMatching(".*/sendMessage")))).isEmpty();
     }
 }

@@ -41,7 +41,7 @@ class LessonReportRepositoryAdapter implements LessonReportRepository {
             report.registerPersistedVersion(saved.lockVersion);
         } catch (ObjectOptimisticLockingFailureException
                 | DataIntegrityViolationException conflict) {
-            throw new ConcurrencyConflictException("relatorio_aula");
+            throw new ConcurrencyConflictException("lesson_report");
         }
     }
 

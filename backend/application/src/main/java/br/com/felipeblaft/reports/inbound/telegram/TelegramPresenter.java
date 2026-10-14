@@ -91,17 +91,17 @@ public class TelegramPresenter {
     public Message noticePdfUnavailable(long chatId, String action, String argument) {
         Button askAgain =
                 argument == null
-                        ? button("BOTAO_VER_PDF", action)
-                        : button("BOTAO_VER_PDF", Map.of(), action, argument);
-        return new Message(chatId, text("PDF_INDISPONIVEL_AVISO"), Keyboard.of(askAgain));
+                        ? button("VIEW_PDF_BUTTON", action)
+                        : button("VIEW_PDF_BUTTON", Map.of(), action, argument);
+        return new Message(chatId, text("PDF_UNAVAILABLE_NOTICE"), Keyboard.of(askAgain));
     }
 
     public Keyboard homeActions() {
         return new Keyboard(
                 List.of(
-                        List.of(button("BOTAO_REGISTRAR_AULA", "reg")),
-                        List.of(button("BOTAO_RELATORIO_SEMESTRAL", "sem")),
-                        List.of(button("BOTAO_HISTORICO", "hist"))));
+                        List.of(button("REGISTER_LESSON_BUTTON", "register")),
+                        List.of(button("SEMESTER_REPORT_BUTTON", "semester")),
+                        List.of(button("HISTORY_BUTTON", "history"))));
     }
 
     /** Bloco de início (FR-012): saudação, relatórios em aberto, total e até 5 alunos, ações. */
@@ -111,45 +111,45 @@ public class TelegramPresenter {
             text.append(prefix).append("\n\n");
         }
         text.append("<b>")
-                .append(text("SAUDACAO", Map.of("nome", start.teacher().firstName())))
+                .append(text("GREETING", Map.of("name", start.teacher().firstName())))
                 .append("</b>\n")
-                .append(text("INICIO_SUBTITULO"));
+                .append(text("HOME_SUBTITLE"));
         if (start.withoutStudents()) {
-            text.append("\n\n").append(text("SEM_ALUNOS"));
+            text.append("\n\n").append(text("NO_STUDENTS"));
             return new Message(chatId, text.toString(), Keyboard.NONE);
         }
-        text.append("\n\n<b>").append(text("INICIO_RELATORIOS_EM_ABERTO")).append("</b>\n");
+        text.append("\n\n<b>").append(text("HOME_OPEN_REPORTS")).append("</b>\n");
         if (start.openReports().isEmpty()) {
-            text.append(text("INICIO_SEM_RELATORIOS_EM_ABERTO"));
+            text.append(text("HOME_WITHOUT_OPEN_REPORTS"));
         } else {
             for (OpenReport openReport : start.openReports()) {
                 text.append("• ").append(escape(openItem(openReport))).append('\n');
             }
         }
         text.append("\n\n<b>")
-                .append(text("INICIO_TOTAL_ALUNOS", Map.of("total", start.totalStudents())))
+                .append(text("HOME_TOTAL_STUDENTS", Map.of("total", start.totalStudents())))
                 .append("</b>");
         for (StudentSummary student : start.students()) {
             text.append("\n• ").append(escape(studentLine(student)));
         }
         List<List<Button>> rows = new ArrayList<>();
         for (OpenReport openReport : start.openReports()) {
-            if (openReport.type() == ReportType.AULA || openReport.reportId() != null) {
+            if (openReport.type() == ReportType.LESSON || openReport.reportId() != null) {
                 String argument =
                         openReport.reportId() != null
-                                ? (openReport.type() == ReportType.AULA ? "a" : "s")
+                                ? (openReport.type() == ReportType.LESSON ? "a" : "s")
                                         + openReport.reportId()
                                 : "t" + openReport.jobId();
                 rows.add(
                         List.of(
                                 button(
-                                        "BOTAO_CONTINUAR_RELATORIO",
+                                        "CONTINUE_REPORT_BUTTON",
                                         Map.of(
-                                                "aluno",
+                                                "student",
                                                 openReport.studentName(),
                                                 "data",
                                                 formatting.data(openReport.updatedAt())),
-                                        "foco",
+                                        "focus",
                                         argument)));
             }
         }
@@ -161,13 +161,13 @@ public class TelegramPresenter {
         String status =
                 openReport.status() != null
                         ? label("STATUS_" + openReport.status().name())
-                        : label("STATUS_EM_PROCESSAMENTO");
+                        : label("STATUS_PROCESSING");
         return label(
-                "ITEM_EM_ABERTO",
+                "OPEN_ITEM",
                 Map.of(
-                        "aluno", openReport.studentName(),
-                        "tipo", label("TIPO_" + openReport.type().name()),
-                        "situacao", status,
+                        "student", openReport.studentName(),
+                        "type", label("TYPE_" + openReport.type().name()),
+                        "outcome", status,
                         "data", formatting.data(openReport.updatedAt()),
                         "hora", formatting.hora(openReport.updatedAt())));
     }
@@ -178,7 +178,7 @@ public class TelegramPresenter {
             line.append(" · ").append(student.instrument());
         }
         if (student.hasOpenReport()) {
-            line.append(" · ").append(label("MARCA_EM_ABERTO"));
+            line.append(" · ").append(label("OPEN_REPORT_MARK"));
         }
         return line.toString();
     }
@@ -190,15 +190,15 @@ public class TelegramPresenter {
             StudentSummary student = students.get(i);
             String label =
                     student.hasOpenReport()
-                            ? student.name() + " · " + label("MARCA_EM_ABERTO")
+                            ? student.name() + " · " + label("OPEN_REPORT_MARK")
                             : student.name();
             rows.add(
                     List.of(
                             new Button(
                                     label,
-                                    CallbackDataCodec.encode("aluno", Integer.toString(i)))));
+                                    CallbackDataCodec.encode("student", Integer.toString(i)))));
         }
-        rows.add(List.of(button("BOTAO_INICIO", "inicio")));
+        rows.add(List.of(button("HOME_BUTTON", "home")));
         return new Message(chatId, header, new Keyboard(rows));
     }
 
@@ -211,17 +211,19 @@ public class TelegramPresenter {
                 chatId,
                 error(
                                 chatId,
-                                ErrorCode.RELATORIO_EM_ABERTO,
-                                Map.of("relatorioEmAberto", openReport.details()))
+                                ErrorCode.REPORT_ALREADY_OPEN,
+                                Map.of("openReport", openReport.details()))
                         .text(),
-                Keyboard.of(button("BOTAO_CONTINUAR", "cont"), button("BOTAO_DESCARTAR", "desc")));
+                Keyboard.of(
+                        button("CONTINUE_BUTTON", "continue"),
+                        button("DISCARD_BUTTON", "discard")));
     }
 
     public Message confirmation(long chatId, String text, Button confirm) {
         return new Message(
                 chatId,
                 text,
-                new Keyboard(List.of(List.of(confirm), List.of(button("BOTAO_VOLTAR", "inicio")))));
+                new Keyboard(List.of(List.of(confirm), List.of(button("BACK_BUTTON", "home")))));
     }
 
     /**

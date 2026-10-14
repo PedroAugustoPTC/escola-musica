@@ -30,9 +30,9 @@ class RegisterLessonByAudioUseCaseTest {
 
         ProcessingJob job = c.register.run(c.clara.id(), c.matteo.id(), file, Channel.WEB);
 
-        assertThat(job.type()).isEqualTo(JobType.REGISTRO_AULA);
+        assertThat(job.type()).isEqualTo(JobType.LESSON_REGISTRATION);
         assertThat(job.requestChannel()).isEqualTo(Channel.WEB);
-        assertThat(job.step()).isEqualTo(JobStep.ENVIANDO);
+        assertThat(job.step()).isEqualTo(JobStep.UPLOADING);
         assertThat(job.temporaryFile()).isEqualTo(Path.of("/tmp/audios/web.webm").toString());
         assertThat(job.parameters()).containsEntry("fileSize", "2048");
         assertThat(c.queue.jobs).containsKey(job.id());
@@ -57,7 +57,7 @@ class RegisterLessonByAudioUseCaseTest {
         assertThatThrownBy(() -> c.register.run(c.clara.id(), c.helena.id(), file, Channel.WEB))
                 .isInstanceOf(DomainException.class)
                 .extracting(e -> ((DomainException) e).code())
-                .isEqualTo(ErrorCode.ALUNO_NAO_ASSOCIADO);
+                .isEqualTo(ErrorCode.STUDENT_NOT_ASSIGNED);
         assertThat(c.normalization.deleted).contains(file.path());
         assertThat(c.queue.jobs).isEmpty();
     }
@@ -68,13 +68,13 @@ class RegisterLessonByAudioUseCaseTest {
         c.open.add(
                 c.clara.id(),
                 new OpenReport(
-                        ReportType.AULA,
+                        ReportType.LESSON,
                         null,
                         java.util.UUID.randomUUID(),
                         c.matteo.id(),
                         "Matteo Mafra",
                         null,
-                        JobStep.TRANSCREVENDO,
+                        JobStep.TRANSCRIBING,
                         null,
                         Channel.TELEGRAM,
                         when));
@@ -90,13 +90,13 @@ class RegisterLessonByAudioUseCaseTest {
                 .satisfies(
                         e -> {
                             DomainException error = (DomainException) e;
-                            assertThat(error.code()).isEqualTo(ErrorCode.RELATORIO_EM_ABERTO);
+                            assertThat(error.code()).isEqualTo(ErrorCode.REPORT_ALREADY_OPEN);
                             @SuppressWarnings("unchecked")
                             Map<String, Object> openReport =
-                                    (Map<String, Object>) error.details().get("relatorioEmAberto");
+                                    (Map<String, Object>) error.details().get("openReport");
                             assertThat(openReport)
-                                    .containsEntry("canalOrigem", Channel.TELEGRAM)
-                                    .containsEntry("atualizadoEm", when);
+                                    .containsEntry("originChannel", Channel.TELEGRAM)
+                                    .containsEntry("updatedAt", when);
                         });
     }
 
@@ -112,7 +112,7 @@ class RegisterLessonByAudioUseCaseTest {
                                         Channel.TELEGRAM))
                 .isInstanceOf(DomainException.class)
                 .extracting(e -> ((DomainException) e).code())
-                .isEqualTo(ErrorCode.RELATORIO_EM_ABERTO);
+                .isEqualTo(ErrorCode.REPORT_ALREADY_OPEN);
         assertThat(c.normalization.deleted).contains(Path.of("/tmp/audios/b"));
     }
 
@@ -130,9 +130,9 @@ class RegisterLessonByAudioUseCaseTest {
                 .satisfies(
                         e -> {
                             assertThat(((DomainException) e).code())
-                                    .isEqualTo(ErrorCode.AUDIO_MUITO_GRANDE);
+                                    .isEqualTo(ErrorCode.AUDIO_TOO_LARGE);
                             assertThat(((DomainException) e).details())
-                                    .containsEntry("limiteMb", 50);
+                                    .containsEntry("limitMb", 50);
                         });
         assertThat(c.queue.jobs).isEmpty();
     }
@@ -142,7 +142,7 @@ class RegisterLessonByAudioUseCaseTest {
         // 02:30 UTC de 22/09 ainda é 21/09 em São Paulo
         c.clock.define(Instant.parse("2026-09-22T02:30:00Z"));
         c.llm.schedule(
-                br.com.felipeblaft.reports.port.TaskLlm.ESTRUTURACAO_AULA,
+                br.com.felipeblaft.reports.port.TaskLlm.LESSON_STRUCTURING,
                 ReportScenario.output("x", List.of()));
         c.register.run(c.clara.id(), c.matteo.id(), ReportScenario.file("a", 1), Channel.WEB);
         c.processQueue();

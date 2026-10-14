@@ -39,7 +39,7 @@ public class TemporaryAudioCleanupTask {
     public void onStart() {
         int deleted = delete(temporaries, Instant.MAX);
         if (deleted > 0) {
-            LOG.info("audios-temporarios-apagados-ao-iniciar quantidade={}", deleted);
+            LOG.info("temporary-audios-deleted-at-start quantity={}", deleted);
         }
     }
 
@@ -48,7 +48,7 @@ public class TemporaryAudioCleanupTask {
         Instant limit = Instant.now().minus(MAX_AGE);
         int deleted = delete(filesTelegram, limit) + delete(temporaries, limit);
         if (deleted > 0) {
-            LOG.info("audios-antigos-apagados quantidade={}", deleted);
+            LOG.info("old-audios-deleted quantity={}", deleted);
         }
     }
 
@@ -68,12 +68,12 @@ public class TemporaryAudioCleanupTask {
                                     deleted[0]++;
                                 } catch (IOException error) {
                                     LOG.warn(
-                                            "audio-nao-apagado tipo={}",
+                                            "audio-not-deleted type={}",
                                             error.getClass().getSimpleName());
                                 }
                             });
         } catch (IOException error) {
-            LOG.warn("varredura-audios-falhou tipo={}", error.getClass().getSimpleName());
+            LOG.warn("audio-sweep-failed type={}", error.getClass().getSimpleName());
         }
         return deleted[0];
     }

@@ -26,9 +26,9 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 @AutoConfigureMockMvc
 class InternalSecurityIT extends IntegrationBase {
 
-    static final String ROUTE = "/interno/v1/canal/telegram/acoes/inexistente";
-    static final String CURRENT = "token-servico-atual-teste";
-    static final String NEXT = "token-servico-proximo-teste";
+    static final String ROUTE = "/internal/v1/channel/telegram/actions/missing";
+    static final String CURRENT = "current-service-token-test";
+    static final String NEXT = "next-service-token-test";
 
     @Autowired MockMvc mvc;
     @Autowired ScenarioIT scenario;
@@ -52,12 +52,12 @@ class InternalSecurityIT extends IntegrationBase {
         scenario.clara();
         MvcResult input =
                 mvc.perform(
-                                post("/api/v1/sessao")
+                                post("/api/v1/session")
                                         .with(csrf().asHeader())
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .content("{\"codigo\":\"" + ScenarioIT.CODE_CLARA + "\"}"))
+                                        .content("{\"code\":\"" + ScenarioIT.CODE_CLARA + "\"}"))
                         .andReturn();
-        Cookie cookie = input.getResponse().getCookie("sessao");
+        Cookie cookie = input.getResponse().getCookie("session");
         assertThat(cookie).isNotNull();
         return new Cookie(cookie.getName(), cookie.getValue());
     }
@@ -65,7 +65,7 @@ class InternalSecurityIT extends IntegrationBase {
     @Test
     void withoutTokenOrWrongTokenAreRefusedWithoutBody() throws Exception {
         requires401WithoutBody(route(null));
-        requires401WithoutBody(route("errado"));
+        requires401WithoutBody(route("wrong"));
         requires401WithoutBody(route(""));
         requires401WithoutBody(route(CURRENT + "x"));
         requires401WithoutBody(route(CURRENT.substring(0, CURRENT.length() - 1)));
@@ -89,7 +89,7 @@ class InternalSecurityIT extends IntegrationBase {
     void onlyPortalSessionCookieDoesNotOpenInternalArea() throws Exception {
         Cookie session = claraSession();
         requires401WithoutBody(get(ROUTE).cookie(session));
-        requires401WithoutBody(get(ROUTE).cookie(session).header("X-N8N-Service-Token", "errado"));
+        requires401WithoutBody(get(ROUTE).cookie(session).header("X-N8N-Service-Token", "wrong"));
         // o cookie não atrapalha quem tem o token certo
         assertThat(status(get(ROUTE).cookie(session).header("X-N8N-Service-Token", CURRENT)))
                 .isEqualTo(404);
@@ -98,14 +98,13 @@ class InternalSecurityIT extends IntegrationBase {
     @Test
     void serviceTokenDoesNotOpenPortal() throws Exception {
         MvcResult result =
-                mvc.perform(get("/api/v1/inicio").header("X-N8N-Service-Token", CURRENT))
-                        .andReturn();
+                mvc.perform(get("/api/v1/home").header("X-N8N-Service-Token", CURRENT)).andReturn();
         assertThat(result.getResponse().getStatus()).isEqualTo(401);
         MvcResult withCookieAndWrongToken =
                 mvc.perform(
-                                get("/api/v1/inicio")
-                                        .header("X-N8N-Service-Token", "errado")
-                                        .cookie(new Cookie("sessao", "invalida")))
+                                get("/api/v1/home")
+                                        .header("X-N8N-Service-Token", "wrong")
+                                        .cookie(new Cookie("session", "invalid")))
                         .andReturn();
         assertThat(withCookieAndWrongToken.getResponse().getStatus()).isEqualTo(401);
     }
@@ -114,7 +113,7 @@ class InternalSecurityIT extends IntegrationBase {
     void serviceTokenDoesNotReplaceSessionNorOnMutablePortalRoute() throws Exception {
         MvcResult result =
                 mvc.perform(
-                                delete("/api/v1/sessao")
+                                delete("/api/v1/session")
                                         .with(csrf().asHeader())
                                         .header("X-N8N-Service-Token", CURRENT))
                         .andReturn();
@@ -126,15 +125,15 @@ class InternalSecurityIT extends IntegrationBase {
         // portal: POST mutável sem token CSRF é recusado
         assertThat(
                         status(
-                                post("/api/v1/sessao")
+                                post("/api/v1/session")
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .content("{\"codigo\":\"X\"}")))
+                                        .content("{\"code\":\"X\"}")))
                 .isEqualTo(403);
         // interno: POST sem CSRF, com token de serviço, chega ao controlador (400 por corpo
         // ausente)
         assertThat(
                         status(
-                                post("/interno/v1/canal/telegram/confirmacoes")
+                                post("/internal/v1/channel/telegram/confirmations")
                                         .header("X-N8N-Service-Token", CURRENT)
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content("{}")))
@@ -142,7 +141,7 @@ class InternalSecurityIT extends IntegrationBase {
         // interno sem token: 401 mesmo sem CSRF (e nunca 403)
         MvcResult withoutToken =
                 mvc.perform(
-                                post("/interno/v1/canal/telegram/confirmacoes")
+                                post("/internal/v1/channel/telegram/confirmations")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content("{}"))
                         .andReturn();
@@ -155,8 +154,8 @@ class InternalSecurityIT extends IntegrationBase {
      */
     @Test
     void updateRequiresWebhookSecretBesidesServiceToken() throws Exception {
-        String path = "/interno/v1/canal/telegram/atualizacao";
-        for (String secret : new String[] {null, "", "errado", "segredo-webhook-teste-x"}) {
+        String path = "/internal/v1/channel/telegram/update";
+        for (String secret : new String[] {null, "", "wrong", "secret-webhook-test-x"}) {
             MockHttpServletRequestBuilder request =
                     post(path)
                             .header("X-N8N-Service-Token", CURRENT)
@@ -170,7 +169,7 @@ class InternalSecurityIT extends IntegrationBase {
         // segredo certo mas sem token de serviço: também 401
         requires401WithoutBody(
                 post(path)
-                        .header("X-Telegram-Bot-Api-Secret-Token", "segredo-webhook-teste")
+                        .header("X-Telegram-Bot-Api-Secret-Token", "secret-webhook-test")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"));
         // os dois certos: 200 (corpo vazio de updates é só ignorado)
@@ -180,7 +179,7 @@ class InternalSecurityIT extends IntegrationBase {
                                         .header("X-N8N-Service-Token", NEXT)
                                         .header(
                                                 "X-Telegram-Bot-Api-Secret-Token",
-                                                "segredo-webhook-teste")
+                                                "secret-webhook-test")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content("{}"))
                         .andReturn();
@@ -189,9 +188,9 @@ class InternalSecurityIT extends IntegrationBase {
 
     @Test
     void missingInternalRouteWithoutTokenIsAlso401() throws Exception {
-        requires401WithoutBody(get("/interno/v1/qualquer/coisa"));
-        requires401WithoutBody(get("/interno"));
-        requires401WithoutBody(get("/interno/"));
+        requires401WithoutBody(get("/internal/v1/any/thing"));
+        requires401WithoutBody(get("/internal"));
+        requires401WithoutBody(get("/internal/"));
     }
 
     @Test
@@ -203,7 +202,7 @@ class InternalSecurityIT extends IntegrationBase {
                                 post("/telegram/webhook")
                                         .header(
                                                 "X-Telegram-Bot-Api-Secret-Token",
-                                                "segredo-webhook-teste")
+                                                "secret-webhook-test")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content("{}")))
                 .isEqualTo(200);

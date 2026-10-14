@@ -97,7 +97,7 @@ class FfmpegAudioNormalizationAdapterIT {
 
     @Test
     void oggViraOpusMono() throws Exception {
-        Path original = generate("aula.ogg", 3, false);
+        Path original = generate("lesson.ogg", 3, false);
 
         NormalizedAudio normalized = adapter.normalize(temporary(original, "audio/ogg"));
 
@@ -110,7 +110,7 @@ class FfmpegAudioNormalizationAdapterIT {
 
     @Test
     void mp4VideoOnlyHasExtractedAudioTrack() throws Exception {
-        Path original = generate("aula.mp4", 3, true);
+        Path original = generate("lesson.mp4", 3, true);
 
         NormalizedAudio normalized = adapter.normalize(temporary(original, "video/mp4"));
 
@@ -120,7 +120,7 @@ class FfmpegAudioNormalizationAdapterIT {
 
     @Test
     void textRenamedToOggIsNotSupportedAndLeavesNoLeftover() throws Exception {
-        Path fakeFile = samples.resolve("falso.ogg");
+        Path fakeFile = samples.resolve("false.ogg");
         Files.writeString(fakeFile, "isto não é áudio");
 
         assertThatThrownBy(() -> adapter.normalize(temporary(fakeFile, "audio/ogg")))
@@ -132,19 +132,19 @@ class FfmpegAudioNormalizationAdapterIT {
 
     @Test
     void audioWithLessThanOneSecondIsEmpty() throws Exception {
-        Path shortAudio = generate("curto.ogg", 0.4, false);
+        Path shortAudio = generate("short.ogg", 0.4, false);
 
         assertThatThrownBy(() -> adapter.normalize(temporary(shortAudio, "audio/ogg")))
                 .isInstanceOfSatisfying(
                         AudioNotProcessableException.class,
                         e ->
                                 assertThat(e.reason())
-                                        .isEqualTo(AudioNotProcessableException.Reason.VAZIO));
+                                        .isEqualTo(AudioNotProcessableException.Reason.EMPTY));
     }
 
     @Test
     void deleteRemovesFile() throws Exception {
-        Path original = generate("aula2.ogg", 2, false);
+        Path original = generate("lesson2.ogg", 2, false);
         NormalizedAudio normalized = adapter.normalize(temporary(original, "audio/ogg"));
 
         adapter.delete(normalized.path());

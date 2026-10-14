@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SessionCookie {
 
-    public static final String NAME = "sessao";
+    public static final String NAME = "session";
 
     private final boolean safe;
 

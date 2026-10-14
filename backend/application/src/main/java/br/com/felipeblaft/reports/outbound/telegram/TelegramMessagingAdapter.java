@@ -138,7 +138,7 @@ public class TelegramMessagingAdapter implements TelegramSender {
         if (!enabled) {
             return;
         }
-        String boundary = "----relatorios" + UUID.randomUUID();
+        String boundary = "----reports" + UUID.randomUUID();
         ByteArrayOutputStream body = new ByteArrayOutputStream();
         field(body, boundary, "chat_id", Long.toString(document.chatId()));
         if (document.caption() != null) {
@@ -202,17 +202,17 @@ public class TelegramMessagingAdapter implements TelegramSender {
                     client.send(
                             request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (response.statusCode() / 100 != 2) {
-                LOG.warn("telegram-falha metodo={} status={}", method, response.statusCode());
+                LOG.warn("telegram-failure method={} status={}", method, response.statusCode());
                 return Optional.empty();
             }
             JsonNode no = JSON.readTree(response.body());
             return Optional.ofNullable(no.get("result"));
         } catch (InterruptedException error) {
             Thread.currentThread().interrupt();
-            LOG.warn("telegram-interrompido metodo={}", method);
+            LOG.warn("telegram-interrupted method={}", method);
             return Optional.empty();
         } catch (Exception error) {
-            LOG.warn("telegram-erro metodo={} tipo={}", method, error.getClass().getSimpleName());
+            LOG.warn("telegram-error method={} type={}", method, error.getClass().getSimpleName());
             return Optional.empty();
         }
     }

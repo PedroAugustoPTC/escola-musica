@@ -39,14 +39,14 @@ export function TelaAlunos() {
   }, [parametros]);
 
   const dados = alunos.data;
-  const total = dados?.resultado === 'ENCONTRADOS' ? null : dados?.alunos.length;
+  const total = dados?.result === 'FOUND' ? null : dados?.students.length;
 
   return (
     <Estrutura navAtiva={registrando ? 'registrar' : 'alunos'} navInferior>
       <div className="pagina pagina--larga">
         <div>
-          <div className="sobretitulo">{registrando ? msg('BOTAO_REGISTRAR_AULA') : 'Alunos'}</div>
-          <h1 className="titulo-pagina">{registrando ? msg('ESCOLHER_ALUNO') : 'Seus alunos'}</h1>
+          <div className="sobretitulo">{registrando ? msg('REGISTER_LESSON_BUTTON') : 'Alunos'}</div>
+          <h1 className="titulo-pagina">{registrando ? msg('CHOOSE_STUDENT') : 'Seus alunos'}</h1>
           {total !== null && total !== undefined ? (
             <p className="subtitulo">{total} aluno(s) associado(s) a você.</p>
           ) : null}
@@ -65,13 +65,13 @@ export function TelaAlunos() {
         </label>
         {alunos.isPending ? <EsqueletoCartoes rotulo="Carregando alunos" /> : null}
         {alunos.isError ? <AlertaErro erro={alunos.error} aoTentarDeNovo={() => alunos.refetch()} /> : null}
-        {dados && dados.alunos.length === 0 ? (
-          <EstadoVazio monograma solido titulo="Nenhum aluno por aqui" texto={msg('SEM_ALUNOS')} />
+        {dados && dados.students.length === 0 ? (
+          <EstadoVazio monograma solido titulo="Nenhum aluno por aqui" texto={msg('NO_STUDENTS')} />
         ) : null}
-        {dados?.resultado === 'NENHUM' && dados.alunos.length > 0 ? (
+        {dados?.result === 'NONE' && dados.students.length > 0 ? (
           <EstadoVazio
             icone="person_search"
-            texto={msg('NENHUM_ALUNO_ENCONTRADO', { busca: termo.trim() })}
+            texto={msg('NO_STUDENT_FOUND', { search: termo.trim() })}
             acao={
               <Botao variante="secundario" tamanho="compacto" onClick={() => setBusca('')}>
                 Limpar busca
@@ -79,9 +79,9 @@ export function TelaAlunos() {
             }
           />
         ) : null}
-        {dados && dados.alunos.length > 0 ? (
+        {dados && dados.students.length > 0 ? (
           <div className="grade-cartoes" aria-busy={alunos.isFetching || undefined}>
-            {dados.alunos.map((aluno) => (
+            {dados.students.map((aluno) => (
               <CartaoAluno key={aluno.id} aluno={aluno} />
             ))}
           </div>

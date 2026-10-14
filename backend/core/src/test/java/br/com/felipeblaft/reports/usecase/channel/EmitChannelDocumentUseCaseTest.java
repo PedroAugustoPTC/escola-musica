@@ -29,7 +29,7 @@ class EmitChannelDocumentUseCaseTest {
     void tokenHas43Base64urlCharactersAndSavesOnlyHash() {
         UUID teacher = UUID.randomUUID();
         UUID report = UUID.randomUUID();
-        String token = emit.run(teacher, ReportType.AULA, report, 2, "r-v2.pdf");
+        String token = emit.run(teacher, ReportType.LESSON, report, 2, "r-v2.pdf");
 
         assertThat(token).matches("^[A-Za-z0-9_-]{43}$");
         assertThat(repository.data).doesNotContainKey(token);
@@ -38,7 +38,7 @@ class EmitChannelDocumentUseCaseTest {
         assertThat(saved.tokenHash()).hasSize(64).isNotEqualTo(token);
         assertThat(saved.teacherId()).isEqualTo(teacher);
         assertThat(saved.reportId()).isEqualTo(report);
-        assertThat(saved.reportType()).isEqualTo(ReportType.AULA);
+        assertThat(saved.reportType()).isEqualTo(ReportType.LESSON);
         assertThat(saved.version()).isEqualTo(2);
         assertThat(saved.fileName()).isEqualTo("r-v2.pdf");
     }
@@ -46,7 +46,7 @@ class EmitChannelDocumentUseCaseTest {
     @Test
     void validityAndDeliveryDeadlinePlusOneHour() {
         String token =
-                emit.run(UUID.randomUUID(), ReportType.SEMESTRAL, UUID.randomUUID(), null, "s.pdf");
+                emit.run(UUID.randomUUID(), ReportType.SEMESTER, UUID.randomUUID(), null, "s.pdf");
         ChannelDocument saved =
                 repository.searchByHash(ChannelDocument.hashDoToken(token)).orElseThrow();
         assertThat(saved.official()).isTrue();
@@ -60,7 +60,12 @@ class EmitChannelDocumentUseCaseTest {
         Set<String> tokens = new HashSet<>();
         for (int i = 0; i < 200; i++) {
             tokens.add(
-                    emit.run(UUID.randomUUID(), ReportType.AULA, UUID.randomUUID(), null, "x.pdf"));
+                    emit.run(
+                            UUID.randomUUID(),
+                            ReportType.LESSON,
+                            UUID.randomUUID(),
+                            null,
+                            "x.pdf"));
         }
         assertThat(tokens).hasSize(200);
     }

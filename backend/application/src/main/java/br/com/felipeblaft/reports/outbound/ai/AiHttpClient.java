@@ -61,7 +61,7 @@ class AiHttpClient {
      */
     Response run(Supplier<HttpRequest> request) {
         if (clock.instant().isBefore(openUntil.get())) {
-            throw new ProviderUnavailableException("disjuntor-aberto");
+            throw new ProviderUnavailableException("breaker-open");
         }
         for (int attempt = 1; ; attempt++) {
             Response response;
@@ -75,7 +75,7 @@ class AiHttpClient {
                 response = null;
             } catch (InterruptedException error) {
                 Thread.currentThread().interrupt();
-                throw new ProviderUnavailableException("interrompido");
+                throw new ProviderUnavailableException("interrupted");
             }
             if (response != null && !response.isTransient()) {
                 consecutiveFailures.set(0);
@@ -87,7 +87,7 @@ class AiHttpClient {
                     consecutiveFailures.set(0);
                 }
                 throw new ProviderUnavailableException(
-                        response == null ? "rede" : "status-" + response.status());
+                        response == null ? "network" : "status-" + response.status());
             }
             wait(newAttemptWait);
         }

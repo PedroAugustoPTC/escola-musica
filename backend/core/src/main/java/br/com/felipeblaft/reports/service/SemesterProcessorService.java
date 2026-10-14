@@ -87,13 +87,13 @@ public class SemesterProcessorService implements ComplementProcessor {
 
     @Override
     public boolean serves(ProcessingJob job) {
-        return job.type() == JobType.CONSOLIDACAO_SEMESTRAL
-                || (job.type() == JobType.ALTERACAO && job.reportType() == ReportType.SEMESTRAL);
+        return job.type() == JobType.SEMESTER_CONSOLIDATION
+                || (job.type() == JobType.CHANGE && job.reportType() == ReportType.SEMESTER);
     }
 
     @Override
     public void process(ProcessingJob job, ProcessingSupport support) {
-        if (job.type() == JobType.CONSOLIDACAO_SEMESTRAL) {
+        if (job.type() == JobType.SEMESTER_CONSOLIDATION) {
             consolidate(job, support);
         } else {
             change(job, support);
@@ -109,13 +109,13 @@ public class SemesterProcessorService implements ComplementProcessor {
                 lessons.listApprovedInPeriod(
                         job.teacherId(), job.studentId(), period.start(), period.end());
         if (approvedLessons.isEmpty()) {
-            support.complete(job, JobResult.FALHA_CONSOLIDACAO);
+            support.complete(job, JobResult.CONSOLIDATION_FAILED);
             return;
         }
         int open =
                 lessons.countOpenInPeriod(
                         job.teacherId(), job.studentId(), period.start(), period.end());
-        support.advance(job, JobStep.CONSOLIDANDO);
+        support.advance(job, JobStep.CONSOLIDATING);
         SemesterConsolidationInput input =
                 new SemesterConsolidationInput(
                         approvedLessons.stream()
@@ -127,18 +127,18 @@ public class SemesterProcessorService implements ComplementProcessor {
         Optional<ResponseLlm<AiSemesterReportOutput>> response =
                 support.callLlm(
                         job,
-                        TaskLlm.CONSOLIDACAO_SEMESTRAL,
-                        AiTask.CONSOLIDACAO,
+                        TaskLlm.SEMESTER_CONSOLIDATION,
+                        AiTask.CONSOLIDATION,
                         input,
                         AiSemesterReportOutput.class);
         if (response.isEmpty()) {
-            support.complete(job, JobResult.FALHA_CONSOLIDACAO);
+            support.complete(job, JobResult.CONSOLIDATION_FAILED);
             return;
         }
         if (support.discarded(job)) {
             return;
         }
-        support.advance(job, JobStep.GERANDO_PDF);
+        support.advance(job, JobStep.GENERATING_PDF);
         Instant now = clock.now();
         boolean created;
         try {
@@ -170,11 +170,11 @@ public class SemesterProcessorService implements ComplementProcessor {
                                                 job.requestChannel(),
                                                 now);
                                 semester.save(report);
-                                job.linkReport(ReportType.SEMESTRAL, report.id());
-                                support.linkCosts(job, ReportType.SEMESTRAL, report.id());
+                                job.linkReport(ReportType.SEMESTER, report.id());
+                                support.linkCosts(job, ReportType.SEMESTER, report.id());
                                 createVersion(
                                         report,
-                                        VersionOrigin.CONSOLIDACAO,
+                                        VersionOrigin.CONSOLIDATION,
                                         null,
                                         job,
                                         response.get().versionPrompt());
@@ -186,7 +186,7 @@ public class SemesterProcessorService implements ComplementProcessor {
             created = false;
         }
         support.complete(
-                job, created ? JobResult.PRONTO_PARA_CONFERENCIA : JobResult.FALHA_CONSOLIDACAO);
+                job, created ? JobResult.READY_FOR_REVIEW : JobResult.CONSOLIDATION_FAILED);
     }
 
     // ------------------------------------------------------------ alteração
@@ -194,7 +194,7 @@ public class SemesterProcessorService implements ComplementProcessor {
     private void change(ProcessingJob job, ProcessingSupport support) {
         Optional<String> text = support.requestText(job);
         if (text.isEmpty()) {
-            end(job, support, JobResult.FALHA_ALTERACAO, null, null);
+            end(job, support, JobResult.CHANGE_FAILED, null, null);
             return;
         }
         SemesterReport report = semester.searchById(job.reportId()).orElseThrow();
@@ -206,30 +206,30 @@ public class SemesterProcessorService implements ComplementProcessor {
             end(
                     job,
                     support,
-                    JobResult.VERSAO_DESATUALIZADA,
+                    JobResult.STALE_VERSION,
                     text.get(),
-                    InteractionResult.RECUSADA_VERSAO_DESATUALIZADA);
+                    InteractionResult.REJECTED_STALE_VERSION);
             return;
         }
         if (!withReport(
                 job,
                 support,
                 current -> {
-                    current.startStep(ReportStep.APLICANDO_ALTERACAO, clock.now());
+                    current.startStep(ReportStep.APPLYING_CHANGE, clock.now());
                     return true;
                 })) {
             return;
         }
-        support.advance(job, JobStep.APLICANDO_ALTERACAO);
+        support.advance(job, JobStep.APPLYING_CHANGE);
         Optional<ResponseLlm<AiSemesterReportOutput>> response =
                 support.callLlm(
                         job,
-                        TaskLlm.REVISAO_SEMESTRAL,
-                        AiTask.REVISAO,
+                        TaskLlm.SEMESTER_REVISION,
+                        AiTask.REVISION,
                         new SemesterRevisionInput(report.content(), text.get()),
                         AiSemesterReportOutput.class);
         if (response.isEmpty()) {
-            end(job, support, JobResult.FALHA_ALTERACAO, text.get(), InteractionResult.FALHOU);
+            end(job, support, JobResult.CHANGE_FAILED, text.get(), InteractionResult.FAILED);
             return;
         }
         AiSemesterReportOutput output = response.get().output();
@@ -244,14 +244,14 @@ public class SemesterProcessorService implements ComplementProcessor {
                                     || output.content().equals(current.content())) {
                                 InteractionResult withoutChange =
                                         output.withoutChange() && output.indicatedActionRequest()
-                                                ? InteractionResult.PEDIDO_DE_ACAO_IGNORADO
-                                                : InteractionResult.SEM_ALTERACAO_DE_CONTEUDO;
+                                                ? InteractionResult.ACTION_REQUEST_IGNORED
+                                                : InteractionResult.NO_CONTENT_CHANGE;
                                 registerInteraction(current, job, text.get(), withoutChange, null);
                                 current.completeStep(now);
                                 result[0] =
-                                        withoutChange == InteractionResult.PEDIDO_DE_ACAO_IGNORADO
-                                                ? JobResult.PEDIDO_DE_ACAO_IGNORADO
-                                                : JobResult.SEM_ALTERACAO_DE_CONTEUDO;
+                                        withoutChange == InteractionResult.ACTION_REQUEST_IGNORED
+                                                ? JobResult.ACTION_REQUEST_IGNORED
+                                                : JobResult.NO_CONTENT_CHANGE;
                                 return true;
                             }
                             int created = current.applyChange(output.content(), now);
@@ -260,15 +260,15 @@ public class SemesterProcessorService implements ComplementProcessor {
                                             current,
                                             job,
                                             text.get(),
-                                            InteractionResult.APLICADA,
+                                            InteractionResult.APPLIED,
                                             created);
                             createVersion(
                                     current,
-                                    VersionOrigin.ALTERACAO,
+                                    VersionOrigin.CHANGE,
                                     interaction,
                                     job,
                                     response.get().versionPrompt());
-                            result[0] = JobResult.NOVA_VERSAO;
+                            result[0] = JobResult.NEW_VERSION;
                             return true;
                         });
         if (saved) {
@@ -339,9 +339,9 @@ public class SemesterProcessorService implements ComplementProcessor {
                         .orElse(report.currentVersion());
         ReportInteraction interaction =
                 ReportInteraction.create(
-                        ReportType.SEMESTRAL,
+                        ReportType.SEMESTER,
                         report.id(),
-                        InteractionType.ALTERACAO,
+                        InteractionType.CHANGE,
                         job.requestChannel(),
                         job.medium(),
                         text,
@@ -362,7 +362,7 @@ public class SemesterProcessorService implements ComplementProcessor {
             String prompt) {
         ReportVersion version =
                 ReportVersion.create(
-                        ReportType.SEMESTRAL,
+                        ReportType.SEMESTER,
                         report.id(),
                         report.currentVersion(),
                         report.content(),
@@ -377,7 +377,7 @@ public class SemesterProcessorService implements ComplementProcessor {
 
     @Override
     public void failed(ProcessingJob job) {
-        if (job.reportId() == null || job.reportType() != ReportType.SEMESTRAL) {
+        if (job.reportId() == null || job.reportType() != ReportType.SEMESTER) {
             return;
         }
         transaction.run(

@@ -36,20 +36,20 @@ class GetChannelDocumentUseCaseTest {
                 @Override
                 public ObtainedDocument review(
                         UUID teacherId, ReportType type, UUID reportId, int number) {
-                    calls.add("conferencia:" + teacherId + ":" + number);
+                    calls.add("review:" + teacherId + ":" + number);
                     if (failure != null) {
                         throw failure;
                     }
-                    return new ObtainedDocument(new byte[] {1, 2}, "conferencia.pdf");
+                    return new ObtainedDocument(new byte[] {1, 2}, "review.pdf");
                 }
 
                 @Override
                 public ObtainedDocument official(UUID teacherId, ReportType type, UUID reportId) {
-                    calls.add("oficial:" + teacherId);
+                    calls.add("official:" + teacherId);
                     if (failure != null) {
                         throw failure;
                     }
-                    return new ObtainedDocument(new byte[] {9}, "oficial.pdf");
+                    return new ObtainedDocument(new byte[] {9}, "official.pdf");
                 }
             };
 
@@ -65,24 +65,24 @@ class GetChannelDocumentUseCaseTest {
     @Test
     void officialGoesThroughSamePortalUseCaseWithSavedOwner() {
         UUID teacher = UUID.randomUUID();
-        String token = emit.run(teacher, ReportType.AULA, UUID.randomUUID(), null, "o.pdf");
+        String token = emit.run(teacher, ReportType.LESSON, UUID.randomUUID(), null, "o.pdf");
         ObtainedDocument obtained = get.run(token).orElseThrow();
         assertThat(obtained.content()).containsExactly(9);
-        assertThat(calls).containsExactly("oficial:" + teacher);
+        assertThat(calls).containsExactly("official:" + teacher);
     }
 
     @Test
     void reviewUsesVersionNumber() {
         UUID teacher = UUID.randomUUID();
-        String token = emit.run(teacher, ReportType.AULA, UUID.randomUUID(), 3, "c.pdf");
-        assertThat(get.run(token).orElseThrow().fileName()).isEqualTo("conferencia.pdf");
-        assertThat(calls).containsExactly("conferencia:" + teacher + ":3");
+        String token = emit.run(teacher, ReportType.LESSON, UUID.randomUUID(), 3, "c.pdf");
+        assertThat(get.run(token).orElseThrow().fileName()).isEqualTo("review.pdf");
+        assertThat(calls).containsExactly("review:" + teacher + ":3");
     }
 
     @Test
     void repetitionWithinDeadlineStaysValid() {
         String token =
-                emit.run(UUID.randomUUID(), ReportType.AULA, UUID.randomUUID(), null, "o.pdf");
+                emit.run(UUID.randomUUID(), ReportType.LESSON, UUID.randomUUID(), null, "o.pdf");
         assertThat(get.run(token)).isPresent();
         scenario.clock.advance(Duration.ofHours(24));
         assertThat(get.run(token)).isPresent();
@@ -92,7 +92,7 @@ class GetChannelDocumentUseCaseTest {
     void unknownAndExpiredAreNotFoundWithoutCallingPortal() {
         assertThat(get.run("a".repeat(43))).isEmpty();
         String token =
-                emit.run(UUID.randomUUID(), ReportType.AULA, UUID.randomUUID(), null, "o.pdf");
+                emit.run(UUID.randomUUID(), ReportType.LESSON, UUID.randomUUID(), null, "o.pdf");
         scenario.clock.advance(Duration.ofHours(25));
         assertThat(get.run(token)).isEmpty();
         assertThat(calls).isEmpty();
@@ -101,12 +101,12 @@ class GetChannelDocumentUseCaseTest {
     @Test
     void documentThatVanishedOrWithoutAssignmentBecomesIndistinguishableNotFound() {
         String token =
-                emit.run(UUID.randomUUID(), ReportType.AULA, UUID.randomUUID(), null, "o.pdf");
+                emit.run(UUID.randomUUID(), ReportType.LESSON, UUID.randomUUID(), null, "o.pdf");
         for (ErrorCode code :
                 List.of(
-                        ErrorCode.RECURSO_NAO_ENCONTRADO,
-                        ErrorCode.ALUNO_NAO_ASSOCIADO,
-                        ErrorCode.DADOS_INVALIDOS)) {
+                        ErrorCode.RESOURCE_NOT_FOUND,
+                        ErrorCode.STUDENT_NOT_ASSIGNED,
+                        ErrorCode.INVALID_DATA)) {
             failure = new DomainException(code);
             assertThat(get.run(token)).as(code.name()).isEmpty();
         }
@@ -115,15 +115,15 @@ class GetChannelDocumentUseCaseTest {
     @Test
     void realReadFailurePropagatesNeverPartialBytes() {
         String token =
-                emit.run(UUID.randomUUID(), ReportType.AULA, UUID.randomUUID(), null, "o.pdf");
-        failure = new IllegalStateException("disco");
+                emit.run(UUID.randomUUID(), ReportType.LESSON, UUID.randomUUID(), null, "o.pdf");
+        failure = new IllegalStateException("disk");
         assertThatThrownBy(() -> get.run(token)).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     void onlyTokenHashIsQueried() {
         String token =
-                emit.run(UUID.randomUUID(), ReportType.AULA, UUID.randomUUID(), null, "o.pdf");
+                emit.run(UUID.randomUUID(), ReportType.LESSON, UUID.randomUUID(), null, "o.pdf");
         assertThat(repository.data).containsKey(ChannelDocument.hashDoToken(token));
         assertThat(repository.data).doesNotContainKey(token);
     }

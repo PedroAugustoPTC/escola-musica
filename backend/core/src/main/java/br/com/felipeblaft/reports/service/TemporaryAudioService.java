@@ -50,7 +50,7 @@ public class TemporaryAudioService {
             }
             if (result.text() == null || result.text().isBlank()) {
                 throw new AudioNotProcessableException(
-                        AudioNotProcessableException.Reason.SEM_FALA);
+                        AudioNotProcessableException.Reason.NO_SPEECH);
             }
             return result;
         } finally {

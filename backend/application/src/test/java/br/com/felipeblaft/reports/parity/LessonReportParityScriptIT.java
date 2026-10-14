@@ -78,7 +78,7 @@ class LessonReportParityScriptIT extends TelegramConversationBase {
                 "select task || ' x' || count(*) || ' sucesso=' || bool_and(success)"
                         + " || ' duracao=' || bool_and(duration_ms is not null)"
                         + " || ' custo=' || bool_and(estimated_cost_usd is not null)"
-                        + " from ai_call where report_type = 'AULA' and report_id = ?"
+                        + " from ai_call where report_type = 'LESSON' and report_id = ?"
                         + " group by task order by task",
                 String.class,
                 reportOf(student));
@@ -144,7 +144,7 @@ class LessonReportParityScriptIT extends TelegramConversationBase {
                                         + " where v.report_id = ? order by v.number, d.type",
                                 String.class,
                                 id));
-        return rows.stream().map(l -> l.replace(channel, "CANAL")).toList();
+        return rows.stream().map(l -> l.replace(channel, "CHANNEL")).toList();
     }
 
     private static ParityScript script(ReportChannel channel) {
@@ -169,17 +169,17 @@ class LessonReportParityScriptIT extends TelegramConversationBase {
                     throws Exception {
                 int status = statusBody(result);
                 if (status / 100 == 2) {
-                    return "ACEITO";
+                    return "ACCEPTED";
                 }
                 return JSON.readTree(result.getResponse().getContentAsString())
-                        .path("codigo")
+                        .path("code")
                         .asString();
             }
 
             private MockMultipartFile audio() {
                 return new MockMultipartFile(
                         "audio",
-                        "aula.webm",
+                        "lesson.webm",
                         "audio/webm",
                         AudioNormalizationTest.AUDIO_WITH_SPEECH);
             }
@@ -189,69 +189,69 @@ class LessonReportParityScriptIT extends TelegramConversationBase {
                 code(
                         mvc.perform(
                                         multipart(
-                                                        "/api/v1/alunos/{id}/relatorios-aula",
+                                                        "/api/v1/students/{id}/lesson-reports",
                                                         student.id())
                                                 .file(audio())
                                                 .cookie(session)
                                                 .with(csrf().asHeader()))
                                 .andReturn());
                 scenario.processQueue();
-                return result(student, "REGISTRO_AULA", "AUDIO");
+                return result(student, "LESSON_REGISTRATION", "AUDIO");
             }
 
             @Override
             public String answer(String text) throws Exception {
                 mvc.perform(
-                        post("/api/v1/relatorios-aula/{id}/respostas", reportOf(student))
+                        post("/api/v1/lesson-reports/{id}/answers", reportOf(student))
                                 .cookie(session)
                                 .with(csrf().asHeader())
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(JSON.writeValueAsString(java.util.Map.of("texto", text))));
+                                .content(JSON.writeValueAsString(java.util.Map.of("text", text))));
                 scenario.processQueue();
-                return result(student, "RESPOSTA_PERGUNTAS", "TEXTO");
+                return result(student, "QUESTION_ANSWER", "TEXT");
             }
 
             @Override
             public String changeByText(String text) throws Exception {
                 mvc.perform(
-                        post("/api/v1/relatorios-aula/{id}/alteracoes", reportOf(student))
+                        post("/api/v1/lesson-reports/{id}/changes", reportOf(student))
                                 .cookie(session)
                                 .with(csrf().asHeader())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(
                                         JSON.writeValueAsString(
                                                 java.util.Map.of(
-                                                        "texto",
+                                                        "text",
                                                         text,
-                                                        "versaoBase",
+                                                        "baseVersion",
                                                         currentVersion(student)))));
                 scenario.processQueue();
-                return result(student, "ALTERACAO", "TEXTO");
+                return result(student, "CHANGE", "TEXT");
             }
 
             @Override
             public String changeByAudio() throws Exception {
                 mvc.perform(
-                        multipart("/api/v1/relatorios-aula/{id}/alteracoes", reportOf(student))
+                        multipart("/api/v1/lesson-reports/{id}/changes", reportOf(student))
                                 .file(audio())
-                                .param("versaoBase", String.valueOf(currentVersion(student)))
+                                .param("baseVersion", String.valueOf(currentVersion(student)))
                                 .cookie(session)
                                 .with(csrf().asHeader()));
                 scenario.processQueue();
-                return result(student, "ALTERACAO", "AUDIO");
+                return result(student, "CHANGE", "AUDIO");
             }
 
             private String approveVersion() throws Exception {
                 return code(
                         mvc.perform(
                                         post(
-                                                        "/api/v1/relatorios-aula/{id}/aprovacao",
+                                                        "/api/v1/lesson-reports/{id}/approval",
                                                         reportOf(student))
                                                 .cookie(session)
                                                 .with(csrf().asHeader())
                                                 .contentType(MediaType.APPLICATION_JSON)
                                                 .content(
-                                                        "{\"versaoConfirmada\":"
+                                                        "{\"confirmedVersion\":"
                                                                 + currentVersion(student)
                                                                 + "}"))
                                 .andReturn());
@@ -297,34 +297,34 @@ class LessonReportParityScriptIT extends TelegramConversationBase {
                 sendText(USER_CLARA, "registrar aula");
                 sendText(USER_CLARA, student.name());
                 prepareTelegramFile(
-                        "aula-" + student.id(), AudioNormalizationTest.AUDIO_WITH_SPEECH);
-                sendVoice(USER_CLARA, "aula-" + student.id(), 1000);
-                sendCallback(USER_CLARA, "v1:confal:");
+                        "lesson-" + student.id(), AudioNormalizationTest.AUDIO_WITH_SPEECH);
+                sendVoice(USER_CLARA, "lesson-" + student.id(), 1000);
+                sendCallback(USER_CLARA, "v1:confirm-student:");
                 scenario.processQueue();
-                return result(student, "REGISTRO_AULA", "AUDIO");
+                return result(student, "LESSON_REGISTRATION", "AUDIO");
             }
 
             @Override
             public String answer(String text) throws Exception {
                 sendText(USER_CLARA, text);
                 scenario.processQueue();
-                return result(student, "RESPOSTA_PERGUNTAS", "TEXTO");
+                return result(student, "QUESTION_ANSWER", "TEXT");
             }
 
             @Override
             public String changeByText(String text) throws Exception {
                 sendText(USER_CLARA, text);
                 scenario.processQueue();
-                return result(student, "ALTERACAO", "TEXTO");
+                return result(student, "CHANGE", "TEXT");
             }
 
             @Override
             public String changeByAudio() throws Exception {
                 prepareTelegramFile(
-                        "pedido-" + student.id(), AudioNormalizationTest.AUDIO_WITH_SPEECH);
-                sendVoice(USER_CLARA, "pedido-" + student.id(), 1000);
+                        "request-" + student.id(), AudioNormalizationTest.AUDIO_WITH_SPEECH);
+                sendVoice(USER_CLARA, "request-" + student.id(), 1000);
                 scenario.processQueue();
-                return result(student, "ALTERACAO", "AUDIO");
+                return result(student, "CHANGE", "AUDIO");
             }
 
             @Override
@@ -340,7 +340,7 @@ class LessonReportParityScriptIT extends TelegramConversationBase {
             @Override
             public String approveAgain() throws Exception {
                 API_BOTS.resetRequests();
-                sendCallback(USER_CLARA, "v1:foco:a" + reportOf(student));
+                sendCallback(USER_CLARA, "v1:focus:a" + reportOf(student));
                 return lastMessageCode();
             }
         };
@@ -356,32 +356,32 @@ class LessonReportParityScriptIT extends TelegramConversationBase {
         assertThat(noBot).containsExactlyElementsOf(naWeb);
         assertThat(naWeb)
                 .containsExactly(
-                        "enviar áudio = PERGUNTAS_PENDENTES",
-                        "responder = PRONTO_PARA_CONFERENCIA",
-                        "alterar por texto = NOVA_VERSAO",
-                        "alterar por áudio = NOVA_VERSAO",
-                        "aprovar = APROVADO",
-                        "aprovar de novo = RELATORIO_JA_APROVADO");
+                        "enviar áudio = PENDING_QUESTIONS",
+                        "responder = READY_FOR_REVIEW",
+                        "alterar por texto = NEW_VERSION",
+                        "alterar por áudio = NEW_VERSION",
+                        "aprovar = APPROVED",
+                        "aprovar de novo = REPORT_ALREADY_APPROVED");
 
         List<String> summaryWeb = summary(matteo, "WEB");
         assertThat(summary(helena, "TELEGRAM")).containsExactlyElementsOf(summaryWeb);
         assertThat(summaryWeb)
-                .contains("APROVADO vigente=3 aprovada=3 canalOrigem=CANAL canalAprovacao=CANAL")
-                .anySatisfy(
-                        l -> assertThat(l).startsWith("RESPOSTA_PERGUNTAS TEXTO APLICADA base=0"))
-                .anySatisfy(l -> assertThat(l).startsWith("ALTERACAO TEXTO APLICADA base=1"))
-                .anySatisfy(l -> assertThat(l).startsWith("ALTERACAO AUDIO APLICADA base=2"))
-                .anySatisfy(l -> assertThat(l).startsWith("pdfs=").contains("OFICIAL"));
+                .contains(
+                        "APPROVED vigente=3 aprovada=3 canalOrigem=CHANNEL canalAprovacao=CHANNEL")
+                .anySatisfy(l -> assertThat(l).startsWith("QUESTION_ANSWER TEXT APPLIED base=0"))
+                .anySatisfy(l -> assertThat(l).startsWith("CHANGE TEXT APPLIED base=1"))
+                .anySatisfy(l -> assertThat(l).startsWith("CHANGE AUDIO APPLIED base=2"))
+                .anySatisfy(l -> assertThat(l).startsWith("pdfs=").contains("OFFICIAL"));
 
         // FR-056: uma linha por chamada de IA, todas ligadas ao relatório, nos dois canais
         List<String> costsWeb = costs(matteo);
         assertThat(costs(helena)).containsExactlyElementsOf(costsWeb);
         assertThat(costsWeb)
                 .containsExactly(
-                        "ESTRUTURACAO x1 sucesso=true duracao=true custo=true",
-                        "INCORPORACAO_RESPOSTAS x1 sucesso=true duracao=true custo=true",
-                        "REVISAO x2 sucesso=true duracao=true custo=true",
-                        "TRANSCRICAO x2 sucesso=true duracao=true custo=true");
+                        "ANSWER_INCORPORATION x1 sucesso=true duracao=true custo=true",
+                        "REVISION x2 sucesso=true duracao=true custo=true",
+                        "STRUCTURING x1 sucesso=true duracao=true custo=true",
+                        "TRANSCRIPTION x2 sucesso=true duracao=true custo=true");
         assertThat(
                         jdbc.queryForObject(
                                 "select count(*) from ai_call where report_id is null",
@@ -417,7 +417,7 @@ class LessonReportParityScriptIT extends TelegramConversationBase {
     private List<String> rounds(Student student) {
         return jdbc.queryForList(
                 "select 'rodada ' || round || ' ' || result from report_interaction"
-                        + " where report_id = ? and type = 'RESPOSTA_PERGUNTAS' order by round",
+                        + " where report_id = ? and type = 'QUESTION_ANSWER' order by round",
                 String.class,
                 reportOf(student));
     }
@@ -441,19 +441,19 @@ class LessonReportParityScriptIT extends TelegramConversationBase {
         assertThat(noBot).containsExactlyElementsOf(naWeb);
         assertThat(naWeb)
                 .containsExactly(
-                        "enviar áudio = PERGUNTAS_PENDENTES",
-                        "1ª resposta = PERGUNTAS_PENDENTES",
-                        "2ª resposta = PRONTO_PARA_CONFERENCIA");
+                        "enviar áudio = PENDING_QUESTIONS",
+                        "1ª resposta = PENDING_QUESTIONS",
+                        "2ª resposta = READY_FOR_REVIEW");
         List<String> summaryWeb = summary(matteo, "WEB");
         assertThat(summary(helena, "TELEGRAM")).containsExactlyElementsOf(summaryWeb);
         assertThat(summaryWeb.getFirst())
                 .isEqualTo(
-                        "AGUARDANDO_CONFERENCIA vigente=1 aprovada=- canalOrigem=CANAL canalAprovacao=-");
+                        "AWAITING_REVIEW vigente=1 aprovada=- canalOrigem=CHANNEL canalAprovacao=-");
         assertThat(summaryWeb)
-                .contains("versão 1 RESPOSTA_PERGUNTAS canal=CANAL")
+                .contains("versão 1 QUESTION_ANSWER canal=CHANNEL")
                 .noneMatch(l -> l.startsWith("versão 2"));
         for (Student student : List.of(matteo, helena)) {
-            assertThat(rounds(student)).containsExactly("rodada 1 APLICADA", "rodada 2 APLICADA");
+            assertThat(rounds(student)).containsExactly("rodada 1 APPLIED", "rodada 2 APPLIED");
             assertThat(
                             jdbc.queryForObject(
                                     "select question_rounds from lesson_report where id = ?",
@@ -478,12 +478,12 @@ class LessonReportParityScriptIT extends TelegramConversationBase {
     private Cookie signInOnWeb() throws Exception {
         var result =
                 mvc.perform(
-                                post("/api/v1/sessao")
+                                post("/api/v1/session")
                                         .with(csrf().asHeader())
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .content("{\"codigo\":\"" + ScenarioIT.CODE_CLARA + "\"}"))
+                                        .content("{\"code\":\"" + ScenarioIT.CODE_CLARA + "\"}"))
                         .andReturn();
-        Cookie cookie = result.getResponse().getCookie("sessao");
+        Cookie cookie = result.getResponse().getCookie("session");
         return new Cookie(cookie.getName(), cookie.getValue());
     }
 }

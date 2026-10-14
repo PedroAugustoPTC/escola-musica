@@ -29,7 +29,7 @@ import tools.jackson.databind.JsonNode;
 class ReplyWithinFiveSecondsIT extends OrchestratorDeliveryBase {
 
     private static final Duration LIMIT = Duration.ofSeconds(5);
-    private static final String BASE = "/interno/v1/canal/telegram";
+    private static final String BASE = "/internal/v1/channel/telegram";
 
     @MockitoSpyBean TelegramConversationInterpreter interpreter;
 
@@ -49,7 +49,7 @@ class ReplyWithinFiveSecondsIT extends OrchestratorDeliveryBase {
         long start = System.nanoTime();
         String body =
                 mvc.perform(
-                                post(BASE + "/atualizacao")
+                                post(BASE + "/update")
                                         .header("X-N8N-Service-Token", TOKEN_SERVICE)
                                         .header("X-Telegram-Bot-Api-Secret-Token", SECRET)
                                         .contentType(MediaType.APPLICATION_JSON)
@@ -57,7 +57,7 @@ class ReplyWithinFiveSecondsIT extends OrchestratorDeliveryBase {
                         .andReturn()
                         .getResponse()
                         .getContentAsString();
-        JsonNode actions = JSON.readTree(body).get("acoes");
+        JsonNode actions = JSON.readTree(body).get("actions");
         orchestratorExecutor().run(actions);
         Duration spent = Duration.ofNanos(System.nanoTime() - start);
         actions.forEach(receivedActions::add);
@@ -80,7 +80,7 @@ class ReplyWithinFiveSecondsIT extends OrchestratorDeliveryBase {
         API_BOTS.resetRequests();
         List<JsonNode> actions = new ArrayList<>();
 
-        Duration spent = receiveAndRun(touch(nextUpdate(), "v1:inicio:"), actions);
+        Duration spent = receiveAndRun(touch(nextUpdate(), "v1:home:"), actions);
 
         assertThat(spent).isLessThanOrEqualTo(LIMIT);
         assertThat(actions).isNotEmpty();
@@ -92,7 +92,7 @@ class ReplyWithinFiveSecondsIT extends OrchestratorDeliveryBase {
     void errorMessageAppearsWithinFiveSeconds() throws Exception {
         link(USER_CLARA, ScenarioIT.CODE_CLARA);
         API_BOTS.resetRequests();
-        doThrow(new IllegalStateException("falha")).when(interpreter).interpret(any());
+        doThrow(new IllegalStateException("failure")).when(interpreter).interpret(any());
         List<JsonNode> actions = new ArrayList<>();
 
         Duration spent =

@@ -60,7 +60,7 @@ class PdfLessonReportIT {
                                 LocalDate.of(2026, 9, 21),
                                 CONTENT,
                                 1,
-                                DocumentStatus.CONFERENCIA,
+                                DocumentStatus.REVIEW,
                                 null));
 
         String text = text(document);
@@ -101,7 +101,7 @@ class PdfLessonReportIT {
                                 LocalDate.of(2026, 9, 21),
                                 CONTENT,
                                 2,
-                                DocumentStatus.OFICIAL,
+                                DocumentStatus.OFFICIAL,
                                 new Approval(
                                         "Clara Souza", Instant.parse("2026-09-21T21:42:00Z"), 2)));
 
@@ -126,9 +126,9 @@ class PdfLessonReportIT {
                                 "Matteo Ferreira",
                                 "Clara Souza",
                                 LocalDate.of(2026, 9, 21),
-                                new LessonReportContent(items, "x".repeat(10), items, items, "fim"),
+                                new LessonReportContent(items, "x".repeat(10), items, items, "end"),
                                 1,
-                                DocumentStatus.CONFERENCIA,
+                                DocumentStatus.REVIEW,
                                 null));
 
         try (PDDocument pdf = Loader.loadPDF(document.bytes())) {

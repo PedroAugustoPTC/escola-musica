@@ -34,7 +34,7 @@ class InternalSecurityConfigTest {
 
     private static TelegramChannel channel(String current, String next) {
         return new TelegramChannel(
-                ProactiveDelivery.DIRETA,
+                ProactiveDelivery.DIRECT,
                 current,
                 next,
                 "",
@@ -63,15 +63,15 @@ class InternalSecurityConfigTest {
                         event -> {
                             assertThat(event.getLevel()).isEqualTo(Level.WARN);
                             assertThat(event.getFormattedMessage())
-                                    .contains("canal-telegram-sem-token-de-servico")
+                                    .contains("telegram-channel-without-service-token")
                                     .contains("TELEGRAM_CHANNEL_CURRENT_TOKEN");
                         });
     }
 
     @Test
     void withSomeTokenDoesNotWarnAndNeverPrintsToken() {
-        InternalSecurityConfig.warnIfThereIsNoToken(channel("tok-secreto-1", null));
-        InternalSecurityConfig.warnIfThereIsNoToken(channel("", "tok-secreto-2"));
+        InternalSecurityConfig.warnIfThereIsNoToken(channel("tok-secret-1", null));
+        InternalSecurityConfig.warnIfThereIsNoToken(channel("", "tok-secret-2"));
         assertThat(events.list).isEmpty();
     }
 }

@@ -60,19 +60,17 @@ class CrossAccessIT extends TelegramConversationBase {
         JsonNode generation =
                 JSON.readTree(
                         mvc.perform(
-                                        post(
-                                                        "/api/v1/alunos/{id}/relatorios-semestrais",
-                                                        helena.id())
+                                        post("/api/v1/students/{id}/semester-reports", helena.id())
                                                 .cookie(sessionBruno)
                                                 .with(csrf().asHeader())
                                                 .contentType(MediaType.APPLICATION_JSON)
-                                                .content("{\"periodoChave\":\"2026-1\"}"))
+                                                .content("{\"periodKey\":\"2026-1\"}"))
                                 .andReturn()
                                 .getResponse()
                                 .getContentAsString());
-        job = UUID.fromString(generation.path("trabalhoId").asString());
+        job = UUID.fromString(generation.path("jobId").asString());
         mvc.perform(
-                multipart("/api/v1/alunos/{id}/relatorios-aula", helena.id())
+                multipart("/api/v1/students/{id}/lesson-reports", helena.id())
                         .file(audio())
                         .cookie(sessionBruno)
                         .with(csrf().asHeader()));
@@ -80,24 +78,24 @@ class CrossAccessIT extends TelegramConversationBase {
         semester = jdbc.queryForObject("select id from semester_report", UUID.class);
         openLesson =
                 jdbc.queryForObject(
-                        "select id from lesson_report where status <> 'APROVADO'", UUID.class);
+                        "select id from lesson_report where status <> 'APPROVED'", UUID.class);
     }
 
     private Cookie signIn(String code) throws Exception {
         MvcResult input =
                 mvc.perform(
-                                post("/api/v1/sessao")
+                                post("/api/v1/session")
                                         .with(csrf().asHeader())
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .content("{\"codigo\":\"" + code + "\"}"))
+                                        .content("{\"code\":\"" + code + "\"}"))
                         .andReturn();
-        Cookie cookie = input.getResponse().getCookie("sessao");
+        Cookie cookie = input.getResponse().getCookie("session");
         return new Cookie(cookie.getName(), cookie.getValue());
     }
 
     private static MockMultipartFile audio() {
         return new MockMultipartFile(
-                "audio", "aula.webm", "audio/webm", AudioNormalizationTest.AUDIO_WITH_SPEECH);
+                "audio", "lesson.webm", "audio/webm", AudioNormalizationTest.AUDIO_WITH_SPEECH);
     }
 
     private record Call(
@@ -113,104 +111,98 @@ class CrossAccessIT extends TelegramConversationBase {
         UUID student = helena.id();
         List<Call> calls =
                 List.of(
-                        new Call("aluno", get("/api/v1/alunos/{id}", student), 403),
+                        new Call("student", get("/api/v1/students/{id}", student), 403),
                         new Call(
                                 "em aberto",
-                                get("/api/v1/alunos/{id}/relatorio-em-aberto", student),
+                                get("/api/v1/students/{id}/open-report", student),
                                 403),
                         new Call(
                                 "registrar aula",
-                                multipart("/api/v1/alunos/{id}/relatorios-aula", student)
+                                multipart("/api/v1/students/{id}/lesson-reports", student)
                                         .file(audio()),
                                 403),
-                        new Call("semestres", get("/api/v1/alunos/{id}/semestres", student), 403),
+                        new Call("semesters", get("/api/v1/students/{id}/semesters", student), 403),
                         new Call(
                                 "prévia",
-                                get("/api/v1/alunos/{id}/semestres/2026-1/previa", student),
+                                get("/api/v1/students/{id}/semesters/2026-1/preview", student),
                                 403),
                         new Call(
                                 "gerar semestral",
                                 json(
-                                        "/api/v1/alunos/{id}/relatorios-semestrais",
-                                        "{\"periodoChave\":\"2026-1\"}",
+                                        "/api/v1/students/{id}/semester-reports",
+                                        "{\"periodKey\":\"2026-1\"}",
                                         student),
                                 403),
-                        new Call("histórico", get("/api/v1/alunos/{id}/historico", student), 403),
-                        new Call("trabalho", get("/api/v1/trabalhos/{id}", job), 404),
-                        new Call(
-                                "descartar trabalho",
-                                post("/api/v1/trabalhos/{id}/descarte", job),
-                                404),
+                        new Call("histórico", get("/api/v1/students/{id}/history", student), 403),
+                        new Call("job", get("/api/v1/jobs/{id}", job), 404),
+                        new Call("descartar trabalho", post("/api/v1/jobs/{id}/discard", job), 404),
                         new Call(
                                 "relatório de aula",
-                                get("/api/v1/relatorios-aula/{id}", openLesson),
+                                get("/api/v1/lesson-reports/{id}", openLesson),
                                 404),
                         new Call(
-                                "respostas",
+                                "answers",
                                 json(
-                                        "/api/v1/relatorios-aula/{id}/respostas",
-                                        "{\"texto\":\"Sim.\"}",
+                                        "/api/v1/lesson-reports/{id}/answers",
+                                        "{\"text\":\"Sim.\"}",
                                         openLesson),
                                 404),
                         new Call(
                                 "alteração de aula",
                                 json(
-                                        "/api/v1/relatorios-aula/{id}/alteracoes",
-                                        "{\"texto\":\"Mude.\",\"versaoBase\":1}",
+                                        "/api/v1/lesson-reports/{id}/changes",
+                                        "{\"text\":\"Mude.\",\"baseVersion\":1}",
                                         approvedLesson),
                                 404),
                         new Call(
                                 "nova tentativa",
-                                post("/api/v1/relatorios-aula/{id}/nova-tentativa", openLesson),
+                                post("/api/v1/lesson-reports/{id}/retry", openLesson),
                                 404),
                         new Call(
                                 "aprovar aula",
                                 json(
-                                        "/api/v1/relatorios-aula/{id}/aprovacao",
-                                        "{\"versaoConfirmada\":1}",
+                                        "/api/v1/lesson-reports/{id}/approval",
+                                        "{\"confirmedVersion\":1}",
                                         openLesson),
                                 404),
                         new Call(
                                 "cancelar aula",
-                                post("/api/v1/relatorios-aula/{id}/cancelamento", openLesson),
+                                post("/api/v1/lesson-reports/{id}/cancellation", openLesson),
                                 404),
                         new Call(
                                 "PDF de conferência de aula",
-                                get("/api/v1/relatorios-aula/{id}/versoes/1/pdf", approvedLesson),
+                                get("/api/v1/lesson-reports/{id}/versions/1/pdf", approvedLesson),
                                 404),
                         new Call(
                                 "PDF oficial de aula",
-                                get("/api/v1/relatorios-aula/{id}/pdf-oficial", approvedLesson),
+                                get("/api/v1/lesson-reports/{id}/official-pdf", approvedLesson),
                                 404),
-                        new Call(
-                                "semestral",
-                                get("/api/v1/relatorios-semestrais/{id}", semester),
-                                404),
+                        new Call("semestral", get("/api/v1/semester-reports/{id}", semester), 404),
                         new Call(
                                 "alteração semestral",
                                 json(
-                                        "/api/v1/relatorios-semestrais/{id}/alteracoes",
-                                        "{\"texto\":\"Mude.\",\"versaoBase\":1}",
+                                        "/api/v1/semester-reports/{id}/changes",
+                                        "{\"text\":\"Mude.\",\"baseVersion\":1}",
                                         semester),
                                 404),
                         new Call(
                                 "aprovar semestral",
                                 json(
-                                        "/api/v1/relatorios-semestrais/{id}/aprovacao",
-                                        "{\"versaoConfirmada\":1}",
+                                        "/api/v1/semester-reports/{id}/approval",
+                                        "{\"confirmedVersion\":1}",
                                         semester),
                                 404),
                         new Call(
                                 "cancelar semestral",
-                                post("/api/v1/relatorios-semestrais/{id}/cancelamento", semester),
+                                post("/api/v1/semester-reports/{id}/cancellation", semester),
                                 404),
                         new Call(
                                 "PDF de conferência semestral",
-                                get("/api/v1/relatorios-semestrais/{id}/versoes/1/pdf", semester),
+                                get("/api/v1/semester-reports/{id}/versions/1/pdf", semester),
                                 404),
                         new Call(
                                 "PDF oficial semestral",
-                                get("/api/v1/relatorios-semestrais/{id}/pdf-oficial", semester),
+                                get("/api/v1/semester-reports/{id}/official-pdf", semester),
                                 404));
 
         List<String> failures = new ArrayList<>();
@@ -225,7 +217,7 @@ class CrossAccessIT extends TelegramConversationBase {
                         call.description()
                                 + " → "
                                 + status
-                                + " (esperado "
+                                + " (expected "
                                 + call.expected()
                                 + ")");
             }
@@ -243,9 +235,9 @@ class CrossAccessIT extends TelegramConversationBase {
                                 "select status from lesson_report where id = ?",
                                 String.class,
                                 openLesson))
-                .isNotEqualTo("CANCELADO");
+                .isNotEqualTo("CANCELLED");
         assertThat(jdbc.queryForObject("select status from semester_report", String.class))
-                .isEqualTo("AGUARDANDO_CONFERENCIA");
+                .isEqualTo("AWAITING_REVIEW");
     }
 
     @Test
@@ -256,14 +248,14 @@ class CrossAccessIT extends TelegramConversationBase {
 
         for (String action :
                 List.of(
-                        "v1:foco:a" + openLesson,
-                        "v1:foco:a" + approvedLesson,
-                        "v1:foco:s" + semester,
-                        "v1:foco:t" + job,
-                        "v1:aprov:1",
+                        "v1:focus:a" + openLesson,
+                        "v1:focus:a" + approvedLesson,
+                        "v1:focus:s" + semester,
+                        "v1:focus:t" + job,
+                        "v1:approve:1",
                         "v1:pdf:",
-                        "v1:canc:",
-                        "v1:gerar:2026-1")) {
+                        "v1:cancel:",
+                        "v1:generate:2026-1")) {
             sendCallback(USER_CLARA, action);
         }
         sendText(USER_CLARA, "histórico");
@@ -280,8 +272,8 @@ class CrossAccessIT extends TelegramConversationBase {
                                 "select status from lesson_report where id = ?",
                                 String.class,
                                 openLesson))
-                .isNotEqualTo("CANCELADO");
+                .isNotEqualTo("CANCELLED");
         assertThat(jdbc.queryForObject("select status from semester_report", String.class))
-                .isEqualTo("AGUARDANDO_CONFERENCIA");
+                .isEqualTo("AWAITING_REVIEW");
     }
 }

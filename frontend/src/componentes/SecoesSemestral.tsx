@@ -26,7 +26,7 @@ export function SecoesSemestral({
               <div key={`${secao.numero}-${indice}`} className="secoes__campo">
                 {campo.rotulo ? <div className="secoes__rotulo">{campo.rotulo}</div> : null}
                 {vazio ? (
-                  <p className="secoes__vazia">{msg('SECAO_VAZIA')}</p>
+                  <p className="secoes__vazia">{msg('EMPTY_SECTION')}</p>
                 ) : campo.itens.length > 0 ? (
                   <ul className="secoes__lista">
                     {campo.itens.map((item, i) => (

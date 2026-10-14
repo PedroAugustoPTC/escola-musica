@@ -49,14 +49,14 @@ class JobQueuePostgresAdapterIT extends IntegrationBase {
 
     private ProcessingJob registration(Student student) {
         return ProcessingJob.create(
-                JobType.REGISTRO_AULA,
+                JobType.LESSON_REGISTRATION,
                 clara.id(),
                 student.id(),
                 null,
                 null,
                 Channel.WEB,
                 Medium.AUDIO,
-                JobStep.ENVIANDO,
+                JobStep.UPLOADING,
                 clock.now());
     }
 
@@ -93,7 +93,7 @@ class JobQueuePostgresAdapterIT extends IntegrationBase {
         assertThat(reserved).hasSize(12);
         assertThat(
                         jdbc.queryForObject(
-                                "select count(*) from processing_job where status = 'EM_EXECUCAO'",
+                                "select count(*) from processing_job where status = 'RUNNING'",
                                 Integer.class))
                 .isEqualTo(12);
     }
@@ -107,7 +107,7 @@ class JobQueuePostgresAdapterIT extends IntegrationBase {
                 .isInstanceOf(ConcurrencyConflictException.class);
 
         first.start(clock.now());
-        first.complete(JobResult.AUDIO_NAO_PROCESSAVEL, clock.now());
+        first.complete(JobResult.AUDIO_NOT_PROCESSABLE, clock.now());
         queue.update(first);
         queue.enqueue(registration(matteo));
         assertThat(jdbc.queryForObject("select count(*) from processing_job", Integer.class))
@@ -119,7 +119,7 @@ class JobQueuePostgresAdapterIT extends IntegrationBase {
         ProcessingJob withoutFile = registration(matteo);
         queue.enqueue(withoutFile);
         ProcessingJob withFile = registration(scenario.student(clara, "Helena Prado", "Violino"));
-        withFile.defineTemporaryFile("/tmp/audios/sumiu.webm");
+        withFile.defineTemporaryFile("/tmp/audios/vanished.webm");
         queue.enqueue(withFile);
         queue.reserveNext(clock.now());
         queue.reserveNext(clock.now());
@@ -127,10 +127,10 @@ class JobQueuePostgresAdapterIT extends IntegrationBase {
         assertThat(queue.recoverStuck(clock.now())).isEqualTo(2);
 
         assertThat(queue.searchById(withoutFile.id()).orElseThrow().status())
-                .isEqualTo(JobStatus.PENDENTE);
+                .isEqualTo(JobStatus.PENDING);
         ProcessingJob failed = queue.searchById(withFile.id()).orElseThrow();
-        assertThat(failed.status()).isEqualTo(JobStatus.FALHOU);
-        assertThat(failed.result()).isEqualTo(JobResult.AUDIO_NAO_PROCESSAVEL);
+        assertThat(failed.status()).isEqualTo(JobStatus.FAILED);
+        assertThat(failed.result()).isEqualTo(JobResult.AUDIO_NOT_PROCESSABLE);
         assertThat(failed.temporaryFile()).isNull();
     }
 
@@ -146,7 +146,7 @@ class JobQueuePostgresAdapterIT extends IntegrationBase {
         assertThat(queue.markDelayNotice(job.id())).isTrue();
         assertThat(queue.markDelayNotice(job.id())).isFalse();
 
-        doWorker.advance(JobStep.TRANSCREVENDO);
+        doWorker.advance(JobStep.TRANSCRIBING);
         queue.update(doWorker);
 
         assertThat(queue.searchById(job.id()).orElseThrow().delayNoticeSent()).isTrue();
@@ -160,7 +160,7 @@ class JobQueuePostgresAdapterIT extends IntegrationBase {
         ProcessingJob doWorker = queue.reserveNext(clock.now()).orElseThrow();
         queue.registerStepMessage(job.id(), 321);
 
-        doWorker.advance(JobStep.TRANSCREVENDO);
+        doWorker.advance(JobStep.TRANSCRIBING);
         queue.update(doWorker);
         assertThat(queue.searchById(job.id()).orElseThrow().parameter(ProcessingJob.STEP_MESSAGE))
                 .contains("321");
@@ -169,10 +169,10 @@ class JobQueuePostgresAdapterIT extends IntegrationBase {
         ProcessingJob discarded = queue.searchById(job.id()).orElseThrow();
         discarded.discard(clock.now());
         queue.update(discarded);
-        doWorker.advance(JobStep.ESTRUTURANDO);
+        doWorker.advance(JobStep.STRUCTURING);
         queue.update(doWorker);
 
         assertThat(queue.searchById(job.id()).orElseThrow().status())
-                .isEqualTo(JobStatus.DESCARTADO);
+                .isEqualTo(JobStatus.DISCARDED);
     }
 }

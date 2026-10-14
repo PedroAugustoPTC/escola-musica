@@ -33,12 +33,12 @@ class RegistryPersistenceIT extends IntegrationBase {
 
     @Test
     void teacherRoundTrip() {
-        Teacher clara = Teacher.create("Clara Souza", "clara@exemplo.test", true, now);
+        Teacher clara = Teacher.create("Clara Souza", "clara@example.test", true, now);
         clara.replaceCode(
                 protection.hashAccessCode(AccessCode.of("K7QM2XPA")), now, Duration.ofDays(7));
         teachers.save(clara);
 
-        Teacher read = teachers.searchByEmail("clara@exemplo.test").orElseThrow();
+        Teacher read = teachers.searchByEmail("clara@example.test").orElseThrow();
         assertThat(read.id()).isEqualTo(clara.id());
         assertThat(read.name()).isEqualTo("Clara Souza");
         assertThat(read.accessCodeExpiresAt())
@@ -98,8 +98,8 @@ class RegistryPersistenceIT extends IntegrationBase {
 
     @Test
     void assignmentAndList() {
-        Teacher clara = Teacher.create("Clara", "clara@exemplo.test", true, now);
-        Teacher bruno = Teacher.create("Bruno", "bruno@exemplo.test", true, now);
+        Teacher clara = Teacher.create("Clara", "clara@example.test", true, now);
+        Teacher bruno = Teacher.create("Bruno", "bruno@example.test", true, now);
         teachers.save(clara);
         teachers.save(bruno);
         Student olavo = student("Olavo Torrente", "123.456.789-09");

@@ -34,7 +34,7 @@ public final class ActionsSchemaV1 {
 
     /** Caminho de um arquivo de {@code specs/002-api-interna-canal-telegram/contracts}. */
     public static Path contract(String file) {
-        String portal = System.getenv("CONTRATO_API");
+        String portal = System.getenv("CONTRACT_API");
         if (portal != null && Files.exists(Path.of(portal))) {
             // .../specs/001-fluxo-relatorios/contracts/api-portal.openapi.yaml -> .../specs
             Path specs = Path.of(portal).toAbsolutePath().getParent().getParent().getParent();
@@ -79,7 +79,7 @@ public final class ActionsSchemaV1 {
                         JsonNode contract =
                                 JSON.readTree(
                                         Files.readString(
-                                                contract("acoes-v1.schema.json"),
+                                                contract("actions-v1.schema.json"),
                                                 StandardCharsets.UTF_8));
                         ObjectNode wrapper = JSON.createObjectNode();
                         wrapper.put("$schema", "https://json-schema.org/draft/2020-12/schema");

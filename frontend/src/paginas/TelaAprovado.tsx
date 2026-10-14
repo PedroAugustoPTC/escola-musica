@@ -41,13 +41,13 @@ export function TelaAprovado({ semestral = false }: { semestral?: boolean }) {
 
   const dados = relatorio.data;
   if (!dados) return null;
-  const alunoNome = 'alunoNome' in dados ? dados.alunoNome : dados.informacoesGerais.nome;
-  const aprovadoEm = dados.aprovadoEm ?? dados.atualizadoEm;
+  const alunoNome = 'studentName' in dados ? dados.studentName : dados.generalInformation.name;
+  const aprovadoEm = dados.approvedAt ?? dados.updatedAt;
   const data = dataDoInstante(aprovadoEm);
   const hora = horaDoInstante(aprovadoEm);
   // como no protótipo: a aula pela data; o semestral pelo período
   const referencia =
-    'dataAula' in dados ? formatarData(dados.dataAula) : dados.informacoesGerais.periodoRotulo;
+    'lessonDate' in dados ? formatarData(dados.lessonDate) : dados.generalInformation.periodLabel;
 
   return (
     <Estrutura contexto={contexto}>
@@ -62,7 +62,7 @@ export function TelaAprovado({ semestral = false }: { semestral?: boolean }) {
           Relatório aprovado
         </h1>
         <img src={`/marca/fb-filete-${tintaOuro}.png`} alt="" className="aprovado__filete" />
-        <p className="subtitulo">{msg('RELATORIO_APROVADO', { data, hora })}</p>
+        <p className="subtitulo">{msg('REPORT_APPROVED', { data, hora })}</p>
         <div className="aprovado__dados">
           <div>
             <div className="aprovado__rotulo">ALUNO</div>
@@ -77,10 +77,10 @@ export function TelaAprovado({ semestral = false }: { semestral?: boolean }) {
         </div>
         <div className="aprovado__acoes">
           <Botao tamanho="grande" bloco onClick={() => navegar('/alunos?registrar=1')}>
-            {msg('BOTAO_REGISTRAR_OUTRA_AULA')}
+            {msg('REGISTER_OTHER_LESSON_BUTTON')}
           </Botao>
           <div className="aprovado__acoes-secundarias">
-            <Botao variante="secundario" onClick={() => navegar(`/alunos/${dados.alunoId}/historico`)}>
+            <Botao variante="secundario" onClick={() => navegar(`/alunos/${dados.studentId}/historico`)}>
               Ver histórico
             </Botao>
             <Botao variante="secundario" onClick={() => navegar('/alunos')}>

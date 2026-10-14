@@ -73,7 +73,7 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
                 .requestCache(AbstractHttpConfigurer::disable)
-                .anonymous(anonymous -> anonymous.principal("anonimo"))
+                .anonymous(anonymous -> anonymous.principal("anonymous"))
                 .headers(
                         headers ->
                                 headers.contentTypeOptions(option -> {})
@@ -81,7 +81,7 @@ public class SecurityConfig {
                                         .cacheControl(option -> {}))
                 .authorizeHttpRequests(
                         rules ->
-                                rules.requestMatchers(HttpMethod.POST, "/api/v1/sessao")
+                                rules.requestMatchers(HttpMethod.POST, "/api/v1/session")
                                         .permitAll()
                                         .requestMatchers("/telegram/webhook", "/error")
                                         .permitAll()
@@ -105,8 +105,8 @@ public class SecurityConfig {
                                                                                             .CODE_ATTRIBUTE)
                                                                             instanceof ErrorCode c
                                                                     ? c
-                                                                    : ErrorCode.NAO_AUTENTICADO;
-                                                    if (code == ErrorCode.SESSAO_EXPIRADA) {
+                                                                    : ErrorCode.NOT_AUTHENTICATED;
+                                                    if (code == ErrorCode.SESSION_EXPIRED) {
                                                         response.addHeader(
                                                                 SessionCookie.header(),
                                                                 cookieSession.remove());
@@ -118,7 +118,7 @@ public class SecurityConfig {
                                                         write(
                                                                 response,
                                                                 403,
-                                                                ErrorCode.DADOS_INVALIDOS,
+                                                                ErrorCode.INVALID_DATA,
                                                                 catalog)))
                 .addFilterBefore(
                         new SessionCookieFilter(validateSession, cookieSession),

@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ErroApi, api, requisitar, type Esquemas } from './clienteApi';
 
-export type SessaoDto = Esquemas['SessaoDto'];
+export type SessaoDto = Esquemas['SessionDto'];
 
 export const CHAVE_SESSAO = ['sessao'] as const;
 
@@ -11,7 +11,7 @@ export function useSessao() {
     queryKey: CHAVE_SESSAO,
     queryFn: async () => {
       try {
-        return await requisitar<SessaoDto>('/sessao', { ignorar401: true });
+        return await requisitar<SessaoDto>('/session', { ignorar401: true });
       } catch (erro) {
         if (erro instanceof ErroApi && erro.status === 401) return null;
         throw erro;
@@ -26,7 +26,7 @@ export function useEntrar() {
   const cliente = useQueryClient();
   return useMutation<SessaoDto, ErroApi, string>({
     mutationFn: (codigo) =>
-      requisitar<SessaoDto>('/sessao', { metodo: 'POST', corpo: { codigo }, ignorar401: true }),
+      requisitar<SessaoDto>('/session', { metodo: 'POST', corpo: { code: codigo }, ignorar401: true }),
     onSuccess: (sessao) => {
       cliente.clear();
       cliente.setQueryData(CHAVE_SESSAO, sessao);
@@ -38,7 +38,7 @@ export function useEntrar() {
 export function useEncerrarSessao() {
   const cliente = useQueryClient();
   return useMutation<void, ErroApi, void>({
-    mutationFn: () => api.delete<void>('/sessao'),
+    mutationFn: () => api.delete<void>('/session'),
     onSuccess: () => {
       cliente.clear();
       cliente.setQueryData(CHAVE_SESSAO, null);

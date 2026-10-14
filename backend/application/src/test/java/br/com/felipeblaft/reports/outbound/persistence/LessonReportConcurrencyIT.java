@@ -76,11 +76,11 @@ class LessonReportConcurrencyIT extends IntegrationBase {
                         start.await();
                         try {
                             approve.run(clara.id(), reportId, 1, channel);
-                            return "APROVADO";
+                            return "APPROVED";
                         } catch (DomainException refuses) {
                             return refuses.code().name();
                         } catch (ConcurrencyConflictException conflict) {
-                            return "CONFLITO";
+                            return "CONFLICT";
                         }
                     };
             results.add(channels.submit(attempt));
@@ -92,18 +92,18 @@ class LessonReportConcurrencyIT extends IntegrationBase {
         }
         channels.shutdown();
 
-        assertThat(codes).containsOnlyOnce("APROVADO");
+        assertThat(codes).containsOnlyOnce("APPROVED");
         assertThat(codes)
-                .filteredOn(c -> !c.equals("APROVADO"))
+                .filteredOn(c -> !c.equals("APPROVED"))
                 .singleElement()
-                .isIn(ErrorCode.RELATORIO_JA_APROVADO.name(), "CONFLITO");
+                .isIn(ErrorCode.REPORT_ALREADY_APPROVED.name(), "CONFLICT");
         assertThat(
                         jdbc.queryForObject(
-                                "select count(*) from pdf_document where type = 'OFICIAL'",
+                                "select count(*) from pdf_document where type = 'OFFICIAL'",
                                 Integer.class))
                 .isEqualTo(1);
         assertThat(jdbc.queryForObject("select status from lesson_report", String.class))
-                .isEqualTo("APROVADO");
+                .isEqualTo("APPROVED");
     }
 
     @Test
@@ -113,7 +113,7 @@ class LessonReportConcurrencyIT extends IntegrationBase {
         assertThatThrownBy(() -> approve.run(clara.id(), reportId, 1, Channel.TELEGRAM))
                 .isInstanceOfSatisfying(
                         DomainException.class,
-                        e -> assertThat(e.code()).isEqualTo(ErrorCode.RELATORIO_JA_APROVADO));
+                        e -> assertThat(e.code()).isEqualTo(ErrorCode.REPORT_ALREADY_APPROVED));
     }
 
     @Test

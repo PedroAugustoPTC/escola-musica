@@ -41,12 +41,12 @@ class HistoryContractIT extends ContractApiBase {
 
     @Test
     void emptyHistoryAndOtherTeachersStudent() throws Exception {
-        mvc.perform(get("/api/v1/alunos/{id}/historico", matteo.id()).cookie(session))
+        mvc.perform(get("/api/v1/students/{id}/history", matteo.id()).cookie(session))
                 .andExpect(status().isOk())
                 .andExpect(followsContract())
-                .andExpect(jsonPath("$.aluno.nome").value("Matteo Ferreira"))
-                .andExpect(jsonPath("$.itens", hasSize(0)));
-        mvc.perform(get("/api/v1/alunos/{id}/historico", helena.id()).cookie(session))
+                .andExpect(jsonPath("$.student.name").value("Matteo Ferreira"))
+                .andExpect(jsonPath("$.items", hasSize(0)));
+        mvc.perform(get("/api/v1/students/{id}/history", helena.id()).cookie(session))
                 .andExpect(status().isForbidden())
                 .andExpect(followsContract());
     }
@@ -60,46 +60,42 @@ class HistoryContractIT extends ContractApiBase {
                 scenario.approvedLesson(clara, matteo, LocalDate.of(2026, 9, 1), "Estudo");
         mvc.perform(
                         authenticated(
-                                        post(
-                                                "/api/v1/alunos/{id}/relatorios-semestrais",
-                                                matteo.id()),
+                                        post("/api/v1/students/{id}/semester-reports", matteo.id()),
                                         session)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"periodoChave\":\"2026-1\"}"))
+                                .content("{\"periodKey\":\"2026-1\"}"))
                 .andExpect(status().isAccepted());
         scenario.processQueue();
         UUID semester = jdbc.queryForObject("select id from semester_report", UUID.class);
         mvc.perform(
                         authenticated(
-                                        post(
-                                                "/api/v1/relatorios-semestrais/{id}/aprovacao",
-                                                semester),
+                                        post("/api/v1/semester-reports/{id}/approval", semester),
                                         session)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"versaoConfirmada\":1}"))
+                                .content("{\"confirmedVersion\":1}"))
                 .andExpect(status().isOk());
 
-        mvc.perform(get("/api/v1/alunos/{id}/historico", matteo.id()).cookie(session))
+        mvc.perform(get("/api/v1/students/{id}/history", matteo.id()).cookie(session))
                 .andExpect(status().isOk())
                 .andExpect(followsContract())
-                .andExpect(jsonPath("$.itens", hasSize(3)))
-                .andExpect(jsonPath("$.itens[0].relatorioId").value(september.id().toString()))
-                .andExpect(jsonPath("$.itens[0].rotulo").value("Aula de 01/09/2026"))
-                .andExpect(jsonPath("$.itens[0].dataAula").value("2026-09-01"))
-                .andExpect(jsonPath("$.itens[1].relatorioId").value(milestone.id().toString()))
-                .andExpect(jsonPath("$.itens[2].tipo").value("SEMESTRAL"))
+                .andExpect(jsonPath("$.items", hasSize(3)))
+                .andExpect(jsonPath("$.items[0].reportId").value(september.id().toString()))
+                .andExpect(jsonPath("$.items[0].label").value("Aula de 01/09/2026"))
+                .andExpect(jsonPath("$.items[0].lessonDate").value("2026-09-01"))
+                .andExpect(jsonPath("$.items[1].reportId").value(milestone.id().toString()))
+                .andExpect(jsonPath("$.items[2].type").value("SEMESTER"))
                 .andExpect(
-                        jsonPath("$.itens[2].rotulo").value("Semestral (01/01/2026 a 30/06/2026)"))
-                .andExpect(jsonPath("$.itens[2].periodoInicio").value("2026-01-01"));
+                        jsonPath("$.items[2].label").value("Semestral (01/01/2026 a 30/06/2026)"))
+                .andExpect(jsonPath("$.items[2].periodStart").value("2026-01-01"));
 
-        mvc.perform(get("/api/v1/relatorios-aula/{id}/pdf-oficial", september.id()).cookie(session))
+        mvc.perform(get("/api/v1/lesson-reports/{id}/official-pdf", september.id()).cookie(session))
                 .andExpect(status().isOk())
                 .andExpect(followsContract())
                 .andExpect(
                         header().string(
                                         "Content-Disposition",
                                         "inline; filename=\"relatorio-aula-2026-09-01.pdf\""));
-        mvc.perform(get("/api/v1/relatorios-semestrais/{id}/pdf-oficial", semester).cookie(session))
+        mvc.perform(get("/api/v1/semester-reports/{id}/official-pdf", semester).cookie(session))
                 .andExpect(status().isOk())
                 .andExpect(followsContract())
                 .andExpect(
@@ -107,12 +103,12 @@ class HistoryContractIT extends ContractApiBase {
                                         "Content-Disposition",
                                         "inline; filename=\"relatorio-semestral-2026-1.pdf\""));
         mvc.perform(
-                        get("/api/v1/relatorios-aula/{id}/pdf-oficial", september.id())
+                        get("/api/v1/lesson-reports/{id}/official-pdf", september.id())
                                 .cookie(sessionBruno))
                 .andExpect(status().isNotFound())
                 .andExpect(followsContract());
         mvc.perform(
-                        get("/api/v1/relatorios-semestrais/{id}/pdf-oficial", semester)
+                        get("/api/v1/semester-reports/{id}/official-pdf", semester)
                                 .cookie(sessionBruno))
                 .andExpect(status().isNotFound())
                 .andExpect(followsContract());

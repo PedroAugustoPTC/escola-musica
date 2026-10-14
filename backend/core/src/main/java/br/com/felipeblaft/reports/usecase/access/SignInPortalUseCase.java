@@ -21,7 +21,7 @@ public class SignInPortalUseCase {
 
         @Override
         public String toString() {
-            return "Resultado[sessao=" + session.id() + "]";
+            return "Result[session=" + session.id() + "]";
         }
     }
 

@@ -62,9 +62,9 @@ public class TelegramSemesterReportPresentation {
                 view.jobInProgress()
                         .map(t -> t.step().name())
                         .or(() -> Optional.ofNullable(view.report().step()).map(Enum::name))
-                        .orElse("APLICANDO_ALTERACAO");
+                        .orElse("APPLYING_CHANGE");
         return presenter.text(
-                "PROCESSAMENTO_EM_ANDAMENTO", Map.of("etapa", presenter.formatting().step(step)));
+                "PROCESSING_IN_PROGRESS", Map.of("step", presenter.formatting().step(step)));
     }
 
     public List<TelegramOutput> present(
@@ -78,9 +78,9 @@ public class TelegramSemesterReportPresentation {
         if (!report.status().isOpen()) {
             conversation.cleanFocus();
             String code =
-                    report.status() == ReportStatus.APROVADO
-                            ? "RELATORIO_JA_APROVADO"
-                            : "RELATORIO_CANCELADO_ERRO";
+                    report.status() == ReportStatus.APPROVED
+                            ? "REPORT_ALREADY_APPROVED"
+                            : "REPORT_CANCELLED_ERROR";
             return List.of(
                     new Message(
                             chatId,
@@ -89,7 +89,7 @@ public class TelegramSemesterReportPresentation {
                             presenter.homeActions()));
         }
         conversation.focus(
-                new FocusReport(ReportType.SEMESTRAL, report.id()), report.currentVersion());
+                new FocusReport(ReportType.SEMESTER, report.id()), report.currentVersion());
         if (inProcessing(view)) {
             return List.of(
                     new Message(
@@ -106,7 +106,7 @@ public class TelegramSemesterReportPresentation {
         reviewDocument(chatId, teacherId, report)
                 .ifPresentOrElse(
                         outputs::add,
-                        () -> outputs.add(presenter.simple(chatId, "CONFERENCIA_PDF_GERANDO")));
+                        () -> outputs.add(presenter.simple(chatId, "REVIEW_PDF_GENERATING")));
         outputs.add(lessonPresentation.reviewActions(chatId, report.currentVersion(), null));
         return outputs;
     }
@@ -116,7 +116,7 @@ public class TelegramSemesterReportPresentation {
         try {
             GetReportDocumentUseCase.ObtainedDocument document =
                     getDocument.review(
-                            teacherId, ReportType.SEMESTRAL, report.id(), report.currentVersion());
+                            teacherId, ReportType.SEMESTER, report.id(), report.currentVersion());
             return Optional.of(
                     new Document(
                             chatId,
@@ -125,7 +125,7 @@ public class TelegramSemesterReportPresentation {
                             null,
                             DocumentReference.review(
                                     teacherId,
-                                    ReportType.SEMESTRAL,
+                                    ReportType.SEMESTER,
                                     report.id(),
                                     report.currentVersion()),
                             presenter.noticePdfUnavailable(chatId, "pdf", null)));
@@ -136,28 +136,27 @@ public class TelegramSemesterReportPresentation {
 
     public String reviewText(SemesterReport report) {
         StringBuilder text = new StringBuilder();
-        text.append("<b>").append(presenter.text("CONFERENCIA_TITULO")).append("</b>\n");
-        text.append(presenter.text("CABECALHO_ALUNO"))
+        text.append("<b>").append(presenter.text("REVIEW_TITLE")).append("</b>\n");
+        text.append(presenter.text("STUDENT_HEADER"))
                 .append(": ")
                 .append(TelegramPresenter.escape(report.generalInformation().name()))
                 .append('\n');
-        text.append(presenter.text("CABECALHO_PERIODO"))
+        text.append(presenter.text("PERIOD_HEADER"))
                 .append(": ")
                 .append(TelegramPresenter.escape(sections.periodLabel(report.period().key())))
                 .append('\n');
-        text.append(
-                presenter.text("CONFERENCIA_VERSAO", Map.of("versao", report.currentVersion())));
+        text.append(presenter.text("REVIEW_VERSION", Map.of("version", report.currentVersion())));
         text.append("\n\n")
                 .append(
                         presenter.text(
-                                "AULAS_CONSIDERADAS",
-                                Map.of("quantidade", report.consideredLessonCount())));
+                                "CONSIDERED_LESSONS",
+                                Map.of("quantity", report.consideredLessonCount())));
         if (report.openReportCount() > 0) {
             text.append('\n')
                     .append(
                             presenter.text(
-                                    "HA_RELATORIOS_EM_ABERTO",
-                                    Map.of("quantidade", report.openReportCount())));
+                                    "OPEN_REPORTS_EXIST",
+                                    Map.of("quantity", report.openReportCount())));
         }
         for (Section section : sections.sections(report.generalInformation(), report.content())) {
             text.append("\n\n<b>")
@@ -173,7 +172,7 @@ public class TelegramSemesterReportPresentation {
                             .append("</i>: ");
                 }
                 if (field.empty()) {
-                    text.append(presenter.text("SECAO_VAZIA"));
+                    text.append(presenter.text("EMPTY_SECTION"));
                 } else if (field.getItems().isEmpty()) {
                     text.append(TelegramPresenter.escape(field.getText()));
                 } else {

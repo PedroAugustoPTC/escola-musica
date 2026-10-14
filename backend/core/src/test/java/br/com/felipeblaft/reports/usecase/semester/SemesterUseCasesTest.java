@@ -48,7 +48,7 @@ class SemesterUseCasesTest {
     private SemesterReport semesterInReview() {
         twoApprovedLessonsInSemester1();
         c.llm.schedule(
-                TaskLlm.CONSOLIDACAO_SEMESTRAL, ReportScenario.semesterOutput("Bom semestre."));
+                TaskLlm.SEMESTER_CONSOLIDATION, ReportScenario.semesterOutput("Bom semestre."));
         c.generateSemester.run(c.clara.id(), c.matteo.id(), "2026-1", false, Channel.WEB);
         c.processQueue();
         return c.semester.reports.values().iterator().next();
@@ -66,7 +66,9 @@ class SemesterUseCasesTest {
         assertThat(semesters.getFirst().inProgress()).isTrue();
         assertThat(semesters.getFirst().preSelected()).isTrue();
         assertThat(semesters.get(1).preSelected()).isFalse();
-        code(() -> c.listSemesters.run(c.clara.id(), c.helena.id()), ErrorCode.ALUNO_NAO_ASSOCIADO);
+        code(
+                () -> c.listSemesters.run(c.clara.id(), c.helena.id()),
+                ErrorCode.STUDENT_NOT_ASSIGNED);
     }
 
     @Test
@@ -88,7 +90,7 @@ class SemesterUseCasesTest {
                 () ->
                         c.generateSemester.run(
                                 c.clara.id(), c.matteo.id(), "2026-1", false, Channel.WEB),
-                ErrorCode.SEM_AULAS_APROVADAS_NO_PERIODO);
+                ErrorCode.NO_APPROVED_LESSONS_IN_PERIOD);
         assertThat(c.queue.jobs).isEmpty();
         assertThat(c.llm.inputs).isEmpty();
     }
@@ -114,13 +116,13 @@ class SemesterUseCasesTest {
                 .isInstanceOfSatisfying(
                         DomainException.class,
                         e -> {
-                            assertThat(e.code()).isEqualTo(ErrorCode.HA_RELATORIOS_EM_ABERTO);
-                            assertThat(e.details()).containsEntry("quantidade", 1);
+                            assertThat(e.code()).isEqualTo(ErrorCode.OPEN_REPORTS_EXIST);
+                            assertThat(e.details()).containsEntry("quantity", 1);
                         });
 
         ProcessingJob job =
                 c.generateSemester.run(c.clara.id(), c.matteo.id(), "2026-1", true, Channel.WEB);
-        assertThat(job.type()).isEqualTo(JobType.CONSOLIDACAO_SEMESTRAL);
+        assertThat(job.type()).isEqualTo(JobType.SEMESTER_CONSOLIDATION);
         assertThat(job.parameter(ProcessingJob.PERIOD_KEY)).contains("2026-1");
     }
 
@@ -135,7 +137,7 @@ class SemesterUseCasesTest {
                 () ->
                         c.generateSemester.run(
                                 c.clara.id(), c.matteo.id(), "2026-1", false, Channel.WEB),
-                ErrorCode.RELATORIO_EM_ABERTO);
+                ErrorCode.REPORT_ALREADY_OPEN);
     }
 
     @Test
@@ -148,7 +150,7 @@ class SemesterUseCasesTest {
                 .containsExactly(LocalDate.of(2026, 3, 10), LocalDate.of(2026, 5, 20));
         assertThat(input.lessonCount()).isEqualTo(2);
         assertThat(input.toString()).doesNotContain("Matteo").doesNotContain("2012");
-        assertThat(report.status()).isEqualTo(ReportStatus.AGUARDANDO_CONFERENCIA);
+        assertThat(report.status()).isEqualTo(ReportStatus.AWAITING_REVIEW);
         assertThat(report.currentVersion()).isEqualTo(1);
         assertThat(report.consideredLessonCount()).isEqualTo(2);
         assertThat(report.generalInformation().name()).isEqualTo("Matteo Mafra");
@@ -156,23 +158,22 @@ class SemesterUseCasesTest {
         assertThat(report.content().finalOpinion()).isEqualTo("Bom semestre.");
         assertThat(c.pdf.semesterModels).hasSize(1);
         ProcessingJob job = c.queue.jobs.values().iterator().next();
-        assertThat(job.result()).isEqualTo(JobResult.PRONTO_PARA_CONFERENCIA);
+        assertThat(job.result()).isEqualTo(JobResult.READY_FOR_REVIEW);
         assertThat(job.reportId()).isEqualTo(report.id());
-        assertThat(c.notification.events)
-                .contains("etapa:CONSOLIDANDO", "resultado:PRONTO_PARA_CONFERENCIA");
+        assertThat(c.notification.events).contains("step:CONSOLIDATING", "result:READY_FOR_REVIEW");
     }
 
     @Test
     void consolidationFailureCreatesNothing() {
         twoApprovedLessonsInSemester1();
-        c.llm.schedule(TaskLlm.CONSOLIDACAO_SEMESTRAL, new ProviderUnavailableException("teste"));
+        c.llm.schedule(TaskLlm.SEMESTER_CONSOLIDATION, new ProviderUnavailableException("test"));
         c.generateSemester.run(c.clara.id(), c.matteo.id(), "2026-1", false, Channel.WEB);
 
         c.processQueue();
 
         assertThat(c.semester.reports).isEmpty();
         assertThat(c.queue.jobs.values().iterator().next().result())
-                .isEqualTo(JobResult.FALHA_CONSOLIDACAO);
+                .isEqualTo(JobResult.CONSOLIDATION_FAILED);
         // pode gerar de novo
         c.generateSemester.run(c.clara.id(), c.matteo.id(), "2026-1", false, Channel.WEB);
     }
@@ -181,12 +182,12 @@ class SemesterUseCasesTest {
     void changeGeneratesNewVersionButNoChangeDoesNot() {
         SemesterReport report = semesterInReview();
         c.llm.schedule(
-                TaskLlm.REVISAO_SEMESTRAL,
+                TaskLlm.SEMESTER_REVISION,
                 ReportScenario.semesterOutput("Ótimo semestre."),
                 br.com.felipeblaft.reports.port.AiSemesterReportOutput.of(
                         br.com.felipeblaft.reports.domain.semester.SemesterReportContent.empty(),
                         true,
-                        "APROVAR"));
+                        "APPROVE"));
 
         c.changeSemester.changeByText(
                 c.clara.id(), report.id(), "Diga que foi ótimo.", 1, Channel.TELEGRAM);
@@ -194,23 +195,23 @@ class SemesterUseCasesTest {
         assertThat(report.currentVersion()).isEqualTo(2);
         assertThat(report.content().finalOpinion()).isEqualTo("Ótimo semestre.");
         assertThat(c.llm.inputs.getLast()).isInstanceOf(SemesterRevisionInput.class);
-        assertThat(c.interactions.last(ReportType.SEMESTRAL, report.id()).orElseThrow().result())
-                .isEqualTo(InteractionResult.APLICADA);
+        assertThat(c.interactions.last(ReportType.SEMESTER, report.id()).orElseThrow().result())
+                .isEqualTo(InteractionResult.APPLIED);
 
         c.changeSemester.changeByText(c.clara.id(), report.id(), "aprova aí", 2, Channel.WEB);
         c.processQueue();
         assertThat(report.currentVersion()).isEqualTo(2);
         assertThat(c.queue.jobs.values().stream().reduce((a, b) -> b).orElseThrow().result())
-                .isEqualTo(JobResult.PEDIDO_DE_ACAO_IGNORADO);
+                .isEqualTo(JobResult.ACTION_REQUEST_IGNORED);
 
         code(
                 () -> c.changeSemester.changeByText(c.clara.id(), report.id(), "x", 1, Channel.WEB),
-                ErrorCode.VERSAO_DESATUALIZADA);
+                ErrorCode.STALE_VERSION);
         code(
                 () ->
                         c.changeSemester.changeByText(
                                 c.clara.id(), report.id(), "  ", 2, Channel.WEB),
-                ErrorCode.ALTERACAO_VAZIA);
+                ErrorCode.EMPTY_CHANGE);
     }
 
     @Test
@@ -220,37 +221,37 @@ class SemesterUseCasesTest {
         Approval approval = c.approveSemester.run(c.clara.id(), report.id(), 1, Channel.WEB);
 
         assertThat(approval.approvedVersion()).isEqualTo(1);
-        assertThat(c.pdf.semesterModels.getLast().status().name()).isEqualTo("OFICIAL");
+        assertThat(c.pdf.semesterModels.getLast().status().name()).isEqualTo("OFFICIAL");
         ObtainedDocument official =
-                c.getDocument.official(c.clara.id(), ReportType.SEMESTRAL, report.id());
+                c.getDocument.official(c.clara.id(), ReportType.SEMESTER, report.id());
         assertThat(official.fileName()).isEqualTo("relatorio-semestral-2026-1.pdf");
         code(
                 () ->
                         c.generateSemester.run(
                                 c.clara.id(), c.matteo.id(), "2026-1", false, Channel.WEB),
-                ErrorCode.SEMESTRAL_JA_APROVADO);
+                ErrorCode.SEMESTER_REPORT_ALREADY_APPROVED);
         code(
                 () -> c.approveSemester.run(c.clara.id(), report.id(), 1, Channel.TELEGRAM),
-                ErrorCode.RELATORIO_JA_APROVADO);
+                ErrorCode.REPORT_ALREADY_APPROVED);
     }
 
     @Test
     void cancelReleasesNewGenerationAndOtherTeacherDoesNotSee() {
         SemesterReport report = semesterInReview();
-        code(() -> c.getSemester.run(c.bruno.id(), report.id()), ErrorCode.RECURSO_NAO_ENCONTRADO);
+        code(() -> c.getSemester.run(c.bruno.id(), report.id()), ErrorCode.RESOURCE_NOT_FOUND);
 
         SemesterReportView view = c.getSemester.run(c.clara.id(), report.id());
         assertThat(view.pdfAvailable()).isTrue();
         assertThat(
                         c.getDocument
-                                .review(c.clara.id(), ReportType.SEMESTRAL, report.id(), 1)
+                                .review(c.clara.id(), ReportType.SEMESTER, report.id(), 1)
                                 .fileName())
                 .isEqualTo("relatorio-semestral-2026-1-v1.pdf");
 
         c.cancelSemester.cancel(c.clara.id(), report.id());
 
-        assertThat(report.status()).isEqualTo(ReportStatus.CANCELADO);
-        c.llm.schedule(TaskLlm.CONSOLIDACAO_SEMESTRAL, ReportScenario.semesterOutput("De novo."));
+        assertThat(report.status()).isEqualTo(ReportStatus.CANCELLED);
+        c.llm.schedule(TaskLlm.SEMESTER_CONSOLIDATION, ReportScenario.semesterOutput("De novo."));
         c.generateSemester.run(c.clara.id(), c.matteo.id(), "2026-1", false, Channel.WEB);
         c.processQueue();
         assertThat(c.semester.reports).hasSize(2);
@@ -268,6 +269,6 @@ class SemesterUseCasesTest {
         assertThat(c.semester.reports).isEmpty();
         code(
                 () -> c.cancelSemester.discardConsolidation(c.bruno.id(), job.id()),
-                ErrorCode.RECURSO_NAO_ENCONTRADO);
+                ErrorCode.RESOURCE_NOT_FOUND);
     }
 }

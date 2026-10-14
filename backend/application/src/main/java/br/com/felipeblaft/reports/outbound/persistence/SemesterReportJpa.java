@@ -26,7 +26,7 @@ interface SemesterReportJpa extends JpaRepository<SemesterReportEntity, UUID> {
     @Query(
             """
             select r from SemesterReportEntity r
-            where r.teacherId = :teacherId and r.studentId = :studentId and r.status = 'APROVADO'
+            where r.teacherId = :teacherId and r.studentId = :studentId and r.status = 'APPROVED'
             order by r.periodStart desc
             """)
     List<SemesterReportEntity> approved(UUID teacherId, UUID studentId);
@@ -34,7 +34,7 @@ interface SemesterReportJpa extends JpaRepository<SemesterReportEntity, UUID> {
     @Query(
             """
             select r from SemesterReportEntity r
-            where r.teacherId = :teacherId and r.status = 'AGUARDANDO_CONFERENCIA'
+            where r.teacherId = :teacherId and r.status = 'AWAITING_REVIEW'
             order by r.updatedAt desc
             """)
     List<SemesterReportEntity> teacherOpenReports(UUID teacherId);

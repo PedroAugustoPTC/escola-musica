@@ -49,10 +49,10 @@ public class RequestLessonReportChangeUseCase {
         LessonReport report = access.lessonReportForUpdate(teacherId, reportId);
         report.requireCanChange(baseVersion);
         if (text == null || text.isBlank()) {
-            throw new DomainException(ErrorCode.ALTERACAO_VAZIA);
+            throw new DomainException(ErrorCode.EMPTY_CHANGE);
         }
         ProcessingJob job =
-                start(report, channel, Medium.TEXTO, ReportStep.APLICANDO_ALTERACAO, baseVersion);
+                start(report, channel, Medium.TEXT, ReportStep.APPLYING_CHANGE, baseVersion);
         job.defineParameter(ProcessingJob.TEXT, text.strip());
         queue.enqueue(job);
         return job;
@@ -69,7 +69,7 @@ public class RequestLessonReportChangeUseCase {
                             report,
                             channel,
                             Medium.AUDIO,
-                            ReportStep.TRANSCREVENDO_PEDIDO,
+                            ReportStep.TRANSCRIBING_REQUEST,
                             baseVersion);
             audioSending.attach(job, audio);
             queue.enqueue(job);
@@ -86,16 +86,16 @@ public class RequestLessonReportChangeUseCase {
         reports.save(report);
         ProcessingJob job =
                 ProcessingJob.create(
-                        JobType.ALTERACAO,
+                        JobType.CHANGE,
                         report.teacherId(),
                         report.studentId(),
-                        ReportType.AULA,
+                        ReportType.LESSON,
                         report.id(),
                         channel,
                         medium,
                         medium == Medium.AUDIO
-                                ? JobStep.TRANSCREVENDO_PEDIDO
-                                : JobStep.APLICANDO_ALTERACAO,
+                                ? JobStep.TRANSCRIBING_REQUEST
+                                : JobStep.APPLYING_CHANGE,
                         clock.now());
         job.defineParameter(ProcessingJob.BASE_VERSION, Integer.toString(baseVersion));
         return job;

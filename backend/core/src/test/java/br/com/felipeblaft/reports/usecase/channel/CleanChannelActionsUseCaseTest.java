@@ -38,17 +38,17 @@ class CleanChannelActionsUseCaseTest {
                                 Duration.ofHours(24)))
                 .run(
                         "p:" + id,
-                        ChannelActionOrigin.PROATIVA,
+                        ChannelActionOrigin.PROACTIVE,
                         null,
                         List.of(
                                 new NewAction(
                                         id,
-                                        ChannelActionType.MENSAGEM,
+                                        ChannelActionType.MESSAGE,
                                         1L,
                                         UUID.randomUUID(),
                                         null,
-                                        "{\"texto\":\"segredo\"}",
-                                        "{\"texto\":\"alt\"}")));
+                                        "{\"text\":\"segredo\"}",
+                                        "{\"text\":\"alt\"}")));
         actions.stored(id).confirmExecuted(clock.now());
     }
 
@@ -62,17 +62,17 @@ class CleanChannelActionsUseCaseTest {
                                 Duration.ofHours(24)))
                 .run(
                         "u" + updateId,
-                        ChannelActionOrigin.RESPOSTA_UPDATE,
+                        ChannelActionOrigin.UPDATE_REPLY,
                         updateId,
                         List.of(
                                 new NewAction(
                                         id,
-                                        ChannelActionType.MENSAGEM,
+                                        ChannelActionType.MESSAGE,
                                         1L,
                                         null,
                                         null,
-                                        "{\"texto\":\"nome do aluno\"}",
-                                        "{\"texto\":\"alt\"}")));
+                                        "{\"text\":\"nome do aluno\"}",
+                                        "{\"text\":\"alt\"}")));
     }
 
     @Test
@@ -81,12 +81,13 @@ class CleanChannelActionsUseCaseTest {
 
         clock.advance(Duration.ofHours(23));
         assertThat(clean.run().expiredActions()).isZero();
-        assertThat(actions.stored("u1-e0").state()).isEqualTo(ChannelActionState.ENTREGUE);
+        assertThat(actions.stored("u1-e0").state()).isEqualTo(ChannelActionState.DELIVERED);
         assertThat(actions.stored("u1-e0").payload()).isNotNull();
 
         clock.advance(Duration.ofHours(1));
         assertThat(clean.run().expiredActions()).isEqualTo(1);
-        assertThat(actions.stored("u1-e0").state()).isEqualTo(ChannelActionState.FALHA_DEFINITIVA);
+        assertThat(actions.stored("u1-e0").state())
+                .isEqualTo(ChannelActionState.PERMANENTLY_FAILED);
         assertThat(actions.stored("u1-e0").reasonCode())
                 .isEqualTo(ChannelAction.CODE_WITHOUT_CONFIRMATION);
         // o conteúdo só some depois da retenção, contada a partir da expiração
@@ -112,8 +113,8 @@ class CleanChannelActionsUseCaseTest {
         clock.advance(Duration.ofHours(30));
 
         assertThat(clean.run().expiredActions()).isZero();
-        assertThat(actions.stored("u1-e0").state()).isEqualTo(ChannelActionState.EXECUTADA);
-        assertThat(actions.stored("p:a:0").state()).isEqualTo(ChannelActionState.EXECUTADA);
+        assertThat(actions.stored("u1-e0").state()).isEqualTo(ChannelActionState.EXECUTED);
+        assertThat(actions.stored("p:a:0").state()).isEqualTo(ChannelActionState.EXECUTED);
     }
 
     @Test
@@ -147,12 +148,12 @@ class CleanChannelActionsUseCaseTest {
                                 Duration.ofDays(30)))
                 .run(
                         "p:b",
-                        ChannelActionOrigin.PROATIVA,
+                        ChannelActionOrigin.PROACTIVE,
                         null,
                         List.of(
                                 new NewAction(
                                         "p:b:0",
-                                        ChannelActionType.MENSAGEM,
+                                        ChannelActionType.MESSAGE,
                                         1L,
                                         UUID.randomUUID(),
                                         null,
@@ -170,7 +171,7 @@ class CleanChannelActionsUseCaseTest {
                 new ChannelDocument(
                         "a".repeat(64),
                         UUID.randomUUID(),
-                        ReportType.AULA,
+                        ReportType.LESSON,
                         UUID.randomUUID(),
                         null,
                         "x.pdf",

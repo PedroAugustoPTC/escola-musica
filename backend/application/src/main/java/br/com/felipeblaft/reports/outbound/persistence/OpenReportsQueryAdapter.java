@@ -71,7 +71,7 @@ public class OpenReportsQueryAdapter implements OpenReportsQueryPort {
         for (SemesterReport r : semester.teacherOpenReports(teacherId)) {
             list.add(
                     new OpenReport(
-                            ReportType.SEMESTRAL,
+                            ReportType.SEMESTER,
                             r.id(),
                             null,
                             r.studentId(),
@@ -85,7 +85,7 @@ public class OpenReportsQueryAdapter implements OpenReportsQueryPort {
         for (ProcessingJob t : queue.teacherConsolidationsInProgress(teacherId)) {
             list.add(
                     new OpenReport(
-                            ReportType.SEMESTRAL,
+                            ReportType.SEMESTER,
                             null,
                             t.id(),
                             t.studentId(),
@@ -119,7 +119,7 @@ public class OpenReportsQueryAdapter implements OpenReportsQueryPort {
         jdbc.query(
                 "select a.student_id, max(a.lesson_date) as last from lesson a"
                         + " join lesson_report r on r.lesson_id = a.id"
-                        + " where a.teacher_id = ? and r.status <> 'CANCELADO' group by a.student_id",
+                        + " where a.teacher_id = ? and r.status <> 'CANCELLED' group by a.student_id",
                 line -> {
                     Date data = line.getDate("last");
                     lasts.put(line.getObject("student_id", UUID.class), data.toLocalDate());
@@ -135,7 +135,7 @@ public class OpenReportsQueryAdapter implements OpenReportsQueryPort {
 
     private static OpenReport ofReport(LessonReportEntity r, String studentName) {
         return new OpenReport(
-                ReportType.AULA,
+                ReportType.LESSON,
                 r.id,
                 null,
                 r.studentId,
@@ -157,12 +157,12 @@ public class OpenReportsQueryAdapter implements OpenReportsQueryPort {
 
     private static OpenReport ofJob(ProcessingJob t, String studentName) {
         return new OpenReport(
-                ReportType.AULA,
+                ReportType.LESSON,
                 null,
                 t.id(),
                 t.studentId(),
                 studentName,
-                ReportStatus.EM_PROCESSAMENTO,
+                ReportStatus.PROCESSING,
                 t.step(),
                 null,
                 t.requestChannel(),

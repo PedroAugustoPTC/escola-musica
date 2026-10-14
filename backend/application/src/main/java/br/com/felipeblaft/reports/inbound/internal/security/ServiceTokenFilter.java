@@ -21,7 +21,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class ServiceTokenFilter extends OncePerRequestFilter {
 
     public static final String HEADER = "X-N8N-Service-Token";
-    public static final String AUTHORITY = "SERVICO_CANAL";
+    public static final String AUTHORITY = "CHANNEL_SERVICE";
 
     private final SecretComparator comparator = new SecretComparator();
     private final List<String> configured;
@@ -39,7 +39,7 @@ public class ServiceTokenFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext()
                     .setAuthentication(
                             new UsernamePasswordAuthenticationToken(
-                                    "servico-canal",
+                                    "channel-service",
                                     null,
                                     List.of(new SimpleGrantedAuthority(AUTHORITY))));
         }

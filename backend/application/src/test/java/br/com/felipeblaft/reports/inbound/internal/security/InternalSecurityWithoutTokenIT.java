@@ -22,7 +22,7 @@ import org.springframework.test.web.servlet.MvcResult;
         })
 class InternalSecurityWithoutTokenIT extends IntegrationBase {
 
-    private static final String ROUTE = "/interno/v1/canal/telegram/acoes/inexistente";
+    private static final String ROUTE = "/internal/v1/channel/telegram/actions/missing";
 
     @Autowired MockMvc mvc;
 
@@ -39,14 +39,14 @@ class InternalSecurityWithoutTokenIT extends IntegrationBase {
         requires401(get(ROUTE));
         requires401(get(ROUTE).header("X-N8N-Service-Token", ""));
         requires401(get(ROUTE).header("X-N8N-Service-Token", " "));
-        requires401(get(ROUTE).header("X-N8N-Service-Token", "token-servico-atual-teste"));
-        requires401(get(ROUTE).header("X-N8N-Service-Token", "qualquer"));
+        requires401(get(ROUTE).header("X-N8N-Service-Token", "current-service-token-test"));
+        requires401(get(ROUTE).header("X-N8N-Service-Token", "any"));
     }
 
     @Test
     void singleConfiguredTokenDoesNotOpenOther() throws Exception {
         // contraste: este contexto não tem token algum; com token só no "próximo" ver
         // SegurancaInternaIT
-        requires401(get(ROUTE).header("X-N8N-Service-Token", "token-servico-proximo-teste"));
+        requires401(get(ROUTE).header("X-N8N-Service-Token", "next-service-token-test"));
     }
 }

@@ -48,9 +48,9 @@ public class AnswerQuestionsUseCase {
         LessonReport report = access.lessonReportForUpdate(teacherId, reportId);
         report.requireCanAnswer();
         if (text == null || text.isBlank()) {
-            throw new DomainException(ErrorCode.RESPOSTA_VAZIA);
+            throw new DomainException(ErrorCode.EMPTY_ANSWER);
         }
-        ProcessingJob job = start(report, channel, Medium.TEXTO, ReportStep.INCORPORANDO_RESPOSTAS);
+        ProcessingJob job = start(report, channel, Medium.TEXT, ReportStep.INCORPORATING_ANSWERS);
         job.defineParameter(ProcessingJob.TEXT, text.strip());
         queue.enqueue(job);
         return job;
@@ -63,7 +63,7 @@ public class AnswerQuestionsUseCase {
             report.requireCanAnswer();
             audioSending.requireWithinLimit(audio);
             ProcessingJob job =
-                    start(report, channel, Medium.AUDIO, ReportStep.TRANSCREVENDO_PEDIDO);
+                    start(report, channel, Medium.AUDIO, ReportStep.TRANSCRIBING_REQUEST);
             audioSending.attach(job, audio);
             queue.enqueue(job);
             return job;
@@ -78,16 +78,16 @@ public class AnswerQuestionsUseCase {
         report.startStep(step, clock.now());
         reports.save(report);
         return ProcessingJob.create(
-                JobType.RESPOSTA_PERGUNTAS,
+                JobType.QUESTION_ANSWER,
                 report.teacherId(),
                 report.studentId(),
-                ReportType.AULA,
+                ReportType.LESSON,
                 report.id(),
                 channel,
                 medium,
                 medium == Medium.AUDIO
-                        ? JobStep.TRANSCREVENDO_PEDIDO
-                        : JobStep.INCORPORANDO_RESPOSTAS,
+                        ? JobStep.TRANSCRIBING_REQUEST
+                        : JobStep.INCORPORATING_ANSWERS,
                 clock.now());
     }
 }

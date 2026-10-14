@@ -63,18 +63,18 @@ class DeliverPendingActionsUseCaseTest {
     private void batch(String batchId, long chatId, UUID teacher, String... ids) {
         save.run(
                 batchId,
-                ChannelActionOrigin.PROATIVA,
+                ChannelActionOrigin.PROACTIVE,
                 null,
                 java.util.Arrays.stream(ids)
                         .map(
                                 id ->
                                         new NewAction(
                                                 id,
-                                                ChannelActionType.MENSAGEM,
+                                                ChannelActionType.MESSAGE,
                                                 chatId,
                                                 teacher,
                                                 null,
-                                                "{\"texto\":\"" + id + "\"}",
+                                                "{\"text\":\"" + id + "\"}",
                                                 null))
                         .toList());
     }
@@ -94,12 +94,12 @@ class DeliverPendingActionsUseCaseTest {
 
         assertThat(cycle.acceptedBatches()).isEqualTo(1);
         assertThat(cycle.refusedBatches()).isZero();
-        assertThat(state("p:r:1:0")).isEqualTo(ChannelActionState.ENTREGUE);
-        assertThat(state("p:r:1:1")).isEqualTo(ChannelActionState.ENTREGUE);
+        assertThat(state("p:r:1:0")).isEqualTo(ChannelActionState.DELIVERED);
+        assertThat(state("p:r:1:1")).isEqualTo(ChannelActionState.DELIVERED);
         assertThat(orchestrator.received).hasSize(1);
         DeliveryBatch received = orchestrator.received.get(0);
         assertThat(received.batchId()).isEqualTo("p:r:1");
-        assertThat(received.origin()).isEqualTo(ChannelActionOrigin.PROATIVA);
+        assertThat(received.origin()).isEqualTo(ChannelActionOrigin.PROACTIVE);
         assertThat(received.attempt()).isEqualTo(1);
         assertThat(received.actions())
                 .extracting(DeliveryBatch.Action::actionId)
@@ -120,7 +120,7 @@ class DeliverPendingActionsUseCaseTest {
         orchestrator.refuseNext("HTTP_503", 2);
 
         assertThat(deliver.run(10).refusedBatches()).isEqualTo(1);
-        assertThat(state("p:r:1:0")).isEqualTo(ChannelActionState.PENDENTE);
+        assertThat(state("p:r:1:0")).isEqualTo(ChannelActionState.PENDING);
         assertThat(repository.stored("p:r:1:0").nextAttemptAt())
                 .isEqualTo(clock.now().plusSeconds(30));
         // ainda cedo: nada é enviado
@@ -135,7 +135,7 @@ class DeliverPendingActionsUseCaseTest {
 
         clock.advance(Duration.ofSeconds(60));
         assertThat(deliver.run(10).acceptedBatches()).isEqualTo(1);
-        assertThat(state("p:r:1:0")).isEqualTo(ChannelActionState.ENTREGUE);
+        assertThat(state("p:r:1:0")).isEqualTo(ChannelActionState.DELIVERED);
         assertThat(orchestrator.received).extracting(DeliveryBatch::batchId).containsOnly("p:r:1");
         assertThat(orchestrator.received)
                 .extracting(DeliveryBatch::attempt)
@@ -153,7 +153,7 @@ class DeliverPendingActionsUseCaseTest {
         Cycle cycle = deliver.run(10);
 
         assertThat(cycle.permanentFailures()).containsExactly("p:r:1:0");
-        assertThat(state("p:r:1:0")).isEqualTo(ChannelActionState.FALHA_DEFINITIVA);
+        assertThat(state("p:r:1:0")).isEqualTo(ChannelActionState.PERMANENTLY_FAILED);
         assertThat(orchestrator.received).isEmpty();
     }
 
@@ -168,7 +168,7 @@ class DeliverPendingActionsUseCaseTest {
         Cycle cycle = deliver.run(10);
 
         assertThat(cycle.permanentFailures()).containsExactly("p:r:1:0");
-        assertThat(state("p:r:1:0")).isEqualTo(ChannelActionState.FALHA_DEFINITIVA);
+        assertThat(state("p:r:1:0")).isEqualTo(ChannelActionState.PERMANENTLY_FAILED);
     }
 
     // ---- vínculo
@@ -181,7 +181,7 @@ class DeliverPendingActionsUseCaseTest {
         Cycle cycle = deliver.run(10);
 
         assertThat(cycle.discarded()).isEqualTo(1);
-        assertThat(state("p:r:1:0")).isEqualTo(ChannelActionState.DESCARTADA);
+        assertThat(state("p:r:1:0")).isEqualTo(ChannelActionState.DISCARDED);
         assertThat(orchestrator.received).isEmpty();
     }
 
@@ -207,13 +207,13 @@ class DeliverPendingActionsUseCaseTest {
         assertThat(orchestrator.received)
                 .extracting(DeliveryBatch::batchId)
                 .containsExactly("p:1", "p:3");
-        assertThat(state("p:2:0")).isEqualTo(ChannelActionState.PENDENTE);
+        assertThat(state("p:2:0")).isEqualTo(ChannelActionState.PENDING);
 
         confirm.run(
                 List.of(
                         new ConfirmChannelActionsExecutionUseCase.Result(
                                 "p:1:0",
-                                ConfirmChannelActionsExecutionUseCase.Status.EXECUTADA,
+                                ConfirmChannelActionsExecutionUseCase.Status.EXECUTED,
                                 null,
                                 null)));
         assertThat(deliver.run(10).acceptedBatches()).isEqualTo(1);
@@ -246,12 +246,12 @@ class DeliverPendingActionsUseCaseTest {
         UUID a = linkedTeacher(CHAT_A);
         save.run(
                 "u5",
-                ChannelActionOrigin.RESPOSTA_UPDATE,
+                ChannelActionOrigin.UPDATE_REPLY,
                 5L,
                 List.of(
                         new NewAction(
                                 "u5-0",
-                                ChannelActionType.MENSAGEM,
+                                ChannelActionType.MESSAGE,
                                 CHAT_A,
                                 null,
                                 null,
@@ -277,7 +277,7 @@ class DeliverPendingActionsUseCaseTest {
         deliver.run(10);
 
         assertThat(orchestrator.received).extracting(DeliveryBatch::batchId).containsExactly("p:1");
-        assertThat(state("p:2:0")).isEqualTo(ChannelActionState.PENDENTE);
+        assertThat(state("p:2:0")).isEqualTo(ChannelActionState.PENDING);
     }
 
     @Test
@@ -303,14 +303,14 @@ class DeliverPendingActionsUseCaseTest {
                                         new ConfirmChannelActionsExecutionUseCase.Result(
                                                 "p:1:0",
                                                 ConfirmChannelActionsExecutionUseCase.Status
-                                                        .EXECUTADA,
+                                                        .EXECUTED,
                                                 null,
                                                 null)));
 
         Cycle cycle = deliver.run(10);
 
         assertThat(cycle.acceptedBatches()).isEqualTo(1);
-        assertThat(state("p:1:0")).isEqualTo(ChannelActionState.EXECUTADA);
+        assertThat(state("p:1:0")).isEqualTo(ChannelActionState.EXECUTED);
     }
 
     @Test
@@ -324,12 +324,12 @@ class DeliverPendingActionsUseCaseTest {
                                 List.of(
                                         new ConfirmChannelActionsExecutionUseCase.Result(
                                                 "p:1:0",
-                                                ConfirmChannelActionsExecutionUseCase.Status.FALHOU,
-                                                "ERRO_TELEGRAM",
+                                                ConfirmChannelActionsExecutionUseCase.Status.FAILED,
+                                                "TELEGRAM_ERROR",
                                                 null)));
         Cycle cycle = deliver.run(10);
         assertThat(cycle.permanentFailures()).isEmpty();
-        assertThat(state("p:1:0")).isEqualTo(ChannelActionState.FALHOU);
+        assertThat(state("p:1:0")).isEqualTo(ChannelActionState.FAILED);
     }
 
     @Test
@@ -357,50 +357,50 @@ class DeliverPendingActionsUseCaseTest {
         UUID a = linkedTeacher(CHAT_A);
         ProcessingJob job =
                 ProcessingJob.create(
-                        JobType.REGISTRO_AULA,
+                        JobType.LESSON_REGISTRATION,
                         a,
                         UUID.randomUUID(),
                         null,
                         null,
                         Channel.TELEGRAM,
                         Medium.AUDIO,
-                        JobStep.ENVIANDO,
+                        JobStep.UPLOADING,
                         clock.now());
         job.defineParameter(ProcessingJob.STEP_MESSAGE, "555");
         queue.enqueue(job);
         ProcessingJob withoutMessage =
                 ProcessingJob.create(
-                        JobType.REGISTRO_AULA,
+                        JobType.LESSON_REGISTRATION,
                         a,
                         UUID.randomUUID(),
                         null,
                         null,
                         Channel.TELEGRAM,
                         Medium.AUDIO,
-                        JobStep.ENVIANDO,
+                        JobStep.UPLOADING,
                         clock.now());
         queue.enqueue(withoutMessage);
         ProcessingJob invalid =
                 ProcessingJob.create(
-                        JobType.REGISTRO_AULA,
+                        JobType.LESSON_REGISTRATION,
                         a,
                         UUID.randomUUID(),
                         null,
                         null,
                         Channel.TELEGRAM,
                         Medium.AUDIO,
-                        JobStep.ENVIANDO,
+                        JobStep.UPLOADING,
                         clock.now());
-        invalid.defineParameter(ProcessingJob.STEP_MESSAGE, "nao-e-numero");
+        invalid.defineParameter(ProcessingJob.STEP_MESSAGE, "not-a-number");
         queue.enqueue(invalid);
         save.run(
                 "p:e",
-                ChannelActionOrigin.PROATIVA,
+                ChannelActionOrigin.PROACTIVE,
                 null,
                 List.of(
                         new NewAction(
                                 "p:e:0",
-                                ChannelActionType.MENSAGEM_ETAPA,
+                                ChannelActionType.STEP_MESSAGE,
                                 CHAT_A,
                                 a,
                                 job.id(),
@@ -408,7 +408,7 @@ class DeliverPendingActionsUseCaseTest {
                                 null),
                         new NewAction(
                                 "p:e:1",
-                                ChannelActionType.MENSAGEM_ETAPA,
+                                ChannelActionType.STEP_MESSAGE,
                                 CHAT_A,
                                 a,
                                 withoutMessage.id(),
@@ -416,7 +416,7 @@ class DeliverPendingActionsUseCaseTest {
                                 null),
                         new NewAction(
                                 "p:e:2",
-                                ChannelActionType.MENSAGEM_ETAPA,
+                                ChannelActionType.STEP_MESSAGE,
                                 CHAT_A,
                                 a,
                                 invalid.id(),
@@ -424,7 +424,7 @@ class DeliverPendingActionsUseCaseTest {
                                 null),
                         new NewAction(
                                 "p:e:3",
-                                ChannelActionType.MENSAGEM_ETAPA,
+                                ChannelActionType.STEP_MESSAGE,
                                 CHAT_A,
                                 a,
                                 UUID.randomUUID(),
@@ -432,7 +432,7 @@ class DeliverPendingActionsUseCaseTest {
                                 null),
                         new NewAction(
                                 "p:e:4",
-                                ChannelActionType.MENSAGEM,
+                                ChannelActionType.MESSAGE,
                                 CHAT_A,
                                 a,
                                 job.id(),
@@ -453,14 +453,14 @@ class DeliverPendingActionsUseCaseTest {
         UUID a = linkedTeacher(CHAT_A);
         ProcessingJob job =
                 ProcessingJob.create(
-                        JobType.REGISTRO_AULA,
+                        JobType.LESSON_REGISTRATION,
                         a,
                         UUID.randomUUID(),
                         null,
                         null,
                         Channel.TELEGRAM,
                         Medium.AUDIO,
-                        JobStep.ENVIANDO,
+                        JobStep.UPLOADING,
                         clock.now());
         job.defineParameter(ProcessingJob.STEP_MESSAGE, "555");
         queue.enqueue(job);
@@ -468,12 +468,12 @@ class DeliverPendingActionsUseCaseTest {
                 ChannelAction.create(
                         "p:e:0",
                         "p:e",
-                        ChannelActionOrigin.PROATIVA,
+                        ChannelActionOrigin.PROACTIVE,
                         null,
                         CHAT_A,
                         a,
                         job.id(),
-                        ChannelActionType.MENSAGEM_ETAPA,
+                        ChannelActionType.STEP_MESSAGE,
                         "{}",
                         "{}",
                         clock.now(),

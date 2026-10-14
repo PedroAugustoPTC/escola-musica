@@ -4,6 +4,6 @@ package br.com.felipeblaft.reports.port;
 public class UnsupportedFormatException extends RuntimeException {
 
     public UnsupportedFormatException() {
-        super("FORMATO_NAO_SUPORTADO", null, false, false);
+        super("UNSUPPORTED_FORMAT", null, false, false);
     }
 }

@@ -23,11 +23,11 @@ export function TelaGravacao() {
   const [audio, setAudio] = useState<AudioSelecionado | null>(null);
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState<unknown>(null);
-  const limiteMb = inicio.data?.limiteAudioMb ?? LIMITE_PADRAO_MB;
+  const limiteMb = inicio.data?.audioLimitMb ?? LIMITE_PADRAO_MB;
 
   const contexto = {
     sobretitulo: 'Novo relatório',
-    titulo: aluno.data?.nome ?? '',
+    titulo: aluno.data?.name ?? '',
     voltarPara: '/alunos?registrar=1',
   };
 
@@ -51,10 +51,10 @@ export function TelaGravacao() {
     setEnviando(true);
     setErro(null);
     try {
-      const { trabalhoId } = await relatoriosAula.registrar(alunoId, audio);
-      navegar(`/trabalhos/${trabalhoId}`, { state: { alunoId } });
+      const { jobId } = await relatoriosAula.registrar(alunoId, audio);
+      navegar(`/trabalhos/${jobId}`, { state: { alunoId } });
     } catch (falha) {
-      if (falha instanceof ErroApi && falha.codigo === 'RELATORIO_EM_ABERTO') {
+      if (falha instanceof ErroApi && falha.codigo === 'REPORT_ALREADY_OPEN') {
         // FR-034: o aluno já tem relatório em aberto; a tela 04 oferece continuar ou descartar
         navegar(`/alunos/${alunoId}/relatorio-em-aberto`, { replace: true });
         return;
@@ -85,7 +85,7 @@ export function TelaGravacao() {
       <div className="pagina pagina--estreita">
         <div>
           <div className="sobretitulo">Novo relatório de aula</div>
-          <h1 className="titulo-pagina">{aluno.data.nome}</h1>
+          <h1 className="titulo-pagina">{aluno.data.name}</h1>
           <p className="subtitulo">Aula de {formatarData(hojeNaEscola())}</p>
         </div>
         {erro ? <AlertaErro erro={erro} /> : null}
@@ -95,7 +95,7 @@ export function TelaGravacao() {
           desabilitado={enviando}
           dica="Conte o que foi trabalhado, como o aluno evoluiu, as dificuldades e o que ele deve estudar em casa."
         />
-        <p className="texto-apoio">{msg('FORMATOS_E_LIMITE', { limiteMb })}</p>
+        <p className="texto-apoio">{msg('FORMATS_AND_LIMIT', { limitMb: limiteMb })}</p>
       </div>
     </Estrutura>
   );

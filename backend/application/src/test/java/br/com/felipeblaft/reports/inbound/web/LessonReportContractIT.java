@@ -42,7 +42,7 @@ class LessonReportContractIT extends ContractApiBase {
     }
 
     private static MockMultipartFile audio(String type, byte[] content) {
-        return new MockMultipartFile("audio", "aula.webm", type, content);
+        return new MockMultipartFile("audio", "lesson.webm", type, content);
     }
 
     private static MockMultipartFile audio() {
@@ -54,17 +54,17 @@ class LessonReportContractIT extends ContractApiBase {
                 mvc.perform(
                                 authenticated(
                                         multipart(
-                                                        "/api/v1/alunos/{id}/relatorios-aula",
+                                                        "/api/v1/students/{id}/lesson-reports",
                                                         matteo.id())
                                                 .file(audio()),
                                         session))
                         .andExpect(status().isAccepted())
                         .andExpect(replyFollowsContract())
-                        .andExpect(jsonPath("$.trabalhoId").isString())
+                        .andExpect(jsonPath("$.jobId").isString())
                         .andReturn()
                         .getResponse()
                         .getContentAsString();
-        return UUID.fromString(body.replaceAll(".*\"trabalhoId\":\"([^\"]+)\".*", "$1"));
+        return UUID.fromString(body.replaceAll(".*\"jobId\":\"([^\"]+)\".*", "$1"));
     }
 
     private UUID reportWithQuestions() throws Exception {
@@ -76,9 +76,9 @@ class LessonReportContractIT extends ContractApiBase {
     private UUID reportInReview() throws Exception {
         UUID id = reportWithQuestions();
         mvc.perform(
-                        authenticated(post("/api/v1/relatorios-aula/{id}/respostas", id), session)
+                        authenticated(post("/api/v1/lesson-reports/{id}/answers", id), session)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"texto\":\"Estudou bem.\"}"))
+                                .content("{\"text\":\"Estudou bem.\"}"))
                 .andExpect(status().isAccepted());
         scenario.processQueue();
         return id;
@@ -88,80 +88,80 @@ class LessonReportContractIT extends ContractApiBase {
     void registerAcceptsAudioAndReturnsJob() throws Exception {
         UUID jobId = register();
 
-        mvc.perform(get("/api/v1/trabalhos/{id}", jobId).cookie(session))
+        mvc.perform(get("/api/v1/jobs/{id}", jobId).cookie(session))
                 .andExpect(status().isOk())
                 .andExpect(followsContract())
-                .andExpect(jsonPath("$.tipo").value("REGISTRO_AULA"))
-                .andExpect(jsonPath("$.status").value("PENDENTE"))
-                .andExpect(jsonPath("$.etapa").value("ENVIANDO"))
-                .andExpect(jsonPath("$.demorando").value(false));
+                .andExpect(jsonPath("$.type").value("LESSON_REGISTRATION"))
+                .andExpect(jsonPath("$.status").value("PENDING"))
+                .andExpect(jsonPath("$.step").value("UPLOADING"))
+                .andExpect(jsonPath("$.delayed").value(false));
     }
 
     @Test
     void registerRefusalUnassignedStudentFormatSizeAndOpenReport() throws Exception {
         mvc.perform(
                         authenticated(
-                                multipart("/api/v1/alunos/{id}/relatorios-aula", helena.id())
+                                multipart("/api/v1/students/{id}/lesson-reports", helena.id())
                                         .file(audio()),
                                 session))
                 .andExpect(status().isForbidden())
                 .andExpect(replyFollowsContract())
-                .andExpect(jsonPath("$.codigo").value("ALUNO_NAO_ASSOCIADO"));
+                .andExpect(jsonPath("$.code").value("STUDENT_NOT_ASSIGNED"));
         mvc.perform(
                         authenticated(
-                                multipart("/api/v1/alunos/{id}/relatorios-aula", matteo.id())
+                                multipart("/api/v1/students/{id}/lesson-reports", matteo.id())
                                         .file(
                                                 new MockMultipartFile(
                                                         "audio",
-                                                        "notas.txt",
+                                                        "notes.txt",
                                                         "text/plain",
                                                         new byte[] {1})),
                                 session))
                 .andExpect(status().isUnsupportedMediaType())
                 .andExpect(replyFollowsContract())
-                .andExpect(jsonPath("$.codigo").value("FORMATO_NAO_SUPORTADO"));
+                .andExpect(jsonPath("$.code").value("UNSUPPORTED_FORMAT"));
         mvc.perform(
                         authenticated(
-                                multipart("/api/v1/alunos/{id}/relatorios-aula", matteo.id())
+                                multipart("/api/v1/students/{id}/lesson-reports", matteo.id())
                                         .file(audio("audio/mpeg", new byte[50 * 1024 * 1024 + 1])),
                                 session))
                 .andExpect(status().isContentTooLarge())
                 .andExpect(replyFollowsContract())
-                .andExpect(jsonPath("$.codigo").value("AUDIO_MUITO_GRANDE"))
-                .andExpect(jsonPath("$.detalhes.limiteMb").value(50));
+                .andExpect(jsonPath("$.code").value("AUDIO_TOO_LARGE"))
+                .andExpect(jsonPath("$.details.limitMb").value(50));
 
         register();
         mvc.perform(
                         authenticated(
-                                multipart("/api/v1/alunos/{id}/relatorios-aula", matteo.id())
+                                multipart("/api/v1/students/{id}/lesson-reports", matteo.id())
                                         .file(audio()),
                                 session))
                 .andExpect(status().isConflict())
                 .andExpect(replyFollowsContract())
-                .andExpect(jsonPath("$.codigo").value("RELATORIO_EM_ABERTO"))
-                .andExpect(jsonPath("$.mensagem", startsWith("Você tem um relatório em aberto.")))
-                .andExpect(jsonPath("$.detalhes.relatorioEmAberto.canalOrigem").value("WEB"));
+                .andExpect(jsonPath("$.code").value("REPORT_ALREADY_OPEN"))
+                .andExpect(jsonPath("$.message", startsWith("Você tem um relatório em aberto.")))
+                .andExpect(jsonPath("$.details.openReport.originChannel").value("WEB"));
     }
 
     @Test
     void getReportWithQuestionsAndOtherTeacherGets404() throws Exception {
         UUID id = reportWithQuestions();
 
-        mvc.perform(get("/api/v1/relatorios-aula/{id}", id).cookie(session))
+        mvc.perform(get("/api/v1/lesson-reports/{id}", id).cookie(session))
                 .andExpect(status().isOk())
                 .andExpect(followsContract())
-                .andExpect(jsonPath("$.status").value("AGUARDANDO_RESPOSTAS"))
-                .andExpect(jsonPath("$.alunoNome").value("Matteo Ferreira"))
-                .andExpect(jsonPath("$.professorNome").value("Clara Souza"))
-                .andExpect(jsonPath("$.dataAula").value("2026-09-21"))
-                .andExpect(jsonPath("$.perguntasPendentes", hasSize(2)))
-                .andExpect(jsonPath("$.versaoVigente").value(0))
-                .andExpect(jsonPath("$.pdfDisponivel").value(false))
-                .andExpect(jsonPath("$.canalOrigem").value("WEB"));
-        mvc.perform(get("/api/v1/relatorios-aula/{id}", id).cookie(sessionBruno))
+                .andExpect(jsonPath("$.status").value("AWAITING_ANSWERS"))
+                .andExpect(jsonPath("$.studentName").value("Matteo Ferreira"))
+                .andExpect(jsonPath("$.teacherName").value("Clara Souza"))
+                .andExpect(jsonPath("$.lessonDate").value("2026-09-21"))
+                .andExpect(jsonPath("$.pendingQuestions", hasSize(2)))
+                .andExpect(jsonPath("$.currentVersion").value(0))
+                .andExpect(jsonPath("$.pdfAvailable").value(false))
+                .andExpect(jsonPath("$.originChannel").value("WEB"));
+        mvc.perform(get("/api/v1/lesson-reports/{id}", id).cookie(sessionBruno))
                 .andExpect(status().isNotFound())
                 .andExpect(followsContract())
-                .andExpect(jsonPath("$.codigo").value("RECURSO_NAO_ENCONTRADO"));
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
     }
 
     @Test
@@ -169,71 +169,70 @@ class LessonReportContractIT extends ContractApiBase {
         UUID id = reportWithQuestions();
 
         mvc.perform(
-                        authenticated(post("/api/v1/relatorios-aula/{id}/respostas", id), session)
+                        authenticated(post("/api/v1/lesson-reports/{id}/answers", id), session)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"texto\":\"   \"}"))
+                                .content("{\"text\":\"   \"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(followsContract())
-                .andExpect(jsonPath("$.codigo").value("RESPOSTA_VAZIA"));
+                .andExpect(jsonPath("$.code").value("EMPTY_ANSWER"));
         mvc.perform(
                         authenticated(
-                                multipart("/api/v1/relatorios-aula/{id}/respostas", id)
-                                        .file(audio()),
+                                multipart("/api/v1/lesson-reports/{id}/answers", id).file(audio()),
                                 session))
                 .andExpect(status().isAccepted())
                 .andExpect(replyFollowsContract());
         mvc.perform(
-                        authenticated(post("/api/v1/relatorios-aula/{id}/respostas", id), session)
+                        authenticated(post("/api/v1/lesson-reports/{id}/answers", id), session)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"texto\":\"Estudou bem.\"}"))
+                                .content("{\"text\":\"Estudou bem.\"}"))
                 .andExpect(status().isConflict())
                 .andExpect(followsContract())
-                .andExpect(jsonPath("$.codigo").value("PROCESSAMENTO_EM_ANDAMENTO"));
+                .andExpect(jsonPath("$.code").value("PROCESSING_IN_PROGRESS"));
     }
 
     @Test
     void changesWithBaseVersionAndNewAttemptOutsideStep() throws Exception {
         UUID id = reportInReview();
 
-        mvc.perform(get("/api/v1/relatorios-aula/{id}", id).cookie(session))
+        mvc.perform(get("/api/v1/lesson-reports/{id}", id).cookie(session))
                 .andExpect(status().isOk())
                 .andExpect(followsContract())
-                .andExpect(jsonPath("$.status").value("AGUARDANDO_CONFERENCIA"))
-                .andExpect(jsonPath("$.versaoVigente").value(1))
-                .andExpect(jsonPath("$.pdfDisponivel").value(true))
-                .andExpect(jsonPath("$.ultimaInteracao.tipo").value("RESPOSTA_PERGUNTAS"))
-                .andExpect(jsonPath("$.ultimaInteracao.texto").value("Estudou bem."));
+                .andExpect(jsonPath("$.status").value("AWAITING_REVIEW"))
+                .andExpect(jsonPath("$.currentVersion").value(1))
+                .andExpect(jsonPath("$.pdfAvailable").value(true))
+                .andExpect(jsonPath("$.lastInteraction.type").value("QUESTION_ANSWER"))
+                .andExpect(jsonPath("$.lastInteraction.text").value("Estudou bem."));
         mvc.perform(
-                        authenticated(post("/api/v1/relatorios-aula/{id}/alteracoes", id), session)
+                        authenticated(post("/api/v1/lesson-reports/{id}/changes", id), session)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"texto\":\"Diga que foi ótima.\",\"versaoBase\":3}"))
+                                .content("{\"text\":\"Diga que foi ótima.\",\"baseVersion\":3}"))
                 .andExpect(status().isConflict())
                 .andExpect(followsContract())
-                .andExpect(jsonPath("$.codigo").value("VERSAO_DESATUALIZADA"))
-                .andExpect(jsonPath("$.detalhes.versaoVigente").value(1));
+                .andExpect(jsonPath("$.code").value("STALE_VERSION"))
+                .andExpect(jsonPath("$.details.currentVersion").value(1));
         mvc.perform(
-                        authenticated(post("/api/v1/relatorios-aula/{id}/alteracoes", id), session)
+                        authenticated(post("/api/v1/lesson-reports/{id}/changes", id), session)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"texto\":\"   \",\"versaoBase\":1}"))
+                                .content("{\"text\":\"   \",\"baseVersion\":1}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(followsContract())
-                .andExpect(jsonPath("$.codigo").value("ALTERACAO_VAZIA"));
-        mvc.perform(authenticated(post("/api/v1/relatorios-aula/{id}/nova-tentativa", id), session))
+                .andExpect(jsonPath("$.code").value("EMPTY_CHANGE"));
+        mvc.perform(authenticated(post("/api/v1/lesson-reports/{id}/retry", id), session))
                 .andExpect(status().isConflict())
                 .andExpect(followsContract());
         mvc.perform(
                         authenticated(
-                                multipart("/api/v1/relatorios-aula/{id}/alteracoes", id)
+                                multipart("/api/v1/lesson-reports/{id}/changes", id)
                                         .file(audio())
-                                        .param("versaoBase", "1"),
+                                        .param("baseVersion", "1"),
                                 session))
                 .andExpect(status().isAccepted())
                 .andExpect(replyFollowsContract());
         scenario.processQueue();
 
-        mvc.perform(get("/api/v1/relatorios-aula/{id}", id).cookie(session))
-                .andExpect(jsonPath("$.versaoVigente").value(2))
-                .andExpect(jsonPath("$.ultimaInteracao.meio").value("AUDIO"));
+        mvc.perform(get("/api/v1/lesson-reports/{id}", id).cookie(session))
+                .andExpect(jsonPath("$.currentVersion").value(2))
+                .andExpect(jsonPath("$.lastInteraction.medium").value("AUDIO"));
     }
 
     @Test
@@ -241,21 +240,21 @@ class LessonReportContractIT extends ContractApiBase {
         UUID id = reportInReview();
 
         mvc.perform(
-                        authenticated(post("/api/v1/relatorios-aula/{id}/aprovacao", id), session)
+                        authenticated(post("/api/v1/lesson-reports/{id}/approval", id), session)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"versaoConfirmada\":1}"))
+                                .content("{\"confirmedVersion\":1}"))
                 .andExpect(status().isOk())
                 .andExpect(followsContract())
-                .andExpect(jsonPath("$.status").value("APROVADO"))
-                .andExpect(jsonPath("$.versaoAprovada").value(1))
-                .andExpect(jsonPath("$.aprovadoEm").value("2026-09-21T13:00:00Z"));
+                .andExpect(jsonPath("$.status").value("APPROVED"))
+                .andExpect(jsonPath("$.approvedVersion").value(1))
+                .andExpect(jsonPath("$.approvedAt").value("2026-09-21T13:00:00Z"));
         mvc.perform(
-                        authenticated(post("/api/v1/relatorios-aula/{id}/aprovacao", id), session)
+                        authenticated(post("/api/v1/lesson-reports/{id}/approval", id), session)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"versaoConfirmada\":1}"))
+                                .content("{\"confirmedVersion\":1}"))
                 .andExpect(status().isConflict())
                 .andExpect(followsContract())
-                .andExpect(jsonPath("$.codigo").value("RELATORIO_JA_APROVADO"));
+                .andExpect(jsonPath("$.code").value("REPORT_ALREADY_APPROVED"));
     }
 
     @Test
@@ -264,35 +263,34 @@ class LessonReportContractIT extends ContractApiBase {
 
         mvc.perform(
                         authenticated(
-                                post("/api/v1/relatorios-aula/{id}/cancelamento", id),
-                                sessionBruno))
+                                post("/api/v1/lesson-reports/{id}/cancellation", id), sessionBruno))
                 .andExpect(status().isNotFound())
                 .andExpect(followsContract());
-        mvc.perform(authenticated(post("/api/v1/relatorios-aula/{id}/cancelamento", id), session))
+        mvc.perform(authenticated(post("/api/v1/lesson-reports/{id}/cancellation", id), session))
                 .andExpect(status().isNoContent())
                 .andExpect(followsContract());
         mvc.perform(
-                        authenticated(post("/api/v1/relatorios-aula/{id}/aprovacao", id), session)
+                        authenticated(post("/api/v1/lesson-reports/{id}/approval", id), session)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"versaoConfirmada\":1}"))
+                                .content("{\"confirmedVersion\":1}"))
                 .andExpect(status().isConflict())
                 .andExpect(followsContract())
-                .andExpect(jsonPath("$.codigo").value("RELATORIO_CANCELADO"));
+                .andExpect(jsonPath("$.code").value("REPORT_CANCELLED"));
     }
 
     @Test
     void otherTeachersJobDoesNotExist() throws Exception {
         UUID jobId = register();
 
-        mvc.perform(get("/api/v1/trabalhos/{id}", jobId).cookie(sessionBruno))
+        mvc.perform(get("/api/v1/jobs/{id}", jobId).cookie(sessionBruno))
                 .andExpect(status().isNotFound())
                 .andExpect(followsContract());
         scenario.processQueue();
-        mvc.perform(get("/api/v1/trabalhos/{id}", jobId).cookie(session))
+        mvc.perform(get("/api/v1/jobs/{id}", jobId).cookie(session))
                 .andExpect(status().isOk())
                 .andExpect(followsContract())
-                .andExpect(jsonPath("$.status").value("CONCLUIDO"))
-                .andExpect(jsonPath("$.resultadoCodigo").value("PERGUNTAS_PENDENTES"))
-                .andExpect(jsonPath("$.relatorioTipo").value("AULA"));
+                .andExpect(jsonPath("$.status").value("COMPLETED"))
+                .andExpect(jsonPath("$.resultCode").value("PENDING_QUESTIONS"))
+                .andExpect(jsonPath("$.reportType").value("LESSON"));
     }
 }

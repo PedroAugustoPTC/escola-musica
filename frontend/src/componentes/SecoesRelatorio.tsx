@@ -1,7 +1,7 @@
 import { msg } from '../mensagens/mensagens';
 import type { RelatorioAulaDto } from '../servicos/relatoriosAula';
 
-type Conteudo = RelatorioAulaDto['conteudo'];
+type Conteudo = RelatorioAulaDto['content'];
 
 interface Secao {
   titulo: string;
@@ -12,11 +12,11 @@ interface Secao {
 /** As cinco seções do relatório de aula (FR-019), na ordem do modelo. */
 export function secoesDaAula(conteudo: Conteudo): Secao[] {
   return [
-    { titulo: msg('SECAO_CONTEUDOS_TRABALHADOS'), itens: conteudo.conteudosTrabalhados },
-    { titulo: msg('SECAO_EVOLUCAO'), texto: conteudo.evolucao },
-    { titulo: msg('SECAO_DIFICULDADES'), itens: conteudo.dificuldades },
-    { titulo: msg('SECAO_ATIVIDADES_PROPOSTAS'), itens: conteudo.atividadesPropostas },
-    { titulo: msg('SECAO_OBSERVACOES'), texto: conteudo.observacoes },
+    { titulo: msg('WORKED_TOPICS_SECTION'), itens: conteudo.workedTopics },
+    { titulo: msg('PROGRESS_SECTION'), texto: conteudo.progress },
+    { titulo: msg('DIFFICULTIES_SECTION'), itens: conteudo.difficulties },
+    { titulo: msg('PROPOSED_ACTIVITIES_SECTION'), itens: conteudo.proposedActivities },
+    { titulo: msg('OBSERVATIONS_SECTION'), texto: conteudo.observations },
   ];
 }
 
@@ -36,7 +36,7 @@ export function SecoesRelatorio({
           <section key={secao.titulo} className="secoes__secao">
             <h2 className="secoes__titulo">{secao.titulo}</h2>
             {vazia ? (
-              <p className="secoes__vazia">{msg('SECAO_VAZIA')}</p>
+              <p className="secoes__vazia">{msg('EMPTY_SECTION')}</p>
             ) : secao.itens ? (
               <ul className="secoes__lista">
                 {secao.itens.map((item, indice) => (

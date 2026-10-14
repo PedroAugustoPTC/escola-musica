@@ -30,7 +30,7 @@ public class QueryStudentHistoryUseCase {
             Instant approvedAt) {
 
         LocalDate reference() {
-            return type == ReportType.AULA ? lessonDate : period.start();
+            return type == ReportType.LESSON ? lessonDate : period.start();
         }
     }
 
@@ -62,7 +62,7 @@ public class QueryStudentHistoryUseCase {
                         a ->
                                 items.add(
                                         new HistoryItem(
-                                                ReportType.AULA,
+                                                ReportType.LESSON,
                                                 a.reportId(),
                                                 a.lessonDate(),
                                                 null,
@@ -72,7 +72,7 @@ public class QueryStudentHistoryUseCase {
                         s ->
                                 items.add(
                                         new HistoryItem(
-                                                ReportType.SEMESTRAL,
+                                                ReportType.SEMESTER,
                                                 s.id(),
                                                 null,
                                                 s.period(),

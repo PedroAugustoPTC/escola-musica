@@ -155,7 +155,7 @@ public class LoadInitialRegistryUseCase {
                                                         () ->
                                                                 new DomainException(
                                                                         ErrorCode
-                                                                                .PROFESSOR_INEXISTENTE)));
+                                                                                .TEACHER_NOT_FOUND)));
                 if (created || !assignments.exists(teacher.id(), student.id())) {
                     createdAssignments++;
                     save(
@@ -189,14 +189,13 @@ public class LoadInitialRegistryUseCase {
             SeedTeacher seed = list.get(i);
             String email = Teacher.normalizeEmail(seed.email());
             if (email == null || !EMAIL_FORMAT.matcher(email).matches()) {
-                errors.add(new SeedError("teachers", i, "email", ErrorCode.EMAIL_INVALIDO));
+                errors.add(new SeedError("teachers", i, "email", ErrorCode.INVALID_EMAIL));
             } else if (!emails.add(email)) {
                 errors.add(
-                        new SeedError(
-                                "teachers", i, "email", ErrorCode.EMAIL_DUPLICADO_NO_ARQUIVO));
+                        new SeedError("teachers", i, "email", ErrorCode.DUPLICATE_EMAIL_IN_FILE));
             }
             if (optionalText(seed.name()) == null) {
-                errors.add(new SeedError("teachers", i, "name", ErrorCode.NOME_OBRIGATORIO));
+                errors.add(new SeedError("teachers", i, "name", ErrorCode.NAME_REQUIRED));
             }
         }
     }
@@ -219,7 +218,7 @@ public class LoadInitialRegistryUseCase {
         for (int i = 0; i < list.size(); i++) {
             SeedStudent seed = list.get(i);
             if (optionalText(seed.name()) == null) {
-                errors.add(new SeedError("students", i, "name", ErrorCode.NOME_OBRIGATORIO));
+                errors.add(new SeedError("students", i, "name", ErrorCode.NAME_REQUIRED));
             }
             try {
                 Cpf cpf = Cpf.of(seed.cpf());
@@ -227,26 +226,21 @@ public class LoadInitialRegistryUseCase {
                     validCpfs.put(i, cpf);
                 } else {
                     errors.add(
-                            new SeedError("students", i, "cpf", ErrorCode.CPF_DUPLICADO_NO_ARQUIVO));
+                            new SeedError("students", i, "cpf", ErrorCode.DUPLICATE_CPF_IN_FILE));
                 }
             } catch (DomainException error) {
-                errors.add(new SeedError("students", i, "cpf", ErrorCode.CPF_INVALIDO));
+                errors.add(new SeedError("students", i, "cpf", ErrorCode.INVALID_CPF));
             }
             LocalDate birth = readDate(seed.birthDate());
             if (birth == null || birth.isAfter(today)) {
-                errors.add(
-                        new SeedError(
-                                "students", i, "birthDate", ErrorCode.DATA_NASCIMENTO_INVALIDA));
+                errors.add(new SeedError("students", i, "birthDate", ErrorCode.INVALID_BIRTH_DATE));
             } else {
                 births.put(i, birth);
                 if (Student.requiresGuardian(birth, today)
                         && optionalText(seed.guardianName()) == null) {
                     errors.add(
                             new SeedError(
-                                    "students",
-                                    i,
-                                    "guardianName",
-                                    ErrorCode.RESPONSAVEL_OBRIGATORIO));
+                                    "students", i, "guardianName", ErrorCode.GUARDIAN_REQUIRED));
                 }
             }
             List<String> emails = seed.teachers();
@@ -262,7 +256,7 @@ public class LoadInitialRegistryUseCase {
                                     "students",
                                     i,
                                     "teachers[" + j + "]",
-                                    ErrorCode.PROFESSOR_INEXISTENTE));
+                                    ErrorCode.TEACHER_NOT_FOUND));
                 }
             }
         }

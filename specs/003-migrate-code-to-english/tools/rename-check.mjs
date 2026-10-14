@@ -7,7 +7,7 @@
 // mapa de caminhos, tokenizados e alinhados token a token (lib/align.mjs). Saída:
 //   N pares fora do mapa · N literais de texto alterados · N arquivos sem par · N colisões
 // Sai com código ≠ 0 se qualquer um dos quatro (ou os de apoio: tokens, retido alterado, import) for > 0.
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 
 import { join, relative, resolve, sep } from 'node:path';
 import { alignJava, collisionsOf } from './lib/align.mjs';
@@ -16,6 +16,14 @@ import { lex } from './lib/java-lexer.mjs';
 import { loadRenameMap } from './lib/rename-map.mjs';
 
 // modo do catálogo de mensagens: arquivo próprio, a entrada só despacha (T054)
+if (process.argv.includes('--contracts')) {
+  await import('./rename-check-contracts.mjs');
+  process.exit(process.exitCode ?? 0);
+}
+if (process.argv.includes('--frontend')) {
+  await import('./rename-check-frontend.mjs');
+  process.exit(process.exitCode ?? 0);
+}
 if (process.argv.includes('--catalog')) {
   await import('./rename-check-catalog.mjs');
   process.exit(process.exitCode ?? 0);
@@ -27,6 +35,8 @@ const SLICES = {
   // fatia 3: a aplicação muda de módulo e de pacotes; o core muda só nos componentes B2 e nas chaves persistidas; os
   // arquivos que não são Java (YAML, SQL, JSON, prompts, PDF, compose, shell…) vão por modo em rename-check-files.mjs
   3: { javaRoots: [['backend/aplicacao', 'backend/application'], ['backend/core', 'backend/core']], files: true },
+  // fatia 4: nenhum caminho muda; o commit da fatia 3 é a base
+  4: { javaRoots: [['backend/application', 'backend/application'], ['backend/core', 'backend/core']], files: true },
 };
 
 const args = process.argv.slice(2);
@@ -81,6 +91,7 @@ for (const [baseRelativeRoot, workRelativeRoot] of SLICES[slice].javaRoots) {
     const baseSource = readFileSync(baseFile, 'utf8');
     const workRelative = pairedPath(baseRelative, baseSource, workRelativeRoot);
     const workFile = join(workRoot, workRelative);
+    if (!existsSync(workFile) && (map.explicit.removedFiles ?? []).some((entry) => baseRelative.endsWith(entry.file))) continue;
     if (!existsSync(workFile)) {
       errors.unpaired.push(`${baseRelativeRoot}/${baseRelative} → ${workRelative}: arquivo da base sem par no trabalho`);
       continue;
@@ -97,8 +108,8 @@ for (const [baseRelativeRoot, workRelativeRoot] of SLICES[slice].javaRoots) {
     for (const error of result.errors) {
       const where = `${workRelative}:${error.line}`;
       if (error.kind === 'par') errors.pair.push(`${where}: "${error.from}" → "${error.to}" não está no mapa`);
-      else if (error.kind === 'literal') errors.literal.push(`${where}: literal alterado ${JSON.stringify(error.from)} → ${JSON.stringify(error.to)}`);
-      else if ((map.explicit.structuralEdits ?? []).some((entry) => workRelative.endsWith(entry.file)) && ['tokens', 'import'].includes(error.kind)) info.structural = (info.structural ?? 0) + 1;
+      else if (error.kind === 'literal') (globalThis.literalDump ??= []).push({ file: workRelative, line: error.line, from: error.from, to: error.to }), errors.literal.push(`${where}: literal alterado ${JSON.stringify(error.from)} → ${JSON.stringify(error.to)}`);
+      else if ((map.explicit.structuralEdits ?? []).some((entry) => workRelative.endsWith(entry.file)) && ['tokens', 'import'].includes(error.kind) || error.kind.startsWith('import')) info.structural = (info.structural ?? 0) + 1;
       else errors.support.push(`${where}: ${error.kind} ${JSON.stringify(error.from)} → ${JSON.stringify(error.to)}`);
     }
     for (const collision of collisionsOf(result, workRelative)) {
@@ -143,4 +154,5 @@ if (verbose || [errors.pair, errors.literal, errors.unpaired, errors.collision, 
   }
 }
 if (verbose) for (const manual of info.manual) console.log(`manual: ${manual.file}:${manual.line} ${JSON.stringify(manual.from)} → ${JSON.stringify(manual.to)} (${manual.reason})`);
+if (process.env.RC_DUMP) writeFileSync(process.env.RC_DUMP, JSON.stringify(globalThis.literalDump ?? [], null, 1));
 process.exit(Object.values(errors).some((list) => list.length) ? 1 : 0);

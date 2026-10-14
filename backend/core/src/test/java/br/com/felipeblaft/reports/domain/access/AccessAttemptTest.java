@@ -14,7 +14,7 @@ class AccessAttemptTest {
 
     @Test
     void blocksOnFifthConsecutiveFailure() {
-        AccessAttempt attempt = AccessAttempt.create(Channel.WEB, "origem", T0);
+        AccessAttempt attempt = AccessAttempt.create(Channel.WEB, "origin", T0);
         for (int i = 1; i <= 4; i++) {
             attempt.registerFailure(T0.plusSeconds(i), 5, QUINZE);
             assertThat(attempt.remainingLock(T0.plusSeconds(i))).isEmpty();
@@ -25,12 +25,12 @@ class AccessAttemptTest {
         assertThat(attempt.remainingLock(T0.plusSeconds(65))).contains(Duration.ofMinutes(14));
         assertThat(attempt.lockEnded(T0.plusSeconds(65))).isFalse();
         assertThat(attempt.channel()).isEqualTo(Channel.WEB);
-        assertThat(attempt.originHash()).isEqualTo("origem");
+        assertThat(attempt.originHash()).isEqualTo("origin");
     }
 
     @Test
     void lockEndResetsBeforeCountingNewFailure() {
-        AccessAttempt attempt = AccessAttempt.create(Channel.TELEGRAM, "origem", T0);
+        AccessAttempt attempt = AccessAttempt.create(Channel.TELEGRAM, "origin", T0);
         for (int i = 0; i < 5; i++) {
             attempt.registerFailure(T0, 5, QUINZE);
         }
@@ -47,7 +47,7 @@ class AccessAttemptTest {
 
     @Test
     void successResets() {
-        AccessAttempt attempt = AccessAttempt.create(Channel.WEB, "origem", T0);
+        AccessAttempt attempt = AccessAttempt.create(Channel.WEB, "origin", T0);
         attempt.registerFailure(T0, 5, QUINZE);
         attempt.reset(T0.plusSeconds(1));
         assertThat(attempt.failedAttempts()).isZero();

@@ -15,7 +15,7 @@ x-maven: &maven
     DATABASE_URL: jdbc:postgresql://postgres-teste:5432/relatorios_teste
     DATABASE_USER: relatorios
     DATABASE_PASSWORD: teste
-    CONTRATO_API: /work/specs/001-fluxo-relatorios/contracts/api-portal.openapi.yaml
+    CONTRACT_API: /work/specs/001-fluxo-relatorios/contracts/api-portal.openapi.yaml
   depends_on:
     postgres-teste:
       condition: service_healthy

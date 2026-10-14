@@ -6,36 +6,36 @@ import { SESSAO_CLARA, renderizarRotas, simularApi } from '../utilitarios';
 
 const MATTEO = {
   id: '0190a000-0000-7000-8000-00000000000a',
-  nome: 'Matteo Mafra',
-  instrumento: 'Piano',
-  ultimaAulaEm: '2026-09-21',
-  possuiRelatorioEmAberto: true,
+  name: 'Matteo Mafra',
+  instrument: 'Piano',
+  lastLessonAt: '2026-09-21',
+  hasOpenReport: true,
 };
 
 const INICIO = {
-  professor: SESSAO_CLARA.professor,
-  totalAlunos: 7,
-  alunos: [MATTEO],
-  relatoriosEmAberto: [
+  teacher: SESSAO_CLARA.teacher,
+  totalStudents: 7,
+  students: [MATTEO],
+  openReports: [
     {
-      tipo: 'AULA',
-      relatorioId: '0190a000-0000-7000-8000-0000000000aa',
-      trabalhoId: null,
-      alunoId: MATTEO.id,
-      alunoNome: 'Matteo Mafra',
-      status: 'AGUARDANDO_CONFERENCIA',
-      etapa: null,
-      periodoChave: null,
-      canalOrigem: 'TELEGRAM',
-      atualizadoEm: '2026-09-20T12:57:00Z',
+      type: 'LESSON',
+      reportId: '0190a000-0000-7000-8000-0000000000aa',
+      jobId: null,
+      studentId: MATTEO.id,
+      studentName: 'Matteo Mafra',
+      status: 'AWAITING_REVIEW',
+      step: null,
+      periodKey: null,
+      originChannel: 'TELEGRAM',
+      updatedAt: '2026-09-20T12:57:00Z',
     },
   ],
-  limiteAudioMb: 50,
+  audioLimitMb: 50,
 };
 
 describe('TelaPainel (02)', () => {
   it('mostra saudação, relatórios em aberto, total e primeiros alunos', async () => {
-    simularApi({ 'GET /api/v1/sessao': { corpo: SESSAO_CLARA }, 'GET /api/v1/inicio': { corpo: INICIO } });
+    simularApi({ 'GET /api/v1/session': { corpo: SESSAO_CLARA }, 'GET /api/v1/home': { corpo: INICIO } });
     const usuario = userEvent.setup();
     const { roteador } = renderizarRotas(rotas, '/');
 
@@ -52,7 +52,7 @@ describe('TelaPainel (02)', () => {
   });
 
   it('registrar aula leva à escolha do aluno', async () => {
-    simularApi({ 'GET /api/v1/sessao': { corpo: SESSAO_CLARA }, 'GET /api/v1/inicio': { corpo: INICIO } });
+    simularApi({ 'GET /api/v1/session': { corpo: SESSAO_CLARA }, 'GET /api/v1/home': { corpo: INICIO } });
     const usuario = userEvent.setup();
     const { roteador } = renderizarRotas(rotas, '/');
     await usuario.click(await screen.findByRole('button', { name: /Grave um áudio/ }));
@@ -61,8 +61,8 @@ describe('TelaPainel (02)', () => {
 
   it('vazio (02b) quando não há alunos', async () => {
     simularApi({
-      'GET /api/v1/sessao': { corpo: SESSAO_CLARA },
-      'GET /api/v1/inicio': { corpo: { ...INICIO, totalAlunos: 0, alunos: [], relatoriosEmAberto: [] } },
+      'GET /api/v1/session': { corpo: SESSAO_CLARA },
+      'GET /api/v1/home': { corpo: { ...INICIO, totalStudents: 0, students: [], openReports: [] } },
     });
     renderizarRotas(rotas, '/');
     expect(await screen.findByText('Nenhum aluno por aqui')).toBeInTheDocument();
@@ -73,17 +73,17 @@ describe('TelaPainel (02)', () => {
 
   it('menu (02c) com tema e encerrar sessão; 401 leva a Entrar', async () => {
     simularApi({
-      'GET /api/v1/sessao': { corpo: SESSAO_CLARA },
-      'GET /api/v1/inicio': {
+      'GET /api/v1/session': { corpo: SESSAO_CLARA },
+      'GET /api/v1/home': {
         status: 401,
         corpo: {
-          codigo: 'SESSAO_EXPIRADA',
-          mensagem: 'Sua sessão expirou. Entre novamente com o seu código.',
+          code: 'SESSION_EXPIRED',
+          message: 'Sua sessão expirou. Entre novamente com o seu código.',
         },
       },
     });
     const { roteador } = renderizarRotas(rotas, '/');
     await waitFor(() => expect(roteador.state.location.pathname).toBe('/entrar'));
-    expect(roteador.state.location.search).toContain('motivo=SESSAO_EXPIRADA');
+    expect(roteador.state.location.search).toContain('motivo=SESSION_EXPIRED');
   });
 });

@@ -14,18 +14,18 @@ import type { RelatorioEmAbertoDto } from '../servicos/inicio';
 import { semestral, usePreviaSemestral, useSemestres, type SemestreDto } from '../servicos/semestral';
 
 function intervalo(semestre: SemestreDto): string {
-  return msg('SEMESTRE_INTERVALO', {
-    rotulo: semestre.rotulo,
-    inicio: formatarData(semestre.inicio),
-    fim: formatarData(semestre.fim),
+  return msg('SEMESTER_INTERVAL', {
+    label: semestre.label,
+    start: formatarData(semestre.start),
+    end: formatarData(semestre.end),
   });
 }
 
 function textoEmAberto(aberto: RelatorioEmAbertoDto): string {
-  return msg('RELATORIO_EM_ABERTO', {
-    canalOrigem: msg(aberto.canalOrigem === 'TELEGRAM' ? 'CANAL_ORIGEM_TELEGRAM' : 'CANAL_ORIGEM_WEB'),
-    data: dataDoInstante(aberto.atualizadoEm),
-    hora: horaDoInstante(aberto.atualizadoEm),
+  return msg('REPORT_ALREADY_OPEN', {
+    originChannel: msg(aberto.originChannel === 'TELEGRAM' ? 'TELEGRAM_ORIGIN_CHANNEL' : 'WEB_ORIGIN_CHANNEL'),
+    data: dataDoInstante(aberto.updatedAt),
+    hora: horaDoInstante(aberto.updatedAt),
   });
 }
 
@@ -39,7 +39,7 @@ export function TelaSemestral() {
   const aluno = useAluno(alunoId);
   const semestres = useSemestres(alunoId);
   const [escolhido, setEscolhido] = useState<string | null>(null);
-  const chave = escolhido ?? semestres.data?.find((s) => s.preSelecionado)?.chave ?? null;
+  const chave = escolhido ?? semestres.data?.find((s) => s.preselected)?.key ?? null;
   const previa = usePreviaSemestral(alunoId, chave);
   const [gerando, setGerando] = useState(false);
   const [erro, setErro] = useState<unknown>(null);
@@ -49,7 +49,7 @@ export function TelaSemestral() {
 
   const contexto = {
     sobretitulo: 'Relatório semestral',
-    titulo: aluno.data?.nome ?? '',
+    titulo: aluno.data?.name ?? '',
     voltarPara: '/alunos',
   };
 
@@ -69,22 +69,22 @@ export function TelaSemestral() {
   }
 
   const lista = semestres.data;
-  const selecionado = lista.find((s) => s.chave === chave) ?? null;
+  const selecionado = lista.find((s) => s.key === chave) ?? null;
   const dados = previa.data;
   const podeGerar =
     dados !== undefined &&
-    !dados.semestralAprovadoId &&
-    !dados.semestralEmAberto &&
-    dados.aulasAprovadas > 0 &&
-    dados.relatoriosAulaEmAberto === 0;
+    !dados.approvedSemesterReportId &&
+    !dados.openSemesterReport &&
+    dados.approvedLessons > 0 &&
+    dados.openLessonReports === 0;
 
   const gerar = async (mesmoComEmAberto: boolean) => {
     if (!alunoId || !chave) return;
     setGerando(true);
     setErro(null);
     try {
-      const { trabalhoId } = await semestral.gerar(alunoId, chave, mesmoComEmAberto);
-      navegar(`/trabalhos/${trabalhoId}`);
+      const { jobId } = await semestral.gerar(alunoId, chave, mesmoComEmAberto);
+      navegar(`/trabalhos/${jobId}`);
     } catch (falha) {
       setErro(falha);
       setGerando(false);
@@ -92,15 +92,15 @@ export function TelaSemestral() {
   };
 
   const confirmarDescarte = async () => {
-    const aberto = dados?.semestralEmAberto;
+    const aberto = dados?.openSemesterReport;
     if (!aberto) return;
     setDescartando(true);
     setErroDescarte(null);
     try {
-      if (aberto.relatorioId) {
-        await semestral.cancelar(aberto.relatorioId);
-      } else if (aberto.trabalhoId) {
-        await semestral.descartarConsolidacao(aberto.trabalhoId);
+      if (aberto.reportId) {
+        await semestral.cancelar(aberto.reportId);
+      } else if (aberto.jobId) {
+        await semestral.descartarConsolidacao(aberto.jobId);
       }
       setDescartar(false);
       await previa.refetch();
@@ -126,7 +126,7 @@ export function TelaSemestral() {
             carregando={gerando}
             onClick={() => void gerar(false)}
           >
-            {msg('BOTAO_GERAR_SEMESTRAL')}
+            {msg('GENERATE_SEMESTER_BUTTON')}
           </Botao>
         ) : undefined
       }
@@ -134,13 +134,13 @@ export function TelaSemestral() {
       <div className="pagina pagina--estreita">
         <div>
           <div className="sobretitulo">Relatório semestral</div>
-          <h1 className="titulo-pagina">{aluno.data.nome}</h1>
+          <h1 className="titulo-pagina">{aluno.data.name}</h1>
           <p className="subtitulo">
             Escolha o período. O relatório consolida todas as aulas aprovadas no semestre.
           </p>
         </div>
         {lista.length === 0 ? (
-          <EstadoVazio icone="event_busy" texto={msg('SEM_SEMESTRES')} />
+          <EstadoVazio icone="event_busy" texto={msg('NO_SEMESTERS')} />
         ) : (
           <>
             <fieldset className="periodos">
@@ -148,20 +148,20 @@ export function TelaSemestral() {
               <div role="radiogroup" aria-label="Período" className="periodos__opcoes">
                 {lista.map((semestre) => (
                   <button
-                    key={semestre.chave}
+                    key={semestre.key}
                     type="button"
                     role="radio"
-                    aria-checked={semestre.chave === chave}
+                    aria-checked={semestre.key === chave}
                     className="periodos__opcao"
                     onClick={() => {
-                      setEscolhido(semestre.chave);
+                      setEscolhido(semestre.key);
                       setErro(null);
                     }}
                   >
-                    <Icone nome={semestre.chave === chave ? 'check_circle' : 'calendar_month'} />
-                    {semestre.rotulo}
-                    {semestre.emAndamento ? (
-                      <span className="chip chip--contorno">{msg('SEMESTRE_EM_ANDAMENTO')}</span>
+                    <Icone nome={semestre.key === chave ? 'check_circle' : 'calendar_month'} />
+                    {semestre.label}
+                    {semestre.inProgress ? (
+                      <span className="chip chip--contorno">{msg('SEMESTER_IN_PROGRESS')}</span>
                     ) : null}
                   </button>
                 ))}
@@ -172,64 +172,64 @@ export function TelaSemestral() {
               <AlertaErro erro={previa.error} aoTentarDeNovo={() => void previa.refetch()} />
             ) : !dados ? (
               <EstadoCarregando rotulo="Consultando o período" />
-            ) : dados.semestralAprovadoId ? (
+            ) : dados.approvedSemesterReportId ? (
               <div role="status" className="alerta alerta--info">
                 <Icone nome="verified" />
-                <div className="alerta__texto">{msg('SEMESTRAL_JA_APROVADO')}</div>
+                <div className="alerta__texto">{msg('SEMESTER_REPORT_ALREADY_APPROVED')}</div>
                 <Link className="botao botao--link" to={`/alunos/${alunoId}/historico`}>
-                  {msg('BOTAO_HISTORICO')}
+                  {msg('HISTORY_BUTTON')}
                 </Link>
               </div>
-            ) : dados.semestralEmAberto ? (
+            ) : dados.openSemesterReport ? (
               <div role="alert" className="alerta alerta--aviso alerta--coluna">
                 <Icone nome="edit_note" />
-                <div className="alerta__texto">{textoEmAberto(dados.semestralEmAberto)}</div>
+                <div className="alerta__texto">{textoEmAberto(dados.openSemesterReport)}</div>
                 <div className="pilha-acoes">
                   <Botao
                     variante="aviso"
                     onClick={() =>
                       navegar(
-                        dados.semestralEmAberto?.relatorioId
-                          ? `/relatorios-semestrais/${dados.semestralEmAberto.relatorioId}`
-                          : `/trabalhos/${dados.semestralEmAberto?.trabalhoId}`,
+                        dados.openSemesterReport?.reportId
+                          ? `/relatorios-semestrais/${dados.openSemesterReport.reportId}`
+                          : `/trabalhos/${dados.openSemesterReport?.jobId}`,
                       )
                     }
                   >
-                    {msg('BOTAO_CONTINUAR')}
+                    {msg('CONTINUE_BUTTON')}
                   </Botao>
                   <Botao variante="perigo" onClick={() => setDescartar(true)}>
-                    {msg('BOTAO_DESCARTAR')}
+                    {msg('DISCARD_BUTTON')}
                   </Botao>
                 </div>
               </div>
-            ) : dados.aulasAprovadas === 0 ? (
+            ) : dados.approvedLessons === 0 ? (
               <div role="alert" className="alerta alerta--erro">
                 <Icone nome="error" />
-                <div className="alerta__texto">{msg('SEM_AULAS_APROVADAS_NO_PERIODO')}</div>
+                <div className="alerta__texto">{msg('NO_APPROVED_LESSONS_IN_PERIOD')}</div>
               </div>
             ) : (
               <>
                 <div role="status" className="alerta alerta--info">
                   <Icone nome="info" />
                   <div className="alerta__texto">
-                    {msg('SEMESTRAL_PREVIA', {
-                      rotulo: selecionado?.rotulo ?? '',
-                      quantidade: dados.aulasAprovadas,
+                    {msg('SEMESTER_PREVIEW', {
+                      label: selecionado?.label ?? '',
+                      quantity: dados.approvedLessons,
                     })}
                   </div>
                 </div>
-                {dados.relatoriosAulaEmAberto > 0 ? (
+                {dados.openLessonReports > 0 ? (
                   <div role="alert" className="alerta alerta--aviso alerta--coluna">
                     <Icone nome="warning" />
                     <div className="alerta__texto">
-                      {msg('HA_RELATORIOS_EM_ABERTO', { quantidade: dados.relatoriosAulaEmAberto })}
+                      {msg('OPEN_REPORTS_EXIST', { quantity: dados.openLessonReports })}
                     </div>
                     <div className="pilha-acoes">
                       <Botao variante="aviso" carregando={gerando} onClick={() => void gerar(true)}>
-                        {msg('BOTAO_GERAR_MESMO_ASSIM')}
+                        {msg('GENERATE_ANYWAY_BUTTON')}
                       </Botao>
                       <Botao variante="secundario" onClick={() => navegar('/alunos')}>
-                        {msg('BOTAO_VOLTAR')}
+                        {msg('BACK_BUTTON')}
                       </Botao>
                     </div>
                   </div>
@@ -245,8 +245,8 @@ export function TelaSemestral() {
         perigo
         icone="delete"
         titulo="Descartar o relatório em aberto?"
-        texto={msg('CONFIRMAR_DESCARTE')}
-        rotuloConfirmar={msg('BOTAO_CONFIRMAR_DESCARTE')}
+        texto={msg('CONFIRM_DISCARD')}
+        rotuloConfirmar={msg('CONFIRM_DISCARD_BUTTON')}
         carregando={descartando}
         erro={erroDescarte ? textoDoErro(erroDescarte) : undefined}
         aoConfirmar={() => void confirmarDescarte()}

@@ -60,7 +60,7 @@ public class InMemoryChannelActionRepository implements ChannelActionRepository 
         Instant limit = now.minus(confirmationMax);
         Optional<ChannelAction> candidate =
                 data.values().stream()
-                        .filter(a -> a.state() == ChannelActionState.PENDENTE)
+                        .filter(a -> a.state() == ChannelActionState.PENDING)
                         .filter(a -> !a.nextAttemptAt().isAfter(now))
                         .filter(this::firstPendingOfBatch)
                         .filter(a -> !blockedByOrder(a, limit))
@@ -72,7 +72,7 @@ public class InMemoryChannelActionRepository implements ChannelActionRepository 
         List<ChannelAction> reserved = new ArrayList<>();
         for (ChannelAction action : ordered(a -> a.batchId().equals(batch))) {
             ChannelAction stored = data.get(action.id());
-            if (stored.state() == ChannelActionState.PENDENTE) {
+            if (stored.state() == ChannelActionState.PENDING) {
                 stored.reserveUntil(leaseAte);
                 stored.defineVersion(stored.version() + 1);
                 reserved.add(copy(stored));
@@ -129,12 +129,12 @@ public class InMemoryChannelActionRepository implements ChannelActionRepository 
     public Pending pending(Instant deliveredUntil) {
         long withoutConfirmation =
                 data.values().stream()
-                        .filter(a -> a.state() == ChannelActionState.ENTREGUE)
+                        .filter(a -> a.state() == ChannelActionState.DELIVERED)
                         .filter(a -> a.deliveredAt().isBefore(deliveredUntil))
                         .count();
         List<ChannelAction> pending =
                 data.values().stream()
-                        .filter(a -> a.state() == ChannelActionState.PENDENTE)
+                        .filter(a -> a.state() == ChannelActionState.PENDING)
                         .toList();
         Instant oldest =
                 pending.stream()
@@ -165,7 +165,7 @@ public class InMemoryChannelActionRepository implements ChannelActionRepository 
         long minimum =
                 data.values().stream()
                         .filter(a -> a.batchId().equals(action.batchId()))
-                        .filter(a -> a.state() == ChannelActionState.PENDENTE)
+                        .filter(a -> a.state() == ChannelActionState.PENDING)
                         .mapToLong(a -> sequences.get(a.id()))
                         .min()
                         .orElseThrow();
@@ -180,8 +180,8 @@ public class InMemoryChannelActionRepository implements ChannelActionRepository 
                 .filter(b -> !b.batchId().equals(action.batchId()))
                 .anyMatch(
                         b ->
-                                b.state() == ChannelActionState.PENDENTE
-                                        || (b.state() == ChannelActionState.ENTREGUE
+                                b.state() == ChannelActionState.PENDING
+                                        || (b.state() == ChannelActionState.DELIVERED
                                                 && b.deliveredAt().isAfter(confirmationLimit)));
     }
 

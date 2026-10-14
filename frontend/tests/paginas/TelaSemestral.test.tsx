@@ -9,77 +9,77 @@ const SEMESTRAL = '0190a000-0000-7000-8000-0000000000s1';
 
 const SEMESTRES = [
   {
-    chave: '2026-2',
-    rotulo: '2º semestre 2026',
-    inicio: '2026-07-01',
-    fim: '2026-12-31',
-    emAndamento: true,
-    preSelecionado: true,
+    key: '2026-2',
+    label: '2º semestre 2026',
+    start: '2026-07-01',
+    end: '2026-12-31',
+    inProgress: true,
+    preselected: true,
   },
   {
-    chave: '2026-1',
-    rotulo: '1º semestre 2026',
-    inicio: '2026-01-01',
-    fim: '2026-06-30',
-    emAndamento: false,
-    preSelecionado: false,
+    key: '2026-1',
+    label: '1º semestre 2026',
+    start: '2026-01-01',
+    end: '2026-06-30',
+    inProgress: false,
+    preselected: false,
   },
 ];
 
 function previa(chave: string, sobrescrever: Record<string, unknown> = {}) {
   return {
-    periodoChave: chave,
-    aulasAprovadas: 3,
-    relatoriosAulaEmAberto: 0,
-    semestralAprovadoId: null,
-    semestralEmAberto: null,
+    periodKey: chave,
+    approvedLessons: 3,
+    openLessonReports: 0,
+    approvedSemesterReportId: null,
+    openSemesterReport: null,
     ...sobrescrever,
   };
 }
 
 const BASE = {
-  'GET /api/v1/sessao': { corpo: SESSAO_CLARA },
-  'GET /api/v1/inicio': {
+  'GET /api/v1/session': { corpo: SESSAO_CLARA },
+  'GET /api/v1/home': {
     corpo: {
-      professor: SESSAO_CLARA.professor,
-      totalAlunos: 1,
-      alunos: [],
-      relatoriosEmAberto: [],
-      limiteAudioMb: 50,
+      teacher: SESSAO_CLARA.teacher,
+      totalStudents: 1,
+      students: [],
+      openReports: [],
+      audioLimitMb: 50,
     },
   },
-  [`GET /api/v1/alunos/${ALUNO}`]: {
+  [`GET /api/v1/students/${ALUNO}`]: {
     corpo: {
       id: ALUNO,
-      nome: 'Matteo Mafra',
-      instrumento: 'Piano',
-      ultimaAulaEm: null,
-      possuiRelatorioEmAberto: false,
+      name: 'Matteo Mafra',
+      instrument: 'Piano',
+      lastLessonAt: null,
+      hasOpenReport: false,
     },
   },
-  [`GET /api/v1/alunos/${ALUNO}/semestres`]: { corpo: SEMESTRES },
+  [`GET /api/v1/students/${ALUNO}/semesters`]: { corpo: SEMESTRES },
 };
 
 describe('TelaSemestral (10)', () => {
   it('pré-seleciona o mais recente, mostra o intervalo e gera pelo semestre escolhido', async () => {
     const api = simularApi({
       ...BASE,
-      [`GET /api/v1/alunos/${ALUNO}/semestres/2026-2/previa`]: {
-        corpo: previa('2026-2', { aulasAprovadas: 0 }),
+      [`GET /api/v1/students/${ALUNO}/semesters/2026-2/preview`]: {
+        corpo: previa('2026-2', { approvedLessons: 0 }),
       },
-      [`GET /api/v1/alunos/${ALUNO}/semestres/2026-1/previa`]: { corpo: previa('2026-1') },
-      [`POST /api/v1/alunos/${ALUNO}/relatorios-semestrais`]: { status: 202, corpo: { trabalhoId: 't7' } },
-      'GET /api/v1/trabalhos/t7': {
+      [`GET /api/v1/students/${ALUNO}/semesters/2026-1/preview`]: { corpo: previa('2026-1') },
+      [`POST /api/v1/students/${ALUNO}/semester-reports`]: { status: 202, corpo: { jobId: 't7' } },
+      'GET /api/v1/jobs/t7': {
         corpo: {
-          trabalhoId: 't7',
-          tipo: 'CONSOLIDACAO_SEMESTRAL',
-          status: 'EM_EXECUCAO',
-          etapa: 'CONSOLIDANDO',
-          demorando: false,
-          resultadoCodigo: null,
-          relatorioTipo: 'SEMESTRAL',
-          relatorioId: null,
-          textoEntendido: null,
+          jobId: 't7',
+          type: 'SEMESTER_CONSOLIDATION',
+          status: 'RUNNING',
+          step: 'CONSOLIDATING',
+          delayed: false,
+          resultCode: null,
+          reportType: 'SEMESTER',
+          reportId: null,
+          understoodText: null,
         },
       },
     });
@@ -105,18 +105,18 @@ describe('TelaSemestral (10)', () => {
     await waitFor(() => expect(roteador.state.location.pathname).toBe('/trabalhos/t7'));
     const envio = api.chamadas.find((c) => c.metodo === 'POST')!;
     expect(JSON.parse(envio.init.body as string)).toEqual({
-      periodoChave: '2026-1',
-      confirmarMesmoComEmAberto: false,
+      periodKey: '2026-1',
+      confirmDespiteOpenReports: false,
     });
   });
 
   it('relatórios de aula em aberto pedem "Gerar mesmo assim"', async () => {
     const api = simularApi({
       ...BASE,
-      [`GET /api/v1/alunos/${ALUNO}/semestres/2026-2/previa`]: {
-        corpo: previa('2026-2', { relatoriosAulaEmAberto: 2 }),
+      [`GET /api/v1/students/${ALUNO}/semesters/2026-2/preview`]: {
+        corpo: previa('2026-2', { openLessonReports: 2 }),
       },
-      [`POST /api/v1/alunos/${ALUNO}/relatorios-semestrais`]: { status: 202, corpo: { trabalhoId: 't8' } },
+      [`POST /api/v1/students/${ALUNO}/semester-reports`]: { status: 202, corpo: { jobId: 't8' } },
     });
     const usuario = userEvent.setup();
     renderizarRotas(rotas, `/alunos/${ALUNO}/semestral`);
@@ -132,8 +132,8 @@ describe('TelaSemestral (10)', () => {
     await waitFor(() => expect(api.chamadas.some((c) => c.metodo === 'POST')).toBe(true));
     const envio = api.chamadas.find((c) => c.metodo === 'POST')!;
     expect(JSON.parse(envio.init.body as string)).toEqual({
-      periodoChave: '2026-2',
-      confirmarMesmoComEmAberto: true,
+      periodKey: '2026-2',
+      confirmDespiteOpenReports: true,
     });
   });
 
@@ -141,28 +141,28 @@ describe('TelaSemestral (10)', () => {
     let cancelado = false;
     simularApi({
       ...BASE,
-      [`GET /api/v1/alunos/${ALUNO}/semestres/2026-2/previa`]: () => ({
+      [`GET /api/v1/students/${ALUNO}/semesters/2026-2/preview`]: () => ({
         corpo: previa('2026-2', {
-          semestralEmAberto: cancelado
+          openSemesterReport: cancelado
             ? null
             : {
-                tipo: 'SEMESTRAL',
-                relatorioId: SEMESTRAL,
-                trabalhoId: null,
-                alunoId: ALUNO,
-                alunoNome: 'Matteo Mafra',
-                status: 'AGUARDANDO_CONFERENCIA',
-                etapa: null,
-                periodoChave: '2026-2',
-                canalOrigem: 'TELEGRAM',
-                atualizadoEm: '2026-09-20T12:57:00Z',
+                type: 'SEMESTER',
+                reportId: SEMESTRAL,
+                jobId: null,
+                studentId: ALUNO,
+                studentName: 'Matteo Mafra',
+                status: 'AWAITING_REVIEW',
+                step: null,
+                periodKey: '2026-2',
+                originChannel: 'TELEGRAM',
+                updatedAt: '2026-09-20T12:57:00Z',
               },
         }),
       }),
-      [`GET /api/v1/alunos/${ALUNO}/semestres/2026-1/previa`]: {
-        corpo: previa('2026-1', { semestralAprovadoId: SEMESTRAL }),
+      [`GET /api/v1/students/${ALUNO}/semesters/2026-1/preview`]: {
+        corpo: previa('2026-1', { approvedSemesterReportId: SEMESTRAL }),
       },
-      [`POST /api/v1/relatorios-semestrais/${SEMESTRAL}/cancelamento`]: () => {
+      [`POST /api/v1/semester-reports/${SEMESTRAL}/cancellation`]: () => {
         cancelado = true;
         return { status: 204 };
       },
@@ -185,7 +185,7 @@ describe('TelaSemestral (10)', () => {
   });
 
   it('10c: nenhum semestre disponível', async () => {
-    simularApi({ ...BASE, [`GET /api/v1/alunos/${ALUNO}/semestres`]: { corpo: [] } });
+    simularApi({ ...BASE, [`GET /api/v1/students/${ALUNO}/semesters`]: { corpo: [] } });
     renderizarRotas(rotas, `/alunos/${ALUNO}/semestral`);
 
     expect(await screen.findByText('Nenhum semestre disponível para este aluno ainda.')).toBeInTheDocument();

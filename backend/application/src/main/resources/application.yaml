@@ -78,8 +78,8 @@ reports:
     files-dir: ${TELEGRAM_FILES_DIR:/var/lib/telegram-bot-api}
     pending-audio-minutes: ${PENDING_AUDIO_MINUTES:30}
   telegram-channel:
-    # DIRETA = envio direto à API de bots (padrão); ORQUESTRADOR = outbox entregue ao n8n (feature 003)
-    proactive-delivery: ${TELEGRAM_CHANNEL_DELIVERY:DIRETA}
+    # DIRECT = envio direto à API de bots (padrão); ORCHESTRATOR = outbox entregue ao n8n (feature 003)
+    proactive-delivery: ${TELEGRAM_CHANNEL_DELIVERY:DIRECT}
     current-token: ${TELEGRAM_CHANNEL_CURRENT_TOKEN:}
     next-token: ${TELEGRAM_CHANNEL_NEXT_TOKEN:}
     orchestrator-url: ${TELEGRAM_CHANNEL_ORCHESTRATOR_URL:}

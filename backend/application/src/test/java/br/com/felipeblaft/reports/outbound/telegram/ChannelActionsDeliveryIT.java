@@ -58,10 +58,10 @@ class ChannelActionsDeliveryIT extends OrchestratorDeliveryBase {
     void markBaseLine() {
         for (String[] counter :
                 new String[][] {
-                    {"canal_entregas_total", "resultado", "aceita"},
-                    {"canal_entregas_total", "resultado", "recusada"},
-                    {"canal_acoes_falha_definitiva_total"},
-                    {"canal_confirmacoes_total", "situacao", "FALHOU", "codigo", "ERRO_TELEGRAM"}
+                    {"channel_deliveries_total", "result", "accepts"},
+                    {"channel_deliveries_total", "result", "refused"},
+                    {"channel_permanent_failure_actions_total"},
+                    {"channel_confirmations_total", "outcome", "FAILED", "code", "TELEGRAM_ERROR"}
                 }) {
             String[] tags = java.util.Arrays.copyOfRange(counter, 1, counter.length);
             baseLine.put(key(counter[0], tags), total(counter[0], tags));
@@ -73,7 +73,7 @@ class ChannelActionsDeliveryIT extends OrchestratorDeliveryBase {
     }
 
     private void confirmEverythingThroughExecutor(JsonNode batch) throws Exception {
-        orchestratorExecutor().run(batch.get("acoes"));
+        orchestratorExecutor().run(batch.get("actions"));
     }
 
     // ---- V8 / C9: orquestrador fora do ar e volta
@@ -87,12 +87,12 @@ class ChannelActionsDeliveryIT extends OrchestratorDeliveryBase {
         generateNoticeOf(matteo);
 
         String actionId = actionIds().get(0);
-        assertThat(actionId).startsWith("p:resultado:");
+        assertThat(actionId).startsWith("p:result:");
         task.dispatch();
-        assertThat(state(actionId)).isEqualTo("PENDENTE");
+        assertThat(state(actionId)).isEqualTo("PENDING");
         // o processamento do relatório não depende do orquestrador (FR-015)
         assertThat(jdbc.queryForObject("select status from lesson_report", String.class))
-                .isEqualTo("AGUARDANDO_RESPOSTAS");
+                .isEqualTo("AWAITING_ANSWERS");
         Instant first =
                 jdbc.queryForObject("select next_attempt_at from channel_action", Timestamp.class)
                         .toInstant();
@@ -110,25 +110,25 @@ class ChannelActionsDeliveryIT extends OrchestratorDeliveryBase {
         accept();
         task.dispatch();
 
-        assertThat(state(actionId)).isEqualTo("ENTREGUE");
+        assertThat(state(actionId)).isEqualTo("DELIVERED");
         List<LoggedRequest> received = deliveries();
         assertThat(received).hasSize(3);
         List<String> sentIds = new ArrayList<>();
         List<Integer> attempts = new ArrayList<>();
         for (LoggedRequest delivery : received) {
             JsonNode batch = body(delivery);
-            assertThat(batch.path("origem").asString()).isEqualTo("PROATIVA");
+            assertThat(batch.path("origin").asString()).isEqualTo("PROACTIVE");
             assertThat(delivery.getHeader("Idempotency-Key"))
-                    .isEqualTo(batch.path("loteId").asString());
-            assertThat(delivery.getHeader("X-Canal-Entrega-Token"))
-                    .isEqualTo("segredo-do-orquestrador");
-            sentIds.add(batch.get("acoes").get(0).path("acaoId").asString());
-            attempts.add(batch.path("tentativa").asInt());
+                    .isEqualTo(batch.path("batchId").asString());
+            assertThat(delivery.getHeader("X-Channel-Delivery-Token"))
+                    .isEqualTo("orchestrator-secret");
+            sentIds.add(batch.get("actions").get(0).path("actionId").asString());
+            attempts.add(batch.path("attempt").asInt());
         }
         assertThat(sentIds).containsOnly(actionId);
         assertThat(attempts).containsExactly(1, 2, 3);
-        assertThat(counter("canal_entregas_total", "resultado", "recusada")).isEqualTo(2);
-        assertThat(counter("canal_entregas_total", "resultado", "aceita")).isEqualTo(1);
+        assertThat(counter("channel_deliveries_total", "result", "refused")).isEqualTo(2);
+        assertThat(counter("channel_deliveries_total", "result", "accepts")).isEqualTo(1);
     }
 
     @Test
@@ -140,17 +140,17 @@ class ChannelActionsDeliveryIT extends OrchestratorDeliveryBase {
 
         answer(500);
         task.dispatch();
-        assertThat(state(actionId)).isEqualTo("PENDENTE");
+        assertThat(state(actionId)).isEqualTo("PENDING");
 
         clock.advance(Duration.ofMinutes(1));
         answer(404);
         task.dispatch();
-        assertThat(state(actionId)).isEqualTo("PENDENTE");
+        assertThat(state(actionId)).isEqualTo("PENDING");
 
         clock.advance(Duration.ofMinutes(5));
         replyWithDelay(200, 4000); // além do timeout de resposta (1,5 s)
         task.dispatch();
-        assertThat(state(actionId)).isEqualTo("PENDENTE");
+        assertThat(state(actionId)).isEqualTo("PENDING");
 
         clock.advance(Duration.ofMinutes(20));
         ORCHESTRATOR.resetMappings();
@@ -158,7 +158,7 @@ class ChannelActionsDeliveryIT extends OrchestratorDeliveryBase {
                 post(urlPathEqualTo(PATH))
                         .willReturn(aResponse().withFault(Fault.CONNECTION_RESET_BY_PEER)));
         task.dispatch();
-        assertThat(state(actionId)).isEqualTo("PENDENTE");
+        assertThat(state(actionId)).isEqualTo("PENDING");
         assertThat(jdbc.queryForObject("select attempts from channel_action", Integer.class))
                 .isEqualTo(4);
 
@@ -167,14 +167,14 @@ class ChannelActionsDeliveryIT extends OrchestratorDeliveryBase {
         accept();
         task.dispatch();
 
-        assertThat(state(actionId)).isEqualTo("FALHA_DEFINITIVA");
+        assertThat(state(actionId)).isEqualTo("PERMANENTLY_FAILED");
         assertThat(jdbc.queryForObject("select reason_code from channel_action", String.class))
-                .isEqualTo("PRAZO_VENCIDO");
-        assertThat(counter("canal_acoes_falha_definitiva_total")).isEqualTo(1);
+                .isEqualTo("DEADLINE_EXPIRED");
+        assertThat(counter("channel_permanent_failure_actions_total")).isEqualTo(1);
         assertThat(output.getOut() + output.getErr())
-                .contains("canal-acao-falha-definitiva acaoId=" + actionId)
+                .contains("channel-action-permanent-failure actionId=" + actionId)
                 .doesNotContain("Matteo", "perguntas pendentes")
-                .doesNotContain("segredo-do-orquestrador", "segredo-no-caminho-123");
+                .doesNotContain("orchestrator-secret", "secret-in-path-123");
         assertThat(deliveries()).hasSize(4);
     }
 
@@ -190,7 +190,7 @@ class ChannelActionsDeliveryIT extends OrchestratorDeliveryBase {
         task.dispatch();
 
         // a espera de 1 min passaria do prazo: a próxima tentativa é o próprio prazo
-        assertThat(state(actionId)).isEqualTo("PENDENTE");
+        assertThat(state(actionId)).isEqualTo("PENDING");
         assertThat(
                         jdbc.queryForObject(
                                 "select next_attempt_at = deadline_at from channel_action where id = ?",
@@ -201,15 +201,15 @@ class ChannelActionsDeliveryIT extends OrchestratorDeliveryBase {
         clock.advance(Duration.ofSeconds(10));
         task.dispatch();
 
-        assertThat(state(actionId)).isEqualTo("FALHA_DEFINITIVA");
+        assertThat(state(actionId)).isEqualTo("PERMANENTLY_FAILED");
         assertThat(
                         jdbc.queryForObject(
-                                "select finalized_at = deadline_at and reason_code = 'PRAZO_VENCIDO'"
+                                "select finalized_at = deadline_at and reason_code = 'DEADLINE_EXPIRED'"
                                         + " from channel_action where id = ?",
                                 Boolean.class,
                                 actionId))
                 .isTrue();
-        assertThat(counter("canal_acoes_falha_definitiva_total")).isEqualTo(1);
+        assertThat(counter("channel_permanent_failure_actions_total")).isEqualTo(1);
     }
 
     // ---- V9: ordem por chat, portão de confirmação, chats independentes
@@ -235,12 +235,12 @@ class ChannelActionsDeliveryIT extends OrchestratorDeliveryBase {
         assertThat(first).hasSize(2);
         List<Long> chats = new ArrayList<>();
         for (LoggedRequest delivery : first) {
-            chats.add(body(delivery).get("acoes").get(0).path("chatId").asLong());
+            chats.add(body(delivery).get("actions").get(0).path("chatId").asLong());
         }
         assertThat(chats).containsExactlyInAnyOrder(USER_CLARA, USER_BRUNO);
         assertThat(
                         jdbc.queryForObject(
-                                "select count(*) from channel_action where state = 'PENDENTE'",
+                                "select count(*) from channel_action where state = 'PENDING'",
                                 Integer.class))
                 .isEqualTo(1);
 
@@ -248,7 +248,7 @@ class ChannelActionsDeliveryIT extends OrchestratorDeliveryBase {
         JsonNode claraFirst = null;
         for (LoggedRequest delivery : first) {
             JsonNode batch = body(delivery);
-            if (batch.get("acoes").get(0).path("chatId").asLong() == USER_CLARA) {
+            if (batch.get("actions").get(0).path("chatId").asLong() == USER_CLARA) {
                 claraFirst = batch;
             }
         }
@@ -257,7 +257,7 @@ class ChannelActionsDeliveryIT extends OrchestratorDeliveryBase {
         assertThat(deliveries()).hasSize(3);
         assertThat(
                         jdbc.queryForObject(
-                                "select count(*) from channel_action where state = 'PENDENTE'",
+                                "select count(*) from channel_action where state = 'PENDING'",
                                 Integer.class))
                 .isZero();
     }
@@ -280,7 +280,7 @@ class ChannelActionsDeliveryIT extends OrchestratorDeliveryBase {
         assertThat(deliveries()).hasSize(2);
         // métrica de ações entregues e ainda sem confirmação além da espera máxima
         clock.advance(Duration.ofSeconds(5));
-        assertThat(gauge("canal_acoes_sem_confirmacao_total")).isEqualTo(1);
+        assertThat(gauge("channel_unconfirmed_actions_total")).isEqualTo(1);
     }
 
     // ---- V10: idempotência do evento, concorrência, vínculo
@@ -336,9 +336,9 @@ class ChannelActionsDeliveryIT extends OrchestratorDeliveryBase {
         task.dispatch();
 
         String actionId = actionIds().get(0);
-        assertThat(state(actionId)).isEqualTo("DESCARTADA");
+        assertThat(state(actionId)).isEqualTo("DISCARDED");
         assertThat(jdbc.queryForObject("select reason_code from channel_action", String.class))
-                .isEqualTo("VINCULO_DESFEITO");
+                .isEqualTo("LINK_UNDONE");
         assertThat(deliveries()).isEmpty();
     }
 
@@ -358,13 +358,13 @@ class ChannelActionsDeliveryIT extends OrchestratorDeliveryBase {
                             mvc.perform(
                                     org.springframework.test.web.servlet.request
                                             .MockMvcRequestBuilders.post(
-                                                    "/interno/v1/canal/telegram/confirmacoes")
+                                                    "/internal/v1/channel/telegram/confirmations")
                                             .header("X-N8N-Service-Token", TOKEN_SERVICE)
                                             .contentType(MediaType.APPLICATION_JSON)
                                             .content(
-                                                    "{\"versao\":\"v1\",\"resultados\":[{\"acaoId\":\""
+                                                    "{\"version\":\"v1\",\"results\":[{\"actionId\":\""
                                                             + actionId
-                                                            + "\",\"situacao\":\"EXECUTADA\"}]}"));
+                                                            + "\",\"outcome\":\"EXECUTED\"}]}"));
                             return null;
                         });
 
@@ -372,10 +372,10 @@ class ChannelActionsDeliveryIT extends OrchestratorDeliveryBase {
         confirmation.get();
         pool.shutdown();
 
-        assertThat(state(actionId)).isEqualTo("EXECUTADA");
+        assertThat(state(actionId)).isEqualTo("EXECUTED");
         assertThat(
                         jdbc.queryForObject(
-                                "select count(*) from channel_action where state = 'ENTREGUE'",
+                                "select count(*) from channel_action where state = 'DELIVERED'",
                                 Integer.class))
                 .isZero();
     }
@@ -398,7 +398,7 @@ class ChannelActionsDeliveryIT extends OrchestratorDeliveryBase {
         task.dispatch();
 
         assertThat(deliveries()).hasSize(1);
-        assertThat(body(deliveries().get(0)).get("acoes").get(0).path("acaoId").asString())
+        assertThat(body(deliveries().get(0)).get("actions").get(0).path("actionId").asString())
                 .isEqualTo(actionId);
     }
 
@@ -422,7 +422,7 @@ class ChannelActionsDeliveryIT extends OrchestratorDeliveryBase {
         assertThat(calls("sendMessage")).hasSize(1);
         assertThat(sentTexts().get(0))
                 .isEqualTo("O relatório de Matteo Ferreira tem perguntas pendentes.");
-        assertThat(state(actionIds().get(0))).isEqualTo("EXECUTADA");
+        assertThat(state(actionIds().get(0))).isEqualTo("EXECUTED");
     }
 
     // ---- métricas
@@ -433,33 +433,33 @@ class ChannelActionsDeliveryIT extends OrchestratorDeliveryBase {
         generateNoticeOf(matteo);
         generateNoticeOf(helena);
 
-        assertThat(gauge("canal_acoes_pendentes")).isEqualTo(2);
+        assertThat(gauge("channel_pending_actions")).isEqualTo(2);
         clock.advance(Duration.ofSeconds(90));
-        assertThat(gauge("canal_acao_pendente_mais_antiga_segundos")).isEqualTo(90);
+        assertThat(gauge("channel_oldest_pending_action_seconds")).isEqualTo(90);
 
         task.dispatch();
-        assertThat(gauge("canal_acoes_pendentes")).isEqualTo(1);
-        assertThat(counter("canal_entregas_total", "resultado", "aceita")).isEqualTo(1);
+        assertThat(gauge("channel_pending_actions")).isEqualTo(1);
+        assertThat(counter("channel_deliveries_total", "result", "accepts")).isEqualTo(1);
 
         String delivered =
                 jdbc.queryForObject(
-                        "select id from channel_action where state = 'ENTREGUE'", String.class);
+                        "select id from channel_action where state = 'DELIVERED'", String.class);
         mvc.perform(
                 org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
-                                "/interno/v1/canal/telegram/confirmacoes")
+                                "/internal/v1/channel/telegram/confirmations")
                         .header("X-N8N-Service-Token", TOKEN_SERVICE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(
-                                "{\"versao\":\"v1\",\"resultados\":[{\"acaoId\":\""
+                                "{\"version\":\"v1\",\"results\":[{\"actionId\":\""
                                         + delivered
-                                        + "\",\"situacao\":\"FALHOU\",\"codigoMotivo\":\"CODIGO_NOVO_QUALQUER\"}]}"));
+                                        + "\",\"outcome\":\"FAILED\",\"reasonCode\":\"ANY_NEW_CODE\"}]}"));
         assertThat(
                         counter(
-                                "canal_confirmacoes_total",
-                                "situacao",
-                                "FALHOU",
-                                "codigo",
-                                "ERRO_TELEGRAM"))
+                                "channel_confirmations_total",
+                                "outcome",
+                                "FAILED",
+                                "code",
+                                "TELEGRAM_ERROR"))
                 .isEqualTo(1);
     }
 }

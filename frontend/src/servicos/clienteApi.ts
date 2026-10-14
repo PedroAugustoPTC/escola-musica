@@ -3,7 +3,7 @@ import { msg } from '../mensagens/mensagens';
 
 /** Tipos do contrato da API (gerados de contracts/api-portal.openapi.yaml). */
 export type Esquemas = components['schemas'];
-export type ErroContrato = Esquemas['Erro'];
+export type ErroContrato = Esquemas['Error'];
 
 export const BASE_API = '/api/v1';
 export const EVENTO_SESSAO_EXPIRADA = 'relatorios:sessao-expirada';
@@ -21,12 +21,12 @@ export class ErroApi extends Error {
   readonly retryAfterSeconds?: number;
 
   constructor(status: number, corpo: Partial<ErroContrato> | null) {
-    const codigo = corpo?.codigo ?? (status === 0 ? 'SEM_CONEXAO' : 'ERRO_INTERNO');
-    super(corpo?.mensagem ?? msg(codigo));
+    const codigo = corpo?.code ?? (status === 0 ? 'NO_CONNECTION' : 'INTERNAL_ERROR');
+    super(corpo?.message ?? msg(codigo));
     this.name = 'ErroApi';
     this.status = status;
     this.codigo = codigo;
-    this.detalhes = (corpo?.detalhes as Record<string, unknown> | undefined) ?? {};
+    this.detalhes = (corpo?.details as Record<string, unknown> | undefined) ?? {};
     this.retryAfterSeconds = corpo?.retryAfterSeconds;
   }
 }
@@ -47,7 +47,7 @@ async function garantirCsrf(): Promise<string | null> {
   let token = lerCookie(COOKIE_CSRF);
   if (!token) {
     try {
-      await fetch(`${BASE_API}/sessao`, { credentials: 'same-origin' });
+      await fetch(`${BASE_API}/session`, { credentials: 'same-origin' });
     } catch {
       // a requisição principal vai relatar a falha de rede
     }

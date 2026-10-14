@@ -46,10 +46,7 @@ import tools.jackson.databind.json.JsonMapper;
  */
 @AutoConfigureMockMvc
 @TestPropertySource(
-        properties = {
-            "reports.providers.mode=real",
-            "reports.test.simulated-normalization=false"
-        })
+        properties = {"reports.providers.mode=real", "reports.test.simulated-normalization=false"})
 class RealAiSuiteIT extends IntegrationBase {
 
     private static final JsonMapper JSON = JsonMapper.builder().build();
@@ -82,7 +79,7 @@ class RealAiSuiteIT extends IntegrationBase {
     }
 
     private static final List<String> SECTIONS_WITHOUT_OBSERVATIONS =
-            List.of("conteudosTrabalhados", "evolucao", "dificuldades", "atividadesPropostas");
+            List.of("workedTopics", "progress", "difficulties", "proposedActivities");
 
     private final List<Incorporation> incorporations = new ArrayList<>();
 
@@ -122,7 +119,7 @@ class RealAiSuiteIT extends IntegrationBase {
         writeReport();
         assertThat(measures)
                 .filteredOn(m -> m.step().equals("Registro até a conferência"))
-                .allSatisfy(m -> assertThat(m.result()).isEqualTo("AGUARDANDO_CONFERENCIA"));
+                .allSatisfy(m -> assertThat(m.result()).isEqualTo("AWAITING_REVIEW"));
         // FR-025: a resposta entrou nas seções adequadas, não só anexada às observações
         assertThat(incorporations).as("ao menos uma gravação teve perguntas").isNotEmpty();
         assertThat(incorporations)
@@ -138,11 +135,11 @@ class RealAiSuiteIT extends IntegrationBase {
         byte[] content = Files.readAllBytes(recording);
         MvcResult sending =
                 mvc.perform(
-                                multipart("/api/v1/alunos/{id}/relatorios-aula", student.id())
+                                multipart("/api/v1/students/{id}/lesson-reports", student.id())
                                         .file(
                                                 new MockMultipartFile(
                                                         "audio",
-                                                        "aula" + extension(recording),
+                                                        "lesson" + extension(recording),
                                                         type(recording),
                                                         content))
                                         .cookie(session)
@@ -161,9 +158,9 @@ class RealAiSuiteIT extends IntegrationBase {
         }
         scenario.processQueue();
         UUID report = studentReport(student);
-        if (report != null && "AGUARDANDO_RESPOSTAS".equals(status(report))) {
+        if (report != null && "AWAITING_ANSWERS".equals(status(report))) {
             JsonNode before = content(report);
-            postJson("/api/v1/relatorios-aula/" + report + "/respostas", Map.of("texto", RESPONSE));
+            postJson("/api/v1/lesson-reports/" + report + "/answers", Map.of("text", RESPONSE));
             scenario.processQueue();
             incorporations.add(incorporation(name(recording), before, content(report)));
         }
@@ -176,7 +173,7 @@ class RealAiSuiteIT extends IntegrationBase {
                         millis(start),
                         cost(report),
                         result));
-        return "AGUARDANDO_CONFERENCIA".equals(result) ? report : null;
+        return "AWAITING_REVIEW".equals(result) ? report : null;
     }
 
     private JsonNode content(UUID report) {
@@ -192,9 +189,9 @@ class RealAiSuiteIT extends IntegrationBase {
                 SECTIONS_WITHOUT_OBSERVATIONS.stream()
                         .filter(section -> !before.path(section).equals(after.path(section)))
                         .toList();
-        String observations = after.path("observacoes").asString("");
+        String observations = after.path("observations").asString("");
         boolean onlyAttached =
-                changed.isEmpty() && !observations.equals(before.path("observacoes").asString(""));
+                changed.isEmpty() && !observations.equals(before.path("observations").asString(""));
         return new Incorporation(file, changed, onlyAttached);
     }
 
@@ -202,11 +199,11 @@ class RealAiSuiteIT extends IntegrationBase {
         BigDecimal before = cost(report);
         long start = System.nanoTime();
         postJson(
-                "/api/v1/relatorios-aula/" + report + "/alteracoes",
+                "/api/v1/lesson-reports/" + report + "/changes",
                 Map.of(
-                        "texto",
+                        "text",
                         "Acrescente nas observações que o aluno chegou pontualmente e com o material.",
-                        "versaoBase",
+                        "baseVersion",
                         version(report)));
         scenario.processQueue();
         measures.add(
@@ -220,7 +217,7 @@ class RealAiSuiteIT extends IntegrationBase {
     }
 
     private void changeByAudio(UUID report, Path recording) throws Exception {
-        Path excerpt = Files.createTempFile("trecho-", ".ogg");
+        Path excerpt = Files.createTempFile("excerpt-", ".ogg");
         try {
             Process ffmpeg =
                     new ProcessBuilder(
@@ -244,11 +241,11 @@ class RealAiSuiteIT extends IntegrationBase {
             int versionBefore = version(report);
             long start = System.nanoTime();
             mvc.perform(
-                    multipart("/api/v1/relatorios-aula/{id}/alteracoes", report)
+                    multipart("/api/v1/lesson-reports/{id}/changes", report)
                             .file(
                                     new MockMultipartFile(
-                                            "audio", "alteracao.ogg", "audio/ogg", content))
-                            .param("versaoBase", Integer.toString(versionBefore))
+                                            "audio", "change.ogg", "audio/ogg", content))
+                            .param("baseVersion", Integer.toString(versionBefore))
                             .cookie(session)
                             .with(csrf().asHeader()));
             scenario.processQueue();
@@ -284,12 +281,12 @@ class RealAiSuiteIT extends IntegrationBase {
         }
         long start = System.nanoTime();
         postJson(
-                "/api/v1/alunos/" + student.id() + "/relatorios-semestrais",
-                Map.of("periodoChave", "2026-1"));
+                "/api/v1/students/" + student.id() + "/semester-reports",
+                Map.of("periodKey", "2026-1"));
         scenario.processQueue();
         BigDecimal cost =
                 jdbc.queryForObject(
-                        "select coalesce(sum(estimated_cost_usd), 0) from ai_call where report_type = 'SEMESTRAL'",
+                        "select coalesce(sum(estimated_cost_usd), 0) from ai_call where report_type = 'SEMESTER'",
                         BigDecimal.class);
         String status =
                 jdbc.queryForList("select status from semester_report", String.class).stream()
@@ -358,7 +355,7 @@ class RealAiSuiteIT extends IntegrationBase {
                                     ? "incorporada nas seções"
                                     : "apenas anexada às observações"));
         }
-        Path destination = Path.of("target", "ia-real", "relatorio.md");
+        Path destination = Path.of("target", "real-ai", "report.md");
         Files.createDirectories(destination.getParent());
         Files.writeString(destination, md);
     }
@@ -368,12 +365,12 @@ class RealAiSuiteIT extends IntegrationBase {
     private Cookie signIn() throws Exception {
         MvcResult input =
                 mvc.perform(
-                                post("/api/v1/sessao")
+                                post("/api/v1/session")
                                         .with(csrf().asHeader())
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .content("{\"codigo\":\"" + ScenarioIT.CODE_CLARA + "\"}"))
+                                        .content("{\"code\":\"" + ScenarioIT.CODE_CLARA + "\"}"))
                         .andReturn();
-        Cookie cookie = input.getResponse().getCookie("sessao");
+        Cookie cookie = input.getResponse().getCookie("session");
         return new Cookie(cookie.getName(), cookie.getValue());
     }
 
@@ -389,11 +386,11 @@ class RealAiSuiteIT extends IntegrationBase {
     private int version(UUID report) throws Exception {
         JsonNode dto =
                 JSON.readTree(
-                        mvc.perform(get("/api/v1/relatorios-aula/{id}", report).cookie(session))
+                        mvc.perform(get("/api/v1/lesson-reports/{id}", report).cookie(session))
                                 .andReturn()
                                 .getResponse()
                                 .getContentAsString());
-        return dto.path("versaoVigente").asInt();
+        return dto.path("currentVersion").asInt();
     }
 
     private UUID studentReport(Student student) {
@@ -419,7 +416,7 @@ class RealAiSuiteIT extends IntegrationBase {
                         String.class)
                 .stream()
                 .findFirst()
-                .orElse("SEM TRABALHO");
+                .orElse("SEM JOB");
     }
 
     private BigDecimal cost(UUID report) {
@@ -441,7 +438,7 @@ class RealAiSuiteIT extends IntegrationBase {
      * "Aula Matteo Mafra_21_09_2026.ogg" → "Matteo Mafra" (nomes fictícios das gravações de teste).
      */
     static String studentName(Path recording) {
-        String name = recording.getFileName().toString().replaceFirst("(?i)^Aula\\s+", "");
+        String name = recording.getFileName().toString().replaceFirst("(?i)^Lesson\\s+", "");
         int end = name.indexOf('_');
         return (end > 0 ? name.substring(0, end) : name.replaceFirst("\\.[^.]+$", "")).strip();
     }

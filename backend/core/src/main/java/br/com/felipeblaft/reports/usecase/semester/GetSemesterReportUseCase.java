@@ -58,33 +58,32 @@ public class GetSemesterReportUseCase implements DocumentSource {
     public SemesterReportView run(UUID teacherId, UUID reportId) {
         SemesterReport report = access.report(teacherId, reportId);
         boolean pdf =
-                document(report.id(), report.currentVersion(), DocumentType.CONFERENCIA)
-                        .isPresent();
+                document(report.id(), report.currentVersion(), DocumentType.REVIEW).isPresent();
         return new SemesterReportView(
                 report,
-                interactions.last(ReportType.SEMESTRAL, report.id()),
-                queue.searchInProgressByReport(ReportType.SEMESTRAL, report.id()),
+                interactions.last(ReportType.SEMESTER, report.id()),
+                queue.searchInProgressByReport(ReportType.SEMESTER, report.id()),
                 pdf);
     }
 
     @Override
     public ReportType type() {
-        return ReportType.SEMESTRAL;
+        return ReportType.SEMESTER;
     }
 
     @Override
     public ObtainedDocument review(UUID teacherId, UUID reportId, int number) {
         SemesterReport report = access.report(teacherId, reportId);
-        return read(report.id(), number, DocumentType.CONFERENCIA, name(report, "-v" + number));
+        return read(report.id(), number, DocumentType.REVIEW, name(report, "-v" + number));
     }
 
     @Override
     public ObtainedDocument official(UUID teacherId, UUID reportId) {
         SemesterReport report = access.report(teacherId, reportId);
-        if (report.status() != ReportStatus.APROVADO) {
+        if (report.status() != ReportStatus.APPROVED) {
             throw notFound();
         }
-        return read(report.id(), report.approvedVersion(), DocumentType.OFICIAL, name(report, ""));
+        return read(report.id(), report.approvedVersion(), DocumentType.OFFICIAL, name(report, ""));
     }
 
     private static String name(SemesterReport report, String suffix) {
@@ -92,7 +91,7 @@ public class GetSemesterReportUseCase implements DocumentSource {
     }
 
     private Optional<PdfDocument> document(UUID reportId, int number, DocumentType type) {
-        return versions.search(ReportType.SEMESTRAL, reportId, number)
+        return versions.search(ReportType.SEMESTER, reportId, number)
                 .flatMap(v -> documents.search(v.id(), type));
     }
 
@@ -105,6 +104,6 @@ public class GetSemesterReportUseCase implements DocumentSource {
     }
 
     private static DomainException notFound() {
-        return new DomainException(ErrorCode.RECURSO_NAO_ENCONTRADO);
+        return new DomainException(ErrorCode.RESOURCE_NOT_FOUND);
     }
 }

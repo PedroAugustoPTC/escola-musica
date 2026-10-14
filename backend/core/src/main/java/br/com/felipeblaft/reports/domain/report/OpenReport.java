@@ -35,16 +35,16 @@ public record OpenReport(
     /** Detalhes estruturados para o erro {@code RELATORIO_EM_ABERTO} (sem texto). */
     public Map<String, Object> details() {
         Map<String, Object> map = new LinkedHashMap<>();
-        map.put("tipo", type);
-        map.put("relatorioId", reportId);
-        map.put("trabalhoId", jobId);
-        map.put("alunoId", studentId);
-        map.put("alunoNome", studentName);
+        map.put("type", type);
+        map.put("reportId", reportId);
+        map.put("jobId", jobId);
+        map.put("studentId", studentId);
+        map.put("studentName", studentName);
         map.put("status", status);
-        map.put("etapa", step);
-        map.put("periodoChave", periodKey);
-        map.put("canalOrigem", originChannel);
-        map.put("atualizadoEm", updatedAt);
+        map.put("step", step);
+        map.put("periodKey", periodKey);
+        map.put("originChannel", originChannel);
+        map.put("updatedAt", updatedAt);
         return map;
     }
 }

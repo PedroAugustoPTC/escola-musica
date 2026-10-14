@@ -34,7 +34,7 @@ public record SeedResult(
 
         @Override
         public String toString() {
-            return "CodigoEmitido[email=" + email + ", codigo=***]";
+            return "IssuedCode[email=" + email + ", code=***]";
         }
     }
 }

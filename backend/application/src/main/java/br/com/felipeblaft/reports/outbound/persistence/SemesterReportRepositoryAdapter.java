@@ -32,7 +32,7 @@ class SemesterReportRepositoryAdapter implements SemesterReportRepository {
             SemesterReportEntity saved = jpa.saveAndFlush(toEntity(report));
             report.registerPersistedVersion(saved.lockVersion);
         } catch (OptimisticLockingFailureException | DataIntegrityViolationException conflict) {
-            throw new ConcurrencyConflictException("relatorio_semestral");
+            throw new ConcurrencyConflictException("semester_report");
         }
     }
 
@@ -49,14 +49,13 @@ class SemesterReportRepositoryAdapter implements SemesterReportRepository {
     @Override
     public Optional<SemesterReport> searchApproved(
             UUID teacherId, UUID studentId, String periodKey) {
-        return jpa.doTrio(teacherId, studentId, periodKey, ReportStatus.APROVADO.name())
+        return jpa.doTrio(teacherId, studentId, periodKey, ReportStatus.APPROVED.name())
                 .map(SemesterReportRepositoryAdapter::toDomain);
     }
 
     @Override
     public Optional<SemesterReport> searchOpen(UUID teacherId, UUID studentId, String periodKey) {
-        return jpa.doTrio(
-                        teacherId, studentId, periodKey, ReportStatus.AGUARDANDO_CONFERENCIA.name())
+        return jpa.doTrio(teacherId, studentId, periodKey, ReportStatus.AWAITING_REVIEW.name())
                 .map(SemesterReportRepositoryAdapter::toDomain);
     }
 

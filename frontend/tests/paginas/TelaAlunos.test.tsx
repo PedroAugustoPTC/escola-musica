@@ -7,25 +7,25 @@ import { SESSAO_CLARA, renderizarRotas, simularApi } from '../utilitarios';
 const ALUNOS = [
   {
     id: '0190a000-0000-7000-8000-00000000000a',
-    nome: 'Matteo Mafra',
-    instrumento: 'Piano',
-    ultimaAulaEm: '2026-09-21',
-    possuiRelatorioEmAberto: true,
+    name: 'Matteo Mafra',
+    instrument: 'Piano',
+    lastLessonAt: '2026-09-21',
+    hasOpenReport: true,
   },
   {
     id: '0190a000-0000-7000-8000-00000000000b',
-    nome: 'Olavo Torrente',
-    instrumento: null,
-    ultimaAulaEm: null,
-    possuiRelatorioEmAberto: false,
+    name: 'Olavo Torrente',
+    instrument: null,
+    lastLessonAt: null,
+    hasOpenReport: false,
   },
 ];
 
 describe('TelaAlunos (03)', () => {
   it('lista os alunos com a marca Em aberto e as ações', async () => {
     simularApi({
-      'GET /api/v1/sessao': { corpo: SESSAO_CLARA },
-      'GET /api/v1/alunos': { corpo: { resultado: 'TODOS', alunos: ALUNOS } },
+      'GET /api/v1/session': { corpo: SESSAO_CLARA },
+      'GET /api/v1/students': { corpo: { result: 'ALL', students: ALUNOS } },
     });
     const usuario = userEvent.setup();
     const { roteador } = renderizarRotas(rotas, '/alunos');
@@ -40,8 +40,8 @@ describe('TelaAlunos (03)', () => {
 
   it('aluno sem relatório em aberto vai direto para a gravação; semestral e histórico', async () => {
     simularApi({
-      'GET /api/v1/sessao': { corpo: SESSAO_CLARA },
-      'GET /api/v1/alunos': { corpo: { resultado: 'TODOS', alunos: ALUNOS } },
+      'GET /api/v1/session': { corpo: SESSAO_CLARA },
+      'GET /api/v1/students': { corpo: { result: 'ALL', students: ALUNOS } },
     });
     const usuario = userEvent.setup();
     const { roteador } = renderizarRotas(rotas, '/alunos?registrar=1');
@@ -52,9 +52,9 @@ describe('TelaAlunos (03)', () => {
 
   it('busca sem resultado (03b) informa e mostra todos; limpar busca', async () => {
     const api = simularApi({
-      'GET /api/v1/sessao': { corpo: SESSAO_CLARA },
-      'GET /api/v1/alunos': { corpo: { resultado: 'TODOS', alunos: ALUNOS } },
-      'GET /api/v1/alunos?busca=Beethoven': { corpo: { resultado: 'NENHUM', alunos: ALUNOS } },
+      'GET /api/v1/session': { corpo: SESSAO_CLARA },
+      'GET /api/v1/students': { corpo: { result: 'ALL', students: ALUNOS } },
+      'GET /api/v1/students?search=Beethoven': { corpo: { result: 'NONE', students: ALUNOS } },
     });
     const usuario = userEvent.setup();
     const { roteador } = renderizarRotas(rotas, '/alunos');
@@ -64,7 +64,7 @@ describe('TelaAlunos (03)', () => {
     expect(await screen.findByText('Nenhum aluno encontrado para "Beethoven".')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Olavo Torrente' })).toBeInTheDocument();
     await waitFor(() => expect(roteador.state.location.search).toBe('?busca=Beethoven'));
-    expect(api.chamadas.some((c) => c.url.endsWith('busca=Beethoven'))).toBe(true);
+    expect(api.chamadas.some((c) => c.url.endsWith('search=Beethoven'))).toBe(true);
 
     await usuario.click(screen.getByRole('button', { name: 'Limpar busca' }));
     await waitFor(() => expect(screen.queryByText(/Nenhum aluno encontrado/)).not.toBeInTheDocument());
@@ -72,8 +72,8 @@ describe('TelaAlunos (03)', () => {
 
   it('carregando (03c) anuncia ocupado', async () => {
     simularApi({
-      'GET /api/v1/sessao': { corpo: SESSAO_CLARA },
-      'GET /api/v1/alunos': () => new Promise(() => undefined),
+      'GET /api/v1/session': { corpo: SESSAO_CLARA },
+      'GET /api/v1/students': () => new Promise(() => undefined),
     });
     renderizarRotas(rotas, '/alunos');
     expect(await screen.findByLabelText('Carregando alunos')).toHaveAttribute('aria-busy', 'true');

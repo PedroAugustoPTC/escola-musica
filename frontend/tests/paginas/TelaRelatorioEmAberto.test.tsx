@@ -8,46 +8,46 @@ const ALUNO = '0190a000-0000-7000-8000-00000000000a';
 const RELATORIO = '0190a000-0000-7000-8000-0000000000r1';
 
 const INICIO = {
-  professor: SESSAO_CLARA.professor,
-  totalAlunos: 1,
-  alunos: [],
-  relatoriosEmAberto: [],
-  limiteAudioMb: 50,
+  teacher: SESSAO_CLARA.teacher,
+  totalStudents: 1,
+  students: [],
+  openReports: [],
+  audioLimitMb: 50,
 };
 
 function aberto(sobrescrever: Record<string, unknown> = {}) {
   return {
-    tipo: 'AULA',
-    relatorioId: RELATORIO,
-    trabalhoId: null,
-    alunoId: ALUNO,
-    alunoNome: 'Matteo Mafra',
-    status: 'AGUARDANDO_CONFERENCIA',
-    etapa: null,
-    periodoChave: null,
-    canalOrigem: 'TELEGRAM',
-    atualizadoEm: '2026-09-20T12:57:00Z',
+    type: 'LESSON',
+    reportId: RELATORIO,
+    jobId: null,
+    studentId: ALUNO,
+    studentName: 'Matteo Mafra',
+    status: 'AWAITING_REVIEW',
+    step: null,
+    periodKey: null,
+    originChannel: 'TELEGRAM',
+    updatedAt: '2026-09-20T12:57:00Z',
     ...sobrescrever,
   };
 }
 
 const BASE = {
-  'GET /api/v1/sessao': { corpo: SESSAO_CLARA },
-  'GET /api/v1/inicio': { corpo: INICIO },
-  [`GET /api/v1/alunos/${ALUNO}`]: {
+  'GET /api/v1/session': { corpo: SESSAO_CLARA },
+  'GET /api/v1/home': { corpo: INICIO },
+  [`GET /api/v1/students/${ALUNO}`]: {
     corpo: {
       id: ALUNO,
-      nome: 'Matteo Mafra',
-      instrumento: 'Piano',
-      ultimaAulaEm: null,
-      possuiRelatorioEmAberto: true,
+      name: 'Matteo Mafra',
+      instrument: 'Piano',
+      lastLessonAt: null,
+      hasOpenReport: true,
     },
   },
 };
 
 describe('TelaRelatorioEmAberto (04)', () => {
   it('mostra o canal de origem e a última alteração; continuar vai para a conferência', async () => {
-    simularApi({ ...BASE, [`GET /api/v1/alunos/${ALUNO}/relatorio-em-aberto`]: { corpo: aberto() } });
+    simularApi({ ...BASE, [`GET /api/v1/students/${ALUNO}/open-report`]: { corpo: aberto() } });
     const usuario = userEvent.setup();
     const { roteador } = renderizarRotas(rotas, `/alunos/${ALUNO}/relatorio-em-aberto`);
 
@@ -67,8 +67,8 @@ describe('TelaRelatorioEmAberto (04)', () => {
   it('continuar com perguntas pendentes ou em transcrição vai para a etapa certa', async () => {
     simularApi({
       ...BASE,
-      [`GET /api/v1/alunos/${ALUNO}/relatorio-em-aberto`]: {
-        corpo: aberto({ relatorioId: null, trabalhoId: 't9', status: null, etapa: 'TRANSCREVENDO' }),
+      [`GET /api/v1/students/${ALUNO}/open-report`]: {
+        corpo: aberto({ reportId: null, jobId: 't9', status: null, step: 'TRANSCRIBING' }),
       },
     });
     const usuario = userEvent.setup();
@@ -81,8 +81,8 @@ describe('TelaRelatorioEmAberto (04)', () => {
   it('descartar pede confirmação, cancela e só então segue para a gravação', async () => {
     const api = simularApi({
       ...BASE,
-      [`GET /api/v1/alunos/${ALUNO}/relatorio-em-aberto`]: { corpo: aberto() },
-      [`POST /api/v1/relatorios-aula/${RELATORIO}/cancelamento`]: { status: 204 },
+      [`GET /api/v1/students/${ALUNO}/open-report`]: { corpo: aberto() },
+      [`POST /api/v1/lesson-reports/${RELATORIO}/cancellation`]: { status: 204 },
     });
     const usuario = userEvent.setup();
     const { roteador } = renderizarRotas(rotas, `/alunos/${ALUNO}/relatorio-em-aberto`);
@@ -92,20 +92,20 @@ describe('TelaRelatorioEmAberto (04)', () => {
     await usuario.click(within(dialogo).getByRole('button', { name: 'Sim, descartar' }));
 
     await waitFor(() => expect(roteador.state.location.pathname).toBe(`/alunos/${ALUNO}/nova-aula`));
-    expect(api.chamadas.some((c) => c.url.endsWith('/cancelamento'))).toBe(true);
+    expect(api.chamadas.some((c) => c.url.endsWith('/cancellation'))).toBe(true);
   });
 
   it('registro em transcrição é descartado pelo trabalho; erro mantém a tela', async () => {
     simularApi({
       ...BASE,
-      [`GET /api/v1/alunos/${ALUNO}/relatorio-em-aberto`]: {
-        corpo: aberto({ relatorioId: null, trabalhoId: 't9', status: null }),
+      [`GET /api/v1/students/${ALUNO}/open-report`]: {
+        corpo: aberto({ reportId: null, jobId: 't9', status: null }),
       },
-      'POST /api/v1/trabalhos/t9/descarte': {
+      'POST /api/v1/jobs/t9/discard': {
         status: 409,
         corpo: {
-          codigo: 'ACAO_NAO_PERMITIDA_NA_ETAPA',
-          mensagem: 'Esta ação não está disponível nesta etapa do relatório.',
+          code: 'ACTION_NOT_ALLOWED_AT_STEP',
+          message: 'Esta ação não está disponível nesta etapa do relatório.',
         },
       },
     });
@@ -122,7 +122,7 @@ describe('TelaRelatorioEmAberto (04)', () => {
   });
 
   it('sem relatório em aberto (204) segue direto para a gravação', async () => {
-    simularApi({ ...BASE, [`GET /api/v1/alunos/${ALUNO}/relatorio-em-aberto`]: { status: 204 } });
+    simularApi({ ...BASE, [`GET /api/v1/students/${ALUNO}/open-report`]: { status: 204 } });
     const { roteador } = renderizarRotas(rotas, `/alunos/${ALUNO}/relatorio-em-aberto`);
 
     await waitFor(() => expect(roteador.state.location.pathname).toBe(`/alunos/${ALUNO}/nova-aula`));

@@ -50,9 +50,9 @@ public class RequestSemesterReportChangeUseCase {
         SemesterReport report = access.reportForUpdate(teacherId, reportId);
         report.requireCanChange(baseVersion);
         if (text == null || text.isBlank()) {
-            throw new DomainException(ErrorCode.ALTERACAO_VAZIA);
+            throw new DomainException(ErrorCode.EMPTY_CHANGE);
         }
-        ProcessingJob job = start(report, channel, Medium.TEXTO, baseVersion);
+        ProcessingJob job = start(report, channel, Medium.TEXT, baseVersion);
         job.defineParameter(ProcessingJob.TEXT, text.strip());
         queue.enqueue(job);
         return job;
@@ -78,22 +78,22 @@ public class RequestSemesterReportChangeUseCase {
             SemesterReport report, Channel channel, Medium medium, int baseVersion) {
         report.startStep(
                 medium == Medium.AUDIO
-                        ? ReportStep.TRANSCREVENDO_PEDIDO
-                        : ReportStep.APLICANDO_ALTERACAO,
+                        ? ReportStep.TRANSCRIBING_REQUEST
+                        : ReportStep.APPLYING_CHANGE,
                 clock.now());
         semester.save(report);
         ProcessingJob job =
                 ProcessingJob.create(
-                        JobType.ALTERACAO,
+                        JobType.CHANGE,
                         report.teacherId(),
                         report.studentId(),
-                        ReportType.SEMESTRAL,
+                        ReportType.SEMESTER,
                         report.id(),
                         channel,
                         medium,
                         medium == Medium.AUDIO
-                                ? JobStep.TRANSCREVENDO_PEDIDO
-                                : JobStep.APLICANDO_ALTERACAO,
+                                ? JobStep.TRANSCRIBING_REQUEST
+                                : JobStep.APPLYING_CHANGE,
                         clock.now());
         job.defineParameter(ProcessingJob.BASE_VERSION, Integer.toString(baseVersion));
         return job;

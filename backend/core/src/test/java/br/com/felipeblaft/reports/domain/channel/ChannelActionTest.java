@@ -19,15 +19,15 @@ class ChannelActionTest {
 
     private ChannelAction proactive(ChannelActionType type, String compensation) {
         return ChannelAction.create(
-                "p:resultado:x:0",
-                "p:resultado:x",
-                ChannelActionOrigin.PROATIVA,
+                "p:result:x:0",
+                "p:result:x",
+                ChannelActionOrigin.PROACTIVE,
                 null,
                 10L,
                 TEACHER,
                 JOB,
                 type,
-                "{\"texto\":\"a\"}",
+                "{\"text\":\"a\"}",
                 compensation,
                 NOW,
                 policy);
@@ -37,12 +37,12 @@ class ChannelActionTest {
         return ChannelAction.create(
                 "u1-0",
                 "u1",
-                ChannelActionOrigin.RESPOSTA_UPDATE,
+                ChannelActionOrigin.UPDATE_REPLY,
                 1L,
                 10L,
                 null,
                 null,
-                ChannelActionType.MENSAGEM,
+                ChannelActionType.MESSAGE,
                 "{}",
                 null,
                 NOW,
@@ -52,7 +52,7 @@ class ChannelActionTest {
     @Test
     void replyToUpdateStartsDelivered() {
         ChannelAction action = response();
-        assertThat(action.state()).isEqualTo(ChannelActionState.ENTREGUE);
+        assertThat(action.state()).isEqualTo(ChannelActionState.DELIVERED);
         assertThat(action.deliveredAt()).isEqualTo(NOW);
         assertThat(action.nextAttemptAt()).isNull();
         assertThat(action.attempts()).isZero();
@@ -68,12 +68,12 @@ class ChannelActionTest {
                                 ChannelAction.create(
                                         "u1-0",
                                         "u1",
-                                        ChannelActionOrigin.RESPOSTA_UPDATE,
+                                        ChannelActionOrigin.UPDATE_REPLY,
                                         null,
                                         10L,
                                         null,
                                         null,
-                                        ChannelActionType.MENSAGEM,
+                                        ChannelActionType.MESSAGE,
                                         "{}",
                                         null,
                                         NOW,
@@ -83,8 +83,8 @@ class ChannelActionTest {
 
     @Test
     void proactiveStartsDueAndPending() {
-        ChannelAction action = proactive(ChannelActionType.MENSAGEM, null);
-        assertThat(action.state()).isEqualTo(ChannelActionState.PENDENTE);
+        ChannelAction action = proactive(ChannelActionType.MESSAGE, null);
+        assertThat(action.state()).isEqualTo(ChannelActionState.PENDING);
         assertThat(action.nextAttemptAt()).isEqualTo(NOW);
         assertThat(action.deliveredAt()).isNull();
         assertThat(action.teacherId()).isEqualTo(TEACHER);
@@ -94,9 +94,9 @@ class ChannelActionTest {
 
     @Test
     void deliveryFailureReschedulesAccordingToPolicy() {
-        ChannelAction action = proactive(ChannelActionType.MENSAGEM, null);
+        ChannelAction action = proactive(ChannelActionType.MESSAGE, null);
         action.registerDeliveryFailure(NOW, policy);
-        assertThat(action.state()).isEqualTo(ChannelActionState.PENDENTE);
+        assertThat(action.state()).isEqualTo(ChannelActionState.PENDING);
         assertThat(action.attempts()).isEqualTo(1);
         assertThat(action.nextAttemptAt()).isEqualTo(NOW.plusSeconds(30));
         action.registerDeliveryFailure(NOW.plusSeconds(30), policy);
@@ -106,10 +106,10 @@ class ChannelActionTest {
 
     @Test
     void deliveryFailureAfterDeadlineIsPermanentFailure() {
-        ChannelAction action = proactive(ChannelActionType.MENSAGEM, null);
+        ChannelAction action = proactive(ChannelActionType.MESSAGE, null);
         Instant afterDeadline = NOW.plus(Duration.ofHours(24));
         action.registerDeliveryFailure(afterDeadline, policy);
-        assertThat(action.state()).isEqualTo(ChannelActionState.FALHA_DEFINITIVA);
+        assertThat(action.state()).isEqualTo(ChannelActionState.PERMANENTLY_FAILED);
         assertThat(action.reasonCode()).isEqualTo(ChannelAction.DEADLINE_EXPIRED_CODE);
         assertThat(action.finalizedAt()).isEqualTo(afterDeadline);
         assertThat(action.nextAttemptAt()).isNull();
@@ -119,13 +119,13 @@ class ChannelActionTest {
     void deliveryFailureDoesNotTouchActionThatIsNotPending() {
         ChannelAction action = response();
         action.registerDeliveryFailure(NOW, policy);
-        assertThat(action.state()).isEqualTo(ChannelActionState.ENTREGUE);
+        assertThat(action.state()).isEqualTo(ChannelActionState.DELIVERED);
         assertThat(action.attempts()).isZero();
     }
 
     @Test
     void reservationPushesNextAttemptOnlyWhenPending() {
-        ChannelAction action = proactive(ChannelActionType.MENSAGEM, null);
+        ChannelAction action = proactive(ChannelActionType.MESSAGE, null);
         action.reserveUntil(NOW.plusSeconds(60));
         assertThat(action.nextAttemptAt()).isEqualTo(NOW.plusSeconds(60));
         action.markDelivered(NOW);
@@ -135,9 +135,9 @@ class ChannelActionTest {
 
     @Test
     void acceptMarksDeliveredAndCounts() {
-        ChannelAction action = proactive(ChannelActionType.MENSAGEM, null);
+        ChannelAction action = proactive(ChannelActionType.MESSAGE, null);
         action.markDelivered(NOW.plusSeconds(5));
-        assertThat(action.state()).isEqualTo(ChannelActionState.ENTREGUE);
+        assertThat(action.state()).isEqualTo(ChannelActionState.DELIVERED);
         assertThat(action.deliveredAt()).isEqualTo(NOW.plusSeconds(5));
         assertThat(action.attempts()).isEqualTo(1);
         assertThat(action.nextAttemptAt()).isNull();
@@ -145,21 +145,21 @@ class ChannelActionTest {
 
     @Test
     void acceptDoesNotTouchAlreadyConfirmedAction() {
-        ChannelAction action = proactive(ChannelActionType.MENSAGEM, null);
+        ChannelAction action = proactive(ChannelActionType.MESSAGE, null);
         action.confirmExecuted(NOW);
         action.markDelivered(NOW.plusSeconds(1));
-        assertThat(action.state()).isEqualTo(ChannelActionState.EXECUTADA);
+        assertThat(action.state()).isEqualTo(ChannelActionState.EXECUTED);
         assertThat(action.deliveredAt()).isNull();
     }
 
     @Test
     void executedConfirmationIsIdempotent() {
         ChannelAction action = response();
-        assertThat(action.confirmExecuted(NOW)).isEqualTo(ConfirmationResult.APLICADA);
-        assertThat(action.state()).isEqualTo(ChannelActionState.EXECUTADA);
+        assertThat(action.confirmExecuted(NOW)).isEqualTo(ConfirmationResult.APPLIED);
+        assertThat(action.state()).isEqualTo(ChannelActionState.EXECUTED);
         assertThat(action.finalizedAt()).isEqualTo(NOW);
         assertThat(action.confirmExecuted(NOW.plusSeconds(9)))
-                .isEqualTo(ConfirmationResult.REPETIDA);
+                .isEqualTo(ConfirmationResult.REPEATED);
         assertThat(action.finalizedAt()).isEqualTo(NOW);
     }
 
@@ -167,44 +167,44 @@ class ChannelActionTest {
     void divergentConfirmationOfFinalStateIsIgnored() {
         ChannelAction action = response();
         action.confirmExecuted(NOW);
-        assertThat(action.confirmFailure("ERRO_TELEGRAM", NOW))
-                .isEqualTo(ConfirmationResult.DIVERGENTE);
-        assertThat(action.state()).isEqualTo(ChannelActionState.EXECUTADA);
+        assertThat(action.confirmFailure("TELEGRAM_ERROR", NOW))
+                .isEqualTo(ConfirmationResult.DIVERGENT);
+        assertThat(action.state()).isEqualTo(ChannelActionState.EXECUTED);
         assertThat(action.reasonCode()).isNull();
     }
 
     @Test
     void failureConfirmationIsIdempotentAndDivergentWhenCodeChanges() {
         ChannelAction action = response();
-        assertThat(action.confirmFailure("CHAT_INDISPONIVEL", NOW))
-                .isEqualTo(ConfirmationResult.APLICADA);
-        assertThat(action.state()).isEqualTo(ChannelActionState.FALHOU);
-        assertThat(action.reasonCode()).isEqualTo("CHAT_INDISPONIVEL");
-        assertThat(action.confirmFailure("CHAT_INDISPONIVEL", NOW.plusSeconds(1)))
-                .isEqualTo(ConfirmationResult.REPETIDA);
-        assertThat(action.confirmFailure("ERRO_TELEGRAM", NOW.plusSeconds(1)))
-                .isEqualTo(ConfirmationResult.DIVERGENTE);
+        assertThat(action.confirmFailure("CHAT_UNAVAILABLE", NOW))
+                .isEqualTo(ConfirmationResult.APPLIED);
+        assertThat(action.state()).isEqualTo(ChannelActionState.FAILED);
+        assertThat(action.reasonCode()).isEqualTo("CHAT_UNAVAILABLE");
+        assertThat(action.confirmFailure("CHAT_UNAVAILABLE", NOW.plusSeconds(1)))
+                .isEqualTo(ConfirmationResult.REPEATED);
+        assertThat(action.confirmFailure("TELEGRAM_ERROR", NOW.plusSeconds(1)))
+                .isEqualTo(ConfirmationResult.DIVERGENT);
         assertThat(action.confirmExecuted(NOW.plusSeconds(1)))
-                .isEqualTo(ConfirmationResult.DIVERGENTE);
-        assertThat(action.reasonCode()).isEqualTo("CHAT_INDISPONIVEL");
+                .isEqualTo(ConfirmationResult.DIVERGENT);
+        assertThat(action.reasonCode()).isEqualTo("CHAT_UNAVAILABLE");
     }
 
     @Test
     void confirmationArrivingBeforeAcceptGoesFromPendingToFinal() {
-        ChannelAction action = proactive(ChannelActionType.MENSAGEM, null);
-        assertThat(action.confirmFailure("LIMITE_DE_TAXA", NOW))
-                .isEqualTo(ConfirmationResult.APLICADA);
-        assertThat(action.state()).isEqualTo(ChannelActionState.FALHOU);
+        ChannelAction action = proactive(ChannelActionType.MESSAGE, null);
+        assertThat(action.confirmFailure("RATE_LIMITED", NOW))
+                .isEqualTo(ConfirmationResult.APPLIED);
+        assertThat(action.state()).isEqualTo(ChannelActionState.FAILED);
         assertThat(action.nextAttemptAt()).isNull();
     }
 
     @Test
     void confirmationOfActionFinalizedForOtherReasonIsDivergent() {
-        ChannelAction discarded = proactive(ChannelActionType.MENSAGEM, null);
+        ChannelAction discarded = proactive(ChannelActionType.MESSAGE, null);
         discarded.discard(NOW);
-        assertThat(discarded.confirmExecuted(NOW)).isEqualTo(ConfirmationResult.DIVERGENTE);
-        assertThat(discarded.confirmFailure("X", NOW)).isEqualTo(ConfirmationResult.DIVERGENTE);
-        assertThat(discarded.state()).isEqualTo(ChannelActionState.DESCARTADA);
+        assertThat(discarded.confirmExecuted(NOW)).isEqualTo(ConfirmationResult.DIVERGENT);
+        assertThat(discarded.confirmFailure("X", NOW)).isEqualTo(ConfirmationResult.DIVERGENT);
+        assertThat(discarded.state()).isEqualTo(ChannelActionState.DISCARDED);
     }
 
     @Test
@@ -215,46 +215,46 @@ class ChannelActionTest {
 
     @Test
     void discardOnlyValidWhenPending() {
-        ChannelAction pending = proactive(ChannelActionType.MENSAGEM, null);
+        ChannelAction pending = proactive(ChannelActionType.MESSAGE, null);
         pending.discard(NOW);
-        assertThat(pending.state()).isEqualTo(ChannelActionState.DESCARTADA);
+        assertThat(pending.state()).isEqualTo(ChannelActionState.DISCARDED);
         assertThat(pending.reasonCode()).isEqualTo(ChannelAction.LINK_UNDONE_CODE);
 
         ChannelAction delivered = response();
         delivered.discard(NOW);
-        assertThat(delivered.state()).isEqualTo(ChannelActionState.ENTREGUE);
+        assertThat(delivered.state()).isEqualTo(ChannelActionState.DELIVERED);
     }
 
     @Test
     void expiresOnlyWhenNotFinalizedAndDeadlinePassed() {
-        ChannelAction action = proactive(ChannelActionType.MENSAGEM, null);
+        ChannelAction action = proactive(ChannelActionType.MESSAGE, null);
         action.expire(NOW.plusSeconds(10));
-        assertThat(action.state()).isEqualTo(ChannelActionState.PENDENTE);
+        assertThat(action.state()).isEqualTo(ChannelActionState.PENDING);
         assertThat(action.expired(NOW.plus(Duration.ofHours(24)))).isTrue();
         action.expire(NOW.plus(Duration.ofHours(24)));
-        assertThat(action.state()).isEqualTo(ChannelActionState.FALHA_DEFINITIVA);
+        assertThat(action.state()).isEqualTo(ChannelActionState.PERMANENTLY_FAILED);
         assertThat(action.expired(NOW.plus(Duration.ofHours(48)))).isFalse();
         action.expire(NOW.plus(Duration.ofHours(48)));
-        assertThat(action.state()).isEqualTo(ChannelActionState.FALHA_DEFINITIVA);
+        assertThat(action.state()).isEqualTo(ChannelActionState.PERMANENTLY_FAILED);
     }
 
     @Test
     void deliveryFailureNeverSchedulesAfterDeadline() {
-        ChannelAction action = proactive(ChannelActionType.MENSAGEM, null);
+        ChannelAction action = proactive(ChannelActionType.MESSAGE, null);
         Instant deadline = NOW.plus(Duration.ofHours(24));
         action.registerDeliveryFailure(deadline.minusSeconds(10), policy);
-        assertThat(action.state()).isEqualTo(ChannelActionState.PENDENTE);
+        assertThat(action.state()).isEqualTo(ChannelActionState.PENDING);
         assertThat(action.nextAttemptAt()).isEqualTo(deadline);
 
         action.expire(deadline);
-        assertThat(action.state()).isEqualTo(ChannelActionState.FALHA_DEFINITIVA);
+        assertThat(action.state()).isEqualTo(ChannelActionState.PERMANENTLY_FAILED);
         assertThat(action.reasonCode()).isEqualTo(ChannelAction.DEADLINE_EXPIRED_CODE);
         assertThat(action.finalizedAt()).isEqualTo(deadline);
     }
 
     @Test
     void deliveryFailureBeforeDeadlineKeepsPolicyWait() {
-        ChannelAction action = proactive(ChannelActionType.MENSAGEM, null);
+        ChannelAction action = proactive(ChannelActionType.MESSAGE, null);
         action.registerDeliveryFailure(NOW, policy);
         assertThat(action.nextAttemptAt()).isEqualTo(NOW.plusSeconds(30));
     }
@@ -264,10 +264,10 @@ class ChannelActionTest {
         ChannelAction action = response();
         Instant deadline = NOW.plus(Duration.ofHours(24));
         assertThat(action.expireWithoutConfirmation(deadline.minusSeconds(1))).isFalse();
-        assertThat(action.state()).isEqualTo(ChannelActionState.ENTREGUE);
+        assertThat(action.state()).isEqualTo(ChannelActionState.DELIVERED);
 
         assertThat(action.expireWithoutConfirmation(deadline)).isTrue();
-        assertThat(action.state()).isEqualTo(ChannelActionState.FALHA_DEFINITIVA);
+        assertThat(action.state()).isEqualTo(ChannelActionState.PERMANENTLY_FAILED);
         assertThat(action.reasonCode()).isEqualTo(ChannelAction.CODE_WITHOUT_CONFIRMATION);
         assertThat(action.finalizedAt()).isEqualTo(deadline);
         assertThat(action.nextAttemptAt()).isNull();
@@ -280,14 +280,14 @@ class ChannelActionTest {
     @Test
     void expireWithoutConfirmationOnlyActsOnDelivered() {
         Instant muchLater = NOW.plus(Duration.ofDays(3));
-        ChannelAction pending = proactive(ChannelActionType.MENSAGEM, null);
+        ChannelAction pending = proactive(ChannelActionType.MESSAGE, null);
         assertThat(pending.expireWithoutConfirmation(muchLater)).isFalse();
-        assertThat(pending.state()).isEqualTo(ChannelActionState.PENDENTE);
+        assertThat(pending.state()).isEqualTo(ChannelActionState.PENDING);
 
         ChannelAction executed = response();
         executed.confirmExecuted(NOW);
         assertThat(executed.expireWithoutConfirmation(muchLater)).isFalse();
-        assertThat(executed.state()).isEqualTo(ChannelActionState.EXECUTADA);
+        assertThat(executed.state()).isEqualTo(ChannelActionState.EXECUTED);
         assertThat(executed.reasonCode()).isNull();
     }
 
@@ -296,43 +296,43 @@ class ChannelActionTest {
         ChannelAction action = response();
         action.expireWithoutConfirmation(NOW.plus(Duration.ofHours(24)));
         assertThat(action.confirmExecuted(NOW.plus(Duration.ofHours(25))))
-                .isEqualTo(ConfirmationResult.DIVERGENTE);
+                .isEqualTo(ConfirmationResult.DIVERGENT);
         assertThat(action.reasonCode()).isEqualTo(ChannelAction.CODE_WITHOUT_CONFIRMATION);
     }
 
     @Test
     void editCompensationBecomesMessageInSameChat() {
-        ChannelAction edit = proactive(ChannelActionType.EDICAO, "{\"texto\":\"alternativa\"}");
+        ChannelAction edit = proactive(ChannelActionType.EDIT, "{\"text\":\"alternativa\"}");
         assertThat(edit.hasCompensation()).isTrue();
-        assertThat(edit.compensationId()).isEqualTo("p:resultado:x:0-c");
+        assertThat(edit.compensationId()).isEqualTo("p:result:x:0-c");
         ChannelAction compensation = edit.createCompensation(NOW, policy);
-        assertThat(compensation.id()).isEqualTo("p:resultado:x:0-c");
-        assertThat(compensation.batchId()).isEqualTo("c:p:resultado:x:0");
-        assertThat(compensation.origin()).isEqualTo(ChannelActionOrigin.COMPENSACAO);
-        assertThat(compensation.type()).isEqualTo(ChannelActionType.MENSAGEM);
-        assertThat(compensation.payload()).isEqualTo("{\"texto\":\"alternativa\"}");
+        assertThat(compensation.id()).isEqualTo("p:result:x:0-c");
+        assertThat(compensation.batchId()).isEqualTo("c:p:result:x:0");
+        assertThat(compensation.origin()).isEqualTo(ChannelActionOrigin.COMPENSATION);
+        assertThat(compensation.type()).isEqualTo(ChannelActionType.MESSAGE);
+        assertThat(compensation.payload()).isEqualTo("{\"text\":\"alternativa\"}");
         assertThat(compensation.chatId()).isEqualTo(10L);
         assertThat(compensation.teacherId()).isEqualTo(TEACHER);
-        assertThat(compensation.state()).isEqualTo(ChannelActionState.PENDENTE);
+        assertThat(compensation.state()).isEqualTo(ChannelActionState.PENDING);
         assertThat(compensation.hasCompensation()).isFalse();
     }
 
     @Test
     void documentCompensatesOnlyForUnavailableDocumentAndEditOnlyForNonEditableMessage() {
-        ChannelAction document = proactive(ChannelActionType.DOCUMENTO, "{\"texto\":\"aviso\"}");
-        assertThat(document.compensatesBy("DOCUMENTO_INDISPONIVEL")).isTrue();
-        assertThat(document.compensatesBy("MENSAGEM_NAO_EDITAVEL")).isFalse();
-        assertThat(document.compensatesBy("ERRO_TELEGRAM")).isFalse();
+        ChannelAction document = proactive(ChannelActionType.DOCUMENT, "{\"text\":\"aviso\"}");
+        assertThat(document.compensatesBy("DOCUMENT_UNAVAILABLE")).isTrue();
+        assertThat(document.compensatesBy("MESSAGE_NOT_EDITABLE")).isFalse();
+        assertThat(document.compensatesBy("TELEGRAM_ERROR")).isFalse();
 
-        ChannelAction edit = proactive(ChannelActionType.EDICAO, "{\"texto\":\"x\"}");
-        assertThat(edit.compensatesBy("MENSAGEM_NAO_EDITAVEL")).isTrue();
-        assertThat(edit.compensatesBy("DOCUMENTO_INDISPONIVEL")).isFalse();
+        ChannelAction edit = proactive(ChannelActionType.EDIT, "{\"text\":\"x\"}");
+        assertThat(edit.compensatesBy("MESSAGE_NOT_EDITABLE")).isTrue();
+        assertThat(edit.compensatesBy("DOCUMENT_UNAVAILABLE")).isFalse();
 
         assertThat(
-                        proactive(ChannelActionType.DOCUMENTO, null)
-                                .compensatesBy("DOCUMENTO_INDISPONIVEL"))
+                        proactive(ChannelActionType.DOCUMENT, null)
+                                .compensatesBy("DOCUMENT_UNAVAILABLE"))
                 .isFalse();
-        assertThat(document.createCompensation(NOW, policy).compensatesBy("DOCUMENTO_INDISPONIVEL"))
+        assertThat(document.createCompensation(NOW, policy).compensatesBy("DOCUMENT_UNAVAILABLE"))
                 .isFalse();
     }
 
@@ -340,39 +340,39 @@ class ChannelActionTest {
     void documentCompensationBecomesMessageInSameChatWithoutBringingDocument() {
         ChannelAction document =
                 ChannelAction.create(
-                        "p:resultado:x:3",
-                        "p:resultado:x",
-                        ChannelActionOrigin.PROATIVA,
+                        "p:result:x:3",
+                        "p:result:x",
+                        ChannelActionOrigin.PROACTIVE,
                         null,
                         10L,
                         TEACHER,
                         JOB,
-                        ChannelActionType.DOCUMENTO,
-                        "{\"documentoId\":\"abc\",\"nomeArquivo\":\"a.pdf\"}",
-                        "{\"tipo\":\"MENSAGEM\",\"chatId\":10,\"texto\":\"Aviso\"}",
+                        ChannelActionType.DOCUMENT,
+                        "{\"documentId\":\"abc\",\"fileName\":\"a.pdf\"}",
+                        "{\"type\":\"MESSAGE\",\"chatId\":10,\"text\":\"Aviso\"}",
                         NOW,
                         policy);
         ChannelAction compensation = document.createCompensation(NOW, policy);
-        assertThat(compensation.id()).isEqualTo("p:resultado:x:3-c");
-        assertThat(compensation.batchId()).isEqualTo("c:p:resultado:x:3");
-        assertThat(compensation.origin()).isEqualTo(ChannelActionOrigin.COMPENSACAO);
-        assertThat(compensation.type()).isEqualTo(ChannelActionType.MENSAGEM);
-        assertThat(compensation.payload()).doesNotContain("documentoId", "a.pdf");
+        assertThat(compensation.id()).isEqualTo("p:result:x:3-c");
+        assertThat(compensation.batchId()).isEqualTo("c:p:result:x:3");
+        assertThat(compensation.origin()).isEqualTo(ChannelActionOrigin.COMPENSATION);
+        assertThat(compensation.type()).isEqualTo(ChannelActionType.MESSAGE);
+        assertThat(compensation.payload()).doesNotContain("documentId", "a.pdf");
         assertThat(compensation.chatId()).isEqualTo(10L);
         assertThat(compensation.teacherId()).isEqualTo(TEACHER);
-        assertThat(compensation.state()).isEqualTo(ChannelActionState.PENDENTE);
+        assertThat(compensation.state()).isEqualTo(ChannelActionState.PENDING);
     }
 
     @Test
     void stepCompensationRemainsStep() {
-        ChannelAction step = proactive(ChannelActionType.MENSAGEM_ETAPA, "{\"texto\":\"etapa\"}");
+        ChannelAction step = proactive(ChannelActionType.STEP_MESSAGE, "{\"text\":\"etapa\"}");
         assertThat(step.createCompensation(NOW, policy).type())
-                .isEqualTo(ChannelActionType.MENSAGEM_ETAPA);
+                .isEqualTo(ChannelActionType.STEP_MESSAGE);
     }
 
     @Test
     void actionWithoutCompensationDoesNotCreate() {
-        ChannelAction action = proactive(ChannelActionType.EDICAO, null);
+        ChannelAction action = proactive(ChannelActionType.EDIT, null);
         assertThat(action.hasCompensation()).isFalse();
         assertThatThrownBy(() -> action.createCompensation(NOW, policy))
                 .isInstanceOf(IllegalStateException.class);
@@ -380,7 +380,7 @@ class ChannelActionTest {
 
     @Test
     void resetPayloadDeletesOContent() {
-        ChannelAction action = proactive(ChannelActionType.EDICAO, "{}");
+        ChannelAction action = proactive(ChannelActionType.EDIT, "{}");
         action.resetPayload();
         assertThat(action.payload()).isNull();
         assertThat(action.compensation()).isNull();
@@ -395,14 +395,14 @@ class ChannelActionTest {
 
     @Test
     void finalStates() {
-        assertThat(ChannelActionState.PENDENTE.finalized()).isFalse();
-        assertThat(ChannelActionState.ENTREGUE.finalized()).isFalse();
+        assertThat(ChannelActionState.PENDING.finalized()).isFalse();
+        assertThat(ChannelActionState.DELIVERED.finalized()).isFalse();
         for (ChannelActionState final_ :
                 new ChannelActionState[] {
-                    ChannelActionState.EXECUTADA,
-                    ChannelActionState.FALHOU,
-                    ChannelActionState.FALHA_DEFINITIVA,
-                    ChannelActionState.DESCARTADA
+                    ChannelActionState.EXECUTED,
+                    ChannelActionState.FAILED,
+                    ChannelActionState.PERMANENTLY_FAILED,
+                    ChannelActionState.DISCARDED
                 }) {
             assertThat(final_.finalized()).isTrue();
         }

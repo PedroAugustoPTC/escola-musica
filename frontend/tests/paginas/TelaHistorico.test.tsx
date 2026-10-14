@@ -10,38 +10,38 @@ const SEMESTRAL = '0190a000-0000-7000-8000-0000000000s1';
 
 const ALUNO_DTO = {
   id: ALUNO,
-  nome: 'Matteo Mafra',
-  instrumento: 'Piano',
-  ultimaAulaEm: null,
-  possuiRelatorioEmAberto: false,
+  name: 'Matteo Mafra',
+  instrument: 'Piano',
+  lastLessonAt: null,
+  hasOpenReport: false,
 };
 
 const ITENS = [
   {
-    tipo: 'AULA',
-    relatorioId: AULA,
-    rotulo: 'Aula de 21/09/2026',
-    dataAula: '2026-09-21',
-    periodoInicio: null,
-    periodoFim: null,
-    aprovadoEm: '2026-09-21T21:40:00Z',
+    type: 'LESSON',
+    reportId: AULA,
+    label: 'Aula de 21/09/2026',
+    lessonDate: '2026-09-21',
+    periodStart: null,
+    periodEnd: null,
+    approvedAt: '2026-09-21T21:40:00Z',
   },
   {
-    tipo: 'SEMESTRAL',
-    relatorioId: SEMESTRAL,
-    rotulo: 'Semestral (01/01/2026 a 30/06/2026)',
-    dataAula: null,
-    periodoInicio: '2026-01-01',
-    periodoFim: '2026-06-30',
-    aprovadoEm: '2026-07-03T13:12:00Z',
+    type: 'SEMESTER',
+    reportId: SEMESTRAL,
+    label: 'Semestral (01/01/2026 a 30/06/2026)',
+    lessonDate: null,
+    periodStart: '2026-01-01',
+    periodEnd: '2026-06-30',
+    approvedAt: '2026-07-03T13:12:00Z',
   },
 ];
 
 const BASE = {
-  'GET /api/v1/sessao': { corpo: SESSAO_CLARA },
-  [`GET /api/v1/alunos/${ALUNO}`]: { corpo: ALUNO_DTO },
-  [`GET /api/v1/relatorios-aula/${AULA}/pdf-oficial`]: { corpo: new Blob(['%PDF-aula']) },
-  [`GET /api/v1/relatorios-semestrais/${SEMESTRAL}/pdf-oficial`]: { corpo: new Blob(['%PDF-sem']) },
+  'GET /api/v1/session': { corpo: SESSAO_CLARA },
+  [`GET /api/v1/students/${ALUNO}`]: { corpo: ALUNO_DTO },
+  [`GET /api/v1/lesson-reports/${AULA}/official-pdf`]: { corpo: new Blob(['%PDF-aula']) },
+  [`GET /api/v1/semester-reports/${SEMESTRAL}/official-pdf`]: { corpo: new Blob(['%PDF-sem']) },
 };
 
 afterEach(() => {
@@ -52,7 +52,7 @@ describe('TelaHistorico (12)', () => {
   it('lista os aprovados do mais recente ao mais antigo com os rótulos do bot', async () => {
     simularApi({
       ...BASE,
-      [`GET /api/v1/alunos/${ALUNO}/historico`]: { corpo: { aluno: ALUNO_DTO, itens: ITENS } },
+      [`GET /api/v1/students/${ALUNO}/history`]: { corpo: { student: ALUNO_DTO, items: ITENS } },
     });
     renderizarRotas(rotas, `/alunos/${ALUNO}/historico`);
 
@@ -71,7 +71,7 @@ describe('TelaHistorico (12)', () => {
   it('12b: sem relatórios aprovados oferece registrar aula', async () => {
     simularApi({
       ...BASE,
-      [`GET /api/v1/alunos/${ALUNO}/historico`]: { corpo: { aluno: ALUNO_DTO, itens: [] } },
+      [`GET /api/v1/students/${ALUNO}/history`]: { corpo: { student: ALUNO_DTO, items: [] } },
     });
     const { roteador } = renderizarRotas(rotas, `/alunos/${ALUNO}/historico`);
 
@@ -86,7 +86,7 @@ describe('TelaHistorico (12)', () => {
   it('12c: mostra o carregamento enquanto a lista não chega', async () => {
     simularApi({
       ...BASE,
-      [`GET /api/v1/alunos/${ALUNO}/historico`]: () => new Promise(() => undefined),
+      [`GET /api/v1/students/${ALUNO}/history`]: () => new Promise(() => undefined),
     });
     renderizarRotas(rotas, `/alunos/${ALUNO}/historico`);
 
@@ -96,7 +96,7 @@ describe('TelaHistorico (12)', () => {
   it('"Abrir PDF" busca o PDF oficial com a sessão e abre numa nova aba', async () => {
     const api = simularApi({
       ...BASE,
-      [`GET /api/v1/alunos/${ALUNO}/historico`]: { corpo: { aluno: ALUNO_DTO, itens: ITENS } },
+      [`GET /api/v1/students/${ALUNO}/history`]: { corpo: { student: ALUNO_DTO, items: ITENS } },
     });
     const aba = { location: { href: '' } };
     const abrir = vi.spyOn(window, 'open').mockReturnValue(aba as unknown as Window);
@@ -109,7 +109,7 @@ describe('TelaHistorico (12)', () => {
     await waitFor(() => expect(aba.location.href).toMatch(/^blob:/));
     expect(abrir).toHaveBeenCalledWith('', '_blank');
     const chamada = api.chamadas.find((c) =>
-      c.url.endsWith(`/relatorios-semestrais/${SEMESTRAL}/pdf-oficial`),
+      c.url.endsWith(`/semester-reports/${SEMESTRAL}/official-pdf`),
     );
     expect(chamada?.init.credentials).toBe('same-origin');
   });
@@ -117,7 +117,7 @@ describe('TelaHistorico (12)', () => {
   it('aba bloqueada: baixa o arquivo e avisa', async () => {
     simularApi({
       ...BASE,
-      [`GET /api/v1/alunos/${ALUNO}/historico`]: { corpo: { aluno: ALUNO_DTO, itens: ITENS } },
+      [`GET /api/v1/students/${ALUNO}/history`]: { corpo: { student: ALUNO_DTO, items: ITENS } },
     });
     vi.spyOn(window, 'open').mockReturnValue(null);
     const clique = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (

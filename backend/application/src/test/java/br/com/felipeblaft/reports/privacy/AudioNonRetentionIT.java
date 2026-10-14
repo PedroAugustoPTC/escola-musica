@@ -31,7 +31,7 @@ import org.springframework.test.web.servlet.MvcResult;
  */
 class AudioNonRetentionIT extends TelegramConversationBase {
 
-    private static final String BRAND = "AUDIO-DE-AULA-FICTICIO";
+    private static final String BRAND = "FICTITIOUS-LESSON-AUDIO";
 
     private Cookie session;
     private Student matteo;
@@ -52,19 +52,19 @@ class AudioNonRetentionIT extends TelegramConversationBase {
         link(USER_CLARA, ScenarioIT.CODE_CLARA);
         MvcResult input =
                 mvc.perform(
-                                post("/api/v1/sessao")
+                                post("/api/v1/session")
                                         .with(csrf().asHeader())
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .content("{\"codigo\":\"" + ScenarioIT.CODE_CLARA + "\"}"))
+                                        .content("{\"code\":\"" + ScenarioIT.CODE_CLARA + "\"}"))
                         .andReturn();
-        Cookie cookie = input.getResponse().getCookie("sessao");
+        Cookie cookie = input.getResponse().getCookie("session");
         session = new Cookie(cookie.getName(), cookie.getValue());
     }
 
     private void sendThroughWeb(Student student, byte[] content) throws Exception {
         mvc.perform(
-                multipart("/api/v1/alunos/{id}/relatorios-aula", student.id())
-                        .file(new MockMultipartFile("audio", "aula.webm", "audio/webm", content))
+                multipart("/api/v1/students/{id}/lesson-reports", student.id())
+                        .file(new MockMultipartFile("audio", "lesson.webm", "audio/webm", content))
                         .cookie(session)
                         .with(csrf().asHeader()));
         scenario.processQueue();
@@ -75,7 +75,7 @@ class AudioNonRetentionIT extends TelegramConversationBase {
         sendText(USER_CLARA, student.name());
         prepareTelegramFile(fileId, content);
         sendVoice(USER_CLARA, fileId, content.length);
-        sendCallback(USER_CLARA, "v1:confal:");
+        sendCallback(USER_CLARA, "v1:confirm-student:");
         scenario.processQueue();
     }
 
@@ -98,13 +98,13 @@ class AudioNonRetentionIT extends TelegramConversationBase {
     @Test
     void successInBothChannelsLeavesNoAudio() throws Exception {
         sendThroughWeb(matteo, AudioNormalizationTest.AUDIO_WITH_SPEECH);
-        sendThroughBot(olavo, "voz-sucesso", AudioNormalizationTest.AUDIO_WITH_SPEECH);
+        sendThroughBot(olavo, "success-voice", AudioNormalizationTest.AUDIO_WITH_SPEECH);
 
         assertThat(
                         jdbc.queryForList(
                                 "select status from lesson_report order by created_at",
                                 String.class))
-                .containsExactly("AGUARDANDO_RESPOSTAS", "AGUARDANDO_RESPOSTAS");
+                .containsExactly("AWAITING_ANSWERS", "AWAITING_ANSWERS");
         withoutRetainedAudio();
     }
 
@@ -114,11 +114,11 @@ class AudioNonRetentionIT extends TelegramConversationBase {
         sendThroughWeb(olavo, AudioNormalizationTest.INVALID.getBytes(StandardCharsets.UTF_8));
         sendThroughBot(
                 matteo,
-                "voz-silencio",
+                "silent-voice",
                 AudioNormalizationTest.SILENCE.getBytes(StandardCharsets.UTF_8));
         sendThroughBot(
                 olavo,
-                "voz-invalida",
+                "invalid-voice",
                 AudioNormalizationTest.INVALID.getBytes(StandardCharsets.UTF_8));
 
         assertThat(jdbc.queryForObject("select count(*) from lesson", Integer.class)).isZero();
@@ -128,7 +128,7 @@ class AudioNonRetentionIT extends TelegramConversationBase {
     @Test
     void databaseDoesNotKeepAudioBytes() throws Exception {
         sendThroughWeb(matteo, AudioNormalizationTest.AUDIO_WITH_SPEECH);
-        sendThroughBot(olavo, "voz-banco", AudioNormalizationTest.AUDIO_WITH_SPEECH);
+        sendThroughBot(olavo, "voice-database", AudioNormalizationTest.AUDIO_WITH_SPEECH);
 
         List<Map<String, Object>> binary =
                 jdbc.queryForList(

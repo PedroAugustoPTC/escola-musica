@@ -20,13 +20,13 @@ public class AuthorizationService {
 
     public void requireAssignment(UUID teacherId, UUID studentId) {
         if (!assignments.exists(teacherId, studentId)) {
-            throw new DomainException(ErrorCode.ALUNO_NAO_ASSOCIADO);
+            throw new DomainException(ErrorCode.STUDENT_NOT_ASSIGNED);
         }
     }
 
     public void requireOwner(UUID teacherId, UUID resourceTeacher) {
         if (!Objects.equals(teacherId, resourceTeacher)) {
-            throw new DomainException(ErrorCode.RECURSO_NAO_ENCONTRADO);
+            throw new DomainException(ErrorCode.RESOURCE_NOT_FOUND);
         }
     }
 }

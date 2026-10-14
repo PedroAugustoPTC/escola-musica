@@ -65,6 +65,6 @@ public final class AccessCode {
 
     @Override
     public String toString() {
-        return "CodigoAcesso[***]";
+        return "AccessCode[***]";
     }
 }

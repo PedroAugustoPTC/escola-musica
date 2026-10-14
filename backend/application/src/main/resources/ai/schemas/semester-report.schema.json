@@ -72,6 +72,6 @@
     },
     "finalOpinion": { "type": "string", "maxLength": 6000 },
     "noContentChange": { "type": "boolean" },
-    "actionRequest": { "enum": ["NENHUM", "APROVAR", "CANCELAR"] }
+    "actionRequest": { "enum": ["NONE", "APPROVE", "CANCEL"] }
   }
 }

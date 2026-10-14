@@ -702,6 +702,412 @@
       "to": " connection-timeout-ms + response-timeout-ms",
       "slice": 3,
       "reason": "a mensagem de erro de configuração cita a chave renomeada; o texto e a asserção acompanham o nome citado (decisão 8)"
+    },
+    {
+      "file": "support/ActionsSchemaV1.java",
+      "from": "acoes-v1.schema.json",
+      "to": "actions-v1.schema.json",
+      "slice": 4,
+      "reason": "arquivo do contrato renomeado (T112)"
+    },
+    {
+      "file": "support/ChannelOpenApiContract.java",
+      "from": "canal-telegram-interno.openapi.yaml",
+      "to": "telegram-channel-internal.openapi.yaml",
+      "slice": 4,
+      "reason": "arquivo do contrato renomeado (T113)"
+    },
+    {
+      "file": "support/ActionsSchemaV1.java",
+      "from": "CONTRATO_API",
+      "to": "CONTRACT_API",
+      "slice": 4,
+      "reason": "variável de ambiente do contrato (T115)"
+    },
+    {
+      "file": "support/ContractApiBase.java",
+      "from": "CONTRATO_API",
+      "to": "CONTRACT_API",
+      "slice": 4,
+      "reason": "variável de ambiente do contrato (T115)"
+    },
+    {
+      "file": "outbound/telegram/TelegramDirectPublicationAdapter.java",
+      "from": "DIRETA",
+      "to": "DIRECT",
+      "slice": 4,
+      "reason": "valor de enumeração de configuração (B1): DIRETA→DIRECT"
+    },
+    {
+      "file": "outbound/telegram/TelegramOutboxPublicationAdapter.java",
+      "from": "ORQUESTRADOR",
+      "to": "ORCHESTRATOR",
+      "slice": 4,
+      "reason": "valor de enumeração de configuração (B1): ORQUESTRADOR→ORCHESTRATOR"
+    },
+    {
+      "file": "inbound/internal/security/InternalSecurityConfig.java",
+      "from": "canal-telegram-sem-token-de-servico: a area /interno/** recusa todas as",
+      "to": "telegram-channel-without-service-token: a area /internal/** recusa todas as",
+      "slice": 4,
+      "reason": "código do evento de log e rota citada no texto acompanham os nomes novos (rota /internal/**); o texto em português segue"
+    },
+    {
+      "file": "inbound/telegram/channel/ChannelActionMapperTest.java",
+      "from": "Acao",
+      "to": "Action",
+      "slice": 4,
+      "reason": "nome da definição no esquema novo das ações (actions-v1.schema.json: $defs/Action)"
+    },
+    {
+      "file": "inbound/telegram/channel/TelegramChannelContractIT.java",
+      "from": "Erro",
+      "to": "Error",
+      "slice": 4,
+      "reason": "nome da definição no esquema novo das ações (actions-v1.schema.json: $defs/Error)"
+    },
+    {
+      "file": "support/OrchestratorDeliveryBase.java",
+      "from": "reports.telegram-channel.orchestrator-token=segredo-do-orquestrador",
+      "to": "reports.telegram-channel.orchestrator-token=orchestrator-secret",
+      "slice": 4,
+      "reason": "valor de teste do token do orquestrador acompanha a asserção que o procura no log (orchestrator-secret)"
+    },
+    {
+      "file": "config/TelegramChannelConfig.java",
+      "from": " ORQUESTRADOR), mas há ",
+      "to": " ORCHESTRATOR), mas há ",
+      "slice": 4,
+      "reason": "valor de configuração migrado (ORQUESTRADOR→ORCHESTRATOR) citado na mensagem de validação; o texto livre da mensagem não muda"
+    },
+    {
+      "file": "config/TelegramConfig.java",
+      "from": "webhook-nao-registrado; nova tentativa em 1 minuto",
+      "to": "webhook-not-registered; nova tentativa em 1 minuto",
+      "slice": 4,
+      "reason": "código de evento de log migrado (identificador); o texto livre da mensagem não muda"
+    },
+    {
+      "file": "inbound/internal/security/InternalSecurityConfigTest.java",
+      "from": "tok-secreto-1",
+      "to": "tok-secret-1",
+      "slice": 4,
+      "reason": "valor de teste de token/chave sem texto de usuário; renomeado junto com a configuração de teste"
+    },
+    {
+      "file": "inbound/internal/security/InternalSecurityConfigTest.java",
+      "from": "tok-secreto-2",
+      "to": "tok-secret-2",
+      "slice": 4,
+      "reason": "valor de teste de token/chave sem texto de usuário; renomeado junto com a configuração de teste"
+    },
+    {
+      "file": "inbound/internal/security/InternalSecurityIT.java",
+      "from": "/interno/v1/qualquer/coisa",
+      "to": "/internal/v1/any/thing",
+      "slice": 4,
+      "reason": "caminho, rota ou e-mail de dado de teste sem texto de usuário; acompanha a rota, a carga e o arquivo migrados"
+    },
+    {
+      "file": "inbound/seed/DemoDataIT.java",
+      "from": "clara@exemplo.test → ",
+      "to": "clara@example.test → ",
+      "slice": 4,
+      "reason": "caminho, rota ou e-mail de dado de teste sem texto de usuário; acompanha a rota, a carga e o arquivo migrados"
+    },
+    {
+      "file": "inbound/seed/DemoDataIT.java",
+      "from": "bruno@exemplo.test → ",
+      "to": "bruno@example.test → ",
+      "slice": 4,
+      "reason": "caminho, rota ou e-mail de dado de teste sem texto de usuário; acompanha a rota, a carga e o arquivo migrados"
+    },
+    {
+      "file": "inbound/seed/SeedCommandIT.java",
+      "from": "clara@exemplo\\\\.test → [A-HJ-NP-Z2-9]{8} \\\\(válido até 28/09/2026 10:00\\\\)",
+      "to": "clara@example\\\\.test → [A-HJ-NP-Z2-9]{8} \\\\(válido até 28/09/2026 10:00\\\\)",
+      "slice": 4,
+      "reason": "caminho, rota ou e-mail de dado de teste sem texto de usuário; acompanha a rota, a carga e o arquivo migrados"
+    },
+    {
+      "file": "inbound/seed/SeedCommandIT.java",
+      "from": "bruno@exemplo\\\\.test → [A-HJ-NP-Z2-9]{8}",
+      "to": "bruno@example\\\\.test → [A-HJ-NP-Z2-9]{8}",
+      "slice": 4,
+      "reason": "caminho, rota ou e-mail de dado de teste sem texto de usuário; acompanha a rota, a carga e o arquivo migrados"
+    },
+    {
+      "file": "inbound/seed/SeedCommandIT.java",
+      "from": "students[1].cpf: CPF_INVALIDO — CPF inválido.",
+      "to": "students[1].cpf: INVALID_CPF — CPF inválido.",
+      "slice": 4,
+      "reason": "código de erro da carga migrado (CPF_INVALIDO→INVALID_CPF); o texto livre da mensagem não muda"
+    },
+    {
+      "file": "inbound/seed/SeedCommandIT.java",
+      "from": "/nao/existe.json",
+      "to": "/missing/exists.json",
+      "slice": 4,
+      "reason": "caminho, rota ou e-mail de dado de teste sem texto de usuário; acompanha a rota, a carga e o arquivo migrados"
+    },
+    {
+      "file": "inbound/seed/SeedCommandIT.java",
+      "from": "clara@exemplo\\\\.test → [A-HJ-NP-Z2-9]{8} \\\\(válido até",
+      "to": "clara@example\\\\.test → [A-HJ-NP-Z2-9]{8} \\\\(válido até",
+      "slice": 4,
+      "reason": "caminho, rota ou e-mail de dado de teste sem texto de usuário; acompanha a rota, a carga e o arquivo migrados"
+    },
+    {
+      "file": "inbound/telegram/channel/ChannelActionMapperTest.java",
+      "from": "%PDF-conteudo-do-relatorio",
+      "to": "%PDF-content-of-report",
+      "slice": 4,
+      "reason": "dado de teste arbitrário (nome de arquivo, conteúdo fictício, código de teste ou e-mail): a troca é feita nos dois lados do teste e nenhum texto de usuário esperado muda"
+    },
+    {
+      "file": "inbound/telegram/channel/ChannelActionMapperTest.java",
+      "from": "Confirma?",
+      "to": "Confirm?",
+      "slice": 4,
+      "reason": "dado de teste arbitrário (nome de arquivo, conteúdo fictício, código de teste ou e-mail): a troca é feita nos dois lados do teste e nenhum texto de usuário esperado muda"
+    },
+    {
+      "file": "inbound/telegram/LessonRegistrationConversationIT.java",
+      "from": "AUDIO-DE-AULA",
+      "to": "FICTITIOUS-LESSON-AUDIO",
+      "slice": 4,
+      "reason": "dado de teste arbitrário (nome de arquivo, conteúdo fictício, código de teste ou e-mail): a troca é feita nos dois lados do teste e nenhum texto de usuário esperado muda"
+    },
+    {
+      "file": "outbound/ai/LlmOpenAiCompatibleAdapterIT.java",
+      "from": "Bearer chave-teste",
+      "to": "Bearer test-key",
+      "slice": 4,
+      "reason": "valor de teste de token/chave sem texto de usuário; renomeado junto com a configuração de teste"
+    },
+    {
+      "file": "outbound/audio/FfmpegAudioNormalizationAdapterIT.java",
+      "from": "aula2.ogg",
+      "to": "lesson2.ogg",
+      "slice": 4,
+      "reason": "dado de teste arbitrário (nome de arquivo, conteúdo fictício, código de teste ou e-mail): a troca é feita nos dois lados do teste e nenhum texto de usuário esperado muda"
+    },
+    {
+      "file": "outbound/queue/JobQueuePostgresAdapterIT.java",
+      "from": "/tmp/audios/sumiu.webm",
+      "to": "/tmp/audios/vanished.webm",
+      "slice": 4,
+      "reason": "dado de teste arbitrário (nome de arquivo, conteúdo fictício, código de teste ou e-mail): a troca é feita nos dois lados do teste e nenhum texto de usuário esperado muda"
+    },
+    {
+      "file": "outbound/telegram/ChannelActionsDeliveryIT.java",
+      "from": "canal-acao-falha-definitiva acaoId=",
+      "to": "channel-action-permanent-failure actionId=",
+      "slice": 4,
+      "reason": "código de evento de log migrado (identificador); o texto livre da mensagem não muda"
+    },
+    {
+      "file": "outbound/telegram/ChannelActionsDeliveryIT.java",
+      "from": "\\\",\\\"situacao\\\":\\\"FALHOU\\\",\\\"codigoMotivo\\\":\\\"CODIGO_NOVO_QUALQUER\\\"}]}",
+      "to": "\\\",\\\"outcome\\\":\\\"FAILED\\\",\\\"reasonCode\\\":\\\"ANY_NEW_CODE\\\"}]}",
+      "slice": 4,
+      "reason": "JSON do fio de teste: chaves e valores migrados (situacao→outcome, codigoMotivo→reasonCode, FALHOU→FAILED); o código desconhecido é dado arbitrário"
+    },
+    {
+      "file": "outbound/telegram/CompensationConfirmationIT.java",
+      "from": "\\\",\\\"nomeArquivo\\\":\\\"relatorio.pdf\\\",",
+      "to": "\\\",\\\"fileName\\\":\\\"report.pdf\\\",",
+      "slice": 4,
+      "reason": "dado de teste arbitrário (nome de arquivo, conteúdo fictício, código de teste ou e-mail): a troca é feita nos dois lados do teste e nenhum texto de usuário esperado muda"
+    },
+    {
+      "file": "outbound/telegram/CompensationConfirmationIT.java",
+      "from": "\\\",\\\"situacao\\\":\\\"FALHOU\\\",\\\"codigoMotivo\\\":\\\"NOVO_CODIGO_DO_N8N\\\"},",
+      "to": "\\\",\\\"outcome\\\":\\\"FAILED\\\",\\\"reasonCode\\\":\\\"NEW_CODE_FROM_N8N\\\"},",
+      "slice": 4,
+      "reason": "JSON do fio de teste: chaves e valores migrados (situacao→outcome, codigoMotivo→reasonCode, FALHOU→FAILED); o código desconhecido é dado arbitrário"
+    },
+    {
+      "file": "outbound/telegram/CompensationConfirmationIT.java",
+      "from": "{\\\"acaoId\\\":\\\"p:nao:existe:0\\\",\\\"situacao\\\":\\\"EXECUTADA\\\"}",
+      "to": "{\\\"actionId\\\":\\\"p:missing:none:0\\\",\\\"outcome\\\":\\\"EXECUTED\\\"}",
+      "slice": 4,
+      "reason": "JSON do fio de teste: chaves e valores migrados (situacao→outcome, codigoMotivo→reasonCode, FALHOU→FAILED); o código desconhecido é dado arbitrário"
+    },
+    {
+      "file": "parity/AccessParityScriptIT.java",
+      "from": "código errado = CODIGO_INVALIDO",
+      "to": "código errado = INVALID_CODE",
+      "slice": 4,
+      "reason": "valor de enumeração, chave ou código de erro migrado (identificador) citado em linha de roteiro de paridade ou de asserção; o texto livre da linha não muda"
+    },
+    {
+      "file": "parity/AccessParityScriptIT.java",
+      "from": "código certo bloqueado = BLOQUEADO_TEMPORARIAMENTE",
+      "to": "código certo bloqueado = TEMPORARILY_BLOCKED",
+      "slice": 4,
+      "reason": "valor de enumeração, chave ou código de erro migrado (identificador) citado em linha de roteiro de paridade ou de asserção; o texto livre da linha não muda"
+    },
+    {
+      "file": "parity/AccessParityScriptIT.java",
+      "from": "busca com vários = SearchResult[type=ENCONTRADOS, students=[Miguel de Castro Torrente, Olavo Torrente]]",
+      "to": "busca com vários = SearchResult[type=FOUND, students=[Miguel de Castro Torrente, Olavo Torrente]]",
+      "slice": 4,
+      "reason": "valor de enumeração, chave ou código de erro migrado (identificador) citado em linha de roteiro de paridade ou de asserção; o texto livre da linha não muda"
+    },
+    {
+      "file": "parity/LessonReportParityScriptIT.java",
+      "from": "enviar áudio = PERGUNTAS_PENDENTES",
+      "to": "enviar áudio = PENDING_QUESTIONS",
+      "slice": 4,
+      "reason": "valor de enumeração, chave ou código de erro migrado (identificador) citado em linha de roteiro de paridade ou de asserção; o texto livre da linha não muda"
+    },
+    {
+      "file": "parity/LessonReportParityScriptIT.java",
+      "from": "alterar por áudio = NOVA_VERSAO",
+      "to": "alterar por áudio = NEW_VERSION",
+      "slice": 4,
+      "reason": "valor de enumeração, chave ou código de erro migrado (identificador) citado em linha de roteiro de paridade ou de asserção; o texto livre da linha não muda"
+    },
+    {
+      "file": "parity/LessonReportParityScriptIT.java",
+      "from": "ESTRUTURACAO x1 sucesso=true duracao=true custo=true",
+      "to": "ANSWER_INCORPORATION x1 sucesso=true duracao=true custo=true",
+      "slice": 4,
+      "reason": "valor de enumeração, chave ou código de erro migrado (identificador) citado em linha de roteiro de paridade ou de asserção; o texto livre da linha não muda"
+    },
+    {
+      "file": "parity/LessonReportParityScriptIT.java",
+      "from": "INCORPORACAO_RESPOSTAS x1 sucesso=true duracao=true custo=true",
+      "to": "REVISION x2 sucesso=true duracao=true custo=true",
+      "slice": 4,
+      "reason": "valor de enumeração, chave ou código de erro migrado (identificador) citado em linha de roteiro de paridade ou de asserção; o texto livre da linha não muda"
+    },
+    {
+      "file": "parity/LessonReportParityScriptIT.java",
+      "from": "REVISAO x2 sucesso=true duracao=true custo=true",
+      "to": "STRUCTURING x1 sucesso=true duracao=true custo=true",
+      "slice": 4,
+      "reason": "valor de enumeração, chave ou código de erro migrado (identificador) citado em linha de roteiro de paridade ou de asserção; o texto livre da linha não muda"
+    },
+    {
+      "file": "parity/LessonReportParityScriptIT.java",
+      "from": "1ª resposta = PERGUNTAS_PENDENTES",
+      "to": "1ª resposta = PENDING_QUESTIONS",
+      "slice": 4,
+      "reason": "valor de enumeração, chave ou código de erro migrado (identificador) citado em linha de roteiro de paridade ou de asserção; o texto livre da linha não muda"
+    },
+    {
+      "file": "parity/LessonReportParityScriptIT.java",
+      "from": "2ª resposta = PRONTO_PARA_CONFERENCIA",
+      "to": "2ª resposta = READY_FOR_REVIEW",
+      "slice": 4,
+      "reason": "valor de enumeração, chave ou código de erro migrado (identificador) citado em linha de roteiro de paridade ou de asserção; o texto livre da linha não muda"
+    },
+    {
+      "file": "parity/LessonReportParityScriptIT.java",
+      "from": "versão 1 RESPOSTA_PERGUNTAS canal=CANAL",
+      "to": "versão 1 QUESTION_ANSWER canal=CHANNEL",
+      "slice": 4,
+      "reason": "valor de enumeração, chave ou código de erro migrado (identificador) citado em linha de roteiro de paridade ou de asserção; o texto livre da linha não muda"
+    },
+    {
+      "file": "parity/SemesterParityScriptIT.java",
+      "from": "período sem aulas = SEM_AULAS_APROVADAS_NO_PERIODO",
+      "to": "período sem aulas = NO_APPROVED_LESSONS_IN_PERIOD",
+      "slice": 4,
+      "reason": "valor de enumeração, chave ou código de erro migrado (identificador) citado em linha de roteiro de paridade ou de asserção; o texto livre da linha não muda"
+    },
+    {
+      "file": "parity/SemesterParityScriptIT.java",
+      "from": "versão 2 ALTERACAO OFICIAL",
+      "to": "versão 2 CHANGE OFFICIAL",
+      "slice": 4,
+      "reason": "valor de enumeração, chave ou código de erro migrado (identificador) citado em linha de roteiro de paridade ou de asserção; o texto livre da linha não muda"
+    },
+    {
+      "file": "parity/SemesterParityScriptIT.java",
+      "from": "versão 1 CONSOLIDACAO CONFERENCIA",
+      "to": "versão 1 CONSOLIDATION REVIEW",
+      "slice": 4,
+      "reason": "valor de enumeração, chave ou código de erro migrado (identificador) citado em linha de roteiro de paridade ou de asserção; o texto livre da linha não muda"
+    },
+    {
+      "file": "privacy/AudioNonRetentionIT.java",
+      "from": "AUDIO-DE-AULA-FICTICIO",
+      "to": "FICTITIOUS-LESSON-AUDIO",
+      "slice": 4,
+      "reason": "dado de teste arbitrário (nome de arquivo, conteúdo fictício, código de teste ou e-mail): a troca é feita nos dois lados do teste e nenhum texto de usuário esperado muda"
+    },
+    {
+      "file": "privacy/InternalChannelLogWithoutSensitiveDataIT.java",
+      "from": "telegram-erro-interpretacao updateId=",
+      "to": "telegram-interpretation-error updateId=",
+      "slice": 4,
+      "reason": "código de evento de log migrado (identificador); o texto livre da mensagem não muda"
+    },
+    {
+      "file": "privacy/InternalChannelLogWithoutSensitiveDataIT.java",
+      "from": "\\\"voice\\\": {\\\"file_id\\\": \\\"aula\\\", \\\"file_unique_id\\\": \\\"u-aula\\\", \\\"mime_type\\\": \\\"audio/ogg\\\", \\\"file_size\\\": 1000, \\\"duration\\\": 30}",
+      "to": "\\\"voice\\\": {\\\"file_id\\\": \\\"lesson\\\", \\\"file_unique_id\\\": \\\"u-lesson\\\", \\\"mime_type\\\": \\\"audio/ogg\\\", \\\"file_size\\\": 1000, \\\"duration\\\": 30}",
+      "slice": 4,
+      "reason": "dado de teste arbitrário (nome de arquivo, conteúdo fictício, código de teste ou e-mail): a troca é feita nos dois lados do teste e nenhum texto de usuário esperado muda"
+    },
+    {
+      "file": "privacy/LogWithoutSensitiveDataIT.java",
+      "from": "AUDIO-DE-AULA-FICTICIO",
+      "to": "FICTITIOUS-LESSON-AUDIO",
+      "slice": 4,
+      "reason": "dado de teste arbitrário (nome de arquivo, conteúdo fictício, código de teste ou e-mail): a troca é feita nos dois lados do teste e nenhum texto de usuário esperado muda"
+    },
+    {
+      "file": "support/AudioNormalizationTest.java",
+      "from": "AUDIO-DE-AULA-FICTICIO",
+      "to": "FICTITIOUS-LESSON-AUDIO",
+      "slice": 4,
+      "reason": "dado de teste arbitrário (nome de arquivo, conteúdo fictício, código de teste ou e-mail): a troca é feita nos dois lados do teste e nenhum texto de usuário esperado muda"
+    },
+    {
+      "file": "usecase/access/LinkTelegramUseCaseTest.java",
+      "from": "ERRADO22",
+      "to": "WRONG222",
+      "slice": 4,
+      "reason": "dado de teste arbitrário (nome de arquivo, conteúdo fictício, código de teste ou e-mail): a troca é feita nos dois lados do teste e nenhum texto de usuário esperado muda"
+    },
+    {
+      "file": "usecase/seed/EmitAccessCodeUseCaseTest.java",
+      "from": "codigo:ANTIGO22",
+      "to": "code:OLD2222",
+      "slice": 4,
+      "reason": "dado de teste arbitrário (nome de arquivo, conteúdo fictício, código de teste ou e-mail): a troca é feita nos dois lados do teste e nenhum texto de usuário esperado muda"
+    },
+    {
+      "file": "usecase/seed/EmitAccessCodeUseCaseTest.java",
+      "from": "ninguem@exemplo.test",
+      "to": "nobody@example.test",
+      "slice": 4,
+      "reason": "caminho, rota ou e-mail de dado de teste sem texto de usuário; acompanha a rota, a carga e o arquivo migrados"
+    },
+    {
+      "file": "usecase/seed/EmitAccessCodeUseCaseTest.java",
+      "from": "codigo:MESMA234",
+      "to": "code:SAME2345",
+      "slice": 4,
+      "reason": "dado de teste arbitrário (nome de arquivo, conteúdo fictício, código de teste ou e-mail): a troca é feita nos dois lados do teste e nenhum texto de usuário esperado muda"
+    },
+    {
+      "file": "usecase/seed/EmitAccessCodeUseCaseTest.java",
+      "from": "MESMA234",
+      "to": "SAME2345",
+      "slice": 4,
+      "reason": "dado de teste arbitrário (nome de arquivo, conteúdo fictício, código de teste ou e-mail): a troca é feita nos dois lados do teste e nenhum texto de usuário esperado muda"
+    },
+    {
+      "file": "usecase/seed/LoadInitialRegistryUseCaseTest.java",
+      "from": "ninguem@exemplo.test",
+      "to": "nobody@example.test",
+      "slice": 4,
+      "reason": "caminho, rota ou e-mail de dado de teste sem texto de usuário; acompanha a rota, a carga e o arquivo migrados"
     }
   ],
   "methodIdentifiers": {
@@ -935,7 +1341,9 @@
   ],
   "configValues": {
     "simulado": "simulated",
-    "carga": "seed"
+    "carga": "seed",
+    "DIRETA": "DIRECT",
+    "ORQUESTRADOR": "ORCHESTRATOR"
   },
   "envNames": [
     "BANCO_URL",
@@ -1185,6 +1593,12 @@
         "to": "dockerfile: application/Dockerfile",
         "count": 1,
         "reason": "caminho do Dockerfile do módulo (T061)"
+      },
+      {
+        "from": "CONTRATO_API: /work/specs/001-fluxo-relatorios/contracts/api-portal.openapi.yaml",
+        "to": "CONTRACT_API: /work/specs/001-fluxo-relatorios/contracts/api-portal.openapi.yaml",
+        "count": 1,
+        "reason": "variável de ambiente que aponta o contrato do Portal acompanha o nome lido pelo teste de contrato (fatia 4)"
       }
     ],
     "frontend/Dockerfile": [
@@ -1265,6 +1679,12 @@
         "to": "urn:reports:schema:lesson-report",
         "count": 1,
         "reason": "$id do esquema, como no contrato novo (T071)"
+      },
+      {
+        "from": "[\"NENHUM\", \"APROVAR\", \"CANCELAR\"]",
+        "to": "[\"NONE\", \"APPROVE\", \"CANCEL\"]",
+        "count": 1,
+        "reason": "valores de enumeração do pedido de ação da IA (T116/T121): o esquema novo do contrato usa NONE, APPROVE e CANCEL"
       }
     ],
     "backend/application/src/main/resources/ai/schemas/semester-report.schema.json": [
@@ -1273,6 +1693,12 @@
         "to": "urn:reports:schema:semester-report",
         "count": 1,
         "reason": "$id do esquema, como no contrato novo (T071)"
+      },
+      {
+        "from": "[\"NENHUM\", \"APROVAR\", \"CANCELAR\"]",
+        "to": "[\"NONE\", \"APPROVE\", \"CANCEL\"]",
+        "count": 1,
+        "reason": "valores de enumeração do pedido de ação da IA (T116/T121): o esquema novo do contrato usa NONE, APPROVE e CANCEL"
       }
     ],
     "backend/application/src/main/resources/logback-spring.xml": [
@@ -1299,6 +1725,138 @@
         "to": "\"CONSOLE\"",
         "count": 2,
         "reason": "nome do appender de console (identificador do arquivo)"
+      },
+      {
+        "from": "<includeMdcKeyName>relatorioId</includeMdcKeyName>",
+        "to": "<includeMdcKeyName>reportId</includeMdcKeyName>",
+        "count": 1,
+        "reason": "chave do MDC dos logs estruturados: acompanha o literal Java que a grava (fatia 4)"
+      },
+      {
+        "from": "<includeMdcKeyName>trabalhoId</includeMdcKeyName>",
+        "to": "<includeMdcKeyName>jobId</includeMdcKeyName>",
+        "count": 1,
+        "reason": "chave do MDC dos logs estruturados: acompanha o literal Java que a grava (fatia 4)"
+      },
+      {
+        "from": "<includeMdcKeyName>canal</includeMdcKeyName>",
+        "to": "<includeMdcKeyName>channel</includeMdcKeyName>",
+        "count": 1,
+        "reason": "chave do MDC dos logs estruturados: acompanha o literal Java que a grava (fatia 4)"
+      },
+      {
+        "from": "<includeMdcKeyName>etapa</includeMdcKeyName>",
+        "to": "<includeMdcKeyName>step</includeMdcKeyName>",
+        "count": 1,
+        "reason": "chave do MDC dos logs estruturados: acompanha o literal Java que a grava (fatia 4)"
+      }
+    ],
+    "backend/application/src/main/resources/prompts/lesson-revision.v1.txt": [
+      {
+        "from": "indique \"APROVAR\" se o professor pediu para aprovar, \"CANCELAR\" se pediu para cancelar ou descartar, ou \"NENHUM\".",
+        "to": "indique \"APPROVE\" se o professor pediu para aprovar, \"CANCEL\" se pediu para cancelar ou descartar, ou \"NONE\".",
+        "count": 1,
+        "reason": "valores de enumeração do pedido de ação (nomes de valor que a IA devolve, iguais aos do esquema); o texto em português segue"
+      }
+    ],
+    "backend/application/src/main/resources/prompts/semester-revision.v1.txt": [
+      {
+        "from": "indique \"APROVAR\" se o professor pediu para aprovar, \"CANCELAR\" se pediu para cancelar ou descartar, ou \"NENHUM\".",
+        "to": "indique \"APPROVE\" se o professor pediu para aprovar, \"CANCEL\" se pediu para cancelar ou descartar, ou \"NONE\".",
+        "count": 1,
+        "reason": "valores de enumeração do pedido de ação (nomes de valor que a IA devolve, iguais aos do esquema); o texto em português segue"
+      }
+    ],
+    "backend/application/src/main/resources/application.yaml": [
+      {
+        "from": "${TELEGRAM_CHANNEL_DELIVERY:DIRETA}",
+        "to": "${TELEGRAM_CHANNEL_DELIVERY:DIRECT}",
+        "count": 1,
+        "reason": "valor de enumeração de configuração (B1): DIRETA→DIRECT"
+      },
+      {
+        "from": "# DIRETA = envio direto à API de bots (padrão); ORQUESTRADOR = outbox entregue ao n8n (feature 003)",
+        "to": "# DIRECT = envio direto à API de bots (padrão); ORCHESTRATOR = outbox entregue ao n8n (feature 003)",
+        "count": 1,
+        "reason": "comentário cita os valores da enumeração; acompanha o nome novo"
+      }
+    ],
+    "backend/application/src/test/resources/application-test.yaml": [
+      {
+        "from": "proactive-delivery: DIRETA",
+        "to": "proactive-delivery: DIRECT",
+        "count": 1,
+        "reason": "valor de enumeração de configuração (B1)"
+      },
+      {
+        "from": "webhook-secret: segredo-webhook-teste",
+        "to": "webhook-secret: secret-webhook-test",
+        "count": 1,
+        "reason": "valor de teste acompanha os literais Java que o enviam (secret-webhook-test, current-service-token-test, next-service-token-test)"
+      },
+      {
+        "from": "current-token: token-servico-atual-teste",
+        "to": "current-token: current-service-token-test",
+        "count": 1,
+        "reason": "valor de teste acompanha os literais Java que o enviam (secret-webhook-test, current-service-token-test, next-service-token-test)"
+      },
+      {
+        "from": "next-token: token-servico-proximo-teste",
+        "to": "next-token: next-service-token-test",
+        "count": 1,
+        "reason": "valor de teste acompanha os literais Java que o enviam (secret-webhook-test, current-service-token-test, next-service-token-test)"
+      }
+    ],
+    "infra/carga/demonstracao.json": [
+      {
+        "from": "@exemplo.test",
+        "to": "@example.test",
+        "count": 10,
+        "reason": "dado fictício do exemplo: o domínio dos e-mails acompanha o inglês (@exemplo.test → @example.test), nos testes e nos arquivos de carga"
+      }
+    ],
+    "infra/carga/exemplo.json": [
+      {
+        "from": "@exemplo.test",
+        "to": "@example.test",
+        "count": 6,
+        "reason": "dado fictício do exemplo: o domínio dos e-mails acompanha o inglês (@exemplo.test → @example.test), nos testes e nos arquivos de carga"
+      }
+    ],
+    "frontend/tests/e2e/suporte.ts": [
+      {
+        "from": "@exemplo.test",
+        "to": "@example.test",
+        "count": 2,
+        "reason": "dado fictício do exemplo: o domínio dos e-mails acompanha o inglês (@exemplo.test → @example.test), nos testes e nos arquivos de carga"
+      }
+    ],
+    "specs/001-fluxo-relatorios/contracts/carga-inicial.md": [
+      {
+        "from": "@exemplo.test",
+        "to": "@example.test",
+        "count": 2,
+        "reason": "dado fictício do exemplo: o domínio dos e-mails acompanha o inglês (@exemplo.test → @example.test), nos testes e nos arquivos de carga"
+      }
+    ],
+    "infra/.env.example": [
+      {
+        "from": "# Quem entrega as mensagens proativas: DIRETA (API de bots, padrão) ou ORQUESTRADOR (outbox -> n8n).\n#TELEGRAM_CHANNEL_DELIVERY=DIRETA",
+        "to": "# Quem entrega as mensagens proativas: DIRECT (API de bots, padrão) ou ORCHESTRATOR (outbox -> n8n).\n#TELEGRAM_CHANNEL_DELIVERY=DIRECT",
+        "count": 1,
+        "reason": "valores de enumeração de configuração (B1): DIRETA→DIRECT, ORQUESTRADOR→ORCHESTRATOR"
+      },
+      {
+        "from": "(obrigatório com ENTREGA=ORQUESTRADOR) e o SEGREDO\n# enviado em X-Canal-Entrega-Token.",
+        "to": "(obrigatório com ENTREGA=ORCHESTRATOR) e o SEGREDO\n# enviado em X-Channel-Delivery-Token.",
+        "count": 1,
+        "reason": "o valor e o cabeçalho da entrega proativa ganham o nome do contrato novo (telegram-channel-internal.openapi.yaml)"
+      },
+      {
+        "from": "# Vazios = a área /interno/** recusa tudo.",
+        "to": "# Vazios = a área /internal/** recusa tudo.",
+        "count": 1,
+        "reason": "a rota da área interna passa a /internal/** (contrato novo)"
       }
     ]
   },
@@ -1312,7 +1870,7 @@
       "reason": "teste novo escrito à mão: cita os nomes do esquema ANTIGO ou NOVO de propósito"
     },
     {
-      "file": "MigrationV7ReadableDataIT.java",
+      "file": "MigrationV8ReadableDataIT.java",
       "reason": "teste novo escrito à mão: cita os nomes do esquema ANTIGO ou NOVO de propósito"
     },
     {
@@ -1326,6 +1884,22 @@
     {
       "file": "MigrationTestSupport.java",
       "reason": "teste novo escrito à mão: cita os nomes do esquema ANTIGO ou NOVO de propósito"
+    },
+    {
+      "file": "MigrationV8ProtectionsIT.java",
+      "reason": "teste novo escrito à mão: cita os valores e as chaves ANTIGOS de propósito (dados da V7, botão no formato antigo)"
+    },
+    {
+      "file": "MigrationV8JsonKeysAndUnknownValueIT.java",
+      "reason": "teste novo escrito à mão: cita os valores e as chaves ANTIGOS de propósito (dados da V7, botão no formato antigo)"
+    },
+    {
+      "file": "MigrationV8StructureIT.java",
+      "reason": "teste novo escrito à mão: cita os valores e as chaves ANTIGOS de propósito (dados da V7, botão no formato antigo)"
+    },
+    {
+      "file": "OldButtonFormatIT.java",
+      "reason": "teste novo escrito à mão: cita os valores e as chaves ANTIGOS de propósito (dados da V7, botão no formato antigo)"
     }
   ],
   "residualRenames": [
@@ -1381,14 +1955,137 @@
       "reason": "apoio dos testes de migração (T089)"
     },
     {
-      "file": "inbound/web/SemesterReportContentDto.java",
-      "reason": "DTO de fio do conteúdo semestral: o registro do núcleo já usa nomes em inglês e o contrato do Portal só migra na fatia 4"
+      "file": "outbound/persistence/MigrationV8ReadableDataIT.java",
+      "reason": "teste da V7 (T091) passa a migrar até a V8: depois do corte do fio os adaptadores só leem os valores novos, então os dados da V6 só ficam legíveis na V8 (T129)"
+    },
+    {
+      "file": "outbound/persistence/MigrationV8StructureIT.java",
+      "reason": "teste novo da fatia 4 (T128)"
+    },
+    {
+      "file": "outbound/persistence/MigrationV8ProtectionsIT.java",
+      "reason": "teste novo da fatia 4 (T131)"
+    },
+    {
+      "file": "outbound/persistence/MigrationV8JsonKeysAndUnknownValueIT.java",
+      "reason": "teste novo da fatia 4 (T130)"
+    },
+    {
+      "file": "inbound/telegram/OldButtonFormatIT.java",
+      "reason": "teste novo da fatia 4 (T127)"
+    },
+    {
+      "file": "outbound/security/DataProtectionStoredFormatTest.java",
+      "reason": "teste novo da fatia 4: fixa o formato gravado do HMAC do código de acesso e da origem"
     }
   ],
   "structuralEdits": [
     {
       "file": "inbound/web/SemesterReportController.java",
-      "reason": "o conteúdo semestral deixa de ser serializado direto do registro do núcleo (já em inglês): o controlador usa SemesterReportContentDto.from(...) para manter o fio em português até a fatia 4; é a única alteração estrutural da fatia, coberta por SemesterReportContractIT"
+      "reason": "fatia 4: o controlador volta a serializar o registro do núcleo direto (o DTO de fio da fatia 3 deixa de existir, pois o contrato novo tem os nomes do registro); alteração estrutural única, coberta por SemesterReportContractIT"
+    }
+  ],
+  "slice4": {
+    "callbackActions": {
+      "alt": "change",
+      "aluno": "student",
+      "aprov": "approve",
+      "aprovok": "approve-ok",
+      "canc": "cancel",
+      "cancok": "cancel-ok",
+      "confal": "confirm-student",
+      "cont": "continue",
+      "desc": "discard",
+      "descok": "discard-ok",
+      "foco": "focus",
+      "gerar": "generate",
+      "gerarsim": "generate-yes",
+      "hist": "history",
+      "hitem": "history-item",
+      "hmais": "history-more",
+      "inicio": "home",
+      "per": "period",
+      "reg": "register",
+      "sair": "sign-out",
+      "sairok": "sign-out-ok",
+      "sem": "semester",
+      "tent": "retry",
+      "trocal": "switch-student",
+      "voltar": "back",
+      "sim": "yes",
+      "opcoes": "options"
+    },
+    "keepTokens": [],
+    "typedWords": [
+      "inicio",
+      "registrar",
+      "semestral",
+      "historico",
+      "aprovar",
+      "cancelar",
+      "continuar",
+      "descartar",
+      "tentar",
+      "sair",
+      "ajuda",
+      "sim"
+    ],
+    "typedWordFiles": [
+      "TelegramKeywords.java",
+      "TelegramConfig.java",
+      "SimulatedLlmAdapter.java"
+    ],
+    "pathTokens": {
+      "inicio": "home"
+    },
+    "keepLiterals": [
+      {
+        "file": "TelegramKeywords.java",
+        "from": "inicio"
+      },
+      {
+        "file": ".java",
+        "from": "../../infra/carga/demonstracao.json"
+      },
+      {
+        "file": ".java",
+        "from": "../../infra/carga/exemplo.json"
+      },
+      {
+        "file": "PdfFileNamesIT.java",
+        "from": "oficial.pdf"
+      },
+      {
+        "file": "ScriptIT.java",
+        "from": "encerrar"
+      },
+      {
+        "file": "ScriptIT.java",
+        "from": "responder"
+      }
+    ],
+    "mainCallbackDirs": [
+      "/inbound/telegram/"
+    ],
+    "keepPrefixes": [
+      "relatorio-aula",
+      "relatorio-semestral",
+      "api-interna-canal-telegram",
+      "fluxo-relatorios",
+      "migrate-code-to-english"
+    ],
+    "callbackAmbiguous": [
+      "inicio"
+    ]
+  },
+  "removedFiles": [
+    {
+      "file": "inbound/web/SemesterReportContentDto.java",
+      "reason": "fatia 4: o DTO de fio da decisão 10 da fatia 3 deixa de existir; o contrato novo tem os nomes do registro do núcleo e o controlador o serializa direto"
+    },
+    {
+      "file": "outbound/persistence/MigrationV7ReadableDataIT.java",
+      "reason": "fatia 4: o teste migra até a V8 (depois do corte os adaptadores só leem os valores novos); virou MigrationV8ReadableDataIT"
     }
   ]
 }

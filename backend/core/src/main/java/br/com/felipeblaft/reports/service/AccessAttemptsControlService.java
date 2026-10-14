@@ -50,7 +50,7 @@ public class AccessAttemptsControlService {
         if (remaining.isPresent()) {
             long seconds = Math.max(1, (remaining.get().toMillis() + 999) / 1000);
             throw new DomainException(
-                    ErrorCode.BLOQUEADO_TEMPORARIAMENTE, Map.of("segundosRestantes", seconds));
+                    ErrorCode.TEMPORARILY_BLOCKED, Map.of("remainingSeconds", seconds));
         }
         if (attempt.lockEnded(now)) {
             attempt.reset(now);

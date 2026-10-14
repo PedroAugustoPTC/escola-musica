@@ -38,14 +38,14 @@ class CostRecordPersistenceIT extends IntegrationBase {
     private ProcessingJob job(Teacher teacher, Student student) {
         ProcessingJob job =
                 ProcessingJob.create(
-                        JobType.REGISTRO_AULA,
+                        JobType.LESSON_REGISTRATION,
                         teacher.id(),
                         student.id(),
                         null,
                         null,
                         Channel.WEB,
                         Medium.AUDIO,
-                        JobStep.ENVIANDO,
+                        JobStep.UPLOADING,
                         clock.now());
         queue.enqueue(job);
         return job;
@@ -55,10 +55,10 @@ class CostRecordPersistenceIT extends IntegrationBase {
         costs.register(
                 AiCall.create(
                         job.id(),
-                        report == null ? null : ReportType.AULA,
+                        report == null ? null : ReportType.LESSON,
                         report,
                         task,
-                        "provedor/modelo",
+                        "provider/model",
                         null,
                         100,
                         50,
@@ -79,11 +79,11 @@ class CostRecordPersistenceIT extends IntegrationBase {
         UUID report = UUID.randomUUID();
         UUID alreadyOn = UUID.randomUUID();
 
-        call(a, null, AiTask.TRANSCRICAO, "0.01");
-        call(a, alreadyOn, AiTask.ESTRUTURACAO, "0.002");
-        call(other, null, AiTask.TRANSCRICAO, "0.5");
+        call(a, null, AiTask.TRANSCRIPTION, "0.01");
+        call(a, alreadyOn, AiTask.STRUCTURING, "0.002");
+        call(other, null, AiTask.TRANSCRIPTION, "0.5");
 
-        transaction.executeWithoutResult(s -> costs.linkReport(a.id(), ReportType.AULA, report));
+        transaction.executeWithoutResult(s -> costs.linkReport(a.id(), ReportType.LESSON, report));
 
         assertThat(
                         jdbc.queryForObject(
@@ -96,11 +96,11 @@ class CostRecordPersistenceIT extends IntegrationBase {
                                 "select task from ai_call where report_id = ?",
                                 String.class,
                                 report))
-                .isEqualTo("TRANSCRICAO");
+                .isEqualTo("TRANSCRIPTION");
         // a já ligada a outro relatório não muda, e o outro trabalho segue sem relatório
         assertThat(
                         jdbc.queryForObject(
-                                "select report_id from ai_call where task = 'ESTRUTURACAO'",
+                                "select report_id from ai_call where task = 'STRUCTURING'",
                                 UUID.class))
                 .isEqualTo(alreadyOn);
         assertThat(

@@ -18,18 +18,18 @@ export interface ResultadoNavegacao {
 
 /** Para onde levar o professor quando o trabalho termina com sucesso. */
 export function destinoDoResultado(trabalho: TrabalhoDto): string | null {
-  if (!trabalho.relatorioId) return null;
+  if (!trabalho.reportId) return null;
   const base =
-    trabalho.relatorioTipo === 'SEMESTRAL'
-      ? `/relatorios-semestrais/${trabalho.relatorioId}`
-      : `/relatorios-aula/${trabalho.relatorioId}`;
-  switch (trabalho.resultadoCodigo) {
-    case 'PERGUNTAS_PENDENTES':
-    case 'FALHA_RESPOSTA':
+    trabalho.reportType === 'SEMESTER'
+      ? `/relatorios-semestrais/${trabalho.reportId}`
+      : `/relatorios-aula/${trabalho.reportId}`;
+  switch (trabalho.resultCode) {
+    case 'PENDING_QUESTIONS':
+    case 'ANSWER_FAILED':
       return `${base}/perguntas`;
-    case 'FALHA_ESTRUTURACAO':
-    case 'FALHA_CONSOLIDACAO':
-    case 'AUDIO_NAO_PROCESSAVEL':
+    case 'STRUCTURING_FAILED':
+    case 'CONSOLIDATION_FAILED':
+    case 'AUDIO_NOT_PROCESSABLE':
       return null;
     default:
       return base;
@@ -37,7 +37,7 @@ export function destinoDoResultado(trabalho: TrabalhoDto): string | null {
 }
 
 function tituloEtapa(trabalho: TrabalhoDto): string {
-  const etapa = msg(`ETAPA_${trabalho.etapa}`);
+  const etapa = msg(`STEP_${trabalho.step}`);
   return `${etapa}…`;
 }
 
@@ -55,15 +55,15 @@ export function TelaProcessando() {
 
   useEffect(() => {
     if (!dados || !trabalho.finalizado) return;
-    if (dados.status === 'DESCARTADO') {
+    if (dados.status === 'DISCARDED') {
       navegar('/', { replace: true });
       return;
     }
     const destino = destinoDoResultado(dados);
     if (destino) {
       const estado: ResultadoNavegacao = {
-        resultado: dados.resultadoCodigo ?? null,
-        textoEntendido: dados.textoEntendido ?? null,
+        resultado: dados.resultCode ?? null,
+        textoEntendido: dados.understoodText ?? null,
       };
       navegar(destino, { replace: true, state: estado });
     }
@@ -89,14 +89,14 @@ export function TelaProcessando() {
 
   const falhou =
     trabalho.finalizado &&
-    (dados.resultadoCodigo === 'FALHA_ESTRUTURACAO' || dados.resultadoCodigo === 'AUDIO_NAO_PROCESSAVEL');
+    (dados.resultCode === 'STRUCTURING_FAILED' || dados.resultCode === 'AUDIO_NOT_PROCESSABLE');
 
   const tentarNovamente = async () => {
-    if (!dados.relatorioId) return;
+    if (!dados.reportId) return;
     setAcao('tentar');
     setErroAcao(null);
     try {
-      const { trabalhoId: novo } = await relatoriosAula.novaTentativa(dados.relatorioId);
+      const { jobId: novo } = await relatoriosAula.novaTentativa(dados.reportId);
       navegar(`/trabalhos/${novo}`, { replace: true, state: { alunoId } });
     } catch (falha) {
       setErroAcao(falha);
@@ -106,11 +106,11 @@ export function TelaProcessando() {
   };
 
   const cancelar = async () => {
-    if (!dados.relatorioId) return;
+    if (!dados.reportId) return;
     setAcao('cancelar');
     setErroAcao(null);
     try {
-      await relatoriosAula.cancelar(dados.relatorioId);
+      await relatoriosAula.cancelar(dados.reportId);
       navegar('/', { replace: true });
     } catch (falha) {
       setErroAcao(falha);
@@ -119,7 +119,7 @@ export function TelaProcessando() {
   };
 
   if (falhou) {
-    const semRelatorio = dados.resultadoCodigo === 'AUDIO_NAO_PROCESSAVEL';
+    const semRelatorio = dados.resultCode === 'AUDIO_NOT_PROCESSABLE';
     return (
       <Estrutura navAtiva="alunos" contexto={contexto}>
         <div className="pagina pagina--centro">
@@ -132,7 +132,7 @@ export function TelaProcessando() {
                 {semRelatorio ? 'Não foi possível entender o áudio.' : 'Não foi possível processar o áudio.'}
               </h1>
               <p className="subtitulo">
-                {semRelatorio ? msg('AUDIO_NAO_PROCESSAVEL') : msg('FALHA_PROCESSAMENTO_OPCOES')}
+                {semRelatorio ? msg('AUDIO_NOT_PROCESSABLE') : msg('PROCESSING_FAILURE_OPTIONS')}
               </p>
             </div>
             {erroAcao ? <AlertaErro erro={erroAcao} /> : null}
@@ -154,7 +154,7 @@ export function TelaProcessando() {
                     disabled={acao !== null}
                     onClick={() => void tentarNovamente()}
                   >
-                    {msg('BOTAO_TENTAR_NOVAMENTE')}
+                    {msg('RETRY_BUTTON')}
                   </Botao>
                   <Botao
                     variante="link-perigo"
@@ -162,7 +162,7 @@ export function TelaProcessando() {
                     disabled={acao !== null}
                     onClick={() => void cancelar()}
                   >
-                    {msg('BOTAO_CANCELAR_RELATORIO')}
+                    {msg('CANCEL_REPORT_BUTTON')}
                   </Botao>
                 </>
               )}
@@ -178,7 +178,7 @@ export function TelaProcessando() {
       <div className="pagina pagina--centro">
         <div aria-live="polite">
           <div className="sobretitulo">
-            {dados.tipo === 'REGISTRO_AULA' ? 'Novo relatório de aula' : 'Relatório de aula'}
+            {dados.type === 'LESSON_REGISTRATION' ? 'Novo relatório de aula' : 'Relatório de aula'}
           </div>
           <h1 className="titulo-pagina">{tituloEtapa(dados)}</h1>
           <p className="subtitulo">
@@ -187,10 +187,10 @@ export function TelaProcessando() {
           </p>
         </div>
         <EtapasProcessamento trabalho={dados} />
-        {dados.demorando || trabalho.excedeuLimite ? (
+        {dados.delayed || trabalho.excedeuLimite ? (
           <div role="status" className="alerta alerta--aviso">
             <Icone nome="hourglass_top" />
-            <div className="alerta__texto">{msg('PROCESSAMENTO_DEMORADO')}</div>
+            <div className="alerta__texto">{msg('PROCESSING_DELAYED')}</div>
             <Botao variante="aviso" tamanho="compacto" onClick={() => navegar('/')}>
               Voltar ao Painel
             </Botao>

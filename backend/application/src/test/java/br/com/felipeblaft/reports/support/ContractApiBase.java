@@ -34,7 +34,7 @@ public abstract class ContractApiBase extends IntegrationBase {
     @Autowired protected ScenarioIT scenario;
 
     static String contractPath() {
-        String configured = System.getenv("CONTRATO_API");
+        String configured = System.getenv("CONTRACT_API");
         if (configured != null && Files.exists(Path.of(configured))) {
             return configured;
         }
@@ -95,13 +95,13 @@ public abstract class ContractApiBase extends IntegrationBase {
     protected Cookie signIn(String code) throws Exception {
         var result =
                 mvc.perform(
-                                post("/api/v1/sessao")
+                                post("/api/v1/session")
                                         .with(csrf().asHeader())
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .content("{\"codigo\":\"" + code + "\"}"))
+                                        .content("{\"code\":\"" + code + "\"}"))
                         .andExpect(status().isOk())
                         .andReturn();
-        Cookie cookie = result.getResponse().getCookie("sessao");
+        Cookie cookie = result.getResponse().getCookie("session");
         if (cookie == null) {
             throw new IllegalStateException("cookie de sessão ausente");
         }

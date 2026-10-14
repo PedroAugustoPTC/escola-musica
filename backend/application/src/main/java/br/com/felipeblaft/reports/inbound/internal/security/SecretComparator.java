@@ -15,7 +15,7 @@ import java.util.List;
  */
 public final class SecretComparator {
 
-    private static final byte[] BAIT = digest("isca:" + random());
+    private static final byte[] BAIT = digest("bait:" + random());
 
     private final Runnable onEvaluate;
 

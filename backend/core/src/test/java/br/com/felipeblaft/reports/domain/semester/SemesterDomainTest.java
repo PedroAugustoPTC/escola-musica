@@ -46,7 +46,7 @@ class SemesterDomainTest {
     @Test
     void invalidKeyAndInvalidData() {
         for (String key : new String[] {"2026-3", "26-1", "2026/1", "", null}) {
-            code(() -> SemesterPeriod.of(key), ErrorCode.DADOS_INVALIDOS);
+            code(() -> SemesterPeriod.of(key), ErrorCode.INVALID_DATA);
         }
     }
 
@@ -138,16 +138,16 @@ class SemesterDomainTest {
     @Test
     void startsInReviewAtVersion1AndChangeGeneratesNewVersion() {
         SemesterReport report = create();
-        assertThat(report.status()).isEqualTo(ReportStatus.AGUARDANDO_CONFERENCIA);
+        assertThat(report.status()).isEqualTo(ReportStatus.AWAITING_REVIEW);
         assertThat(report.currentVersion()).isEqualTo(1);
         assertThat(report.openReportCount()).isEqualTo(1);
 
         report.requireCanChange(1);
-        report.startStep(ReportStep.APLICANDO_ALTERACAO, NOW);
-        code(() -> report.requireCanChange(1), ErrorCode.PROCESSAMENTO_EM_ANDAMENTO);
+        report.startStep(ReportStep.APPLYING_CHANGE, NOW);
+        code(() -> report.requireCanChange(1), ErrorCode.PROCESSING_IN_PROGRESS);
         assertThat(report.applyChange(SemesterReportContent.empty(), NOW)).isEqualTo(2);
-        code(() -> report.requireCanChange(1), ErrorCode.VERSAO_DESATUALIZADA);
-        code(() -> report.approve(1, Channel.WEB, NOW), ErrorCode.VERSAO_DESATUALIZADA);
+        code(() -> report.requireCanChange(1), ErrorCode.STALE_VERSION);
+        code(() -> report.approve(1, Channel.WEB, NOW), ErrorCode.STALE_VERSION);
     }
 
     @Test
@@ -156,12 +156,12 @@ class SemesterDomainTest {
         approved.approve(1, Channel.TELEGRAM, NOW);
         assertThat(approved.approvedVersion()).isEqualTo(1);
         assertThat(approved.approvalChannel()).isEqualTo(Channel.TELEGRAM);
-        code(() -> approved.approve(1, Channel.WEB, NOW), ErrorCode.RELATORIO_JA_APROVADO);
-        code(() -> approved.cancel(NOW), ErrorCode.RELATORIO_JA_APROVADO);
+        code(() -> approved.approve(1, Channel.WEB, NOW), ErrorCode.REPORT_ALREADY_APPROVED);
+        code(() -> approved.cancel(NOW), ErrorCode.REPORT_ALREADY_APPROVED);
 
         SemesterReport cancelled = create();
         cancelled.cancel(NOW);
-        code(() -> cancelled.requireCanChange(1), ErrorCode.RELATORIO_CANCELADO);
+        code(() -> cancelled.requireCanChange(1), ErrorCode.REPORT_CANCELLED);
         assertThatThrownBy(() -> cancelled.applyChange(SemesterReportContent.empty(), NOW))
                 .isInstanceOf(IllegalStateException.class);
     }

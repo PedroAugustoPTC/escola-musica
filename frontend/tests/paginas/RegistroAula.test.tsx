@@ -6,78 +6,78 @@ import { SESSAO_CLARA, renderizarRotas, simularApi } from '../utilitarios';
 
 const ALUNO = {
   id: '0190a000-0000-7000-8000-00000000000a',
-  nome: 'Matteo Mafra',
-  instrumento: 'Piano',
-  ultimaAulaEm: null,
-  possuiRelatorioEmAberto: false,
+  name: 'Matteo Mafra',
+  instrument: 'Piano',
+  lastLessonAt: null,
+  hasOpenReport: false,
 };
 
 const RELATORIO = '0190a000-0000-7000-8000-0000000000r1';
 
 const INICIO = {
-  professor: SESSAO_CLARA.professor,
-  totalAlunos: 1,
-  alunos: [ALUNO],
-  relatoriosEmAberto: [],
-  limiteAudioMb: 50,
+  teacher: SESSAO_CLARA.teacher,
+  totalStudents: 1,
+  students: [ALUNO],
+  openReports: [],
+  audioLimitMb: 50,
 };
 
 function relatorio(sobrescrever: Record<string, unknown> = {}) {
   return {
-    relatorioId: RELATORIO,
-    alunoId: ALUNO.id,
-    alunoNome: ALUNO.nome,
-    professorNome: 'Clara Souza',
-    dataAula: '2026-09-21',
-    status: 'AGUARDANDO_CONFERENCIA',
-    etapa: null,
-    trabalhoEmCursoId: null,
-    versaoVigente: 1,
-    canalOrigem: 'WEB',
-    conteudo: {
-      conteudosTrabalhados: ['Estudo nº 5 de Czerny'],
-      evolucao: 'Mais segurança na mão direita.',
-      dificuldades: [],
-      atividadesPropostas: ['Estudar os compassos 9 a 12'],
-      observacoes: '',
+    reportId: RELATORIO,
+    studentId: ALUNO.id,
+    studentName: ALUNO.name,
+    teacherName: 'Clara Souza',
+    lessonDate: '2026-09-21',
+    status: 'AWAITING_REVIEW',
+    step: null,
+    activeJobId: null,
+    currentVersion: 1,
+    originChannel: 'WEB',
+    content: {
+      workedTopics: ['Estudo nº 5 de Czerny'],
+      progress: 'Mais segurança na mão direita.',
+      difficulties: [],
+      proposedActivities: ['Estudar os compassos 9 a 12'],
+      observations: '',
     },
-    perguntasPendentes: [],
-    rodadasPerguntas: 1,
-    ultimaInteracao: null,
-    pdfDisponivel: true,
-    aprovadoEm: null,
-    atualizadoEm: '2026-09-21T13:00:00Z',
+    pendingQuestions: [],
+    questionRounds: 1,
+    lastInteraction: null,
+    pdfAvailable: true,
+    approvedAt: null,
+    updatedAt: '2026-09-21T13:00:00Z',
     ...sobrescrever,
   };
 }
 
 function trabalho(sobrescrever: Record<string, unknown> = {}) {
   return {
-    trabalhoId: 't1',
-    tipo: 'REGISTRO_AULA',
-    status: 'EM_EXECUCAO',
-    etapa: 'TRANSCREVENDO',
-    demorando: false,
-    resultadoCodigo: null,
-    relatorioTipo: null,
-    relatorioId: null,
-    textoEntendido: null,
+    jobId: 't1',
+    type: 'LESSON_REGISTRATION',
+    status: 'RUNNING',
+    step: 'TRANSCRIBING',
+    delayed: false,
+    resultCode: null,
+    reportType: null,
+    reportId: null,
+    understoodText: null,
     ...sobrescrever,
   };
 }
 
 const BASE = {
-  'GET /api/v1/sessao': { corpo: SESSAO_CLARA },
-  'GET /api/v1/inicio': { corpo: INICIO },
+  'GET /api/v1/session': { corpo: SESSAO_CLARA },
+  'GET /api/v1/home': { corpo: INICIO },
 };
 
 describe('TelaGravacao (05)', () => {
   it('envio só com áudio; envia o arquivo e segue para o processamento', async () => {
     const api = simularApi({
       ...BASE,
-      [`GET /api/v1/alunos/${ALUNO.id}`]: { corpo: ALUNO },
-      [`POST /api/v1/alunos/${ALUNO.id}/relatorios-aula`]: { status: 202, corpo: { trabalhoId: 't1' } },
-      'GET /api/v1/trabalhos/t1': { corpo: trabalho() },
+      [`GET /api/v1/students/${ALUNO.id}`]: { corpo: ALUNO },
+      [`POST /api/v1/students/${ALUNO.id}/lesson-reports`]: { status: 202, corpo: { jobId: 't1' } },
+      'GET /api/v1/jobs/t1': { corpo: trabalho() },
     });
     const usuario = userEvent.setup();
     const { roteador } = renderizarRotas(rotas, `/alunos/${ALUNO.id}/nova-aula`);
@@ -104,23 +104,23 @@ describe('TelaGravacao (05)', () => {
   it('relatório em aberto (409) leva à tela 04', async () => {
     simularApi({
       ...BASE,
-      [`GET /api/v1/alunos/${ALUNO.id}`]: { corpo: ALUNO },
-      [`POST /api/v1/alunos/${ALUNO.id}/relatorios-aula`]: {
+      [`GET /api/v1/students/${ALUNO.id}`]: { corpo: ALUNO },
+      [`POST /api/v1/students/${ALUNO.id}/lesson-reports`]: {
         status: 409,
-        corpo: { codigo: 'RELATORIO_EM_ABERTO', mensagem: 'Você tem um relatório em aberto.' },
+        corpo: { code: 'REPORT_ALREADY_OPEN', message: 'Você tem um relatório em aberto.' },
       },
-      [`GET /api/v1/alunos/${ALUNO.id}/relatorio-em-aberto`]: {
+      [`GET /api/v1/students/${ALUNO.id}/open-report`]: {
         corpo: {
-          tipo: 'AULA',
-          relatorioId: RELATORIO,
-          trabalhoId: null,
-          alunoId: ALUNO.id,
-          alunoNome: ALUNO.nome,
-          status: 'AGUARDANDO_CONFERENCIA',
-          etapa: null,
-          periodoChave: null,
-          canalOrigem: 'TELEGRAM',
-          atualizadoEm: '2026-09-20T12:57:00Z',
+          type: 'LESSON',
+          reportId: RELATORIO,
+          jobId: null,
+          studentId: ALUNO.id,
+          studentName: ALUNO.name,
+          status: 'AWAITING_REVIEW',
+          step: null,
+          periodKey: null,
+          originChannel: 'TELEGRAM',
+          updatedAt: '2026-09-20T12:57:00Z',
         },
       },
     });
@@ -145,23 +145,23 @@ describe('TelaProcessando (06)', () => {
     let consultas = 0;
     simularApi({
       ...BASE,
-      'GET /api/v1/trabalhos/t1': () => {
+      'GET /api/v1/jobs/t1': () => {
         consultas += 1;
         return {
           corpo:
             consultas === 1
               ? trabalho()
               : trabalho({
-                  status: 'CONCLUIDO',
-                  etapa: 'PRONTO',
-                  resultadoCodigo: 'PERGUNTAS_PENDENTES',
-                  relatorioTipo: 'AULA',
-                  relatorioId: RELATORIO,
+                  status: 'COMPLETED',
+                  step: 'READY',
+                  resultCode: 'PENDING_QUESTIONS',
+                  reportType: 'LESSON',
+                  reportId: RELATORIO,
                 }),
         };
       },
-      [`GET /api/v1/relatorios-aula/${RELATORIO}`]: {
-        corpo: relatorio({ status: 'AGUARDANDO_RESPOSTAS', perguntasPendentes: ['Estudou em casa?'] }),
+      [`GET /api/v1/lesson-reports/${RELATORIO}`]: {
+        corpo: relatorio({ status: 'AWAITING_ANSWERS', pendingQuestions: ['Estudou em casa?'] }),
       },
     });
     const { roteador } = renderizarRotas(rotas, '/trabalhos/t1');
@@ -179,7 +179,7 @@ describe('TelaProcessando (06)', () => {
   });
 
   it('avisa quando está demorando', async () => {
-    simularApi({ ...BASE, 'GET /api/v1/trabalhos/t1': { corpo: trabalho({ demorando: true }) } });
+    simularApi({ ...BASE, 'GET /api/v1/jobs/t1': { corpo: trabalho({ delayed: true }) } });
     renderizarRotas(rotas, '/trabalhos/t1');
 
     expect(await screen.findByText(/Está demorando mais que o normal/)).toBeInTheDocument();
@@ -188,21 +188,21 @@ describe('TelaProcessando (06)', () => {
   it('falha na estruturação oferece tentar de novo sem reenviar o áudio', async () => {
     const api = simularApi({
       ...BASE,
-      'GET /api/v1/trabalhos/t1': {
+      'GET /api/v1/jobs/t1': {
         corpo: trabalho({
-          status: 'FALHOU',
-          etapa: 'ESTRUTURANDO',
-          resultadoCodigo: 'FALHA_ESTRUTURACAO',
-          relatorioTipo: 'AULA',
-          relatorioId: RELATORIO,
+          status: 'FAILED',
+          step: 'STRUCTURING',
+          resultCode: 'STRUCTURING_FAILED',
+          reportType: 'LESSON',
+          reportId: RELATORIO,
         }),
       },
-      [`POST /api/v1/relatorios-aula/${RELATORIO}/nova-tentativa`]: {
+      [`POST /api/v1/lesson-reports/${RELATORIO}/retry`]: {
         status: 202,
-        corpo: { trabalhoId: 't2' },
+        corpo: { jobId: 't2' },
       },
-      'GET /api/v1/trabalhos/t2': {
-        corpo: trabalho({ trabalhoId: 't2', tipo: 'NOVA_TENTATIVA', etapa: 'ESTRUTURANDO' }),
+      'GET /api/v1/jobs/t2': {
+        corpo: trabalho({ jobId: 't2', type: 'RETRY', step: 'STRUCTURING' }),
       },
     });
     const usuario = userEvent.setup();
@@ -214,7 +214,7 @@ describe('TelaProcessando (06)', () => {
     await usuario.click(screen.getByRole('button', { name: 'Tentar novamente' }));
 
     await waitFor(() => expect(roteador.state.location.pathname).toBe('/trabalhos/t2'));
-    expect(api.chamadas.some((c) => c.url.endsWith('/nova-tentativa'))).toBe(true);
+    expect(api.chamadas.some((c) => c.url.endsWith('/retry'))).toBe(true);
   });
 });
 
@@ -222,16 +222,16 @@ describe('TelaPerguntas (07)', () => {
   it('lista as perguntas numeradas, exige resposta e envia o texto', async () => {
     const api = simularApi({
       ...BASE,
-      [`GET /api/v1/relatorios-aula/${RELATORIO}`]: {
+      [`GET /api/v1/lesson-reports/${RELATORIO}`]: {
         corpo: relatorio({
-          status: 'AGUARDANDO_RESPOSTAS',
-          versaoVigente: 0,
-          perguntasPendentes: ['O aluno estudou em casa?', 'Qual o repertório da próxima aula?'],
+          status: 'AWAITING_ANSWERS',
+          currentVersion: 0,
+          pendingQuestions: ['O aluno estudou em casa?', 'Qual o repertório da próxima aula?'],
         }),
       },
-      [`POST /api/v1/relatorios-aula/${RELATORIO}/respostas`]: { status: 202, corpo: { trabalhoId: 't3' } },
-      'GET /api/v1/trabalhos/t3': {
-        corpo: trabalho({ trabalhoId: 't3', tipo: 'RESPOSTA_PERGUNTAS', etapa: 'INCORPORANDO_RESPOSTAS' }),
+      [`POST /api/v1/lesson-reports/${RELATORIO}/answers`]: { status: 202, corpo: { jobId: 't3' } },
+      'GET /api/v1/jobs/t3': {
+        corpo: trabalho({ jobId: 't3', type: 'QUESTION_ANSWER', step: 'INCORPORATING_ANSWERS' }),
       },
     });
     const usuario = userEvent.setup();
@@ -247,16 +247,16 @@ describe('TelaPerguntas (07)', () => {
     await usuario.click(screen.getByRole('button', { name: 'Enviar resposta' }));
 
     await waitFor(() => expect(roteador.state.location.pathname).toBe('/trabalhos/t3'));
-    const envio = api.chamadas.find((c) => c.metodo === 'POST' && c.url.endsWith('/respostas'))!;
-    expect(JSON.parse(envio.init.body as string)).toEqual({ texto: 'Estudou sim; vai preparar a valsa.' });
+    const envio = api.chamadas.find((c) => c.metodo === 'POST' && c.url.endsWith('/answers'))!;
+    expect(JSON.parse(envio.init.body as string)).toEqual({ text: 'Estudou sim; vai preparar a valsa.' });
   });
 });
 
 describe('TelaConferencia (08)', () => {
   const conferencia = {
     ...BASE,
-    [`GET /api/v1/relatorios-aula/${RELATORIO}`]: { corpo: relatorio() },
-    [`GET /api/v1/relatorios-aula/${RELATORIO}/versoes/1/pdf`]: {
+    [`GET /api/v1/lesson-reports/${RELATORIO}`]: { corpo: relatorio() },
+    [`GET /api/v1/lesson-reports/${RELATORIO}/versions/1/pdf`]: {
       corpo: new Blob(['%PDF-'], { type: 'application/pdf' }),
     },
   };
@@ -294,12 +294,12 @@ describe('TelaConferencia (08)', () => {
   it('aprovar cita a versão e só navega com a resposta 2xx', async () => {
     const api = simularApi({
       ...conferencia,
-      [`POST /api/v1/relatorios-aula/${RELATORIO}/aprovacao`]: {
+      [`POST /api/v1/lesson-reports/${RELATORIO}/approval`]: {
         corpo: {
-          relatorioId: RELATORIO,
-          status: 'APROVADO',
-          versaoAprovada: 1,
-          aprovadoEm: '2026-09-21T13:00:00Z',
+          reportId: RELATORIO,
+          status: 'APPROVED',
+          approvedVersion: 1,
+          approvedAt: '2026-09-21T13:00:00Z',
         },
       },
     });
@@ -313,19 +313,19 @@ describe('TelaConferencia (08)', () => {
     await waitFor(() =>
       expect(roteador.state.location.pathname).toBe(`/relatorios-aula/${RELATORIO}/aprovado`),
     );
-    const envio = api.chamadas.find((c) => c.url.endsWith('/aprovacao'))!;
-    expect(JSON.parse(envio.init.body as string)).toEqual({ versaoConfirmada: 1 });
+    const envio = api.chamadas.find((c) => c.url.endsWith('/approval'))!;
+    expect(JSON.parse(envio.init.body as string)).toEqual({ confirmedVersion: 1 });
   });
 
   it('versão desatualizada mantém a tela e pede para recarregar (08d)', async () => {
     simularApi({
       ...conferencia,
-      [`POST /api/v1/relatorios-aula/${RELATORIO}/aprovacao`]: {
+      [`POST /api/v1/lesson-reports/${RELATORIO}/approval`]: {
         status: 409,
         corpo: {
-          codigo: 'VERSAO_DESATUALIZADA',
-          mensagem: 'Esta versão está desatualizada.',
-          detalhes: { versaoVigente: 2 },
+          code: 'STALE_VERSION',
+          message: 'Esta versão está desatualizada.',
+          details: { currentVersion: 2 },
         },
       },
     });
@@ -343,22 +343,22 @@ describe('TelaConferencia (08)', () => {
     let versao = 1;
     simularApi({
       ...conferencia,
-      [`GET /api/v1/relatorios-aula/${RELATORIO}`]: () => ({ corpo: relatorio({ versaoVigente: versao }) }),
-      [`GET /api/v1/relatorios-aula/${RELATORIO}/versoes/2/pdf`]: { corpo: new Blob(['%PDF-']) },
-      [`POST /api/v1/relatorios-aula/${RELATORIO}/alteracoes`]: () => {
+      [`GET /api/v1/lesson-reports/${RELATORIO}`]: () => ({ corpo: relatorio({ currentVersion: versao }) }),
+      [`GET /api/v1/lesson-reports/${RELATORIO}/versions/2/pdf`]: { corpo: new Blob(['%PDF-']) },
+      [`POST /api/v1/lesson-reports/${RELATORIO}/changes`]: () => {
         versao = 2;
-        return { status: 202, corpo: { trabalhoId: 't4' } };
+        return { status: 202, corpo: { jobId: 't4' } };
       },
-      'GET /api/v1/trabalhos/t4': {
+      'GET /api/v1/jobs/t4': {
         corpo: trabalho({
-          trabalhoId: 't4',
-          tipo: 'ALTERACAO',
-          status: 'CONCLUIDO',
-          etapa: 'PRONTO',
-          resultadoCodigo: 'NOVA_VERSAO',
-          relatorioTipo: 'AULA',
-          relatorioId: RELATORIO,
-          textoEntendido: 'Diga que a aula foi ótima.',
+          jobId: 't4',
+          type: 'CHANGE',
+          status: 'COMPLETED',
+          step: 'READY',
+          resultCode: 'NEW_VERSION',
+          reportType: 'LESSON',
+          reportId: RELATORIO,
+          understoodText: 'Diga que a aula foi ótima.',
         }),
       },
     });
@@ -376,7 +376,7 @@ describe('TelaConferencia (08)', () => {
   it('cancelar pede confirmação e volta ao Painel', async () => {
     simularApi({
       ...conferencia,
-      [`POST /api/v1/relatorios-aula/${RELATORIO}/cancelamento`]: { status: 204 },
+      [`POST /api/v1/lesson-reports/${RELATORIO}/cancellation`]: { status: 204 },
     });
     const usuario = userEvent.setup();
     const { roteador } = renderizarRotas(rotas, `/relatorios-aula/${RELATORIO}`);
@@ -392,8 +392,8 @@ describe('TelaAprovado (09)', () => {
   it('mostra a data e a hora da aprovação e os próximos passos', async () => {
     simularApi({
       ...BASE,
-      [`GET /api/v1/relatorios-aula/${RELATORIO}`]: {
-        corpo: relatorio({ status: 'APROVADO', aprovadoEm: '2026-09-21T21:42:00Z' }),
+      [`GET /api/v1/lesson-reports/${RELATORIO}`]: {
+        corpo: relatorio({ status: 'APPROVED', approvedAt: '2026-09-21T21:42:00Z' }),
       },
     });
     const usuario = userEvent.setup();

@@ -20,7 +20,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  */
 public class SessionCookieFilter extends OncePerRequestFilter {
 
-    public static final String CODE_ATTRIBUTE = SessionCookieFilter.class.getName() + ".codigo";
+    public static final String CODE_ATTRIBUTE = SessionCookieFilter.class.getName() + ".code";
 
     private final ValidateSessionWebUseCase validateSession;
     private final SessionCookie cookie;
@@ -47,10 +47,10 @@ public class SessionCookieFilter extends OncePerRequestFilter {
                         new AuthenticatedTeacher(result.teacher(), result.session().expiresAt());
                 var authentication =
                         new UsernamePasswordAuthenticationToken(
-                                principal, null, List.of(new SimpleGrantedAuthority("PROFESSOR")));
+                                principal, null, List.of(new SimpleGrantedAuthority("TEACHER")));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (DomainException error) {
-                request.setAttribute(CODE_ATTRIBUTE, ErrorCode.SESSAO_EXPIRADA);
+                request.setAttribute(CODE_ATTRIBUTE, ErrorCode.SESSION_EXPIRED);
             }
         }
         // o contexto é limpo pelo SecurityContextHolderFilter ao fim da requisição; limpar aqui

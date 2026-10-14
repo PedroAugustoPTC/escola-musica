@@ -94,7 +94,7 @@ public class TelegramSemesterFlow implements TelegramFlow {
 
     @Override
     public boolean onChooseStudent(TelegramContext context, StudentSummary student) {
-        if (context.conversation().flow() != ConversationFlow.SEMESTRAL) {
+        if (context.conversation().flow() != ConversationFlow.SEMESTER) {
             return false;
         }
         offerPeriods(context, student);
@@ -104,19 +104,18 @@ public class TelegramSemesterFlow implements TelegramFlow {
     private void offerPeriods(TelegramContext context, StudentSummary student) {
         TelegramConversation conversation = context.conversation();
         conversation.cleanFocus();
-        conversation.startFlow(
-                ConversationFlow.SEMESTRAL, ConversationFlowStep.ESCOLHENDO_SEMESTRE);
+        conversation.startFlow(ConversationFlow.SEMESTER, ConversationFlowStep.CHOOSING_SEMESTER);
         conversation.store(STUDENT, student.id().toString());
         List<Semester> semesters = list.run(context.teacher().id(), student.id());
         if (semesters.isEmpty()) {
-            context.answer(presenter.simple(context.chatId(), "SEM_SEMESTRES"));
+            context.answer(presenter.simple(context.chatId(), "NO_SEMESTERS"));
             return;
         }
         conversation.store(
                 OPTIONS, String.join(",", semesters.stream().map(s -> s.period().key()).toList()));
         StringBuilder text =
                 new StringBuilder(
-                        presenter.text("ESCOLHER_SEMESTRE", Map.of("aluno", student.name())));
+                        presenter.text("CHOOSE_SEMESTER", Map.of("student", student.name())));
         List<List<Button>> rows = new ArrayList<>();
         for (int i = 0; i < semesters.size(); i++) {
             Semester semester = semesters.get(i);
@@ -124,14 +123,14 @@ public class TelegramSemesterFlow implements TelegramFlow {
             text.append('\n')
                     .append(
                             presenter.text(
-                                    "SEMESTRE_INTERVALO",
+                                    "SEMESTER_INTERVAL",
                                     Map.of(
-                                            "rotulo", label,
-                                            "inicio",
+                                            "label", label,
+                                            "start",
                                                     presenter
                                                             .formatting()
                                                             .data(semester.period().start()),
-                                            "fim",
+                                            "end",
                                                     presenter
                                                             .formatting()
                                                             .data(semester.period().end()))));
@@ -139,14 +138,15 @@ public class TelegramSemesterFlow implements TelegramFlow {
                     (semester.preSelected() ? "★ " : "")
                             + label
                             + (semester.inProgress()
-                                    ? " · " + presenter.label("SEMESTRE_EM_ANDAMENTO")
+                                    ? " · " + presenter.label("SEMESTER_IN_PROGRESS")
                                     : "");
             rows.add(
                     List.of(
                             new Button(
-                                    button, CallbackDataCodec.encode("per", Integer.toString(i)))));
+                                    button,
+                                    CallbackDataCodec.encode("period", Integer.toString(i)))));
         }
-        rows.add(List.of(presenter.button("BOTAO_INICIO", "inicio")));
+        rows.add(List.of(presenter.button("HOME_BUTTON", "home")));
         context.answer(new Message(context.chatId(), text.toString(), new Keyboard(rows)));
     }
 
@@ -167,40 +167,43 @@ public class TelegramSemesterFlow implements TelegramFlow {
         }
         TelegramConversation conversation = context.conversation();
         conversation.store(PERIOD, key);
-        conversation.defineStep(ConversationFlowStep.CONFIRMANDO_GERACAO_SEMESTRAL);
+        conversation.defineStep(ConversationFlowStep.CONFIRMING_SEMESTER_GENERATION);
         Preview p = preview.run(context.teacher().id(), studentId.get(), key);
         String label = sections.periodLabel(key);
         long chat = context.chatId();
-        Button back = presenter.button("BOTAO_VOLTAR", "voltar");
+        Button back = presenter.button("BACK_BUTTON", "back");
         if (p.approvedSemesterId().isPresent()) {
             context.answer(
-                    new Message(chat, presenter.text("SEMESTRAL_JA_APROVADO"), Keyboard.of(back)));
+                    new Message(
+                            chat,
+                            presenter.text("SEMESTER_REPORT_ALREADY_APPROVED"),
+                            Keyboard.of(back)));
         } else if (p.openSemester().isPresent()) {
-            conversation.defineStep(ConversationFlowStep.AVISO_RELATORIO_EM_ABERTO);
+            conversation.defineStep(ConversationFlowStep.OPEN_REPORT_NOTICE);
             context.answer(presenter.openNotice(chat, p.openSemester().get()));
         } else if (p.approvedLessons() == 0) {
             context.answer(
                     new Message(
                             chat,
-                            presenter.text("SEM_AULAS_APROVADAS_NO_PERIODO"),
+                            presenter.text("NO_APPROVED_LESSONS_IN_PERIOD"),
                             Keyboard.of(back)));
         } else {
             String text =
                     presenter.text(
-                            "SEMESTRAL_PREVIA",
-                            Map.of("rotulo", label, "quantidade", p.approvedLessons()));
+                            "SEMESTER_PREVIEW",
+                            Map.of("label", label, "quantity", p.approvedLessons()));
             if (p.openLessonReports() > 0) {
                 text +=
                         "\n"
                                 + presenter.text(
-                                        "HA_RELATORIOS_EM_ABERTO",
-                                        Map.of("quantidade", p.openLessonReports()));
+                                        "OPEN_REPORTS_EXIST",
+                                        Map.of("quantity", p.openLessonReports()));
                 context.answer(
                         new Message(
                                 chat,
                                 text,
                                 Keyboard.of(
-                                        presenter.button("BOTAO_GERAR_MESMO_ASSIM", "gerarsim"),
+                                        presenter.button("GENERATE_ANYWAY_BUTTON", "generate-yes"),
                                         back)));
             } else {
                 context.answer(
@@ -208,7 +211,8 @@ public class TelegramSemesterFlow implements TelegramFlow {
                                 chat,
                                 text,
                                 Keyboard.of(
-                                        presenter.button("BOTAO_GERAR_SEMESTRAL", "gerar"), back)));
+                                        presenter.button("GENERATE_SEMESTER_BUTTON", "generate"),
+                                        back)));
             }
         }
         return true;
@@ -238,7 +242,7 @@ public class TelegramSemesterFlow implements TelegramFlow {
     private Optional<SemesterReportView> focus(TelegramContext context) {
         TelegramConversation conversation = context.conversation();
         Optional<FocusReport> focus =
-                conversation.focusReport().filter(f -> f.type() == ReportType.SEMESTRAL);
+                conversation.focusReport().filter(f -> f.type() == ReportType.SEMESTER);
         if (focus.isEmpty()) {
             return Optional.empty();
         }
@@ -287,8 +291,8 @@ public class TelegramSemesterFlow implements TelegramFlow {
             return true;
         }
         TelegramConversation conversation = context.conversation();
-        if (conversation.flow() == ConversationFlow.SEMESTRAL
-                && conversation.step() == ConversationFlowStep.ESCOLHENDO_SEMESTRE) {
+        if (conversation.flow() == ConversationFlow.SEMESTER
+                && conversation.step() == ConversationFlowStep.CHOOSING_SEMESTER) {
             String normalized = StudentSearch.normalize(text);
             for (String key : options(conversation)) {
                 if (normalized.equals(key)
@@ -332,7 +336,7 @@ public class TelegramSemesterFlow implements TelegramFlow {
         try {
             action.run();
         } catch (DomainException error) {
-            if (error.code() != ErrorCode.VERSAO_DESATUALIZADA) {
+            if (error.code() != ErrorCode.STALE_VERSION) {
                 throw error;
             }
             context.answer(presenter.error(context.chatId(), error.code(), error.details()));
@@ -369,9 +373,9 @@ public class TelegramSemesterFlow implements TelegramFlow {
     @Override
     public boolean aoCallback(TelegramContext context, String action, String argument) {
         TelegramConversation conversation = context.conversation();
-        boolean inFlow = conversation.flow() == ConversationFlow.SEMESTRAL;
+        boolean inFlow = conversation.flow() == ConversationFlow.SEMESTER;
         switch (action) {
-            case "per" -> {
+            case "period" -> {
                 List<String> options = options(conversation);
                 try {
                     int index = Integer.parseInt(argument);
@@ -384,16 +388,16 @@ public class TelegramSemesterFlow implements TelegramFlow {
                     return false;
                 }
             }
-            case "gerar", "gerarsim" -> {
+            case "generate", "generate-yes" -> {
                 if (!inFlow
                         || conversation.step()
-                                != ConversationFlowStep.CONFIRMANDO_GERACAO_SEMESTRAL) {
+                                != ConversationFlowStep.CONFIRMING_SEMESTER_GENERATION) {
                     return false;
                 }
-                generate(context, action.equals("gerarsim"));
+                generate(context, action.equals("generate-yes"));
                 return true;
             }
-            case "voltar" -> {
+            case "back" -> {
                 Optional<StudentSummary> student =
                         student(context).flatMap(id -> summary(context, id));
                 if (!inFlow || student.isEmpty()) {
@@ -402,20 +406,19 @@ public class TelegramSemesterFlow implements TelegramFlow {
                 offerPeriods(context, student.get());
                 return true;
             }
-            case "cont" -> {
+            case "continue" -> {
                 return inFlow
-                        && conversation.step() == ConversationFlowStep.AVISO_RELATORIO_EM_ABERTO
+                        && conversation.step() == ConversationFlowStep.OPEN_REPORT_NOTICE
                         && proceed(context);
             }
-            case "desc" -> {
-                if (!inFlow
-                        || conversation.step() != ConversationFlowStep.AVISO_RELATORIO_EM_ABERTO) {
+            case "discard" -> {
+                if (!inFlow || conversation.step() != ConversationFlowStep.OPEN_REPORT_NOTICE) {
                     return false;
                 }
                 askDiscard(context);
                 return true;
             }
-            case "descok" -> {
+            case "discard-ok" -> {
                 if (!inFlow
                         || !conversation
                                 .pendingConfirmation()
@@ -426,10 +429,10 @@ public class TelegramSemesterFlow implements TelegramFlow {
                 conversation.cleanConfirmation();
                 return discard(context);
             }
-            case "foco" -> {
+            case "focus" -> {
                 return continueInChat(context, argument);
             }
-            case "aprov", "aprovok", "alt", "canc", "cancok", "pdf" -> {
+            case "approve", "approve-ok", "change", "cancel", "cancel-ok", "pdf" -> {
                 Optional<SemesterReportView> focus = focus(context);
                 return focus.isPresent() && actionInFocus(context, focus.get(), action, argument);
             }
@@ -442,8 +445,8 @@ public class TelegramSemesterFlow implements TelegramFlow {
     @Override
     public boolean onCommand(TelegramContext context, Command command) {
         TelegramConversation conversation = context.conversation();
-        if (conversation.flow() == ConversationFlow.SEMESTRAL
-                && conversation.step() == ConversationFlowStep.AVISO_RELATORIO_EM_ABERTO) {
+        if (conversation.flow() == ConversationFlow.SEMESTER
+                && conversation.step() == ConversationFlowStep.OPEN_REPORT_NOTICE) {
             if (command == Command.CONTINUE) {
                 return proceed(context);
             }
@@ -471,7 +474,7 @@ public class TelegramSemesterFlow implements TelegramFlow {
     public boolean onConfirm(TelegramContext context, String confirmation) {
         TelegramConversation conversation = context.conversation();
         if (TelegramResumptionFlow.DISCARD_CONFIRMATION.equals(confirmation)
-                && conversation.flow() == ConversationFlow.SEMESTRAL) {
+                && conversation.flow() == ConversationFlow.SEMESTER) {
             return discard(context);
         }
         Optional<SemesterReportView> focus = focus(context);
@@ -502,7 +505,7 @@ public class TelegramSemesterFlow implements TelegramFlow {
     @Override
     public String whatICanReceive(TelegramContext context) {
         if (focus(context).isPresent()) {
-            return presenter.label("RECEBER_ALTERACAO");
+            return presenter.label("RECEIVE_CHANGE");
         }
         return null;
     }
@@ -512,7 +515,7 @@ public class TelegramSemesterFlow implements TelegramFlow {
         TelegramConversation conversation = context.conversation();
         SemesterReport report = view.report();
         switch (action) {
-            case "aprov" -> {
+            case "approve" -> {
                 Integer version = number(argument);
                 if (version == null) {
                     return false;
@@ -520,7 +523,7 @@ public class TelegramSemesterFlow implements TelegramFlow {
                 conversation.cleanConfirmation();
                 askApproval(context, view, version);
             }
-            case "aprovok" -> {
+            case "approve-ok" -> {
                 Integer version = number(argument);
                 if (version == null
                         || !conversation
@@ -534,7 +537,7 @@ public class TelegramSemesterFlow implements TelegramFlow {
                 conversation.cleanConfirmation();
                 approveVersion(context, report.id(), version);
             }
-            case "cancok" -> {
+            case "cancel-ok" -> {
                 if (!conversation
                         .pendingConfirmation()
                         .filter(TelegramLessonReportFlow.CANCEL_CONFIRMATION::equals)
@@ -544,12 +547,12 @@ public class TelegramSemesterFlow implements TelegramFlow {
                 conversation.cleanConfirmation();
                 cancelSemester(context, report.id());
             }
-            case "canc" -> {
+            case "cancel" -> {
                 conversation.cleanConfirmation();
                 askCancellation(context);
             }
-            case "alt" ->
-                    context.answer(presenter.simple(context.chatId(), "PEDIDO_ALTERACAO_ROTULO"));
+            case "change" ->
+                    context.answer(presenter.simple(context.chatId(), "CHANGE_REQUEST_LABEL"));
             default ->
                     presentation
                             .reviewDocument(context.chatId(), context.teacher().id(), report)
@@ -559,7 +562,7 @@ public class TelegramSemesterFlow implements TelegramFlow {
                                             context.answer(
                                                     presenter.simple(
                                                             context.chatId(),
-                                                            "CONFERENCIA_PDF_GERANDO")));
+                                                            "REVIEW_PDF_GENERATING")));
         }
         return true;
     }
@@ -567,14 +570,14 @@ public class TelegramSemesterFlow implements TelegramFlow {
     private void askApproval(TelegramContext context, SemesterReportView view, int version) {
         SemesterReport report = view.report();
         if (TelegramSemesterReportPresentation.inProcessing(view)) {
-            throw new DomainException(ErrorCode.ACAO_NAO_PERMITIDA_NA_ETAPA);
+            throw new DomainException(ErrorCode.ACTION_NOT_ALLOWED_AT_STEP);
         }
         if (version != report.currentVersion()) {
             context.answer(
                     presenter.error(
                             context.chatId(),
-                            ErrorCode.VERSAO_DESATUALIZADA,
-                            Map.of("versaoVigente", report.currentVersion())));
+                            ErrorCode.STALE_VERSION,
+                            Map.of("currentVersion", report.currentVersion())));
             present(context, report.id());
             return;
         }
@@ -583,11 +586,11 @@ public class TelegramSemesterFlow implements TelegramFlow {
         context.answer(
                 presenter.confirmation(
                         context.chatId(),
-                        presenter.text("CONFIRMAR_APROVACAO", Map.of("versao", version)),
+                        presenter.text("CONFIRM_APPROVAL", Map.of("version", version)),
                         presenter.button(
-                                "BOTAO_CONFIRMAR_APROVACAO",
-                                Map.of("versao", version),
-                                "aprovok",
+                                "CONFIRM_APPROVAL_BUTTON",
+                                Map.of("version", version),
+                                "approve-ok",
                                 Integer.toString(version))));
     }
 
@@ -596,7 +599,7 @@ public class TelegramSemesterFlow implements TelegramFlow {
         try {
             approval = approve.run(context.teacher().id(), reportId, version, Channel.TELEGRAM);
         } catch (DomainException error) {
-            if (error.code() != ErrorCode.VERSAO_DESATUALIZADA) {
+            if (error.code() != ErrorCode.STALE_VERSION) {
                 throw error;
             }
             context.answer(presenter.error(context.chatId(), error.code(), error.details()));
@@ -611,7 +614,7 @@ public class TelegramSemesterFlow implements TelegramFlow {
                 new Message(
                         context.chatId(),
                         presenter.text(
-                                "RELATORIO_APROVADO",
+                                "REPORT_APPROVED",
                                 Map.of(
                                         "data", presenter.formatting().data(approval.approvedAt()),
                                         "hora",
@@ -619,8 +622,8 @@ public class TelegramSemesterFlow implements TelegramFlow {
                                                         .formatting()
                                                         .hora(approval.approvedAt()))),
                         Keyboard.of(
-                                presenter.button("BOTAO_HISTORICO", "hist"),
-                                presenter.button("BOTAO_INICIO", "inicio"))));
+                                presenter.button("HISTORY_BUTTON", "history"),
+                                presenter.button("HOME_BUTTON", "home"))));
     }
 
     private void askCancellation(TelegramContext context) {
@@ -628,8 +631,8 @@ public class TelegramSemesterFlow implements TelegramFlow {
         context.answer(
                 presenter.confirmation(
                         context.chatId(),
-                        presenter.text("CONFIRMAR_CANCELAMENTO"),
-                        presenter.button("BOTAO_CONFIRMAR_CANCELAMENTO", "cancok")));
+                        presenter.text("CONFIRM_CANCELLATION"),
+                        presenter.button("CONFIRM_CANCELLATION_BUTTON", "cancel-ok")));
     }
 
     private void cancelSemester(TelegramContext context, UUID reportId) {
@@ -638,7 +641,7 @@ public class TelegramSemesterFlow implements TelegramFlow {
         conversation.cleanFocus();
         conversation.cleanSelection();
         conversation.endFlow();
-        context.answer(presenter.simple(context.chatId(), "RELATORIO_CANCELADO"));
+        context.answer(presenter.simple(context.chatId(), "REPORT_CANCELLED"));
         interpreter.showHome(context);
     }
 
@@ -665,13 +668,13 @@ public class TelegramSemesterFlow implements TelegramFlow {
         } else {
             String step =
                     openReport.get().step() == null
-                            ? "CONSOLIDANDO"
+                            ? "CONSOLIDATING"
                             : openReport.get().step().name();
             context.answer(
                     presenter.simple(
                             context.chatId(),
-                            "PROCESSAMENTO_EM_ANDAMENTO",
-                            Map.of("etapa", presenter.formatting().step(step))));
+                            "PROCESSING_IN_PROGRESS",
+                            Map.of("step", presenter.formatting().step(step))));
         }
         return true;
     }
@@ -681,8 +684,8 @@ public class TelegramSemesterFlow implements TelegramFlow {
         context.answer(
                 presenter.confirmation(
                         context.chatId(),
-                        presenter.text("CONFIRMAR_DESCARTE"),
-                        presenter.button("BOTAO_CONFIRMAR_DESCARTE", "descok")));
+                        presenter.text("CONFIRM_DISCARD"),
+                        presenter.button("CONFIRM_DISCARD_BUTTON", "discard-ok")));
     }
 
     private boolean discard(TelegramContext context) {
@@ -696,7 +699,7 @@ public class TelegramSemesterFlow implements TelegramFlow {
                         cancel.discardConsolidation(teacherId, a.jobId());
                     }
                 });
-        context.answer(presenter.simple(context.chatId(), "RELATORIO_CANCELADO"));
+        context.answer(presenter.simple(context.chatId(), "REPORT_CANCELLED"));
         Optional<String> key = context.conversation().data(PERIOD);
         return key.map(c -> choosePeriod(context, c)).orElse(true);
     }

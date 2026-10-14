@@ -13,7 +13,7 @@ interface ProcessingJobJpa extends JpaRepository<ProcessingJobEntity, UUID> {
     /** Próximo pendente sem disputar com outros workers (R-06). */
     @Query(
             value =
-                    "select id from processing_job where status = 'PENDENTE'"
+                    "select id from processing_job where status = 'PENDING'"
                             + " order by created_at limit 1 for update skip locked",
             nativeQuery = true)
     Optional<UUID> nextPending();
@@ -22,7 +22,7 @@ interface ProcessingJobJpa extends JpaRepository<ProcessingJobEntity, UUID> {
             """
             select t from ProcessingJobEntity t
             where t.reportType = :type and t.reportId = :reportId
-              and t.status in ('PENDENTE', 'EM_EXECUCAO')
+              and t.status in ('PENDING', 'RUNNING')
             order by t.createdAt desc
             """)
     List<ProcessingJobEntity> reportInProgress(String type, UUID reportId);
@@ -31,15 +31,15 @@ interface ProcessingJobJpa extends JpaRepository<ProcessingJobEntity, UUID> {
             """
             select t from ProcessingJobEntity t
             where t.teacherId = :teacherId and t.studentId = :studentId and t.reportId is null
-              and t.type in ('REGISTRO_AULA') and t.status in ('PENDENTE', 'EM_EXECUCAO')
+              and t.type in ('LESSON_REGISTRATION') and t.status in ('PENDING', 'RUNNING')
             """)
     List<ProcessingJobEntity> registrationInProgress(UUID teacherId, UUID studentId);
 
     @Query(
             """
             select t from ProcessingJobEntity t
-            where t.reportId is null and t.type = 'REGISTRO_AULA'
-              and t.teacherId = :teacherId and t.status in ('PENDENTE', 'EM_EXECUCAO')
+            where t.reportId is null and t.type = 'LESSON_REGISTRATION'
+              and t.teacherId = :teacherId and t.status in ('PENDING', 'RUNNING')
             order by t.createdAt desc
             """)
     List<ProcessingJobEntity> teacherRegistrationsInProgress(UUID teacherId);
@@ -47,7 +47,7 @@ interface ProcessingJobJpa extends JpaRepository<ProcessingJobEntity, UUID> {
     @Query(
             """
             select t from ProcessingJobEntity t
-            where t.status in ('PENDENTE', 'EM_EXECUCAO') and t.delayNoticeSent = false
+            where t.status in ('PENDING', 'RUNNING') and t.delayNoticeSent = false
               and t.createdAt <= :limit
             """)
     List<ProcessingJobEntity> delayedWithoutNotice(Instant limit);
@@ -73,8 +73,8 @@ interface ProcessingJobJpa extends JpaRepository<ProcessingJobEntity, UUID> {
 
     @Query(
             value =
-                    "select * from processing_job where type = 'CONSOLIDACAO_SEMESTRAL'"
-                            + " and status in ('PENDENTE', 'EM_EXECUCAO') and teacher_id = :teacherId"
+                    "select * from processing_job where type = 'SEMESTER_CONSOLIDATION'"
+                            + " and status in ('PENDING', 'RUNNING') and teacher_id = :teacherId"
                             + " and student_id = :studentId and parameters ->> 'periodKey' = :periodKey",
             nativeQuery = true)
     List<ProcessingJobEntity> consolidationInProgress(
@@ -83,8 +83,8 @@ interface ProcessingJobJpa extends JpaRepository<ProcessingJobEntity, UUID> {
     @Query(
             """
             select t from ProcessingJobEntity t
-            where t.type = 'CONSOLIDACAO_SEMESTRAL' and t.reportId is null
-              and t.teacherId = :teacherId and t.status in ('PENDENTE', 'EM_EXECUCAO')
+            where t.type = 'SEMESTER_CONSOLIDATION' and t.reportId is null
+              and t.teacherId = :teacherId and t.status in ('PENDING', 'RUNNING')
             order by t.createdAt desc
             """)
     List<ProcessingJobEntity> teacherConsolidationsInProgress(UUID teacherId);

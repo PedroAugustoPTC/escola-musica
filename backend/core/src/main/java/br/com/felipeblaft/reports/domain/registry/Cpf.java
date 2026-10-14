@@ -17,15 +17,15 @@ public final class Cpf {
 
     public static Cpf of(String input) {
         if (input == null) {
-            throw new DomainException(ErrorCode.CPF_INVALIDO);
+            throw new DomainException(ErrorCode.INVALID_CPF);
         }
         String digits = input.replaceAll("[.\\-\\s/]", "");
         if (!digits.matches("\\d{11}") || digits.chars().distinct().count() == 1) {
-            throw new DomainException(ErrorCode.CPF_INVALIDO);
+            throw new DomainException(ErrorCode.INVALID_CPF);
         }
         if (checkDigit(digits, 9) != digits.charAt(9) - '0'
                 || checkDigit(digits, 10) != digits.charAt(10) - '0') {
-            throw new DomainException(ErrorCode.CPF_INVALIDO);
+            throw new DomainException(ErrorCode.INVALID_CPF);
         }
         return new Cpf(digits);
     }

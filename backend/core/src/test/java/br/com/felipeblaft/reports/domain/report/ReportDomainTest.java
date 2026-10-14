@@ -47,25 +47,25 @@ class ReportDomainTest {
         UUID report = UUID.randomUUID();
         ReportVersion version =
                 ReportVersion.create(
-                        ReportType.AULA,
+                        ReportType.LESSON,
                         report,
                         1,
                         LessonReportContent.empty(),
-                        VersionOrigin.ESTRUTURACAO_INICIAL,
+                        VersionOrigin.INITIAL_STRUCTURING,
                         null,
                         Channel.WEB,
-                        "estruturacao-aula.v1",
+                        "lesson-structuring.v1",
                         T0);
         assertThat(version.number()).isEqualTo(1);
         assertThat(version.reportId()).isEqualTo(report);
         assertThatThrownBy(
                         () ->
                                 ReportVersion.create(
-                                        ReportType.AULA,
+                                        ReportType.LESSON,
                                         report,
                                         0,
                                         LessonReportContent.empty(),
-                                        VersionOrigin.ALTERACAO,
+                                        VersionOrigin.CHANGE,
                                         null,
                                         Channel.WEB,
                                         null,
@@ -77,18 +77,18 @@ class ReportDomainTest {
     void interactionDoesNotExposeText() {
         ReportInteraction interaction =
                 ReportInteraction.create(
-                        ReportType.AULA,
+                        ReportType.LESSON,
                         UUID.randomUUID(),
-                        InteractionType.ALTERACAO,
+                        InteractionType.CHANGE,
                         Channel.TELEGRAM,
                         Medium.AUDIO,
                         "troque a evolução",
                         2,
                         null,
-                        InteractionResult.APLICADA,
+                        InteractionResult.APPLIED,
                         3,
                         T0);
-        assertThat(interaction.toString()).doesNotContain("troque").contains("ALTERACAO");
+        assertThat(interaction.toString()).doesNotContain("swap").contains("CHANGE");
         assertThat(interaction.resultingVersion()).isEqualTo(3);
     }
 
@@ -97,12 +97,12 @@ class ReportDomainTest {
         PdfDocument document =
                 PdfDocument.create(
                         UUID.randomUUID(),
-                        DocumentType.OFICIAL,
-                        "relatorios/aula/x/oficial.pdf",
+                        DocumentType.OFFICIAL,
+                        "reports/lesson/x/official.pdf",
                         10,
                         "sha",
                         T0);
-        assertThat(document.type()).isEqualTo(DocumentType.OFICIAL);
+        assertThat(document.type()).isEqualTo(DocumentType.OFFICIAL);
         assertThatThrownBy(
                         () ->
                                 new Lesson(
@@ -112,7 +112,7 @@ class ReportDomainTest {
                                         null,
                                         T0))
                 .isInstanceOf(NullPointerException.class);
-        assertThat(ReportStep.valueOf("GERANDO_PDF")).isNotNull();
+        assertThat(ReportStep.valueOf("GENERATING_PDF")).isNotNull();
         assertThat(VersionOrigin.values()).hasSize(4);
     }
 }

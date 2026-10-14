@@ -107,7 +107,7 @@ public class SemesterReport {
                 openCount,
                 generalInformation,
                 content,
-                ReportStatus.AGUARDANDO_CONFERENCIA,
+                ReportStatus.AWAITING_REVIEW,
                 null,
                 1,
                 channel,
@@ -124,25 +124,25 @@ public class SemesterReport {
     // ------------------------------------------------------------ verificações
 
     public void requireOpen() {
-        if (status == ReportStatus.APROVADO) {
-            throw new DomainException(ErrorCode.RELATORIO_JA_APROVADO);
+        if (status == ReportStatus.APPROVED) {
+            throw new DomainException(ErrorCode.REPORT_ALREADY_APPROVED);
         }
-        if (status == ReportStatus.CANCELADO) {
-            throw new DomainException(ErrorCode.RELATORIO_CANCELADO);
+        if (status == ReportStatus.CANCELLED) {
+            throw new DomainException(ErrorCode.REPORT_CANCELLED);
         }
     }
 
     private void requireNoStepInProgress() {
         if (step != null) {
             throw new DomainException(
-                    ErrorCode.PROCESSAMENTO_EM_ANDAMENTO, Map.of("etapa", step.name()));
+                    ErrorCode.PROCESSING_IN_PROGRESS, Map.of("step", step.name()));
         }
     }
 
     public void requireCurrentVersion(int presentedVersion) {
         if (presentedVersion != currentVersion) {
             throw new DomainException(
-                    ErrorCode.VERSAO_DESATUALIZADA, Map.of("versaoVigente", currentVersion));
+                    ErrorCode.STALE_VERSION, Map.of("currentVersion", currentVersion));
         }
     }
 
@@ -166,7 +166,7 @@ public class SemesterReport {
 
     /** Alteração aplicada: nova versão (N+1). Devolve o número da nova versão. */
     public int applyChange(SemesterReportContent newContent, Instant now) {
-        if (status != ReportStatus.AGUARDANDO_CONFERENCIA) {
+        if (status != ReportStatus.AWAITING_REVIEW) {
             throw new IllegalStateException("transição inválida a partir de " + status);
         }
         content = Objects.requireNonNull(newContent);
@@ -180,7 +180,7 @@ public class SemesterReport {
         requireOpen();
         requireNoStepInProgress();
         requireCurrentVersion(confirmedVersion);
-        status = ReportStatus.APROVADO;
+        status = ReportStatus.APPROVED;
         approvedAt = now;
         approvedVersion = currentVersion;
         approvalChannel = Objects.requireNonNull(channel);
@@ -189,7 +189,7 @@ public class SemesterReport {
 
     public void cancel(Instant now) {
         requireOpen();
-        status = ReportStatus.CANCELADO;
+        status = ReportStatus.CANCELLED;
         cancelledAt = now;
         step = null;
         updatedAt = now;
@@ -287,12 +287,6 @@ public class SemesterReport {
 
     @Override
     public String toString() {
-        return "RelatorioSemestral[id="
-                + id
-                + ", periodo="
-                + period.key()
-                + ", status="
-                + status
-                + "]";
+        return "SemesterReport[id=" + id + ", period=" + period.key() + ", status=" + status + "]";
     }
 }

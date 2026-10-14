@@ -39,11 +39,11 @@ class ReviewDocumentContractIT extends ContractApiBase {
         sessionBruno = signIn(ScenarioIT.CODE_BRUNO);
         mvc.perform(
                         authenticated(
-                                multipart("/api/v1/alunos/{id}/relatorios-aula", matteo.id())
+                                multipart("/api/v1/students/{id}/lesson-reports", matteo.id())
                                         .file(
                                                 new MockMultipartFile(
                                                         "audio",
-                                                        "aula.m4a",
+                                                        "lesson.m4a",
                                                         "audio/mp4",
                                                         AudioNormalizationTest.AUDIO_WITH_SPEECH)),
                                 session))
@@ -52,10 +52,10 @@ class ReviewDocumentContractIT extends ContractApiBase {
         reportId = jdbc.queryForObject("select id from lesson_report", UUID.class);
         mvc.perform(
                         authenticated(
-                                        post("/api/v1/relatorios-aula/{id}/respostas", reportId),
+                                        post("/api/v1/lesson-reports/{id}/answers", reportId),
                                         session)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"texto\":\"Estudou bem.\"}"))
+                                .content("{\"text\":\"Estudou bem.\"}"))
                 .andExpect(status().isAccepted());
         scenario.processQueue();
     }
@@ -64,7 +64,7 @@ class ReviewDocumentContractIT extends ContractApiBase {
     void inlineReviewPdfWithoutCacheAndNameWithoutIdentifier() throws Exception {
         MvcResult result =
                 mvc.perform(
-                                get("/api/v1/relatorios-aula/{id}/versoes/1/pdf", reportId)
+                                get("/api/v1/lesson-reports/{id}/versions/1/pdf", reportId)
                                         .cookie(session))
                         .andExpect(status().isOk())
                         .andExpect(followsContract())
@@ -88,38 +88,38 @@ class ReviewDocumentContractIT extends ContractApiBase {
     @Test
     void otherTeacherAndMissingVersionGet404() throws Exception {
         mvc.perform(
-                        get("/api/v1/relatorios-aula/{id}/versoes/1/pdf", reportId)
+                        get("/api/v1/lesson-reports/{id}/versions/1/pdf", reportId)
                                 .cookie(sessionBruno))
                 .andExpect(status().isNotFound())
                 .andExpect(followsContract());
-        mvc.perform(get("/api/v1/relatorios-aula/{id}/versoes/7/pdf", reportId).cookie(session))
+        mvc.perform(get("/api/v1/lesson-reports/{id}/versions/7/pdf", reportId).cookie(session))
                 .andExpect(status().isNotFound())
                 .andExpect(followsContract());
-        mvc.perform(get("/api/v1/relatorios-aula/{id}/versoes/1/pdf", reportId))
+        mvc.perform(get("/api/v1/lesson-reports/{id}/versions/1/pdf", reportId))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     void officialPdfOnlyAfterApproval() throws Exception {
-        mvc.perform(get("/api/v1/relatorios-aula/{id}/pdf-oficial", reportId).cookie(session))
+        mvc.perform(get("/api/v1/lesson-reports/{id}/official-pdf", reportId).cookie(session))
                 .andExpect(status().isNotFound())
                 .andExpect(followsContract());
         mvc.perform(
                         authenticated(
-                                        post("/api/v1/relatorios-aula/{id}/aprovacao", reportId),
+                                        post("/api/v1/lesson-reports/{id}/approval", reportId),
                                         session)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"versaoConfirmada\":1}"))
+                                .content("{\"confirmedVersion\":1}"))
                 .andExpect(status().isOk());
 
-        mvc.perform(get("/api/v1/relatorios-aula/{id}/pdf-oficial", reportId).cookie(session))
+        mvc.perform(get("/api/v1/lesson-reports/{id}/official-pdf", reportId).cookie(session))
                 .andExpect(status().isOk())
                 .andExpect(followsContract())
                 .andExpect(
                         header().string(
                                         "Content-Disposition",
                                         "inline; filename=\"relatorio-aula-2026-09-21.pdf\""));
-        mvc.perform(get("/api/v1/relatorios-aula/{id}/pdf-oficial", reportId).cookie(sessionBruno))
+        mvc.perform(get("/api/v1/lesson-reports/{id}/official-pdf", reportId).cookie(sessionBruno))
                 .andExpect(status().isNotFound());
     }
 }

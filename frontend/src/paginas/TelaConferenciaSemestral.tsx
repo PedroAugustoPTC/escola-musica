@@ -58,20 +58,20 @@ export function TelaConferenciaSemestral() {
   const [erroDialogo, setErroDialogo] = useState<unknown>(null);
 
   const dados = relatorio.data;
-  const trabalhoEmCurso = trabalhoAlteracao ?? dados?.trabalhoEmCursoId ?? null;
+  const trabalhoEmCurso = trabalhoAlteracao ?? dados?.activeJobId ?? null;
   const polling = usePollingTrabalho(trabalhoEmCurso ?? undefined);
   const aviso =
     avisoAtual !== undefined
       ? avisoAtual
       : dados && estadoInicial?.resultado
-        ? avisoDoResultado(estadoInicial.resultado, estadoInicial.textoEntendido, dados.versaoVigente)
+        ? avisoDoResultado(estadoInicial.resultado, estadoInicial.textoEntendido, dados.currentVersion)
         : null;
 
   useEffect(() => {
     if (!dados || trabalhoEmCurso) return;
-    if (dados.status === 'APROVADO') {
-      navegar(`/relatorios-semestrais/${dados.relatorioId}/aprovado`, { replace: true });
-    } else if (dados.status === 'CANCELADO') {
+    if (dados.status === 'APPROVED') {
+      navegar(`/relatorios-semestrais/${dados.reportId}/aprovado`, { replace: true });
+    } else if (dados.status === 'CANCELLED') {
       navegar('/', { replace: true });
     }
   }, [dados, trabalhoEmCurso, navegar]);
@@ -87,9 +87,9 @@ export function TelaConferenciaSemestral() {
       });
       setAviso(
         avisoDoResultado(
-          concluido.resultadoCodigo ?? null,
-          concluido.textoEntendido ?? null,
-          atualizado.versaoVigente,
+          concluido.resultCode ?? null,
+          concluido.understoodText ?? null,
+          atualizado.currentVersion,
         ),
       );
       setTrabalhoAlteracao(null);
@@ -99,7 +99,7 @@ export function TelaConferenciaSemestral() {
 
   const contexto = {
     sobretitulo: 'Relatório semestral',
-    titulo: dados?.informacoesGerais.nome ?? '',
+    titulo: dados?.generalInformation.name ?? '',
     voltarPara: '/',
   };
 
@@ -120,11 +120,11 @@ export function TelaConferenciaSemestral() {
   if (!dados) return null;
 
   const aplicando = trabalhoEmCurso !== null;
-  const versao = dados.versaoVigente;
+  const versao = dados.currentVersion;
   const podeAjustar = !aplicando && !enviandoAjuste && (ajuste.trim() !== '' || audio !== null);
 
   const tratarConflito = (falha: unknown): boolean => {
-    if (falha instanceof ErroApi && falha.codigo === 'VERSAO_DESATUALIZADA') {
+    if (falha instanceof ErroApi && falha.codigo === 'STALE_VERSION') {
       setDesatualizada(true);
       void relatorio.refetch();
       return true;
@@ -138,10 +138,10 @@ export function TelaConferenciaSemestral() {
     setErroAjuste(null);
     setAviso(null);
     try {
-      const { trabalhoId } = audio
+      const { jobId } = audio
         ? await semestral.alterarAudio(relatorioId, audio, versao)
         : await semestral.alterarTexto(relatorioId, ajuste.trim(), versao);
-      setTrabalhoAlteracao(trabalhoId);
+      setTrabalhoAlteracao(jobId);
       setAjuste('');
       setAudio(null);
       setChaveGravador((c) => c + 1);
@@ -185,7 +185,7 @@ export function TelaConferenciaSemestral() {
       barraAcoes={
         <>
           <Botao variante="link-perigo" disabled={aplicando} onClick={() => setDialogo('cancelar')}>
-            {msg('BOTAO_CANCELAR_RELATORIO')}
+            {msg('CANCEL_REPORT_BUTTON')}
           </Botao>
           <Botao
             tamanho="grande"
@@ -193,32 +193,32 @@ export function TelaConferenciaSemestral() {
             disabled={aplicando || desatualizada}
             onClick={() => setDialogo('aprovar')}
           >
-            {msg('BOTAO_APROVAR')} · versão {versao}
+            {msg('APPROVE_BUTTON')} · versão {versao}
           </Botao>
         </>
       }
     >
       <div className="pagina pagina--conferencia">
         <div>
-          <div className="sobretitulo">Relatório semestral · {dados.informacoesGerais.periodoRotulo}</div>
-          <h1 className="titulo-pagina">{msg('CONFERENCIA_TITULO')}</h1>
+          <div className="sobretitulo">Relatório semestral · {dados.generalInformation.periodLabel}</div>
+          <h1 className="titulo-pagina">{msg('REVIEW_TITLE')}</h1>
           <div className="conferencia__chips">
             <span className="chip chip--aviso">
               <Icone nome="schedule" tamanho="pequeno" />
-              {msg('STATUS_AGUARDANDO_CONFERENCIA')}
+              {msg('STATUS_AWAITING_REVIEW')}
             </span>
-            <span className="chip chip--contorno">{msg('CONFERENCIA_VERSAO', { versao })}</span>
+            <span className="chip chip--contorno">{msg('REVIEW_VERSION', { version: versao })}</span>
           </div>
         </div>
         <div className="consolidacao">
-          <span className="consolidacao__numero">{dados.informacoesGerais.quantidadeAulasConsideradas}</span>{' '}
-          <span>{msg('AULAS_CONSIDERADAS', { quantidade: '' }).trim()}</span>
+          <span className="consolidacao__numero">{dados.generalInformation.consideredLessonCount}</span>{' '}
+          <span>{msg('CONSIDERED_LESSONS', { quantity: '' }).trim()}</span>
         </div>
-        {dados.quantidadeRelatoriosEmAberto > 0 ? (
+        {dados.openReportCount > 0 ? (
           <div role="status" className="alerta alerta--aviso">
             <Icone nome="warning" />
             <div className="alerta__texto">
-              {msg('HA_RELATORIOS_EM_ABERTO', { quantidade: dados.quantidadeRelatoriosEmAberto })}
+              {msg('OPEN_REPORTS_EXIST', { quantity: dados.openReportCount })}
             </div>
           </div>
         ) : null}
@@ -245,7 +245,7 @@ export function TelaConferenciaSemestral() {
           <div role="status" className="alerta alerta--info">
             <span className="girador" aria-hidden="true" />
             <div className="alerta__texto">
-              <strong>{msg('ALTERACAO_EM_APLICACAO')}</strong> Uma nova versão será gerada em instantes.
+              <strong>{msg('CHANGE_BEING_APPLIED')}</strong> Uma nova versão será gerada em instantes.
             </div>
           </div>
         ) : null}
@@ -285,12 +285,12 @@ export function TelaConferenciaSemestral() {
           {mostrarTexto ? (
             <div className="conferencia__texto">
               <SecoesSemestral
-                secoes={secoesSemestral(dados.informacoesGerais, dados.conteudo)}
+                secoes={secoesSemestral(dados.generalInformation, dados.content)}
                 esmaecido={aplicando}
               />
               <div className="campo">
                 <label htmlFor={idAjuste} className="campo__rotulo">
-                  {msg('PEDIDO_ALTERACAO_ROTULO')}
+                  {msg('CHANGE_REQUEST_LABEL')}
                 </label>
                 <textarea
                   id={idAjuste}
@@ -306,7 +306,7 @@ export function TelaConferenciaSemestral() {
               <GravadorAudio
                 key={chaveGravador}
                 compacto
-                limiteMb={inicio.data?.limiteAudioMb ?? 50}
+                limiteMb={inicio.data?.audioLimitMb ?? 50}
                 aoMudar={setAudio}
                 desabilitado={aplicando || enviandoAjuste}
               />
@@ -319,16 +319,16 @@ export function TelaConferenciaSemestral() {
                 carregando={enviandoAjuste}
                 onClick={() => void solicitarAlteracao()}
               >
-                {msg('BOTAO_SOLICITAR_ALTERACAO')}
+                {msg('REQUEST_CHANGE_BUTTON')}
               </Botao>
             </div>
           ) : null}
           {mostrarPdf ? (
             <VisualizadorPdf
-              caminho={caminhoPdfSemestral(dados.relatorioId, versao)}
+              caminho={caminhoPdfSemestral(dados.reportId, versao)}
               versao={versao}
-              disponivel={Boolean(dados.pdfDisponivel) && !aplicando}
-              nomeArquivo={`relatorio-semestral-${dados.periodoChave}-v${versao}.pdf`}
+              disponivel={Boolean(dados.pdfAvailable) && !aplicando}
+              nomeArquivo={`relatorio-semestral-${dados.periodKey}-v${versao}.pdf`}
             />
           ) : null}
         </div>
@@ -337,8 +337,8 @@ export function TelaConferenciaSemestral() {
         aberto={dialogo === 'aprovar'}
         icone="verified"
         titulo={`Aprovar a versão ${versao}?`}
-        texto={msg('CONFIRMAR_APROVACAO', { versao })}
-        rotuloConfirmar={msg('BOTAO_CONFIRMAR_APROVACAO', { versao })}
+        texto={msg('CONFIRM_APPROVAL', { version: versao })}
+        rotuloConfirmar={msg('CONFIRM_APPROVAL_BUTTON', { version: versao })}
         carregando={confirmando}
         erro={erroDialogo ? textoDoErro(erroDialogo) : undefined}
         aoConfirmar={() => void confirmar()}
@@ -352,8 +352,8 @@ export function TelaConferenciaSemestral() {
         perigo
         icone="block"
         titulo="Cancelar este relatório?"
-        texto={msg('CONFIRMAR_CANCELAMENTO')}
-        rotuloConfirmar={msg('BOTAO_CONFIRMAR_CANCELAMENTO')}
+        texto={msg('CONFIRM_CANCELLATION')}
+        rotuloConfirmar={msg('CONFIRM_CANCELLATION_BUTTON')}
         carregando={confirmando}
         erro={erroDialogo ? textoDoErro(erroDialogo) : undefined}
         aoConfirmar={() => void confirmar()}

@@ -147,6 +147,6 @@ public class Student {
 
     @Override
     public String toString() {
-        return "Aluno[id=" + id + "]";
+        return "Student[id=" + id + "]";
     }
 }

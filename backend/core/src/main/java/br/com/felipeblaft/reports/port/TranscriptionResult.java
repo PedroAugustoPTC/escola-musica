@@ -8,6 +8,6 @@ public record TranscriptionResult(
 
     @Override
     public String toString() {
-        return "ResultadoTranscricao[duracao=" + durationSeconds + "]";
+        return "TranscriptionResult[duration=" + durationSeconds + "]";
     }
 }

@@ -91,7 +91,7 @@ class ChannelActionRepositoryAdapter implements ChannelActionRepository {
         }
         jpa.reserveBatch(batch.get(), leaseAte);
         return jpa.findByBatchIdOrderBySeq(batch.get()).stream()
-                .filter(e -> ChannelActionState.PENDENTE.name().equals(e.state))
+                .filter(e -> ChannelActionState.PENDING.name().equals(e.state))
                 .map(this::read)
                 .toList();
     }

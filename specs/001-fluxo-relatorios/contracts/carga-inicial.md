@@ -28,7 +28,7 @@ repassa o código ao professor fora do sistema.
 ```json
 {
   "teachers": [
-    { "email": "clara@exemplo.test", "name": "Clara Souza", "active": true }
+    { "email": "clara@example.test", "name": "Clara Souza", "active": true }
   ],
   "students": [
     {
@@ -37,7 +37,7 @@ repassa o código ao professor fora do sistema.
       "birthDate": "2014-05-10",
       "guardianName": "Responsável Fictício",
       "instrument": "Piano",
-      "teachers": ["clara@exemplo.test"]
+      "teachers": ["clara@example.test"]
     }
   ]
 }

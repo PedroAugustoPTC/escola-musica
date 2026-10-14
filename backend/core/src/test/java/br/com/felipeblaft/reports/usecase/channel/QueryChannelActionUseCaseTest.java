@@ -27,12 +27,12 @@ class QueryChannelActionUseCaseTest {
                                 Duration.ofHours(24)))
                 .run(
                         "u1",
-                        ChannelActionOrigin.RESPOSTA_UPDATE,
+                        ChannelActionOrigin.UPDATE_REPLY,
                         1L,
                         List.of(
                                 new NewAction(
                                         "u1-0",
-                                        ChannelActionType.MENSAGEM,
+                                        ChannelActionType.MESSAGE,
                                         1L,
                                         null,
                                         null,
@@ -40,7 +40,7 @@ class QueryChannelActionUseCaseTest {
                                         null)));
         QueryChannelActionUseCase query = new QueryChannelActionUseCase(repository);
 
-        assertThat(query.run("u1-0").orElseThrow().state()).isEqualTo(ChannelActionState.ENTREGUE);
+        assertThat(query.run("u1-0").orElseThrow().state()).isEqualTo(ChannelActionState.DELIVERED);
         assertThat(query.run("u9-9")).isEmpty();
     }
 }

@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api, type Esquemas } from './clienteApi';
 
-export type TrabalhoDto = Esquemas['TrabalhoDto'];
+export type TrabalhoDto = Esquemas['JobDto'];
 
 /** Intervalo do polling (R-06) e limite depois do qual a tela oferece voltar ao Painel. */
 export const INTERVALO_POLLING_MS = 2000;
@@ -10,7 +10,7 @@ export const LIMITE_POLLING_MS = 10 * 60 * 1000;
 
 export function trabalhoFinalizado(trabalho: TrabalhoDto | undefined): boolean {
   return (
-    trabalho?.status === 'CONCLUIDO' || trabalho?.status === 'FALHOU' || trabalho?.status === 'DESCARTADO'
+    trabalho?.status === 'COMPLETED' || trabalho?.status === 'FAILED' || trabalho?.status === 'DISCARDED'
   );
 }
 
@@ -25,7 +25,7 @@ export function usePollingTrabalho(trabalhoId: string | undefined) {
 
   const consulta = useQuery<TrabalhoDto>({
     queryKey: ['trabalho', trabalhoId],
-    queryFn: ({ signal }) => api.get<TrabalhoDto>(`/trabalhos/${trabalhoId}`, signal),
+    queryFn: ({ signal }) => api.get<TrabalhoDto>(`/jobs/${trabalhoId}`, signal),
     enabled: Boolean(trabalhoId) && !excedeuLimite,
     refetchInterval: (query) => {
       if (trabalhoFinalizado(query.state.data)) return false;

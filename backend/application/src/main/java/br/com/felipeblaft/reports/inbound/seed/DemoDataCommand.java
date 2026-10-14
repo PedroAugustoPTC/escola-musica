@@ -284,11 +284,11 @@ public class DemoDataCommand {
     private ReportVersion lessonVersion(LessonReport report, Channel channel, Instant when) {
         ReportVersion version =
                 ReportVersion.create(
-                        ReportType.AULA,
+                        ReportType.LESSON,
                         report.id(),
                         1,
                         report.content(),
-                        VersionOrigin.ESTRUTURACAO_INICIAL,
+                        VersionOrigin.INITIAL_STRUCTURING,
                         null,
                         channel,
                         "lesson-structuring.v1",
@@ -336,11 +336,11 @@ public class DemoDataCommand {
                     semester.save(report);
                     ReportVersion version =
                             ReportVersion.create(
-                                    ReportType.SEMESTRAL,
+                                    ReportType.SEMESTER,
                                     report.id(),
                                     1,
                                     report.content(),
-                                    VersionOrigin.CONSOLIDACAO,
+                                    VersionOrigin.CONSOLIDATION,
                                     null,
                                     Channel.WEB,
                                     "semester-consolidation.v1",

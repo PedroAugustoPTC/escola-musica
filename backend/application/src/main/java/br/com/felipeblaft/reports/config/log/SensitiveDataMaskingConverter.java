@@ -15,7 +15,7 @@ public class SensitiveDataMaskingConverter implements ValueMasker {
     static final String MASK = "***";
 
     private static final List<String> HIDDEN_FIELDS =
-            List.of("transcricao", "texto", "conteudo", "cpf", "codigo", "token");
+            List.of("transcription", "text", "content", "cpf", "code", "token");
 
     private static final List<Pattern> PATTERNS =
             List.of(

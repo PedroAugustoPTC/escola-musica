@@ -33,6 +33,6 @@ test('descartar cancela o relatório e pede um novo áudio', async ({ page }) =>
     .getByRole('button', { name: 'Sim, descartar' })
     .click();
   await expect(page.getByRole('button', { name: 'Enviar áudio e gerar relatório' })).toBeVisible();
-  const aberto = await page.request.get(`/api/v1/alunos/${dados.alunos.matteo}/relatorio-em-aberto`);
+  const aberto = await page.request.get(`/api/v1/students/${dados.alunos.matteo}/open-report`);
   expect(aberto.status()).toBe(204);
 });

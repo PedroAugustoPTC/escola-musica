@@ -9,7 +9,7 @@ export type Parametros = Record<string, string | number | null | undefined>;
 export function msg(codigo: CodigoMensagem | string, parametros: Parametros = {}): string {
   const modelo = (catalogo as Record<string, string>)[codigo];
   if (modelo === undefined) {
-    return (catalogo as Record<string, string>).ERRO_INTERNO ?? '';
+    return (catalogo as Record<string, string>).INTERNAL_ERROR ?? '';
   }
   return modelo.replace(/\{([A-Za-z]+)\}/g, (_, chave: string) => {
     const valor = parametros[chave];

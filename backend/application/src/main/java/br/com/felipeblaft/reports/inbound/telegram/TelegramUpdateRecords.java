@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface TelegramUpdateRecords {
 
     /** Origem gravada para updates que entraram pela rota interna do canal. */
-    String INTERNAL_ORIGIN = "INTERNO";
+    String INTERNAL_ORIGIN = "INTERNAL";
 
     /**
      * Situação de um update já registrado.

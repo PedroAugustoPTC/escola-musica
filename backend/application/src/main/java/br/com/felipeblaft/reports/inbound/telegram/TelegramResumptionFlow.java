@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
 @Order(5)
 public class TelegramResumptionFlow implements TelegramFlow {
 
-    static final String DISCARD_CONFIRMATION = "descartar";
+    static final String DISCARD_CONFIRMATION = "discard";
 
     private final GetOpenReportUseCase getOpen;
     private final CancelLessonReportUseCase cancel;
@@ -68,7 +68,7 @@ public class TelegramResumptionFlow implements TelegramFlow {
     /** Aluno do aviso em aberto guardado na conversa, se a conversa está nessa etapa. */
     private Optional<UUID> noticeStudent(TelegramContext context) {
         TelegramConversation conversation = context.conversation();
-        if (conversation.step() != ConversationFlowStep.AVISO_RELATORIO_EM_ABERTO) {
+        if (conversation.step() != ConversationFlowStep.OPEN_REPORT_NOTICE) {
             return Optional.empty();
         }
         return conversation
@@ -79,15 +79,15 @@ public class TelegramResumptionFlow implements TelegramFlow {
     @Override
     public boolean aoCallback(TelegramContext context, String action, String argument) {
         switch (action) {
-            case "cont" -> {
+            case "continue" -> {
                 return noticeStudent(context)
                         .map(student -> proceed(context, student))
                         .orElse(false);
             }
-            case "desc" -> {
+            case "discard" -> {
                 return noticeStudent(context).map(student -> askDiscard(context)).orElse(false);
             }
-            case "descok" -> {
+            case "discard-ok" -> {
                 Optional<UUID> student = noticeStudent(context);
                 if (student.isEmpty()
                         || !context.conversation()
@@ -129,7 +129,7 @@ public class TelegramResumptionFlow implements TelegramFlow {
     @Override
     public String whatICanReceive(TelegramContext context) {
         return noticeStudent(context).isPresent()
-                ? presenter.label("BOTAO_CONTINUAR") + " / " + presenter.label("BOTAO_DESCARTAR")
+                ? presenter.label("CONTINUE_BUTTON") + " / " + presenter.label("DISCARD_BUTTON")
                 : null;
     }
 
@@ -147,7 +147,7 @@ public class TelegramResumptionFlow implements TelegramFlow {
             return true;
         }
         OpenReport report = openReport.get();
-        if (report.reportId() != null && report.type() == ReportType.AULA) {
+        if (report.reportId() != null && report.type() == ReportType.LESSON) {
             presentation
                     .present(
                             context.chatId(),
@@ -157,12 +157,12 @@ public class TelegramResumptionFlow implements TelegramFlow {
                             null)
                     .forEach(context::answer);
         } else {
-            String step = report.step() == null ? "TRANSCREVENDO" : report.step().name();
+            String step = report.step() == null ? "TRANSCRIBING" : report.step().name();
             context.answer(
                     presenter.simple(
                             context.chatId(),
-                            "PROCESSAMENTO_EM_ANDAMENTO",
-                            Map.of("etapa", presenter.formatting().step(step))));
+                            "PROCESSING_IN_PROGRESS",
+                            Map.of("step", presenter.formatting().step(step))));
         }
         return true;
     }
@@ -172,8 +172,8 @@ public class TelegramResumptionFlow implements TelegramFlow {
         context.answer(
                 presenter.confirmation(
                         context.chatId(),
-                        presenter.text("CONFIRMAR_DESCARTE"),
-                        presenter.button("BOTAO_CONFIRMAR_DESCARTE", "descok")));
+                        presenter.text("CONFIRM_DISCARD"),
+                        presenter.button("CONFIRM_DISCARD_BUTTON", "discard-ok")));
         return true;
     }
 
@@ -196,7 +196,7 @@ public class TelegramResumptionFlow implements TelegramFlow {
             interpreter.showHome(context);
             return true;
         }
-        context.answer(presenter.simple(context.chatId(), "RELATORIO_CANCELADO"));
+        context.answer(presenter.simple(context.chatId(), "REPORT_CANCELLED"));
         if (conversation.pendingAudio().isPresent()) {
             // o áudio enviado antes do aviso ainda vale: vira o novo registro
             registration.registerPendingAudio(context, student.get(), context.callbackMessageId());

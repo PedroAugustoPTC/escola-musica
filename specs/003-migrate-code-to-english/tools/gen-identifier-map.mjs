@@ -119,7 +119,7 @@ function translateWord(glossary, word) {
 
 /** Escolhe o valor de uma palavra polissêmica: pelo contexto do chamador, depois pelos vizinhos. */
 function resolveContextual(word, neighbours, options) {
-  const rules = CONTEXTUAL[word];
+  const rules = Object.hasOwn(CONTEXTUAL, word) ? CONTEXTUAL[word] : null;
   if (!rules) return null;
   if (options.context) {
     const forced = rules.find((rule) => rule.context === options.context);
@@ -160,7 +160,7 @@ export function translateIdentifier(identifier, glossary, options = {}) {
   const lower = parts.map((part) => stripAccents(part).toLowerCase());
   const isAmbiguous = (word) => (glossary.matching?.ambiguousWords ?? []).includes(word);
   const isPt = (word) =>
-    lookup(glossary, word) !== null || Object.hasOwn(glossary.words, word) || Boolean(CONTEXTUAL[word]);
+    lookup(glossary, word) !== null || Object.hasOwn(glossary.words, word) || Object.hasOwn(CONTEXTUAL, word);
 
   // classifica; palavra ambígua só entra na corrida quando encostada em palavra portuguesa
   const kinds = lower.map((word) => (isPt(word) ? 'pt' : 'en'));
@@ -221,11 +221,11 @@ function translateRun(words, glossary, options, reasons) {
       reasons.add(`contextual: ${word} (${CONTEXTUAL[word].map((rule) => rule.en).join('|')})`);
     }
     if (GENITIVE.has(word)) return null;
-    if (PREPOSITIONS[word]) {
+    if (Object.hasOwn(PREPOSITIONS, word)) {
       reasons.add('conectivo');
       return PREPOSITIONS[word];
     }
-    if (atSuffix && NOUN_AS_PARTICIPLE[word]) return NOUN_AS_PARTICIPLE[word];
+    if (atSuffix && Object.hasOwn(NOUN_AS_PARTICIPLE, word)) return NOUN_AS_PARTICIPLE[word];
     if (word === 'data') return list.length > 1 || originalOrder.length > 1 ? 'date' : 'data';
     const translated = translateWord(glossary, word);
     if (translated) return translated.en;
@@ -367,6 +367,15 @@ function main() {
       item.novo = done.novo;
       item.needsReview = false;
       item.herdado = Number(earlier);
+    }
+  }
+  // União (`--union 3,2`): nomes antigos de fatias anteriores que já não aparecem como identificador mas ainda aparecem em
+  // literais (ex.: nome de classe dentro de um toString) continuam no mapa, para a edição de literais da fatia.
+  for (const earlier of (option('--union') ?? '').split(',').filter(Boolean)) {
+    const earlierPath = resolve(root, `specs/003-migrate-code-to-english/tools/maps/slice-${earlier}.json`);
+    for (const done of JSON.parse(readFileSync(earlierPath, 'utf8'))) {
+      if (map.some((candidate) => candidate.antigo === done.antigo) || Object.hasOwn(reviewed, done.antigo)) continue;
+      map.push({ antigo: done.antigo, novo: done.novo, needsReview: false, motivo: 'união', herdado: Number(earlier), exemplos: [] });
     }
   }
   const finalMap = map.filter((item) => item.novo !== item.antigo || item.needsReview);

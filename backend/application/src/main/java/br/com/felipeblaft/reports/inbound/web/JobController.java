@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /** Etapa e resultado de um processamento, consultados pela Web a cada 2 s (FR-021). */
 @RestController
-@RequestMapping("/api/v1/trabalhos")
+@RequestMapping("/api/v1/jobs")
 public class JobController {
 
     private final QueryJobUseCase query;
@@ -27,16 +27,16 @@ public class JobController {
     }
 
     /** "Descartar e começar um novo" para um registro ainda em transcrição (retomada, US3). */
-    @PostMapping("/{trabalhoId}/descarte")
+    @PostMapping("/{jobId}/discard")
     public ResponseEntity<Void> discard(
-            @AuthenticationPrincipal AuthenticatedTeacher teacher, @PathVariable UUID trabalhoId) {
-        discard.run(teacher.id(), trabalhoId);
+            @AuthenticationPrincipal AuthenticatedTeacher teacher, @PathVariable UUID jobId) {
+        discard.run(teacher.id(), jobId);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{trabalhoId}")
+    @GetMapping("/{jobId}")
     public JobDto job(
-            @AuthenticationPrincipal AuthenticatedTeacher teacher, @PathVariable UUID trabalhoId) {
-        return LessonReportMapper.job(query.run(teacher.id(), trabalhoId));
+            @AuthenticationPrincipal AuthenticatedTeacher teacher, @PathVariable UUID jobId) {
+        return LessonReportMapper.job(query.run(teacher.id(), jobId));
     }
 }

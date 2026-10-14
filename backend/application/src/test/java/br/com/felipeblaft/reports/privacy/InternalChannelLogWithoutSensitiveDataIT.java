@@ -43,7 +43,7 @@ import tools.jackson.databind.JsonNode;
 class InternalChannelLogWithoutSensitiveDataIT extends OrchestratorDeliveryBase {
 
     private static final String RESPONSE = "Resposta sigilosa sobre a rotina de estudo da semana";
-    private static final String BASE = "/interno/v1/canal/telegram";
+    private static final String BASE = "/internal/v1/channel/telegram";
 
     @Autowired SaveChannelActionsUseCase save;
 
@@ -93,8 +93,7 @@ class InternalChannelLogWithoutSensitiveDataIT extends OrchestratorDeliveryBase 
     }
 
     private MvcResult update(String json, String token, String secret) throws Exception {
-        var request =
-                post(BASE + "/atualizacao").contentType(MediaType.APPLICATION_JSON).content(json);
+        var request = post(BASE + "/update").contentType(MediaType.APPLICATION_JSON).content(json);
         if (token != null) {
             request.header("X-N8N-Service-Token", token);
         }
@@ -107,8 +106,8 @@ class InternalChannelLogWithoutSensitiveDataIT extends OrchestratorDeliveryBase 
     private JsonNode throughInternalApi(String json) throws Exception {
         MvcResult result = update(json, TOKEN_SERVICE, SECRET);
         JsonNode body = JSON.readTree(result.getResponse().getContentAsString());
-        orchestratorExecutor().run(body.get("acoes"));
-        return body.get("acoes");
+        orchestratorExecutor().run(body.get("actions"));
+        return body.get("actions");
     }
 
     @Test
@@ -129,7 +128,7 @@ class InternalChannelLogWithoutSensitiveDataIT extends OrchestratorDeliveryBase 
         assertThat(response).contains("Ocorreu um erro inesperado");
         String logs = logText();
         assertThat(logs)
-                .contains("telegram-erro-interpretacao updateId=" + update)
+                .contains("telegram-interpretation-error updateId=" + update)
                 .contains("IllegalStateException");
         for (String forbidden :
                 List.of("Matteo", "123.456.789-09", "Czerny", "valsa", RESPONSE, "causa:")) {
@@ -138,7 +137,10 @@ class InternalChannelLogWithoutSensitiveDataIT extends OrchestratorDeliveryBase 
         }
         assertThat(
                         events.list.stream()
-                                .filter(e -> e.getFormattedMessage().contains("erro-interpretacao"))
+                                .filter(
+                                        e ->
+                                                e.getFormattedMessage()
+                                                        .contains("interpretation-error"))
                                 .allMatch(e -> e.getThrowableProxy() == null))
                 .as("sem stack trace")
                 .isTrue();
@@ -152,16 +154,16 @@ class InternalChannelLogWithoutSensitiveDataIT extends OrchestratorDeliveryBase 
         for (MvcResult refused :
                 List.of(
                         update("{}", null, SECRET),
-                        update("{}", "tok-teste-123", SECRET),
-                        update("{}", TOKEN_SERVICE, "segredo-errado"),
+                        update("{}", "tok-test-123", SECRET),
+                        update("{}", TOKEN_SERVICE, "wrong-secret"),
                         update("{ dado do aluno Matteo nao e json", TOKEN_SERVICE, SECRET),
                         mvc.perform(
-                                        get(BASE + "/documentos/" + "Z".repeat(43))
+                                        get(BASE + "/documents/" + "Z".repeat(43))
                                                 .header("X-N8N-Service-Token", TOKEN_SERVICE))
                                 .andReturn(),
                         mvc.perform(
-                                        get(BASE + "/acoes/u0-0")
-                                                .header("X-N8N-Service-Token", "tok-teste-123"))
+                                        get(BASE + "/actions/u0-0")
+                                                .header("X-N8N-Service-Token", "tok-test-123"))
                                 .andReturn())) {
             refusedRequests.add(refused);
         }
@@ -169,16 +171,16 @@ class InternalChannelLogWithoutSensitiveDataIT extends OrchestratorDeliveryBase 
         // ---- conversa interna: vínculo, áudio, perguntas, respostas, conferência e PDF
         sendText(
                 USER_CLARA, ScenarioIT.CODE_CLARA); // vínculo pelo webhook (já coberto no outro IT)
-        prepareTelegramFile("aula", AudioNormalizationTest.AUDIO_WITH_SPEECH);
+        prepareTelegramFile("lesson", AudioNormalizationTest.AUDIO_WITH_SPEECH);
         throughInternalApi(messageJson(nextUpdate(), USER_CLARA, "\"text\": \"Matteo\""));
         throughInternalApi(
                 messageJson(
                         nextUpdate(),
                         USER_CLARA,
-                        "\"voice\": {\"file_id\": \"aula\", \"file_unique_id\": \"u-aula\", \"mime_type\": \"audio/ogg\", \"file_size\": 1000, \"duration\": 30}"));
+                        "\"voice\": {\"file_id\": \"lesson\", \"file_unique_id\": \"u-lesson\", \"mime_type\": \"audio/ogg\", \"file_size\": 1000, \"duration\": 30}"));
         throughInternalApi(
                 """
-                {"update_id": %d, "callback_query": {"id": "cb1", "data": "v1:confal:",
+                {"update_id": %d, "callback_query": {"id": "cb1", "data": "v1:confirm-student:",
                  "from": {"id": %d, "is_bot": false, "first_name": "Teste"},
                  "message": {"message_id": 55, "date": 1, "chat": {"id": %d, "type": "private"}}}}
                 """
@@ -197,27 +199,27 @@ class InternalChannelLogWithoutSensitiveDataIT extends OrchestratorDeliveryBase 
                                 """
                                         .formatted(nextUpdate(), USER_CLARA, USER_CLARA))
                         .get(1);
-        String documentId = pdf.path("documentoId").asString();
+        String documentId = pdf.path("documentId").asString();
         assertThat(documentId).hasSize(43);
 
         // ---- entrega com retentativa, compensação e falha definitiva
         save.run(
-                "p:edicao:1",
-                ChannelActionOrigin.PROATIVA,
+                "p:edit:1",
+                ChannelActionOrigin.PROACTIVE,
                 null,
                 List.of(
                         new NewAction(
-                                "p:edicao:1:0",
-                                ChannelActionType.EDICAO,
+                                "p:edit:1:0",
+                                ChannelActionType.EDIT,
                                 USER_CLARA,
                                 clara.id(),
                                 null,
-                                "{\"tipo\":\"EDICAO\",\"chatId\":"
+                                "{\"type\":\"EDIT\",\"chatId\":"
                                         + USER_CLARA
-                                        + ",\"mensagemId\":9,\"texto\":\"Texto sigiloso da edição\",\"teclado\":{\"linhas\":[]}}",
-                                "{\"tipo\":\"MENSAGEM\",\"chatId\":"
+                                        + ",\"messageId\":9,\"text\":\"Texto sigiloso da edição\",\"keyboard\":{\"rows\":[]}}",
+                                "{\"type\":\"MESSAGE\",\"chatId\":"
                                         + USER_CLARA
-                                        + ",\"texto\":\"Texto sigiloso da edição\"}")));
+                                        + ",\"text\":\"Texto sigiloso da edição\"}")));
         answer(503);
         task.dispatch();
         clock.advance(Duration.ofMinutes(2));
@@ -234,19 +236,19 @@ class InternalChannelLogWithoutSensitiveDataIT extends OrchestratorDeliveryBase 
                                                 "{\"ok\":false,\"description\":\"Bad Request: message to edit not found\"}")));
         drain(6);
         save.run(
-                "p:edicao:2",
-                ChannelActionOrigin.PROATIVA,
+                "p:edit:2",
+                ChannelActionOrigin.PROACTIVE,
                 null,
                 List.of(
                         new NewAction(
-                                "p:edicao:2:0",
-                                ChannelActionType.MENSAGEM,
+                                "p:edit:2:0",
+                                ChannelActionType.MESSAGE,
                                 USER_CLARA,
                                 clara.id(),
                                 null,
-                                "{\"tipo\":\"MENSAGEM\",\"chatId\":"
+                                "{\"type\":\"MESSAGE\",\"chatId\":"
                                         + USER_CLARA
-                                        + ",\"texto\":\"Texto sigiloso que vai expirar\"}",
+                                        + ",\"text\":\"Texto sigiloso que vai expirar\"}",
                                 null)));
         answer(500);
         clock.advance(Duration.ofHours(25));
@@ -255,7 +257,7 @@ class InternalChannelLogWithoutSensitiveDataIT extends OrchestratorDeliveryBase 
         // ---- os logs de tudo isso
         String logs = logText();
         assertThat(events.list).as("a captura de logs funcionou").isNotEmpty();
-        assertThat(logs).contains("canal-acao-falha-definitiva acaoId=p:edicao:2:0");
+        assertThat(logs).contains("channel-action-permanent-failure actionId=p:edit:2:0");
         Map<String, String> forbidden =
                 Map.ofEntries(
                         Map.entry("nome de aluno", "Matteo"),
@@ -263,14 +265,14 @@ class InternalChannelLogWithoutSensitiveDataIT extends OrchestratorDeliveryBase 
                         Map.entry("código de acesso", ScenarioIT.CODE_CLARA),
                         Map.entry("token do bot", TOKEN),
                         Map.entry("token de serviço atual", TOKEN_SERVICE),
-                        Map.entry("token de serviço próximo", "token-servico-proximo-teste"),
-                        Map.entry("token de serviço errado semeado", "tok-teste-123"),
+                        Map.entry("token de serviço próximo", "next-service-token-test"),
+                        Map.entry("token de serviço errado semeado", "tok-test-123"),
                         Map.entry("segredo do webhook", SECRET),
-                        Map.entry("segredo do webhook errado", "segredo-errado"),
-                        Map.entry("token do orquestrador", "segredo-do-orquestrador"),
-                        Map.entry("segredo no caminho da URL", "segredo-no-caminho-123"),
+                        Map.entry("segredo do webhook errado", "wrong-secret"),
+                        Map.entry("token do orquestrador", "orchestrator-secret"),
+                        Map.entry("segredo no caminho da URL", "secret-in-path-123"),
                         Map.entry("host e porta da URL", "localhost:" + ORCHESTRATOR.port()),
-                        Map.entry("documentoId", documentId),
+                        Map.entry("documentId", documentId),
                         Map.entry("resposta do professor", RESPONSE),
                         Map.entry("texto de ação", "Texto sigiloso"),
                         Map.entry("texto de conferência", "Confira o relatório"),

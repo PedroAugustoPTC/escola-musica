@@ -37,7 +37,7 @@ import tools.jackson.databind.node.ObjectNode;
 @Component
 public class N8nOrchestratorAdapter implements ChannelOrchestratorPort {
 
-    public static final String HEADER_TOKEN = "X-Canal-Entrega-Token";
+    public static final String HEADER_TOKEN = "X-Channel-Delivery-Token";
     public static final String IDEMPOTENCY_HEADER = "Idempotency-Key";
 
     private static final Logger LOG = LoggerFactory.getLogger(N8nOrchestratorAdapter.class);
@@ -64,8 +64,8 @@ public class N8nOrchestratorAdapter implements ChannelOrchestratorPort {
     @Override
     public DeliveryResult deliver(DeliveryBatch batch) {
         if (destination == null) {
-            LOG.warn("canal-entrega-sem-destino loteId={}", batch.batchId());
-            return DeliveryResult.refused("SEM_DESTINO");
+            LOG.warn("channel-delivery-without-destination batchId={}", batch.batchId());
+            return DeliveryResult.refused("NO_DESTINATION");
         }
         HttpRequest.Builder request =
                 HttpRequest.newBuilder(destination)
@@ -84,24 +84,24 @@ public class N8nOrchestratorAdapter implements ChannelOrchestratorPort {
                     client.send(request.build(), HttpResponse.BodyHandlers.discarding());
             int status = response.statusCode();
             if (status / 100 == 2) {
-                LOG.info("canal-entrega-aceita loteId={} status={}", batch.batchId(), status);
+                LOG.info("channel-delivery-accepted batchId={} status={}", batch.batchId(), status);
                 return DeliveryResult.accept();
             }
-            LOG.warn("canal-entrega-recusada loteId={} status={}", batch.batchId(), status);
+            LOG.warn("channel-delivery-refused batchId={} status={}", batch.batchId(), status);
             return DeliveryResult.refused("HTTP_" + status);
         } catch (HttpTimeoutException timeout) { // inclui o timeout de conexão
-            LOG.warn("canal-entrega-recusada loteId={} situacao=TIMEOUT", batch.batchId());
+            LOG.warn("channel-delivery-refused batchId={} outcome=TIMEOUT", batch.batchId());
             return DeliveryResult.refused("TIMEOUT");
         } catch (InterruptedException interrupted) {
             Thread.currentThread().interrupt();
-            LOG.warn("canal-entrega-recusada loteId={} situacao=INTERROMPIDO", batch.batchId());
-            return DeliveryResult.refused("INTERROMPIDO");
+            LOG.warn("channel-delivery-refused batchId={} outcome=INTERRUPTED", batch.batchId());
+            return DeliveryResult.refused("INTERRUPTED");
         } catch (IOException | RuntimeException error) {
             LOG.warn(
-                    "canal-entrega-recusada loteId={} situacao=CONEXAO tipo={}",
+                    "channel-delivery-refused batchId={} outcome=CONNECTION type={}",
                     batch.batchId(),
                     error.getClass().getSimpleName());
-            return DeliveryResult.refused("CONEXAO");
+            return DeliveryResult.refused("CONNECTION");
         }
     }
 
@@ -112,7 +112,7 @@ public class N8nOrchestratorAdapter implements ChannelOrchestratorPort {
             ObjectNode no = ChannelActionMapper.withActionId(action.actionId(), action.payload());
             if (action.editMessageId() != null) {
                 // o id conhecido do trabalho no momento do despacho vale mais que o da publicação
-                no.put("editarMensagemId", action.editMessageId());
+                no.put("editMessageId", action.editMessageId());
             }
             actions.add(no);
         }

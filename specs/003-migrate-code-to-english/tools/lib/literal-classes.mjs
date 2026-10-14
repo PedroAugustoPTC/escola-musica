@@ -24,6 +24,8 @@ import { isSingleWord } from './java-lexer.mjs';
 
 const JPA_ANNOTATIONS = new Set(['@Entity', '@Table', '@Column', '@JoinColumn', '@JoinTable', '@SequenceGenerator', '@Index', '@Param', '@UniqueConstraint', '@CollectionTable']);
 const CONFIG_ANNOTATIONS = new Set(['@Profile', '@ActiveProfiles', '@ConditionalOnProperty', '@Value', '@ConfigurationProperties', '@TestPropertySource']);
+/** Anotações do Spring MVC cujo texto é rota, parâmetro, cabeçalho ou cookie (fio). */
+const WIRE_ANNOTATIONS = new Set(['@GetMapping', '@PostMapping', '@PutMapping', '@DeleteMapping', '@PatchMapping', '@RequestMapping', '@RequestParam', '@PathVariable', '@RequestHeader', '@CookieValue', '@RequestPart']);
 const SQL_START = /^\s*(select|insert|update|delete|with|truncate|alter|create|drop)\b/i;
 const JDBC_GETTERS = /^get(Object|String|Int|Long|Boolean|Timestamp|Bytes|BigDecimal|Date|Double|Short|Float|OffsetDateTime|LocalDate|UUID)$/;
 const CLI_EXACT = new Set(['carga', 'massa', 'emitir-codigo', '--arquivo', '--simular']);
@@ -44,6 +46,16 @@ function closingParen(tokens, open) {
     else if (tokens[i].value === ')' && tokens[i].type === 'op' && --depth === 0) return i;
   }
   return tokens.length - 1;
+}
+
+/** Posição de um código de ação de botão: `case "x", "y" ->`, `encode("x"…)` e o segundo argumento de `button(CHAVE, "x")`. */
+function isCallbackActionPosition(tokens, i) {
+  let k = i - 1;
+  while (tokens[k]?.value === ',' && (tokens[k - 1]?.type === 'string') && k - 2 >= 0) k -= 2;
+  if (tokens[k]?.value === 'case') return true;
+  const previous = tokens[i - 1];
+  if (previous?.value === '(' && tokens[i - 2]?.value === 'encode' && tokens[i - 3]?.value === '.') return true;
+  return previous?.value === ',' && tokens[i - 2]?.type === 'string' && tokens[i - 3]?.value === '(' && tokens[i - 4]?.value === 'button';
 }
 
 /** Nomes de tabela do esquema V6 (único lugar onde ainda valem em português). */
@@ -83,7 +95,12 @@ function sqlChainMembers(tokens) {
   return members;
 }
 
-export function classifyLiterals(tokens, { envNames = new Set(), path = '' } = {}) {
+export function classifyLiterals(tokens, { envNames = new Set(), path = '', slice = 3, keep = [], typedWords = [], typedWordFiles = [], callbackActions = [], mainCallbackDirs = [], callbackAmbiguous = [] } = {}) {
+  const normalizedPath = path.replace(/\\/g, '/');
+  /** Código de produção dos fluxos do Telegram: um literal avulso que é código de ação de botão é a ação, não a palavra comum. */
+  const mainCallback = slice >= 4 && normalizedPath.includes('/src/main/') && mainCallbackDirs.some((dir) => normalizedPath.includes(dir));
+  const typedHere = typedWords.length > 0 && (/\/src\/test\//.test(path.replace(/\\/g, '/')) || typedWordFiles.some((suffix) => path.endsWith(suffix)));
+  const keepHere = keep.filter((entry) => path.endsWith(entry.file));
   const inSeed = /[\/](seed|carga)[\/]/.test(path);
   const inPdf = /[\/]pdf[\/]/.test(path);
   const classes = new Map();
@@ -105,6 +122,10 @@ export function classifyLiterals(tokens, { envNames = new Set(), path = '' } = {
         classes.set(j, 'config-value');
         continue;
       }
+      if (slice >= 4 && WIRE_ANNOTATIONS.has(name) && ['value', 'path', 'name'].includes(attribute)) {
+        classes.set(j, 'wire');
+        continue;
+      }
       if (!['value', 'name', 'prefix', 'properties', 'columnNames'].includes(attribute)) continue;
       if (attribute === 'properties' && PROPERTY_ASSIGN.test(candidate.value)) classes.set(j, 'prop-assign');
       else if (name === '@Query') classes.set(j, isNative ? 'sql' : 'jpql');
@@ -119,10 +140,12 @@ export function classifyLiterals(tokens, { envNames = new Set(), path = '' } = {
     const token = tokens[i];
     if ((token.type !== 'string' && token.type !== 'textblock') || classes.has(i) || inAnnotation.has(i)) continue;
     const value = token.value;
+    if (keepHere.some((entry) => entry.from === value)) continue;
     const previous = tokens[i - 1];
     const call = tokens[i - 2];
     if (token.type === 'string' && previous?.value === '(' && call?.type === 'ident' && JDBC_GETTERS.test(call.value) && tokens[i - 3]?.value === '.' && isSingleWord(value)) classes.set(i, 'jdbc-label');
     else if (isTest && token.type === 'string' && /^[a-z]+(_[a-z]+)+$/.test(value) && previous?.value === '(' && ['get', 'containsKey', 'getOrDefault'].includes(call?.value) && tokens[i - 3]?.value === '.') classes.set(i, 'jdbc-label');
+    else if (slice >= 4 && token.type === 'string' && (isCallbackActionPosition(tokens, i) || (mainCallback && callbackActions.includes(value) && !callbackAmbiguous.includes(value) && !typedHere))) classes.set(i, 'callback-action');
     else if (inSeed && token.type === 'string' && (CLI_EXACT.has(value) || value.startsWith('--arquivo=') || /^(Uso|Comandos): /.test(value))) classes.set(i, 'cli');
     else if (inPdf && token.type === 'string' && isSingleWord(value) && isTemplateKey(tokens, i)) classes.set(i, 'template-key');
     else if (SQL_START.test(value) || chainSql.has(i) || isJdbcSqlArgument(tokens, i)) classes.set(i, 'sql');
@@ -131,6 +154,7 @@ export function classifyLiterals(tokens, { envNames = new Set(), path = '' } = {
     else if ((value.match(/\b[A-Z][A-Z0-9_]+\b/g) ?? []).some((word) => envNames.has(word))) classes.set(i, 'env-text');
     else if (PROPERTY_ASSIGN.test(value)) classes.set(i, 'prop-assign');
     else if (/^relatorios(\.[a-z][\w-]*)+$/.test(value)) classes.set(i, 'config');
+    else if (slice >= 4 && !(typedHere && (typedWords.includes(value) || (value.startsWith('/') && typedWords.includes(value.slice(1)))))) classes.set(i, 'wire');
   }
   return classes;
 }
@@ -156,6 +180,9 @@ export function mapConfigKey(key, map) {
 function mapQuoted(part, map) {
   const names = new Set(map.explicit.jsonKeys ?? []);
   const inner = part.slice(1, -1);
+  if (map.slice >= 4 && /^[A-Z][A-Z0-9_]*$/.test(inner) && map.ident.has(inner)) return `'${map.ident.get(inner)}'`;
+  // e-mail de exemplo (dado de teste) dentro de consulta: o domínio acompanha os arquivos de carga
+  if (map.slice >= 4 && /@exemplo\b/.test(inner)) return part.replace(/@exemplo\b/g, '@example');
   const key = (name) => (names.has(name) ? (map.ident.get(name) ?? name) : name);
   if (names.has(inner)) return `'${key(inner)}'`;
   const path = inner.match(/^\{([A-Za-z]+(?:,[A-Za-z]+)*)\}$/);
@@ -206,9 +233,72 @@ export function transformLiteral(kind, literal, map) {
       const mapped = map.explicit.configValues?.[value] ?? value;
       return `${mapConfigKey(literal.slice(0, at), map)}=${mapped}`;
     }
+    case 'callback-action': {
+      const actions = map.explicit.slice4?.callbackActions ?? {};
+      return Object.hasOwn(actions, literal) ? actions[literal] : mapWire(literal, map);
+    }
+    case 'wire':
+      return mapWire(literal, map);
     default:
       return literal;
   }
+}
+
+const IDENT_TOKEN = /[A-Za-z_][A-Za-z0-9_]*(?:-[A-Za-z0-9_]+)*/g;
+/** Uma palavra com inicial maiúscula (e talvez espaços): rótulo ou texto para pessoas, nunca código. */
+const CAPITALIZED_WORD = /^\s*[A-ZÀ-Ý][a-zà-ÿ]+\s*$/;
+const QUOTED = /(\\?")([A-Za-z_][A-Za-z0-9_]*)(\\?")(\s*:)?/g;
+
+/**
+ * Fatia 4: nomes que cruzam o fio dentro de literais Java. Três formas, nunca texto para pessoas:
+ *  - `v1:<ação>:…` (callback_data): só a ação, pelo vocabulário de `slice4.callbackActions`;
+ *  - JSON (`"chave":`): as chaves e os valores QUASE constantes (CAIXA_ALTA) entre aspas; os demais valores ficam;
+ *  - código (caminho, JSONPath, chave de catálogo, métrica…): cada identificador do mapa, palavra inteira.
+ */
+export function mapWire(literal, map) {
+  const actions = map.explicit.slice4?.callbackActions ?? {};
+  let text = literal.replace(/\bv1:([a-z]+)(?=:)/g, (all, action) => (Object.hasOwn(actions, action) ? `v1:${actions[action]}` : all));
+  const pathTokens = text.includes('/') ? (map.explicit.slice4?.pathTokens ?? {}) : {};
+  const mapToken = (token) => {
+    if (Object.hasOwn(pathTokens, token)) return pathTokens[token];
+    if ((map.explicit.slice4?.keepTokens ?? []).includes(token)) return token;
+    // exceção permanente `download-file-name`: o nome exibido do PDF fica em português
+    if ((map.explicit.slice4?.keepPrefixes ?? []).some((prefix) => token.startsWith(prefix))) return token;
+    if (map.ident.has(token)) return map.ident.get(token);
+    // variante com inicial maiúscula de uma palavra do mapa (`Exemplo` de `Clara@Exemplo.test`)
+    const lower = token.charAt(0).toLowerCase() + token.slice(1);
+    if (/^[A-Z][a-z]+$/.test(token) && map.ident.has(lower)) {
+      const novo = map.ident.get(lower);
+      return novo.charAt(0).toUpperCase() + novo.slice(1);
+    }
+    // cadeia com hífen que não está inteira no mapa (`canal-file-9`): cada pedaço pelo mapa
+    if (token.includes('-')) return token.split('-').map(mapToken).join('-');
+    return token;
+  };
+  const jsonish = /\\?"[A-Za-z_][A-Za-z0-9_]*\\?"\s*:/.test(text);
+  if (jsonish) {
+    return text.replace(QUOTED, (all, open, token, close, colon) => {
+      if (colon) return `${open}${mapToken(token)}${close}${colon}`;
+      return /^[A-Z][A-Z0-9_]*$/.test(token) ? `${open}${mapToken(token)}${close}` : all;
+    });
+  }
+  // com espaço é texto para pessoas (ou saída de comando), salvo o fragmento de toString ", campo="
+  // endereço de e-mail de exemplo (dado de teste): o domínio acompanha o dado da carga, mesmo dentro de texto
+  // texto para pessoas: caractere fora do ASCII (acento, reticências) ou marcação HTML do Telegram (`<i>Transcrevendo…</i>`)
+  if (/[^\x00-\x7F]/.test(text) || /<\/?[a-z]+>/.test(text)) return text;
+  const withExample = text.replace(/@exemplo\b/g, '@example').replace(/@Exemplo\b/g, '@Example').replace(/@EXEMPLO\b/g, '@EXAMPLE');
+  if (withExample !== text) return mapWire(withExample, map);
+  // mensagem de log que começa por um código de evento em kebab-case seguido de pares chave={} (`erro-inesperado tipo={} local={}`)
+  if (/^[a-z][a-z0-9]*(?:-[a-z0-9]+)+(?: [A-Za-z]+=(?:\{\}|[^ ]+))+$/.test(text)) return text.replace(IDENT_TOKEN, mapToken);
+  if (/\s/.test(text.trim()) && !/^[, ]*[a-z][A-Za-z]*=/.test(text)) {
+    // texto para pessoas: só os valores de enumeração/códigos em CAIXA_ALTA que ele cita acompanham a troca
+    return text.replace(/\b[A-Z][A-Z0-9]{2,}(?:_[A-Z0-9]+)*\b/g, (word) => {
+      const novo = mapToken(word);
+      return /^[A-Z][A-Z0-9_]*$/.test(novo) ? novo : word;
+    });
+  }
+  if (CAPITALIZED_WORD.test(text)) return text;
+  return text.replace(IDENT_TOKEN, mapToken);
 }
 
 /** Conteúdo bruto do literal (o lexer já tira as aspas de `"…"` e de `"""…"""`; os escapes ficam como no fonte). */

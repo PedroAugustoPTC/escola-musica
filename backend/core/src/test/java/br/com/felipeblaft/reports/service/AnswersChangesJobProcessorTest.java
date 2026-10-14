@@ -37,23 +37,23 @@ class AnswersChangesJobProcessorTest {
     void answerByTextIncorporatedGoesToReview() {
         LessonReport report = c.reportWithQuestions();
         c.llm.schedule(
-                TaskLlm.INCORPORACAO_RESPOSTAS,
+                TaskLlm.ANSWER_INCORPORATION,
                 ReportScenario.output("Estudou três vezes.", List.of()));
 
         ProcessingJob job =
                 c.answer.answerText(
                         c.clara.id(), report.id(), "Czerny; estudou três vezes.", Channel.WEB);
 
-        assertThat(result(job)).isEqualTo(JobResult.PRONTO_PARA_CONFERENCIA);
-        assertThat(report.status()).isEqualTo(ReportStatus.AGUARDANDO_CONFERENCIA);
+        assertThat(result(job)).isEqualTo(JobResult.READY_FOR_REVIEW);
+        assertThat(report.status()).isEqualTo(ReportStatus.AWAITING_REVIEW);
         assertThat(report.content().progress()).isEqualTo("Estudou três vezes.");
         assertThat(c.versions.versions)
                 .singleElement()
                 .extracting(v -> v.origin())
-                .isEqualTo(VersionOrigin.RESPOSTA_PERGUNTAS);
+                .isEqualTo(VersionOrigin.QUESTION_ANSWER);
         ReportInteraction interaction = c.interactions.interactions.getFirst();
-        assertThat(interaction.type()).isEqualTo(InteractionType.RESPOSTA_PERGUNTAS);
-        assertThat(interaction.medium()).isEqualTo(Medium.TEXTO);
+        assertThat(interaction.type()).isEqualTo(InteractionType.QUESTION_ANSWER);
+        assertThat(interaction.medium()).isEqualTo(Medium.TEXT);
         assertThat(interaction.channel()).isEqualTo(Channel.WEB);
         assertThat(interaction.round()).isEqualTo(1);
         assertThat(c.versions.versions.getFirst().interactionId()).isEqualTo(interaction.id());
@@ -69,7 +69,7 @@ class AnswersChangesJobProcessorTest {
         LessonReport report = c.reportWithQuestions();
         c.transcription.schedule("Foi o Czerny.");
         c.llm.schedule(
-                TaskLlm.INCORPORACAO_RESPOSTAS, ReportScenario.output("x", List.of("E a escala?")));
+                TaskLlm.ANSWER_INCORPORATION, ReportScenario.output("x", List.of("E a escala?")));
 
         ProcessingJob job =
                 c.answer.answerAudio(
@@ -78,36 +78,36 @@ class AnswersChangesJobProcessorTest {
                         ReportScenario.file("resp.ogg", 10),
                         Channel.TELEGRAM);
 
-        assertThat(result(job)).isEqualTo(JobResult.PERGUNTAS_PENDENTES);
+        assertThat(result(job)).isEqualTo(JobResult.PENDING_QUESTIONS);
         assertThat(c.queue.searchById(job.id()).orElseThrow().parameters())
                 .containsEntry("understoodText", "Foi o Czerny.");
         assertThat(report.questionRounds()).isEqualTo(2);
         assertThat(report.step()).isNull();
         assertThat(c.interactions.interactions.getFirst().medium()).isEqualTo(Medium.AUDIO);
         assertThat(c.notification.events)
-                .contains("etapa:TRANSCREVENDO_PEDIDO", "etapa:INCORPORANDO_RESPOSTAS");
+                .contains("step:TRANSCRIBING_REQUEST", "step:INCORPORATING_ANSWERS");
     }
 
     @Test
     void secondAnswerWithNewQuestionsIncorporatesIgnoresExcessAndGoesToReview() {
         LessonReport report = c.reportWithQuestions();
         c.llm.schedule(
-                TaskLlm.INCORPORACAO_RESPOSTAS,
+                TaskLlm.ANSWER_INCORPORATION,
                 ReportScenario.output("Primeira rodada.", List.of("E a escala?")),
                 ReportScenario.output("Segunda rodada.", List.of("Mais uma pergunta?")));
 
         ProcessingJob first =
                 c.answer.answerText(c.clara.id(), report.id(), "Foi o Czerny.", Channel.WEB);
-        assertThat(result(first)).isEqualTo(JobResult.PERGUNTAS_PENDENTES);
-        assertThat(report.status()).isEqualTo(ReportStatus.AGUARDANDO_RESPOSTAS);
+        assertThat(result(first)).isEqualTo(JobResult.PENDING_QUESTIONS);
+        assertThat(report.status()).isEqualTo(ReportStatus.AWAITING_ANSWERS);
         assertThat(report.questionRounds()).isEqualTo(2);
         assertThat(c.versions.versions).isEmpty();
 
         ProcessingJob second =
                 c.answer.answerText(c.clara.id(), report.id(), "Escala de Dó maior.", Channel.WEB);
 
-        assertThat(result(second)).isEqualTo(JobResult.PRONTO_PARA_CONFERENCIA);
-        assertThat(report.status()).isEqualTo(ReportStatus.AGUARDANDO_CONFERENCIA);
+        assertThat(result(second)).isEqualTo(JobResult.READY_FOR_REVIEW);
+        assertThat(report.status()).isEqualTo(ReportStatus.AWAITING_REVIEW);
         assertThat(report.questionRounds()).isEqualTo(2);
         assertThat(report.pendingQuestions()).isEmpty();
         assertThat(report.content().progress()).isEqualTo("Segunda rodada.");
@@ -117,14 +117,14 @@ class AnswersChangesJobProcessorTest {
                 .satisfies(
                         v -> {
                             assertThat(v.number()).isEqualTo(1);
-                            assertThat(v.origin()).isEqualTo(VersionOrigin.RESPOSTA_PERGUNTAS);
+                            assertThat(v.origin()).isEqualTo(VersionOrigin.QUESTION_ANSWER);
                         });
         assertThat(c.pdfDocuments.documents.values()).hasSize(1);
         assertThat(c.interactions.interactions)
                 .extracting(ReportInteraction::round)
                 .containsExactly(1, 2);
         assertThat(c.interactions.interactions)
-                .allMatch(i -> i.result() == InteractionResult.APLICADA);
+                .allMatch(i -> i.result() == InteractionResult.APPLIED);
         TaskInput.AnswerIncorporation input =
                 (TaskInput.AnswerIncorporation) c.llm.inputs.getLast();
         assertThat(input.round()).isEqualTo(2);
@@ -135,14 +135,14 @@ class AnswersChangesJobProcessorTest {
     void answerTranscriptionFailsWithoutInteractionAndWithoutConsumingRound() {
         LessonReport report = c.reportWithQuestions();
         c.transcription.schedule(
-                new AudioNotProcessableException(AudioNotProcessableException.Reason.SEM_FALA));
+                new AudioNotProcessableException(AudioNotProcessableException.Reason.NO_SPEECH));
 
         ProcessingJob job =
                 c.answer.answerAudio(
                         c.clara.id(), report.id(), ReportScenario.file("r.ogg", 10), Channel.WEB);
 
-        assertThat(result(job)).isEqualTo(JobResult.FALHA_RESPOSTA);
-        assertThat(report.status()).isEqualTo(ReportStatus.AGUARDANDO_RESPOSTAS);
+        assertThat(result(job)).isEqualTo(JobResult.ANSWER_FAILED);
+        assertThat(report.status()).isEqualTo(ReportStatus.AWAITING_ANSWERS);
         assertThat(report.questionRounds()).isEqualTo(1);
         assertThat(report.step()).isNull();
         assertThat(c.interactions.interactions).isEmpty();
@@ -151,12 +151,12 @@ class AnswersChangesJobProcessorTest {
     @Test
     void aiFailureInAnswerRegistersFailedInteraction() {
         LessonReport report = c.reportWithQuestions();
-        c.llm.schedule(TaskLlm.INCORPORACAO_RESPOSTAS, new InvalidAiOutputException("x"));
+        c.llm.schedule(TaskLlm.ANSWER_INCORPORATION, new InvalidAiOutputException("x"));
         ProcessingJob job = c.answer.answerText(c.clara.id(), report.id(), "ok", Channel.WEB);
-        assertThat(result(job)).isEqualTo(JobResult.FALHA_RESPOSTA);
+        assertThat(result(job)).isEqualTo(JobResult.ANSWER_FAILED);
         assertThat(c.interactions.interactions.getFirst().result())
-                .isEqualTo(InteractionResult.FALHOU);
-        assertThat(report.status()).isEqualTo(ReportStatus.AGUARDANDO_RESPOSTAS);
+                .isEqualTo(InteractionResult.FAILED);
+        assertThat(report.status()).isEqualTo(ReportStatus.AWAITING_ANSWERS);
     }
 
     // ------------------------------------------------------------ alterações
@@ -165,8 +165,8 @@ class AnswersChangesJobProcessorTest {
     void changeByTextCreatesNewVersionWithPdf() {
         LessonReport report = c.reportInReview();
         c.llm.schedule(
-                TaskLlm.REVISAO_AULA,
-                ReportScenario.revision("Leitura mais fácil.", false, "NENHUM"));
+                TaskLlm.LESSON_REVISION,
+                ReportScenario.revision("Leitura mais fácil.", false, "NONE"));
 
         ProcessingJob job =
                 c.change.changeByText(
@@ -176,7 +176,7 @@ class AnswersChangesJobProcessorTest {
                         1,
                         Channel.TELEGRAM);
 
-        assertThat(result(job)).isEqualTo(JobResult.NOVA_VERSAO);
+        assertThat(result(job)).isEqualTo(JobResult.NEW_VERSION);
         assertThat(report.currentVersion()).isEqualTo(2);
         assertThat(report.content().progress()).isEqualTo("Leitura mais fácil.");
         assertThat(c.versions.versions).hasSize(2);
@@ -184,7 +184,7 @@ class AnswersChangesJobProcessorTest {
                 .isNotEqualTo(c.versions.versions.getLast().content());
         assertThat(c.pdf.models).extracting(m -> m.version()).containsExactly(1, 2);
         ReportInteraction interaction = c.interactions.interactions.getLast();
-        assertThat(interaction.result()).isEqualTo(InteractionResult.APLICADA);
+        assertThat(interaction.result()).isEqualTo(InteractionResult.APPLIED);
         assertThat(interaction.baseVersion()).isEqualTo(1);
         assertThat(interaction.resultingVersion()).isEqualTo(2);
     }
@@ -194,7 +194,7 @@ class AnswersChangesJobProcessorTest {
         LessonReport report = c.reportInReview();
         c.transcription.schedule("Troque a observação para: estudou pouco.");
         c.llm.schedule(
-                TaskLlm.REVISAO_AULA, ReportScenario.revision("Nova evolução.", false, "NENHUM"));
+                TaskLlm.LESSON_REVISION, ReportScenario.revision("Nova evolução.", false, "NONE"));
 
         ProcessingJob job =
                 c.change.changeByAudio(
@@ -204,7 +204,7 @@ class AnswersChangesJobProcessorTest {
                         1,
                         Channel.WEB);
 
-        assertThat(result(job)).isEqualTo(JobResult.NOVA_VERSAO);
+        assertThat(result(job)).isEqualTo(JobResult.NEW_VERSION);
         assertThat(c.queue.searchById(job.id()).orElseThrow().parameters())
                 .containsEntry("understoodText", "Troque a observação para: estudou pouco.");
         assertThat(((TaskInput.LessonRevision) c.llm.inputs.getLast()).request())
@@ -216,33 +216,33 @@ class AnswersChangesJobProcessorTest {
     void actionRequestNeverApprovesNorCancels() {
         LessonReport report = c.reportInReview();
         c.llm.schedule(
-                TaskLlm.REVISAO_AULA,
-                ReportScenario.revision("Evoluiu na articulação.", true, "APROVAR"));
+                TaskLlm.LESSON_REVISION,
+                ReportScenario.revision("Evoluiu na articulação.", true, "APPROVE"));
         ProcessingJob job =
                 c.change.changeByText(c.clara.id(), report.id(), "pode aprovar", 1, Channel.WEB);
 
-        assertThat(result(job)).isEqualTo(JobResult.PEDIDO_DE_ACAO_IGNORADO);
-        assertThat(report.status()).isEqualTo(ReportStatus.AGUARDANDO_CONFERENCIA);
+        assertThat(result(job)).isEqualTo(JobResult.ACTION_REQUEST_IGNORED);
+        assertThat(report.status()).isEqualTo(ReportStatus.AWAITING_REVIEW);
         assertThat(report.currentVersion()).isEqualTo(1);
         assertThat(report.step()).isNull();
         assertThat(c.interactions.interactions.getLast().result())
-                .isEqualTo(InteractionResult.PEDIDO_DE_ACAO_IGNORADO);
+                .isEqualTo(InteractionResult.ACTION_REQUEST_IGNORED);
     }
 
     @Test
     void withoutContentChangeOrIdenticalContentDoesNotCreateVersion() {
         LessonReport report = c.reportInReview();
         c.llm.schedule(
-                TaskLlm.REVISAO_AULA,
-                ReportScenario.revision("x", true, "NENHUM"),
+                TaskLlm.LESSON_REVISION,
+                ReportScenario.revision("x", true, "NONE"),
                 ReportScenario.revision("Evoluiu na articulação.", false, null));
 
         ProcessingJob without =
                 c.change.changeByText(c.clara.id(), report.id(), "hmm", 1, Channel.WEB);
-        assertThat(result(without)).isEqualTo(JobResult.SEM_ALTERACAO_DE_CONTEUDO);
+        assertThat(result(without)).isEqualTo(JobResult.NO_CONTENT_CHANGE);
         ProcessingJob identical =
-                c.change.changeByText(c.clara.id(), report.id(), "mantenha", 1, Channel.WEB);
-        assertThat(result(identical)).isEqualTo(JobResult.SEM_ALTERACAO_DE_CONTEUDO);
+                c.change.changeByText(c.clara.id(), report.id(), "keep", 1, Channel.WEB);
+        assertThat(result(identical)).isEqualTo(JobResult.NO_CONTENT_CHANGE);
 
         assertThat(report.currentVersion()).isEqualTo(1);
         assertThat(c.versions.versions).hasSize(1);
@@ -251,18 +251,18 @@ class AnswersChangesJobProcessorTest {
     @Test
     void staleBaseVersionAtProcessingIsRefused() {
         LessonReport report = c.reportInReview();
-        c.llm.schedule(TaskLlm.REVISAO_AULA, ReportScenario.revision("A.", false, "NENHUM"));
+        c.llm.schedule(TaskLlm.LESSON_REVISION, ReportScenario.revision("A.", false, "NONE"));
         ProcessingJob first = c.change.changeByText(c.clara.id(), report.id(), "a", 1, Channel.WEB);
         // um segundo pedido já na fila, feito sobre a versão 1, chega depois da versão 2
         report.completeStep(c.clock.now());
         ProcessingJob second =
                 c.change.changeByText(c.clara.id(), report.id(), "b", 1, Channel.TELEGRAM);
 
-        assertThat(result(first)).isEqualTo(JobResult.NOVA_VERSAO);
+        assertThat(result(first)).isEqualTo(JobResult.NEW_VERSION);
         assertThat(c.queue.searchById(second.id()).orElseThrow().result())
-                .isEqualTo(JobResult.VERSAO_DESATUALIZADA);
+                .isEqualTo(JobResult.STALE_VERSION);
         assertThat(c.interactions.interactions.getLast().result())
-                .isEqualTo(InteractionResult.RECUSADA_VERSAO_DESATUALIZADA);
+                .isEqualTo(InteractionResult.REJECTED_STALE_VERSION);
         assertThat(report.step()).isNull();
     }
 
@@ -270,22 +270,22 @@ class AnswersChangesJobProcessorTest {
     void changeFailuresKeepVersion() {
         LessonReport report = c.reportInReview();
         c.transcription.schedule(
-                new AudioNotProcessableException(AudioNotProcessableException.Reason.VAZIO));
+                new AudioNotProcessableException(AudioNotProcessableException.Reason.EMPTY));
         ProcessingJob audio =
                 c.change.changeByAudio(
                         c.clara.id(), report.id(), ReportScenario.file("v.ogg", 1), 1, Channel.WEB);
-        assertThat(result(audio)).isEqualTo(JobResult.FALHA_ALTERACAO);
+        assertThat(result(audio)).isEqualTo(JobResult.CHANGE_FAILED);
         assertThat(c.interactions.interactions).isEmpty();
 
-        c.llm.schedule(TaskLlm.REVISAO_AULA, new ProviderUnavailableException("503"));
+        c.llm.schedule(TaskLlm.LESSON_REVISION, new ProviderUnavailableException("503"));
         ProcessingJob ai = c.change.changeByText(c.clara.id(), report.id(), "x", 1, Channel.WEB);
-        assertThat(result(ai)).isEqualTo(JobResult.FALHA_ALTERACAO);
+        assertThat(result(ai)).isEqualTo(JobResult.CHANGE_FAILED);
         assertThat(c.interactions.interactions.getLast().result())
-                .isEqualTo(InteractionResult.FALHOU);
+                .isEqualTo(InteractionResult.FAILED);
         assertThat(report.currentVersion()).isEqualTo(1);
         assertThat(report.step()).isNull();
         assertThat(JobProcessorService.failureCode(new InvalidAiOutputException("x")))
-                .isEqualTo("SAIDA_INVALIDA");
+                .isEqualTo("INVALID_OUTPUT");
     }
 
     @Test
@@ -306,14 +306,14 @@ class AnswersChangesJobProcessorTest {
                 });
         ProcessingJob semester =
                 ProcessingJob.create(
-                        br.com.felipeblaft.reports.domain.job.JobType.CONSOLIDACAO_SEMESTRAL,
+                        br.com.felipeblaft.reports.domain.job.JobType.SEMESTER_CONSOLIDATION,
                         c.clara.id(),
                         c.matteo.id(),
                         null,
                         null,
                         Channel.WEB,
-                        Medium.TEXTO,
-                        br.com.felipeblaft.reports.domain.job.JobStep.CONSOLIDANDO,
+                        Medium.TEXT,
+                        br.com.felipeblaft.reports.domain.job.JobStep.CONSOLIDATING,
                         c.clock.now());
         c.queue.enqueue(semester);
         c.processQueue();

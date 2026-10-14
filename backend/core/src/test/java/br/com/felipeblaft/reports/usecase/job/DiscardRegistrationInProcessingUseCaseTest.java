@@ -19,7 +19,7 @@ class DiscardRegistrationInProcessingUseCaseTest {
     private final ReportScenario c = new ReportScenario();
 
     private ProcessingJob register() {
-        TemporaryFile file = ReportScenario.file("aula.webm", 2048);
+        TemporaryFile file = ReportScenario.file("lesson.webm", 2048);
         return c.register.run(c.clara.id(), c.matteo.id(), file, Channel.WEB);
     }
 
@@ -30,13 +30,13 @@ class DiscardRegistrationInProcessingUseCaseTest {
         c.discardRegistration.run(c.clara.id(), job.id());
 
         ProcessingJob discarded = c.queue.searchById(job.id()).orElseThrow();
-        assertThat(discarded.status()).isEqualTo(JobStatus.DESCARTADO);
+        assertThat(discarded.status()).isEqualTo(JobStatus.DISCARDED);
         assertThat(discarded.temporaryFile()).isNull();
-        assertThat(c.normalization.deleted).contains(Path.of("/tmp/audios/aula.webm"));
+        assertThat(c.normalization.deleted).contains(Path.of("/tmp/audios/lesson.webm"));
         c.processQueue();
         assertThat(c.reports.reports.values()).isEmpty();
         // o aluno fica livre para um novo registro
-        assertThat(register().status()).isEqualTo(JobStatus.PENDENTE);
+        assertThat(register().status()).isEqualTo(JobStatus.PENDING);
     }
 
     @Test
@@ -49,8 +49,8 @@ class DiscardRegistrationInProcessingUseCaseTest {
 
         assertThat(c.reports.reports.values()).isEmpty();
         assertThat(c.queue.searchById(job.id()).orElseThrow().status())
-                .isEqualTo(JobStatus.DESCARTADO);
-        assertThat(c.notification.events).noneMatch(e -> e.startsWith("resultado:"));
+                .isEqualTo(JobStatus.DISCARDED);
+        assertThat(c.notification.events).noneMatch(e -> e.startsWith("result:"));
     }
 
     @Test
@@ -60,7 +60,7 @@ class DiscardRegistrationInProcessingUseCaseTest {
         assertThatThrownBy(() -> c.discardRegistration.run(c.bruno.id(), job.id()))
                 .isInstanceOfSatisfying(
                         DomainException.class,
-                        e -> assertThat(e.code()).isEqualTo(ErrorCode.RECURSO_NAO_ENCONTRADO));
+                        e -> assertThat(e.code()).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND));
     }
 
     @Test
@@ -75,6 +75,6 @@ class DiscardRegistrationInProcessingUseCaseTest {
         assertThatThrownBy(() -> c.discardRegistration.run(c.clara.id(), completed.id()))
                 .isInstanceOfSatisfying(
                         DomainException.class,
-                        e -> assertThat(e.code()).isEqualTo(ErrorCode.ACAO_NAO_PERMITIDA_NA_ETAPA));
+                        e -> assertThat(e.code()).isEqualTo(ErrorCode.ACTION_NOT_ALLOWED_AT_STEP));
     }
 }

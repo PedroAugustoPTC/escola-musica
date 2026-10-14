@@ -149,7 +149,7 @@ export function alignJava(baseSource, workSource, { map, file = '' }) {
     });
   }
   const heldStarts = heldPositions(baseTokens, map);
-  const literalClasses = map.codeLiterals === false ? new Map() : classifyLiterals(baseTokens, { envNames: new Set(map.explicit.envNames ?? []), path: file });
+  const literalClasses = map.codeLiterals === false ? new Map() : classifyLiterals(baseTokens, { envNames: new Set(map.explicit.envNames ?? []), path: file, slice: map.slice, keep: map.explicit.slice4?.keepLiterals ?? [], typedWords: map.explicit.slice4?.typedWords ?? [], typedWordFiles: map.explicit.slice4?.typedWordFiles ?? [], callbackActions: Object.keys(map.explicit.slice4?.callbackActions ?? {}), mainCallbackDirs: map.explicit.slice4?.mainCallbackDirs ?? [], callbackAmbiguous: map.explicit.slice4?.callbackAmbiguous ?? [] });
   for (let i = 0; i < baseTokens.length; i++) {
     const a = baseTokens[i];
     const b = workTokens[i];

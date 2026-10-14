@@ -76,8 +76,7 @@ class PdfSemesterReportIT {
     void reviewWithTenSectionsGeneralInformationAndBand() throws Exception {
         GeneratedDocument document =
                 adapter.generateSemesterReport(
-                        new SemesterReportPdfModel(
-                                INFO, CONTENT, 1, DocumentStatus.CONFERENCIA, null));
+                        new SemesterReportPdfModel(INFO, CONTENT, 1, DocumentStatus.REVIEW, null));
 
         String text = text(document);
         assertThat(text)
@@ -112,7 +111,7 @@ class PdfSemesterReportIT {
                                 INFO,
                                 CONTENT,
                                 2,
-                                DocumentStatus.OFICIAL,
+                                DocumentStatus.OFFICIAL,
                                 new Approval(
                                         "Clara Souza", Instant.parse("2026-07-02T21:42:00Z"), 2)));
 

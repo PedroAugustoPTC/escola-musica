@@ -29,12 +29,12 @@ class HistoryConversationIT extends TelegramConversationBase {
 
     @Test
     void emptyHistoryOffersRegisteringLesson() throws Exception {
-        sendCallback(USER_CLARA, "v1:hist:");
+        sendCallback(USER_CLARA, "v1:history:");
         sendText(USER_CLARA, "Matteo");
 
         assertThat(lastMessage().get("text").asString())
                 .isEqualTo("Este aluno ainda não tem relatórios aprovados.");
-        assertThat(buttons(lastMessage())).containsExactly("v1:reg:");
+        assertThat(buttons(lastMessage())).containsExactly("v1:register:");
     }
 
     @Test
@@ -52,19 +52,19 @@ class HistoryConversationIT extends TelegramConversationBase {
                 .contains("\n10. Aula de 03/03/2026")
                 .doesNotContain("11. ");
         assertThat(buttons(list))
-                .contains("v1:hitem:0", "v1:hitem:9", "v1:hmais:1")
-                .doesNotContain("v1:hitem:10");
+                .contains("v1:history-item:0", "v1:history-item:9", "v1:history-more:1")
+                .doesNotContain("v1:history-item:10");
 
-        sendCallback(USER_CLARA, "v1:hmais:1");
+        sendCallback(USER_CLARA, "v1:history-more:1");
         assertThat(lastMessage().get("text").asString())
                 .contains("\n11. Aula de 02/03/2026")
                 .contains("\n12. Aula de 01/03/2026");
         assertThat(buttons(lastMessage()))
-                .contains("v1:hitem:10", "v1:hitem:11")
-                .doesNotContain("v1:hmais:2");
+                .contains("v1:history-item:10", "v1:history-item:11")
+                .doesNotContain("v1:history-more:2");
 
         API_BOTS.resetRequests();
-        sendCallback(USER_CLARA, "v1:hitem:11");
+        sendCallback(USER_CLARA, "v1:history-item:11");
         API_BOTS.verify(
                 1,
                 postRequestedFor(urlPathMatching(".*/sendDocument"))
@@ -77,7 +77,7 @@ class HistoryConversationIT extends TelegramConversationBase {
         sendText(USER_CLARA, "histórico");
         sendText(USER_CLARA, "Matteo");
 
-        sendCallback(USER_CLARA, "v1:hitem:5");
+        sendCallback(USER_CLARA, "v1:history-item:5");
 
         assertThat(sentTexts()).contains("Esta opção não vale mais. Veja abaixo a etapa atual.");
     }

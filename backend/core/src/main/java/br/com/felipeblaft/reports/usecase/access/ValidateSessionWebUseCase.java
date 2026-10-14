@@ -45,21 +45,21 @@ public class ValidateSessionWebUseCase {
 
     public Result run(String token) {
         if (token == null || token.isBlank()) {
-            throw new DomainException(ErrorCode.NAO_AUTENTICADO);
+            throw new DomainException(ErrorCode.NOT_AUTHENTICATED);
         }
         Instant now = clock.now();
         WebSession session =
                 sessions.searchByTokenHash(protection.sessionTokenHash(token))
-                        .orElseThrow(() -> new DomainException(ErrorCode.SESSAO_EXPIRADA));
+                        .orElseThrow(() -> new DomainException(ErrorCode.SESSION_EXPIRED));
         if (!session.validAt(now)) {
             sessions.remove(session.id());
-            throw new DomainException(ErrorCode.SESSAO_EXPIRADA);
+            throw new DomainException(ErrorCode.SESSION_EXPIRED);
         }
         Teacher teacher =
                 teachers.searchById(session.teacherId()).filter(Teacher::active).orElse(null);
         if (teacher == null) {
             sessions.remove(session.id());
-            throw new DomainException(ErrorCode.SESSAO_EXPIRADA);
+            throw new DomainException(ErrorCode.SESSION_EXPIRED);
         }
         if (session.registerUse(now, parameters.webSessionInactivity())) {
             sessions.save(session);

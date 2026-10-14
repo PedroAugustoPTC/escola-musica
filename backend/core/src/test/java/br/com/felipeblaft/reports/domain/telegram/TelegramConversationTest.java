@@ -18,8 +18,8 @@ class TelegramConversationTest {
     @Test
     void emptyConversationStartsWithoutFlow() {
         TelegramConversation conversation = TelegramConversation.empty();
-        assertThat(conversation.flow()).isEqualTo(ConversationFlow.NENHUM);
-        assertThat(conversation.step()).isEqualTo(ConversationFlowStep.NENHUMA);
+        assertThat(conversation.flow()).isEqualTo(ConversationFlow.NONE);
+        assertThat(conversation.step()).isEqualTo(ConversationFlowStep.NONE);
         assertThat(conversation.data()).isEmpty();
         assertThat(conversation.pendingAudio()).isEmpty();
         assertThat(conversation.focusReport()).isEmpty();
@@ -33,16 +33,15 @@ class TelegramConversationTest {
         UUID student = UUID.randomUUID();
         conversation.selectStudent(student);
         conversation.startFlow(
-                ConversationFlow.REGISTRO_AULA, ConversationFlowStep.ESCOLHENDO_ALUNO);
-        conversation.store("opcoes", "a,b");
-        assertThat(conversation.data("opcoes")).contains("a,b");
-        conversation.store("opcoes", null);
-        assertThat(conversation.data("opcoes")).isEmpty();
+                ConversationFlow.LESSON_REGISTRATION, ConversationFlowStep.CHOOSING_STUDENT);
+        conversation.store("options", "a,b");
+        assertThat(conversation.data("options")).contains("a,b");
+        conversation.store("options", null);
+        assertThat(conversation.data("options")).isEmpty();
         conversation.store("x", "1");
-        conversation.defineStep(ConversationFlowStep.AGUARDANDO_AUDIO);
-        assertThat(conversation.step()).isEqualTo(ConversationFlowStep.AGUARDANDO_AUDIO);
-        conversation.startFlow(
-                ConversationFlow.SEMESTRAL, ConversationFlowStep.ESCOLHENDO_SEMESTRE);
+        conversation.defineStep(ConversationFlowStep.AWAITING_AUDIO);
+        assertThat(conversation.step()).isEqualTo(ConversationFlowStep.AWAITING_AUDIO);
+        conversation.startFlow(ConversationFlow.SEMESTER, ConversationFlowStep.CHOOSING_SEMESTER);
         assertThat(conversation.data()).isEmpty();
         assertThat(conversation.selectedStudentId()).isEqualTo(student);
         conversation.cleanSelection();
@@ -54,8 +53,8 @@ class TelegramConversationTest {
     @Test
     void pendingConfirmation() {
         TelegramConversation conversation = TelegramConversation.empty();
-        conversation.askConfirmation("aprovar:2");
-        assertThat(conversation.pendingConfirmation()).contains("aprovar:2");
+        conversation.askConfirmation("approve:2");
+        assertThat(conversation.pendingConfirmation()).contains("approve:2");
         conversation.cleanConfirmation();
         assertThat(conversation.pendingConfirmation()).isEmpty();
     }
@@ -82,7 +81,7 @@ class TelegramConversationTest {
     @Test
     void focusAndPresentedVersion() {
         TelegramConversation conversation = TelegramConversation.empty();
-        FocusReport focus = new FocusReport(ReportType.AULA, UUID.randomUUID());
+        FocusReport focus = new FocusReport(ReportType.LESSON, UUID.randomUUID());
         conversation.focus(focus, 1);
         conversation.registerPresentedVersion(2);
         assertThat(conversation.focusReport()).contains(focus);
@@ -97,14 +96,14 @@ class TelegramConversationTest {
         TelegramConversation conversation =
                 new TelegramConversation(
                         UUID.randomUUID(),
-                        ConversationFlow.HISTORICO,
-                        ConversationFlowStep.ESCOLHENDO_ITEM_HISTORICO,
-                        Map.of("pagina", "2"),
+                        ConversationFlow.HISTORY,
+                        ConversationFlowStep.CHOOSING_HISTORY_ITEM,
+                        Map.of("page", "2"),
                         new PendingAudio("f", "u", "audio/ogg", 1, T0),
-                        new FocusReport(ReportType.SEMESTRAL, UUID.randomUUID()),
+                        new FocusReport(ReportType.SEMESTER, UUID.randomUUID()),
                         3);
         conversation.cleanEverything();
-        assertThat(conversation.flow()).isEqualTo(ConversationFlow.NENHUM);
+        assertThat(conversation.flow()).isEqualTo(ConversationFlow.NONE);
         assertThat(conversation.data()).isEmpty();
         assertThat(conversation.pendingAudio()).isEmpty();
         assertThat(conversation.focusReport()).isEmpty();

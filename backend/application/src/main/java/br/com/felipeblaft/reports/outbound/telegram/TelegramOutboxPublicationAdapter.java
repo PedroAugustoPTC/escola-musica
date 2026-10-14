@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 @ConditionalOnProperty(
         prefix = "reports.telegram-channel",
         name = "proactive-delivery",
-        havingValue = "ORQUESTRADOR")
+        havingValue = "ORCHESTRATOR")
 public class TelegramOutboxPublicationAdapter implements TelegramActionPublicationPort {
 
     private final ChannelActionMapper mapper;
@@ -42,7 +42,7 @@ public class TelegramOutboxPublicationAdapter implements TelegramActionPublicati
         List<MappedAction> actions = mapper.map(outputs, chat, pos -> batchId + ":" + pos);
         save.run(
                 batchId,
-                ChannelActionOrigin.PROATIVA,
+                ChannelActionOrigin.PROACTIVE,
                 null,
                 actions.stream().map(a -> a.toNewAction(teacherId)).toList());
     }

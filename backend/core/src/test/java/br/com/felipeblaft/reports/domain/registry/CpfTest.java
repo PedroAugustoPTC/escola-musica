@@ -40,7 +40,7 @@ class CpfTest {
         assertThatThrownBy(() -> Cpf.of(input))
                 .isInstanceOf(DomainException.class)
                 .extracting(e -> ((DomainException) e).code())
-                .isEqualTo(ErrorCode.CPF_INVALIDO);
+                .isEqualTo(ErrorCode.INVALID_CPF);
     }
 
     @Test

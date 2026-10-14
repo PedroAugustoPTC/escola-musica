@@ -3,38 +3,41 @@ info:
   title: API do Portal do Professor — Relatórios Pedagógicos por Voz
   version: 1.0.0
   description: |
-    Contrato entre o frontend (Portal do Professor) e o backend, feature 001-fluxo-relatorios.
+    Contrato entre o frontend (Portal do Professor) e o backend, feature 001-fluxo-relatorios, com os
+    nomes técnicos em inglês da feature 003-migrate-code-to-english (Princípio VI). Só os nomes
+    mudaram: rotas, parâmetros, campos, valores de enumeração, códigos de erro e o cookie. Os textos
+    em português continuam sendo a documentação e o catálogo de mensagens.
 
-    - Autenticação por cookie de sessão `sessao` (HttpOnly, Secure, SameSite=Strict). A identidade do
+    - Autenticação por cookie de sessão `session` (HttpOnly, Secure, SameSite=Strict). A identidade do
       professor vem sempre da sessão, nunca de parâmetros (FR-009).
     - Requisições que alteram estado exigem o cabeçalho `X-CSRF-TOKEN` com o valor do cookie
       `XSRF-TOKEN`.
     - Toda resposta autenticada renova a sessão (12 h de inatividade) e a validade do código (FR-005,
       FR-008).
-    - Erros seguem o schema `Erro`; os códigos e textos estão em `contracts/mensagens.md`. Nenhum erro
+    - Erros seguem o schema `Error`; os códigos e textos estão em `contracts/mensagens.md`. Nenhum erro
       expõe detalhe interno (FR-054).
-    - Aluno não associado → 403 `ALUNO_NAO_ASSOCIADO`. Relatório de outro professor → 404
-      `RECURSO_NAO_ENCONTRADO`.
+    - Aluno não associado → 403 `STUDENT_NOT_ASSIGNED`. Relatório de outro professor → 404
+      `RESOURCE_NOT_FOUND`.
     - O canal Telegram usa os mesmos casos de uso por outro adaptador; ver
       `contracts/telegram-conversa.md`.
 servers:
   - url: /api/v1
 security:
-  - sessao: []
+  - session: []
 tags:
-  - name: Acesso
-  - name: Inicio
-  - name: Alunos
-  - name: RelatorioAula
-  - name: RelatorioSemestral
-  - name: Trabalhos
-  - name: Historico
-  - name: Documentos
+  - name: Access
+  - name: Home
+  - name: Students
+  - name: LessonReport
+  - name: SemesterReport
+  - name: Jobs
+  - name: History
+  - name: Documents
 
 paths:
-  /sessao:
+  /session:
     post:
-      tags: [Acesso]
+      tags: [Access]
       summary: Entrar com o código de acesso (FR-004, FR-007)
       security: []
       requestBody:
@@ -43,90 +46,90 @@ paths:
           application/json:
             schema:
               type: object
-              required: [codigo]
+              required: [code]
               properties:
-                codigo: { type: string, minLength: 1, maxLength: 16, example: "K7QM2XPA" }
+                code: { type: string, minLength: 1, maxLength: 16, example: "K7QM2XPA" }
       responses:
         "200":
-          description: Sessão criada; cookie `sessao` definido.
+          description: Sessão criada; cookie `session` definido.
           headers:
             Set-Cookie: { schema: { type: string } }
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/SessaoDto" }
-        "400": { $ref: "#/components/responses/DadosInvalidos" }
+              schema: { $ref: "#/components/schemas/SessionDto" }
+        "400": { $ref: "#/components/responses/InvalidData" }
         "401":
-          description: "`CODIGO_INVALIDO` ou `CODIGO_EXPIRADO`"
-          content: { application/json: { schema: { $ref: "#/components/schemas/Erro" } } }
-        "429": { $ref: "#/components/responses/Bloqueado" }
+          description: "`INVALID_CODE` ou `EXPIRED_CODE`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "429": { $ref: "#/components/responses/Blocked" }
     get:
-      tags: [Acesso]
+      tags: [Access]
       summary: Sessão atual
       responses:
         "200":
           description: OK
-          content: { application/json: { schema: { $ref: "#/components/schemas/SessaoDto" } } }
-        "401": { $ref: "#/components/responses/NaoAutenticado" }
+          content: { application/json: { schema: { $ref: "#/components/schemas/SessionDto" } } }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
     delete:
-      tags: [Acesso]
+      tags: [Access]
       summary: Encerrar sessão (revoga no servidor)
       responses:
         "204": { description: Sessão encerrada; cookie removido. }
-        "401": { $ref: "#/components/responses/NaoAutenticado" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
 
-  /inicio:
+  /home:
     get:
-      tags: [Inicio]
+      tags: [Home]
       summary: Dados do Painel (FR-012, FR-035)
       responses:
         "200":
           description: OK
-          content: { application/json: { schema: { $ref: "#/components/schemas/InicioDto" } } }
-        "401": { $ref: "#/components/responses/NaoAutenticado" }
+          content: { application/json: { schema: { $ref: "#/components/schemas/HomeDto" } } }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
 
-  /alunos:
+  /students:
     get:
-      tags: [Alunos]
+      tags: [Students]
       summary: Alunos associados, com busca aproximada (FR-013)
       parameters:
-        - name: busca
+        - name: search
           in: query
           required: false
           schema: { type: string, maxLength: 100 }
       responses:
         "200":
           description: OK
-          content: { application/json: { schema: { $ref: "#/components/schemas/BuscaAlunosDto" } } }
-        "401": { $ref: "#/components/responses/NaoAutenticado" }
+          content: { application/json: { schema: { $ref: "#/components/schemas/StudentSearchDto" } } }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
 
-  /alunos/{alunoId}:
-    parameters: [{ $ref: "#/components/parameters/AlunoId" }]
+  /students/{studentId}:
+    parameters: [{ $ref: "#/components/parameters/StudentId" }]
     get:
-      tags: [Alunos]
+      tags: [Students]
       summary: Resumo de um aluno associado
       responses:
         "200":
           description: OK
-          content: { application/json: { schema: { $ref: "#/components/schemas/AlunoResumoDto" } } }
-        "403": { $ref: "#/components/responses/AlunoNaoAssociado" }
-        "404": { $ref: "#/components/responses/NaoEncontrado" }
+          content: { application/json: { schema: { $ref: "#/components/schemas/StudentSummaryDto" } } }
+        "403": { $ref: "#/components/responses/StudentNotAssigned" }
+        "404": { $ref: "#/components/responses/NotFound" }
 
-  /alunos/{alunoId}/relatorio-em-aberto:
-    parameters: [{ $ref: "#/components/parameters/AlunoId" }]
+  /students/{studentId}/open-report:
+    parameters: [{ $ref: "#/components/parameters/StudentId" }]
     get:
-      tags: [RelatorioAula]
+      tags: [LessonReport]
       summary: Relatório de aula (ou registro em processamento) em aberto para o aluno (FR-034)
       responses:
         "200":
           description: Existe relatório em aberto.
-          content: { application/json: { schema: { $ref: "#/components/schemas/RelatorioEmAbertoDto" } } }
+          content: { application/json: { schema: { $ref: "#/components/schemas/OpenReportDto" } } }
         "204": { description: Nenhum relatório em aberto. }
-        "403": { $ref: "#/components/responses/AlunoNaoAssociado" }
+        "403": { $ref: "#/components/responses/StudentNotAssigned" }
 
-  /alunos/{alunoId}/relatorios-aula:
-    parameters: [{ $ref: "#/components/parameters/AlunoId" }]
+  /students/{studentId}/lesson-reports:
+    parameters: [{ $ref: "#/components/parameters/StudentId" }]
     post:
-      tags: [RelatorioAula]
+      tags: [LessonReport]
       summary: Registrar aula por áudio (FR-014 a FR-017); processamento assíncrono
       requestBody:
         required: true
@@ -142,59 +145,59 @@ paths:
                   description: MP3, M4A, OGG/Opus, WAV, WebM ou MP4 (só a trilha de áudio). Até 50 MB (configurável).
       responses:
         "202":
-          description: Áudio aceito; acompanhar por `/trabalhos/{trabalhoId}`.
-          content: { application/json: { schema: { $ref: "#/components/schemas/TrabalhoRefDto" } } }
-        "403": { $ref: "#/components/responses/AlunoNaoAssociado" }
+          description: Áudio aceito; acompanhar por `/jobs/{jobId}`.
+          content: { application/json: { schema: { $ref: "#/components/schemas/JobRefDto" } } }
+        "403": { $ref: "#/components/responses/StudentNotAssigned" }
         "409":
-          description: "`RELATORIO_EM_ABERTO` (detalhes trazem o relatório em aberto)"
-          content: { application/json: { schema: { $ref: "#/components/schemas/Erro" } } }
-        "413": { $ref: "#/components/responses/AudioMuitoGrande" }
-        "415": { $ref: "#/components/responses/FormatoNaoSuportado" }
+          description: "`REPORT_ALREADY_OPEN` (details traz o relatório em aberto)"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "413": { $ref: "#/components/responses/AudioTooLarge" }
+        "415": { $ref: "#/components/responses/UnsupportedFormat" }
 
-  /trabalhos/{trabalhoId}:
+  /jobs/{jobId}:
     parameters:
-      - name: trabalhoId
+      - name: jobId
         in: path
         required: true
         schema: { type: string, format: uuid }
     get:
-      tags: [Trabalhos]
+      tags: [Jobs]
       summary: Etapa e resultado de um processamento (polling a cada 2 s) (FR-021)
       responses:
         "200":
           description: OK
-          content: { application/json: { schema: { $ref: "#/components/schemas/TrabalhoDto" } } }
-        "404": { $ref: "#/components/responses/NaoEncontrado" }
+          content: { application/json: { schema: { $ref: "#/components/schemas/JobDto" } } }
+        "404": { $ref: "#/components/responses/NotFound" }
 
-  /trabalhos/{trabalhoId}/descarte:
+  /jobs/{jobId}/discard:
     parameters:
-      - name: trabalhoId
+      - name: jobId
         in: path
         required: true
         schema: { type: string, format: uuid }
     post:
-      tags: [Trabalhos]
+      tags: [Jobs]
       summary: Descartar um registro ainda em transcrição (opção "descartar" da retomada)
       responses:
         "204": { description: Descartado. }
-        "404": { $ref: "#/components/responses/NaoEncontrado" }
-        "409": { $ref: "#/components/responses/Conflito" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
 
-  /relatorios-aula/{relatorioId}:
-    parameters: [{ $ref: "#/components/parameters/RelatorioId" }]
+  /lesson-reports/{reportId}:
+    parameters: [{ $ref: "#/components/parameters/ReportId" }]
     get:
-      tags: [RelatorioAula]
+      tags: [LessonReport]
       summary: Estado e conteúdo vigente do relatório de aula
       responses:
         "200":
           description: OK
-          content: { application/json: { schema: { $ref: "#/components/schemas/RelatorioAulaDto" } } }
-        "404": { $ref: "#/components/responses/NaoEncontrado" }
+          content: { application/json: { schema: { $ref: "#/components/schemas/LessonReportDto" } } }
+        "404": { $ref: "#/components/responses/NotFound" }
 
-  /relatorios-aula/{relatorioId}/respostas:
-    parameters: [{ $ref: "#/components/parameters/RelatorioId" }]
+  /lesson-reports/{reportId}/answers:
+    parameters: [{ $ref: "#/components/parameters/ReportId" }]
     post:
-      tags: [RelatorioAula]
+      tags: [LessonReport]
       summary: Responder às perguntas pendentes, por texto ou áudio (FR-024, FR-024a, FR-025)
       requestBody:
         required: true
@@ -202,9 +205,9 @@ paths:
           application/json:
             schema:
               type: object
-              required: [texto]
+              required: [text]
               properties:
-                texto: { type: string, minLength: 1, maxLength: 4000 }
+                text: { type: string, minLength: 1, maxLength: 4000 }
           multipart/form-data:
             schema:
               type: object
@@ -214,98 +217,98 @@ paths:
       responses:
         "202":
           description: Resposta aceita; acompanhar pelo trabalho.
-          content: { application/json: { schema: { $ref: "#/components/schemas/TrabalhoRefDto" } } }
-        "400": { $ref: "#/components/responses/DadosInvalidos" }
-        "404": { $ref: "#/components/responses/NaoEncontrado" }
-        "409": { $ref: "#/components/responses/Conflito" }
-        "413": { $ref: "#/components/responses/AudioMuitoGrande" }
-        "415": { $ref: "#/components/responses/FormatoNaoSuportado" }
+          content: { application/json: { schema: { $ref: "#/components/schemas/JobRefDto" } } }
+        "400": { $ref: "#/components/responses/InvalidData" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "413": { $ref: "#/components/responses/AudioTooLarge" }
+        "415": { $ref: "#/components/responses/UnsupportedFormat" }
 
-  /relatorios-aula/{relatorioId}/alteracoes:
-    parameters: [{ $ref: "#/components/parameters/RelatorioId" }]
+  /lesson-reports/{reportId}/changes:
+    parameters: [{ $ref: "#/components/parameters/ReportId" }]
     post:
-      tags: [RelatorioAula]
+      tags: [LessonReport]
       summary: Pedir alteração em linguagem natural, por texto ou áudio (FR-027, FR-027a, FR-033)
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/AlteracaoTextoRequisicao" }
+            schema: { $ref: "#/components/schemas/ChangeTextRequest" }
           multipart/form-data:
-            schema: { $ref: "#/components/schemas/AlteracaoAudioRequisicao" }
+            schema: { $ref: "#/components/schemas/ChangeAudioRequest" }
       responses:
         "202":
           description: Pedido aceito; acompanhar pelo trabalho.
-          content: { application/json: { schema: { $ref: "#/components/schemas/TrabalhoRefDto" } } }
-        "400": { $ref: "#/components/responses/DadosInvalidos" }
-        "404": { $ref: "#/components/responses/NaoEncontrado" }
-        "409": { $ref: "#/components/responses/VersaoOuEtapa" }
-        "413": { $ref: "#/components/responses/AudioMuitoGrande" }
-        "415": { $ref: "#/components/responses/FormatoNaoSuportado" }
+          content: { application/json: { schema: { $ref: "#/components/schemas/JobRefDto" } } }
+        "400": { $ref: "#/components/responses/InvalidData" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/VersionOrStep" }
+        "413": { $ref: "#/components/responses/AudioTooLarge" }
+        "415": { $ref: "#/components/responses/UnsupportedFormat" }
 
-  /relatorios-aula/{relatorioId}/nova-tentativa:
-    parameters: [{ $ref: "#/components/parameters/RelatorioId" }]
+  /lesson-reports/{reportId}/retry:
+    parameters: [{ $ref: "#/components/parameters/ReportId" }]
     post:
-      tags: [RelatorioAula]
+      tags: [LessonReport]
       summary: Tentar de novo a estruturação sem reenviar o áudio (FR-022)
       responses:
         "202":
           description: OK
-          content: { application/json: { schema: { $ref: "#/components/schemas/TrabalhoRefDto" } } }
-        "404": { $ref: "#/components/responses/NaoEncontrado" }
-        "409": { $ref: "#/components/responses/Conflito" }
+          content: { application/json: { schema: { $ref: "#/components/schemas/JobRefDto" } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
 
-  /relatorios-aula/{relatorioId}/aprovacao:
-    parameters: [{ $ref: "#/components/parameters/RelatorioId" }]
+  /lesson-reports/{reportId}/approval:
+    parameters: [{ $ref: "#/components/parameters/ReportId" }]
     post:
-      tags: [RelatorioAula]
+      tags: [LessonReport]
       summary: Aprovar a versão apresentada (FR-028 a FR-030)
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/AprovacaoRequisicao" }
+            schema: { $ref: "#/components/schemas/ApprovalRequest" }
       responses:
         "200":
           description: Aprovado.
-          content: { application/json: { schema: { $ref: "#/components/schemas/AprovacaoDto" } } }
-        "404": { $ref: "#/components/responses/NaoEncontrado" }
-        "409": { $ref: "#/components/responses/VersaoOuEtapa" }
+          content: { application/json: { schema: { $ref: "#/components/schemas/ApprovalDto" } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/VersionOrStep" }
 
-  /relatorios-aula/{relatorioId}/cancelamento:
-    parameters: [{ $ref: "#/components/parameters/RelatorioId" }]
+  /lesson-reports/{reportId}/cancellation:
+    parameters: [{ $ref: "#/components/parameters/ReportId" }]
     post:
-      tags: [RelatorioAula]
+      tags: [LessonReport]
       summary: Cancelar relatório em aberto (FR-031)
       responses:
         "204": { description: Cancelado. }
-        "404": { $ref: "#/components/responses/NaoEncontrado" }
-        "409": { $ref: "#/components/responses/Conflito" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
 
-  /relatorios-aula/{relatorioId}/versoes/{numero}/pdf:
+  /lesson-reports/{reportId}/versions/{number}/pdf:
     parameters:
-      - { $ref: "#/components/parameters/RelatorioId" }
-      - { $ref: "#/components/parameters/NumeroVersao" }
+      - { $ref: "#/components/parameters/ReportId" }
+      - { $ref: "#/components/parameters/VersionNumber" }
     get:
-      tags: [Documentos]
+      tags: [Documents]
       summary: PDF de conferência de uma versão (FR-026, FR-048)
       responses:
         "200": { $ref: "#/components/responses/Pdf" }
-        "404": { $ref: "#/components/responses/NaoEncontrado" }
+        "404": { $ref: "#/components/responses/NotFound" }
 
-  /relatorios-aula/{relatorioId}/pdf-oficial:
-    parameters: [{ $ref: "#/components/parameters/RelatorioId" }]
+  /lesson-reports/{reportId}/official-pdf:
+    parameters: [{ $ref: "#/components/parameters/ReportId" }]
     get:
-      tags: [Documentos]
+      tags: [Documents]
       summary: PDF oficial do relatório aprovado (FR-030, FR-048)
       responses:
         "200": { $ref: "#/components/responses/Pdf" }
-        "404": { $ref: "#/components/responses/NaoEncontrado" }
+        "404": { $ref: "#/components/responses/NotFound" }
 
-  /alunos/{alunoId}/semestres:
-    parameters: [{ $ref: "#/components/parameters/AlunoId" }]
+  /students/{studentId}/semesters:
+    parameters: [{ $ref: "#/components/parameters/StudentId" }]
     get:
-      tags: [RelatorioSemestral]
+      tags: [SemesterReport]
       summary: Semestres disponíveis (FR-041)
       responses:
         "200":
@@ -314,27 +317,27 @@ paths:
             application/json:
               schema:
                 type: array
-                items: { $ref: "#/components/schemas/SemestreDto" }
-        "403": { $ref: "#/components/responses/AlunoNaoAssociado" }
+                items: { $ref: "#/components/schemas/SemesterDto" }
+        "403": { $ref: "#/components/responses/StudentNotAssigned" }
 
-  /alunos/{alunoId}/semestres/{periodoChave}/previa:
+  /students/{studentId}/semesters/{periodKey}/preview:
     parameters:
-      - { $ref: "#/components/parameters/AlunoId" }
-      - { $ref: "#/components/parameters/PeriodoChave" }
+      - { $ref: "#/components/parameters/StudentId" }
+      - { $ref: "#/components/parameters/PeriodKey" }
     get:
-      tags: [RelatorioSemestral]
+      tags: [SemesterReport]
       summary: Contagens e situação do período antes de gerar (FR-042, FR-046, FR-034)
       responses:
         "200":
           description: OK
-          content: { application/json: { schema: { $ref: "#/components/schemas/PreviaSemestralDto" } } }
-        "400": { $ref: "#/components/responses/DadosInvalidos" }
-        "403": { $ref: "#/components/responses/AlunoNaoAssociado" }
+          content: { application/json: { schema: { $ref: "#/components/schemas/SemesterPreviewDto" } } }
+        "400": { $ref: "#/components/responses/InvalidData" }
+        "403": { $ref: "#/components/responses/StudentNotAssigned" }
 
-  /alunos/{alunoId}/relatorios-semestrais:
-    parameters: [{ $ref: "#/components/parameters/AlunoId" }]
+  /students/{studentId}/semester-reports:
+    parameters: [{ $ref: "#/components/parameters/StudentId" }]
     post:
-      tags: [RelatorioSemestral]
+      tags: [SemesterReport]
       summary: Gerar relatório semestral (FR-042 a FR-046); processamento assíncrono
       requestBody:
         required: true
@@ -342,170 +345,170 @@ paths:
           application/json:
             schema:
               type: object
-              required: [periodoChave]
+              required: [periodKey]
               properties:
-                periodoChave: { type: string, pattern: "^[0-9]{4}-[12]$", example: "2026-2" }
-                confirmarMesmoComEmAberto: { type: boolean, default: false }
+                periodKey: { type: string, pattern: "^[0-9]{4}-[12]$", example: "2026-2" }
+                confirmDespiteOpenReports: { type: boolean, default: false }
       responses:
         "202":
           description: Consolidação iniciada.
-          content: { application/json: { schema: { $ref: "#/components/schemas/TrabalhoRefDto" } } }
-        "400": { $ref: "#/components/responses/DadosInvalidos" }
-        "403": { $ref: "#/components/responses/AlunoNaoAssociado" }
+          content: { application/json: { schema: { $ref: "#/components/schemas/JobRefDto" } } }
+        "400": { $ref: "#/components/responses/InvalidData" }
+        "403": { $ref: "#/components/responses/StudentNotAssigned" }
         "409":
-          description: "`SEM_AULAS_APROVADAS_NO_PERIODO`, `HA_RELATORIOS_EM_ABERTO` (detalhes.quantidade), `SEMESTRAL_JA_APROVADO` ou `RELATORIO_EM_ABERTO` (detalhes do semestral em aberto)"
-          content: { application/json: { schema: { $ref: "#/components/schemas/Erro" } } }
+          description: "`NO_APPROVED_LESSONS_IN_PERIOD`, `OPEN_REPORTS_EXIST` (details.count), `SEMESTER_REPORT_ALREADY_APPROVED` ou `REPORT_ALREADY_OPEN` (details do semestral em aberto)"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
 
-  /relatorios-semestrais/{relatorioId}:
-    parameters: [{ $ref: "#/components/parameters/RelatorioId" }]
+  /semester-reports/{reportId}:
+    parameters: [{ $ref: "#/components/parameters/ReportId" }]
     get:
-      tags: [RelatorioSemestral]
+      tags: [SemesterReport]
       summary: Estado e conteúdo vigente do semestral
       responses:
         "200":
           description: OK
-          content: { application/json: { schema: { $ref: "#/components/schemas/RelatorioSemestralDto" } } }
-        "404": { $ref: "#/components/responses/NaoEncontrado" }
+          content: { application/json: { schema: { $ref: "#/components/schemas/SemesterReportDto" } } }
+        "404": { $ref: "#/components/responses/NotFound" }
 
-  /relatorios-semestrais/{relatorioId}/alteracoes:
-    parameters: [{ $ref: "#/components/parameters/RelatorioId" }]
+  /semester-reports/{reportId}/changes:
+    parameters: [{ $ref: "#/components/parameters/ReportId" }]
     post:
-      tags: [RelatorioSemestral]
+      tags: [SemesterReport]
       summary: Pedir alteração no semestral, por texto ou áudio (FR-045, FR-027a)
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/AlteracaoTextoRequisicao" }
+            schema: { $ref: "#/components/schemas/ChangeTextRequest" }
           multipart/form-data:
-            schema: { $ref: "#/components/schemas/AlteracaoAudioRequisicao" }
+            schema: { $ref: "#/components/schemas/ChangeAudioRequest" }
       responses:
         "202":
           description: OK
-          content: { application/json: { schema: { $ref: "#/components/schemas/TrabalhoRefDto" } } }
-        "400": { $ref: "#/components/responses/DadosInvalidos" }
-        "404": { $ref: "#/components/responses/NaoEncontrado" }
-        "409": { $ref: "#/components/responses/VersaoOuEtapa" }
-        "413": { $ref: "#/components/responses/AudioMuitoGrande" }
-        "415": { $ref: "#/components/responses/FormatoNaoSuportado" }
+          content: { application/json: { schema: { $ref: "#/components/schemas/JobRefDto" } } }
+        "400": { $ref: "#/components/responses/InvalidData" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/VersionOrStep" }
+        "413": { $ref: "#/components/responses/AudioTooLarge" }
+        "415": { $ref: "#/components/responses/UnsupportedFormat" }
 
-  /relatorios-semestrais/{relatorioId}/aprovacao:
-    parameters: [{ $ref: "#/components/parameters/RelatorioId" }]
+  /semester-reports/{reportId}/approval:
+    parameters: [{ $ref: "#/components/parameters/ReportId" }]
     post:
-      tags: [RelatorioSemestral]
+      tags: [SemesterReport]
       summary: Aprovar a versão apresentada do semestral
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/AprovacaoRequisicao" }
+            schema: { $ref: "#/components/schemas/ApprovalRequest" }
       responses:
         "200":
           description: Aprovado.
-          content: { application/json: { schema: { $ref: "#/components/schemas/AprovacaoDto" } } }
-        "404": { $ref: "#/components/responses/NaoEncontrado" }
-        "409": { $ref: "#/components/responses/VersaoOuEtapa" }
+          content: { application/json: { schema: { $ref: "#/components/schemas/ApprovalDto" } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/VersionOrStep" }
 
-  /relatorios-semestrais/{relatorioId}/cancelamento:
-    parameters: [{ $ref: "#/components/parameters/RelatorioId" }]
+  /semester-reports/{reportId}/cancellation:
+    parameters: [{ $ref: "#/components/parameters/ReportId" }]
     post:
-      tags: [RelatorioSemestral]
+      tags: [SemesterReport]
       summary: Cancelar semestral em aberto
       responses:
         "204": { description: Cancelado. }
-        "404": { $ref: "#/components/responses/NaoEncontrado" }
-        "409": { $ref: "#/components/responses/Conflito" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
 
-  /relatorios-semestrais/{relatorioId}/versoes/{numero}/pdf:
+  /semester-reports/{reportId}/versions/{number}/pdf:
     parameters:
-      - { $ref: "#/components/parameters/RelatorioId" }
-      - { $ref: "#/components/parameters/NumeroVersao" }
+      - { $ref: "#/components/parameters/ReportId" }
+      - { $ref: "#/components/parameters/VersionNumber" }
     get:
-      tags: [Documentos]
+      tags: [Documents]
       summary: PDF de conferência de uma versão do semestral
       responses:
         "200": { $ref: "#/components/responses/Pdf" }
-        "404": { $ref: "#/components/responses/NaoEncontrado" }
+        "404": { $ref: "#/components/responses/NotFound" }
 
-  /relatorios-semestrais/{relatorioId}/pdf-oficial:
-    parameters: [{ $ref: "#/components/parameters/RelatorioId" }]
+  /semester-reports/{reportId}/official-pdf:
+    parameters: [{ $ref: "#/components/parameters/ReportId" }]
     get:
-      tags: [Documentos]
+      tags: [Documents]
       summary: PDF oficial do semestral aprovado
       responses:
         "200": { $ref: "#/components/responses/Pdf" }
-        "404": { $ref: "#/components/responses/NaoEncontrado" }
+        "404": { $ref: "#/components/responses/NotFound" }
 
-  /alunos/{alunoId}/historico:
-    parameters: [{ $ref: "#/components/parameters/AlunoId" }]
+  /students/{studentId}/history:
+    parameters: [{ $ref: "#/components/parameters/StudentId" }]
     get:
-      tags: [Historico]
+      tags: [History]
       summary: Relatórios aprovados do professor para o aluno (FR-047)
       responses:
         "200":
           description: OK
-          content: { application/json: { schema: { $ref: "#/components/schemas/HistoricoDto" } } }
-        "403": { $ref: "#/components/responses/AlunoNaoAssociado" }
+          content: { application/json: { schema: { $ref: "#/components/schemas/HistoryDto" } } }
+        "403": { $ref: "#/components/responses/StudentNotAssigned" }
 
 components:
   securitySchemes:
-    sessao:
+    session:
       type: apiKey
       in: cookie
-      name: sessao
+      name: session
 
   parameters:
-    AlunoId:
-      name: alunoId
+    StudentId:
+      name: studentId
       in: path
       required: true
       schema: { type: string, format: uuid }
-    RelatorioId:
-      name: relatorioId
+    ReportId:
+      name: reportId
       in: path
       required: true
       schema: { type: string, format: uuid }
-    NumeroVersao:
-      name: numero
+    VersionNumber:
+      name: number
       in: path
       required: true
       schema: { type: integer, minimum: 1 }
-    PeriodoChave:
-      name: periodoChave
+    PeriodKey:
+      name: periodKey
       in: path
       required: true
       schema: { type: string, pattern: "^[0-9]{4}-[12]$" }
 
   responses:
-    DadosInvalidos:
-      description: "`DADOS_INVALIDOS` (ex.: texto vazio)"
-      content: { application/json: { schema: { $ref: "#/components/schemas/Erro" } } }
-    NaoAutenticado:
-      description: "`SESSAO_EXPIRADA` ou `NAO_AUTENTICADO`; o portal leva à tela Entrar"
-      content: { application/json: { schema: { $ref: "#/components/schemas/Erro" } } }
-    AlunoNaoAssociado:
-      description: "`ALUNO_NAO_ASSOCIADO`; nenhum dado do aluno é revelado"
-      content: { application/json: { schema: { $ref: "#/components/schemas/Erro" } } }
-    NaoEncontrado:
-      description: "`RECURSO_NAO_ENCONTRADO` (inclui relatório de outro professor)"
-      content: { application/json: { schema: { $ref: "#/components/schemas/Erro" } } }
-    Conflito:
-      description: "`ACAO_NAO_PERMITIDA_NA_ETAPA`, `RELATORIO_JA_APROVADO`, `RELATORIO_CANCELADO`, `PROCESSAMENTO_EM_ANDAMENTO`"
-      content: { application/json: { schema: { $ref: "#/components/schemas/Erro" } } }
-    VersaoOuEtapa:
-      description: "`VERSAO_DESATUALIZADA` (detalhes.versaoVigente) ou um dos códigos de `Conflito`"
-      content: { application/json: { schema: { $ref: "#/components/schemas/Erro" } } }
-    AudioMuitoGrande:
-      description: "`AUDIO_MUITO_GRANDE` (detalhes.limiteMb)"
-      content: { application/json: { schema: { $ref: "#/components/schemas/Erro" } } }
-    FormatoNaoSuportado:
-      description: "`FORMATO_NAO_SUPORTADO`"
-      content: { application/json: { schema: { $ref: "#/components/schemas/Erro" } } }
-    Bloqueado:
-      description: "`BLOQUEADO_TEMPORARIAMENTE`"
+    InvalidData:
+      description: "`INVALID_DATA` (ex.: texto vazio)"
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    NotAuthenticated:
+      description: "`SESSION_EXPIRED` ou `NOT_AUTHENTICATED`; o portal leva à tela Entrar"
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    StudentNotAssigned:
+      description: "`STUDENT_NOT_ASSIGNED`; nenhum dado do aluno é revelado"
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    NotFound:
+      description: "`RESOURCE_NOT_FOUND` (inclui relatório de outro professor)"
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    Conflict:
+      description: "`ACTION_NOT_ALLOWED_AT_STEP`, `REPORT_ALREADY_APPROVED`, `REPORT_CANCELLED`, `PROCESSING_IN_PROGRESS`"
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    VersionOrStep:
+      description: "`STALE_VERSION` (details.currentVersion) ou um dos códigos de `Conflict`"
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    AudioTooLarge:
+      description: "`AUDIO_TOO_LARGE` (details.limitMb)"
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    UnsupportedFormat:
+      description: "`UNSUPPORTED_FORMAT`"
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    Blocked:
+      description: "`TEMPORARILY_BLOCKED`"
       headers:
         Retry-After: { schema: { type: integer } }
-      content: { application/json: { schema: { $ref: "#/components/schemas/Erro" } } }
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
     Pdf:
       description: PDF (inline); o nome sugerido não revela identificadores internos.
       headers:
@@ -516,274 +519,274 @@ components:
           schema: { type: string, format: binary }
 
   schemas:
-    Erro:
+    Error:
       type: object
-      required: [codigo, mensagem]
+      required: [code, message]
       properties:
-        codigo: { type: string, example: VERSAO_DESATUALIZADA }
-        mensagem: { type: string, description: Texto do catálogo `mensagens.md` }
+        code: { type: string, example: STALE_VERSION }
+        message: { type: string, description: Texto do catálogo `mensagens.md` }
         retryAfterSeconds: { type: integer, description: Só em 429 }
-        detalhes:
+        details:
           type: object
           additionalProperties: true
-          description: "Dados estruturados do erro (ex.: versaoVigente, quantidade, limiteMb, relatorioEmAberto)"
+          description: "Dados estruturados do erro (ex.: currentVersion, count, limitMb, openReport)"
 
-    Canal: { type: string, enum: [WEB, TELEGRAM] }
-    Meio: { type: string, enum: [TEXTO, AUDIO] }
-    TipoRelatorio: { type: string, enum: [AULA, SEMESTRAL] }
-    StatusRelatorio:
+    Channel: { type: string, enum: [WEB, TELEGRAM] }
+    Medium: { type: string, enum: [TEXT, AUDIO] }
+    ReportType: { type: string, enum: [LESSON, SEMESTER] }
+    ReportStatus:
       type: string
-      enum: [EM_PROCESSAMENTO, FALHA_PROCESSAMENTO, AGUARDANDO_RESPOSTAS, AGUARDANDO_CONFERENCIA, APROVADO, CANCELADO]
-    EtapaProcessamento:
+      enum: [PROCESSING, PROCESSING_FAILED, AWAITING_ANSWERS, AWAITING_REVIEW, APPROVED, CANCELLED]
+    ProcessingStep:
       type: string
-      enum: [ENVIANDO, TRANSCREVENDO, ESTRUTURANDO, INCORPORANDO_RESPOSTAS, TRANSCREVENDO_PEDIDO, APLICANDO_ALTERACAO, CONSOLIDANDO, GERANDO_PDF, PRONTO]
+      enum: [UPLOADING, TRANSCRIBING, STRUCTURING, INCORPORATING_ANSWERS, TRANSCRIBING_REQUEST, APPLYING_CHANGE, CONSOLIDATING, GENERATING_PDF, READY]
 
-    ProfessorResumoDto:
+    TeacherSummaryDto:
       type: object
-      required: [id, nome]
+      required: [id, name]
       properties:
         id: { type: string, format: uuid }
-        nome: { type: string }
+        name: { type: string }
 
-    SessaoDto:
+    SessionDto:
       type: object
-      required: [professor, sessaoExpiraEm, telegramVinculado]
+      required: [teacher, sessionExpiresAt, telegramLinked]
       properties:
-        professor: { $ref: "#/components/schemas/ProfessorResumoDto" }
-        sessaoExpiraEm: { type: string, format: date-time }
-        telegramVinculado: { type: boolean }
+        teacher: { $ref: "#/components/schemas/TeacherSummaryDto" }
+        sessionExpiresAt: { type: string, format: date-time }
+        telegramLinked: { type: boolean }
 
-    AlunoResumoDto:
+    StudentSummaryDto:
       type: object
-      required: [id, nome, possuiRelatorioEmAberto]
+      required: [id, name, hasOpenReport]
       properties:
         id: { type: string, format: uuid }
-        nome: { type: string }
-        instrumento: { type: [string, "null"] }
-        ultimaAulaEm: { type: [string, "null"], format: date }
-        possuiRelatorioEmAberto: { type: boolean }
+        name: { type: string }
+        instrument: { type: [string, "null"] }
+        lastLessonAt: { type: [string, "null"], format: date }
+        hasOpenReport: { type: boolean }
 
-    BuscaAlunosDto:
+    StudentSearchDto:
       type: object
-      required: [resultado, alunos]
+      required: [result, students]
       properties:
-        resultado:
+        result:
           type: string
-          enum: [TODOS, ENCONTRADOS, NENHUM]
-          description: NENHUM traz em `alunos` todos os alunos do professor
-        alunos:
+          enum: [ALL, FOUND, NONE]
+          description: NONE traz em `students` todos os alunos do professor
+        students:
           type: array
-          items: { $ref: "#/components/schemas/AlunoResumoDto" }
+          items: { $ref: "#/components/schemas/StudentSummaryDto" }
 
-    RelatorioEmAbertoDto:
+    OpenReportDto:
       type: object
-      required: [tipo, alunoId, alunoNome, canalOrigem, atualizadoEm]
+      required: [type, studentId, studentName, originChannel, updatedAt]
       properties:
-        tipo: { $ref: "#/components/schemas/TipoRelatorio" }
-        relatorioId: { type: [string, "null"], format: uuid, description: Nulo se ainda em transcrição }
-        trabalhoId: { type: [string, "null"], format: uuid }
-        alunoId: { type: string, format: uuid }
-        alunoNome: { type: string }
-        status: { oneOf: [{ $ref: "#/components/schemas/StatusRelatorio" }, { type: "null" }] }
-        etapa: { oneOf: [{ $ref: "#/components/schemas/EtapaProcessamento" }, { type: "null" }] }
-        periodoChave: { type: [string, "null"] }
-        canalOrigem: { $ref: "#/components/schemas/Canal" }
-        atualizadoEm: { type: string, format: date-time }
+        type: { $ref: "#/components/schemas/ReportType" }
+        reportId: { type: [string, "null"], format: uuid, description: Nulo se ainda em transcrição }
+        jobId: { type: [string, "null"], format: uuid }
+        studentId: { type: string, format: uuid }
+        studentName: { type: string }
+        status: { oneOf: [{ $ref: "#/components/schemas/ReportStatus" }, { type: "null" }] }
+        step: { oneOf: [{ $ref: "#/components/schemas/ProcessingStep" }, { type: "null" }] }
+        periodKey: { type: [string, "null"] }
+        originChannel: { $ref: "#/components/schemas/Channel" }
+        updatedAt: { type: string, format: date-time }
 
-    InicioDto:
+    HomeDto:
       type: object
-      required: [professor, totalAlunos, alunos, relatoriosEmAberto, limiteAudioMb]
+      required: [teacher, totalStudents, students, openReports, audioLimitMb]
       properties:
-        professor: { $ref: "#/components/schemas/ProfessorResumoDto" }
-        totalAlunos: { type: integer }
-        alunos:
+        teacher: { $ref: "#/components/schemas/TeacherSummaryDto" }
+        totalStudents: { type: integer }
+        students:
           type: array
           maxItems: 5
-          items: { $ref: "#/components/schemas/AlunoResumoDto" }
-        relatoriosEmAberto:
+          items: { $ref: "#/components/schemas/StudentSummaryDto" }
+        openReports:
           type: array
-          items: { $ref: "#/components/schemas/RelatorioEmAbertoDto" }
-        limiteAudioMb: { type: integer, example: 50 }
+          items: { $ref: "#/components/schemas/OpenReportDto" }
+        audioLimitMb: { type: integer, example: 50 }
 
-    TrabalhoRefDto:
+    JobRefDto:
       type: object
-      required: [trabalhoId]
+      required: [jobId]
       properties:
-        trabalhoId: { type: string, format: uuid }
+        jobId: { type: string, format: uuid }
 
-    TrabalhoDto:
+    JobDto:
       type: object
-      required: [trabalhoId, tipo, status, etapa, demorando]
+      required: [jobId, type, status, step, delayed]
       properties:
-        trabalhoId: { type: string, format: uuid }
-        tipo: { type: string, enum: [REGISTRO_AULA, NOVA_TENTATIVA, RESPOSTA_PERGUNTAS, ALTERACAO, CONSOLIDACAO_SEMESTRAL] }
-        status: { type: string, enum: [PENDENTE, EM_EXECUCAO, CONCLUIDO, FALHOU, DESCARTADO] }
-        etapa: { $ref: "#/components/schemas/EtapaProcessamento" }
-        demorando: { type: boolean, description: Verdadeiro após 3 minutos sem conclusão }
-        resultadoCodigo:
+        jobId: { type: string, format: uuid }
+        type: { type: string, enum: [LESSON_REGISTRATION, RETRY, QUESTION_ANSWER, CHANGE, SEMESTER_CONSOLIDATION] }
+        status: { type: string, enum: [PENDING, RUNNING, COMPLETED, FAILED, DISCARDED] }
+        step: { $ref: "#/components/schemas/ProcessingStep" }
+        delayed: { type: boolean, description: Verdadeiro após 3 minutos sem conclusão }
+        resultCode:
           type: [string, "null"]
-          description: PRONTO_PARA_CONFERENCIA, PERGUNTAS_PENDENTES, NOVA_VERSAO, SEM_ALTERACAO_DE_CONTEUDO, PEDIDO_DE_ACAO_IGNORADO, AUDIO_NAO_PROCESSAVEL, FALHA_ESTRUTURACAO, FALHA_ALTERACAO, VERSAO_DESATUALIZADA
-        relatorioTipo: { oneOf: [{ $ref: "#/components/schemas/TipoRelatorio" }, { type: "null" }] }
-        relatorioId: { type: [string, "null"], format: uuid }
-        textoEntendido: { type: [string, "null"], description: Transcrição do pedido ou resposta por áudio (FR-024a, FR-027a) }
+          description: READY_FOR_REVIEW, PENDING_QUESTIONS, NEW_VERSION, NO_CONTENT_CHANGE, ACTION_REQUEST_IGNORED, AUDIO_NOT_PROCESSABLE, STRUCTURING_FAILED, CHANGE_FAILED, STALE_VERSION
+        reportType: { oneOf: [{ $ref: "#/components/schemas/ReportType" }, { type: "null" }] }
+        reportId: { type: [string, "null"], format: uuid }
+        understoodText: { type: [string, "null"], description: Transcrição do pedido ou resposta por áudio (FR-024a, FR-027a) }
 
-    ConteudoRelatorioAulaDto:
+    LessonReportContentDto:
       type: object
-      required: [conteudosTrabalhados, evolucao, dificuldades, atividadesPropostas, observacoes]
+      required: [workedTopics, progress, difficulties, proposedActivities, observations]
       properties:
-        conteudosTrabalhados: { type: array, items: { type: string } }
-        evolucao: { type: string }
-        dificuldades: { type: array, items: { type: string } }
-        atividadesPropostas: { type: array, items: { type: string } }
-        observacoes: { type: string }
+        workedTopics: { type: array, items: { type: string } }
+        progress: { type: string }
+        difficulties: { type: array, items: { type: string } }
+        proposedActivities: { type: array, items: { type: string } }
+        observations: { type: string }
 
-    InteracaoDto:
+    InteractionDto:
       type: object
-      required: [tipo, canal, meio, texto, criadoEm]
+      required: [type, channel, medium, text, createdAt]
       properties:
-        tipo: { type: string, enum: [RESPOSTA_PERGUNTAS, ALTERACAO] }
-        canal: { $ref: "#/components/schemas/Canal" }
-        meio: { $ref: "#/components/schemas/Meio" }
-        texto: { type: string }
-        criadoEm: { type: string, format: date-time }
+        type: { type: string, enum: [QUESTION_ANSWER, CHANGE] }
+        channel: { $ref: "#/components/schemas/Channel" }
+        medium: { $ref: "#/components/schemas/Medium" }
+        text: { type: string }
+        createdAt: { type: string, format: date-time }
 
-    RelatorioAulaDto:
+    LessonReportDto:
       type: object
-      required: [relatorioId, alunoId, alunoNome, professorNome, dataAula, status, versaoVigente, canalOrigem, conteudo, perguntasPendentes, rodadasPerguntas, atualizadoEm]
+      required: [reportId, studentId, studentName, teacherName, lessonDate, status, currentVersion, originChannel, content, pendingQuestions, questionRounds, updatedAt]
       properties:
-        relatorioId: { type: string, format: uuid }
-        alunoId: { type: string, format: uuid }
-        alunoNome: { type: string }
-        professorNome: { type: string }
-        dataAula: { type: string, format: date }
-        status: { $ref: "#/components/schemas/StatusRelatorio" }
-        etapa: { oneOf: [{ $ref: "#/components/schemas/EtapaProcessamento" }, { type: "null" }] }
-        trabalhoEmCursoId: { type: [string, "null"], format: uuid }
-        versaoVigente: { type: integer, minimum: 0 }
-        canalOrigem: { $ref: "#/components/schemas/Canal" }
-        conteudo: { $ref: "#/components/schemas/ConteudoRelatorioAulaDto" }
-        perguntasPendentes: { type: array, items: { type: string } }
-        rodadasPerguntas: { type: integer, minimum: 0, maximum: 2 }
-        ultimaInteracao: { oneOf: [{ $ref: "#/components/schemas/InteracaoDto" }, { type: "null" }] }
-        pdfDisponivel: { type: boolean }
-        aprovadoEm: { type: [string, "null"], format: date-time }
-        atualizadoEm: { type: string, format: date-time }
+        reportId: { type: string, format: uuid }
+        studentId: { type: string, format: uuid }
+        studentName: { type: string }
+        teacherName: { type: string }
+        lessonDate: { type: string, format: date }
+        status: { $ref: "#/components/schemas/ReportStatus" }
+        step: { oneOf: [{ $ref: "#/components/schemas/ProcessingStep" }, { type: "null" }] }
+        activeJobId: { type: [string, "null"], format: uuid }
+        currentVersion: { type: integer, minimum: 0 }
+        originChannel: { $ref: "#/components/schemas/Channel" }
+        content: { $ref: "#/components/schemas/LessonReportContentDto" }
+        pendingQuestions: { type: array, items: { type: string } }
+        questionRounds: { type: integer, minimum: 0, maximum: 2 }
+        lastInteraction: { oneOf: [{ $ref: "#/components/schemas/InteractionDto" }, { type: "null" }] }
+        pdfAvailable: { type: boolean }
+        approvedAt: { type: [string, "null"], format: date-time }
+        updatedAt: { type: string, format: date-time }
 
-    InformacoesGeraisDto:
+    GeneralInformationDto:
       type: object
-      required: [nome, idade, professor, periodoRotulo, periodoInicio, periodoFim, quantidadeAulasConsideradas]
+      required: [name, age, teacher, periodLabel, periodStart, periodEnd, consideredLessonCount]
       properties:
-        nome: { type: string }
-        idade: { type: integer }
-        instrumento: { type: [string, "null"] }
-        professor: { type: string }
-        periodoRotulo: { type: string, example: "2º semestre 2026" }
-        periodoInicio: { type: string, format: date }
-        periodoFim: { type: string, format: date }
-        quantidadeAulasConsideradas: { type: integer }
+        name: { type: string }
+        age: { type: integer }
+        instrument: { type: [string, "null"] }
+        teacher: { type: string }
+        periodLabel: { type: string, example: "2º semestre 2026" }
+        periodStart: { type: string, format: date }
+        periodEnd: { type: string, format: date }
+        consideredLessonCount: { type: integer }
 
-    ConteudoRelatorioSemestralDto:
+    SemesterReportContentDto:
       type: object
       description: Seções 2 a 10 do modelo da escola (ver data-model.md, seção 9)
-      required: [frequenciaEEstudo, tecnica, musicalidade, leituraEMemorizacao, pontosDeAtencao, estrategiasPedagogicas, acompanhamentoFamiliar, planejamentoProximoSemestre, parecerFinal]
+      required: [attendanceAndStudy, technique, musicality, readingAndMemorization, attentionPoints, pedagogicalStrategies, familySupport, nextSemesterPlan, finalOpinion]
       properties:
-        frequenciaEEstudo: { type: object, additionalProperties: true }
-        tecnica: { type: object, additionalProperties: true }
-        musicalidade: { type: object, additionalProperties: true }
-        leituraEMemorizacao: { type: object, additionalProperties: true }
-        pontosDeAtencao: { type: object, additionalProperties: true }
-        estrategiasPedagogicas: { type: object, additionalProperties: true }
-        acompanhamentoFamiliar: { type: object, additionalProperties: true }
-        planejamentoProximoSemestre: { type: object, additionalProperties: true }
-        parecerFinal: { type: string }
+        attendanceAndStudy: { type: object, additionalProperties: true }
+        technique: { type: object, additionalProperties: true }
+        musicality: { type: object, additionalProperties: true }
+        readingAndMemorization: { type: object, additionalProperties: true }
+        attentionPoints: { type: object, additionalProperties: true }
+        pedagogicalStrategies: { type: object, additionalProperties: true }
+        familySupport: { type: object, additionalProperties: true }
+        nextSemesterPlan: { type: object, additionalProperties: true }
+        finalOpinion: { type: string }
 
-    RelatorioSemestralDto:
+    SemesterReportDto:
       type: object
-      required: [relatorioId, alunoId, periodoChave, status, versaoVigente, canalOrigem, informacoesGerais, conteudo, quantidadeRelatoriosEmAberto, atualizadoEm]
+      required: [reportId, studentId, periodKey, status, currentVersion, originChannel, generalInformation, content, openReportCount, updatedAt]
       properties:
-        relatorioId: { type: string, format: uuid }
-        alunoId: { type: string, format: uuid }
-        periodoChave: { type: string }
-        status: { $ref: "#/components/schemas/StatusRelatorio" }
-        etapa: { oneOf: [{ $ref: "#/components/schemas/EtapaProcessamento" }, { type: "null" }] }
-        trabalhoEmCursoId: { type: [string, "null"], format: uuid }
-        versaoVigente: { type: integer, minimum: 1 }
-        canalOrigem: { $ref: "#/components/schemas/Canal" }
-        informacoesGerais: { $ref: "#/components/schemas/InformacoesGeraisDto" }
-        conteudo: { $ref: "#/components/schemas/ConteudoRelatorioSemestralDto" }
-        quantidadeRelatoriosEmAberto: { type: integer, description: Se > 0, a conferência repete o aviso (FR-042) }
-        ultimaInteracao: { oneOf: [{ $ref: "#/components/schemas/InteracaoDto" }, { type: "null" }] }
-        pdfDisponivel: { type: boolean }
-        aprovadoEm: { type: [string, "null"], format: date-time }
-        atualizadoEm: { type: string, format: date-time }
+        reportId: { type: string, format: uuid }
+        studentId: { type: string, format: uuid }
+        periodKey: { type: string }
+        status: { $ref: "#/components/schemas/ReportStatus" }
+        step: { oneOf: [{ $ref: "#/components/schemas/ProcessingStep" }, { type: "null" }] }
+        activeJobId: { type: [string, "null"], format: uuid }
+        currentVersion: { type: integer, minimum: 1 }
+        originChannel: { $ref: "#/components/schemas/Channel" }
+        generalInformation: { $ref: "#/components/schemas/GeneralInformationDto" }
+        content: { $ref: "#/components/schemas/SemesterReportContentDto" }
+        openReportCount: { type: integer, description: Se > 0, a conferência repete o aviso (FR-042) }
+        lastInteraction: { oneOf: [{ $ref: "#/components/schemas/InteractionDto" }, { type: "null" }] }
+        pdfAvailable: { type: boolean }
+        approvedAt: { type: [string, "null"], format: date-time }
+        updatedAt: { type: string, format: date-time }
 
-    AlteracaoTextoRequisicao:
+    ChangeTextRequest:
       type: object
-      required: [texto, versaoBase]
+      required: [text, baseVersion]
       properties:
-        texto: { type: string, minLength: 1, maxLength: 4000 }
-        versaoBase: { type: integer, minimum: 1, description: Versão que o professor está vendo (FR-033) }
+        text: { type: string, minLength: 1, maxLength: 4000 }
+        baseVersion: { type: integer, minimum: 1, description: Versão que o professor está vendo (FR-033) }
 
-    AlteracaoAudioRequisicao:
+    ChangeAudioRequest:
       type: object
-      required: [audio, versaoBase]
+      required: [audio, baseVersion]
       properties:
         audio: { type: string, format: binary }
-        versaoBase: { type: integer, minimum: 1 }
+        baseVersion: { type: integer, minimum: 1 }
 
-    AprovacaoRequisicao:
+    ApprovalRequest:
       type: object
-      required: [versaoConfirmada]
+      required: [confirmedVersion]
       properties:
-        versaoConfirmada: { type: integer, minimum: 1 }
+        confirmedVersion: { type: integer, minimum: 1 }
 
-    AprovacaoDto:
+    ApprovalDto:
       type: object
-      required: [relatorioId, status, versaoAprovada, aprovadoEm]
+      required: [reportId, status, approvedVersion, approvedAt]
       properties:
-        relatorioId: { type: string, format: uuid }
-        status: { type: string, const: APROVADO }
-        versaoAprovada: { type: integer }
-        aprovadoEm: { type: string, format: date-time }
+        reportId: { type: string, format: uuid }
+        status: { type: string, const: APPROVED }
+        approvedVersion: { type: integer }
+        approvedAt: { type: string, format: date-time }
 
-    SemestreDto:
+    SemesterDto:
       type: object
-      required: [chave, rotulo, inicio, fim, emAndamento, preSelecionado]
+      required: [key, label, start, end, inProgress, preselected]
       properties:
-        chave: { type: string, example: "2026-2" }
-        rotulo: { type: string, example: "2º semestre 2026" }
-        inicio: { type: string, format: date }
-        fim: { type: string, format: date }
-        emAndamento: { type: boolean }
-        preSelecionado: { type: boolean }
+        key: { type: string, example: "2026-2" }
+        label: { type: string, example: "2º semestre 2026" }
+        start: { type: string, format: date }
+        end: { type: string, format: date }
+        inProgress: { type: boolean }
+        preselected: { type: boolean }
 
-    PreviaSemestralDto:
+    SemesterPreviewDto:
       type: object
-      required: [periodoChave, aulasAprovadas, relatoriosAulaEmAberto]
+      required: [periodKey, approvedLessons, openLessonReports]
       properties:
-        periodoChave: { type: string }
-        aulasAprovadas: { type: integer }
-        relatoriosAulaEmAberto: { type: integer }
-        semestralAprovadoId: { type: [string, "null"], format: uuid }
-        semestralEmAberto: { oneOf: [{ $ref: "#/components/schemas/RelatorioEmAbertoDto" }, { type: "null" }] }
+        periodKey: { type: string }
+        approvedLessons: { type: integer }
+        openLessonReports: { type: integer }
+        approvedSemesterReportId: { type: [string, "null"], format: uuid }
+        openSemesterReport: { oneOf: [{ $ref: "#/components/schemas/OpenReportDto" }, { type: "null" }] }
 
-    ItemHistoricoDto:
+    HistoryItemDto:
       type: object
-      required: [tipo, relatorioId, rotulo, aprovadoEm]
+      required: [type, reportId, label, approvedAt]
       properties:
-        tipo: { $ref: "#/components/schemas/TipoRelatorio" }
-        relatorioId: { type: string, format: uuid }
-        rotulo: { type: string, example: "Aula de 21/09/2026" }
-        dataAula: { type: [string, "null"], format: date }
-        periodoInicio: { type: [string, "null"], format: date }
-        periodoFim: { type: [string, "null"], format: date }
-        aprovadoEm: { type: string, format: date-time }
+        type: { $ref: "#/components/schemas/ReportType" }
+        reportId: { type: string, format: uuid }
+        label: { type: string, example: "Aula de 21/09/2026" }
+        lessonDate: { type: [string, "null"], format: date }
+        periodStart: { type: [string, "null"], format: date }
+        periodEnd: { type: [string, "null"], format: date }
+        approvedAt: { type: string, format: date-time }
 
-    HistoricoDto:
+    HistoryDto:
       type: object
-      required: [aluno, itens]
+      required: [student, items]
       properties:
-        aluno: { $ref: "#/components/schemas/AlunoResumoDto" }
-        itens:
+        student: { $ref: "#/components/schemas/StudentSummaryDto" }
+        items:
           type: array
-          items: { $ref: "#/components/schemas/ItemHistoricoDto" }
+          items: { $ref: "#/components/schemas/HistoryItemDto" }

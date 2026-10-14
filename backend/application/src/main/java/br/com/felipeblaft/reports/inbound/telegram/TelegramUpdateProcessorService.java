@@ -46,7 +46,7 @@ public class TelegramUpdateProcessorService {
         try {
             return Optional.of(JSON.readValue(body == null ? "{}" : body, UpdateTelegram.class));
         } catch (RuntimeException error) {
-            LOG.warn("telegram-update-invalido");
+            LOG.warn("telegram-update-invalid");
             return Optional.empty();
         }
     }
@@ -66,7 +66,7 @@ public class TelegramUpdateProcessorService {
 
     private TelegramUpdateResult process(UpdateTelegram update, boolean created) {
         if (!created) {
-            LOG.info("telegram-update-repetido updateId={}", update.updateId());
+            LOG.info("telegram-update-repeated updateId={}", update.updateId());
             return TelegramUpdateResult.repeated(update.updateId());
         }
         List<TelegramOutput> outputs;
@@ -75,7 +75,7 @@ public class TelegramUpdateProcessorService {
         } catch (RuntimeException error) {
             // só o tipo: a mensagem e a causa podem trazer dado de aluno (FR-029)
             LOG.error(
-                    "telegram-erro-interpretacao updateId={} tipo={}",
+                    "telegram-interpretation-error updateId={} type={}",
                     update.updateId(),
                     error.getClass().getSimpleName());
             outputs = errorReply(update);
@@ -99,7 +99,7 @@ public class TelegramUpdateProcessorService {
         if (chatId == null) {
             return List.of();
         }
-        TelegramOutput message = presenter.simple(chatId, "ERRO_INTERNO");
+        TelegramOutput message = presenter.simple(chatId, "INTERNAL_ERROR");
         return callbackId == null
                 ? List.of(message)
                 : List.of(new TelegramOutput.CallbackReply(callbackId), message);

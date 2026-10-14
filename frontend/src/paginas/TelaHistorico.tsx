@@ -31,7 +31,7 @@ export function TelaHistorico() {
 
   const contexto = {
     sobretitulo: 'Histórico',
-    titulo: historico.data?.aluno.nome ?? '',
+    titulo: historico.data?.student.name ?? '',
     voltarPara: '/alunos',
   };
 
@@ -50,17 +50,17 @@ export function TelaHistorico() {
     );
   }
 
-  const { aluno, itens } = historico.data;
+  const { student, items } = historico.data;
 
   const abrir = async (item: ItemHistoricoDto) => {
     const { caminho, nomeArquivo } = pdfOficial(item);
     setAviso(null);
-    setAbrindo(item.relatorioId);
+    setAbrindo(item.reportId);
     try {
       const abriu = await abrirPdf(caminho, nomeArquivo);
-      if (!abriu) setAviso({ tipo: 'info', texto: msg('PDF_BLOQUEADO_NAVEGADOR') });
+      if (!abriu) setAviso({ tipo: 'info', texto: msg('PDF_BLOCKED_BY_BROWSER') });
     } catch (falha) {
-      setAviso({ tipo: 'erro', texto: falha instanceof Error ? falha.message : msg('ERRO_INTERNO') });
+      setAviso({ tipo: 'erro', texto: falha instanceof Error ? falha.message : msg('INTERNAL_ERROR') });
     } finally {
       setAbrindo(null);
     }
@@ -71,7 +71,7 @@ export function TelaHistorico() {
       <div className="pagina pagina--media">
         <div>
           <div className="sobretitulo">Histórico</div>
-          <h1 className="titulo-pagina">{aluno.nome}</h1>
+          <h1 className="titulo-pagina">{student.name}</h1>
           <p className="subtitulo">Relatórios aprovados, do mais recente ao mais antigo.</p>
         </div>
         {aviso ? (
@@ -79,30 +79,30 @@ export function TelaHistorico() {
             <div className="alerta__texto">{aviso.texto}</div>
           </div>
         ) : null}
-        {itens.length === 0 ? (
+        {items.length === 0 ? (
           <EstadoVazio
             monograma
-            texto={msg('HISTORICO_VAZIO')}
+            texto={msg('EMPTY_HISTORY')}
             acao={
-              <Botao onClick={() => navegar(`/alunos/${aluno.id}/nova-aula`)}>
-                {msg('BOTAO_REGISTRAR_AULA')}
+              <Botao onClick={() => navegar(`/alunos/${student.id}/nova-aula`)}>
+                {msg('REGISTER_LESSON_BUTTON')}
               </Botao>
             }
           />
         ) : (
-          <ol className="historico" aria-label={msg('HISTORICO_TITULO', { aluno: aluno.nome })}>
-            {itens.map((item) => {
+          <ol className="historico" aria-label={msg('HISTORY_TITLE', { student: student.name })}>
+            {items.map((item) => {
               const selo = seloDoItem(item);
               return (
-                <li key={`${item.tipo}-${item.relatorioId}`} className="historico__item">
+                <li key={`${item.type}-${item.reportId}`} className="historico__item">
                   <div className="historico__selo" aria-hidden="true">
                     <div className="historico__dia">{selo.dia}</div>
                     <div className="historico__mes">{selo.mes}</div>
                   </div>
                   <div className="historico__corpo">
                     <div className="historico__titulo">
-                      <span>{item.rotulo}</span>
-                      {item.tipo === 'SEMESTRAL' ? (
+                      <span>{item.label}</span>
+                      {item.type === 'SEMESTER' ? (
                         <span className="historico__etiqueta">Semestral</span>
                       ) : null}
                     </div>
@@ -115,11 +115,11 @@ export function TelaHistorico() {
                     variante="secundario"
                     icone="picture_as_pdf"
                     className="historico__pdf"
-                    aria-label={`${msg('BOTAO_ABRIR_PDF')} — ${item.rotulo}`}
-                    carregando={abrindo === item.relatorioId}
+                    aria-label={`${msg('OPEN_PDF_BUTTON')} — ${item.label}`}
+                    carregando={abrindo === item.reportId}
                     onClick={() => void abrir(item)}
                   >
-                    {movel ? 'PDF' : msg('BOTAO_ABRIR_PDF')}
+                    {movel ? 'PDF' : msg('OPEN_PDF_BUTTON')}
                   </Botao>
                 </li>
               );

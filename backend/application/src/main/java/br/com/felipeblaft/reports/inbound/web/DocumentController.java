@@ -30,32 +30,32 @@ public class DocumentController {
         this.getDocument = getDocument;
     }
 
-    @GetMapping("/relatorios-aula/{relatorioId}/versoes/{numero}/pdf")
+    @GetMapping("/lesson-reports/{reportId}/versions/{number}/pdf")
     public ResponseEntity<byte[]> lessonReview(
             @AuthenticationPrincipal AuthenticatedTeacher teacher,
-            @PathVariable UUID relatorioId,
-            @PathVariable int numero) {
-        return pdf(getDocument.review(teacher.id(), ReportType.AULA, relatorioId, numero));
+            @PathVariable UUID reportId,
+            @PathVariable int number) {
+        return pdf(getDocument.review(teacher.id(), ReportType.LESSON, reportId, number));
     }
 
-    @GetMapping("/relatorios-aula/{relatorioId}/pdf-oficial")
+    @GetMapping("/lesson-reports/{reportId}/official-pdf")
     public ResponseEntity<byte[]> lessonOfficial(
-            @AuthenticationPrincipal AuthenticatedTeacher teacher, @PathVariable UUID relatorioId) {
-        return pdf(getDocument.official(teacher.id(), ReportType.AULA, relatorioId));
+            @AuthenticationPrincipal AuthenticatedTeacher teacher, @PathVariable UUID reportId) {
+        return pdf(getDocument.official(teacher.id(), ReportType.LESSON, reportId));
     }
 
-    @GetMapping("/relatorios-semestrais/{relatorioId}/versoes/{numero}/pdf")
+    @GetMapping("/semester-reports/{reportId}/versions/{number}/pdf")
     public ResponseEntity<byte[]> semesterReview(
             @AuthenticationPrincipal AuthenticatedTeacher teacher,
-            @PathVariable UUID relatorioId,
-            @PathVariable int numero) {
-        return pdf(getDocument.review(teacher.id(), ReportType.SEMESTRAL, relatorioId, numero));
+            @PathVariable UUID reportId,
+            @PathVariable int number) {
+        return pdf(getDocument.review(teacher.id(), ReportType.SEMESTER, reportId, number));
     }
 
-    @GetMapping("/relatorios-semestrais/{relatorioId}/pdf-oficial")
+    @GetMapping("/semester-reports/{reportId}/official-pdf")
     public ResponseEntity<byte[]> semesterOfficial(
-            @AuthenticationPrincipal AuthenticatedTeacher teacher, @PathVariable UUID relatorioId) {
-        return pdf(getDocument.official(teacher.id(), ReportType.SEMESTRAL, relatorioId));
+            @AuthenticationPrincipal AuthenticatedTeacher teacher, @PathVariable UUID reportId) {
+        return pdf(getDocument.official(teacher.id(), ReportType.SEMESTER, reportId));
     }
 
     static ResponseEntity<byte[]> pdf(ObtainedDocument document) {

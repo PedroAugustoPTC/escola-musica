@@ -108,21 +108,21 @@ public class OpenHtmlToPdfGenerationAdapter implements PdfGenerationPort {
         this.styles = new String(resource(ROOT + "pdf-styles.css"), StandardCharsets.UTF_8);
         this.images =
                 Map.of(
-                        "logo", image("fb-logo-preto.png"),
-                        "divider", image("fb-filete-preto.png"),
-                        "wordmark", image("fb-wordmark-preto.png"));
+                        "logo", image("fb-logo-black.png"),
+                        "divider", image("fb-divider-black.png"),
+                        "wordmark", image("fb-wordmark-black.png"));
     }
 
     @Override
     public GeneratedDocument generateLessonReport(LessonReportPdfModel model) {
         Map<String, Object> variables = new HashMap<>();
-        variables.put("title", catalog.text("PDF_TITULO_AULA"));
+        variables.put("title", catalog.text("PDF_LESSON_TITLE"));
         variables.put("student", model.studentName());
         variables.put("teacher", model.teacherName());
         variables.put("data", formatting.data(model.lessonDate()));
         variables.put("sections", sections(model.content()));
         variables.put(
-                "footerText", catalog.text("PDF_RODAPE") + " — relatório pedagógico de aula.");
+                "footerText", catalog.text("PDF_FOOTER") + " — relatório pedagógico de aula.");
         fillStatus(variables, model.status(), model.approval(), model.version());
         return generate("lesson-report", variables);
     }
@@ -131,7 +131,7 @@ public class OpenHtmlToPdfGenerationAdapter implements PdfGenerationPort {
     public GeneratedDocument generateSemesterReport(SemesterReportPdfModel model) {
         GeneralInformation info = model.generalInformation();
         Map<String, Object> variables = new HashMap<>();
-        variables.put("title", catalog.text("PDF_TITULO_SEMESTRAL"));
+        variables.put("title", catalog.text("PDF_SEMESTER_TITLE"));
         variables.put("student", info.name());
         variables.put("teacher", info.teacher());
         variables.put(
@@ -141,12 +141,11 @@ public class OpenHtmlToPdfGenerationAdapter implements PdfGenerationPort {
         variables.put(
                 "consolidation",
                 catalog.text(
-                        "CONSOLIDACAO_DE_AULAS",
-                        Map.of("quantidade", info.consideredLessonCount())));
+                        "LESSON_CONSOLIDATION", Map.of("quantity", info.consideredLessonCount())));
         variables.put("sections", semesterSections.sections(info, model.content()));
         variables.put(
                 "footerText",
-                catalog.text("PDF_RODAPE")
+                catalog.text("PDF_FOOTER")
                         + " — documento gerado a partir dos relatórios de aula do período.");
         fillStatus(variables, model.status(), model.approval(), model.version());
         variables.put(
@@ -154,7 +153,7 @@ public class OpenHtmlToPdfGenerationAdapter implements PdfGenerationPort {
                 model.approval() == null
                         ? ""
                         : catalog.text(
-                                "APROVADO_EM",
+                                "APPROVED_AT",
                                 Map.of(
                                         "data", formatting.data(model.approval().approvedAt()),
                                         "hora", formatting.hora(model.approval().approvedAt()))));
@@ -164,20 +163,20 @@ public class OpenHtmlToPdfGenerationAdapter implements PdfGenerationPort {
     /** Variáveis comuns de situação (faixa de conferência ou linha de aprovação). */
     void fillStatus(
             Map<String, Object> variables, DocumentStatus status, Approval approval, int version) {
-        boolean review = status == DocumentStatus.CONFERENCIA;
+        boolean review = status == DocumentStatus.REVIEW;
         variables.put("review", review);
-        variables.put("banner", catalog.text("PDF_FAIXA_CONFERENCIA"));
+        variables.put("banner", catalog.text("PDF_REVIEW_BAND"));
         variables.put(
                 "approval",
                 review
                         ? null
                         : catalog.text(
-                                "PDF_APROVACAO",
+                                "PDF_APPROVAL",
                                 Map.of(
-                                        "professor", approval.teacherName(),
+                                        "teacher", approval.teacherName(),
                                         "data", formatting.data(approval.approvedAt()),
                                         "hora", formatting.hora(approval.approvedAt()),
-                                        "versao", approval.version())));
+                                        "version", approval.version())));
         variables.put("versionText", "Versão " + version);
     }
 
@@ -213,23 +212,23 @@ public class OpenHtmlToPdfGenerationAdapter implements PdfGenerationPort {
 
     private List<Section> sections(LessonReportContent content) {
         List<Section> sections = new ArrayList<>();
-        sections.add(list("SECAO_CONTEUDOS_TRABALHADOS", content.workedTopics()));
-        sections.add(text("SECAO_EVOLUCAO", content.progress()));
-        sections.add(list("SECAO_DIFICULDADES", content.difficulties()));
-        sections.add(list("SECAO_ATIVIDADES_PROPOSTAS", content.proposedActivities()));
-        sections.add(text("SECAO_OBSERVACOES", content.observations()));
+        sections.add(list("WORKED_TOPICS_SECTION", content.workedTopics()));
+        sections.add(text("PROGRESS_SECTION", content.progress()));
+        sections.add(list("DIFFICULTIES_SECTION", content.difficulties()));
+        sections.add(list("PROPOSED_ACTIVITIES_SECTION", content.proposedActivities()));
+        sections.add(text("OBSERVATIONS_SECTION", content.observations()));
         return sections;
     }
 
     Section list(String key, List<String> items) {
-        return new Section(catalog.text(key), items, catalog.text("SECAO_VAZIA"));
+        return new Section(catalog.text(key), items, catalog.text("EMPTY_SECTION"));
     }
 
     Section text(String key, String text) {
         return new Section(
                 catalog.text(key),
                 List.of(),
-                text == null || text.isBlank() ? catalog.text("SECAO_VAZIA") : text);
+                text == null || text.isBlank() ? catalog.text("EMPTY_SECTION") : text);
     }
 
     /** Seção do template: itens em lista ou um parágrafo; vazia mostra "—" (FR-020). */
@@ -259,7 +258,7 @@ public class OpenHtmlToPdfGenerationAdapter implements PdfGenerationPort {
 
     /** Numeração "Página X de Y" toda gerada pelo CSS paginado, com o rótulo do catálogo. */
     private String paginationStyle() {
-        String label = catalog.text("PDF_PAGINA").replace("\\", "").replace("\"", "");
+        String label = catalog.text("PDF_PAGE").replace("\\", "").replace("\"", "");
         return ".pagination::after { content: \""
                 + label
                 + " \" counter(page) \" de \" counter(pages); }";

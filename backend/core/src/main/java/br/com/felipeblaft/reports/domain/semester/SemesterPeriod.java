@@ -26,7 +26,7 @@ public record SemesterPeriod(int year, int semester) implements Comparable<Semes
     public static SemesterPeriod of(String key) {
         Matcher parts = key == null ? null : KEY.matcher(key);
         if (parts == null || !parts.matches()) {
-            throw new DomainException(ErrorCode.DADOS_INVALIDOS);
+            throw new DomainException(ErrorCode.INVALID_DATA);
         }
         return new SemesterPeriod(
                 Integer.parseInt(parts.group(1)), Integer.parseInt(parts.group(2)));

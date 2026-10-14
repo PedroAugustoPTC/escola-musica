@@ -64,7 +64,7 @@ public class TelegramConfig {
                                         "max_connections", 10))
                         .isPresent();
         if (!ok) {
-            LOG.warn("webhook-nao-registrado; nova tentativa em 1 minuto");
+            LOG.warn("webhook-not-registered; nova tentativa em 1 minuto");
             return;
         }
         messaging.call(
@@ -72,14 +72,14 @@ public class TelegramConfig {
                 Map.of(
                         "commands",
                         List.of(
-                                command("inicio", "BOTAO_INICIO"),
-                                command("registrar", "BOTAO_REGISTRAR_AULA"),
-                                command("semestral", "BOTAO_RELATORIO_SEMESTRAL"),
-                                command("historico", "BOTAO_HISTORICO"),
+                                command("inicio", "HOME_BUTTON"),
+                                command("registrar", "REGISTER_LESSON_BUTTON"),
+                                command("semestral", "SEMESTER_REPORT_BUTTON"),
+                                command("historico", "HISTORY_BUTTON"),
                                 Map.of("command", "ajuda", "description", "Ajuda"),
                                 Map.of("command", "sair", "description", "Sair"))));
         registered.set(true);
-        LOG.info("webhook-registrado");
+        LOG.info("webhook-registered");
     }
 
     private Map<String, String> command(String name, String label) {

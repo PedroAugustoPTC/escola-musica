@@ -50,7 +50,7 @@ public class TelegramHistoryFlow implements TelegramFlow {
     @Override
     public boolean onChooseStudent(TelegramContext context, StudentSummary student) {
         TelegramConversation conversation = context.conversation();
-        if (conversation.flow() != ConversationFlow.HISTORICO) {
+        if (conversation.flow() != ConversationFlow.HISTORY) {
             return false;
         }
         conversation.cleanFocus();
@@ -60,18 +60,21 @@ public class TelegramHistoryFlow implements TelegramFlow {
             context.answer(
                     new Message(
                             context.chatId(),
-                            presenter.text("HISTORICO_VAZIO"),
-                            Keyboard.of(presenter.button("BOTAO_REGISTRAR_AULA", "reg"))));
+                            presenter.text("EMPTY_HISTORY"),
+                            Keyboard.of(presenter.button("REGISTER_LESSON_BUTTON", "register"))));
             return true;
         }
-        conversation.defineStep(ConversationFlowStep.ESCOLHENDO_ITEM_HISTORICO);
+        conversation.defineStep(ConversationFlowStep.CHOOSING_HISTORY_ITEM);
         conversation.store(STUDENT, student.id().toString());
         conversation.store(
                 ITEMS,
                 String.join(
                         ",",
                         history.items().stream()
-                                .map(i -> (i.type() == ReportType.AULA ? "a" : "s") + i.reportId())
+                                .map(
+                                        i ->
+                                                (i.type() == ReportType.LESSON ? "a" : "s")
+                                                        + i.reportId())
                                 .toList()));
         showPage(context, history, 0);
         return true;
@@ -85,8 +88,8 @@ public class TelegramHistoryFlow implements TelegramFlow {
                 new StringBuilder("<b>")
                         .append(
                                 presenter.text(
-                                        "HISTORICO_TITULO",
-                                        Map.of("aluno", history.student().name())))
+                                        "HISTORY_TITLE",
+                                        Map.of("student", history.student().name())))
                         .append("</b>");
         List<List<Button>> rows = new ArrayList<>();
         for (int i = start; i < end; i++) {
@@ -104,22 +107,26 @@ public class TelegramHistoryFlow implements TelegramFlow {
                     List.of(
                             new Button(
                                     label,
-                                    CallbackDataCodec.encode("hitem", Integer.toString(i)))));
+                                    CallbackDataCodec.encode(
+                                            "history-item", Integer.toString(i)))));
         }
         if (end < items.size()) {
             rows.add(
                     List.of(
                             presenter.button(
-                                    "BOTAO_MAIS", Map.of(), "hmais", Integer.toString(page + 1))));
+                                    "MORE_BUTTON",
+                                    Map.of(),
+                                    "history-more",
+                                    Integer.toString(page + 1))));
         }
-        rows.add(List.of(presenter.button("BOTAO_INICIO", "inicio")));
+        rows.add(List.of(presenter.button("HOME_BUTTON", "home")));
         context.answer(new Message(context.chatId(), text.toString(), new Keyboard(rows)));
     }
 
     @Override
     public boolean aoCallback(TelegramContext context, String action, String argument) {
         TelegramConversation conversation = context.conversation();
-        if (conversation.step() != ConversationFlowStep.ESCOLHENDO_ITEM_HISTORICO) {
+        if (conversation.step() != ConversationFlowStep.CHOOSING_HISTORY_ITEM) {
             return false;
         }
         Optional<UUID> student = conversation.data(STUDENT).map(UUID::fromString);
@@ -128,7 +135,7 @@ public class TelegramHistoryFlow implements TelegramFlow {
             return false;
         }
         switch (action) {
-            case "hmais" -> {
+            case "history-more" -> {
                 History history = query.run(context.teacher().id(), student.get());
                 if (number < 0 || number * PER_PAGE >= history.items().size()) {
                     return false;
@@ -136,14 +143,14 @@ public class TelegramHistoryFlow implements TelegramFlow {
                 showPage(context, history, number);
                 return true;
             }
-            case "hitem" -> {
+            case "history-item" -> {
                 List<String> items =
                         conversation.data(ITEMS).map(s -> List.of(s.split(","))).orElse(List.of());
                 if (number < 0 || number >= items.size()) {
                     return false;
                 }
                 String item = items.get(number);
-                ReportType type = item.charAt(0) == 'a' ? ReportType.AULA : ReportType.SEMESTRAL;
+                ReportType type = item.charAt(0) == 'a' ? ReportType.LESSON : ReportType.SEMESTER;
                 ObtainedDocument document =
                         getDocument.official(
                                 context.teacher().id(), type, UUID.fromString(item.substring(1)));
@@ -158,7 +165,9 @@ public class TelegramHistoryFlow implements TelegramFlow {
                                         type,
                                         UUID.fromString(item.substring(1))),
                                 presenter.noticePdfUnavailable(
-                                        context.chatId(), "hitem", Integer.toString(number))));
+                                        context.chatId(),
+                                        "history-item",
+                                        Integer.toString(number))));
                 return true;
             }
             default -> {
@@ -169,8 +178,8 @@ public class TelegramHistoryFlow implements TelegramFlow {
 
     @Override
     public String whatICanReceive(TelegramContext context) {
-        return context.conversation().step() == ConversationFlowStep.ESCOLHENDO_ITEM_HISTORICO
-                ? presenter.label("RECEBER_ALUNO")
+        return context.conversation().step() == ConversationFlowStep.CHOOSING_HISTORY_ITEM
+                ? presenter.label("RECEIVE_STUDENT")
                 : null;
     }
 

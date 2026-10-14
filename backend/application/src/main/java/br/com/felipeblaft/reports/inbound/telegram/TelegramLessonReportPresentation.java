@@ -63,26 +63,27 @@ public class TelegramLessonReportPresentation {
             TelegramConversation conversation,
             String prefix) {
         LessonReport report = view.report();
-        if (report.status() == ReportStatus.APROVADO || report.status() == ReportStatus.CANCELADO) {
+        if (report.status() == ReportStatus.APPROVED || report.status() == ReportStatus.CANCELLED) {
             conversation.cleanFocus();
             String code =
-                    report.status() == ReportStatus.APROVADO
-                            ? "RELATORIO_JA_APROVADO"
-                            : "RELATORIO_CANCELADO_ERRO";
+                    report.status() == ReportStatus.APPROVED
+                            ? "REPORT_ALREADY_APPROVED"
+                            : "REPORT_CANCELLED_ERROR";
             return List.of(
                     new Message(
                             chatId,
                             withPrefix(prefix, presenter.text(code)),
                             presenter.homeActions()));
         }
-        conversation.focus(new FocusReport(ReportType.AULA, report.id()), report.currentVersion());
+        conversation.focus(
+                new FocusReport(ReportType.LESSON, report.id()), report.currentVersion());
         if (inProcessing(view)) {
             return List.of(
                     new Message(chatId, withPrefix(prefix, processing(view)), Keyboard.NONE));
         }
         return switch (report.status()) {
-            case AGUARDANDO_RESPOSTAS -> List.of(questions(chatId, report, prefix));
-            case AGUARDANDO_CONFERENCIA -> review(chatId, teacherId, view, prefix);
+            case AWAITING_ANSWERS -> List.of(questions(chatId, report, prefix));
+            case AWAITING_REVIEW -> review(chatId, teacherId, view, prefix);
             default -> List.of(failure(chatId, prefix));
         };
     }
@@ -90,7 +91,7 @@ public class TelegramLessonReportPresentation {
     public static boolean inProcessing(LessonReportView view) {
         return view.jobInProgress().isPresent()
                 || view.report().step() != null
-                || view.report().status() == ReportStatus.EM_PROCESSAMENTO;
+                || view.report().status() == ReportStatus.PROCESSING;
     }
 
     public String processing(LessonReportView view) {
@@ -98,9 +99,9 @@ public class TelegramLessonReportPresentation {
                 view.jobInProgress()
                         .map(t -> t.step().name())
                         .or(() -> Optional.ofNullable(view.report().step()).map(Enum::name))
-                        .orElse("ESTRUTURANDO");
+                        .orElse("STRUCTURING");
         return presenter.text(
-                "PROCESSAMENTO_EM_ANDAMENTO", Map.of("etapa", presenter.formatting().step(step)));
+                "PROCESSING_IN_PROGRESS", Map.of("step", presenter.formatting().step(step)));
     }
 
     public Message questions(long chatId, LessonReport report, String prefix) {
@@ -110,16 +111,16 @@ public class TelegramLessonReportPresentation {
             numbered.append('\n').append(i + 1).append(". ").append(questions.get(i));
         }
         String text =
-                presenter.text("PERGUNTAS_PENDENTES", Map.of("perguntasNumeradas", numbered))
+                presenter.text("PENDING_QUESTIONS", Map.of("numberedQuestions", numbered))
                         + "\n\n<i>"
-                        + presenter.text("LEMBRETE_FOCO")
+                        + presenter.text("FOCUS_REMINDER")
                         + "</i>";
         return new Message(
                 chatId,
                 withPrefix(prefix, text),
                 Keyboard.of(
-                        presenter.button("BOTAO_CANCELAR_RELATORIO", "canc"),
-                        presenter.button("BOTAO_REGISTRAR_AULA", "reg")));
+                        presenter.button("CANCEL_REPORT_BUTTON", "cancel"),
+                        presenter.button("REGISTER_LESSON_BUTTON", "register")));
     }
 
     /** Cabeçalho e seções em texto, o PDF como documento e as ações com o lembrete de foco. */
@@ -131,7 +132,7 @@ public class TelegramLessonReportPresentation {
         reviewDocument(chatId, teacherId, report)
                 .ifPresentOrElse(
                         outputs::add,
-                        () -> outputs.add(presenter.simple(chatId, "CONFERENCIA_PDF_GERANDO")));
+                        () -> outputs.add(presenter.simple(chatId, "REVIEW_PDF_GENERATING")));
         outputs.add(reviewActions(chatId, report.currentVersion(), null));
         return outputs;
     }
@@ -141,7 +142,7 @@ public class TelegramLessonReportPresentation {
         try {
             GetReportDocumentUseCase.ObtainedDocument document =
                     getDocument.review(
-                            teacherId, ReportType.AULA, report.id(), report.currentVersion());
+                            teacherId, ReportType.LESSON, report.id(), report.currentVersion());
             return Optional.of(
                     new Document(
                             chatId,
@@ -150,7 +151,7 @@ public class TelegramLessonReportPresentation {
                             null,
                             DocumentReference.review(
                                     teacherId,
-                                    ReportType.AULA,
+                                    ReportType.LESSON,
                                     report.id(),
                                     report.currentVersion()),
                             presenter.noticePdfUnavailable(chatId, "pdf", null)));
@@ -161,7 +162,7 @@ public class TelegramLessonReportPresentation {
 
     /** Lembrete de foco com os botões da conferência ({@code aprov} cita a versão apresentada). */
     public Message reviewActions(long chatId, int version, String prefix) {
-        String text = "<i>" + presenter.text("LEMBRETE_FOCO") + "</i>";
+        String text = "<i>" + presenter.text("FOCUS_REMINDER") + "</i>";
         return new Message(
                 chatId,
                 withPrefix(prefix, text),
@@ -169,41 +170,40 @@ public class TelegramLessonReportPresentation {
                         List.of(
                                 List.of(
                                         new Button(
-                                                presenter.label("BOTAO_APROVAR"),
+                                                presenter.label("APPROVE_BUTTON"),
                                                 CallbackDataCodec.encode(
-                                                        "aprov", Integer.toString(version)))),
-                                List.of(presenter.button("BOTAO_SOLICITAR_ALTERACAO", "alt")),
+                                                        "approve", Integer.toString(version)))),
+                                List.of(presenter.button("REQUEST_CHANGE_BUTTON", "change")),
                                 List.of(
-                                        presenter.button("BOTAO_VER_PDF", "pdf"),
-                                        presenter.button("BOTAO_CANCELAR_RELATORIO", "canc")),
-                                List.of(presenter.button("BOTAO_REGISTRAR_AULA", "reg")))));
+                                        presenter.button("VIEW_PDF_BUTTON", "pdf"),
+                                        presenter.button("CANCEL_REPORT_BUTTON", "cancel")),
+                                List.of(presenter.button("REGISTER_LESSON_BUTTON", "register")))));
     }
 
     public String reviewText(LessonReportView view) {
         LessonReport report = view.report();
         LessonReportContent content = report.content();
         StringBuilder text = new StringBuilder();
-        text.append("<b>").append(presenter.text("CONFERENCIA_TITULO")).append("</b>\n");
-        line(text, "CABECALHO_ALUNO", view.studentName());
-        line(text, "CABECALHO_PROFESSOR", view.teacherName());
-        line(text, "CABECALHO_DATA_AULA", presenter.formatting().data(view.lesson().lessonDate()));
-        text.append(
-                presenter.text("CONFERENCIA_VERSAO", Map.of("versao", report.currentVersion())));
-        list(text, "SECAO_CONTEUDOS_TRABALHADOS", content.workedTopics());
-        paragraph(text, "SECAO_EVOLUCAO", content.progress());
-        list(text, "SECAO_DIFICULDADES", content.difficulties());
-        list(text, "SECAO_ATIVIDADES_PROPOSTAS", content.proposedActivities());
-        paragraph(text, "SECAO_OBSERVACOES", content.observations());
+        text.append("<b>").append(presenter.text("REVIEW_TITLE")).append("</b>\n");
+        line(text, "STUDENT_HEADER", view.studentName());
+        line(text, "TEACHER_HEADER", view.teacherName());
+        line(text, "LESSON_DATE_HEADER", presenter.formatting().data(view.lesson().lessonDate()));
+        text.append(presenter.text("REVIEW_VERSION", Map.of("version", report.currentVersion())));
+        list(text, "WORKED_TOPICS_SECTION", content.workedTopics());
+        paragraph(text, "PROGRESS_SECTION", content.progress());
+        list(text, "DIFFICULTIES_SECTION", content.difficulties());
+        list(text, "PROPOSED_ACTIVITIES_SECTION", content.proposedActivities());
+        paragraph(text, "OBSERVATIONS_SECTION", content.observations());
         return text.toString();
     }
 
     public Message failure(long chatId, String prefix) {
         return new Message(
                 chatId,
-                withPrefix(prefix, presenter.text("FALHA_PROCESSAMENTO_OPCOES")),
+                withPrefix(prefix, presenter.text("PROCESSING_FAILURE_OPTIONS")),
                 Keyboard.of(
-                        presenter.button("BOTAO_TENTAR_NOVAMENTE", "tent"),
-                        presenter.button("BOTAO_CANCELAR_RELATORIO", "canc")));
+                        presenter.button("RETRY_BUTTON", "retry"),
+                        presenter.button("CANCEL_REPORT_BUTTON", "cancel")));
     }
 
     private void line(StringBuilder text, String label, String value) {
@@ -216,7 +216,7 @@ public class TelegramLessonReportPresentation {
     private void list(StringBuilder text, String section, List<String> items) {
         text.append("\n\n<b>").append(presenter.text(section)).append("</b>");
         if (items.isEmpty()) {
-            text.append('\n').append(presenter.text("SECAO_VAZIA"));
+            text.append('\n').append(presenter.text("EMPTY_SECTION"));
         }
         for (String item : items) {
             text.append("\n• ").append(TelegramPresenter.escape(item));
@@ -229,7 +229,7 @@ public class TelegramLessonReportPresentation {
                 .append("</b>\n")
                 .append(
                         value == null || value.isBlank()
-                                ? presenter.text("SECAO_VAZIA")
+                                ? presenter.text("EMPTY_SECTION")
                                 : TelegramPresenter.escape(value));
     }
 

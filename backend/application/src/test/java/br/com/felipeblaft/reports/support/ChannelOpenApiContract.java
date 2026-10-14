@@ -18,7 +18,7 @@ public final class ChannelOpenApiContract {
 
     private static final OpenApiInteractionValidator VALIDATOR =
             OpenApiInteractionValidator.createForSpecificationUrl(
-                            ActionsSchemaV1.contract("canal-telegram-interno.openapi.yaml")
+                            ActionsSchemaV1.contract("telegram-channel-internal.openapi.yaml")
                                     .toUri()
                                     .toString())
                     .withLevelResolver(

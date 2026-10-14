@@ -43,12 +43,12 @@ class HistoryParityScriptIT extends TelegramConversationBase {
         link(USER_CLARA, ScenarioIT.CODE_CLARA);
         MvcResult input =
                 mvc.perform(
-                                post("/api/v1/sessao")
+                                post("/api/v1/session")
                                         .with(csrf().asHeader())
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .content("{\"codigo\":\"" + ScenarioIT.CODE_CLARA + "\"}"))
+                                        .content("{\"code\":\"" + ScenarioIT.CODE_CLARA + "\"}"))
                         .andReturn();
-        Cookie cookie = input.getResponse().getCookie("sessao");
+        Cookie cookie = input.getResponse().getCookie("session");
         session = new Cookie(cookie.getName(), cookie.getValue());
 
         scenario.approvedLesson(clara, matteo, LocalDate.of(2026, 3, 10), "Escalas");
@@ -57,24 +57,24 @@ class HistoryParityScriptIT extends TelegramConversationBase {
         clock.advance(Duration.ofMinutes(5));
         scenario.approvedLesson(clara, matteo, LocalDate.of(2026, 5, 20), "Leitura");
         mvc.perform(
-                post("/api/v1/alunos/{id}/relatorios-semestrais", matteo.id())
+                post("/api/v1/students/{id}/semester-reports", matteo.id())
                         .cookie(session)
                         .with(csrf().asHeader())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"periodoChave\":\"2026-1\"}"));
+                        .content("{\"periodKey\":\"2026-1\"}"));
         scenario.processQueue();
         String semester = jdbc.queryForObject("select id::text from semester_report", String.class);
         mvc.perform(
-                post("/api/v1/relatorios-semestrais/{id}/aprovacao", semester)
+                post("/api/v1/semester-reports/{id}/approval", semester)
                         .cookie(session)
                         .with(csrf().asHeader())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"versaoConfirmada\":1}"));
+                        .content("{\"confirmedVersion\":1}"));
     }
 
     private JsonNode historyWeb() throws Exception {
         return JSON.readTree(
-                mvc.perform(get("/api/v1/alunos/{id}/historico", matteo.id()).cookie(session))
+                mvc.perform(get("/api/v1/students/{id}/history", matteo.id()).cookie(session))
                         .andReturn()
                         .getResponse()
                         .getContentAsString());
@@ -82,13 +82,13 @@ class HistoryParityScriptIT extends TelegramConversationBase {
 
     private byte[] pdfWeb(JsonNode item) throws Exception {
         String resource =
-                item.path("tipo").asString().equals("AULA")
-                        ? "relatorios-aula"
-                        : "relatorios-semestrais";
+                item.path("type").asString().equals("LESSON")
+                        ? "lesson-reports"
+                        : "semester-reports";
         return mvc.perform(
                         get(
-                                        "/api/v1/" + resource + "/{id}/pdf-oficial",
-                                        item.path("relatorioId").asString())
+                                        "/api/v1/" + resource + "/{id}/official-pdf",
+                                        item.path("reportId").asString())
                                 .cookie(session))
                 .andReturn()
                 .getResponse()
@@ -97,7 +97,7 @@ class HistoryParityScriptIT extends TelegramConversationBase {
 
     private byte[] pdfBot(int index) throws Exception {
         API_BOTS.resetRequests();
-        sendCallback(USER_CLARA, "v1:hitem:" + index);
+        sendCallback(USER_CLARA, "v1:history-item:" + index);
         return API_BOTS.findAll(postRequestedFor(urlPathMatching(".*/sendDocument")))
                 .getFirst()
                 .getPart("document")
@@ -109,15 +109,15 @@ class HistoryParityScriptIT extends TelegramConversationBase {
     void sameListAndSamePdfsInBothChannels() throws Exception {
         JsonNode web = historyWeb();
         List<String> webRows = new ArrayList<>();
-        for (int i = 0; i < web.path("itens").size(); i++) {
-            JsonNode item = web.path("itens").get(i);
+        for (int i = 0; i < web.path("items").size(); i++) {
+            JsonNode item = web.path("items").get(i);
             webRows.add(
                     (i + 1)
                             + ". "
-                            + item.path("rotulo").asString()
+                            + item.path("label").asString()
                             + " · "
                             + formatting.approvedAt(
-                                    Instant.parse(item.path("aprovadoEm").asString())));
+                                    Instant.parse(item.path("approvedAt").asString())));
         }
 
         sendText(USER_CLARA, "histórico");
@@ -132,11 +132,11 @@ class HistoryParityScriptIT extends TelegramConversationBase {
         assertThat(webRows.getLast()).startsWith("4. Semestral (01/01/2026 a 30/06/2026)");
         assertThat(buttonLabels(lastMessage()))
                 .startsWith(
-                        web.path("itens").get(0).path("rotulo").asString(),
-                        web.path("itens").get(1).path("rotulo").asString());
+                        web.path("items").get(0).path("label").asString(),
+                        web.path("items").get(1).path("label").asString());
 
         for (int i = 0; i < webRows.size(); i++) {
-            byte[] naWeb = pdfWeb(web.path("itens").get(i));
+            byte[] naWeb = pdfWeb(web.path("items").get(i));
             assertThat(naWeb).isNotEmpty();
             assertThat(pdfBot(i)).as("PDF do item %d", i + 1).isEqualTo(naWeb);
         }

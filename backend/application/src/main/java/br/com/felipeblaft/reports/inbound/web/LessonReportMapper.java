@@ -80,6 +80,6 @@ final class LessonReportMapper {
 
     static ApprovalDto approval(ApproveLessonReportUseCase.Approval approval) {
         return new ApprovalDto(
-                approval.reportId(), "APROVADO", approval.approvedVersion(), approval.approvedAt());
+                approval.reportId(), "APPROVED", approval.approvedVersion(), approval.approvedAt());
     }
 }

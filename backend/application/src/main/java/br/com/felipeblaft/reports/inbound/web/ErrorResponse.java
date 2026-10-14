@@ -6,4 +6,4 @@ import java.util.Map;
 /** Corpo de erro da API (schema {@code Erro} do contrato). Nunca expõe detalhe interno (FR-054). */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record ErrorResponse(
-        String codigo, String mensagem, Integer retryAfterSeconds, Map<String, Object> detalhes) {}
+        String code, String message, Integer retryAfterSeconds, Map<String, Object> details) {}

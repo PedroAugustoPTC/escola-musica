@@ -15,16 +15,16 @@ class SecretComparatorTest {
 
     @Test
     void equalOnesAcceptAndDifferentOnesRefuse() {
-        assertThat(comparator.equal("segredo", "segredo")).isTrue();
-        assertThat(comparator.equal("segredo", "segredx")).isFalse();
-        assertThat(comparator.equal("", "segredo")).isFalse();
+        assertThat(comparator.equal("secret", "secret")).isTrue();
+        assertThat(comparator.equal("secret", "segredx")).isFalse();
+        assertThat(comparator.equal("", "secret")).isFalse();
     }
 
     @Test
     void differentSizesAndPrefixesAreNotAccepted() {
-        assertThat(comparator.equal("segredo", "segredo-longo")).isFalse();
-        assertThat(comparator.equal("segredo-longo", "segredo")).isFalse();
-        assertThat(comparator.equal("s", "segredo")).isFalse();
+        assertThat(comparator.equal("secret", "long-secret")).isFalse();
+        assertThat(comparator.equal("long-secret", "secret")).isFalse();
+        assertThat(comparator.equal("s", "secret")).isFalse();
     }
 
     @Test
@@ -32,35 +32,35 @@ class SecretComparatorTest {
         assertThat(comparator.equal(null, null)).isFalse();
         assertThat(comparator.equal("", "")).isFalse();
         assertThat(comparator.equal(null, "")).isFalse();
-        assertThat(comparator.equal("qualquer", null)).isFalse();
-        assertThat(comparator.equal("qualquer", "")).isFalse();
-        assertThat(comparator.equal(null, "segredo")).isFalse();
+        assertThat(comparator.equal("any", null)).isFalse();
+        assertThat(comparator.equal("any", "")).isFalse();
+        assertThat(comparator.equal(null, "secret")).isFalse();
     }
 
     @Test
     void baitIsNotReplayedByKnownInput() {
-        for (String attempt : List.of("", "isca", "isca:", "0".repeat(64), "null", "nenhum")) {
+        for (String attempt : List.of("", "bait", "bait:", "0".repeat(64), "null", "none")) {
             assertThat(comparator.equal(attempt, null)).isFalse();
         }
     }
 
     @Test
     void eitherOfTheTwoTokensAuthenticates() {
-        assertThat(comparator.containsAny("atual", List.of("atual", "proximo"))).isTrue();
-        assertThat(comparator.containsAny("proximo", List.of("atual", "proximo"))).isTrue();
-        assertThat(comparator.containsAny("outro", List.of("atual", "proximo"))).isFalse();
+        assertThat(comparator.containsAny("current", List.of("current", "next"))).isTrue();
+        assertThat(comparator.containsAny("next", List.of("current", "next"))).isTrue();
+        assertThat(comparator.containsAny("other", List.of("current", "next"))).isFalse();
     }
 
     @Test
     void alwaysEvaluatesAllConfiguredOnesEvenAfterAHit() {
-        assertThat(comparator.containsAny("atual", List.of("atual", "proximo"))).isTrue();
+        assertThat(comparator.containsAny("current", List.of("current", "next"))).isTrue();
         assertThat(assessments.get()).isEqualTo(2);
         assessments.set(0);
-        assertThat(comparator.containsAny("errado", List.of("atual", "proximo"))).isFalse();
+        assertThat(comparator.containsAny("wrong", List.of("current", "next"))).isFalse();
         assertThat(assessments.get()).isEqualTo(2);
         assessments.set(0);
         // token ausente também conta como avaliado (contra a isca)
-        assertThat(comparator.containsAny("atual", Arrays.asList("atual", null))).isTrue();
+        assertThat(comparator.containsAny("current", Arrays.asList("current", null))).isTrue();
         assertThat(assessments.get()).isEqualTo(2);
     }
 

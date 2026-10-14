@@ -60,6 +60,6 @@ test('encerrar sessão invalida o acesso no servidor', async ({ page }) => {
   await page.getByRole('button', { name: 'Clara Souza' }).click();
   await page.getByRole('menuitem', { name: 'Encerrar sessão' }).click();
   await expect(page).toHaveURL(/\/entrar$/);
-  const resposta = await page.request.get('/api/v1/inicio');
+  const resposta = await page.request.get('/api/v1/home');
   expect(resposta.status()).toBe(401);
 });

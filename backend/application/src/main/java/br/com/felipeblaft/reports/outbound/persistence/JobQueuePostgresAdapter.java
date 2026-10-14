@@ -42,7 +42,7 @@ public class JobQueuePostgresAdapter implements JobQueuePort {
         try {
             jpa.saveAndFlush(toEntity(job));
         } catch (DataIntegrityViolationException conflict) {
-            throw new ConcurrencyConflictException("trabalho_processamento");
+            throw new ConcurrencyConflictException("processing_job");
         }
     }
 
@@ -52,8 +52,8 @@ public class JobQueuePostgresAdapter implements JobQueuePort {
         // um trabalho descartado por outro canal não volta a ficar ativo
         Optional<ProcessingJobEntity> current = jpa.findById(job.id());
         if (current.isPresent()
-                && JobStatus.DESCARTADO.name().equals(current.get().status)
-                && job.status() != JobStatus.DESCARTADO) {
+                && JobStatus.DISCARDED.name().equals(current.get().status)
+                && job.status() != JobStatus.DISCARDED) {
             return;
         }
         // a mensagem de etapa do Telegram é registrada à parte, pelo envio; a gravação do worker a
@@ -154,10 +154,10 @@ public class JobQueuePostgresAdapter implements JobQueuePort {
     @Transactional
     public int recoverStuck(Instant now) {
         int recovered = 0;
-        for (ProcessingJobEntity entity : jpa.findByStatus(JobStatus.EM_EXECUCAO.name())) {
+        for (ProcessingJobEntity entity : jpa.findByStatus(JobStatus.RUNNING.name())) {
             ProcessingJob job = toDomain(entity);
             if (job.temporaryFile() != null) {
-                job.complete(JobResult.AUDIO_NAO_PROCESSAVEL, now);
+                job.complete(JobResult.AUDIO_NOT_PROCESSABLE, now);
                 job.defineTemporaryFile(null);
             } else {
                 job.returnToQueue();

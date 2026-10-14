@@ -83,7 +83,7 @@ public class ChannelActionMapper {
     /** Reconstitui a ação completa a partir do {@code payload} guardado (reentrega e despacho). */
     public static ObjectNode withActionId(String actionId, String payload) {
         ObjectNode complete = JSON.createObjectNode();
-        complete.put("acaoId", actionId);
+        complete.put("actionId", actionId);
         JsonNode read = JSON.readTree(payload);
         if (read instanceof ObjectNode object) {
             complete.setAll(object);
@@ -108,7 +108,7 @@ public class ChannelActionMapper {
                                     m.chatId(),
                                     parts.get(i),
                                     keyboard),
-                            ChannelActionType.MENSAGEM,
+                            ChannelActionType.MESSAGE,
                             m.chatId(),
                             null,
                             null));
@@ -133,7 +133,7 @@ public class ChannelActionMapper {
                                 e.messageId(),
                                 e.text(),
                                 keyboard(e.keyboard(), true)),
-                        ChannelActionType.EDICAO,
+                        ChannelActionType.EDIT,
                         e.chatId(),
                         null,
                         withoutActionId(compensation)));
@@ -162,7 +162,7 @@ public class ChannelActionMapper {
                                 d.fileName(),
                                 PDF,
                                 d.caption()),
-                        ChannelActionType.DOCUMENTO,
+                        ChannelActionType.DOCUMENT,
                         d.chatId(),
                         null,
                         documentCompensation(d)));
@@ -211,7 +211,7 @@ public class ChannelActionMapper {
         actions.add(
                 mount(
                         dto,
-                        ChannelActionType.MENSAGEM_ETAPA,
+                        ChannelActionType.STEP_MESSAGE,
                         e.chatId(),
                         e.jobId(),
                         withoutActionId(withoutEdit)));
@@ -228,7 +228,7 @@ public class ChannelActionMapper {
                                 id.apply(actions.size()),
                                 ActionDto.CALLBACK_REPLY_TYPE,
                                 r.callbackId()),
-                        ChannelActionType.RESPOSTA_CALLBACK,
+                        ChannelActionType.CALLBACK_REPLY,
                         chatDoUpdate,
                         null,
                         null));
@@ -240,14 +240,14 @@ public class ChannelActionMapper {
             ActionDto dto, ChannelActionType type, long chatId, UUID jobId, String compensation) {
         ObjectNode response = JSON.valueToTree(dto);
         ObjectNode withoutId = response.deepCopy();
-        withoutId.remove("acaoId");
+        withoutId.remove("actionId");
         return new MappedAction(
-                dto.acaoId(), response, type, chatId, jobId, withoutId.toString(), compensation);
+                dto.actionId(), response, type, chatId, jobId, withoutId.toString(), compensation);
     }
 
     private static String withoutActionId(ActionDto dto) {
         ObjectNode no = JSON.valueToTree(dto);
-        no.remove("acaoId");
+        no.remove("actionId");
         return no.toString();
     }
 

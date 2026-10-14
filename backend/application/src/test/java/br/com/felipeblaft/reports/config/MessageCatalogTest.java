@@ -24,22 +24,22 @@ class MessageCatalogTest {
 
     @Test
     void replacesPlaceholdersAndKeepsAccents() {
-        assertThat(catalog.text("SAUDACAO", Map.of("nome", "Clara"))).isEqualTo("Olá, Clara");
-        assertThat(catalog.text("ALTERACAO_APLICADA", Map.of("versao", 2)))
+        assertThat(catalog.text("GREETING", Map.of("name", "Clara"))).isEqualTo("Olá, Clara");
+        assertThat(catalog.text("CHANGE_APPLIED", Map.of("version", 2)))
                 .isEqualTo("Alteração aplicada. Confira a versão 2.");
-        assertThat(catalog.text("TEXTO_ENTENDIDO", Map.of("texto", "troque $1 por \\x")))
+        assertThat(catalog.text("UNDERSTOOD_TEXT", Map.of("text", "troque $1 por \\x")))
                 .isEqualTo("Entendi: “troque $1 por \\x”");
-        assertThat(catalog.text("NENHUM_ALUNO_ENCONTRADO", Map.of()))
+        assertThat(catalog.text("NO_STUDENT_FOUND", Map.of()))
                 .isEqualTo("Nenhum aluno encontrado para \"\".");
-        assertThat(catalog.text(ErrorCode.RELATORIO_CANCELADO, Map.of()))
+        assertThat(catalog.text(ErrorCode.REPORT_CANCELLED, Map.of()))
                 .isEqualTo("Este relatório foi cancelado e não pode mais ser alterado.");
-        assertThat(catalog.text("SECAO_VAZIA")).isEqualTo("—");
+        assertThat(catalog.text("EMPTY_SECTION")).isEqualTo("—");
     }
 
     @Test
     void missingKeyFails() {
-        assertThat(catalog.keys()).contains("CODIGO_NECESSARIO", "AVISO_RESULTADO_WEB_PRONTO");
-        assertThatThrownBy(() -> catalog.text("NAO_EXISTE"))
+        assertThat(catalog.keys()).contains("CODE_REQUIRED", "WEB_RESULT_NOTICE_READY");
+        assertThatThrownBy(() -> catalog.text("DOES_NOT_EXIST"))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }

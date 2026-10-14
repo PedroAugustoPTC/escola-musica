@@ -29,7 +29,7 @@ public class QueryJobUseCase {
         ProcessingJob job =
                 queue.searchById(jobId)
                         .filter(t -> t.teacherId().equals(teacherId))
-                        .orElseThrow(() -> new DomainException(ErrorCode.RECURSO_NAO_ENCONTRADO));
+                        .orElseThrow(() -> new DomainException(ErrorCode.RESOURCE_NOT_FOUND));
         Optional<String> text =
                 job.parameter(ProcessingJob.UNDERSTOOD_TEXT)
                         .or(() -> job.parameter(ProcessingJob.TEXT));

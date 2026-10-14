@@ -40,12 +40,12 @@ class ResumptionParityScriptIT extends TelegramConversationBase {
         link(USER_CLARA, ScenarioIT.CODE_CLARA);
         MvcResult input =
                 mvc.perform(
-                                post("/api/v1/sessao")
+                                post("/api/v1/session")
                                         .with(csrf().asHeader())
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .content("{\"codigo\":\"" + ScenarioIT.CODE_CLARA + "\"}"))
+                                        .content("{\"code\":\"" + ScenarioIT.CODE_CLARA + "\"}"))
                         .andReturn();
-        Cookie cookie = input.getResponse().getCookie("sessao");
+        Cookie cookie = input.getResponse().getCookie("session");
         session = new Cookie(cookie.getName(), cookie.getValue());
     }
 
@@ -53,11 +53,11 @@ class ResumptionParityScriptIT extends TelegramConversationBase {
 
     private void webRegister(Student student) throws Exception {
         mvc.perform(
-                multipart("/api/v1/alunos/{id}/relatorios-aula", student.id())
+                multipart("/api/v1/students/{id}/lesson-reports", student.id())
                         .file(
                                 new MockMultipartFile(
                                         "audio",
-                                        "aula.webm",
+                                        "lesson.webm",
                                         "audio/webm",
                                         AudioNormalizationTest.AUDIO_WITH_SPEECH))
                         .cookie(session)
@@ -67,9 +67,7 @@ class ResumptionParityScriptIT extends TelegramConversationBase {
 
     private JsonNode webOpen(Student student) throws Exception {
         MvcResult result =
-                mvc.perform(
-                                get("/api/v1/alunos/{id}/relatorio-em-aberto", student.id())
-                                        .cookie(session))
+                mvc.perform(get("/api/v1/students/{id}/open-report", student.id()).cookie(session))
                         .andReturn();
         return result.getResponse().getStatus() == 204
                 ? JSON.nullNode()
@@ -91,7 +89,7 @@ class ResumptionParityScriptIT extends TelegramConversationBase {
         if (result.getResponse().getStatus() / 100 == 2) {
             return "OK";
         }
-        return JSON.readTree(result.getResponse().getContentAsString()).path("codigo").asString();
+        return JSON.readTree(result.getResponse().getContentAsString()).path("code").asString();
     }
 
     // ---------------------------------------------------------------- ações no bot
@@ -99,9 +97,9 @@ class ResumptionParityScriptIT extends TelegramConversationBase {
     private void botRegister(Student student) throws Exception {
         sendText(USER_CLARA, "registrar aula");
         sendText(USER_CLARA, student.name());
-        prepareTelegramFile("aula-" + student.id(), AudioNormalizationTest.AUDIO_WITH_SPEECH);
-        sendVoice(USER_CLARA, "aula-" + student.id(), 1000);
-        sendCallback(USER_CLARA, "v1:confal:");
+        prepareTelegramFile("lesson-" + student.id(), AudioNormalizationTest.AUDIO_WITH_SPEECH);
+        sendVoice(USER_CLARA, "lesson-" + student.id(), 1000);
+        sendCallback(USER_CLARA, "v1:confirm-student:");
         scenario.processQueue();
     }
 
@@ -116,7 +114,7 @@ class ResumptionParityScriptIT extends TelegramConversationBase {
 
     private UUID openReport(Student student) {
         return jdbc.queryForObject(
-                "select id from lesson_report where student_id = ? and status not in ('CANCELADO', 'APROVADO')",
+                "select id from lesson_report where student_id = ? and status not in ('CANCELLED', 'APPROVED')",
                 UUID.class,
                 student.id());
     }
@@ -125,18 +123,18 @@ class ResumptionParityScriptIT extends TelegramConversationBase {
     void startOnWebAndFinishInBot() throws Exception {
         webRegister(matteo);
         webPost(
-                "/relatorios-aula/" + openReport(matteo) + "/respostas",
-                Map.of("texto", "Estudou bem."));
+                "/lesson-reports/" + openReport(matteo) + "/answers",
+                Map.of("text", "Estudou bem."));
         scenario.processQueue();
 
         sendText(USER_CLARA, "registrar aula");
         sendText(USER_CLARA, matteo.name());
         assertThat(lastMessage().get("text").asString()).contains("pelo portal");
-        sendCallback(USER_CLARA, "v1:cont:");
-        sendCallback(USER_CLARA, "v1:aprov:1");
-        sendCallback(USER_CLARA, "v1:aprovok:1");
+        sendCallback(USER_CLARA, "v1:continue:");
+        sendCallback(USER_CLARA, "v1:approve:1");
+        sendCallback(USER_CLARA, "v1:approve-ok:1");
 
-        assertThat(status(matteo)).isEqualTo("APROVADO");
+        assertThat(status(matteo)).isEqualTo("APPROVED");
         assertThat(
                         jdbc.queryForObject(
                                 "select origin_channel || '>' || approval_channel from lesson_report",
@@ -151,14 +149,14 @@ class ResumptionParityScriptIT extends TelegramConversationBase {
         scenario.processQueue();
 
         JsonNode openReport = webOpen(matteo);
-        assertThat(openReport.path("canalOrigem").asString()).isEqualTo("TELEGRAM");
-        assertThat(openReport.path("status").asString()).isEqualTo("AGUARDANDO_CONFERENCIA");
+        assertThat(openReport.path("originChannel").asString()).isEqualTo("TELEGRAM");
+        assertThat(openReport.path("status").asString()).isEqualTo("AWAITING_REVIEW");
         assertThat(
                         webPost(
-                                "/relatorios-aula/"
-                                        + openReport.path("relatorioId").asString()
-                                        + "/aprovacao",
-                                Map.of("versaoConfirmada", 1)))
+                                "/lesson-reports/"
+                                        + openReport.path("reportId").asString()
+                                        + "/approval",
+                                Map.of("confirmedVersion", 1)))
                 .isEqualTo("OK");
 
         assertThat(
@@ -174,16 +172,16 @@ class ResumptionParityScriptIT extends TelegramConversationBase {
         webRegister(matteo);
         sendText(USER_CLARA, "registrar aula");
         sendText(USER_CLARA, matteo.name());
-        sendCallback(USER_CLARA, "v1:desc:");
-        sendCallback(USER_CLARA, "v1:descok:");
+        sendCallback(USER_CLARA, "v1:discard:");
+        sendCallback(USER_CLARA, "v1:discard-ok:");
         // começou no bot, descartado na Web
         botRegister(helena);
         String discardWeb =
-                webPost("/relatorios-aula/" + openReport(helena) + "/cancelamento", null);
+                webPost("/lesson-reports/" + openReport(helena) + "/cancellation", null);
 
-        assertThat(status(matteo)).isEqualTo("CANCELADO");
+        assertThat(status(matteo)).isEqualTo("CANCELLED");
         assertThat(discardWeb).isEqualTo("OK");
-        assertThat(status(helena)).isEqualTo("CANCELADO");
+        assertThat(status(helena)).isEqualTo("CANCELLED");
         assertThat(webOpen(matteo).isNull()).isTrue();
         assertThat(webOpen(helena).isNull()).isTrue();
     }
@@ -192,16 +190,16 @@ class ResumptionParityScriptIT extends TelegramConversationBase {
     void staleVersionIsRefusedInBothChannels() throws Exception {
         webRegister(matteo);
         UUID id = openReport(matteo);
-        webPost("/relatorios-aula/" + id + "/respostas", Map.of("texto", "Estudou bem."));
+        webPost("/lesson-reports/" + id + "/answers", Map.of("text", "Estudou bem."));
         scenario.processQueue();
         // o bot apresenta a versão 1
         sendText(USER_CLARA, "registrar aula");
         sendText(USER_CLARA, matteo.name());
-        sendCallback(USER_CLARA, "v1:cont:");
+        sendCallback(USER_CLARA, "v1:continue:");
         // a Web altera para a versão 2
         webPost(
-                "/relatorios-aula/" + id + "/alteracoes",
-                Map.of("texto", "Diga que foi ótima.", "versaoBase", 1));
+                "/lesson-reports/" + id + "/changes",
+                Map.of("text", "Diga que foi ótima.", "baseVersion", 1));
         scenario.processQueue();
 
         // o bot tenta aprovar a versão 1 que apresentou
@@ -210,11 +208,11 @@ class ResumptionParityScriptIT extends TelegramConversationBase {
         String noBot = sentTexts().getFirst();
         // a Web tenta aprovar a versão 1 que tinha na tela
         String naWeb =
-                webPost("/relatorios-aula/" + id + "/aprovacao", Map.of("versaoConfirmada", 1));
+                webPost("/lesson-reports/" + id + "/approval", Map.of("confirmedVersion", 1));
 
         assertThat(noBot).startsWith("Esta versão está desatualizada").contains("versão 2");
-        assertThat(naWeb).isEqualTo("VERSAO_DESATUALIZADA");
-        assertThat(status(matteo)).isEqualTo("AGUARDANDO_CONFERENCIA");
-        assertThat(buttons(lastMessage())).contains("v1:aprov:2");
+        assertThat(naWeb).isEqualTo("STALE_VERSION");
+        assertThat(status(matteo)).isEqualTo("AWAITING_REVIEW");
+        assertThat(buttons(lastMessage())).contains("v1:approve:2");
     }
 }

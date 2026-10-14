@@ -24,7 +24,7 @@ class SignInPortalUseCaseTest {
                     c.protection,
                     c.clock,
                     c.parameters);
-    private final Teacher clara = c.teacher("Clara Souza", "clara@exemplo.test", "K7QM2XPA");
+    private final Teacher clara = c.teacher("Clara Souza", "clara@example.test", "K7QM2XPA");
 
     private static void failWith(ThrowingCallable action, ErrorCode code) {
         assertThatThrownBy(action)
@@ -55,9 +55,9 @@ class SignInPortalUseCaseTest {
 
     @Test
     void invalidCodeOrOutsideFormat() {
-        failWith(() -> useCase.run("ZZZZZZZZ", "ip"), ErrorCode.CODIGO_INVALIDO);
-        failWith(() -> useCase.run("curto", "ip"), ErrorCode.CODIGO_INVALIDO);
-        failWith(() -> useCase.run(null, "ip"), ErrorCode.CODIGO_INVALIDO);
+        failWith(() -> useCase.run("ZZZZZZZZ", "ip"), ErrorCode.INVALID_CODE);
+        failWith(() -> useCase.run("short", "ip"), ErrorCode.INVALID_CODE);
+        failWith(() -> useCase.run(null, "ip"), ErrorCode.INVALID_CODE);
         assertThat(c.attemptsRepository.all().getFirst().failedAttempts()).isEqualTo(3);
         assertThat(c.sessions.all()).isEmpty();
     }
@@ -65,31 +65,31 @@ class SignInPortalUseCaseTest {
     @Test
     void inactiveTeacherCannotSignIn() {
         clara.updateRegistry(clara.name(), false, c.clock.now());
-        failWith(() -> useCase.run("K7QM2XPA", "ip"), ErrorCode.CODIGO_INVALIDO);
+        failWith(() -> useCase.run("K7QM2XPA", "ip"), ErrorCode.INVALID_CODE);
     }
 
     @Test
     void codeExpiredAfterSevenDaysWithoutUse() {
         c.clock.advance(Duration.ofDays(7));
-        failWith(() -> useCase.run("K7QM2XPA", "ip"), ErrorCode.CODIGO_EXPIRADO);
+        failWith(() -> useCase.run("K7QM2XPA", "ip"), ErrorCode.EXPIRED_CODE);
         assertThat(c.attemptsRepository.all()).isEmpty();
     }
 
     @Test
     void blocksOnSixthAttemptEvenWithRightCodeAndResetsOnSuccess() {
         for (int i = 0; i < 5; i++) {
-            failWith(() -> useCase.run("ZZZZZZZZ", "ip"), ErrorCode.CODIGO_INVALIDO);
+            failWith(() -> useCase.run("ZZZZZZZZ", "ip"), ErrorCode.INVALID_CODE);
         }
         assertThatThrownBy(() -> useCase.run("K7QM2XPA", "ip"))
                 .isInstanceOf(DomainException.class)
                 .satisfies(
                         e -> {
                             DomainException error = (DomainException) e;
-                            assertThat(error.code()).isEqualTo(ErrorCode.BLOQUEADO_TEMPORARIAMENTE);
-                            assertThat(error.details()).containsEntry("segundosRestantes", 900L);
+                            assertThat(error.code()).isEqualTo(ErrorCode.TEMPORARILY_BLOCKED);
+                            assertThat(error.details()).containsEntry("remainingSeconds", 900L);
                         });
         // outra origem não é afetada
-        assertThat(useCase.run("K7QM2XPA", "outro-ip").teacher().id()).isEqualTo(clara.id());
+        assertThat(useCase.run("K7QM2XPA", "other-ip").teacher().id()).isEqualTo(clara.id());
 
         c.clock.advance(Duration.ofMinutes(15));
         assertThat(useCase.run("K7QM2XPA", "ip").teacher().id()).isEqualTo(clara.id());

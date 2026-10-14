@@ -7,6 +7,7 @@ import br.com.felipeblaft.reports.domain.common.ErrorCode;
 import br.com.felipeblaft.reports.domain.job.ProcessingJob;
 import br.com.felipeblaft.reports.domain.semester.GeneralInformation;
 import br.com.felipeblaft.reports.domain.semester.SemesterReport;
+import br.com.felipeblaft.reports.domain.semester.SemesterReportContent;
 import br.com.felipeblaft.reports.inbound.web.LessonReportDtos.ApprovalDto;
 import br.com.felipeblaft.reports.inbound.web.LessonReportDtos.ApprovalRequest;
 import br.com.felipeblaft.reports.inbound.web.LessonReportDtos.ChangeTextRequest;
@@ -52,50 +53,50 @@ import org.springframework.web.multipart.MultipartFile;
 public class SemesterReportController {
 
     public record SemesterDto(
-            String chave,
-            String rotulo,
-            LocalDate inicio,
-            LocalDate fim,
-            boolean emAndamento,
-            boolean preSelecionado) {}
+            String key,
+            String label,
+            LocalDate start,
+            LocalDate end,
+            boolean inProgress,
+            boolean preselected) {}
 
     public record SemesterPreviewDto(
-            String periodoChave,
-            int aulasAprovadas,
-            int relatoriosAulaEmAberto,
-            UUID semestralAprovadoId,
-            OpenReportDto semestralEmAberto) {}
+            String periodKey,
+            int approvedLessons,
+            int openLessonReports,
+            UUID approvedSemesterReportId,
+            OpenReportDto openSemesterReport) {}
 
     public record GenerateSemesterRequest(
-            @NotNull @Pattern(regexp = "^[0-9]{4}-[12]$") String periodoChave,
-            Boolean confirmarMesmoComEmAberto) {}
+            @NotNull @Pattern(regexp = "^[0-9]{4}-[12]$") String periodKey,
+            Boolean confirmDespiteOpenReports) {}
 
     public record GeneralInformationDto(
-            String nome,
-            int idade,
-            String instrumento,
-            String professor,
-            String periodoRotulo,
-            LocalDate periodoInicio,
-            LocalDate periodoFim,
-            int quantidadeAulasConsideradas) {}
+            String name,
+            int age,
+            String instrument,
+            String teacher,
+            String periodLabel,
+            LocalDate periodStart,
+            LocalDate periodEnd,
+            int consideredLessonCount) {}
 
     public record SemesterReportDto(
-            UUID relatorioId,
-            UUID alunoId,
-            String periodoChave,
+            UUID reportId,
+            UUID studentId,
+            String periodKey,
             String status,
-            String etapa,
-            UUID trabalhoEmCursoId,
-            int versaoVigente,
-            String canalOrigem,
-            GeneralInformationDto informacoesGerais,
-            SemesterReportContentDto conteudo,
-            int quantidadeRelatoriosEmAberto,
-            InteractionDto ultimaInteracao,
-            boolean pdfDisponivel,
-            Instant aprovadoEm,
-            Instant atualizadoEm) {}
+            String step,
+            UUID activeJobId,
+            int currentVersion,
+            String originChannel,
+            GeneralInformationDto generalInformation,
+            SemesterReportContent content,
+            int openReportCount,
+            InteractionDto lastInteraction,
+            boolean pdfAvailable,
+            Instant approvedAt,
+            Instant updatedAt) {}
 
     private final WebAudioReception reception;
     private final ListAvailableSemestersUseCase list;
@@ -129,10 +130,10 @@ public class SemesterReportController {
         this.sections = sections;
     }
 
-    @GetMapping("/alunos/{alunoId}/semestres")
+    @GetMapping("/students/{studentId}/semesters")
     public List<SemesterDto> semesters(
-            @AuthenticationPrincipal AuthenticatedTeacher teacher, @PathVariable UUID alunoId) {
-        return list.run(teacher.id(), alunoId).stream().map(this::semester).toList();
+            @AuthenticationPrincipal AuthenticatedTeacher teacher, @PathVariable UUID studentId) {
+        return list.run(teacher.id(), studentId).stream().map(this::semester).toList();
     }
 
     private SemesterDto semester(Semester s) {
@@ -145,12 +146,12 @@ public class SemesterReportController {
                 s.preSelected());
     }
 
-    @GetMapping("/alunos/{alunoId}/semestres/{periodoChave}/previa")
+    @GetMapping("/students/{studentId}/semesters/{periodKey}/preview")
     public SemesterPreviewDto preview(
             @AuthenticationPrincipal AuthenticatedTeacher teacher,
-            @PathVariable UUID alunoId,
-            @PathVariable String periodoChave) {
-        Preview p = preview.run(teacher.id(), alunoId, periodoChave);
+            @PathVariable UUID studentId,
+            @PathVariable String periodKey) {
+        Preview p = preview.run(teacher.id(), studentId, periodKey);
         return new SemesterPreviewDto(
                 p.period().key(),
                 p.approvedLessons(),
@@ -160,82 +161,82 @@ public class SemesterReportController {
     }
 
     @PostMapping(
-            path = "/alunos/{alunoId}/relatorios-semestrais",
+            path = "/students/{studentId}/semester-reports",
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public JobRefDto generate(
             @AuthenticationPrincipal AuthenticatedTeacher teacher,
-            @PathVariable UUID alunoId,
+            @PathVariable UUID studentId,
             @Valid @RequestBody GenerateSemesterRequest request) {
         ProcessingJob job =
                 generate.run(
                         teacher.id(),
-                        alunoId,
-                        request.periodoChave(),
-                        Boolean.TRUE.equals(request.confirmarMesmoComEmAberto()),
+                        studentId,
+                        request.periodKey(),
+                        Boolean.TRUE.equals(request.confirmDespiteOpenReports()),
                         Channel.WEB);
         return new JobRefDto(job.id());
     }
 
-    @GetMapping("/relatorios-semestrais/{relatorioId}")
+    @GetMapping("/semester-reports/{reportId}")
     public SemesterReportDto get(
-            @AuthenticationPrincipal AuthenticatedTeacher teacher, @PathVariable UUID relatorioId) {
-        return report(get.run(teacher.id(), relatorioId));
+            @AuthenticationPrincipal AuthenticatedTeacher teacher, @PathVariable UUID reportId) {
+        return report(get.run(teacher.id(), reportId));
     }
 
     @PostMapping(
-            path = "/relatorios-semestrais/{relatorioId}/alteracoes",
+            path = "/semester-reports/{reportId}/changes",
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public JobRefDto changeByText(
             @AuthenticationPrincipal AuthenticatedTeacher teacher,
-            @PathVariable UUID relatorioId,
+            @PathVariable UUID reportId,
             @Valid @RequestBody ChangeTextRequest request) {
         return new JobRefDto(
                 change.changeByText(
                                 teacher.id(),
-                                relatorioId,
-                                request.texto(),
-                                request.versaoBase(),
+                                reportId,
+                                request.text(),
+                                request.baseVersion(),
                                 Channel.WEB)
                         .id());
     }
 
     @PostMapping(
-            path = "/relatorios-semestrais/{relatorioId}/alteracoes",
+            path = "/semester-reports/{reportId}/changes",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public JobRefDto changeByAudio(
             @AuthenticationPrincipal AuthenticatedTeacher teacher,
-            @PathVariable UUID relatorioId,
+            @PathVariable UUID reportId,
             @RequestPart("audio") MultipartFile audio,
-            @RequestParam("versaoBase") String baseVersion) {
+            @RequestParam("baseVersion") String baseVersion) {
         int base;
         try {
             base = Integer.parseInt(baseVersion.strip());
         } catch (NumberFormatException invalid) {
-            throw new DomainException(ErrorCode.DADOS_INVALIDOS);
+            throw new DomainException(ErrorCode.INVALID_DATA);
         }
         TemporaryFile file = reception.receive(audio);
         return new JobRefDto(
-                change.changeByAudio(teacher.id(), relatorioId, file, base, Channel.WEB).id());
+                change.changeByAudio(teacher.id(), reportId, file, base, Channel.WEB).id());
     }
 
     @PostMapping(
-            path = "/relatorios-semestrais/{relatorioId}/aprovacao",
+            path = "/semester-reports/{reportId}/approval",
             consumes = MediaType.APPLICATION_JSON_VALUE)
     public ApprovalDto approve(
             @AuthenticationPrincipal AuthenticatedTeacher teacher,
-            @PathVariable UUID relatorioId,
+            @PathVariable UUID reportId,
             @Valid @RequestBody ApprovalRequest request) {
         return LessonReportMapper.approval(
-                approve.run(teacher.id(), relatorioId, request.versaoConfirmada(), Channel.WEB));
+                approve.run(teacher.id(), reportId, request.confirmedVersion(), Channel.WEB));
     }
 
-    @PostMapping("/relatorios-semestrais/{relatorioId}/cancelamento")
+    @PostMapping("/semester-reports/{reportId}/cancellation")
     public ResponseEntity<Void> cancel(
-            @AuthenticationPrincipal AuthenticatedTeacher teacher, @PathVariable UUID relatorioId) {
-        cancel.cancel(teacher.id(), relatorioId);
+            @AuthenticationPrincipal AuthenticatedTeacher teacher, @PathVariable UUID reportId) {
+        cancel.cancel(teacher.id(), reportId);
         return ResponseEntity.noContent().build();
     }
 
@@ -264,7 +265,7 @@ public class SemesterReportController {
                         info.periodStart(),
                         info.periodEnd(),
                         info.consideredLessonCount()),
-                SemesterReportContentDto.from(r.content()),
+                r.content(),
                 r.openReportCount(),
                 view.lastInteraction().map(LessonReportMapper::interaction).orElse(null),
                 view.pdfAvailable(),

@@ -136,8 +136,8 @@ describe('Estados', () => {
 describe('Cabecalho', () => {
   it('menu alterna o tema e encerra a sessão só após 2xx', async () => {
     const api = simularApi({
-      'GET /api/v1/sessao': { corpo: SESSAO_CLARA },
-      'DELETE /api/v1/sessao': { status: 204 },
+      'GET /api/v1/session': { corpo: SESSAO_CLARA },
+      'DELETE /api/v1/session': { status: 204 },
     });
     const usuario = userEvent.setup();
     const { roteador } = renderizar(<Cabecalho />);
@@ -158,12 +158,12 @@ describe('Cabecalho', () => {
 
   it('erro ao encerrar mantém a tela e mostra a mensagem', async () => {
     simularApi({
-      'GET /api/v1/sessao': { corpo: SESSAO_CLARA },
-      'DELETE /api/v1/sessao': {
+      'GET /api/v1/session': { corpo: SESSAO_CLARA },
+      'DELETE /api/v1/session': {
         status: 500,
         corpo: {
-          codigo: 'ERRO_INTERNO',
-          mensagem: 'Ocorreu um erro inesperado. Tente novamente mais tarde.',
+          code: 'INTERNAL_ERROR',
+          message: 'Ocorreu um erro inesperado. Tente novamente mais tarde.',
         },
       },
     });
@@ -176,7 +176,7 @@ describe('Cabecalho', () => {
   });
 
   it('contexto móvel mostra voltar e o aluno', async () => {
-    simularApi({ 'GET /api/v1/sessao': { corpo: SESSAO_CLARA } });
+    simularApi({ 'GET /api/v1/session': { corpo: SESSAO_CLARA } });
     const usuario = userEvent.setup();
     const { roteador } = renderizar(
       <Cabecalho
@@ -193,7 +193,7 @@ describe('Cabecalho', () => {
 
   it('computador mostra navegação e busca', async () => {
     (globalThis as { __larguraTeste?: number }).__larguraTeste = 1440;
-    simularApi({ 'GET /api/v1/sessao': { corpo: SESSAO_CLARA } });
+    simularApi({ 'GET /api/v1/session': { corpo: SESSAO_CLARA } });
     const usuario = userEvent.setup();
     const { roteador } = renderizar(<Cabecalho navAtiva="alunos" />);
     expect(screen.getByRole('button', { name: 'Alunos' })).toHaveAttribute('aria-current', 'page');

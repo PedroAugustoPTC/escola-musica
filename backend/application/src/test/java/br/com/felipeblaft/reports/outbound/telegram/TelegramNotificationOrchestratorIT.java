@@ -42,10 +42,10 @@ class TelegramNotificationOrchestratorIT extends OrchestratorDeliveryBase {
 
     private void reachQuestionsThroughTelegram() throws Exception {
         link(USER_CLARA, ScenarioIT.CODE_CLARA);
-        prepareTelegramFile("aula", AudioNormalizationTest.AUDIO_WITH_SPEECH);
+        prepareTelegramFile("lesson", AudioNormalizationTest.AUDIO_WITH_SPEECH);
         sendText(USER_CLARA, "Matteo");
-        sendVoice(USER_CLARA, "aula", 1000);
-        sendCallback(USER_CLARA, "v1:confal:");
+        sendVoice(USER_CLARA, "lesson", 1000);
+        sendCallback(USER_CLARA, "v1:confirm-student:");
         API_BOTS.resetRequests();
         scenario.processQueue();
     }
@@ -76,7 +76,7 @@ class TelegramNotificationOrchestratorIT extends OrchestratorDeliveryBase {
         withoutDirectBackendCall();
         assertThat(
                         jdbc.queryForObject(
-                                "select count(*) from channel_action where state = 'PENDENTE'",
+                                "select count(*) from channel_action where state = 'PENDING'",
                                 Integer.class))
                 .isEqualTo(1);
 
@@ -86,7 +86,7 @@ class TelegramNotificationOrchestratorIT extends OrchestratorDeliveryBase {
         assertThat(notice.get("text").asString())
                 .isEqualTo("O relatório de Matteo Ferreira tem perguntas pendentes.");
         assertThat(buttonLabels(notice)).containsExactly("Continuar no chat");
-        assertThat(buttons(notice)).containsExactly("v1:foco:a" + reportId());
+        assertThat(buttons(notice)).containsExactly("v1:focus:a" + reportId());
         assertThat(editedTexts()).isEmpty();
         assertThat(jdbc.queryForObject("select focused_report_id from telegram_link", UUID.class))
                 .isNull();
@@ -131,7 +131,7 @@ class TelegramNotificationOrchestratorIT extends OrchestratorDeliveryBase {
                         "Faltam algumas informações. Responda numa única mensagem, digitando ou gravando:")
                 .contains("\n1. O aluno estudou em casa durante a semana?")
                 .contains("Texto ou áudio enviado aqui será aplicado a este relatório.");
-        assertThat(buttons(lastMessage())).containsExactly("v1:canc:", "v1:reg:");
+        assertThat(buttons(lastMessage())).containsExactly("v1:cancel:", "v1:register:");
         // relatório em foco, como no envio direto
         assertThat(jdbc.queryForObject("select focused_report_id from telegram_link", UUID.class))
                 .isEqualTo(reportId());
@@ -143,7 +143,7 @@ class TelegramNotificationOrchestratorIT extends OrchestratorDeliveryBase {
         // tudo foi confirmado pelo orquestrador
         assertThat(
                         jdbc.queryForObject(
-                                "select count(*) from channel_action where state <> 'EXECUTADA'",
+                                "select count(*) from channel_action where state <> 'EXECUTED'",
                                 Integer.class))
                 .isZero();
     }
@@ -169,20 +169,21 @@ class TelegramNotificationOrchestratorIT extends OrchestratorDeliveryBase {
         assertThat(actions.get("text").asString())
                 .contains("Texto ou áudio enviado aqui será aplicado a este relatório.");
         assertThat(buttons(actions))
-                .containsExactly("v1:aprov:1", "v1:alt:", "v1:pdf:", "v1:canc:", "v1:reg:");
+                .containsExactly(
+                        "v1:approve:1", "v1:change:", "v1:pdf:", "v1:cancel:", "v1:register:");
         assertThat(String.join("\n", sentTexts()))
                 .contains("Respostas incorporadas ao relatório. Entendi:")
                 .contains("Aluno: Matteo Ferreira");
         assertThat(jdbc.queryForObject("select status from lesson_report", String.class))
-                .isEqualTo("AGUARDANDO_CONFERENCIA");
+                .isEqualTo("AWAITING_REVIEW");
     }
 
     @Test
     void telegramProcessingFailureBringsRetryOptions() throws Exception {
         link(USER_CLARA, ScenarioIT.CODE_CLARA);
         sendText(USER_CLARA, "Matteo");
-        sendVoice(USER_CLARA, "lenta", 1000); // sem arquivo na API: o áudio não é processável
-        sendCallback(USER_CLARA, "v1:confal:");
+        sendVoice(USER_CLARA, "slow", 1000); // sem arquivo na API: o áudio não é processável
+        sendCallback(USER_CLARA, "v1:confirm-student:");
         API_BOTS.resetRequests();
         scenario.processQueue();
 
@@ -192,7 +193,7 @@ class TelegramNotificationOrchestratorIT extends OrchestratorDeliveryBase {
         assertThat(lastMessage().get("text").asString()).isNotBlank();
         assertThat(
                         jdbc.queryForObject(
-                                "select count(*) from channel_action where state <> 'EXECUTADA'",
+                                "select count(*) from channel_action where state <> 'EXECUTED'",
                                 Integer.class))
                 .isZero();
     }
@@ -203,8 +204,8 @@ class TelegramNotificationOrchestratorIT extends OrchestratorDeliveryBase {
     void telegramDelayNoticeGoesOutOnceThroughOutbox() throws Exception {
         link(USER_CLARA, ScenarioIT.CODE_CLARA);
         sendText(USER_CLARA, "Matteo");
-        sendVoice(USER_CLARA, "lenta", 1000);
-        sendCallback(USER_CLARA, "v1:confal:");
+        sendVoice(USER_CLARA, "slow", 1000);
+        sendCallback(USER_CLARA, "v1:confirm-student:");
         API_BOTS.resetRequests();
 
         clock.advance(Duration.ofMinutes(3));

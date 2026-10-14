@@ -61,14 +61,14 @@ interface ChannelActionJpa extends JpaRepository<ChannelActionEntity, String> {
     @Query(
             value =
                     "select a.batch_id from channel_action a"
-                            + " where a.state = 'PENDENTE' and a.next_attempt_at <= :now"
+                            + " where a.state = 'PENDING' and a.next_attempt_at <= :now"
                             + " and a.seq = (select min(p.seq) from channel_action p"
-                            + "              where p.batch_id = a.batch_id and p.state = 'PENDENTE')"
+                            + "              where p.batch_id = a.batch_id and p.state = 'PENDING')"
                             + " and not exists (select 1 from channel_action b"
                             + "   where b.chat_id = a.chat_id and b.seq < a.seq"
                             + "     and b.batch_id <> a.batch_id"
-                            + "     and (b.state = 'PENDENTE'"
-                            + "          or (b.state = 'ENTREGUE' and b.delivered_at > :confirmationLimit)))"
+                            + "     and (b.state = 'PENDING'"
+                            + "          or (b.state = 'DELIVERED' and b.delivered_at > :confirmationLimit)))"
                             + " order by a.seq limit 1 for update of a skip locked",
             nativeQuery = true)
     Optional<String> nextDueBatch(Instant now, Instant confirmationLimit);
@@ -78,7 +78,7 @@ interface ChannelActionJpa extends JpaRepository<ChannelActionEntity, String> {
     @Query(
             value =
                     "update channel_action set next_attempt_at = :leaseAte, version = version + 1"
-                            + " where batch_id = :batchId and state = 'PENDENTE'",
+                            + " where batch_id = :batchId and state = 'PENDING'",
             nativeQuery = true)
     int reserveBatch(String batchId, Instant leaseAte);
 
@@ -110,10 +110,10 @@ interface ChannelActionJpa extends JpaRepository<ChannelActionEntity, String> {
     @Modifying
     @Query(
             value =
-                    "update channel_action set state = 'FALHA_DEFINITIVA',"
-                            + " reason_code = 'SEM_CONFIRMACAO', finalized_at = :now,"
+                    "update channel_action set state = 'PERMANENTLY_FAILED',"
+                            + " reason_code = 'NO_CONFIRMATION', finalized_at = :now,"
                             + " next_attempt_at = null, version = version + 1"
-                            + " where state = 'ENTREGUE' and deadline_at <= :now",
+                            + " where state = 'DELIVERED' and deadline_at <= :now",
             nativeQuery = true)
     int expireOverdueDelivered(Instant now);
 
@@ -134,15 +134,15 @@ interface ChannelActionJpa extends JpaRepository<ChannelActionEntity, String> {
             nativeQuery = true)
     int removeFinalizedUntil(Instant limit);
 
-    @Query("select count(a) from ChannelActionEntity a where a.state = 'PENDENTE'")
+    @Query("select count(a) from ChannelActionEntity a where a.state = 'PENDING'")
     long countPendings();
 
-    @Query("select min(a.createdAt) from ChannelActionEntity a where a.state = 'PENDENTE'")
+    @Query("select min(a.createdAt) from ChannelActionEntity a where a.state = 'PENDING'")
     Optional<Instant> oldestPendingCreated();
 
     /** Ações entregues antes do limite e ainda sem confirmação. */
     @Query(
-            "select count(a) from ChannelActionEntity a where a.state = 'ENTREGUE'"
+            "select count(a) from ChannelActionEntity a where a.state = 'DELIVERED'"
                     + " and a.deliveredAt < :limit")
     long countDeliveredSince(Instant limit);
 }

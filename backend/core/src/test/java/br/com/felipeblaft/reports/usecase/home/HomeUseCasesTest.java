@@ -25,17 +25,17 @@ class HomeUseCasesTest {
     private final SearchStudentsUseCase search = new SearchStudentsUseCase(c.students, c.open);
     private final GetStudentSummaryUseCase summary =
             new GetStudentSummaryUseCase(c.students, c.open, c.authorization);
-    private final Teacher clara = c.teacher("Clara Souza", "clara@exemplo.test", "K7QM2XPA");
-    private final Teacher bruno = c.teacher("Bruno Lima", "bruno@exemplo.test", "BRUN2XPA");
+    private final Teacher clara = c.teacher("Clara Souza", "clara@example.test", "K7QM2XPA");
+    private final Teacher bruno = c.teacher("Bruno Lima", "bruno@example.test", "BRUN2XPA");
 
     private OpenReport openReport(Student student) {
         return new OpenReport(
-                ReportType.AULA,
+                ReportType.LESSON,
                 UUID.randomUUID(),
                 null,
                 student.id(),
                 student.name(),
-                ReportStatus.AGUARDANDO_CONFERENCIA,
+                ReportStatus.AWAITING_REVIEW,
                 null,
                 null,
                 Channel.TELEGRAM,
@@ -81,14 +81,14 @@ class HomeUseCasesTest {
         c.student(clara, "Olavo Torrente", "Violão");
         c.student(bruno, "Olívia Prado", "Flauta");
 
-        assertThat(search.run(clara.id(), "").type()).isEqualTo(ResultType.TODOS);
+        assertThat(search.run(clara.id(), "").type()).isEqualTo(ResultType.ALL);
         SearchStudentsUseCase.Result found = search.run(clara.id(), "ola");
-        assertThat(found.type()).isEqualTo(ResultType.ENCONTRADOS);
+        assertThat(found.type()).isEqualTo(ResultType.FOUND);
         assertThat(found.students())
                 .extracting(StudentSummary::name)
                 .containsExactly("Olavo Torrente");
         SearchStudentsUseCase.Result none = search.run(clara.id(), "Olívia");
-        assertThat(none.type()).isEqualTo(ResultType.NENHUM);
+        assertThat(none.type()).isEqualTo(ResultType.NONE);
         assertThat(none.students())
                 .extracting(StudentSummary::name)
                 .containsExactly("Matteo Mafra", "Olavo Torrente");
@@ -117,7 +117,7 @@ class HomeUseCasesTest {
         assertThatThrownBy(() -> summary.run(clara.id(), helena.id()))
                 .isInstanceOf(DomainException.class)
                 .extracting(e -> ((DomainException) e).code())
-                .isEqualTo(ErrorCode.ALUNO_NAO_ASSOCIADO);
+                .isEqualTo(ErrorCode.STUDENT_NOT_ASSIGNED);
     }
 
     @Test
@@ -132,17 +132,11 @@ class HomeUseCasesTest {
     void openReportExposesDetailsWithoutText() {
         Student matteo = c.student(clara, "Matteo Mafra", "Piano");
         assertThat(openReport(matteo).details())
-                .containsEntry("canalOrigem", Channel.TELEGRAM)
-                .containsEntry("alunoId", matteo.id())
-                .containsKeys(
-                        "relatorioId",
-                        "trabalhoId",
-                        "status",
-                        "etapa",
-                        "periodoChave",
-                        "atualizadoEm");
-        assertThat(ReportStatus.AGUARDANDO_RESPOSTAS.isOpen()).isTrue();
-        assertThat(ReportStatus.APROVADO.isOpen()).isFalse();
-        assertThat(ReportStatus.CANCELADO.isOpen()).isFalse();
+                .containsEntry("originChannel", Channel.TELEGRAM)
+                .containsEntry("studentId", matteo.id())
+                .containsKeys("reportId", "jobId", "status", "step", "periodKey", "updatedAt");
+        assertThat(ReportStatus.AWAITING_ANSWERS.isOpen()).isTrue();
+        assertThat(ReportStatus.APPROVED.isOpen()).isFalse();
+        assertThat(ReportStatus.CANCELLED.isOpen()).isFalse();
     }
 }

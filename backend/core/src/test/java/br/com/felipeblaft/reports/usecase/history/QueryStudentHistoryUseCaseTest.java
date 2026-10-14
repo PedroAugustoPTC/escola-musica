@@ -36,7 +36,7 @@ class QueryStudentHistoryUseCaseTest {
                 c.approvedLesson(c.matteo, LocalDate.of(2026, 5, 20), "Outro estudo");
         c.reportWithQuestions(); // em aberto: não entra
         c.approvedLesson(c.helena, LocalDate.of(2026, 4, 1), "De outro professor");
-        c.llm.schedule(TaskLlm.CONSOLIDACAO_SEMESTRAL, ReportScenario.semesterOutput("Bom."));
+        c.llm.schedule(TaskLlm.SEMESTER_CONSOLIDATION, ReportScenario.semesterOutput("Bom."));
         c.generateSemester.run(c.clara.id(), c.matteo.id(), "2026-1", false, Channel.WEB);
         c.processQueue();
         SemesterReport semester = c.semester.reports.values().iterator().next();
@@ -48,7 +48,7 @@ class QueryStudentHistoryUseCaseTest {
         assertThat(result.items())
                 .extracting(HistoryItem::reportId)
                 .containsExactly(mayAfter.id(), maio.id(), milestone.id(), semester.id());
-        assertThat(result.items().getLast().type()).isEqualTo(ReportType.SEMESTRAL);
+        assertThat(result.items().getLast().type()).isEqualTo(ReportType.SEMESTER);
         assertThat(result.items().getLast().period().key()).isEqualTo("2026-1");
     }
 
@@ -58,22 +58,24 @@ class QueryStudentHistoryUseCaseTest {
         assertThatThrownBy(() -> history.run(c.clara.id(), c.helena.id()))
                 .isInstanceOfSatisfying(
                         DomainException.class,
-                        e -> assertThat(e.code()).isEqualTo(ErrorCode.ALUNO_NAO_ASSOCIADO));
+                        e -> assertThat(e.code()).isEqualTo(ErrorCode.STUDENT_NOT_ASSIGNED));
     }
 
     @Test
     void officialPdfOnlyOfTeachersApprovedReport() {
         LessonReport review = c.reportInReview();
-        assertThatThrownBy(() -> c.getDocument.official(c.clara.id(), ReportType.AULA, review.id()))
+        assertThatThrownBy(
+                        () -> c.getDocument.official(c.clara.id(), ReportType.LESSON, review.id()))
                 .isInstanceOfSatisfying(
                         DomainException.class,
-                        e -> assertThat(e.code()).isEqualTo(ErrorCode.RECURSO_NAO_ENCONTRADO));
+                        e -> assertThat(e.code()).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND));
         c.approve.run(c.clara.id(), review.id(), review.currentVersion(), Channel.WEB);
-        assertThat(c.getDocument.official(c.clara.id(), ReportType.AULA, review.id()).content())
+        assertThat(c.getDocument.official(c.clara.id(), ReportType.LESSON, review.id()).content())
                 .isNotEmpty();
-        assertThatThrownBy(() -> c.getDocument.official(c.bruno.id(), ReportType.AULA, review.id()))
+        assertThatThrownBy(
+                        () -> c.getDocument.official(c.bruno.id(), ReportType.LESSON, review.id()))
                 .isInstanceOfSatisfying(
                         DomainException.class,
-                        e -> assertThat(e.code()).isEqualTo(ErrorCode.RECURSO_NAO_ENCONTRADO));
+                        e -> assertThat(e.code()).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND));
     }
 }

@@ -71,7 +71,7 @@ public class GetSemesterPreviewUseCase {
                         .map(
                                 r ->
                                         new OpenReport(
-                                                ReportType.SEMESTRAL,
+                                                ReportType.SEMESTER,
                                                 r.id(),
                                                 null,
                                                 studentId,
@@ -89,7 +89,7 @@ public class GetSemesterPreviewUseCase {
         return consolidation.map(
                 t ->
                         new OpenReport(
-                                ReportType.SEMESTRAL,
+                                ReportType.SEMESTER,
                                 null,
                                 t.id(),
                                 studentId,

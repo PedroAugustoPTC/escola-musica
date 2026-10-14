@@ -43,8 +43,8 @@ import org.springframework.stereotype.Component;
 @Order(10)
 public class TelegramLessonReportFlow implements TelegramFlow {
 
-    static final String APPROVE_CONFIRMATION = "aprovar:";
-    static final String CANCEL_CONFIRMATION = "cancelar";
+    static final String APPROVE_CONFIRMATION = "approve:";
+    static final String CANCEL_CONFIRMATION = "cancel";
 
     private final TelegramLessonReportPresentation presentation;
     private final TelegramPresenter presenter;
@@ -87,7 +87,7 @@ public class TelegramLessonReportFlow implements TelegramFlow {
     private Optional<LessonReportView> focus(TelegramContext context) {
         TelegramConversation conversation = context.conversation();
         Optional<FocusReport> focus =
-                conversation.focusReport().filter(f -> f.type() == ReportType.AULA);
+                conversation.focusReport().filter(f -> f.type() == ReportType.LESSON);
         if (focus.isEmpty()) {
             return Optional.empty();
         }
@@ -126,12 +126,12 @@ public class TelegramLessonReportFlow implements TelegramFlow {
         }
         UUID teacherId = context.teacher().id();
         switch (report.status()) {
-            case AGUARDANDO_RESPOSTAS ->
+            case AWAITING_ANSWERS ->
                     step(
                             context,
                             null,
                             answer.answerText(teacherId, report.id(), text, Channel.TELEGRAM));
-            case AGUARDANDO_CONFERENCIA -> {
+            case AWAITING_REVIEW -> {
                 Optional<StudentSummary> otherStudent =
                         searchStudents
                                 .exactMatch(teacherId, text)
@@ -175,12 +175,12 @@ public class TelegramLessonReportFlow implements TelegramFlow {
         UUID teacherId = context.teacher().id();
         ChannelFileReference audio = TelegramLessonRegistrationFlow.reference(message, file);
         switch (report.status()) {
-            case AGUARDANDO_RESPOSTAS ->
+            case AWAITING_ANSWERS ->
                     step(
                             context,
                             null,
                             answer.answerAudio(teacherId, report.id(), audio, Channel.TELEGRAM));
-            case AGUARDANDO_CONFERENCIA ->
+            case AWAITING_REVIEW ->
                     withCurrentVersion(
                             context,
                             view,
@@ -205,23 +205,27 @@ public class TelegramLessonReportFlow implements TelegramFlow {
         TelegramConversation conversation = context.conversation();
         conversation.store(
                 TelegramConversationInterpreter.STUDENT_OPTIONS, student.id().toString());
-        conversation.defineStep(ConversationFlowStep.ESCOLHENDO_ALUNO);
+        conversation.defineStep(ConversationFlowStep.CHOOSING_STUDENT);
         context.answer(
                 new Message(
                         context.chatId(),
                         presenter.text(
-                                "TROCAR_ALUNO_DURANTE_CONFERENCIA",
-                                Map.of("aluno", student.name(), "alunoAtual", view.studentName())),
+                                "SWITCH_STUDENT_DURING_REVIEW",
+                                Map.of(
+                                        "student",
+                                        student.name(),
+                                        "currentStudent",
+                                        view.studentName())),
                         Keyboard.of(
                                 new Button(
                                         presenter.label(
-                                                "BOTAO_CONFIRMAR_ALUNO",
-                                                Map.of("aluno", student.name())),
-                                        CallbackDataCodec.encode("aluno", "0")),
+                                                "CONFIRM_STUDENT_BUTTON",
+                                                Map.of("student", student.name())),
+                                        CallbackDataCodec.encode("student", "0")),
                                 presenter.button(
-                                        "BOTAO_VOLTAR",
+                                        "BACK_BUTTON",
                                         Map.of(),
-                                        "foco",
+                                        "focus",
                                         "a" + view.report().id()))));
     }
 
@@ -231,7 +235,7 @@ public class TelegramLessonReportFlow implements TelegramFlow {
         try {
             action.run();
         } catch (DomainException error) {
-            if (error.code() != ErrorCode.VERSAO_DESATUALIZADA) {
+            if (error.code() != ErrorCode.STALE_VERSION) {
                 throw error;
             }
             context.answer(presenter.error(context.chatId(), error.code(), error.details()));
@@ -272,10 +276,10 @@ public class TelegramLessonReportFlow implements TelegramFlow {
     @Override
     public boolean aoCallback(TelegramContext context, String action, String argument) {
         switch (action) {
-            case "foco" -> {
+            case "focus" -> {
                 return continueInChat(context, argument);
             }
-            case "aprov", "aprovok", "alt", "canc", "cancok", "pdf", "tent" -> {
+            case "approve", "approve-ok", "change", "cancel", "cancel-ok", "pdf", "retry" -> {
                 Optional<LessonReportView> focus = focus(context);
                 if (focus.isEmpty()) {
                     return false;
@@ -293,7 +297,7 @@ public class TelegramLessonReportFlow implements TelegramFlow {
         TelegramConversation conversation = context.conversation();
         LessonReport report = view.report();
         switch (action) {
-            case "aprov" -> {
+            case "approve" -> {
                 Integer version = number(argument);
                 if (version == null) {
                     return false;
@@ -301,7 +305,7 @@ public class TelegramLessonReportFlow implements TelegramFlow {
                 conversation.cleanConfirmation();
                 askApproval(context, view, version);
             }
-            case "aprovok" -> {
+            case "approve-ok" -> {
                 Integer version = number(argument);
                 if (version == null
                         || !conversation
@@ -313,7 +317,7 @@ public class TelegramLessonReportFlow implements TelegramFlow {
                 conversation.cleanConfirmation();
                 approveVersion(context, report.id(), version);
             }
-            case "cancok" -> {
+            case "cancel-ok" -> {
                 if (!conversation
                         .pendingConfirmation()
                         .filter(CANCEL_CONFIRMATION::equals)
@@ -323,19 +327,19 @@ public class TelegramLessonReportFlow implements TelegramFlow {
                 conversation.cleanConfirmation();
                 cancelReport(context, report.id());
             }
-            case "canc" -> {
+            case "cancel" -> {
                 conversation.cleanConfirmation();
                 askCancellation(context);
             }
-            case "alt" -> {
+            case "change" -> {
                 conversation.cleanConfirmation();
-                if (report.status() != ReportStatus.AGUARDANDO_CONFERENCIA) {
+                if (report.status() != ReportStatus.AWAITING_REVIEW) {
                     return false;
                 }
-                context.answer(presenter.simple(context.chatId(), "PEDIDO_ALTERACAO_ROTULO"));
+                context.answer(presenter.simple(context.chatId(), "CHANGE_REQUEST_LABEL"));
             }
             case "pdf" -> {
-                if (report.status() != ReportStatus.AGUARDANDO_CONFERENCIA) {
+                if (report.status() != ReportStatus.AWAITING_REVIEW) {
                     return false;
                 }
                 presentation
@@ -346,7 +350,7 @@ public class TelegramLessonReportFlow implements TelegramFlow {
                                         context.answer(
                                                 presenter.simple(
                                                         context.chatId(),
-                                                        "CONFERENCIA_PDF_GERANDO")));
+                                                        "REVIEW_PDF_GENERATING")));
             }
             default -> {
                 conversation.cleanConfirmation();
@@ -384,9 +388,9 @@ public class TelegramLessonReportFlow implements TelegramFlow {
         return focus(context)
                 .map(
                         view ->
-                                view.report().status() == ReportStatus.AGUARDANDO_RESPOSTAS
-                                        ? presenter.label("RECEBER_RESPOSTA")
-                                        : presenter.label("RECEBER_ALTERACAO"))
+                                view.report().status() == ReportStatus.AWAITING_ANSWERS
+                                        ? presenter.label("RECEIVE_REPLY")
+                                        : presenter.label("RECEIVE_CHANGE"))
                 .orElse(null);
     }
 
@@ -394,16 +398,16 @@ public class TelegramLessonReportFlow implements TelegramFlow {
 
     private void askApproval(TelegramContext context, LessonReportView view, int version) {
         LessonReport report = view.report();
-        if (report.status() != ReportStatus.AGUARDANDO_CONFERENCIA
+        if (report.status() != ReportStatus.AWAITING_REVIEW
                 || TelegramLessonReportPresentation.inProcessing(view)) {
-            throw new DomainException(ErrorCode.ACAO_NAO_PERMITIDA_NA_ETAPA);
+            throw new DomainException(ErrorCode.ACTION_NOT_ALLOWED_AT_STEP);
         }
         if (version != report.currentVersion()) {
             context.answer(
                     presenter.error(
                             context.chatId(),
-                            ErrorCode.VERSAO_DESATUALIZADA,
-                            Map.of("versaoVigente", report.currentVersion())));
+                            ErrorCode.STALE_VERSION,
+                            Map.of("currentVersion", report.currentVersion())));
             present(context, report.id(), null);
             return;
         }
@@ -411,11 +415,11 @@ public class TelegramLessonReportFlow implements TelegramFlow {
         context.answer(
                 presenter.confirmation(
                         context.chatId(),
-                        presenter.text("CONFIRMAR_APROVACAO", Map.of("versao", version)),
+                        presenter.text("CONFIRM_APPROVAL", Map.of("version", version)),
                         presenter.button(
-                                "BOTAO_CONFIRMAR_APROVACAO",
-                                Map.of("versao", version),
-                                "aprovok",
+                                "CONFIRM_APPROVAL_BUTTON",
+                                Map.of("version", version),
+                                "approve-ok",
                                 Integer.toString(version))));
     }
 
@@ -424,7 +428,7 @@ public class TelegramLessonReportFlow implements TelegramFlow {
         try {
             approval = approve.run(context.teacher().id(), reportId, version, Channel.TELEGRAM);
         } catch (DomainException error) {
-            if (error.code() != ErrorCode.VERSAO_DESATUALIZADA) {
+            if (error.code() != ErrorCode.STALE_VERSION) {
                 throw error;
             }
             context.answer(presenter.error(context.chatId(), error.code(), error.details()));
@@ -439,7 +443,7 @@ public class TelegramLessonReportFlow implements TelegramFlow {
                 new Message(
                         context.chatId(),
                         presenter.text(
-                                "RELATORIO_APROVADO",
+                                "REPORT_APPROVED",
                                 Map.of(
                                         "data", presenter.formatting().data(approval.approvedAt()),
                                         "hora",
@@ -447,8 +451,8 @@ public class TelegramLessonReportFlow implements TelegramFlow {
                                                         .formatting()
                                                         .hora(approval.approvedAt()))),
                         Keyboard.of(
-                                presenter.button("BOTAO_REGISTRAR_OUTRA_AULA", "reg"),
-                                presenter.button("BOTAO_HISTORICO", "hist"))));
+                                presenter.button("REGISTER_OTHER_LESSON_BUTTON", "register"),
+                                presenter.button("HISTORY_BUTTON", "history"))));
     }
 
     private void askCancellation(TelegramContext context) {
@@ -456,8 +460,8 @@ public class TelegramLessonReportFlow implements TelegramFlow {
         context.answer(
                 presenter.confirmation(
                         context.chatId(),
-                        presenter.text("CONFIRMAR_CANCELAMENTO"),
-                        presenter.button("BOTAO_CONFIRMAR_CANCELAMENTO", "cancok")));
+                        presenter.text("CONFIRM_CANCELLATION"),
+                        presenter.button("CONFIRM_CANCELLATION_BUTTON", "cancel-ok")));
     }
 
     private void cancelReport(TelegramContext context, UUID reportId) {
@@ -466,7 +470,7 @@ public class TelegramLessonReportFlow implements TelegramFlow {
         conversation.cleanFocus();
         conversation.cleanSelection();
         conversation.endFlow();
-        context.answer(presenter.simple(context.chatId(), "RELATORIO_CANCELADO"));
+        context.answer(presenter.simple(context.chatId(), "REPORT_CANCELLED"));
         interpreter.showHome(context);
     }
 
@@ -495,15 +499,15 @@ public class TelegramLessonReportFlow implements TelegramFlow {
             }
             case 't' -> {
                 QueryJobUseCase.JobView job = queryJob.run(context.teacher().id(), id);
-                if (job.job().reportId() != null && job.job().reportType() == ReportType.AULA) {
+                if (job.job().reportId() != null && job.job().reportType() == ReportType.LESSON) {
                     present(context, job.job().reportId(), null);
                 } else if (job.job().status().inProgress()) {
                     context.answer(
                             presenter.simple(
                                     context.chatId(),
-                                    "PROCESSAMENTO_EM_ANDAMENTO",
+                                    "PROCESSING_IN_PROGRESS",
                                     Map.of(
-                                            "etapa",
+                                            "step",
                                             presenter.formatting().step(job.job().step().name()))));
                 } else {
                     return false;

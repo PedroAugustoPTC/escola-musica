@@ -13,11 +13,11 @@ import java.util.UUID;
  */
 public class ChannelAction {
 
-    public static final String LINK_UNDONE_CODE = "VINCULO_DESFEITO";
-    public static final String DEADLINE_EXPIRED_CODE = "PRAZO_VENCIDO";
-    public static final String CODE_WITHOUT_CONFIRMATION = "SEM_CONFIRMACAO";
-    public static final String MESSAGE_NOT_EDITABLE_CODE = "MENSAGEM_NAO_EDITAVEL";
-    public static final String DOCUMENT_UNAVAILABLE_CODE = "DOCUMENTO_INDISPONIVEL";
+    public static final String LINK_UNDONE_CODE = "LINK_UNDONE";
+    public static final String DEADLINE_EXPIRED_CODE = "DEADLINE_EXPIRED";
+    public static final String CODE_WITHOUT_CONFIRMATION = "NO_CONFIRMATION";
+    public static final String MESSAGE_NOT_EDITABLE_CODE = "MESSAGE_NOT_EDITABLE";
+    public static final String DOCUMENT_UNAVAILABLE_CODE = "DOCUMENT_UNAVAILABLE";
     public static final String COMPENSATION_SUFFIX = "-c";
 
     private final String id;
@@ -103,7 +103,7 @@ public class ChannelAction {
             String compensation,
             Instant now,
             RetryPolicy policy) {
-        boolean response = origin == ChannelActionOrigin.RESPOSTA_UPDATE;
+        boolean response = origin == ChannelActionOrigin.UPDATE_REPLY;
         if (response && updateId == null) {
             throw new IllegalArgumentException("resposta a update exige updateId");
         }
@@ -119,7 +119,7 @@ public class ChannelAction {
                 type,
                 payload,
                 compensation,
-                response ? ChannelActionState.ENTREGUE : ChannelActionState.PENDENTE,
+                response ? ChannelActionState.DELIVERED : ChannelActionState.PENDING,
                 0,
                 response ? null : now,
                 policy.deadlineOf(now),
@@ -138,12 +138,12 @@ public class ChannelAction {
      * {@code PENDENTE}.
      */
     public void registerDeliveryFailure(Instant now, RetryPolicy policy) {
-        if (state != ChannelActionState.PENDENTE) {
+        if (state != ChannelActionState.PENDING) {
             return;
         }
         attempts++;
         if (expired(now)) {
-            finalize(ChannelActionState.FALHA_DEFINITIVA, DEADLINE_EXPIRED_CODE, now);
+            finalize(ChannelActionState.PERMANENTLY_FAILED, DEADLINE_EXPIRED_CODE, now);
             return;
         }
         nextAttemptAt = policy.nextAttempt(attempts, now, deadlineAt);
@@ -154,58 +154,58 @@ public class ChannelAction {
      * morrer, a ação volta a ser devida quando o lease vence. Só age sobre {@code PENDENTE}.
      */
     public void reserveUntil(Instant leaseAte) {
-        if (state == ChannelActionState.PENDENTE) {
+        if (state == ChannelActionState.PENDING) {
             nextAttemptAt = leaseAte;
         }
     }
 
     /** Aceite HTTP do orquestrador. Só age sobre {@code PENDENTE}. */
     public void markDelivered(Instant now) {
-        if (state != ChannelActionState.PENDENTE) {
+        if (state != ChannelActionState.PENDING) {
             return;
         }
-        state = ChannelActionState.ENTREGUE;
+        state = ChannelActionState.DELIVERED;
         deliveredAt = now;
         nextAttemptAt = null;
         attempts++;
     }
 
     public ConfirmationResult confirmExecuted(Instant now) {
-        if (state == ChannelActionState.EXECUTADA) {
-            return ConfirmationResult.REPETIDA;
+        if (state == ChannelActionState.EXECUTED) {
+            return ConfirmationResult.REPEATED;
         }
         if (state.finalized()) {
-            return ConfirmationResult.DIVERGENTE;
+            return ConfirmationResult.DIVERGENT;
         }
-        finalize(ChannelActionState.EXECUTADA, null, now);
-        return ConfirmationResult.APLICADA;
+        finalize(ChannelActionState.EXECUTED, null, now);
+        return ConfirmationResult.APPLIED;
     }
 
     public ConfirmationResult confirmFailure(String code, Instant now) {
         Objects.requireNonNull(code);
-        if (state == ChannelActionState.FALHOU) {
+        if (state == ChannelActionState.FAILED) {
             return code.equals(reasonCode)
-                    ? ConfirmationResult.REPETIDA
-                    : ConfirmationResult.DIVERGENTE;
+                    ? ConfirmationResult.REPEATED
+                    : ConfirmationResult.DIVERGENT;
         }
         if (state.finalized()) {
-            return ConfirmationResult.DIVERGENTE;
+            return ConfirmationResult.DIVERGENT;
         }
-        finalize(ChannelActionState.FALHOU, code, now);
-        return ConfirmationResult.APLICADA;
+        finalize(ChannelActionState.FAILED, code, now);
+        return ConfirmationResult.APPLIED;
     }
 
     /** Descarte por vínculo desfeito: só age sobre {@code PENDENTE}. */
     public void discard(Instant now) {
-        if (state == ChannelActionState.PENDENTE) {
-            finalize(ChannelActionState.DESCARTADA, LINK_UNDONE_CODE, now);
+        if (state == ChannelActionState.PENDING) {
+            finalize(ChannelActionState.DISCARDED, LINK_UNDONE_CODE, now);
         }
     }
 
     /** Encerra uma ação não confirmada cujo prazo venceu. */
     public void expire(Instant now) {
         if (expired(now)) {
-            finalize(ChannelActionState.FALHA_DEFINITIVA, DEADLINE_EXPIRED_CODE, now);
+            finalize(ChannelActionState.PERMANENTLY_FAILED, DEADLINE_EXPIRED_CODE, now);
         }
     }
 
@@ -215,10 +215,10 @@ public class ChannelAction {
      * por isso não conta como falha definitiva nas métricas. Só age sobre {@code ENTREGUE}.
      */
     public boolean expireWithoutConfirmation(Instant now) {
-        if (state != ChannelActionState.ENTREGUE || !expired(now)) {
+        if (state != ChannelActionState.DELIVERED || !expired(now)) {
             return false;
         }
-        finalize(ChannelActionState.FALHA_DEFINITIVA, CODE_WITHOUT_CONFIRMATION, now);
+        finalize(ChannelActionState.PERMANENTLY_FAILED, CODE_WITHOUT_CONFIRMATION, now);
         return true;
     }
 
@@ -230,7 +230,7 @@ public class ChannelAction {
 
     /** Só ações que não são elas mesmas compensação e que têm alternativa gravada. */
     public boolean hasCompensation() {
-        return origin != ChannelActionOrigin.COMPENSACAO && compensation != null;
+        return origin != ChannelActionOrigin.COMPENSATION && compensation != null;
     }
 
     /**
@@ -242,7 +242,7 @@ public class ChannelAction {
         if (!hasCompensation()) {
             return false;
         }
-        return type == ChannelActionType.DOCUMENTO
+        return type == ChannelActionType.DOCUMENT
                 ? DOCUMENT_UNAVAILABLE_CODE.equals(code)
                 : MESSAGE_NOT_EDITABLE_CODE.equals(code);
     }
@@ -260,13 +260,13 @@ public class ChannelAction {
             throw new IllegalStateException("ação sem compensação");
         }
         ChannelActionType compensationType =
-                type == ChannelActionType.MENSAGEM_ETAPA
-                        ? ChannelActionType.MENSAGEM_ETAPA
-                        : ChannelActionType.MENSAGEM;
+                type == ChannelActionType.STEP_MESSAGE
+                        ? ChannelActionType.STEP_MESSAGE
+                        : ChannelActionType.MESSAGE;
         return create(
                 compensationId(),
                 "c:" + id,
-                ChannelActionOrigin.COMPENSACAO,
+                ChannelActionOrigin.COMPENSATION,
                 null,
                 chatId,
                 teacherId,

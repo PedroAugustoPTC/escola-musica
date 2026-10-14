@@ -44,7 +44,7 @@ public class SaveChannelActionsUseCase {
     /**
      * @param loteId evento de origem ({@code u<update_id>}, {@code p:<evento>} ou {@code
      *     c:<acaoId>})
-     * @param updateId obrigatório em {@link ChannelActionOrigin#RESPOSTA_UPDATE}
+     * @param updateId obrigatório em {@link ChannelActionOrigin#UPDATE_REPLY}
      * @return quantas ações foram de fato gravadas (as já existentes não contam)
      */
     public int run(

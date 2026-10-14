@@ -39,7 +39,7 @@ class SemesterProcessorTest {
     private SemesterReport inReview() {
         c.approvedLesson(c.matteo, LocalDate.of(2026, 3, 10), "Escala");
         c.llm.schedule(
-                TaskLlm.CONSOLIDACAO_SEMESTRAL, ReportScenario.semesterOutput("Bom semestre."));
+                TaskLlm.SEMESTER_CONSOLIDATION, ReportScenario.semesterOutput("Bom semestre."));
         c.generateSemester.run(c.clara.id(), c.matteo.id(), "2026-1", false, Channel.WEB);
         c.processQueue();
         return c.semester.reports.values().iterator().next();
@@ -50,7 +50,7 @@ class SemesterProcessorTest {
     }
 
     private InteractionResult lastInteraction(SemesterReport report) {
-        return c.interactions.last(ReportType.SEMESTRAL, report.id()).orElseThrow().result();
+        return c.interactions.last(ReportType.SEMESTER, report.id()).orElseThrow().result();
     }
 
     @Test
@@ -61,9 +61,9 @@ class SemesterProcessorTest {
                 .singleElement()
                 .satisfies(
                         call -> {
-                            assertThat(call.task()).isEqualTo(AiTask.CONSOLIDACAO);
+                            assertThat(call.task()).isEqualTo(AiTask.CONSOLIDATION);
                             assertThat(call.success()).isTrue();
-                            assertThat(call.reportType()).isEqualTo(ReportType.SEMESTRAL);
+                            assertThat(call.reportType()).isEqualTo(ReportType.SEMESTER);
                             assertThat(call.reportId()).isEqualTo(report.id());
                         });
     }
@@ -72,17 +72,17 @@ class SemesterProcessorTest {
     void consolidationThatFailsWithoutReportStaysUnlinkedAndKeepsTokensAndCost() {
         c.approvedLesson(c.matteo, LocalDate.of(2026, 3, 10), "Escala");
         c.llm.schedule(
-                TaskLlm.CONSOLIDACAO_SEMESTRAL,
+                TaskLlm.SEMESTER_CONSOLIDATION,
                 new InvalidAiOutputException("schema", 900, 120, new BigDecimal("0.0042")));
         c.generateSemester.run(c.clara.id(), c.matteo.id(), "2026-1", false, Channel.WEB);
 
         c.processQueue();
 
-        assertThat(last().result()).isEqualTo(JobResult.FALHA_CONSOLIDACAO);
+        assertThat(last().result()).isEqualTo(JobResult.CONSOLIDATION_FAILED);
         assertThat(c.semester.reports).isEmpty();
         AiCall failure = c.costs.calls.getLast();
         assertThat(failure.success()).isFalse();
-        assertThat(failure.errorCode()).isEqualTo("SAIDA_INVALIDA");
+        assertThat(failure.errorCode()).isEqualTo("INVALID_OUTPUT");
         assertThat(failure.reportId()).isNull();
         assertThat(failure.inputTokens()).isEqualTo(900);
         assertThat(failure.outputTokens()).isEqualTo(120);
@@ -97,14 +97,14 @@ class SemesterProcessorTest {
 
         c.processQueue();
 
-        assertThat(last().result()).isEqualTo(JobResult.FALHA_CONSOLIDACAO);
+        assertThat(last().result()).isEqualTo(JobResult.CONSOLIDATION_FAILED);
         assertThat(c.llm.inputs).isEmpty();
     }
 
     @Test
     void semesterOpenInOtherChannelDuringConsolidationDoesNotDuplicate() {
         c.approvedLesson(c.matteo, LocalDate.of(2026, 3, 10), "Escala");
-        c.llm.schedule(TaskLlm.CONSOLIDACAO_SEMESTRAL, ReportScenario.semesterOutput("Bom."));
+        c.llm.schedule(TaskLlm.SEMESTER_CONSOLIDATION, ReportScenario.semesterOutput("Bom."));
         c.generateSemester.run(c.clara.id(), c.matteo.id(), "2026-1", false, Channel.WEB);
         SemesterPeriod period = SemesterPeriod.of("2026-1");
         c.semester.save(
@@ -129,17 +129,17 @@ class SemesterProcessorTest {
         c.processQueue();
 
         assertThat(c.semester.reports).hasSize(1);
-        assertThat(last().result()).isEqualTo(JobResult.FALHA_CONSOLIDACAO);
+        assertThat(last().result()).isEqualTo(JobResult.CONSOLIDATION_FAILED);
     }
 
     @Test
     void changeByAudioWithTranscriptionAndUnderstoodText() {
         SemesterReport report = inReview();
         c.transcription.schedule("Parecer: muito bom.");
-        c.llm.schedule(TaskLlm.REVISAO_SEMESTRAL, ReportScenario.semesterOutput("Muito bom."));
+        c.llm.schedule(TaskLlm.SEMESTER_REVISION, ReportScenario.semesterOutput("Muito bom."));
 
         c.changeSemester.changeByAudio(
-                c.clara.id(), report.id(), ReportScenario.file("pedido.ogg", 100), 1, Channel.WEB);
+                c.clara.id(), report.id(), ReportScenario.file("request.ogg", 100), 1, Channel.WEB);
         c.processQueue();
 
         assertThat(report.currentVersion()).isEqualTo(2);
@@ -152,17 +152,17 @@ class SemesterProcessorTest {
     void requestTranscriptionFailsWithoutNewVersion() {
         SemesterReport report = inReview();
         c.transcription.schedule(
-                new AudioNotProcessableException(AudioNotProcessableException.Reason.SEM_FALA));
+                new AudioNotProcessableException(AudioNotProcessableException.Reason.NO_SPEECH));
 
         c.changeSemester.changeByAudio(
                 c.clara.id(),
                 report.id(),
-                ReportScenario.file("mudo.ogg", 100),
+                ReportScenario.file("mute.ogg", 100),
                 1,
                 Channel.TELEGRAM);
         c.processQueue();
 
-        assertThat(last().result()).isEqualTo(JobResult.FALHA_ALTERACAO);
+        assertThat(last().result()).isEqualTo(JobResult.CHANGE_FAILED);
         assertThat(report.currentVersion()).isEqualTo(1);
         assertThat(report.step()).isNull();
     }
@@ -171,19 +171,19 @@ class SemesterProcessorTest {
     void aiFailureInRevisionRegistersInteractionAndNoChangeDoesNotCreateVersion() {
         SemesterReport report = inReview();
         c.llm.schedule(
-                TaskLlm.REVISAO_SEMESTRAL,
-                new ProviderUnavailableException("teste"),
-                AiSemesterReportOutput.of(report.content(), false, "NENHUM"));
+                TaskLlm.SEMESTER_REVISION,
+                new ProviderUnavailableException("test"),
+                AiSemesterReportOutput.of(report.content(), false, "NONE"));
 
         c.changeSemester.changeByText(c.clara.id(), report.id(), "Mude algo.", 1, Channel.WEB);
         c.processQueue();
-        assertThat(last().result()).isEqualTo(JobResult.FALHA_ALTERACAO);
-        assertThat(lastInteraction(report)).isEqualTo(InteractionResult.FALHOU);
+        assertThat(last().result()).isEqualTo(JobResult.CHANGE_FAILED);
+        assertThat(lastInteraction(report)).isEqualTo(InteractionResult.FAILED);
 
         c.changeSemester.changeByText(c.clara.id(), report.id(), "Mude de novo.", 1, Channel.WEB);
         c.processQueue();
-        assertThat(last().result()).isEqualTo(JobResult.SEM_ALTERACAO_DE_CONTEUDO);
-        assertThat(lastInteraction(report)).isEqualTo(InteractionResult.SEM_ALTERACAO_DE_CONTEUDO);
+        assertThat(last().result()).isEqualTo(JobResult.NO_CONTENT_CHANGE);
+        assertThat(lastInteraction(report)).isEqualTo(InteractionResult.NO_CONTENT_CHANGE);
         assertThat(report.currentVersion()).isEqualTo(1);
     }
 
@@ -195,9 +195,8 @@ class SemesterProcessorTest {
 
         c.processQueue();
 
-        assertThat(last().result()).isEqualTo(JobResult.VERSAO_DESATUALIZADA);
-        assertThat(lastInteraction(report))
-                .isEqualTo(InteractionResult.RECUSADA_VERSAO_DESATUALIZADA);
+        assertThat(last().result()).isEqualTo(JobResult.STALE_VERSION);
+        assertThat(lastInteraction(report)).isEqualTo(InteractionResult.REJECTED_STALE_VERSION);
     }
 
     @Test
@@ -209,20 +208,20 @@ class SemesterProcessorTest {
 
         c.processor.process(job);
 
-        assertThat(job.status()).isEqualTo(JobStatus.DESCARTADO);
+        assertThat(job.status()).isEqualTo(JobStatus.DISCARDED);
         assertThat(report.currentVersion()).isEqualTo(1);
     }
 
     @Test
     void unexpectedErrorDoesNotLeaveSemesterStuckInStep() {
         SemesterReport report = inReview();
-        c.llm.schedule(TaskLlm.REVISAO_SEMESTRAL, new IllegalStateException("falha inesperada"));
+        c.llm.schedule(TaskLlm.SEMESTER_REVISION, new IllegalStateException("falha inesperada"));
         c.changeSemester.changeByText(c.clara.id(), report.id(), "Mude.", 1, Channel.WEB);
 
         assertThatThrownBy(c::processQueue).isInstanceOf(IllegalStateException.class);
 
         assertThat(report.step()).isNull();
-        assertThat(last().result()).isEqualTo(JobResult.FALHA_ALTERACAO);
+        assertThat(last().result()).isEqualTo(JobResult.CHANGE_FAILED);
     }
 
     @Test
@@ -233,8 +232,8 @@ class SemesterProcessorTest {
         assertThatThrownBy(() -> c.discardRegistration.run(c.clara.id(), change.id()))
                 .isInstanceOfSatisfying(
                         DomainException.class,
-                        e -> assertThat(e.code()).isEqualTo(ErrorCode.ACAO_NAO_PERMITIDA_NA_ETAPA));
-        c.llm.schedule(TaskLlm.REVISAO_SEMESTRAL, ReportScenario.semesterOutput("Outro."));
+                        e -> assertThat(e.code()).isEqualTo(ErrorCode.ACTION_NOT_ALLOWED_AT_STEP));
+        c.llm.schedule(TaskLlm.SEMESTER_REVISION, ReportScenario.semesterOutput("Other."));
         c.processQueue();
 
         c.reports.reports.clear();
@@ -242,17 +241,17 @@ class SemesterProcessorTest {
         ProcessingJob consolidation =
                 c.generateSemester.run(c.clara.id(), c.matteo.id(), "2026-2", false, Channel.WEB);
         c.discardRegistration.run(c.clara.id(), consolidation.id());
-        assertThat(consolidation.status()).isEqualTo(JobStatus.DESCARTADO);
+        assertThat(consolidation.status()).isEqualTo(JobStatus.DISCARDED);
         assertThatThrownBy(() -> c.discardRegistration.run(c.clara.id(), consolidation.id()))
                 .isInstanceOf(DomainException.class);
-        assertThat(consolidation.type()).isEqualTo(JobType.CONSOLIDACAO_SEMESTRAL);
-        assertThat(consolidation.step()).isEqualTo(JobStep.CONSOLIDANDO);
+        assertThat(consolidation.type()).isEqualTo(JobType.SEMESTER_CONSOLIDATION);
+        assertThat(consolidation.step()).isEqualTo(JobStep.CONSOLIDATING);
     }
 
     @Test
     void audioAboveLimitInChangeIsRefusedAndDeleted() {
         SemesterReport report = inReview();
-        var large = ReportScenario.file("grande.ogg", c.parameters.audioLimitBytes() + 1);
+        var large = ReportScenario.file("large.ogg", c.parameters.audioLimitBytes() + 1);
 
         assertThatThrownBy(
                         () ->
@@ -260,7 +259,7 @@ class SemesterProcessorTest {
                                         c.clara.id(), report.id(), large, 1, Channel.WEB))
                 .isInstanceOfSatisfying(
                         DomainException.class,
-                        e -> assertThat(e.code()).isEqualTo(ErrorCode.AUDIO_MUITO_GRANDE));
+                        e -> assertThat(e.code()).isEqualTo(ErrorCode.AUDIO_TOO_LARGE));
         assertThat(c.normalization.deleted).contains(large.path());
         assertThat(c.semesterProcessor.serves(last())).isTrue();
         assertThat(List.of(report.step() == null)).containsExactly(true);

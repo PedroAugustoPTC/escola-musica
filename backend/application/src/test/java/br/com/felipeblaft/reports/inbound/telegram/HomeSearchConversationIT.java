@@ -43,7 +43,7 @@ class HomeSearchConversationIT extends TelegramConversationBase {
         long touchId = nextUpdate();
         String touch =
                 """
-                {"update_id": %d, "callback_query": {"id": "cb%d", "data": "v1:inicio:",
+                {"update_id": %d, "callback_query": {"id": "cb%d", "data": "v1:home:",
                  "from": {"id": %d, "is_bot": false, "first_name": "Teste"},
                  "message": {"message_id": 55, "date": 1, "chat": {"id": %d, "type": "private"}}}}
                 """
@@ -79,9 +79,9 @@ class HomeSearchConversationIT extends TelegramConversationBase {
                 .isEqualTo("Encontrei mais de um aluno. Qual deles?");
         assertThat(buttonLabels(lastMessage()))
                 .containsExactly("Miguel de Castro Torrente", "Olavo Torrente", "Início");
-        assertThat(buttons(lastMessage())).startsWith("v1:aluno:0", "v1:aluno:1");
+        assertThat(buttons(lastMessage())).startsWith("v1:student:0", "v1:student:1");
 
-        sendCallback(USER_CLARA, "v1:aluno:1");
+        sendCallback(USER_CLARA, "v1:student:1");
         assertThat(lastMessage().get("text").asString()).contains("com Olavo Torrente");
 
         sendText(USER_CLARA, "Helena");
@@ -94,9 +94,9 @@ class HomeSearchConversationIT extends TelegramConversationBase {
     void registerLessonAsksForStudent() throws Exception {
         sendText(USER_CLARA, "registrar aula");
         assertThat(lastMessage().get("text").asString()).isEqualTo("Para qual aluno?");
-        sendCallback(USER_CLARA, "v1:reg:");
+        sendCallback(USER_CLARA, "v1:register:");
         assertThat(lastMessage().get("text").asString()).isEqualTo("Para qual aluno?");
-        sendCallback(USER_CLARA, "v1:aluno:0");
+        sendCallback(USER_CLARA, "v1:student:0");
         assertThat(lastMessage().get("text").asString()).contains("com Matteo Mafra");
     }
 
@@ -104,7 +104,7 @@ class HomeSearchConversationIT extends TelegramConversationBase {
     void signOutAsksConfirmationAndUndoesLink() throws Exception {
         sendText(USER_CLARA, "sair");
         assertThat(lastMessage().get("text").asString()).startsWith("Deseja sair?");
-        assertThat(buttons(lastMessage())).contains("v1:sairok:");
+        assertThat(buttons(lastMessage())).contains("v1:sign-out-ok:");
 
         sendText(USER_CLARA, "não");
         assertThat(jdbc.queryForObject("select count(*) from telegram_link", Integer.class))
@@ -124,7 +124,7 @@ class HomeSearchConversationIT extends TelegramConversationBase {
     @Test
     void signOutPeloButton() throws Exception {
         sendText(USER_CLARA, "sair");
-        sendCallback(USER_CLARA, "v1:sairok:");
+        sendCallback(USER_CLARA, "v1:sign-out-ok:");
         assertThat(jdbc.queryForObject("select count(*) from telegram_link", Integer.class))
                 .isZero();
     }
@@ -144,10 +144,10 @@ class HomeSearchConversationIT extends TelegramConversationBase {
                 .isEqualTo(
                         "Não consigo usar este tipo de mensagem aqui. Envie o nome de um aluno, um áudio de aula ou escolha uma ação.");
 
-        sendCallback(USER_CLARA, "v1:aluno:9");
+        sendCallback(USER_CLARA, "v1:student:9");
         assertThat(sentTexts()).contains("Esta opção não vale mais. Veja abaixo a etapa atual.");
-        sendCallback(USER_CLARA, "v1:sairok:");
-        sendCallback(USER_CLARA, "lixo");
+        sendCallback(USER_CLARA, "v1:sign-out-ok:");
+        sendCallback(USER_CLARA, "trash");
         assertThat(jdbc.queryForObject("select count(*) from telegram_link", Integer.class))
                 .isEqualTo(1);
 
@@ -162,7 +162,7 @@ class HomeSearchConversationIT extends TelegramConversationBase {
         sendText(USER_CLARA, "início");
         java.time.Instant expires =
                 jdbc.queryForObject(
-                                "select access_code_expires_at from teacher where email = 'clara@exemplo.test'",
+                                "select access_code_expires_at from teacher where email = 'clara@example.test'",
                                 java.sql.Timestamp.class)
                         .toInstant();
         assertThat(expires).isEqualTo(clock.now().plus(java.time.Duration.ofDays(7)));

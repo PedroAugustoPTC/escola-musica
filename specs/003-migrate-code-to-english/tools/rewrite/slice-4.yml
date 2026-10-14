@@ -1,0 +1,14 @@
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: br.com.felipeblaft.migration.Slice4.Members
+displayName: "Fatia 4 — membros do fio e B1"
+description: "Constantes de enumeração, componentes de DTO e parâmetros de rota pelo mapa da fatia 4."
+recipeList:
+  - br.com.felipeblaft.migration.rewrite.RenameMembersByMap
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: br.com.felipeblaft.migration.Slice4.All
+displayName: "Fatia 4 — tudo"
+description: "Só membros: nenhum pacote muda na fatia 4."
+recipeList:
+  - br.com.felipeblaft.migration.Slice4.Members

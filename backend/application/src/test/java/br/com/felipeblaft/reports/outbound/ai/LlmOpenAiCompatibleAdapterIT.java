@@ -41,7 +41,7 @@ class LlmOpenAiCompatibleAdapterIT {
             """
             {"workedTopics":["Escala de Dó maior"],"progress":"Boa evolução.",
              "difficulties":[],"proposedActivities":["Estudar a escala"],"observations":"",
-             "pendingQuestions":[],"campoInventado":"descartar"}
+             "pendingQuestions":[],"inventedField":"descartar"}
             """;
 
     private LlmOpenAiCompatibleAdapter adapter;
@@ -62,8 +62,8 @@ class LlmOpenAiCompatibleAdapterIT {
         ApplicationProperties.Llm config =
                 new ApplicationProperties.Llm(
                         SERVER.baseUrl() + "/v1",
-                        "modelo-teste",
-                        "chave-teste",
+                        "test-model",
+                        "test-key",
                         new BigDecimal("2"),
                         new BigDecimal("8"));
         adapter =
@@ -88,7 +88,7 @@ class LlmOpenAiCompatibleAdapterIT {
 
     private ResponseLlm<AiLessonReportOutput> structure() {
         return adapter.generateJson(
-                TaskLlm.ESTRUTURACAO_AULA,
+                TaskLlm.LESSON_STRUCTURING,
                 new TaskInput.LessonStructuring("Hoje trabalhamos a escala de Dó maior."),
                 AiLessonReportOutput.class);
     }
@@ -107,25 +107,25 @@ class LlmOpenAiCompatibleAdapterIT {
         assertThat(response.estimatedCost()).isEqualByComparingTo("0.006");
         SERVER.verify(
                 postRequestedFor(urlEqualTo(PATH))
-                        .withHeader("Authorization", equalTo("Bearer chave-teste"))
+                        .withHeader("Authorization", equalTo("Bearer test-key"))
                         .withRequestBody(
                                 matchingJsonPath("$.response_format.type", equalTo("json_object")))
                         .withRequestBody(matchingJsonPath("$.temperature", equalTo("0.2")))
-                        .withRequestBody(matchingJsonPath("$.model", equalTo("modelo-teste"))));
+                        .withRequestBody(matchingJsonPath("$.model", equalTo("test-model"))));
     }
 
     @Test
     void invalidOutputAsksForOneCorrection() {
         SERVER.stubFor(
                 post(urlEqualTo(PATH))
-                        .inScenario("correcao")
+                        .inScenario("correction")
                         .whenScenarioStateIs(Scenario.STARTED)
                         .willReturn(aResponse().withBody(response("{\"progress\": 3}")))
-                        .willSetStateTo("corrigir"));
+                        .willSetStateTo("fix"));
         SERVER.stubFor(
                 post(urlEqualTo(PATH))
-                        .inScenario("correcao")
-                        .whenScenarioStateIs("corrigir")
+                        .inScenario("correction")
+                        .whenScenarioStateIs("fix")
                         .willReturn(aResponse().withBody(response("```json\n" + VALID + "\n```"))));
 
         ResponseLlm<AiLessonReportOutput> response = structure();
@@ -166,14 +166,14 @@ class LlmOpenAiCompatibleAdapterIT {
     void providerDownOnCorrectionCallCarriesConsumptionOfFirstCall() {
         SERVER.stubFor(
                 post(urlEqualTo(PATH))
-                        .inScenario("correcao-fora-do-ar")
+                        .inScenario("correction-offline")
                         .whenScenarioStateIs(Scenario.STARTED)
                         .willReturn(aResponse().withBody(response("{\"progress\": 3}")))
-                        .willSetStateTo("fora"));
+                        .willSetStateTo("outside"));
         SERVER.stubFor(
                 post(urlEqualTo(PATH))
-                        .inScenario("correcao-fora-do-ar")
-                        .whenScenarioStateIs("fora")
+                        .inScenario("correction-offline")
+                        .whenScenarioStateIs("outside")
                         .willReturn(aResponse().withStatus(503)));
 
         assertThatThrownBy(this::structure)
@@ -204,14 +204,14 @@ class LlmOpenAiCompatibleAdapterIT {
     void error429HasOneNewAttempt() {
         SERVER.stubFor(
                 post(urlEqualTo(PATH))
-                        .inScenario("limite")
+                        .inScenario("limit")
                         .whenScenarioStateIs(Scenario.STARTED)
                         .willReturn(aResponse().withStatus(429))
-                        .willSetStateTo("liberado"));
+                        .willSetStateTo("released"));
         SERVER.stubFor(
                 post(urlEqualTo(PATH))
-                        .inScenario("limite")
-                        .whenScenarioStateIs("liberado")
+                        .inScenario("limit")
+                        .whenScenarioStateIs("released")
                         .willReturn(aResponse().withBody(response(VALID))));
 
         assertThat(structure().output().proposedActivities()).containsExactly("Estudar a escala");

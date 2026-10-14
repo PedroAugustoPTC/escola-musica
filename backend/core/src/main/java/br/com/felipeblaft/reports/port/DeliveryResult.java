@@ -7,7 +7,7 @@ package br.com.felipeblaft.reports.port;
 public record DeliveryResult(boolean accepted, String statusCode) {
 
     public static DeliveryResult accept() {
-        return new DeliveryResult(true, "ACEITO");
+        return new DeliveryResult(true, "ACCEPTED");
     }
 
     public static DeliveryResult refused(String statusCode) {

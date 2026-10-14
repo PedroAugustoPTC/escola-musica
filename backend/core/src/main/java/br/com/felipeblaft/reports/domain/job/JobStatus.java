@@ -1,13 +1,13 @@
 package br.com.felipeblaft.reports.domain.job;
 
 public enum JobStatus {
-    PENDENTE,
-    EM_EXECUCAO,
-    CONCLUIDO,
-    FALHOU,
-    DESCARTADO;
+    PENDING,
+    RUNNING,
+    COMPLETED,
+    FAILED,
+    DISCARDED;
 
     public boolean inProgress() {
-        return this == PENDENTE || this == EM_EXECUCAO;
+        return this == PENDING || this == RUNNING;
     }
 }

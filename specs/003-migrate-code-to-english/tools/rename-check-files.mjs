@@ -34,9 +34,16 @@ function* files(directory) {
 }
 
 /** Lista fechada de pares [base, trabalho, modo]. Caminhos relativos à raiz de cada árvore. */
-export function filePairs(baseRoot) {
+export function filePairs(baseRoot, slice = 3, explicit = {}) {
   const pairs = [];
   const add = (base, work, mode, extra = {}) => pairs.push({ base, work, mode, ...extra });
+  if (slice >= 4) {
+    // fatia 4: o commit anterior é a base e os caminhos não mudam; todo arquivo editado está em `fileEdits` (texto exato),
+    // então trabalho = base + edições registradas; as três imagens do PDF só mudam de nome (conteúdo idêntico)
+    for (const path of Object.keys(explicit.fileEdits ?? {})) if (existsSync(join(baseRoot, path))) add(path, path, 'path');
+    for (const [antigo, novo] of [['fb-filete-preto.png', 'fb-divider-black.png'], ['fb-logo-preto.png', 'fb-logo-black.png'], ['fb-wordmark-preto.png', 'fb-wordmark-black.png']]) add(`${R}/pdf/images/${antigo}`, `${R}/pdf/images/${novo}`, 'identical');
+    return pairs;
+  }
   add(`${OLD}/application.yaml`, `${R}/application.yaml`, 'config');
   add('backend/aplicacao/src/test/resources/application-teste.yaml', 'backend/application/src/test/resources/application-test.yaml', 'config');
   for (const file of files(join(baseRoot, `${OLD}/db/migration`))) {
@@ -86,11 +93,12 @@ function applyFileEdits(text, edits = []) {
 const sha256 = (file) => createHash('sha256').update(readFileSync(file)).digest('hex');
 
 export function checkFiles({ baseRoot, workRoot, map, heldFields }) {
+  const slice = map.slice ?? 3;
   const errors = { pair: [], literal: [], unpaired: [], support: [] };
   const infos = { files: 0, tokens: 0, commentsChanged: 0, singleWord: 0, manual: [], byMode: new Map() };
   const envNames = new Set(map.explicit.envNames ?? []);
   const keepProse = new Set();
-  for (const pair of filePairs(baseRoot)) {
+  for (const pair of filePairs(baseRoot, slice, map.explicit)) {
     const baseFile = join(baseRoot, pair.base);
     const workFile = join(workRoot, pair.work);
     if (!existsSync(baseFile)) continue; // ainda não existe na base (arquivo opcional de uma árvore)

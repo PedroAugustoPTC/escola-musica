@@ -14,11 +14,11 @@ public final class StudentSearch {
 
     public enum ResultType {
         /** Busca vazia: todos os alunos. */
-        TODOS,
+        ALL,
         /** Uma ou mais correspondências. */
-        ENCONTRADOS,
+        FOUND,
         /** Nenhuma correspondência: a lista traz todos os alunos do professor. */
-        NENHUM
+        NONE
     }
 
     public record Result(ResultType type, List<Student> students) {
@@ -42,13 +42,13 @@ public final class StudentSearch {
     public static Result search(List<Student> students, String text) {
         String query = normalize(text);
         if (query.isEmpty()) {
-            return new Result(ResultType.TODOS, students);
+            return new Result(ResultType.ALL, students);
         }
         List<Student> found = students.stream().filter(a -> matches(a.name(), query)).toList();
         if (found.isEmpty()) {
-            return new Result(ResultType.NENHUM, students);
+            return new Result(ResultType.NONE, students);
         }
-        return new Result(ResultType.ENCONTRADOS, found);
+        return new Result(ResultType.FOUND, found);
     }
 
     static boolean matches(String name, String normalizedQuery) {

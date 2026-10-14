@@ -91,8 +91,8 @@ public class TelegramLessonRegistrationFlow implements TelegramFlow {
             context.answer(
                     presenter.error(
                             context.chatId(),
-                            ErrorCode.AUDIO_MUITO_GRANDE,
-                            Map.of("limiteMb", parameters.audioLimitMb())));
+                            ErrorCode.AUDIO_TOO_LARGE,
+                            Map.of("limitMb", parameters.audioLimitMb())));
             return true;
         }
         conversation.cleanFocus();
@@ -106,20 +106,20 @@ public class TelegramLessonRegistrationFlow implements TelegramFlow {
         Optional<StudentSummary> selected = selectedStudent(context);
         if (selected.isPresent()) {
             conversation.startFlow(
-                    ConversationFlow.REGISTRO_AULA,
-                    ConversationFlowStep.CONFIRMANDO_ALUNO_DO_AUDIO);
+                    ConversationFlow.LESSON_REGISTRATION,
+                    ConversationFlowStep.CONFIRMING_AUDIO_STUDENT);
             askStudentConfirmation(context, selected.get());
         } else {
             conversation.startFlow(
-                    ConversationFlow.REGISTRO_AULA, ConversationFlowStep.ESCOLHENDO_ALUNO);
+                    ConversationFlow.LESSON_REGISTRATION, ConversationFlowStep.CHOOSING_STUDENT);
             SearchStudentsUseCase.Result all = searchStudents.run(context.teacher().id(), "");
             if (all.students().isEmpty()) {
                 conversation.discardAudio();
-                context.answer(presenter.simple(context.chatId(), "SEM_ALUNOS"));
+                context.answer(presenter.simple(context.chatId(), "NO_STUDENTS"));
                 return true;
             }
             interpreter.offerStudents(
-                    context, presenter.text("AUDIO_RECEBIDO_ESCOLHER_ALUNO"), all.students());
+                    context, presenter.text("RECEIVED_AUDIO_CHOOSE_STUDENT"), all.students());
         }
         return true;
     }
@@ -139,14 +139,15 @@ public class TelegramLessonRegistrationFlow implements TelegramFlow {
                 new Message(
                         context.chatId(),
                         presenter.text(
-                                "AUDIO_RECEBIDO_CONFIRMAR_ALUNO", Map.of("aluno", student.name())),
+                                "RECEIVED_AUDIO_CONFIRM_STUDENT",
+                                Map.of("student", student.name())),
                         Keyboard.of(
                                 new Button(
                                         presenter.label(
-                                                "BOTAO_CONFIRMAR_ALUNO",
-                                                Map.of("aluno", student.name())),
-                                        CallbackDataCodec.encode("confal")),
-                                presenter.button("BOTAO_TROCAR_ALUNO", "trocal"))));
+                                                "CONFIRM_STUDENT_BUTTON",
+                                                Map.of("student", student.name())),
+                                        CallbackDataCodec.encode("confirm-student")),
+                                presenter.button("SWITCH_STUDENT_BUTTON", "switch-student"))));
     }
 
     // ------------------------------------------------------------------ confirmação do aluno
@@ -154,8 +155,8 @@ public class TelegramLessonRegistrationFlow implements TelegramFlow {
     @Override
     public boolean onChooseStudent(TelegramContext context, StudentSummary student) {
         TelegramConversation conversation = context.conversation();
-        if (conversation.flow() != ConversationFlow.REGISTRO_AULA
-                && conversation.flow() != ConversationFlow.NENHUM) {
+        if (conversation.flow() != ConversationFlow.LESSON_REGISTRATION
+                && conversation.flow() != ConversationFlow.NONE) {
             return false;
         }
         if (conversation.pendingAudio().isEmpty()) {
@@ -176,7 +177,7 @@ public class TelegramLessonRegistrationFlow implements TelegramFlow {
     public boolean aoCallback(TelegramContext context, String action, String argument) {
         TelegramConversation conversation = context.conversation();
         switch (action) {
-            case "confal" -> {
+            case "confirm-student" -> {
                 Optional<StudentSummary> student = selectedStudent(context);
                 if (conversation.pendingAudio().isEmpty() || student.isEmpty()) {
                     return false;
@@ -185,14 +186,14 @@ public class TelegramLessonRegistrationFlow implements TelegramFlow {
                 registerPendingAudio(context, student.get(), context.callbackMessageId());
                 return true;
             }
-            case "trocal" -> {
+            case "switch-student" -> {
                 if (conversation.pendingAudio().isEmpty()) {
                     return false;
                 }
                 conversation.cleanConfirmation();
                 interpreter.offerStudents(
                         context,
-                        presenter.text("AUDIO_RECEBIDO_ESCOLHER_ALUNO"),
+                        presenter.text("RECEIVED_AUDIO_CHOOSE_STUDENT"),
                         searchStudents.run(context.teacher().id(), "").students());
                 return true;
             }
@@ -211,14 +212,14 @@ public class TelegramLessonRegistrationFlow implements TelegramFlow {
         }
         conversation.discardAudio();
         conversation.endFlow();
-        context.answer(presenter.simple(context.chatId(), "AUDIO_PENDENTE_DESCARTADO"));
+        context.answer(presenter.simple(context.chatId(), "PENDING_AUDIO_DISCARDED"));
         return true;
     }
 
     @Override
     public String whatICanReceive(TelegramContext context) {
         return context.conversation().pendingAudio().isPresent()
-                ? presenter.label("RECEBER_ALUNO")
+                ? presenter.label("RECEIVE_STUDENT")
                 : null;
     }
 
@@ -227,7 +228,7 @@ public class TelegramLessonRegistrationFlow implements TelegramFlow {
         TelegramConversation conversation = context.conversation();
         conversation.cleanFocus();
         conversation.startFlow(
-                ConversationFlow.REGISTRO_AULA, ConversationFlowStep.AVISO_RELATORIO_EM_ABERTO);
+                ConversationFlow.LESSON_REGISTRATION, ConversationFlowStep.OPEN_REPORT_NOTICE);
         conversation.store(STUDENT_WITH_OPEN_REPORT, studentId.toString());
         context.answer(presenter.openNotice(context.chatId(), openReport));
     }
@@ -249,7 +250,7 @@ public class TelegramLessonRegistrationFlow implements TelegramFlow {
                                     audio.size()),
                             Channel.TELEGRAM);
         } catch (DomainException error) {
-            if (error.code() != ErrorCode.RELATORIO_EM_ABERTO) {
+            if (error.code() != ErrorCode.REPORT_ALREADY_OPEN) {
                 conversation.discardAudio();
                 throw error;
             }
@@ -263,7 +264,7 @@ public class TelegramLessonRegistrationFlow implements TelegramFlow {
             return;
         }
         conversation.discardAudio();
-        conversation.startFlow(ConversationFlow.REGISTRO_AULA, ConversationFlowStep.NENHUMA);
+        conversation.startFlow(ConversationFlow.LESSON_REGISTRATION, ConversationFlowStep.NONE);
         context.answer(
                 new StepMessage(
                         context.chatId(),

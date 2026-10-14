@@ -25,23 +25,23 @@ public class ConfirmChannelActionsExecutionUseCase {
 
     public static final String MESSAGE_NOT_EDITABLE = ChannelAction.MESSAGE_NOT_EDITABLE_CODE;
     public static final String DOCUMENT_UNAVAILABLE = ChannelAction.DOCUMENT_UNAVAILABLE_CODE;
-    public static final String TELEGRAM_ERROR = "ERRO_TELEGRAM";
+    public static final String TELEGRAM_ERROR = "TELEGRAM_ERROR";
 
     private static final Set<String> KNOWN_CODES =
             Set.of(
                     MESSAGE_NOT_EDITABLE,
-                    "CHAT_INDISPONIVEL",
-                    "ACAO_NAO_SUPORTADA",
+                    "CHAT_UNAVAILABLE",
+                    "ACTION_NOT_SUPPORTED",
                     DOCUMENT_UNAVAILABLE,
-                    "LIMITE_DE_TAXA",
+                    "RATE_LIMITED",
                     TELEGRAM_ERROR);
     private static final Pattern CODE_FORMAT = Pattern.compile("^[A-Z][A-Z0-9_]{1,39}$");
     private static final Pattern ACTION_ID_FORMAT = Pattern.compile("^[A-Za-z0-9:_.-]{3,120}$");
     private static final int SAVE_ATTEMPTS = 3;
 
     public enum Status {
-        EXECUTADA,
-        FALHOU
+        EXECUTED,
+        FAILED
     }
 
     public record Result(String actionId, Status status, String reasonCode, Long messageId) {}
@@ -77,9 +77,9 @@ public class ConfirmChannelActionsExecutionUseCase {
         for (Result result : results) {
             Outcome outcome = confirm(result);
             switch (outcome) {
-                case ACEITA -> accepted++;
-                case IGNORADA -> registerIgnored(ignored, result);
-                case VIOLACAO -> {
+                case ACCEPTS -> accepted++;
+                case IGNORED -> registerIgnored(ignored, result);
+                case VIOLATION -> {
                     violation = true;
                     registerIgnored(ignored, result);
                 }
@@ -89,9 +89,9 @@ public class ConfirmChannelActionsExecutionUseCase {
     }
 
     private enum Outcome {
-        ACEITA,
-        IGNORADA,
-        VIOLACAO
+        ACCEPTS,
+        IGNORED,
+        VIOLATION
     }
 
     private Outcome confirm(Result result) {
@@ -99,19 +99,19 @@ public class ConfirmChannelActionsExecutionUseCase {
                 || result.actionId() == null
                 || result.actionId().isBlank()
                 || result.status() == null
-                || (result.status() == Status.FALHOU
+                || (result.status() == Status.FAILED
                         && (result.reasonCode() == null || result.reasonCode().isBlank()))) {
-            return Outcome.IGNORADA;
+            return Outcome.IGNORED;
         }
         for (int attempt = 0; attempt < SAVE_ATTEMPTS; attempt++) {
             Optional<ChannelAction> found = actions.searchById(result.actionId());
             if (found.isEmpty()) {
-                return Outcome.IGNORADA;
+                return Outcome.IGNORED;
             }
             ChannelAction action = found.get();
             int readVersion = action.version();
             Instant now = clock.now();
-            if (result.status() == Status.EXECUTADA) {
+            if (result.status() == Status.EXECUTED) {
                 Outcome outcome = executed(action, result, readVersion, now);
                 if (outcome != null) {
                     return outcome;
@@ -123,7 +123,7 @@ public class ConfirmChannelActionsExecutionUseCase {
                 }
             }
         }
-        return Outcome.IGNORADA;
+        return Outcome.IGNORED;
     }
 
     /**
@@ -131,16 +131,16 @@ public class ConfirmChannelActionsExecutionUseCase {
      */
     private Outcome executed(ChannelAction action, Result result, int readVersion, Instant now) {
         boolean stepWithJob =
-                action.type() == ChannelActionType.MENSAGEM_ETAPA && action.jobId() != null;
+                action.type() == ChannelActionType.STEP_MESSAGE && action.jobId() != null;
         if (stepWithJob && (result.messageId() == null || result.messageId() < 1)) {
-            return Outcome.VIOLACAO;
+            return Outcome.VIOLATION;
         }
         ConfirmationResult effect = action.confirmExecuted(now);
-        if (effect == ConfirmationResult.DIVERGENTE) {
-            return Outcome.IGNORADA;
+        if (effect == ConfirmationResult.DIVERGENT) {
+            return Outcome.IGNORED;
         }
-        if (effect == ConfirmationResult.REPETIDA) {
-            return Outcome.ACEITA;
+        if (effect == ConfirmationResult.REPEATED) {
+            return Outcome.ACCEPTS;
         }
         if (!actions.updateIfVersion(action, readVersion)) {
             return null;
@@ -150,7 +150,7 @@ public class ConfirmChannelActionsExecutionUseCase {
             // mensagem
             queue.registerStepMessage(action.jobId(), result.messageId());
         }
-        return Outcome.ACEITA;
+        return Outcome.ACCEPTS;
     }
 
     /**
@@ -159,11 +159,11 @@ public class ConfirmChannelActionsExecutionUseCase {
     private Outcome failed(ChannelAction action, Result result, int readVersion, Instant now) {
         String code = normalize(result.reasonCode());
         ConfirmationResult effect = action.confirmFailure(code, now);
-        if (effect == ConfirmationResult.DIVERGENTE) {
-            return Outcome.IGNORADA;
+        if (effect == ConfirmationResult.DIVERGENT) {
+            return Outcome.IGNORED;
         }
-        if (effect == ConfirmationResult.REPETIDA) {
-            return Outcome.ACEITA;
+        if (effect == ConfirmationResult.REPEATED) {
+            return Outcome.ACCEPTS;
         }
         if (!actions.updateIfVersion(action, readVersion)) {
             return null;
@@ -172,7 +172,7 @@ public class ConfirmChannelActionsExecutionUseCase {
             // uma só compensação por ação (id <acaoId>-c); uma compensação que falha não gera outra
             actions.saveBatch(List.of(action.createCompensation(now, policy)));
         }
-        return Outcome.ACEITA;
+        return Outcome.ACCEPTS;
     }
 
     /**

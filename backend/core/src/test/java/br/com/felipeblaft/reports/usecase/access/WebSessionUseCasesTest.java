@@ -28,7 +28,7 @@ class WebSessionUseCasesTest {
             new ValidateSessionWebUseCase(
                     c.sessions, c.teachers, c.renewal, c.protection, c.clock, c.parameters);
     private final EndWebSessionUseCase end = new EndWebSessionUseCase(c.sessions, c.protection);
-    private final Teacher clara = c.teacher("Clara Souza", "clara@exemplo.test", "K7QM2XPA");
+    private final Teacher clara = c.teacher("Clara Souza", "clara@example.test", "K7QM2XPA");
 
     private static void failWith(ThrowingCallable action, ErrorCode code) {
         assertThatThrownBy(action)
@@ -64,16 +64,16 @@ class WebSessionUseCasesTest {
 
     @Test
     void withoutTokenNotAuthenticated() {
-        failWith(() -> validate.run(null), ErrorCode.NAO_AUTENTICADO);
-        failWith(() -> validate.run(" "), ErrorCode.NAO_AUTENTICADO);
+        failWith(() -> validate.run(null), ErrorCode.NOT_AUTHENTICATED);
+        failWith(() -> validate.run(" "), ErrorCode.NOT_AUTHENTICATED);
     }
 
     @Test
     void unknownOrExpiredToken() {
-        failWith(() -> validate.run("inventado"), ErrorCode.SESSAO_EXPIRADA);
+        failWith(() -> validate.run("invented"), ErrorCode.SESSION_EXPIRED);
         String token = signIn.run("K7QM2XPA", "ip").token();
         c.clock.advance(Duration.ofHours(12));
-        failWith(() -> validate.run(token), ErrorCode.SESSAO_EXPIRADA);
+        failWith(() -> validate.run(token), ErrorCode.SESSION_EXPIRED);
         assertThat(c.sessions.all()).isEmpty();
     }
 
@@ -81,7 +81,7 @@ class WebSessionUseCasesTest {
     void deactivatedTeacherLosesSession() {
         String token = signIn.run("K7QM2XPA", "ip").token();
         clara.updateRegistry(clara.name(), false, c.clock.now());
-        failWith(() -> validate.run(token), ErrorCode.SESSAO_EXPIRADA);
+        failWith(() -> validate.run(token), ErrorCode.SESSION_EXPIRED);
         assertThat(c.sessions.all()).isEmpty();
     }
 
@@ -89,10 +89,10 @@ class WebSessionUseCasesTest {
     void endRevokesOnServer() {
         String token = signIn.run("K7QM2XPA", "ip").token();
         end.run(token);
-        failWith(() -> validate.run(token), ErrorCode.SESSAO_EXPIRADA);
+        failWith(() -> validate.run(token), ErrorCode.SESSION_EXPIRED);
         end.run(null);
         end.run("");
-        end.run("desconhecido");
+        end.run("unknown");
         assertThat(c.sessions.all()).isEmpty();
     }
 }

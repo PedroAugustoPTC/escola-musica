@@ -44,29 +44,29 @@ public class MessageFormatting {
 
     /** "Aula de dd/mm/aaaa" ou "Semestral (dd/mm/aaaa a dd/mm/aaaa)" — iguais nos dois canais. */
     public String historyLabel(HistoryItem item) {
-        return item.type() == ReportType.AULA
-                ? catalog.text("ROTULO_AULA", Map.of("data", data(item.lessonDate())))
+        return item.type() == ReportType.LESSON
+                ? catalog.text("LESSON_LABEL", Map.of("data", data(item.lessonDate())))
                 : catalog.text(
-                        "ROTULO_SEMESTRAL",
+                        "SEMESTER_LABEL",
                         Map.of(
-                                "inicio",
+                                "start",
                                 data(item.period().start()),
-                                "fim",
+                                "end",
                                 data(item.period().end())));
     }
 
     /** "Aprovado em dd/mm/aaaa às hh:mm" no fuso da escola. */
     public String approvedAt(Instant instant) {
-        return catalog.text("APROVADO_EM", Map.of("data", data(instant), "hora", hora(instant)));
+        return catalog.text("APPROVED_AT", Map.of("data", data(instant), "hora", hora(instant)));
     }
 
     public String originChannel(Channel channel) {
         return catalog.text(
-                channel == Channel.TELEGRAM ? "CANAL_ORIGEM_TELEGRAM" : "CANAL_ORIGEM_WEB");
+                channel == Channel.TELEGRAM ? "TELEGRAM_ORIGIN_CHANNEL" : "WEB_ORIGIN_CHANNEL");
     }
 
     public String step(String step) {
-        String key = "ETAPA_" + step;
+        String key = "STEP_" + step;
         return catalog.contains(key) ? catalog.text(key) : "";
     }
 
@@ -74,26 +74,27 @@ public class MessageFormatting {
     public Map<String, Object> errorParameters(ErrorCode code, Map<String, Object> details) {
         Map<String, Object> parameters = new HashMap<>(details);
         switch (code) {
-            case BLOQUEADO_TEMPORARIAMENTE -> {
+            case TEMPORARILY_BLOCKED -> {
                 long seconds =
-                        details.get("segundosRestantes") instanceof Number n ? n.longValue() : 0L;
-                parameters.put("minutos", Math.max(1, (seconds + 59) / 60));
+                        details.get("remainingSeconds") instanceof Number n ? n.longValue() : 0L;
+                parameters.put("minutes", Math.max(1, (seconds + 59) / 60));
             }
-            case PROCESSAMENTO_EM_ANDAMENTO -> {
-                Object step = details.get("etapa");
-                parameters.put("etapa", step == null ? "" : step(step.toString()));
+            case PROCESSING_IN_PROGRESS -> {
+                Object step = details.get("step");
+                parameters.put("step", step == null ? "" : step(step.toString()));
             }
-            case RELATORIO_EM_ABERTO -> {
-                if (details.get("relatorioEmAberto") instanceof Map<?, ?> openReport) {
-                    if (openReport.get("canalOrigem") instanceof Channel channel) {
-                        parameters.put("canalOrigem", originChannel(channel));
-                    } else if (openReport.get("canalOrigem") != null) {
+            case REPORT_ALREADY_OPEN -> {
+                if (details.get("openReport") instanceof Map<?, ?> openReport) {
+                    if (openReport.get("originChannel") instanceof Channel channel) {
+                        parameters.put("originChannel", originChannel(channel));
+                    } else if (openReport.get("originChannel") != null) {
                         parameters.put(
-                                "canalOrigem",
+                                "originChannel",
                                 originChannel(
-                                        Channel.valueOf(openReport.get("canalOrigem").toString())));
+                                        Channel.valueOf(
+                                                openReport.get("originChannel").toString())));
                     }
-                    if (openReport.get("atualizadoEm") instanceof Instant updated) {
+                    if (openReport.get("updatedAt") instanceof Instant updated) {
                         parameters.put("data", data(updated));
                         parameters.put("hora", hora(updated));
                     }

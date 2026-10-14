@@ -25,10 +25,10 @@ public class AiProvidersConfig {
     LlmPort llmPort(ApplicationProperties properties) {
         ApplicationProperties.Providers providers = properties.providers();
         if (providers.simulated()) {
-            LOG.info("provedores-ia modo=simulado");
+            LOG.info("ai-providers mode=simulated");
             return new SimulatedLlmAdapter();
         }
-        LOG.info("provedores-ia modo=real llm={}", providers.llm());
+        LOG.info("ai-providers mode=real llm={}", providers.llm());
         return new LlmOpenAiCompatibleAdapter(providers.llm());
     }
 
@@ -38,7 +38,7 @@ public class AiProvidersConfig {
         if (providers.simulated()) {
             return new SimulatedTranscriptionAdapter();
         }
-        LOG.info("provedores-ia modo=real transcricao={}", providers.transcription());
+        LOG.info("ai-providers mode=real transcription={}", providers.transcription());
         return new TranscriptionOpenAiCompatibleAdapter(providers.transcription());
     }
 }

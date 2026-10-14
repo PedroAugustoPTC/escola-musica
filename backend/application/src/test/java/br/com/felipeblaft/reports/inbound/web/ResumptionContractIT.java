@@ -40,11 +40,11 @@ class ResumptionContractIT extends ContractApiBase {
     private UUID register() throws Exception {
         mvc.perform(
                         authenticated(
-                                multipart("/api/v1/alunos/{id}/relatorios-aula", matteo.id())
+                                multipart("/api/v1/students/{id}/lesson-reports", matteo.id())
                                         .file(
                                                 new MockMultipartFile(
                                                         "audio",
-                                                        "aula.webm",
+                                                        "lesson.webm",
                                                         "audio/webm",
                                                         AudioNormalizationTest.AUDIO_WITH_SPEECH)),
                                 session))
@@ -54,54 +54,54 @@ class ResumptionContractIT extends ContractApiBase {
 
     @Test
     void withoutOpenReportReturns204AndOtherTeachersStudent403() throws Exception {
-        mvc.perform(get("/api/v1/alunos/{id}/relatorio-em-aberto", matteo.id()).cookie(session))
+        mvc.perform(get("/api/v1/students/{id}/open-report", matteo.id()).cookie(session))
                 .andExpect(status().isNoContent())
                 .andExpect(followsContract());
-        mvc.perform(get("/api/v1/alunos/{id}/relatorio-em-aberto", helena.id()).cookie(session))
+        mvc.perform(get("/api/v1/students/{id}/open-report", helena.id()).cookie(session))
                 .andExpect(status().isForbidden())
                 .andExpect(followsContract())
-                .andExpect(jsonPath("$.codigo").value("ALUNO_NAO_ASSOCIADO"));
+                .andExpect(jsonPath("$.code").value("STUDENT_NOT_ASSIGNED"));
     }
 
     @Test
     void registrationInTranscriptionAndThenOpenReport() throws Exception {
         UUID jobId = register();
 
-        mvc.perform(get("/api/v1/alunos/{id}/relatorio-em-aberto", matteo.id()).cookie(session))
+        mvc.perform(get("/api/v1/students/{id}/open-report", matteo.id()).cookie(session))
                 .andExpect(status().isOk())
                 .andExpect(followsContract())
-                .andExpect(jsonPath("$.tipo").value("AULA"))
-                .andExpect(jsonPath("$.relatorioId").isEmpty())
-                .andExpect(jsonPath("$.trabalhoId").value(jobId.toString()))
-                .andExpect(jsonPath("$.canalOrigem").value("WEB"));
+                .andExpect(jsonPath("$.type").value("LESSON"))
+                .andExpect(jsonPath("$.reportId").isEmpty())
+                .andExpect(jsonPath("$.jobId").value(jobId.toString()))
+                .andExpect(jsonPath("$.originChannel").value("WEB"));
 
         scenario.processQueue();
 
-        mvc.perform(get("/api/v1/alunos/{id}/relatorio-em-aberto", matteo.id()).cookie(session))
+        mvc.perform(get("/api/v1/students/{id}/open-report", matteo.id()).cookie(session))
                 .andExpect(status().isOk())
                 .andExpect(followsContract())
-                .andExpect(jsonPath("$.relatorioId").isString())
-                .andExpect(jsonPath("$.status").value("AGUARDANDO_RESPOSTAS"));
+                .andExpect(jsonPath("$.reportId").isString())
+                .andExpect(jsonPath("$.status").value("AWAITING_ANSWERS"));
     }
 
     @Test
     void discardRegistrationInTranscription() throws Exception {
         UUID jobId = register();
 
-        mvc.perform(authenticated(post("/api/v1/trabalhos/{id}/descarte", jobId), sessionBruno))
+        mvc.perform(authenticated(post("/api/v1/jobs/{id}/discard", jobId), sessionBruno))
                 .andExpect(status().isNotFound())
                 .andExpect(followsContract());
-        mvc.perform(authenticated(post("/api/v1/trabalhos/{id}/descarte", jobId), session))
+        mvc.perform(authenticated(post("/api/v1/jobs/{id}/discard", jobId), session))
                 .andExpect(status().isNoContent())
                 .andExpect(followsContract());
-        mvc.perform(authenticated(post("/api/v1/trabalhos/{id}/descarte", jobId), session))
+        mvc.perform(authenticated(post("/api/v1/jobs/{id}/discard", jobId), session))
                 .andExpect(status().isConflict())
                 .andExpect(followsContract())
-                .andExpect(jsonPath("$.codigo").value("ACAO_NAO_PERMITIDA_NA_ETAPA"));
-        mvc.perform(get("/api/v1/alunos/{id}/relatorio-em-aberto", matteo.id()).cookie(session))
+                .andExpect(jsonPath("$.code").value("ACTION_NOT_ALLOWED_AT_STEP"));
+        mvc.perform(get("/api/v1/students/{id}/open-report", matteo.id()).cookie(session))
                 .andExpect(status().isNoContent());
         scenario.processQueue();
-        mvc.perform(get("/api/v1/alunos/{id}/relatorio-em-aberto", matteo.id()).cookie(session))
+        mvc.perform(get("/api/v1/students/{id}/open-report", matteo.id()).cookie(session))
                 .andExpect(status().isNoContent());
     }
 }

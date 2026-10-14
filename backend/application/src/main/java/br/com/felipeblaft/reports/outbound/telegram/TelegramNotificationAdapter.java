@@ -81,11 +81,11 @@ public class TelegramNotificationAdapter implements TeacherNotificationPort {
 
     @Override
     public void notifyStep(ProcessingJob job) {
-        if (job.requestChannel() != Channel.TELEGRAM || job.step() == JobStep.ENVIANDO) {
+        if (job.requestChannel() != Channel.TELEGRAM || job.step() == JobStep.UPLOADING) {
             return;
         }
         guarded(
-                "etapa",
+                "step",
                 () -> {
                     Optional<TelegramLink> link = links.searchByTeacherId(job.teacherId());
                     if (link.isEmpty()) {
@@ -96,7 +96,7 @@ public class TelegramNotificationAdapter implements TeacherNotificationPort {
                     // nada faz e o despacho do orquestrador a resolve pelo trabalho no momento da
                     // entrega
                     publication.publish(
-                            "etapa:" + job.id() + ":" + job.step().name(),
+                            "step:" + job.id() + ":" + job.step().name(),
                             job.teacherId(),
                             List.of(
                                     new TelegramOutput.StepMessage(
@@ -141,29 +141,29 @@ public class TelegramNotificationAdapter implements TeacherNotificationPort {
             return;
         }
         guarded(
-                "demora",
+                "delay",
                 () ->
                         links.searchByTeacherId(job.teacherId())
                                 .ifPresent(
                                         link ->
                                                 publication.publish(
-                                                        "demora:" + job.id(),
+                                                        "delay:" + job.id(),
                                                         job.teacherId(),
                                                         List.of(
                                                                 presenter.simple(
                                                                         link.chatId(),
-                                                                        "PROCESSAMENTO_DEMORADO")))));
+                                                                        "PROCESSING_DELAYED")))));
     }
 
     // ------------------------------------------------------------------ resultado
 
     @Override
     public void notifyResult(ProcessingJob job) {
-        if (job.result() == null || job.result() == JobResult.DESCARTADO) {
+        if (job.result() == null || job.result() == JobResult.DISCARDED) {
             return;
         }
         guarded(
-                "resultado",
+                "result",
                 () -> {
                     if (job.requestChannel() == Channel.WEB) {
                         webNotice(job);
@@ -180,18 +180,18 @@ public class TelegramNotificationAdapter implements TeacherNotificationPort {
         }
         String code =
                 switch (job.result()) {
-                    case PRONTO_PARA_CONFERENCIA -> "AVISO_RESULTADO_WEB_PRONTO";
-                    case PERGUNTAS_PENDENTES -> "AVISO_RESULTADO_WEB_PERGUNTAS";
-                    case NOVA_VERSAO -> "AVISO_RESULTADO_WEB_NOVA_VERSAO";
-                    case FALHA_ESTRUTURACAO, AUDIO_NAO_PROCESSAVEL, FALHA_CONSOLIDACAO ->
-                            "AVISO_RESULTADO_WEB_FALHA";
+                    case READY_FOR_REVIEW -> "WEB_RESULT_NOTICE_READY";
+                    case PENDING_QUESTIONS -> "WEB_RESULT_NOTICE_QUESTIONS";
+                    case NEW_VERSION -> "WEB_RESULT_NOTICE_NEW_VERSION";
+                    case STRUCTURING_FAILED, AUDIO_NOT_PROCESSABLE, CONSOLIDATION_FAILED ->
+                            "WEB_RESULT_NOTICE_FAILURE";
                     default -> null;
                 };
         if (code == null) {
             return;
         }
         String student = students.searchById(job.studentId()).map(a -> a.name()).orElse("");
-        boolean semester = job.reportType() == ReportType.SEMESTRAL;
+        boolean semester = job.reportType() == ReportType.SEMESTER;
         Integer version = null;
         if (job.reportId() != null) {
             version =
@@ -210,12 +210,12 @@ public class TelegramNotificationAdapter implements TeacherNotificationPort {
                         ? Keyboard.NONE
                         : Keyboard.of(
                                 presenter.button(
-                                        "CONTINUAR_NO_CHAT",
+                                        "CONTINUE_IN_CHAT",
                                         Map.of(),
-                                        "foco",
+                                        "focus",
                                         (semester ? "s" : "a") + job.reportId()));
         publication.publish(
-                "resultado:" + job.id(),
+                "result:" + job.id(),
                 job.teacherId(),
                 List.of(
                         new Message(
@@ -223,9 +223,9 @@ public class TelegramNotificationAdapter implements TeacherNotificationPort {
                                 presenter.text(
                                         code,
                                         Map.of(
-                                                "aluno",
+                                                "student",
                                                 student,
-                                                "versao",
+                                                "version",
                                                 version == null ? "" : version)),
                                 keyboard)));
     }
@@ -247,13 +247,13 @@ public class TelegramNotificationAdapter implements TeacherNotificationPort {
                 if (attempt < SAVE_ATTEMPTS) {
                     continue;
                 }
-                LOG.warn("telegram-foco-nao-gravado trabalhoId={}", job.id());
+                LOG.warn("telegram-focus-not-saved jobId={}", job.id());
             }
             List<TelegramOutput> all = new ArrayList<>();
             readyStep(job, link.get().chatId()).ifPresent(all::add);
             all.addAll(outputs);
             if (!all.isEmpty()) {
-                publication.publish("resultado:" + job.id(), job.teacherId(), all);
+                publication.publish("result:" + job.id(), job.teacherId(), all);
             }
             return;
         }
@@ -261,15 +261,14 @@ public class TelegramNotificationAdapter implements TeacherNotificationPort {
 
     /** A mensagem de etapa vira "Pronto" (editada no lugar) antes das mensagens do resultado. */
     private Optional<TelegramOutput> readyStep(ProcessingJob job, long chatId) {
-        if (job.result() != JobResult.PRONTO_PARA_CONFERENCIA
-                && job.result() != JobResult.NOVA_VERSAO) {
+        if (job.result() != JobResult.READY_FOR_REVIEW && job.result() != JobResult.NEW_VERSION) {
             return Optional.empty();
         }
         return Optional.of(
                 new TelegramOutput.StepMessage(
                         chatId,
                         stepMessage(job).orElse(null),
-                        "<i>" + presenter.text("ETAPA_PRONTO") + "</i>",
+                        "<i>" + presenter.text("STEP_READY") + "</i>",
                         job.id()));
     }
 
@@ -278,11 +277,11 @@ public class TelegramNotificationAdapter implements TeacherNotificationPort {
         TelegramConversation conversation = link.conversation();
         Optional<String> understood = understoodText(job);
         switch (job.result()) {
-            case AUDIO_NAO_PROCESSAVEL -> {
-                return List.of(presenter.simple(chatId, "AUDIO_NAO_PROCESSAVEL"));
+            case AUDIO_NOT_PROCESSABLE -> {
+                return List.of(presenter.simple(chatId, "AUDIO_NOT_PROCESSABLE"));
             }
-            case FALHA_CONSOLIDACAO -> {
-                return List.of(presenter.simple(chatId, "FALHA_CONSOLIDACAO"));
+            case CONSOLIDATION_FAILED -> {
+                return List.of(presenter.simple(chatId, "CONSOLIDATION_FAILED"));
             }
             default -> {
                 // demais resultados têm relatório de aula
@@ -291,7 +290,7 @@ public class TelegramNotificationAdapter implements TeacherNotificationPort {
         if (job.reportId() == null) {
             return List.of();
         }
-        if (job.reportType() == ReportType.SEMESTRAL) {
+        if (job.reportType() == ReportType.SEMESTER) {
             return semesterOutputs(job, chatId, conversation, understood);
         }
         LessonReportView view;
@@ -303,17 +302,17 @@ public class TelegramNotificationAdapter implements TeacherNotificationPort {
         LessonReport report = view.report();
         int current = report.currentVersion();
         switch (job.result()) {
-            case SEM_ALTERACAO_DE_CONTEUDO, PEDIDO_DE_ACAO_IGNORADO, FALHA_ALTERACAO -> {
-                conversation.focus(new FocusReport(ReportType.AULA, report.id()), current);
+            case NO_CONTENT_CHANGE, ACTION_REQUEST_IGNORED, CHANGE_FAILED -> {
+                conversation.focus(new FocusReport(ReportType.LESSON, report.id()), current);
                 String text =
-                        presenter.text(job.result().name(), Map.of("versao", current))
+                        presenter.text(job.result().name(), Map.of("version", current))
                                 + understood
                                         .map(
                                                 t ->
                                                         "\n"
                                                                 + presenter.text(
-                                                                        "TEXTO_ENTENDIDO",
-                                                                        Map.of("texto", t)))
+                                                                        "UNDERSTOOD_TEXT",
+                                                                        Map.of("text", t)))
                                         .orElse("");
                 return List.of(presentation.reviewActions(chatId, current, text));
             }
@@ -336,34 +335,31 @@ public class TelegramNotificationAdapter implements TeacherNotificationPort {
             Optional<String> understood) {
         String prefix =
                 switch (job.result()) {
-                    case NOVA_VERSAO,
-                            SEM_ALTERACAO_DE_CONTEUDO,
-                            PEDIDO_DE_ACAO_IGNORADO,
-                            FALHA_ALTERACAO -> {
+                    case NEW_VERSION, NO_CONTENT_CHANGE, ACTION_REQUEST_IGNORED, CHANGE_FAILED -> {
                         int current =
                                 semesterPresentation
                                         .get(job.teacherId(), job.reportId())
                                         .report()
                                         .currentVersion();
                         String code =
-                                job.result() == JobResult.NOVA_VERSAO
-                                        ? "ALTERACAO_APLICADA"
+                                job.result() == JobResult.NEW_VERSION
+                                        ? "CHANGE_APPLIED"
                                         : job.result().name();
-                        yield presenter.text(code, Map.of("versao", current))
+                        yield presenter.text(code, Map.of("version", current))
                                 + understood
                                         .map(
                                                 t ->
                                                         "\n"
                                                                 + presenter.text(
-                                                                        "TEXTO_ENTENDIDO",
-                                                                        Map.of("texto", t)))
+                                                                        "UNDERSTOOD_TEXT",
+                                                                        Map.of("text", t)))
                                         .orElse("");
                     }
-                    case VERSAO_DESATUALIZADA ->
+                    case STALE_VERSION ->
                             presenter.text(
-                                    "VERSAO_DESATUALIZADA",
+                                    "STALE_VERSION",
                                     Map.of(
-                                            "versaoVigente",
+                                            "currentVersion",
                                             semesterPresentation
                                                     .get(job.teacherId(), job.reportId())
                                                     .report()
@@ -381,26 +377,26 @@ public class TelegramNotificationAdapter implements TeacherNotificationPort {
 
     private String prefix(ProcessingJob job, int current, Optional<String> understood) {
         return switch (job.result()) {
-            case NOVA_VERSAO ->
-                    presenter.text("ALTERACAO_APLICADA", Map.of("versao", current))
+            case NEW_VERSION ->
+                    presenter.text("CHANGE_APPLIED", Map.of("version", current))
                             + understood
                                     .map(
                                             t ->
                                                     "\n"
                                                             + presenter.text(
-                                                                    "TEXTO_ENTENDIDO",
-                                                                    Map.of("texto", t)))
+                                                                    "UNDERSTOOD_TEXT",
+                                                                    Map.of("text", t)))
                                     .orElse("");
-            case VERSAO_DESATUALIZADA ->
+            case STALE_VERSION ->
                     TelegramPresenter.escape(
                             presenter.label(
-                                    ErrorCode.VERSAO_DESATUALIZADA.messageKey(),
-                                    Map.of("versaoVigente", current)));
-            case FALHA_RESPOSTA -> presenter.text("FALHA_RESPOSTA");
-            case PRONTO_PARA_CONFERENCIA, PERGUNTAS_PENDENTES ->
-                    job.type() == JobType.RESPOSTA_PERGUNTAS && understood.isPresent()
+                                    ErrorCode.STALE_VERSION.messageKey(),
+                                    Map.of("currentVersion", current)));
+            case ANSWER_FAILED -> presenter.text("ANSWER_FAILED");
+            case READY_FOR_REVIEW, PENDING_QUESTIONS ->
+                    job.type() == JobType.QUESTION_ANSWER && understood.isPresent()
                             ? presenter.text(
-                                    "RESPOSTA_INCORPORADA", Map.of("texto", understood.get()))
+                                    "ANSWER_INCORPORATED", Map.of("text", understood.get()))
                             : null;
             default -> null;
         };
@@ -417,7 +413,7 @@ public class TelegramNotificationAdapter implements TeacherNotificationPort {
             action.run();
         } catch (RuntimeException error) {
             LOG.warn(
-                    "telegram-notificacao-falhou aviso={} tipo={}",
+                    "telegram-notification-failed notice={} type={}",
                     notice,
                     error.getClass().getSimpleName());
         }

@@ -18,10 +18,10 @@
     <springProfile name="!seed">
         <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
             <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-                <includeMdcKeyName>relatorioId</includeMdcKeyName>
-                <includeMdcKeyName>trabalhoId</includeMdcKeyName>
-                <includeMdcKeyName>canal</includeMdcKeyName>
-                <includeMdcKeyName>etapa</includeMdcKeyName>
+                <includeMdcKeyName>reportId</includeMdcKeyName>
+                <includeMdcKeyName>jobId</includeMdcKeyName>
+                <includeMdcKeyName>channel</includeMdcKeyName>
+                <includeMdcKeyName>step</includeMdcKeyName>
                 <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
                     <maxDepthPerThrowable>20</maxDepthPerThrowable>
                     <rootCauseFirst>true</rootCauseFirst>

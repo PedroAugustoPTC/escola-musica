@@ -109,7 +109,7 @@ export function GravadorAudio({
 
   const selecionar = (audio: AudioSelecionado | null) => {
     if (audio && audio.arquivo.size > limiteBytes) {
-      setErro(msg('AUDIO_MUITO_GRANDE'));
+      setErro(msg('AUDIO_TOO_LARGE'));
       aoMudar(null);
       return false;
     }
@@ -192,7 +192,7 @@ export function GravadorAudio({
     if (!escolhido) return;
     if (escolhido.size > limiteBytes) {
       setArquivo(null);
-      setErro(msg('AUDIO_MUITO_GRANDE'));
+      setErro(msg('AUDIO_TOO_LARGE'));
       aoMudar(null);
       return;
     }
@@ -216,7 +216,7 @@ export function GravadorAudio({
       {indisponivel ? (
         <div role="alert" className="alerta alerta--info">
           <Icone nome="mic_off" />
-          <div className="alerta__texto">{msg('GRAVACAO_INDISPONIVEL')}</div>
+          <div className="alerta__texto">{msg('RECORDING_UNAVAILABLE')}</div>
         </div>
       ) : (
         <>
@@ -287,7 +287,7 @@ export function GravadorAudio({
               Enviar arquivo de áudio
             </span>
             <span id={idAjuda} className="texto-apoio">
-              {msg('FORMATOS_E_LIMITE', { limiteMb })}
+              {msg('FORMATS_AND_LIMIT', { limitMb: limiteMb })}
             </span>
           </button>
           <input

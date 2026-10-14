@@ -7,14 +7,14 @@ import { Icone } from './Icone';
 
 export function descricaoAluno(aluno: AlunoResumoDto): string {
   const partes: string[] = [];
-  if (aluno.instrumento) partes.push(aluno.instrumento);
-  if (aluno.ultimaAulaEm) partes.push(msg('ULTIMA_AULA', { data: formatarData(aluno.ultimaAulaEm) }));
+  if (aluno.instrument) partes.push(aluno.instrument);
+  if (aluno.lastLessonAt) partes.push(msg('LAST_LESSON', { data: formatarData(aluno.lastLessonAt) }));
   return partes.join(' · ');
 }
 
 /** Rota de "Registrar aula": com relatório em aberto, a tela 04 decide continuar ou descartar. */
 export function rotaRegistrarAula(aluno: AlunoResumoDto): string {
-  return aluno.possuiRelatorioEmAberto
+  return aluno.hasOpenReport
     ? `/alunos/${aluno.id}/relatorio-em-aberto`
     : `/alunos/${aluno.id}/nova-aula`;
 }
@@ -27,13 +27,13 @@ export function CartaoAluno({ aluno }: { aluno: AlunoResumoDto }) {
     <article className="cartao">
       <div className="cartao-aluno__topo">
         <div className="cartao-aluno__identidade">
-          <h2 className="titulo-cartao">{aluno.nome}</h2>
+          <h2 className="titulo-cartao">{aluno.name}</h2>
           {descricao ? <div className="texto-apoio">{descricao}</div> : null}
         </div>
-        {aluno.possuiRelatorioEmAberto ? (
+        {aluno.hasOpenReport ? (
           <span className="chip chip--aviso">
             <Icone nome="edit_note" tamanho="pequeno" />
-            {msg('MARCA_EM_ABERTO')}
+            {msg('OPEN_REPORT_MARK')}
           </span>
         ) : null}
       </div>
@@ -41,26 +41,26 @@ export function CartaoAluno({ aluno }: { aluno: AlunoResumoDto }) {
         <Botao
           className="cartao-aluno__principal"
           icone="mic"
-          aria-label={`${msg('BOTAO_REGISTRAR_AULA')} — ${aluno.nome}`}
+          aria-label={`${msg('REGISTER_LESSON_BUTTON')} — ${aluno.name}`}
           onClick={() => navegar(rotaRegistrarAula(aluno))}
         >
-          {msg('BOTAO_REGISTRAR_AULA')}
+          {msg('REGISTER_LESSON_BUTTON')}
         </Botao>
         <Botao
           variante="secundario"
           tamanho="compacto"
-          aria-label={`${msg('BOTAO_RELATORIO_SEMESTRAL')} — ${aluno.nome}`}
+          aria-label={`${msg('SEMESTER_REPORT_BUTTON')} — ${aluno.name}`}
           onClick={() => navegar(`/alunos/${aluno.id}/semestral`)}
         >
-          {msg('BOTAO_RELATORIO_SEMESTRAL')}
+          {msg('SEMESTER_REPORT_BUTTON')}
         </Botao>
         <Botao
           variante="secundario"
           tamanho="compacto"
-          aria-label={`${msg('BOTAO_HISTORICO')} — ${aluno.nome}`}
+          aria-label={`${msg('HISTORY_BUTTON')} — ${aluno.name}`}
           onClick={() => navegar(`/alunos/${aluno.id}/historico`)}
         >
-          {msg('BOTAO_HISTORICO')}
+          {msg('HISTORY_BUTTON')}
         </Botao>
       </div>
     </article>

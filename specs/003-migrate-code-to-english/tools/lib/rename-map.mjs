@@ -30,6 +30,7 @@ export function loadRenameMap(root, slice) {
   for (const group of [held.B1, held.B2]) for (const entry of Object.values(group)) for (const name of entry.members) heldNames.add(name);
 
   return {
+    slice,
     ident,
     held,
     heldNames,

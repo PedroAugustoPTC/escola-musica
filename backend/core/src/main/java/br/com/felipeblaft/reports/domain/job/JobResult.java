@@ -2,18 +2,18 @@ package br.com.felipeblaft.reports.domain.job;
 
 /** Código estável do resultado de um trabalho, entregue aos dois canais (FR-021). */
 public enum JobResult {
-    PRONTO_PARA_CONFERENCIA(true),
-    PERGUNTAS_PENDENTES(true),
-    NOVA_VERSAO(true),
-    SEM_ALTERACAO_DE_CONTEUDO(true),
-    PEDIDO_DE_ACAO_IGNORADO(true),
-    VERSAO_DESATUALIZADA(true),
-    AUDIO_NAO_PROCESSAVEL(false),
-    FALHA_ESTRUTURACAO(false),
-    FALHA_ALTERACAO(false),
-    FALHA_RESPOSTA(false),
-    FALHA_CONSOLIDACAO(false),
-    DESCARTADO(false);
+    READY_FOR_REVIEW(true),
+    PENDING_QUESTIONS(true),
+    NEW_VERSION(true),
+    NO_CONTENT_CHANGE(true),
+    ACTION_REQUEST_IGNORED(true),
+    STALE_VERSION(true),
+    AUDIO_NOT_PROCESSABLE(false),
+    STRUCTURING_FAILED(false),
+    CHANGE_FAILED(false),
+    ANSWER_FAILED(false),
+    CONSOLIDATION_FAILED(false),
+    DISCARDED(false);
 
     private final boolean success;
 

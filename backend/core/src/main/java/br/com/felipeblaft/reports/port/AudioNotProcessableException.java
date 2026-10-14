@@ -4,9 +4,9 @@ package br.com.felipeblaft.reports.port;
 public class AudioNotProcessableException extends RuntimeException {
 
     public enum Reason {
-        SEM_FALA,
-        FORMATO,
-        VAZIO
+        NO_SPEECH,
+        FORMAT,
+        EMPTY
     }
 
     private final Reason reason;

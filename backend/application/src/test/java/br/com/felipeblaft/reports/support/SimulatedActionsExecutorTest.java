@@ -44,7 +44,7 @@ public class SimulatedActionsExecutorTest {
     public record Result(String actionId, String status, String reasonCode, Long messageId) {}
 
     private static final JsonMapper JSON = JsonMapper.builder().build();
-    private static final String BASE = "/interno/v1/canal/telegram";
+    private static final String BASE = "/internal/v1/channel/telegram";
 
     private final InternalClient internal;
     private final String urlApiBots;
@@ -63,7 +63,7 @@ public class SimulatedActionsExecutorTest {
     public void run(JsonNode actions) throws Exception {
         List<Result> results = new ArrayList<>();
         for (JsonNode action : actions) {
-            String actionId = action.path("acaoId").asString();
+            String actionId = action.path("actionId").asString();
             if (alreadyHandled(actionId)) {
                 continue;
             }
@@ -76,24 +76,24 @@ public class SimulatedActionsExecutorTest {
 
     /** O receptor não guarda estado: consulta o backend e pula o que já está tratado. */
     private boolean alreadyHandled(String actionId) throws Exception {
-        InternalClient.Response response = internal.get(BASE + "/acoes/" + actionId);
+        InternalClient.Response response = internal.get(BASE + "/actions/" + actionId);
         if (response.status() != 200) {
             return false;
         }
-        String state = JSON.readTree(response.body()).path("estado").asString();
-        return state.equals("EXECUTADA") || state.equals("FALHOU");
+        String state = JSON.readTree(response.body()).path("state").asString();
+        return state.equals("EXECUTED") || state.equals("FAILED");
     }
 
     // ------------------------------------------------------------------ tradução ação -> API de
     // bots
 
     private Result runOne(String actionId, JsonNode action) throws Exception {
-        String type = action.path("tipo").asString();
+        String type = action.path("type").asString();
         return switch (type) {
-            case "MENSAGEM" -> sendMessage(actionId, action);
-            case "EDICAO" -> edit(actionId, action, action.path("mensagemId").asLong());
-            case "DOCUMENTO" -> sendDocument(actionId, action);
-            case "RESPOSTA_CALLBACK" ->
+            case "MESSAGE" -> sendMessage(actionId, action);
+            case "EDIT" -> edit(actionId, action, action.path("messageId").asLong());
+            case "DOCUMENT" -> sendDocument(actionId, action);
+            case "CALLBACK_REPLY" ->
                     resultOf(
                             actionId,
                             callJson(
@@ -103,20 +103,20 @@ public class SimulatedActionsExecutorTest {
                                                     "callback_query_id",
                                                     action.path("callbackId").asString())),
                             null);
-            case "MENSAGEM_ETAPA" -> step(actionId, action);
+            case "STEP_MESSAGE" -> step(actionId, action);
             // tipo novo: pula, informa e segue com as demais (FR-003a)
-            default -> new Result(actionId, "FALHOU", "ACAO_NAO_SUPORTADA", null);
+            default -> new Result(actionId, "FAILED", "ACTION_NOT_SUPPORTED", null);
         };
     }
 
     private Result sendMessage(String actionId, JsonNode action) throws Exception {
         ObjectNode body = JSON.createObjectNode();
         body.put("chat_id", action.path("chatId").asLong());
-        body.put("text", action.path("texto").asString());
+        body.put("text", action.path("text").asString());
         body.put("parse_mode", "HTML");
         body.set("link_preview_options", JSON.createObjectNode().put("is_disabled", true));
-        JsonNode keyboard = action.path("teclado");
-        if (keyboard.path("linhas").size() > 0) {
+        JsonNode keyboard = action.path("keyboard");
+        if (keyboard.path("rows").size() > 0) {
             body.set("reply_markup", keyboardTelegram(keyboard));
         }
         return resultOf(actionId, callJson("sendMessage", body), null);
@@ -126,16 +126,16 @@ public class SimulatedActionsExecutorTest {
         ObjectNode body = JSON.createObjectNode();
         body.put("chat_id", action.path("chatId").asLong());
         body.put("message_id", messageId);
-        body.put("text", action.path("texto").asString());
+        body.put("text", action.path("text").asString());
         body.put("parse_mode", "HTML");
         // teclado vazio remove os botões
-        body.set("reply_markup", keyboardTelegram(action.path("teclado")));
+        body.set("reply_markup", keyboardTelegram(action.path("keyboard")));
         return resultOf(actionId, callJson("editMessageText", body), messageId);
     }
 
     private Result step(String actionId, JsonNode action) throws Exception {
-        if (action.hasNonNull("editarMensagemId")) {
-            return edit(actionId, action, action.path("editarMensagemId").asLong());
+        if (action.hasNonNull("editMessageId")) {
+            return edit(actionId, action, action.path("editMessageId").asLong());
         }
         return sendMessage(actionId, action);
     }
@@ -143,15 +143,15 @@ public class SimulatedActionsExecutorTest {
     /** Uma única tentativa de GET; 404 ou 5xx viram DOCUMENTO_INDISPONIVEL, sem repetir. */
     private Result sendDocument(String actionId, JsonNode action) throws Exception {
         InternalClient.Response pdf =
-                internal.get(BASE + "/documentos/" + action.path("documentoId").asString());
+                internal.get(BASE + "/documents/" + action.path("documentId").asString());
         if (pdf.status() != 200) {
-            return new Result(actionId, "FALHOU", "DOCUMENTO_INDISPONIVEL", null);
+            return new Result(actionId, "FAILED", "DOCUMENT_UNAVAILABLE", null);
         }
         String boundary = "----executor" + UUID.randomUUID();
         ByteArrayOutputStream body = new ByteArrayOutputStream();
         field(body, boundary, "chat_id", Long.toString(action.path("chatId").asLong()));
-        if (action.hasNonNull("legenda")) {
-            field(body, boundary, "caption", action.path("legenda").asString());
+        if (action.hasNonNull("caption")) {
+            field(body, boundary, "caption", action.path("caption").asString());
             field(body, boundary, "parse_mode", "HTML");
         }
         write(
@@ -159,9 +159,9 @@ public class SimulatedActionsExecutorTest {
                 "--"
                         + boundary
                         + "\r\nContent-Disposition: form-data; name=\"document\"; filename=\""
-                        + action.path("nomeArquivo").asString()
+                        + action.path("fileName").asString()
                         + "\"\r\nContent-Type: "
-                        + action.path("tipoConteudo").asString("application/pdf")
+                        + action.path("contentType").asString("application/pdf")
                         + "\r\n\r\n");
         body.writeBytes(pdf.body());
         write(body, "\r\n--" + boundary + "--\r\n");
@@ -184,13 +184,13 @@ public class SimulatedActionsExecutorTest {
 
     private static ObjectNode keyboardTelegram(JsonNode keyboard) {
         ArrayNode rows = JSON.createArrayNode();
-        for (JsonNode line : keyboard.path("linhas")) {
+        for (JsonNode line : keyboard.path("rows")) {
             ArrayNode buttons = JSON.createArrayNode();
             for (JsonNode button : line) {
                 buttons.add(
                         JSON.createObjectNode()
-                                .put("text", button.path("rotulo").asString())
-                                .put("callback_data", button.path("dados").asString()));
+                                .put("text", button.path("label").asString())
+                                .put("callback_data", button.path("data").asString()));
             }
             rows.add(buttons);
         }
@@ -215,12 +215,12 @@ public class SimulatedActionsExecutorTest {
                 JsonNode id = readResult(response.body()).path("message_id");
                 messageId = id.isNumber() ? id.asLong() : null;
             }
-            return new Result(actionId, "EXECUTADA", null, messageId);
+            return new Result(actionId, "EXECUTED", null, messageId);
         }
         String code = classify(status, description);
         return code == null
-                ? new Result(actionId, "EXECUTADA", null, knownMessageId)
-                : new Result(actionId, "FALHOU", code, null);
+                ? new Result(actionId, "EXECUTED", null, knownMessageId)
+                : new Result(actionId, "FAILED", code, null);
     }
 
     /** Tabela "erro do Telegram -> situação" (contracts/canal-telegram-interno.md §4). */
@@ -232,15 +232,15 @@ public class SimulatedActionsExecutorTest {
         if (text.contains("message to edit not found")
                 || text.contains("message can't be edited")
                 || text.contains("message_id_invalid")) {
-            return "MENSAGEM_NAO_EDITAVEL";
+            return "MESSAGE_NOT_EDITABLE";
         }
         if (status == 403 || text.contains("chat not found")) {
-            return "CHAT_INDISPONIVEL";
+            return "CHAT_UNAVAILABLE";
         }
         if (status == 429) {
-            return "LIMITE_DE_TAXA";
+            return "RATE_LIMITED";
         }
-        return "ERRO_TELEGRAM";
+        return "TELEGRAM_ERROR";
     }
 
     private static String descriptionOf(String body) {
@@ -270,24 +270,24 @@ public class SimulatedActionsExecutorTest {
             informed.add(result);
             ObjectNode item =
                     JSON.createObjectNode()
-                            .put("acaoId", result.actionId())
-                            .put("situacao", result.status());
+                            .put("actionId", result.actionId())
+                            .put("outcome", result.status());
             if (result.reasonCode() != null) {
-                item.put("codigoMotivo", result.reasonCode());
+                item.put("reasonCode", result.reasonCode());
             }
             if (result.messageId() != null) {
-                item.put("mensagemId", result.messageId());
+                item.put("messageId", result.messageId());
             }
             items.add(item);
         }
-        ObjectNode body = JSON.createObjectNode().put("versao", "v1");
-        body.set("resultados", items);
-        InternalClient.Response response = internal.post(BASE + "/confirmacoes", body.toString());
+        ObjectNode body = JSON.createObjectNode().put("version", "v1");
+        body.set("results", items);
+        InternalClient.Response response = internal.post(BASE + "/confirmations", body.toString());
         if (response.status() != 200) {
             throw new AssertionError(
                     "confirmação recusada: " + response.status() + " " + response.text());
         }
-        ActionsSchemaV1.require("RespostaConfirmacao", response.text());
+        ActionsSchemaV1.require("ConfirmationResponse", response.text());
     }
 
     private static void field(

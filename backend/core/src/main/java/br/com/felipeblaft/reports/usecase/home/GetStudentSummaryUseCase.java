@@ -32,7 +32,7 @@ public class GetStudentSummaryUseCase {
         authorization.requireAssignment(teacherId, studentId);
         Student student =
                 students.searchById(studentId)
-                        .orElseThrow(() -> new DomainException(ErrorCode.ALUNO_NAO_ASSOCIADO));
+                        .orElseThrow(() -> new DomainException(ErrorCode.STUDENT_NOT_ASSIGNED));
         return new StudentSummary(
                 student.id(),
                 student.name(),

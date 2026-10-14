@@ -54,7 +54,7 @@ import tools.jackson.databind.json.JsonMapper;
  * acaoId} (FR-029). {@code 401} e {@code 404} saem sem corpo.
  */
 @RestController
-@RequestMapping("/interno/v1/canal/telegram")
+@RequestMapping("/internal/v1/channel/telegram")
 public class TelegramChannelController {
 
     public static final String SECRET_HEADER = "X-Telegram-Bot-Api-Secret-Token";
@@ -113,7 +113,7 @@ public class TelegramChannelController {
 
     // ------------------------------------------------------------------ POST /atualizacao
 
-    @PostMapping("/atualizacao")
+    @PostMapping("/update")
     public ResponseEntity<UpdateResponse> update(
             @RequestHeader(name = SECRET_HEADER, required = false) String receivedSecret,
             @RequestBody(required = false) String body) {
@@ -143,7 +143,7 @@ public class TelegramChannelController {
         } catch (RuntimeException error) {
             // toda mensagem recebida traz ao menos uma ação, mesmo se o mapeamento falhar (FR-039)
             LOG.error(
-                    "canal-erro-mapeamento updateId={} tipo={}",
+                    "channel-mapping-error updateId={} type={}",
                     id,
                     error.getClass().getSimpleName());
             actions = mapper.map(processor.errorReply(update), chat, replyIds(id, true));
@@ -153,7 +153,7 @@ public class TelegramChannelController {
                 () -> {
                     save.run(
                             "u" + id,
-                            ChannelActionOrigin.RESPOSTA_UPDATE,
+                            ChannelActionOrigin.UPDATE_REPLY,
                             id,
                             finalActions.stream().map(a -> a.toNewAction(null)).toList());
                     updateRecords.complete(id, finalActions.size());
@@ -232,7 +232,7 @@ public class TelegramChannelController {
 
     // ------------------------------------------------------------------ POST /confirmacoes
 
-    @PostMapping("/confirmacoes")
+    @PostMapping("/confirmations")
     public ResponseEntity<Object> confirmations(@RequestBody(required = false) String body) {
         ConfirmationRequest request;
         try {
@@ -240,13 +240,13 @@ public class TelegramChannelController {
         } catch (RuntimeException unreadable) {
             return invalid();
         }
-        if (request == null || request.versao() == null) {
+        if (request == null || request.version() == null) {
             return invalid();
         }
-        if (!UpdateResponse.VERSION.equals(request.versao())) {
+        if (!UpdateResponse.VERSION.equals(request.version())) {
             return ResponseEntity.badRequest().body(ChannelErrorResponse.unsupportedVersion());
         }
-        List<ConfirmationRequest.ActionResultDto> items = request.resultados();
+        List<ConfirmationRequest.ActionResultDto> items = request.results();
         if (items == null || items.isEmpty() || items.size() > MAX_RESULTS) {
             return invalid();
         }
@@ -257,15 +257,15 @@ public class TelegramChannelController {
                                         item == null
                                                 ? new Result(null, null, null, null)
                                                 : new Result(
-                                                        item.acaoId(),
-                                                        statusOf(item.situacao()),
-                                                        item.codigoMotivo(),
-                                                        item.mensagemId()))
+                                                        item.actionId(),
+                                                        statusOf(item.outcome()),
+                                                        item.reasonCode(),
+                                                        item.messageId()))
                         .toList();
         ConfirmChannelActionsExecutionUseCase.Response response = confirm.run(results);
         countConfirmations(results);
         if (response.contractViolation()) {
-            LOG.warn("canal-confirmacao-sem-mensagem-id-em-etapa");
+            LOG.warn("channel-confirmation-without-message-id-in-step");
             return invalid();
         }
         return ResponseEntity.ok(
@@ -282,14 +282,14 @@ public class TelegramChannelController {
                 continue;
             }
             String code =
-                    result.status() == Status.EXECUTADA || result.reasonCode() == null
-                            ? "NENHUM"
+                    result.status() == Status.EXECUTED || result.reasonCode() == null
+                            ? "NONE"
                             : ConfirmChannelActionsExecutionUseCase.normalize(result.reasonCode());
             metrics.counter(
-                            "canal_confirmacoes_total",
-                            "situacao",
+                            "channel_confirmations_total",
+                            "outcome",
                             result.status().name(),
-                            "codigo",
+                            "code",
                             code)
                     .increment();
         }
@@ -300,8 +300,8 @@ public class TelegramChannelController {
             return null;
         }
         return switch (text) {
-            case "EXECUTADA" -> Status.EXECUTADA;
-            case "FALHOU" -> Status.FALHOU;
+            case "EXECUTED" -> Status.EXECUTED;
+            case "FAILED" -> Status.FAILED;
             default -> null;
         };
     }
@@ -312,12 +312,12 @@ public class TelegramChannelController {
 
     // ------------------------------------------------------------------ GET /acoes/{acaoId}
 
-    @GetMapping("/acoes/{acaoId}")
-    public ResponseEntity<ActionStateResponse> actionState(@PathVariable String acaoId) {
-        if (!ACTION_ID_FORMAT.matcher(acaoId).matches()) {
+    @GetMapping("/actions/{actionId}")
+    public ResponseEntity<ActionStateResponse> actionState(@PathVariable String actionId) {
+        if (!ACTION_ID_FORMAT.matcher(actionId).matches()) {
             return ResponseEntity.notFound().build();
         }
-        return query.run(acaoId)
+        return query.run(actionId)
                 .map(
                         action ->
                                 ResponseEntity.ok(
@@ -331,13 +331,13 @@ public class TelegramChannelController {
 
     // ------------------------------------------------------------------ GET /documentos/{id}
 
-    @GetMapping("/documentos/{documentoId}")
-    public ResponseEntity<byte[]> document(@PathVariable String documentoId) {
+    @GetMapping("/documents/{documentId}")
+    public ResponseEntity<byte[]> document(@PathVariable String documentId) {
         // URL, caminho, tamanho ou alfabeto errado: 404 antes de tocar no banco (FR-023)
-        if (!DOCUMENT_FORMAT.matcher(documentoId).matches()) {
+        if (!DOCUMENT_FORMAT.matcher(documentId).matches()) {
             return ResponseEntity.notFound().build();
         }
-        Optional<ObtainedDocument> document = getDocument.run(documentoId);
+        Optional<ObtainedDocument> document = getDocument.run(documentId);
         if (document.isEmpty()) {
             return ResponseEntity.notFound().build();
         }

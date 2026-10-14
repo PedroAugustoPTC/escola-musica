@@ -2,12 +2,12 @@
   "comment": "Massa de DEMONSTRAÇÃO, 100% fictícia (nomes, CPFs e responsáveis inventados). Usada por `local.sh subir --massa=true`.",
   "teachers": [
     {
-      "email": "clara@exemplo.test",
+      "email": "clara@example.test",
       "name": "Clara Souza",
       "active": true
     },
     {
-      "email": "bruno@exemplo.test",
+      "email": "bruno@example.test",
       "name": "Bruno Lima",
       "active": true
     }
@@ -20,7 +20,7 @@
       "guardianName": "Responsável Fictício de Matteo",
       "instrument": "Piano",
       "teachers": [
-        "clara@exemplo.test"
+        "clara@example.test"
       ]
     },
     {
@@ -29,7 +29,7 @@
       "birthDate": "1998-02-01",
       "instrument": "Violão",
       "teachers": [
-        "clara@exemplo.test"
+        "clara@example.test"
       ]
     },
     {
@@ -39,7 +39,7 @@
       "guardianName": "Responsável Fictício de Miguel",
       "instrument": "Violino",
       "teachers": [
-        "clara@exemplo.test"
+        "clara@example.test"
       ]
     },
     {
@@ -49,7 +49,7 @@
       "guardianName": "Responsável Fictícia de Beatriz",
       "instrument": "Canto",
       "teachers": [
-        "clara@exemplo.test"
+        "clara@example.test"
       ]
     },
     {
@@ -59,7 +59,7 @@
       "guardianName": "Responsável Fictício de Lucas",
       "instrument": "Piano",
       "teachers": [
-        "clara@exemplo.test"
+        "clara@example.test"
       ]
     },
     {
@@ -68,7 +68,7 @@
       "birthDate": "2001-07-22",
       "instrument": "Violão",
       "teachers": [
-        "clara@exemplo.test"
+        "clara@example.test"
       ]
     },
     {
@@ -78,7 +78,7 @@
       "guardianName": "Responsável Fictícia de Helena",
       "instrument": "Flauta",
       "teachers": [
-        "bruno@exemplo.test"
+        "bruno@example.test"
       ]
     },
     {
@@ -88,7 +88,7 @@
       "guardianName": "Responsável Fictício de Davi",
       "instrument": "Bateria",
       "teachers": [
-        "bruno@exemplo.test"
+        "bruno@example.test"
       ]
     }
   ]

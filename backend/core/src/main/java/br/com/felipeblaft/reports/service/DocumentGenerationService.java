@@ -60,18 +60,18 @@ public class DocumentGenerationService {
     }
 
     public static String key(ReportType type, UUID reportId, String file) {
-        return "relatorios/" + type.name().toLowerCase(Locale.ROOT) + "/" + reportId + "/" + file;
+        return "reports/" + type.name().toLowerCase(Locale.ROOT) + "/" + reportId + "/" + file;
     }
 
     public PdfDocument generateReview(LessonReport report, ReportVersion version) {
-        return generateLesson(report, version, DocumentStatus.CONFERENCIA, null);
+        return generateLesson(report, version, DocumentStatus.REVIEW, null);
     }
 
     public PdfDocument generateOfficial(LessonReport report, ReportVersion version) {
         Teacher teacher = teacher(report.teacherId());
         Approval approval =
                 new Approval(teacher.name(), report.approvedAt(), report.approvedVersion());
-        return generateLesson(report, version, DocumentStatus.OFICIAL, approval);
+        return generateLesson(report, version, DocumentStatus.OFFICIAL, approval);
     }
 
     private PdfDocument generateLesson(
@@ -90,19 +90,21 @@ public class DocumentGenerationService {
                         approval);
         GeneratedDocument generated = pdfGeneration.generateLessonReport(model);
         String file =
-                status == DocumentStatus.OFICIAL ? "official.pdf" : "v" + version.number() + ".pdf";
-        return store(ReportType.AULA, report.id(), version, status, generated, file);
+                status == DocumentStatus.OFFICIAL
+                        ? "official.pdf"
+                        : "v" + version.number() + ".pdf";
+        return store(ReportType.LESSON, report.id(), version, status, generated, file);
     }
 
     public PdfDocument generateReview(SemesterReport report, ReportVersion version) {
-        return generateSemester(report, version, DocumentStatus.CONFERENCIA, null);
+        return generateSemester(report, version, DocumentStatus.REVIEW, null);
     }
 
     public PdfDocument generateOfficial(SemesterReport report, ReportVersion version) {
         Teacher teacher = teacher(report.teacherId());
         Approval approval =
                 new Approval(teacher.name(), report.approvedAt(), report.approvedVersion());
-        return generateSemester(report, version, DocumentStatus.OFICIAL, approval);
+        return generateSemester(report, version, DocumentStatus.OFFICIAL, approval);
     }
 
     private PdfDocument generateSemester(
@@ -119,8 +121,10 @@ public class DocumentGenerationService {
                         approval);
         GeneratedDocument generated = pdfGeneration.generateSemesterReport(model);
         String file =
-                status == DocumentStatus.OFICIAL ? "official.pdf" : "v" + version.number() + ".pdf";
-        return store(ReportType.SEMESTRAL, report.id(), version, status, generated, file);
+                status == DocumentStatus.OFFICIAL
+                        ? "official.pdf"
+                        : "v" + version.number() + ".pdf";
+        return store(ReportType.SEMESTER, report.id(), version, status, generated, file);
     }
 
     /** Guarda os bytes e registra o documento (usado também pelo semestral). */
@@ -136,9 +140,9 @@ public class DocumentGenerationService {
         PdfDocument document =
                 PdfDocument.create(
                         version.id(),
-                        status == DocumentStatus.OFICIAL
-                                ? DocumentType.OFICIAL
-                                : DocumentType.CONFERENCIA,
+                        status == DocumentStatus.OFFICIAL
+                                ? DocumentType.OFFICIAL
+                                : DocumentType.REVIEW,
                         key,
                         generated.size(),
                         generated.sha256(),

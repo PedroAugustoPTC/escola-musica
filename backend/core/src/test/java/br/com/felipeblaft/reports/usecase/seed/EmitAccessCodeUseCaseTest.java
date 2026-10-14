@@ -30,71 +30,71 @@ class EmitAccessCodeUseCaseTest {
 
     @Test
     void reissuesReplacingHashAndRestartingValidity() {
-        Teacher clara = Teacher.create("Clara", "clara@exemplo.test", true, clock.now());
-        clara.replaceCode("codigo:ANTIGO22", clock.now(), Duration.ofDays(7));
+        Teacher clara = Teacher.create("Clara", "clara@example.test", true, clock.now());
+        clara.replaceCode("code:OLD2222", clock.now(), Duration.ofDays(7));
         teachers.save(clara);
         clock.advance(Duration.ofDays(9));
         generator.schedule("NEVA2345");
 
-        IssuedCode emitted = useCase.run(" Clara@Exemplo.TEST ");
+        IssuedCode emitted = useCase.run(" Clara@Example.TEST ");
 
-        assertThat(emitted.email()).isEqualTo("clara@exemplo.test");
+        assertThat(emitted.email()).isEqualTo("clara@example.test");
         assertThat(emitted.code()).isEqualTo("NEVA2345");
         assertThat(emitted.validUntil()).isEqualTo(clock.now().plus(Duration.ofDays(7)));
         Teacher saved = teachers.searchById(clara.id()).orElseThrow();
-        assertThat(saved.accessCodeHash()).isEqualTo("codigo:NEVA2345");
+        assertThat(saved.accessCodeHash()).isEqualTo("code:NEVA2345");
         assertThat(saved.validCodeAt(clock.now())).isTrue();
     }
 
     @Test
     void missingTeacher() {
-        assertThatThrownBy(() -> useCase.run("ninguem@exemplo.test"))
+        assertThatThrownBy(() -> useCase.run("nobody@example.test"))
                 .isInstanceOf(DomainException.class)
                 .extracting(e -> ((DomainException) e).code())
-                .isEqualTo(ErrorCode.PROFESSOR_INEXISTENTE);
+                .isEqualTo(ErrorCode.TEACHER_NOT_FOUND);
     }
 
     @Test
     void generatesAnotherCodeIfHashAlreadyBelongsToAnotherTeacher() {
-        Teacher bruno = Teacher.create("Bruno", "bruno@exemplo.test", true, clock.now());
-        bruno.replaceCode("codigo:REPETXDA", clock.now(), Duration.ofDays(7));
+        Teacher bruno = Teacher.create("Bruno", "bruno@example.test", true, clock.now());
+        bruno.replaceCode("code:REPETXDA", clock.now(), Duration.ofDays(7));
         teachers.save(bruno);
-        Teacher clara = Teacher.create("Clara", "clara@exemplo.test", true, clock.now());
+        Teacher clara = Teacher.create("Clara", "clara@example.test", true, clock.now());
         teachers.save(clara);
         generator.schedule("REPETXDA", "UNXCA234");
 
-        assertThat(useCase.run("clara@exemplo.test").code()).isEqualTo("UNXCA234");
+        assertThat(useCase.run("clara@example.test").code()).isEqualTo("UNXCA234");
     }
 
     @Test
     void sameCodeOfOwnTeacherIsAccepted() {
-        Teacher clara = Teacher.create("Clara", "clara@exemplo.test", true, clock.now());
-        clara.replaceCode("codigo:MESMA234", clock.now(), Duration.ofDays(7));
+        Teacher clara = Teacher.create("Clara", "clara@example.test", true, clock.now());
+        clara.replaceCode("code:SAME2345", clock.now(), Duration.ofDays(7));
         teachers.save(clara);
-        generator.schedule("MESMA234");
+        generator.schedule("SAME2345");
 
-        assertThat(useCase.run("clara@exemplo.test").code()).isEqualTo("MESMA234");
+        assertThat(useCase.run("clara@example.test").code()).isEqualTo("SAME2345");
     }
 
     @Test
     void givesUpAfterManyCollisions() {
-        Teacher bruno = Teacher.create("Bruno", "bruno@exemplo.test", true, clock.now());
-        bruno.replaceCode("codigo:REPETXDA", clock.now(), Duration.ofDays(7));
+        Teacher bruno = Teacher.create("Bruno", "bruno@example.test", true, clock.now());
+        bruno.replaceCode("code:REPETXDA", clock.now(), Duration.ofDays(7));
         teachers.save(bruno);
-        Teacher clara = Teacher.create("Clara", "clara@exemplo.test", true, clock.now());
+        Teacher clara = Teacher.create("Clara", "clara@example.test", true, clock.now());
         teachers.save(clara);
         for (int i = 0; i < AccessCodeIssuanceService.UNIQUENESS_ATTEMPTS; i++) {
             generator.schedule("REPETXDA");
         }
 
-        assertThatThrownBy(() -> useCase.run("clara@exemplo.test"))
+        assertThatThrownBy(() -> useCase.run("clara@example.test"))
                 .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     void sequentialGeneratorProducesValidCodes() {
-        Teacher clara = Teacher.create("Clara", "clara@exemplo.test", true, clock.now());
+        Teacher clara = Teacher.create("Clara", "clara@example.test", true, clock.now());
         teachers.save(clara);
-        assertThat(useCase.run("clara@exemplo.test").code()).hasSize(8);
+        assertThat(useCase.run("clara@example.test").code()).hasSize(8);
     }
 }

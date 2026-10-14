@@ -58,14 +58,14 @@ class TranscriptionOpenAiCompatibleAdapterIT {
                 new TranscriptionOpenAiCompatibleAdapter(
                         new ApplicationProperties.Transcription(
                                 SERVER.baseUrl() + "/v1",
-                                "transcritor-teste",
-                                "chave",
+                                "test-transcriber",
+                                "key",
                                 new BigDecimal("0.36")),
                         new AiHttpClient(
                                 HttpClient.newHttpClient(),
                                 Duration.ofMillis(10),
                                 Clock.systemUTC()));
-        Path file = temporary.resolve("normalizado.ogg");
+        Path file = temporary.resolve("normalized.ogg");
         Files.write(file, new byte[] {1, 2, 3, 4});
         audio = new NormalizedAudio(file, 100);
     }
@@ -85,7 +85,7 @@ class TranscriptionOpenAiCompatibleAdapterIT {
                 postRequestedFor(urlEqualTo(PATH))
                         .withRequestBody(containing("filename=\"audio.ogg\""))
                         .withRequestBody(containing("name=\"language\"\r\n\r\npt"))
-                        .withRequestBody(containing("transcritor-teste")));
+                        .withRequestBody(containing("test-transcriber")));
     }
 
     @Test
@@ -98,7 +98,7 @@ class TranscriptionOpenAiCompatibleAdapterIT {
                         AudioNotProcessableException.class,
                         e ->
                                 assertThat(e.reason())
-                                        .isEqualTo(AudioNotProcessableException.Reason.SEM_FALA));
+                                        .isEqualTo(AudioNotProcessableException.Reason.NO_SPEECH));
     }
 
     @Test
@@ -110,7 +110,7 @@ class TranscriptionOpenAiCompatibleAdapterIT {
                         AudioNotProcessableException.class,
                         e ->
                                 assertThat(e.reason())
-                                        .isEqualTo(AudioNotProcessableException.Reason.FORMATO));
+                                        .isEqualTo(AudioNotProcessableException.Reason.FORMAT));
     }
 
     @Test

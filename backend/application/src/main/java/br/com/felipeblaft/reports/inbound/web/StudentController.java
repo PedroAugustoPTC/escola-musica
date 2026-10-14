@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 /** Alunos associados, com busca aproximada (FR-013), e resumo de um aluno (FR-009). */
 @RestController
 @Validated
-@RequestMapping("/api/v1/alunos")
+@RequestMapping("/api/v1/students")
 public class StudentController {
 
     private final SearchStudentsUseCase searchStudents;
@@ -31,13 +31,13 @@ public class StudentController {
     @GetMapping
     public StudentSearchDto students(
             @AuthenticationPrincipal AuthenticatedTeacher teacher,
-            @RequestParam(required = false) @Size(max = 100) String busca) {
-        return HomeMapper.search(searchStudents.run(teacher.id(), busca));
+            @RequestParam(required = false) @Size(max = 100) String search) {
+        return HomeMapper.search(searchStudents.run(teacher.id(), search));
     }
 
-    @GetMapping("/{alunoId}")
+    @GetMapping("/{studentId}")
     public StudentSummaryDto student(
-            @AuthenticationPrincipal AuthenticatedTeacher teacher, @PathVariable UUID alunoId) {
-        return HomeMapper.student(getSummary.run(teacher.id(), alunoId));
+            @AuthenticationPrincipal AuthenticatedTeacher teacher, @PathVariable UUID studentId) {
+        return HomeMapper.student(getSummary.run(teacher.id(), studentId));
     }
 }

@@ -18,10 +18,10 @@ import java.util.UUID;
  */
 public class AudioNormalizationTest implements AudioNormalizationPort {
 
-    public static final String SILENCE = "SILENCIO";
-    public static final String INVALID = "INVALIDO";
+    public static final String SILENCE = "SILENCE";
+    public static final String INVALID = "INVALID";
     public static final byte[] AUDIO_WITH_SPEECH =
-            "AUDIO-DE-AULA-FICTICIO".getBytes(StandardCharsets.UTF_8);
+            "FICTITIOUS-LESSON-AUDIO".getBytes(StandardCharsets.UTF_8);
 
     @Override
     public NormalizedAudio normalize(TemporaryFile original) {
@@ -31,7 +31,7 @@ public class AudioNormalizationTest implements AudioNormalizationPort {
                 throw new UnsupportedFormatException();
             }
             Path normalized =
-                    original.path().resolveSibling("normalizado-" + UUID.randomUUID() + ".ogg");
+                    original.path().resolveSibling("normalized-" + UUID.randomUUID() + ".ogg");
             Files.copy(original.path(), normalized);
             return new NormalizedAudio(normalized, start.startsWith(SILENCE) ? 1.5 : 30);
         } catch (IOException error) {

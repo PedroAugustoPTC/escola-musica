@@ -45,7 +45,7 @@ public class FfmpegAudioNormalizationAdapter implements AudioNormalizationPort {
 
     @Override
     public NormalizedAudio normalize(TemporaryFile original) {
-        Path output = directory.resolve("normalizado-" + UUID.randomUUID() + ".ogg");
+        Path output = directory.resolve("normalized-" + UUID.randomUUID() + ".ogg");
         try {
             Files.createDirectories(directory);
             int code =
@@ -76,7 +76,7 @@ public class FfmpegAudioNormalizationAdapter implements AudioNormalizationPort {
             double duration = duration(output);
             if (duration < MINIMUM_DURATION) {
                 delete(output);
-                throw new AudioNotProcessableException(AudioNotProcessableException.Reason.VAZIO);
+                throw new AudioNotProcessableException(AudioNotProcessableException.Reason.EMPTY);
             }
             return new NormalizedAudio(output, duration);
         } catch (IOException error) {
@@ -128,7 +128,7 @@ public class FfmpegAudioNormalizationAdapter implements AudioNormalizationPort {
         } catch (InterruptedException error) {
             process.destroyForcibly();
             Thread.currentThread().interrupt();
-            throw new IOException("interrompido", error);
+            throw new IOException("interrupted", error);
         }
     }
 
@@ -140,7 +140,7 @@ public class FfmpegAudioNormalizationAdapter implements AudioNormalizationPort {
         try {
             Files.deleteIfExists(path);
         } catch (IOException error) {
-            LOG.warn("audio-nao-apagado tipo={}", error.getClass().getSimpleName());
+            LOG.warn("audio-not-deleted type={}", error.getClass().getSimpleName());
         }
     }
 }

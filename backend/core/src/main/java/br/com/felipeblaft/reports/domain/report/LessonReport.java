@@ -20,7 +20,7 @@ public class LessonReport {
     /** No máximo duas rodadas de perguntas por relatório (FR-025). */
     public static final int MAX_ROUNDS = 2;
 
-    public static final String STRUCTURING_FAILED = "FALHA_ESTRUTURACAO";
+    public static final String STRUCTURING_FAILED = "STRUCTURING_FAILED";
 
     private final UUID id;
     private final UUID lessonId;
@@ -106,8 +106,8 @@ public class LessonReport {
                 LessonReportContent.empty(),
                 List.of(),
                 0,
-                ReportStatus.EM_PROCESSAMENTO,
-                ReportStep.ESTRUTURANDO,
+                ReportStatus.PROCESSING,
+                ReportStep.STRUCTURING,
                 0,
                 channel,
                 null,
@@ -125,52 +125,52 @@ public class LessonReport {
 
     /** Recusa qualquer ação sobre relatório aprovado ou cancelado (FR-031, FR-032). */
     public void requireOpen() {
-        if (status == ReportStatus.APROVADO) {
-            throw new DomainException(ErrorCode.RELATORIO_JA_APROVADO);
+        if (status == ReportStatus.APPROVED) {
+            throw new DomainException(ErrorCode.REPORT_ALREADY_APPROVED);
         }
-        if (status == ReportStatus.CANCELADO) {
-            throw new DomainException(ErrorCode.RELATORIO_CANCELADO);
+        if (status == ReportStatus.CANCELLED) {
+            throw new DomainException(ErrorCode.REPORT_CANCELLED);
         }
     }
 
     private void requireNoStepInProgress() {
         if (step != null) {
             throw new DomainException(
-                    ErrorCode.PROCESSAMENTO_EM_ANDAMENTO, Map.of("etapa", step.name()));
+                    ErrorCode.PROCESSING_IN_PROGRESS, Map.of("step", step.name()));
         }
     }
 
     private void requireStatus(ReportStatus expected) {
         if (status != expected) {
-            throw new DomainException(ErrorCode.ACAO_NAO_PERMITIDA_NA_ETAPA);
+            throw new DomainException(ErrorCode.ACTION_NOT_ALLOWED_AT_STEP);
         }
     }
 
     public void requireCanAnswer() {
         requireOpen();
         requireNoStepInProgress();
-        requireStatus(ReportStatus.AGUARDANDO_RESPOSTAS);
+        requireStatus(ReportStatus.AWAITING_ANSWERS);
     }
 
     /** Pedir alteração exige conferência sem etapa em curso e a versão vigente (FR-033). */
     public void requireCanChange(int baseVersion) {
         requireOpen();
         requireNoStepInProgress();
-        requireStatus(ReportStatus.AGUARDANDO_CONFERENCIA);
+        requireStatus(ReportStatus.AWAITING_REVIEW);
         requireCurrentVersion(baseVersion);
     }
 
     public void requireCurrentVersion(int presentedVersion) {
         if (presentedVersion != currentVersion) {
             throw new DomainException(
-                    ErrorCode.VERSAO_DESATUALIZADA, Map.of("versaoVigente", currentVersion));
+                    ErrorCode.STALE_VERSION, Map.of("currentVersion", currentVersion));
         }
     }
 
     public void requireCanRetry() {
         requireOpen();
         requireNoStepInProgress();
-        requireStatus(ReportStatus.FALHA_PROCESSAMENTO);
+        requireStatus(ReportStatus.PROCESSING_FAILED);
     }
 
     // ------------------------------------------------------------ transições
@@ -181,7 +181,7 @@ public class LessonReport {
      */
     public boolean registerStructuring(
             LessonReportContent newContent, List<String> questions, Instant now) {
-        requireInternal(ReportStatus.EM_PROCESSAMENTO);
+        requireInternal(ReportStatus.PROCESSING);
         return applyContentWithQuestions(newContent, questions, now);
     }
 
@@ -195,18 +195,18 @@ public class LessonReport {
         if (!valid.isEmpty() && questionRounds < MAX_ROUNDS) {
             questionRounds++;
             pendingQuestions = valid;
-            status = ReportStatus.AGUARDANDO_RESPOSTAS;
+            status = ReportStatus.AWAITING_ANSWERS;
             return false;
         }
         pendingQuestions = List.of();
-        status = ReportStatus.AGUARDANDO_CONFERENCIA;
+        status = ReportStatus.AWAITING_REVIEW;
         currentVersion = 1;
         return true;
     }
 
     public void failStructuring(Instant now) {
-        requireInternal(ReportStatus.EM_PROCESSAMENTO);
-        status = ReportStatus.FALHA_PROCESSAMENTO;
+        requireInternal(ReportStatus.PROCESSING);
+        status = ReportStatus.PROCESSING_FAILED;
         failureReason = STRUCTURING_FAILED;
         step = null;
         updatedAt = now;
@@ -214,8 +214,8 @@ public class LessonReport {
 
     public void prepareNewAttempt(Instant now) {
         requireCanRetry();
-        status = ReportStatus.EM_PROCESSAMENTO;
-        step = ReportStep.ESTRUTURANDO;
+        status = ReportStatus.PROCESSING;
+        step = ReportStep.STRUCTURING;
         failureReason = null;
         updatedAt = now;
     }
@@ -236,13 +236,13 @@ public class LessonReport {
      */
     public boolean incorporateAnswer(
             LessonReportContent newContent, List<String> newQuestions, Instant now) {
-        requireInternal(ReportStatus.AGUARDANDO_RESPOSTAS);
+        requireInternal(ReportStatus.AWAITING_ANSWERS);
         return applyContentWithQuestions(newContent, newQuestions, now);
     }
 
     /** Alteração aplicada: nova versão (N+1). Devolve o número da nova versão. */
     public int applyChange(LessonReportContent newContent, Instant now) {
-        requireInternal(ReportStatus.AGUARDANDO_CONFERENCIA);
+        requireInternal(ReportStatus.AWAITING_REVIEW);
         content = Objects.requireNonNull(newContent);
         currentVersion++;
         step = null;
@@ -254,9 +254,9 @@ public class LessonReport {
     public void approve(int confirmedVersion, Channel channel, Instant now) {
         requireOpen();
         requireNoStepInProgress();
-        requireStatus(ReportStatus.AGUARDANDO_CONFERENCIA);
+        requireStatus(ReportStatus.AWAITING_REVIEW);
         requireCurrentVersion(confirmedVersion);
-        status = ReportStatus.APROVADO;
+        status = ReportStatus.APPROVED;
         approvedAt = now;
         approvedVersion = currentVersion;
         approvalChannel = Objects.requireNonNull(channel);
@@ -269,10 +269,10 @@ public class LessonReport {
      */
     public void cancel(Instant now, boolean discardOnResume) {
         requireOpen();
-        if (status == ReportStatus.EM_PROCESSAMENTO && !discardOnResume) {
-            throw new DomainException(ErrorCode.ACAO_NAO_PERMITIDA_NA_ETAPA);
+        if (status == ReportStatus.PROCESSING && !discardOnResume) {
+            throw new DomainException(ErrorCode.ACTION_NOT_ALLOWED_AT_STEP);
         }
-        status = ReportStatus.CANCELADO;
+        status = ReportStatus.CANCELLED;
         cancelledAt = now;
         step = null;
         updatedAt = now;
@@ -380,6 +380,6 @@ public class LessonReport {
 
     @Override
     public String toString() {
-        return "RelatorioAula[id=" + id + ", status=" + status + ", versao=" + currentVersion + "]";
+        return "LessonReport[id=" + id + ", status=" + status + ", version=" + currentVersion + "]";
     }
 }

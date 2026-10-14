@@ -41,7 +41,7 @@ public record ApplicationProperties(
 
         @Override
         public String toString() {
-            return "Seguranca[***]";
+            return "Security[***]";
         }
     }
 
@@ -58,14 +58,14 @@ public record ApplicationProperties(
 
         @Override
         public String toString() {
-            return "Telegram[habilitado=" + enabled + ", apiUrl=" + apiUrl + "]";
+            return "Telegram[enabled=" + enabled + ", apiUrl=" + apiUrl + "]";
         }
     }
 
     /** Quem entrega as mensagens proativas ao Telegram (R-10): exatamente um caminho fica ativo. */
     public enum ProactiveDelivery {
-        DIRETA,
-        ORQUESTRADOR
+        DIRECT,
+        ORCHESTRATOR
     }
 
     /**
@@ -92,7 +92,7 @@ public record ApplicationProperties(
 
         public TelegramChannel {
             if (proactiveDelivery == null) {
-                proactiveDelivery = ProactiveDelivery.DIRETA;
+                proactiveDelivery = ProactiveDelivery.DIRECT;
             }
         }
 
@@ -102,7 +102,7 @@ public record ApplicationProperties(
 
         @Override
         public String toString() {
-            return "CanalTelegram[entregaProativa=" + proactiveDelivery + ", ***]";
+            return "TelegramChannel[proactiveDelivery=" + proactiveDelivery + ", ***]";
         }
     }
 
@@ -117,7 +117,7 @@ public record ApplicationProperties(
 
         @Override
         public String toString() {
-            return "Transcricao[url=" + url + ", modelo=" + model + "]";
+            return "Transcription[url=" + url + ", model=" + model + "]";
         }
     }
 
@@ -130,7 +130,7 @@ public record ApplicationProperties(
 
         @Override
         public String toString() {
-            return "Llm[url=" + url + ", modelo=" + model + "]";
+            return "Llm[url=" + url + ", model=" + model + "]";
         }
     }
 

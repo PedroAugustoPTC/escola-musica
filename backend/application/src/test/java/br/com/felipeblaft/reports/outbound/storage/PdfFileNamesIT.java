@@ -43,11 +43,11 @@ class PdfFileNamesIT extends ContractApiBase {
         session = signIn(ScenarioIT.CODE_CLARA);
         mvc.perform(
                         authenticated(
-                                multipart("/api/v1/alunos/{id}/relatorios-aula", matteo.id())
+                                multipart("/api/v1/students/{id}/lesson-reports", matteo.id())
                                         .file(
                                                 new MockMultipartFile(
                                                         "audio",
-                                                        "aula.m4a",
+                                                        "lesson.m4a",
                                                         "audio/mp4",
                                                         AudioNormalizationTest.AUDIO_WITH_SPEECH)),
                                 session))
@@ -56,30 +56,30 @@ class PdfFileNamesIT extends ContractApiBase {
         reportId = jdbc.queryForObject("select id from lesson_report", UUID.class);
         mvc.perform(
                         authenticated(
-                                        post("/api/v1/relatorios-aula/{id}/respostas", reportId),
+                                        post("/api/v1/lesson-reports/{id}/answers", reportId),
                                         session)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"texto\":\"Estudou bem.\"}"))
+                                .content("{\"text\":\"Estudou bem.\"}"))
                 .andExpect(status().isAccepted());
         scenario.processQueue();
         mvc.perform(
                         authenticated(
-                                        post("/api/v1/relatorios-aula/{id}/aprovacao", reportId),
+                                        post("/api/v1/lesson-reports/{id}/approval", reportId),
                                         session)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"versaoConfirmada\":1}"))
+                                .content("{\"confirmedVersion\":1}"))
                 .andExpect(status().isOk());
     }
 
     @Test
     void displayedNamesStayInPortugueseAndNewStorageKeysAreInEnglish() throws Exception {
-        mvc.perform(get("/api/v1/relatorios-aula/{id}/versoes/1/pdf", reportId).cookie(session))
+        mvc.perform(get("/api/v1/lesson-reports/{id}/versions/1/pdf", reportId).cookie(session))
                 .andExpect(status().isOk())
                 .andExpect(
                         header().string(
                                         "Content-Disposition",
                                         "inline; filename=\"relatorio-aula-2026-09-21-v1.pdf\""));
-        mvc.perform(get("/api/v1/relatorios-aula/{id}/pdf-oficial", reportId).cookie(session))
+        mvc.perform(get("/api/v1/lesson-reports/{id}/official-pdf", reportId).cookie(session))
                 .andExpect(status().isOk())
                 .andExpect(
                         header().string(
@@ -105,7 +105,7 @@ class PdfFileNamesIT extends ContractApiBase {
         jdbc.update(
                 "update pdf_document set storage_key = ? where storage_key = ?", oldKey, newKey);
 
-        mvc.perform(get("/api/v1/relatorios-aula/{id}/pdf-oficial", reportId).cookie(session))
+        mvc.perform(get("/api/v1/lesson-reports/{id}/official-pdf", reportId).cookie(session))
                 .andExpect(status().isOk())
                 .andExpect(
                         header().string(

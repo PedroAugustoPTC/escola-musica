@@ -43,14 +43,14 @@ public class GenerateSemesterReportUseCase {
         requireCanGenerate(current, confirmEvenWithOpen);
         ProcessingJob job =
                 ProcessingJob.create(
-                        JobType.CONSOLIDACAO_SEMESTRAL,
+                        JobType.SEMESTER_CONSOLIDATION,
                         teacherId,
                         studentId,
-                        ReportType.SEMESTRAL,
+                        ReportType.SEMESTER,
                         null,
                         channel,
-                        Medium.TEXTO,
-                        JobStep.CONSOLIDANDO,
+                        Medium.TEXT,
+                        JobStep.CONSOLIDATING,
                         clock.now());
         job.defineParameter(ProcessingJob.PERIOD_KEY, current.period().key());
         if (confirmEvenWithOpen) {
@@ -60,27 +60,26 @@ public class GenerateSemesterReportUseCase {
             queue.enqueue(job);
         } catch (ConcurrencyConflictException conflict) {
             requireCanGenerate(preview.run(teacherId, studentId, periodKey), true);
-            throw new DomainException(ErrorCode.RELATORIO_EM_ABERTO);
+            throw new DomainException(ErrorCode.REPORT_ALREADY_OPEN);
         }
         return job;
     }
 
     static void requireCanGenerate(Preview preview, boolean confirmEvenWithOpen) {
         if (preview.approvedSemesterId().isPresent()) {
-            throw new DomainException(ErrorCode.SEMESTRAL_JA_APROVADO);
+            throw new DomainException(ErrorCode.SEMESTER_REPORT_ALREADY_APPROVED);
         }
         if (preview.openSemester().isPresent()) {
             throw new DomainException(
-                    ErrorCode.RELATORIO_EM_ABERTO,
-                    Map.of("relatorioEmAberto", preview.openSemester().get().details()));
+                    ErrorCode.REPORT_ALREADY_OPEN,
+                    Map.of("openReport", preview.openSemester().get().details()));
         }
         if (preview.approvedLessons() == 0) {
-            throw new DomainException(ErrorCode.SEM_AULAS_APROVADAS_NO_PERIODO);
+            throw new DomainException(ErrorCode.NO_APPROVED_LESSONS_IN_PERIOD);
         }
         if (preview.openLessonReports() > 0 && !confirmEvenWithOpen) {
             throw new DomainException(
-                    ErrorCode.HA_RELATORIOS_EM_ABERTO,
-                    Map.of("quantidade", preview.openLessonReports()));
+                    ErrorCode.OPEN_REPORTS_EXIST, Map.of("quantity", preview.openLessonReports()));
         }
     }
 }

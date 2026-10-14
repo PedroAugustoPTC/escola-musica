@@ -42,8 +42,8 @@ class SemesterConversationIT extends TelegramConversationBase {
     /** Gera o semestral do 1º semestre e chega à conferência. */
     private UUID generateInFirstSemester() throws Exception {
         chooseMatteo();
-        sendCallback(USER_CLARA, "v1:per:1");
-        sendCallback(USER_CLARA, "v1:gerar:");
+        sendCallback(USER_CLARA, "v1:period:1");
+        sendCallback(USER_CLARA, "v1:generate:");
         scenario.processQueue();
         API_BOTS.resetRequests();
         return jdbc.queryForObject("select id from semester_report", UUID.class);
@@ -60,29 +60,29 @@ class SemesterConversationIT extends TelegramConversationBase {
                 .contains("1º semestre 2026: 01/01/2026 a 30/06/2026");
         assertThat(buttonLabels(periods))
                 .startsWith("★ 2º semestre 2026 · em andamento", "1º semestre 2026");
-        assertThat(buttons(periods)).startsWith("v1:per:0", "v1:per:1");
+        assertThat(buttons(periods)).startsWith("v1:period:0", "v1:period:1");
 
-        sendCallback(USER_CLARA, "v1:per:0");
+        sendCallback(USER_CLARA, "v1:period:0");
         assertThat(lastMessage().get("text").asString())
                 .startsWith("Nenhum relatório de aula aprovado neste período.");
-        assertThat(buttons(lastMessage())).containsExactly("v1:voltar:");
+        assertThat(buttons(lastMessage())).containsExactly("v1:back:");
 
-        sendCallback(USER_CLARA, "v1:voltar:");
+        sendCallback(USER_CLARA, "v1:back:");
         assertThat(lastMessage().get("text").asString()).startsWith("Escolha o semestre");
 
-        sendCallback(USER_CLARA, "v1:per:1");
+        sendCallback(USER_CLARA, "v1:period:1");
         assertThat(lastMessage().get("text").asString())
                 .isEqualTo("O 1º semestre 2026 tem 2 relatório(s) de aula aprovado(s).");
-        assertThat(buttons(lastMessage())).containsExactly("v1:gerar:", "v1:voltar:");
+        assertThat(buttons(lastMessage())).containsExactly("v1:generate:", "v1:back:");
     }
 
     @Test
     void generateShowsStepAndReviewWithPdf() throws Exception {
         chooseMatteo();
-        sendCallback(USER_CLARA, "v1:per:1");
+        sendCallback(USER_CLARA, "v1:period:1");
         API_BOTS.resetRequests();
 
-        sendCallback(USER_CLARA, "v1:gerar:");
+        sendCallback(USER_CLARA, "v1:generate:");
         assertThat(editedTexts()).contains("<i>Consolidando as aulas do semestre…</i>");
         scenario.processQueue();
 
@@ -99,8 +99,8 @@ class SemesterConversationIT extends TelegramConversationBase {
                 .contains("<b>1. Informações Gerais</b>")
                 .contains("<b>10. Parecer Final</b>");
         API_BOTS.verify(1, postRequestedFor(urlPathMatching(".*/sendDocument")));
-        assertThat(buttons(lastMessage())).contains("v1:aprov:1", "v1:alt:", "v1:canc:");
-        assertThat(conversation().get("focused_report_type")).isEqualTo("SEMESTRAL");
+        assertThat(buttons(lastMessage())).contains("v1:approve:1", "v1:change:", "v1:cancel:");
+        assertThat(conversation().get("focused_report_type")).isEqualTo("SEMESTER");
     }
 
     @Test
@@ -120,10 +120,10 @@ class SemesterConversationIT extends TelegramConversationBase {
         assertThat(lastMessage().get("text").asString())
                 .startsWith("Relatório aprovado em 21/09/2026");
         assertThat(jdbc.queryForObject("select status from semester_report", String.class))
-                .isEqualTo("APROVADO");
+                .isEqualTo("APPROVED");
 
         chooseMatteo();
-        sendCallback(USER_CLARA, "v1:per:1");
+        sendCallback(USER_CLARA, "v1:period:1");
         assertThat(lastMessage().get("text").asString())
                 .isEqualTo("O relatório semestral deste período já foi aprovado.");
     }
@@ -132,22 +132,22 @@ class SemesterConversationIT extends TelegramConversationBase {
     void openSemesterOffersContinueOrDiscard() throws Exception {
         generateInFirstSemester();
         chooseMatteo();
-        sendCallback(USER_CLARA, "v1:per:1");
+        sendCallback(USER_CLARA, "v1:period:1");
         assertThat(lastMessage().get("text").asString())
                 .startsWith("Você tem um relatório em aberto.");
-        assertThat(buttons(lastMessage())).containsExactly("v1:cont:", "v1:desc:");
+        assertThat(buttons(lastMessage())).containsExactly("v1:continue:", "v1:discard:");
         API_BOTS.resetRequests();
 
-        sendCallback(USER_CLARA, "v1:cont:");
+        sendCallback(USER_CLARA, "v1:continue:");
         assertThat(String.join("\n", sentTexts())).contains("Confira o relatório antes de aprovar");
 
         chooseMatteo();
-        sendCallback(USER_CLARA, "v1:per:1");
-        sendCallback(USER_CLARA, "v1:desc:");
-        sendCallback(USER_CLARA, "v1:descok:");
+        sendCallback(USER_CLARA, "v1:period:1");
+        sendCallback(USER_CLARA, "v1:discard:");
+        sendCallback(USER_CLARA, "v1:discard-ok:");
 
         assertThat(jdbc.queryForObject("select status from semester_report", String.class))
-                .isEqualTo("CANCELADO");
+                .isEqualTo("CANCELLED");
         assertThat(lastMessage().get("text").asString())
                 .isEqualTo("O 1º semestre 2026 tem 2 relatório(s) de aula aprovado(s).");
     }
@@ -155,24 +155,24 @@ class SemesterConversationIT extends TelegramConversationBase {
     @Test
     void openLessonReportsAskGenerateAnyway() throws Exception {
         jdbc.update(
-                "update lesson_report set status = 'AGUARDANDO_CONFERENCIA', approved_at = null,"
+                "update lesson_report set status = 'AWAITING_REVIEW', approved_at = null,"
                         + " approved_version = null, approval_channel = null"
                         + " where id = (select r.id from lesson_report r join lesson a on a.id = r.lesson_id"
                         + " where a.lesson_date = '2026-05-20')");
         chooseMatteo();
 
-        sendCallback(USER_CLARA, "v1:per:1");
+        sendCallback(USER_CLARA, "v1:period:1");
 
         assertThat(lastMessage().get("text").asString())
                 .contains(
                         "Há 1 relatório(s) de aula em aberto neste período; eles não serão considerados.");
-        assertThat(buttons(lastMessage())).containsExactly("v1:gerarsim:", "v1:voltar:");
-        sendCallback(USER_CLARA, "v1:gerar:");
+        assertThat(buttons(lastMessage())).containsExactly("v1:generate-yes:", "v1:back:");
+        sendCallback(USER_CLARA, "v1:generate:");
         assertThat(lastMessage().get("text").asString())
                 .isEqualTo(
                         "Há 1 relatório(s) de aula em aberto neste período; eles não serão considerados.");
-        sendCallback(USER_CLARA, "v1:per:1");
-        sendCallback(USER_CLARA, "v1:gerarsim:");
+        sendCallback(USER_CLARA, "v1:period:1");
+        sendCallback(USER_CLARA, "v1:generate-yes:");
         scenario.processQueue();
         assertThat(
                         jdbc.queryForObject(
@@ -184,12 +184,12 @@ class SemesterConversationIT extends TelegramConversationBase {
     void cancelByButton() throws Exception {
         generateInFirstSemester();
 
-        sendCallback(USER_CLARA, "v1:canc:");
-        sendCallback(USER_CLARA, "v1:cancok:");
+        sendCallback(USER_CLARA, "v1:cancel:");
+        sendCallback(USER_CLARA, "v1:cancel-ok:");
 
         assertThat(sentTexts()).contains("Relatório cancelado.");
         assertThat(jdbc.queryForObject("select status from semester_report", String.class))
-                .isEqualTo("CANCELADO");
+                .isEqualTo("CANCELLED");
         assertThat(conversation().get("focused_report_id")).isNull();
     }
 }

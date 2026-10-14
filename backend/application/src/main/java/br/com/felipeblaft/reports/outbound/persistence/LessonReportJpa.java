@@ -19,7 +19,7 @@ interface LessonReportJpa extends JpaRepository<LessonReportEntity, UUID> {
             """
             select r from LessonReportEntity r
             where r.teacherId = :teacherId and r.studentId = :studentId
-              and r.status in ('EM_PROCESSAMENTO', 'FALHA_PROCESSAMENTO', 'AGUARDANDO_RESPOSTAS', 'AGUARDANDO_CONFERENCIA')
+              and r.status in ('PROCESSING', 'PROCESSING_FAILED', 'AWAITING_ANSWERS', 'AWAITING_REVIEW')
             """)
     Optional<LessonReportEntity> searchOpen(UUID teacherId, UUID studentId);
 
@@ -27,7 +27,7 @@ interface LessonReportJpa extends JpaRepository<LessonReportEntity, UUID> {
             """
             select r from LessonReportEntity r
             where r.teacherId = :teacherId
-              and r.status in ('EM_PROCESSAMENTO', 'FALHA_PROCESSAMENTO', 'AGUARDANDO_RESPOSTAS', 'AGUARDANDO_CONFERENCIA')
+              and r.status in ('PROCESSING', 'PROCESSING_FAILED', 'AWAITING_ANSWERS', 'AWAITING_REVIEW')
             order by r.updatedAt desc
             """)
     List<LessonReportEntity> listTeacherOpenReports(UUID teacherId);
@@ -37,7 +37,7 @@ interface LessonReportJpa extends JpaRepository<LessonReportEntity, UUID> {
             """
             select r, a.lessonDate from LessonReportEntity r, LessonEntity a
             where a.id = r.lessonId and r.teacherId = :teacherId and r.studentId = :studentId
-              and r.status = 'APROVADO' and a.lessonDate between :start and :end
+              and r.status = 'APPROVED' and a.lessonDate between :start and :end
             order by a.lessonDate, r.approvedAt
             """)
     List<Object[]> approvedInPeriod(
@@ -47,7 +47,7 @@ interface LessonReportJpa extends JpaRepository<LessonReportEntity, UUID> {
             """
             select count(r) from LessonReportEntity r, LessonEntity a
             where a.id = r.lessonId and r.teacherId = :teacherId and r.studentId = :studentId
-              and r.status in ('EM_PROCESSAMENTO', 'FALHA_PROCESSAMENTO', 'AGUARDANDO_RESPOSTAS', 'AGUARDANDO_CONFERENCIA')
+              and r.status in ('PROCESSING', 'PROCESSING_FAILED', 'AWAITING_ANSWERS', 'AWAITING_REVIEW')
               and a.lessonDate between :start and :end
             """)
     long countOpenInPeriod(
@@ -61,7 +61,7 @@ interface LessonReportJpa extends JpaRepository<LessonReportEntity, UUID> {
             """
             select r, a.lessonDate from LessonReportEntity r, LessonEntity a
             where a.id = r.lessonId and r.teacherId = :teacherId and r.studentId = :studentId
-              and r.status = 'APROVADO'
+              and r.status = 'APPROVED'
             """)
     List<Object[]> approved(UUID teacherId, UUID studentId);
 }

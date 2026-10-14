@@ -27,9 +27,9 @@ export function VisualizadorPdf({
     setAviso(null);
     try {
       const abriu = await abrirPdf(caminho, nomeArquivo);
-      if (!abriu) setAviso(msg('PDF_BLOQUEADO_NAVEGADOR'));
+      if (!abriu) setAviso(msg('PDF_BLOCKED_BY_BROWSER'));
     } catch (falha) {
-      setAviso(falha instanceof Error ? falha.message : msg('ERRO_INTERNO'));
+      setAviso(falha instanceof Error ? falha.message : msg('INTERNAL_ERROR'));
     }
   };
 
@@ -39,7 +39,7 @@ export function VisualizadorPdf({
         <span className="visualizador-pdf__rotulo">PDF · VERSÃO {versao}</span>
         {disponivel ? (
           <Botao variante="link" icone="open_in_new" onClick={() => void abrir()}>
-            {msg('BOTAO_ABRIR_PDF')}
+            {msg('OPEN_PDF_BUTTON')}
           </Botao>
         ) : null}
       </div>
@@ -51,7 +51,7 @@ export function VisualizadorPdf({
       {!disponivel ? (
         <div role="status" className="visualizador-pdf__gerando">
           <span className="girador girador--grande" aria-hidden="true" />
-          <div className="visualizador-pdf__gerando-titulo">{msg('CONFERENCIA_PDF_GERANDO')}</div>
+          <div className="visualizador-pdf__gerando-titulo">{msg('REVIEW_PDF_GENERATING')}</div>
           <div className="texto-apoio">Você já pode conferir o texto enquanto isso.</div>
         </div>
       ) : erro ? (

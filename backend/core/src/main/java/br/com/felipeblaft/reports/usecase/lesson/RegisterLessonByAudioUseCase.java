@@ -53,21 +53,21 @@ public class RegisterLessonByAudioUseCase {
             audioSending.requireWithinLimit(audio);
             ProcessingJob job =
                     ProcessingJob.create(
-                            JobType.REGISTRO_AULA,
+                            JobType.LESSON_REGISTRATION,
                             teacherId,
                             studentId,
                             null,
                             null,
                             channel,
                             Medium.AUDIO,
-                            JobStep.ENVIANDO,
+                            JobStep.UPLOADING,
                             clock.now());
             audioSending.attach(job, audio);
             try {
                 queue.enqueue(job);
             } catch (ConcurrencyConflictException conflict) {
                 requireNoOpenReport(teacherId, studentId);
-                throw new DomainException(ErrorCode.RELATORIO_EM_ABERTO);
+                throw new DomainException(ErrorCode.REPORT_ALREADY_OPEN);
             }
             return job;
         } catch (DomainException refuses) {
@@ -80,8 +80,8 @@ public class RegisterLessonByAudioUseCase {
         Optional<OpenReport> openReport = open.searchByStudent(teacherId, studentId);
         if (openReport.isPresent()) {
             throw new DomainException(
-                    ErrorCode.RELATORIO_EM_ABERTO,
-                    Map.of("relatorioEmAberto", openReport.get().details()));
+                    ErrorCode.REPORT_ALREADY_OPEN,
+                    Map.of("openReport", openReport.get().details()));
         }
     }
 }

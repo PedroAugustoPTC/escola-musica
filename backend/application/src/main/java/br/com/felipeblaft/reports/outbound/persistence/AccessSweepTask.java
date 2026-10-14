@@ -34,6 +34,6 @@ class AccessSweepTask {
         Instant now = clock.now();
         int removedSessions = sessions.removeExpired(now);
         int updatesRemoved = updates.removeOld(now.minus(RETENTION_UPDATES));
-        LOG.info("varredura-acesso sessoes={} updates={}", removedSessions, updatesRemoved);
+        LOG.info("access-sweep sessions={} updates={}", removedSessions, updatesRemoved);
     }
 }

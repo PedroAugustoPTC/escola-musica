@@ -2,7 +2,10 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 
 export type Tema = 'claro' | 'escuro';
 
-const CHAVE = 'relatorios.tema';
+const CHAVE = 'reports.theme';
+
+/** Valores guardados no navegador (nomes do armazenamento); o tema interno segue 'claro'/'escuro' até a fatia 5. */
+const GUARDADO: Record<Tema, string> = { claro: 'light', escuro: 'dark' };
 
 interface ContextoTema {
   tema: Tema;
@@ -18,7 +21,8 @@ const Contexto = createContext<ContextoTema | null>(null);
 function lerPreferencia(): Tema {
   try {
     const salvo = window.localStorage.getItem(CHAVE);
-    if (salvo === 'claro' || salvo === 'escuro') return salvo;
+    if (salvo === GUARDADO.claro) return 'claro';
+    if (salvo === GUARDADO.escuro) return 'escuro';
   } catch {
     // armazenamento indisponível: segue a preferência do sistema
   }
@@ -43,7 +47,7 @@ export function TemaProvedor({ children }: { children: ReactNode }) {
     setTema((atual) => {
       const novo: Tema = atual === 'escuro' ? 'claro' : 'escuro';
       try {
-        window.localStorage.setItem(CHAVE, novo);
+        window.localStorage.setItem(CHAVE, GUARDADO[novo]);
       } catch {
         // sem armazenamento: vale só para esta visita
       }

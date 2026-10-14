@@ -60,12 +60,12 @@ class SemesterParityScriptIT extends TelegramConversationBase {
         scenario.timePerJob = java.time.Duration.ofSeconds(2);
         MvcResult input =
                 mvc.perform(
-                                post("/api/v1/sessao")
+                                post("/api/v1/session")
                                         .with(csrf().asHeader())
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .content("{\"codigo\":\"" + ScenarioIT.CODE_CLARA + "\"}"))
+                                        .content("{\"code\":\"" + ScenarioIT.CODE_CLARA + "\"}"))
                         .andReturn();
-        Cookie cookie = input.getResponse().getCookie("sessao");
+        Cookie cookie = input.getResponse().getCookie("session");
         session = new Cookie(cookie.getName(), cookie.getValue());
     }
 
@@ -80,7 +80,7 @@ class SemesterParityScriptIT extends TelegramConversationBase {
                 "select task || ' x' || count(*) || ' sucesso=' || bool_and(success)"
                         + " || ' duracao=' || bool_and(duration_ms is not null)"
                         + " || ' custo=' || bool_and(estimated_cost_usd is not null)"
-                        + " from ai_call where report_type = 'SEMESTRAL' and report_id = ?"
+                        + " from ai_call where report_type = 'SEMESTER' and report_id = ?"
                         + " group by task order by task",
                 String.class,
                 semester(student));
@@ -88,7 +88,7 @@ class SemesterParityScriptIT extends TelegramConversationBase {
 
     private UUID semester(Student student) {
         return jdbc.queryForObject(
-                "select id from semester_report where student_id = ? and status <> 'CANCELADO'",
+                "select id from semester_report where student_id = ? and status <> 'CANCELLED'",
                 UUID.class,
                 student.id());
     }
@@ -118,10 +118,8 @@ class SemesterParityScriptIT extends TelegramConversationBase {
                                         .content(JSON.writeValueAsString(body)))
                         .andReturn();
         return result.getResponse().getStatus() / 100 == 2
-                ? "ACEITO"
-                : JSON.readTree(result.getResponse().getContentAsString())
-                        .path("codigo")
-                        .asString();
+                ? "ACCEPTED"
+                : JSON.readTree(result.getResponse().getContentAsString()).path("code").asString();
     }
 
     private SemesterChannel web(Student student) {
@@ -129,33 +127,33 @@ class SemesterParityScriptIT extends TelegramConversationBase {
             @Override
             public String generateWithoutLessons() throws Exception {
                 return webPost(
-                        "/alunos/" + student.id() + "/relatorios-semestrais",
-                        Map.of("periodoChave", "2026-2"));
+                        "/students/" + student.id() + "/semester-reports",
+                        Map.of("periodKey", "2026-2"));
             }
 
             @Override
             public String generate() throws Exception {
                 webPost(
-                        "/alunos/" + student.id() + "/relatorios-semestrais",
-                        Map.of("periodoChave", "2026-1"));
+                        "/students/" + student.id() + "/semester-reports",
+                        Map.of("periodKey", "2026-1"));
                 scenario.processQueue();
-                return result(student, "CONSOLIDACAO_SEMESTRAL");
+                return result(student, "SEMESTER_CONSOLIDATION");
             }
 
             @Override
             public String change(String text) throws Exception {
                 webPost(
-                        "/relatorios-semestrais/" + semester(student) + "/alteracoes",
-                        Map.of("texto", text, "versaoBase", current(student)));
+                        "/semester-reports/" + semester(student) + "/changes",
+                        Map.of("text", text, "baseVersion", current(student)));
                 scenario.processQueue();
-                return result(student, "ALTERACAO");
+                return result(student, "CHANGE");
             }
 
             @Override
             public String approve() throws Exception {
                 webPost(
-                        "/relatorios-semestrais/" + semester(student) + "/aprovacao",
-                        Map.of("versaoConfirmada", current(student)));
+                        "/semester-reports/" + semester(student) + "/approval",
+                        Map.of("confirmedVersion", current(student)));
                 return jdbc.queryForObject(
                         "select status from semester_report where student_id = ?",
                         String.class,
@@ -165,8 +163,8 @@ class SemesterParityScriptIT extends TelegramConversationBase {
             @Override
             public String generateAgain() throws Exception {
                 return webPost(
-                        "/alunos/" + student.id() + "/relatorios-semestrais",
-                        Map.of("periodoChave", "2026-1"));
+                        "/students/" + student.id() + "/semester-reports",
+                        Map.of("periodKey", "2026-1"));
             }
         };
     }
@@ -196,24 +194,24 @@ class SemesterParityScriptIT extends TelegramConversationBase {
             @Override
             public String generateWithoutLessons() throws Exception {
                 chooseStudent();
-                sendCallback(USER_CLARA, "v1:per:0");
+                sendCallback(USER_CLARA, "v1:period:0");
                 return lastMessageCode();
             }
 
             @Override
             public String generate() throws Exception {
                 chooseStudent();
-                sendCallback(USER_CLARA, "v1:per:1");
-                sendCallback(USER_CLARA, "v1:gerar:");
+                sendCallback(USER_CLARA, "v1:period:1");
+                sendCallback(USER_CLARA, "v1:generate:");
                 scenario.processQueue();
-                return result(student, "CONSOLIDACAO_SEMESTRAL");
+                return result(student, "SEMESTER_CONSOLIDATION");
             }
 
             @Override
             public String change(String text) throws Exception {
                 sendText(USER_CLARA, text);
                 scenario.processQueue();
-                return result(student, "ALTERACAO");
+                return result(student, "CHANGE");
             }
 
             @Override
@@ -229,7 +227,7 @@ class SemesterParityScriptIT extends TelegramConversationBase {
             @Override
             public String generateAgain() throws Exception {
                 chooseStudent();
-                sendCallback(USER_CLARA, "v1:per:1");
+                sendCallback(USER_CLARA, "v1:period:1");
                 return lastMessageCode();
             }
         };
@@ -274,7 +272,7 @@ class SemesterParityScriptIT extends TelegramConversationBase {
                                 + " order by v.number, d.type",
                         String.class,
                         id));
-        return rows.stream().map(l -> l.replace(channel, "CANAL")).toList();
+        return rows.stream().map(l -> l.replace(channel, "CHANNEL")).toList();
     }
 
     @Test
@@ -285,27 +283,27 @@ class SemesterParityScriptIT extends TelegramConversationBase {
         assertThat(noBot).containsExactlyElementsOf(naWeb);
         assertThat(naWeb)
                 .containsExactly(
-                        "período sem aulas = SEM_AULAS_APROVADAS_NO_PERIODO",
-                        "gerar = PRONTO_PARA_CONFERENCIA",
-                        "alterar = NOVA_VERSAO",
-                        "aprovar = APROVADO",
-                        "gerar de novo = SEMESTRAL_JA_APROVADO");
+                        "período sem aulas = NO_APPROVED_LESSONS_IN_PERIOD",
+                        "gerar = READY_FOR_REVIEW",
+                        "alterar = NEW_VERSION",
+                        "aprovar = APPROVED",
+                        "gerar de novo = SEMESTER_REPORT_ALREADY_APPROVED");
         List<String> summaryWeb = summary(matteo, "WEB");
         assertThat(summary(helena, "TELEGRAM")).containsExactlyElementsOf(summaryWeb);
         assertThat(summaryWeb.getFirst())
                 .isEqualTo(
-                        "APROVADO vigente=2 aprovada=2 aulas=2 periodo=2026-1 origem=CANAL aprovacao=CANAL"
+                        "APPROVED vigente=2 aprovada=2 aulas=2 periodo=2026-1 origem=CHANNEL aprovacao=CHANNEL"
                                 + " parecer=Parecer: excelente semestre.");
         assertThat(summaryWeb)
-                .contains("versão 2 ALTERACAO OFICIAL", "versão 1 CONSOLIDACAO CONFERENCIA");
+                .contains("versão 2 CHANGE OFFICIAL", "versão 1 CONSOLIDATION REVIEW");
 
         // FR-056: a consolidação e a revisão ligadas ao relatório, nos dois canais
         List<String> costsWeb = costs(matteo);
         assertThat(costs(helena)).containsExactlyElementsOf(costsWeb);
         assertThat(costsWeb)
                 .containsExactly(
-                        "CONSOLIDACAO x1 sucesso=true duracao=true custo=true",
-                        "REVISAO x1 sucesso=true duracao=true custo=true");
+                        "CONSOLIDATION x1 sucesso=true duracao=true custo=true",
+                        "REVISION x1 sucesso=true duracao=true custo=true");
         assertThat(
                         jdbc.queryForObject(
                                 "select count(*) from ai_call where report_id is null",

@@ -8,9 +8,9 @@ import tools.jackson.databind.JsonNode;
  * #/$defs/LoteEntrega}).
  */
 public record DeliveryBatchDto(
-        String versao,
-        String loteId,
-        String origem,
-        String criadoEm,
-        int tentativa,
-        List<JsonNode> acoes) {}
+        String version,
+        String batchId,
+        String origin,
+        String createdAt,
+        int attempt,
+        List<JsonNode> actions) {}

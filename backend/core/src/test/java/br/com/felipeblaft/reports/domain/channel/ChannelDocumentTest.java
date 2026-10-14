@@ -16,10 +16,10 @@ class ChannelDocumentTest {
         return new ChannelDocument(
                 "a".repeat(64),
                 UUID.randomUUID(),
-                ReportType.AULA,
+                ReportType.LESSON,
                 UUID.randomUUID(),
                 version,
-                "relatorio.pdf",
+                "report.pdf",
                 NOW,
                 NOW.plusSeconds(3600));
     }
@@ -50,7 +50,7 @@ class ChannelDocumentTest {
                                 new ChannelDocument(
                                         null,
                                         UUID.randomUUID(),
-                                        ReportType.AULA,
+                                        ReportType.LESSON,
                                         UUID.randomUUID(),
                                         null,
                                         "x.pdf",

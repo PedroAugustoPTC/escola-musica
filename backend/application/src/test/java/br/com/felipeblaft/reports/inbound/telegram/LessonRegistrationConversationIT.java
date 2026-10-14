@@ -47,10 +47,10 @@ class LessonRegistrationConversationIT extends TelegramConversationBase {
     @Test
     void audioInInternalTransportCarriesNoBytesPathNorAddress() throws Exception {
         org.junit.jupiter.api.Assumptions.assumeTrue("internal".equals(TRANSPORT));
-        prepareTelegramFile("voz-ok", AudioNormalizationTest.AUDIO_WITH_SPEECH);
+        prepareTelegramFile("voice-ok", AudioNormalizationTest.AUDIO_WITH_SPEECH);
         chooseMatteo();
 
-        sendVoice(USER_CLARA, "voz-ok", 1000);
+        sendVoice(USER_CLARA, "voice-ok", 1000);
 
         String actions =
                 String.join(
@@ -61,7 +61,12 @@ class LessonRegistrationConversationIT extends TelegramConversationBase {
                 .isNotBlank()
                 .doesNotContain(properties.telegram().filesDir().toString())
                 .doesNotContain(
-                        "file_path", "file_id", ".oga", "http://", "https://", "AUDIO-DE-AULA");
+                        "file_path",
+                        "file_id",
+                        ".oga",
+                        "http://",
+                        "https://",
+                        "FICTITIOUS-LESSON-AUDIO");
         assertThat(lastMessage().get("text").asString()).startsWith("Áudio recebido");
         API_BOTS.verify(0, postRequestedFor(urlPathMatching(".*/getFile")));
     }
@@ -76,11 +81,11 @@ class LessonRegistrationConversationIT extends TelegramConversationBase {
 
     @Test
     void registerLessonAsksForStudentAndThenAudio() throws Exception {
-        sendCallback(USER_CLARA, "v1:reg:");
+        sendCallback(USER_CLARA, "v1:register:");
         assertThat(lastMessage().get("text").asString()).isEqualTo("Para qual aluno?");
-        assertThat(buttons(lastMessage())).contains("v1:aluno:0", "v1:aluno:1");
+        assertThat(buttons(lastMessage())).contains("v1:student:0", "v1:student:1");
 
-        sendCallback(USER_CLARA, "v1:aluno:1");
+        sendCallback(USER_CLARA, "v1:student:1");
 
         assertThat(lastMessage().get("text").asString())
                 .isEqualTo(
@@ -92,15 +97,15 @@ class LessonRegistrationConversationIT extends TelegramConversationBase {
     void audioWithSelectedStudentAsksConfirmationWithoutDownloadingAnything() throws Exception {
         chooseMatteo();
 
-        sendVoice(USER_CLARA, "voz-1", 120_000);
+        sendVoice(USER_CLARA, "voice-1", 120_000);
 
         JsonNode message = lastMessage();
         assertThat(message.get("text").asString())
                 .isEqualTo("Áudio recebido. Este áudio é da aula de Matteo Ferreira?");
-        assertThat(buttons(message)).containsExactly("v1:confal:", "v1:trocal:");
+        assertThat(buttons(message)).containsExactly("v1:confirm-student:", "v1:switch-student:");
         assertThat(buttonLabels(message))
                 .containsExactly("Confirmar Matteo Ferreira", "Trocar aluno");
-        assertThat(conversation().get("pending_audio_file_id")).isEqualTo("voz-1");
+        assertThat(conversation().get("pending_audio_file_id")).isEqualTo("voice-1");
         assertThat(jobs()).isZero();
         API_BOTS.verify(0, postRequestedFor(urlPathMatching(".*/getFile")));
     }
@@ -122,7 +127,7 @@ class LessonRegistrationConversationIT extends TelegramConversationBase {
         }
 
         API_BOTS.resetRequests();
-        sendFile(USER_CLARA, "document", "planilha", "application/pdf", 1000);
+        sendFile(USER_CLARA, "document", "spreadsheet", "application/pdf", 1000);
         assertThat(lastMessage().get("text").asString())
                 .startsWith("Não consigo usar este tipo de mensagem aqui.");
     }
@@ -131,7 +136,7 @@ class LessonRegistrationConversationIT extends TelegramConversationBase {
     void audioAboveLimitIsRefusedWithoutDownloading() throws Exception {
         chooseMatteo();
 
-        sendVoice(USER_CLARA, "grande", LIMIT + 1);
+        sendVoice(USER_CLARA, "large", LIMIT + 1);
 
         assertThat(lastMessage().get("text").asString())
                 .isEqualTo(
@@ -143,9 +148,9 @@ class LessonRegistrationConversationIT extends TelegramConversationBase {
     @Test
     void newAudioReplacesPreviousAndExpiresIn30Minutes() throws Exception {
         chooseMatteo();
-        sendVoice(USER_CLARA, "primeiro", 1000);
-        sendVoice(USER_CLARA, "segundo", 1000);
-        assertThat(conversation().get("pending_audio_file_id")).isEqualTo("segundo");
+        sendVoice(USER_CLARA, "first", 1000);
+        sendVoice(USER_CLARA, "second", 1000);
+        assertThat(conversation().get("pending_audio_file_id")).isEqualTo("second");
 
         clock.advance(Duration.ofMinutes(31));
         API_BOTS.resetRequests();
@@ -159,13 +164,13 @@ class LessonRegistrationConversationIT extends TelegramConversationBase {
 
     @Test
     void withoutSelectedStudentAudioAsksForStudentAndChoiceConfirms() throws Exception {
-        prepareTelegramFile("sem-aluno", AudioNormalizationTest.AUDIO_WITH_SPEECH);
+        prepareTelegramFile("no-student", AudioNormalizationTest.AUDIO_WITH_SPEECH);
 
-        sendVoice(USER_CLARA, "sem-aluno", 1000);
+        sendVoice(USER_CLARA, "no-student", 1000);
         assertThat(lastMessage().get("text").asString())
                 .isEqualTo("Áudio recebido. De qual aluno é esta aula?");
 
-        sendCallback(USER_CLARA, "v1:aluno:1");
+        sendCallback(USER_CLARA, "v1:student:1");
 
         assertThat(jobs()).isEqualTo(1);
         assertThat(
@@ -178,23 +183,23 @@ class LessonRegistrationConversationIT extends TelegramConversationBase {
     @Test
     void switchStudentShowsList() throws Exception {
         chooseMatteo();
-        sendVoice(USER_CLARA, "voz-troca", 1000);
+        sendVoice(USER_CLARA, "switch-voice", 1000);
 
-        sendCallback(USER_CLARA, "v1:trocal:");
+        sendCallback(USER_CLARA, "v1:switch-student:");
 
         assertThat(lastMessage().get("text").asString())
                 .isEqualTo("Áudio recebido. De qual aluno é esta aula?");
-        assertThat(buttons(lastMessage())).contains("v1:aluno:0", "v1:aluno:1");
+        assertThat(buttons(lastMessage())).contains("v1:student:0", "v1:student:1");
     }
 
     @Test
     void confirmProcessesEditingSameMessageUpToQuestions() throws Exception {
-        Path file = prepareTelegramFile("voz-ok", AudioNormalizationTest.AUDIO_WITH_SPEECH);
+        Path file = prepareTelegramFile("voice-ok", AudioNormalizationTest.AUDIO_WITH_SPEECH);
         chooseMatteo();
-        sendVoice(USER_CLARA, "voz-ok", 1000);
+        sendVoice(USER_CLARA, "voice-ok", 1000);
         API_BOTS.resetRequests();
 
-        sendCallback(USER_CLARA, "v1:confal:");
+        sendCallback(USER_CLARA, "v1:confirm-student:");
 
         // a mensagem dos botões vira a mensagem de etapa, editada no lugar
         JsonNode edit = calls("editMessageText").getFirst();
@@ -219,9 +224,9 @@ class LessonRegistrationConversationIT extends TelegramConversationBase {
                 .contains("\n1. O aluno estudou em casa durante a semana?")
                 .contains("\n2. Que repertório o aluno deve preparar para a próxima aula?")
                 .contains("Texto ou áudio enviado aqui será aplicado a este relatório.");
-        assertThat(buttons(lastMessage())).containsExactly("v1:canc:", "v1:reg:");
+        assertThat(buttons(lastMessage())).containsExactly("v1:cancel:", "v1:register:");
         Map<String, Object> state = conversation();
-        assertThat(state.get("focused_report_type")).isEqualTo("AULA");
+        assertThat(state.get("focused_report_type")).isEqualTo("LESSON");
         assertThat(state.get("focused_report_id"))
                 .isEqualTo(
                         jdbc.queryForObject("select id from lesson_report", java.util.UUID.class));
@@ -233,10 +238,10 @@ class LessonRegistrationConversationIT extends TelegramConversationBase {
     @Test
     void audioWithoutSpeechDoesNotCreateReport() throws Exception {
         prepareTelegramFile(
-                "silencio", AudioNormalizationTest.SILENCE.getBytes(StandardCharsets.UTF_8));
+                "silence", AudioNormalizationTest.SILENCE.getBytes(StandardCharsets.UTF_8));
         chooseMatteo();
-        sendVoice(USER_CLARA, "silencio", 1000);
-        sendCallback(USER_CLARA, "v1:confal:");
+        sendVoice(USER_CLARA, "silence", 1000);
+        sendCallback(USER_CLARA, "v1:confirm-student:");
 
         scenario.processQueue();
 
@@ -248,10 +253,10 @@ class LessonRegistrationConversationIT extends TelegramConversationBase {
 
     @Test
     void studentWithOpenReportWarnsBeforeAskingForAudio() throws Exception {
-        prepareTelegramFile("primeiro", AudioNormalizationTest.AUDIO_WITH_SPEECH);
+        prepareTelegramFile("first", AudioNormalizationTest.AUDIO_WITH_SPEECH);
         chooseMatteo();
-        sendVoice(USER_CLARA, "primeiro", 1000);
-        sendCallback(USER_CLARA, "v1:confal:");
+        sendVoice(USER_CLARA, "first", 1000);
+        sendCallback(USER_CLARA, "v1:confirm-student:");
         scenario.processQueue();
         sendText(USER_CLARA, "registrar aula");
         API_BOTS.resetRequests();
@@ -261,14 +266,14 @@ class LessonRegistrationConversationIT extends TelegramConversationBase {
         assertThat(lastMessage().get("text").asString())
                 .startsWith("Você tem um relatório em aberto.")
                 .contains("pelo Telegram");
-        assertThat(buttons(lastMessage())).containsExactly("v1:cont:", "v1:desc:");
+        assertThat(buttons(lastMessage())).containsExactly("v1:continue:", "v1:discard:");
         assertThat(jobs()).isEqualTo(1);
     }
 
     @Test
     void cancelWithoutFocusedReportDiscardsPendingAudio() throws Exception {
         chooseMatteo();
-        sendVoice(USER_CLARA, "descartavel", 1000);
+        sendVoice(USER_CLARA, "disposable", 1000);
 
         sendText(USER_CLARA, "cancelar");
 

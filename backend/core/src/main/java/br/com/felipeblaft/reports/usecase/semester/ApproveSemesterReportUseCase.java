@@ -40,7 +40,7 @@ public class ApproveSemesterReportUseCase {
         report.approve(confirmedVersion, channel, clock.now());
         semester.save(report);
         ReportVersion version =
-                versions.search(ReportType.SEMESTRAL, report.id(), report.approvedVersion())
+                versions.search(ReportType.SEMESTER, report.id(), report.approvedVersion())
                         .orElseThrow();
         documents.generateOfficial(report, version);
         return new Approval(report.id(), report.approvedVersion(), report.approvedAt());

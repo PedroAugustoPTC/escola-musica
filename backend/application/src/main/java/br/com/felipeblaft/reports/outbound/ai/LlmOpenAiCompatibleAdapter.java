@@ -44,17 +44,18 @@ public class LlmOpenAiCompatibleAdapter implements LlmPort {
 
     static {
         TASKS.put(
-                TaskLlm.ESTRUTURACAO_AULA,
+                TaskLlm.LESSON_STRUCTURING,
                 new TaskDefinition("lesson-structuring.v1", "lesson-report"));
         TASKS.put(
-                TaskLlm.INCORPORACAO_RESPOSTAS,
+                TaskLlm.ANSWER_INCORPORATION,
                 new TaskDefinition("answer-incorporation.v1", "lesson-report"));
-        TASKS.put(TaskLlm.REVISAO_AULA, new TaskDefinition("lesson-revision.v1", "lesson-report"));
         TASKS.put(
-                TaskLlm.CONSOLIDACAO_SEMESTRAL,
+                TaskLlm.LESSON_REVISION, new TaskDefinition("lesson-revision.v1", "lesson-report"));
+        TASKS.put(
+                TaskLlm.SEMESTER_CONSOLIDATION,
                 new TaskDefinition("semester-consolidation.v1", "semester-report"));
         TASKS.put(
-                TaskLlm.REVISAO_SEMESTRAL,
+                TaskLlm.SEMESTER_REVISION,
                 new TaskDefinition("semester-revision.v1", "semester-report"));
     }
 
@@ -118,7 +119,7 @@ public class LlmOpenAiCompatibleAdapter implements LlmPort {
             content = clean(correction.content());
             if (!validate(definition.schema(), content).isEmpty()) {
                 throw new InvalidAiOutputException(
-                        "saida-fora-do-schema",
+                        "output-outside-schema",
                         inputTokens,
                         outputTokens,
                         cost(inputTokens, outputTokens));
@@ -129,7 +130,7 @@ public class LlmOpenAiCompatibleAdapter implements LlmPort {
             output = JSON.readValue(content, outputType);
         } catch (JacksonException error) {
             throw new InvalidAiOutputException(
-                    "saida-nao-desserializavel",
+                    "non-deserializable-output",
                     inputTokens,
                     outputTokens,
                     cost(inputTokens, outputTokens));
@@ -176,7 +177,7 @@ public class LlmOpenAiCompatibleAdapter implements LlmPort {
                     use.path("prompt_tokens").asInt(0),
                     use.path("completion_tokens").asInt(0));
         } catch (JacksonException error) {
-            throw new ProviderUnavailableException("resposta-invalida");
+            throw new ProviderUnavailableException("invalid-answer");
         }
     }
 

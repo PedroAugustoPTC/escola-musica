@@ -38,7 +38,7 @@ import org.springframework.stereotype.Component;
 public class TelegramConversationInterpreter {
 
     public static final String STUDENT_OPTIONS = "options";
-    public static final String SIGN_OUT_CONFIRMATION = "sair";
+    public static final String SIGN_OUT_CONFIRMATION = "sign-out";
 
     private final IdentifyTelegramTeacherUseCase identify;
     private final LinkTelegramUseCase linkUseCase;
@@ -103,7 +103,7 @@ public class TelegramConversationInterpreter {
         TelegramContext context =
                 new TelegramContext(message.from().id(), message.chat().id(), null);
         if (!message.chat().privateChat()) {
-            context.answer(presenter.simple(context.chatId(), "SOMENTE_CONVERSA_PRIVADA"));
+            context.answer(presenter.simple(context.chatId(), "PRIVATE_CONVERSATION_ONLY"));
             return context.outputs();
         }
         load(context);
@@ -139,21 +139,21 @@ public class TelegramConversationInterpreter {
         String text = message.text();
         boolean command = text != null && TelegramKeywords.identify(text).isPresent();
         if (text == null || command || !AccessCode.looksLikeCode(text)) {
-            context.answer(presenter.simple(context.chatId(), "CODIGO_NECESSARIO"));
+            context.answer(presenter.simple(context.chatId(), "CODE_REQUIRED"));
             return;
         }
         LinkTelegramUseCase.Result result =
                 linkUseCase.run(context.userId(), context.chatId(), text);
         identify.run(context.userId()).ifPresent(context::identify);
         String prefix =
-                presenter.text("VINCULO_CRIADO", Map.of("nome", result.teacher().firstName()));
+                presenter.text("LINK_CREATED", Map.of("name", result.teacher().firstName()));
         context.answer(presenter.start(context.chatId(), getHome.run(result.teacher()), prefix));
     }
 
     private void linked(TelegramContext context, TelegramMessage message) {
         TelegramConversation conversation = context.conversation();
         if (conversation.discardAudioIfExpired(clock.now(), parameters.pendingAudioExpiry())) {
-            context.answer(presenter.simple(context.chatId(), "AUDIO_PENDENTE_EXPIRADO"));
+            context.answer(presenter.simple(context.chatId(), "PENDING_AUDIO_EXPIRED"));
         }
         TelegramFile file = message.audioFile();
         if (message.text() != null) {
@@ -202,9 +202,9 @@ public class TelegramConversationInterpreter {
     public void unsupportedType(TelegramContext context) {
         String whatICanReceive = null;
         if (!context.linked()) {
-            whatICanReceive = presenter.label("RECEBER_CODIGO");
+            whatICanReceive = presenter.label("RECEIVE_CODE");
         } else if (context.conversation().pendingConfirmation().isPresent()) {
-            whatICanReceive = presenter.label("RECEBER_CONFIRMACAO");
+            whatICanReceive = presenter.label("RECEIVE_CONFIRMATION");
         } else {
             for (TelegramFlow flow : flows()) {
                 whatICanReceive = flow.whatICanReceive(context);
@@ -214,16 +214,16 @@ public class TelegramConversationInterpreter {
             }
             if (whatICanReceive == null) {
                 whatICanReceive =
-                        context.conversation().step() == ConversationFlowStep.ESCOLHENDO_ALUNO
-                                ? presenter.label("RECEBER_ALUNO")
-                                : presenter.label("RECEBER_INICIO");
+                        context.conversation().step() == ConversationFlowStep.CHOOSING_STUDENT
+                                ? presenter.label("RECEIVE_STUDENT")
+                                : presenter.label("RECEIVE_START");
             }
         }
         context.answer(
                 presenter.simple(
                         context.chatId(),
-                        "TIPO_NAO_SUPORTADO",
-                        Map.of("oQuePossoReceber", whatICanReceive)));
+                        "UNSUPPORTED_TYPE",
+                        Map.of("whatICanReceive", whatICanReceive)));
     }
 
     // ------------------------------------------------------------------ comandos
@@ -237,22 +237,23 @@ public class TelegramConversationInterpreter {
                 conversation.discardAudio();
                 showHome(context);
             }
-            case REGISTER_LESSON -> startStudentChoice(context, ConversationFlow.REGISTRO_AULA);
-            case SEMESTER -> startStudentChoice(context, ConversationFlow.SEMESTRAL);
-            case HISTORY -> startStudentChoice(context, ConversationFlow.HISTORICO);
+            case REGISTER_LESSON ->
+                    startStudentChoice(context, ConversationFlow.LESSON_REGISTRATION);
+            case SEMESTER -> startStudentChoice(context, ConversationFlow.SEMESTER);
+            case HISTORY -> startStudentChoice(context, ConversationFlow.HISTORY);
             case SIGN_OUT -> {
                 conversation.askConfirmation(SIGN_OUT_CONFIRMATION);
                 context.answer(
                         presenter.confirmation(
                                 context.chatId(),
-                                presenter.text("CONFIRMAR_SAIR"),
-                                presenter.button("BOTAO_CONFIRMAR_SAIR", "sairok")));
+                                presenter.text("CONFIRM_SIGN_OUT"),
+                                presenter.button("CONFIRM_SIGN_OUT_BUTTON", "sign-out-ok")));
             }
             case HELP ->
                     context.answer(
                             new TelegramOutput.Message(
                                     context.chatId(),
-                                    presenter.text("AJUDA"),
+                                    presenter.text("HELP"),
                                     presenter.homeActions()));
             default -> {
                 for (TelegramFlow flow : flows()) {
@@ -262,7 +263,7 @@ public class TelegramConversationInterpreter {
                 }
                 context.answer(
                         presenter.error(
-                                context.chatId(), ErrorCode.ACAO_NAO_PERMITIDA_NA_ETAPA, Map.of()));
+                                context.chatId(), ErrorCode.ACTION_NOT_ALLOWED_AT_STEP, Map.of()));
             }
         }
     }
@@ -271,7 +272,7 @@ public class TelegramConversationInterpreter {
         if (SIGN_OUT_CONFIRMATION.equals(confirmation)) {
             endLink.run(context.userId());
             context.markEndedLink();
-            context.answer(presenter.simple(context.chatId(), "VINCULO_ENCERRADO"));
+            context.answer(presenter.simple(context.chatId(), "LINK_ENDED"));
             return;
         }
         for (TelegramFlow flow : flows()) {
@@ -279,7 +280,7 @@ public class TelegramConversationInterpreter {
                 return;
             }
         }
-        context.answer(presenter.simple(context.chatId(), "ACAO_EXPIRADA"));
+        context.answer(presenter.simple(context.chatId(), "EXPIRED_ACTION"));
         showHome(context);
     }
 
@@ -296,20 +297,20 @@ public class TelegramConversationInterpreter {
         TelegramConversation conversation = context.conversation();
         conversation.cleanFocus();
         conversation.discardAudio();
-        conversation.startFlow(flow, ConversationFlowStep.ESCOLHENDO_ALUNO);
+        conversation.startFlow(flow, ConversationFlowStep.CHOOSING_STUDENT);
         SearchStudentsUseCase.Result all = searchStudents.run(context.teacher().id(), "");
         if (all.students().isEmpty()) {
-            context.answer(presenter.simple(context.chatId(), "SEM_ALUNOS"));
+            context.answer(presenter.simple(context.chatId(), "NO_STUDENTS"));
             return;
         }
-        offerStudents(context, presenter.text("ESCOLHER_ALUNO"), all.students());
+        offerStudents(context, presenter.text("CHOOSE_STUDENT"), all.students());
     }
 
     /** Lista de alunos como botões; as opções ficam na conversa para validar o toque. */
     public void offerStudents(
             TelegramContext context, String header, List<StudentSummary> students) {
         TelegramConversation conversation = context.conversation();
-        conversation.defineStep(ConversationFlowStep.ESCOLHENDO_ALUNO);
+        conversation.defineStep(ConversationFlowStep.CHOOSING_STUDENT);
         conversation.store(
                 STUDENT_OPTIONS,
                 String.join(",", students.stream().map(a -> a.id().toString()).toList()));
@@ -320,20 +321,20 @@ public class TelegramConversationInterpreter {
     private void searchStudent(TelegramContext context, String text) {
         SearchStudentsUseCase.Result result = searchStudents.run(context.teacher().id(), text);
         if (result.students().isEmpty()) {
-            context.answer(presenter.simple(context.chatId(), "SEM_ALUNOS"));
+            context.answer(presenter.simple(context.chatId(), "NO_STUDENTS"));
             return;
         }
-        if (result.type() == ResultType.ENCONTRADOS && result.students().size() == 1) {
+        if (result.type() == ResultType.FOUND && result.students().size() == 1) {
             chooseStudent(context, result.students().getFirst());
-        } else if (result.type() == ResultType.ENCONTRADOS) {
-            offerStudents(context, presenter.text("VARIOS_ALUNOS_ENCONTRADOS"), result.students());
-        } else if (result.type() == ResultType.NENHUM) {
+        } else if (result.type() == ResultType.FOUND) {
+            offerStudents(context, presenter.text("SEVERAL_STUDENTS_FOUND"), result.students());
+        } else if (result.type() == ResultType.NONE) {
             offerStudents(
                     context,
-                    presenter.text("NENHUM_ALUNO_ENCONTRADO", Map.of("busca", text)),
+                    presenter.text("NO_STUDENT_FOUND", Map.of("search", text)),
                     result.students());
         } else {
-            offerStudents(context, presenter.text("ESCOLHER_ALUNO"), result.students());
+            offerStudents(context, presenter.text("CHOOSE_STUDENT"), result.students());
         }
     }
 
@@ -352,17 +353,17 @@ public class TelegramConversationInterpreter {
         conversation.cleanFocus();
         conversation.selectStudent(student.id());
         conversation.startFlow(
-                ConversationFlow.REGISTRO_AULA, ConversationFlowStep.AGUARDANDO_AUDIO);
+                ConversationFlow.LESSON_REGISTRATION, ConversationFlowStep.AWAITING_AUDIO);
         context.answer(
                 presenter.simple(
                         context.chatId(),
-                        "ALUNO_SELECIONADO",
+                        "SELECTED_STUDENT",
                         Map.of(
                                 "data",
                                 presenter.formatting().data(clock.todayInSchoolTimezone()),
-                                "aluno",
+                                "student",
                                 student.name(),
-                                "limiteMb",
+                                "limitMb",
                                 parameters.audioLimitMb())));
     }
 
@@ -379,7 +380,7 @@ public class TelegramConversationInterpreter {
         load(context);
         try {
             if (!context.linked()) {
-                context.answer(presenter.simple(chatId, "CODIGO_NECESSARIO"));
+                context.answer(presenter.simple(chatId, "CODE_REQUIRED"));
                 return context.outputs();
             }
             Optional<CallbackData> data = CallbackDataCodec.decode(callback.data());
@@ -395,34 +396,34 @@ public class TelegramConversationInterpreter {
     }
 
     public void expiredAction(TelegramContext context) {
-        context.answer(presenter.simple(context.chatId(), "ACAO_EXPIRADA"));
+        context.answer(presenter.simple(context.chatId(), "EXPIRED_ACTION"));
         showHome(context);
     }
 
     private boolean handleCallback(TelegramContext context, CallbackData data) {
         TelegramConversation conversation = context.conversation();
         switch (data.action()) {
-            case "inicio" -> {
+            case "home" -> {
                 conversation.cleanConfirmation();
                 command(context, Command.HOME);
                 return true;
             }
-            case "reg" -> {
+            case "register" -> {
                 conversation.cleanConfirmation();
-                startStudentChoice(context, ConversationFlow.REGISTRO_AULA);
+                startStudentChoice(context, ConversationFlow.LESSON_REGISTRATION);
                 return true;
             }
-            case "sem" -> {
+            case "semester" -> {
                 conversation.cleanConfirmation();
-                startStudentChoice(context, ConversationFlow.SEMESTRAL);
+                startStudentChoice(context, ConversationFlow.SEMESTER);
                 return true;
             }
-            case "hist" -> {
+            case "history" -> {
                 conversation.cleanConfirmation();
-                startStudentChoice(context, ConversationFlow.HISTORICO);
+                startStudentChoice(context, ConversationFlow.HISTORY);
                 return true;
             }
-            case "sairok" -> {
+            case "sign-out-ok" -> {
                 if (!conversation
                         .pendingConfirmation()
                         .filter(SIGN_OUT_CONFIRMATION::equals)
@@ -433,7 +434,7 @@ public class TelegramConversationInterpreter {
                 confirm(context, SIGN_OUT_CONFIRMATION);
                 return true;
             }
-            case "aluno" -> {
+            case "student" -> {
                 return studentChosenFromList(context, data.argument());
             }
             default -> {
@@ -449,7 +450,7 @@ public class TelegramConversationInterpreter {
 
     private boolean studentChosenFromList(TelegramContext context, String argument) {
         TelegramConversation conversation = context.conversation();
-        if (conversation.step() != ConversationFlowStep.ESCOLHENDO_ALUNO) {
+        if (conversation.step() != ConversationFlowStep.CHOOSING_STUDENT) {
             return false;
         }
         Optional<UUID> studentId = option(conversation, argument);

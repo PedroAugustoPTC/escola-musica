@@ -32,7 +32,7 @@ export function simularApi(rotas: Record<string, RespostaSimulada | RotaSimulada
       ? rotas[chave]!
       : {
           status: 404,
-          corpo: { codigo: 'RECURSO_NAO_ENCONTRADO', mensagem: 'Não encontramos o que você procurou.' },
+          corpo: { code: 'RESOURCE_NOT_FOUND', message: 'Não encontramos o que você procurou.' },
         };
     const resposta = typeof definicao === 'function' ? await definicao(url, init) : definicao;
     const status = resposta.status ?? 200;
@@ -54,9 +54,9 @@ export function simularApi(rotas: Record<string, RespostaSimulada | RotaSimulada
 }
 
 export const SESSAO_CLARA = {
-  professor: { id: '0190a000-0000-7000-8000-000000000001', nome: 'Clara Souza' },
-  sessaoExpiraEm: '2026-09-21T23:00:00Z',
-  telegramVinculado: false,
+  teacher: { id: '0190a000-0000-7000-8000-000000000001', name: 'Clara Souza' },
+  sessionExpiresAt: '2026-09-21T23:00:00Z',
+  telegramLinked: false,
 };
 
 /** Renderiza as rotas dadas com QueryClient, tema e roteador em memória. */

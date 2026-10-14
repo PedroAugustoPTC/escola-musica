@@ -23,8 +23,8 @@ public class TelegramChannelConfig {
     static void validate(ApplicationProperties.TelegramChannel channel, int activePublications) {
         if (activePublications != 1) {
             throw new IllegalStateException(
-                    "exatamente um caminho de entrega proativa deve estar ativo (DIRETA ou"
-                            + " ORQUESTRADOR), mas há "
+                    "exatamente um caminho de entrega proativa deve estar ativo (DIRECT ou"
+                            + " ORCHESTRATOR), mas há "
                             + activePublications);
         }
         long windowHttpMs = (long) channel.connectionTimeoutMs() + channel.responseTimeoutMs();
@@ -33,10 +33,10 @@ public class TelegramChannelConfig {
                     "reports.telegram-channel.lease-seconds deve ser maior que"
                             + " connection-timeout-ms + response-timeout-ms");
         }
-        if (channel.proactiveDelivery() == ApplicationProperties.ProactiveDelivery.ORQUESTRADOR
+        if (channel.proactiveDelivery() == ApplicationProperties.ProactiveDelivery.ORCHESTRATOR
                 && !channel.configuredOrchestrator()) {
             throw new IllegalStateException(
-                    "TELEGRAM_CHANNEL_DELIVERY=ORQUESTRADOR exige TELEGRAM_CHANNEL_ORCHESTRATOR_URL");
+                    "TELEGRAM_CHANNEL_DELIVERY=ORCHESTRATOR exige TELEGRAM_CHANNEL_ORCHESTRATOR_URL");
         }
         if (channel.configuredOrchestrator() && !allowedDestination(channel.orchestratorUrl())) {
             throw new IllegalStateException(

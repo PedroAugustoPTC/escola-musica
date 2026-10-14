@@ -36,7 +36,10 @@ class RegistrationJobProcessorTest {
     private ProcessingJob registerAndProcess(Channel channel) {
         ProcessingJob job =
                 c.register.run(
-                        c.clara.id(), c.matteo.id(), ReportScenario.file("aula.ogg", 10), channel);
+                        c.clara.id(),
+                        c.matteo.id(),
+                        ReportScenario.file("lesson.ogg", 10),
+                        channel);
         c.processQueue();
         return c.queue.searchById(job.id()).orElseThrow();
     }
@@ -44,38 +47,38 @@ class RegistrationJobProcessorTest {
     @Test
     void successWithoutQuestionsCreatesLessonReportVersionOneAndPdf() {
         c.transcription.schedule("Hoje trabalhamos o Czerny com o aluno.");
-        c.llm.schedule(TaskLlm.ESTRUTURACAO_AULA, ReportScenario.output("Evoluiu.", List.of()));
+        c.llm.schedule(TaskLlm.LESSON_STRUCTURING, ReportScenario.output("Evoluiu.", List.of()));
 
         ProcessingJob job = registerAndProcess(Channel.WEB);
 
-        assertThat(job.status()).isEqualTo(JobStatus.CONCLUIDO);
-        assertThat(job.result()).isEqualTo(JobResult.PRONTO_PARA_CONFERENCIA);
+        assertThat(job.status()).isEqualTo(JobStatus.COMPLETED);
+        assertThat(job.result()).isEqualTo(JobResult.READY_FOR_REVIEW);
         LessonReport report = c.reports.searchById(job.reportId()).orElseThrow();
-        assertThat(report.status()).isEqualTo(ReportStatus.AGUARDANDO_CONFERENCIA);
+        assertThat(report.status()).isEqualTo(ReportStatus.AWAITING_REVIEW);
         assertThat(report.transcription()).isEqualTo("Hoje trabalhamos o Czerny com o aluno.");
         assertThat(report.originChannel()).isEqualTo(Channel.WEB);
         assertThat(c.versions.versions)
                 .singleElement()
                 .satisfies(
                         v -> {
-                            assertThat(v.origin()).isEqualTo(VersionOrigin.ESTRUTURACAO_INICIAL);
-                            assertThat(v.promptVersion()).isEqualTo("estruturacao-aula.v1");
+                            assertThat(v.origin()).isEqualTo(VersionOrigin.INITIAL_STRUCTURING);
+                            assertThat(v.promptVersion()).isEqualTo("lesson-structuring.v1");
                         });
         assertThat(c.pdfDocuments.documents.values())
                 .singleElement()
-                .satisfies(d -> assertThat(d.type()).isEqualTo(DocumentType.CONFERENCIA));
-        assertThat(c.pdf.models.getFirst().status()).isEqualTo(DocumentStatus.CONFERENCIA);
+                .satisfies(d -> assertThat(d.type()).isEqualTo(DocumentType.REVIEW));
+        assertThat(c.pdf.models.getFirst().status()).isEqualTo(DocumentStatus.REVIEW);
         assertThat(c.pdf.models.getFirst().studentName()).isEqualTo("Matteo Mafra");
-        assertThat(c.storage.files).containsKey("relatorios/aula/" + report.id() + "/v1.pdf");
+        assertThat(c.storage.files).containsKey("reports/lesson/" + report.id() + "/v1.pdf");
         assertThat(c.notification.events)
                 .containsExactly(
-                        "etapa:ENVIANDO",
-                        "etapa:TRANSCREVENDO",
-                        "etapa:ESTRUTURANDO",
-                        "resultado:PRONTO_PARA_CONFERENCIA");
+                        "step:UPLOADING",
+                        "step:TRANSCRIBING",
+                        "step:STRUCTURING",
+                        "result:READY_FOR_REVIEW");
         assertThat(c.costs.calls)
                 .extracting(AiCall::task)
-                .containsExactly(AiTask.TRANSCRICAO, AiTask.ESTRUTURACAO);
+                .containsExactly(AiTask.TRANSCRIPTION, AiTask.STRUCTURING);
         assertThat(c.costs.calls).allMatch(AiCall::success);
         assertThat(report.processingTimeMs()).isGreaterThanOrEqualTo(0);
     }
@@ -83,18 +86,18 @@ class RegistrationJobProcessorTest {
     @Test
     void initialTranscriptionStaysLinkedToCreatedReport() {
         c.transcription.schedule("Hoje trabalhamos o Czerny com o aluno.");
-        c.llm.schedule(TaskLlm.ESTRUTURACAO_AULA, ReportScenario.output("x", List.of()));
+        c.llm.schedule(TaskLlm.LESSON_STRUCTURING, ReportScenario.output("x", List.of()));
 
         ProcessingJob job = registerAndProcess(Channel.WEB);
 
         assertThat(job.reportId()).isNotNull();
         assertThat(c.costs.calls)
                 .extracting(AiCall::task)
-                .containsExactly(AiTask.TRANSCRICAO, AiTask.ESTRUTURACAO);
+                .containsExactly(AiTask.TRANSCRIPTION, AiTask.STRUCTURING);
         assertThat(c.costs.calls)
                 .allSatisfy(
                         call -> {
-                            assertThat(call.reportType()).isEqualTo(ReportType.AULA);
+                            assertThat(call.reportType()).isEqualTo(ReportType.LESSON);
                             assertThat(call.reportId()).isEqualTo(job.reportId());
                         });
     }
@@ -119,16 +122,16 @@ class RegistrationJobProcessorTest {
     void invalidOutputRegistersTokensAndCostOfModelCalls() {
         c.transcription.schedule("Transcrição preservada.");
         c.llm.schedule(
-                TaskLlm.ESTRUTURACAO_AULA,
+                TaskLlm.LESSON_STRUCTURING,
                 new InvalidAiOutputException("schema", 1200, 340, new BigDecimal("0.0123")));
 
         ProcessingJob job = registerAndProcess(Channel.WEB);
 
-        assertThat(job.result()).isEqualTo(JobResult.FALHA_ESTRUTURACAO);
+        assertThat(job.result()).isEqualTo(JobResult.STRUCTURING_FAILED);
         AiCall failure = c.costs.calls.getLast();
-        assertThat(failure.task()).isEqualTo(AiTask.ESTRUTURACAO);
+        assertThat(failure.task()).isEqualTo(AiTask.STRUCTURING);
         assertThat(failure.success()).isFalse();
-        assertThat(failure.errorCode()).isEqualTo("SAIDA_INVALIDA");
+        assertThat(failure.errorCode()).isEqualTo("INVALID_OUTPUT");
         assertThat(failure.inputTokens()).isEqualTo(1200);
         assertThat(failure.outputTokens()).isEqualTo(340);
         assertThat(failure.estimatedCostUsd()).isEqualByComparingTo("0.0123");
@@ -139,14 +142,14 @@ class RegistrationJobProcessorTest {
     void providerDownAfterAlreadyConsumingRegistersWhatWasSpent() {
         c.transcription.schedule("x");
         c.llm.schedule(
-                TaskLlm.ESTRUTURACAO_AULA,
+                TaskLlm.LESSON_STRUCTURING,
                 new ProviderUnavailableException("503", 1000, 500, new BigDecimal("0.006")));
 
         registerAndProcess(Channel.WEB);
 
         AiCall failure = c.costs.calls.getLast();
         assertThat(failure.success()).isFalse();
-        assertThat(failure.errorCode()).isEqualTo("PROVEDOR_INDISPONIVEL");
+        assertThat(failure.errorCode()).isEqualTo("PROVIDER_UNAVAILABLE");
         assertThat(failure.inputTokens()).isEqualTo(1000);
         assertThat(failure.outputTokens()).isEqualTo(500);
         assertThat(failure.estimatedCostUsd()).isEqualByComparingTo("0.006");
@@ -155,12 +158,12 @@ class RegistrationJobProcessorTest {
     @Test
     void unavailableProviderHasNoTokensNorCost() {
         c.transcription.schedule("x");
-        c.llm.schedule(TaskLlm.ESTRUTURACAO_AULA, new ProviderUnavailableException("503"));
+        c.llm.schedule(TaskLlm.LESSON_STRUCTURING, new ProviderUnavailableException("503"));
 
         registerAndProcess(Channel.WEB);
 
         AiCall failure = c.costs.calls.getLast();
-        assertThat(failure.errorCode()).isEqualTo("PROVEDOR_INDISPONIVEL");
+        assertThat(failure.errorCode()).isEqualTo("PROVIDER_UNAVAILABLE");
         assertThat(failure.inputTokens()).isNull();
         assertThat(failure.outputTokens()).isNull();
         assertThat(failure.estimatedCostUsd()).isEqualByComparingTo("0");
@@ -168,13 +171,13 @@ class RegistrationJobProcessorTest {
 
     @Test
     void audioDeletedOnAllPathsAndAiInputWithoutStudentData() {
-        c.llm.schedule(TaskLlm.ESTRUTURACAO_AULA, ReportScenario.output("x", List.of()));
+        c.llm.schedule(TaskLlm.LESSON_STRUCTURING, ReportScenario.output("x", List.of()));
         registerAndProcess(Channel.WEB);
 
         assertThat(c.normalization.deleted)
                 .contains(
-                        Path.of("/tmp/audios/aula.ogg"),
-                        Path.of("/tmp/audios/aula.ogg.normalizado.ogg"));
+                        Path.of("/tmp/audios/lesson.ogg"),
+                        Path.of("/tmp/audios/lesson.ogg.normalized.ogg"));
         assertThat(c.llm.inputs)
                 .singleElement()
                 .isInstanceOf(TaskInput.LessonStructuring.class)
@@ -186,13 +189,13 @@ class RegistrationJobProcessorTest {
     @Test
     void withQuestionsAwaitsAnswersWithoutPdf() {
         c.llm.schedule(
-                TaskLlm.ESTRUTURACAO_AULA, ReportScenario.output("x", List.of("Qual peça?")));
+                TaskLlm.LESSON_STRUCTURING, ReportScenario.output("x", List.of("Qual peça?")));
 
         ProcessingJob job = registerAndProcess(Channel.TELEGRAM);
 
-        assertThat(job.result()).isEqualTo(JobResult.PERGUNTAS_PENDENTES);
+        assertThat(job.result()).isEqualTo(JobResult.PENDING_QUESTIONS);
         LessonReport report = c.reports.searchById(job.reportId()).orElseThrow();
-        assertThat(report.status()).isEqualTo(ReportStatus.AGUARDANDO_RESPOSTAS);
+        assertThat(report.status()).isEqualTo(ReportStatus.AWAITING_ANSWERS);
         assertThat(report.pendingQuestions()).containsExactly("Qual peça?");
         assertThat(c.versions.versions).isEmpty();
         assertThat(c.pdf.models).isEmpty();
@@ -201,35 +204,34 @@ class RegistrationJobProcessorTest {
     @Test
     void emptyTranscriptionOrInvalidFormatCreatesNothing() {
         c.transcription.schedule(
-                new AudioNotProcessableException(AudioNotProcessableException.Reason.SEM_FALA));
+                new AudioNotProcessableException(AudioNotProcessableException.Reason.NO_SPEECH));
         ProcessingJob withoutSpeech = registerAndProcess(Channel.WEB);
-        assertThat(withoutSpeech.result()).isEqualTo(JobResult.AUDIO_NAO_PROCESSAVEL);
-        assertThat(withoutSpeech.status()).isEqualTo(JobStatus.FALHOU);
+        assertThat(withoutSpeech.result()).isEqualTo(JobResult.AUDIO_NOT_PROCESSABLE);
+        assertThat(withoutSpeech.status()).isEqualTo(JobStatus.FAILED);
 
         c.normalization.failWith(new UnsupportedFormatException());
         ProcessingJob format = registerAndProcess(Channel.WEB);
-        assertThat(format.result()).isEqualTo(JobResult.AUDIO_NAO_PROCESSAVEL);
+        assertThat(format.result()).isEqualTo(JobResult.AUDIO_NOT_PROCESSABLE);
 
         c.transcription.schedule("   ");
         ProcessingJob empty = registerAndProcess(Channel.WEB);
-        assertThat(empty.result()).isEqualTo(JobResult.AUDIO_NAO_PROCESSAVEL);
+        assertThat(empty.result()).isEqualTo(JobResult.AUDIO_NOT_PROCESSABLE);
 
         assertThat(c.reports.reports).isEmpty();
         assertThat(c.reports.lessons).isEmpty();
-        assertThat(c.normalization.deleted).contains(Path.of("/tmp/audios/aula.ogg"));
+        assertThat(c.normalization.deleted).contains(Path.of("/tmp/audios/lesson.ogg"));
         assertThat(c.costs.calls).noneMatch(AiCall::success);
         assertThat(c.costs.calls)
                 .extracting(AiCall::errorCode)
-                .containsExactly("AUDIO_SEM_FALA", "FORMATO_NAO_SUPORTADO", "AUDIO_SEM_FALA");
+                .containsExactly("AUDIO_NO_SPEECH", "UNSUPPORTED_FORMAT", "AUDIO_NO_SPEECH");
     }
 
     @Test
     void unavailableProviderRetriesOnce() {
         c.transcription.schedule(
                 new ProviderUnavailableException("503"), "Transcrição na segunda tentativa.");
-        c.llm.schedule(TaskLlm.ESTRUTURACAO_AULA, ReportScenario.output("x", List.of()));
-        assertThat(registerAndProcess(Channel.WEB).result())
-                .isEqualTo(JobResult.PRONTO_PARA_CONFERENCIA);
+        c.llm.schedule(TaskLlm.LESSON_STRUCTURING, ReportScenario.output("x", List.of()));
+        assertThat(registerAndProcess(Channel.WEB).result()).isEqualTo(JobResult.READY_FOR_REVIEW);
 
         c.transcription.schedule(
                 new ProviderUnavailableException("503"), new ProviderUnavailableException("503"));
@@ -241,13 +243,13 @@ class RegistrationJobProcessorTest {
                         Channel.WEB);
         c.processQueue();
         assertThat(c.queue.searchById(failed.id()).orElseThrow().result())
-                .isEqualTo(JobResult.AUDIO_NAO_PROCESSAVEL);
-        assertThat(c.costs.calls.getLast().errorCode()).isEqualTo("PROVEDOR_INDISPONIVEL");
+                .isEqualTo(JobResult.AUDIO_NOT_PROCESSABLE);
+        assertThat(c.costs.calls.getLast().errorCode()).isEqualTo("PROVIDER_UNAVAILABLE");
     }
 
     @Test
     void telegramFileIsDownloadedOnlyDuringProcessing() {
-        c.llm.schedule(TaskLlm.ESTRUTURACAO_AULA, ReportScenario.output("x", List.of()));
+        c.llm.schedule(TaskLlm.LESSON_STRUCTURING, ReportScenario.output("x", List.of()));
         c.register.run(
                 c.clara.id(),
                 c.matteo.id(),
@@ -258,35 +260,35 @@ class RegistrationJobProcessorTest {
         assertThat(c.channelFile.obtained)
                 .extracting(ChannelFileReference::id)
                 .containsExactly("file-9");
-        assertThat(c.normalization.deleted).contains(Path.of("/tmp/audios/canal-file-9"));
+        assertThat(c.normalization.deleted).contains(Path.of("/tmp/audios/channel-file-9"));
     }
 
     @Test
     void invalidOutputFailsWithPreservedTranscriptionAndNewAttempt() {
         c.transcription.schedule("Transcrição preservada.");
-        c.llm.schedule(TaskLlm.ESTRUTURACAO_AULA, new InvalidAiOutputException("schema"));
+        c.llm.schedule(TaskLlm.LESSON_STRUCTURING, new InvalidAiOutputException("schema"));
         ProcessingJob job = registerAndProcess(Channel.WEB);
 
-        assertThat(job.result()).isEqualTo(JobResult.FALHA_ESTRUTURACAO);
+        assertThat(job.result()).isEqualTo(JobResult.STRUCTURING_FAILED);
         LessonReport report = c.reports.searchById(job.reportId()).orElseThrow();
-        assertThat(report.status()).isEqualTo(ReportStatus.FALHA_PROCESSAMENTO);
+        assertThat(report.status()).isEqualTo(ReportStatus.PROCESSING_FAILED);
         assertThat(report.transcription()).isEqualTo("Transcrição preservada.");
 
-        c.llm.schedule(TaskLlm.ESTRUTURACAO_AULA, ReportScenario.output("x", List.of()));
+        c.llm.schedule(TaskLlm.LESSON_STRUCTURING, ReportScenario.output("x", List.of()));
         ProcessingJob newAttempt = c.retry.run(c.clara.id(), report.id(), Channel.TELEGRAM);
         int transcriptions = c.transcription.received.size();
         c.processQueue();
 
         assertThat(c.queue.searchById(newAttempt.id()).orElseThrow().result())
-                .isEqualTo(JobResult.PRONTO_PARA_CONFERENCIA);
+                .isEqualTo(JobResult.READY_FOR_REVIEW);
         assertThat(c.transcription.received).hasSize(transcriptions);
-        assertThat(report.status()).isEqualTo(ReportStatus.AGUARDANDO_CONFERENCIA);
+        assertThat(report.status()).isEqualTo(ReportStatus.AWAITING_REVIEW);
     }
 
     @Test
     void cancellationDuringJobDiscardsResult() {
         LessonReport failure = failureScenario();
-        c.llm.schedule(TaskLlm.ESTRUTURACAO_AULA, ReportScenario.output("x", List.of()));
+        c.llm.schedule(TaskLlm.LESSON_STRUCTURING, ReportScenario.output("x", List.of()));
         ProcessingJob job = c.retry.run(c.clara.id(), failure.id(), Channel.WEB);
         ProcessingJob reserved = c.queue.reserveNext(c.clock.now()).orElseThrow();
         c.cancel.discard(c.clara.id(), failure.id());
@@ -294,10 +296,10 @@ class RegistrationJobProcessorTest {
         c.processor.process(reserved);
 
         assertThat(c.queue.searchById(job.id()).orElseThrow().status())
-                .isEqualTo(JobStatus.DESCARTADO);
-        assertThat(failure.status()).isEqualTo(ReportStatus.CANCELADO);
+                .isEqualTo(JobStatus.DISCARDED);
+        assertThat(failure.status()).isEqualTo(ReportStatus.CANCELLED);
         assertThat(c.versions.versions).isEmpty();
-        assertThat(c.notification.events).doesNotContain("resultado:PRONTO_PARA_CONFERENCIA");
+        assertThat(c.notification.events).doesNotContain("result:READY_FOR_REVIEW");
     }
 
     @Test
@@ -312,7 +314,7 @@ class RegistrationJobProcessorTest {
 
         assertThat(c.reports.reports).isEmpty();
         assertThat(c.queue.searchById(job.id()).orElseThrow().status())
-                .isEqualTo(JobStatus.DESCARTADO);
+                .isEqualTo(JobStatus.DISCARDED);
     }
 
     @Test
@@ -326,14 +328,14 @@ class RegistrationJobProcessorTest {
                 .isInstanceOf(IllegalStateException.class);
 
         ProcessingJob saved = c.queue.searchById(job.id()).orElseThrow();
-        assertThat(saved.status()).isEqualTo(JobStatus.FALHOU);
-        assertThat(saved.result()).isEqualTo(JobResult.FALHA_ESTRUTURACAO);
+        assertThat(saved.status()).isEqualTo(JobStatus.FAILED);
+        assertThat(saved.result()).isEqualTo(JobResult.STRUCTURING_FAILED);
         assertThat(c.reports.searchById(saved.reportId()).orElseThrow().status())
-                .isEqualTo(ReportStatus.FALHA_PROCESSAMENTO);
+                .isEqualTo(ReportStatus.PROCESSING_FAILED);
     }
 
     private LessonReport failureScenario() {
-        c.llm.schedule(TaskLlm.ESTRUTURACAO_AULA, new ProviderUnavailableException("fora"));
+        c.llm.schedule(TaskLlm.LESSON_STRUCTURING, new ProviderUnavailableException("outside"));
         ProcessingJob job = registerAndProcess(Channel.WEB);
         return c.reports.searchById(job.reportId()).orElseThrow();
     }

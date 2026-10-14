@@ -67,6 +67,6 @@ public record ReportInteraction(
 
     @Override
     public String toString() {
-        return "InteracaoRelatorio[id=" + id + ", tipo=" + type + ", resultado=" + result + "]";
+        return "ReportInteraction[id=" + id + ", type=" + type + ", result=" + result + "]";
     }
 }

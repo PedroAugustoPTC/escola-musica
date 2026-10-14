@@ -5,32 +5,32 @@ import { rotas } from '../../src/app/rotas';
 import { SESSAO_CLARA, renderizarRotas, simularApi } from '../utilitarios';
 
 const INICIO = {
-  professor: SESSAO_CLARA.professor,
-  totalAlunos: 0,
-  alunos: [],
-  relatoriosEmAberto: [],
-  limiteAudioMb: 50,
+  teacher: SESSAO_CLARA.teacher,
+  totalStudents: 0,
+  students: [],
+  openReports: [],
+  audioLimitMb: 50,
 };
 
 describe('TelaEntrar (01)', () => {
   it('entra com o código e volta ao destino guardado', async () => {
     let logado = false;
     const api = simularApi({
-      'GET /api/v1/sessao': () =>
+      'GET /api/v1/session': () =>
         logado
           ? { corpo: SESSAO_CLARA }
           : {
               status: 401,
               corpo: {
-                codigo: 'NAO_AUTENTICADO',
-                mensagem: 'Entre com o seu código de acesso para continuar.',
+                code: 'NOT_AUTHENTICATED',
+                message: 'Entre com o seu código de acesso para continuar.',
               },
             },
-      'POST /api/v1/sessao': () => {
+      'POST /api/v1/session': () => {
         logado = true;
         return { corpo: SESSAO_CLARA };
       },
-      'GET /api/v1/inicio': { corpo: INICIO },
+      'GET /api/v1/home': { corpo: INICIO },
     });
     const usuario = userEvent.setup();
     const { roteador } = renderizarRotas(rotas, '/alunos');
@@ -47,17 +47,17 @@ describe('TelaEntrar (01)', () => {
 
     await waitFor(() => expect(roteador.state.location.pathname).toBe('/alunos'));
     const post = api.chamadas.find((c) => c.metodo === 'POST');
-    expect(JSON.parse(post!.init.body as string)).toEqual({ codigo: 'K7QM-2XPA' });
+    expect(JSON.parse(post!.init.body as string)).toEqual({ code: 'K7QM-2XPA' });
     expect((post!.init.headers as Record<string, string>)['X-CSRF-TOKEN']).toBe('token-teste');
   });
 
   it('código inválido (01b) mostra a mensagem do catálogo no campo', async () => {
     simularApi({
-      'POST /api/v1/sessao': {
+      'POST /api/v1/session': {
         status: 401,
         corpo: {
-          codigo: 'CODIGO_INVALIDO',
-          mensagem:
+          code: 'INVALID_CODE',
+          message:
             'Código inválido. Confira o código e tente de novo, ou peça um novo à secretaria da escola.',
         },
       },
@@ -73,12 +73,12 @@ describe('TelaEntrar (01)', () => {
 
   it('bloqueio (01c) desabilita o campo e mostra o tempo restante', async () => {
     simularApi({
-      'POST /api/v1/sessao': {
+      'POST /api/v1/session': {
         status: 429,
         cabecalhos: { 'Retry-After': '120' },
         corpo: {
-          codigo: 'BLOQUEADO_TEMPORARIAMENTE',
-          mensagem:
+          code: 'TEMPORARILY_BLOCKED',
+          message:
             'Acesso bloqueado temporariamente por muitas tentativas incorretas. Tente novamente em 2 minuto(s).',
           retryAfterSeconds: 120,
         },
@@ -99,7 +99,7 @@ describe('TelaEntrar (01)', () => {
 
   it('sem conexão (01d)', async () => {
     simularApi({
-      'POST /api/v1/sessao': () => {
+      'POST /api/v1/session': () => {
         throw new TypeError('Failed to fetch');
       },
     });
@@ -116,7 +116,7 @@ describe('TelaEntrar (01)', () => {
 
   it('avisa quando a sessão expirou', () => {
     simularApi({});
-    renderizarRotas(rotas, '/entrar?motivo=SESSAO_EXPIRADA');
+    renderizarRotas(rotas, '/entrar?motivo=SESSION_EXPIRED');
     expect(screen.getByRole('status')).toHaveTextContent('Sua sessão expirou.');
   });
 });

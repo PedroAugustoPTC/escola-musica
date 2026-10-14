@@ -41,7 +41,7 @@ public class CancelSemesterReportUseCase {
         Instant now = clock.now();
         report.cancel(now);
         semester.save(report);
-        queue.searchInProgressByReport(ReportType.SEMESTRAL, reportId)
+        queue.searchInProgressByReport(ReportType.SEMESTER, reportId)
                 .ifPresent(
                         job -> {
                             job.discard(now);
@@ -54,10 +54,10 @@ public class CancelSemesterReportUseCase {
         ProcessingJob job =
                 queue.searchById(jobId)
                         .filter(t -> t.teacherId().equals(teacherId))
-                        .filter(t -> t.type() == JobType.CONSOLIDACAO_SEMESTRAL)
-                        .orElseThrow(() -> new DomainException(ErrorCode.RECURSO_NAO_ENCONTRADO));
+                        .filter(t -> t.type() == JobType.SEMESTER_CONSOLIDATION)
+                        .orElseThrow(() -> new DomainException(ErrorCode.RESOURCE_NOT_FOUND));
         if (!job.discard(clock.now())) {
-            throw new DomainException(ErrorCode.ACAO_NAO_PERMITIDA_NA_ETAPA);
+            throw new DomainException(ErrorCode.ACTION_NOT_ALLOWED_AT_STEP);
         }
         queue.update(job);
     }

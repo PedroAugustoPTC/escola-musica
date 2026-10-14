@@ -42,7 +42,7 @@ for (const dir of dirs) {
     const source = readFileSync(file, 'utf8');
     const { tokens } = lex(source);
     const excluded = (map.explicit.literalEditExclusions ?? []).some((entry) => path.endsWith(entry.file));
-    const classes = excluded ? new Map() : classifyLiterals(tokens, { envNames: new Set(map.explicit.envNames ?? []), path });
+    const classes = excluded ? new Map() : classifyLiterals(tokens, { envNames: new Set(map.explicit.envNames ?? []), path, slice, keep: map.explicit.slice4?.keepLiterals ?? [], typedWords: map.explicit.slice4?.typedWords ?? [], typedWordFiles: map.explicit.slice4?.typedWordFiles ?? [], callbackActions: Object.keys(map.explicit.slice4?.callbackActions ?? {}), mainCallbackDirs: map.explicit.slice4?.mainCallbackDirs ?? [], callbackAmbiguous: map.explicit.slice4?.callbackAmbiguous ?? [] });
     const replacements = []; // { start, end, text, kind, line, from, to }
     const occurrences = new Map();
     tokens.forEach((token, index) => {

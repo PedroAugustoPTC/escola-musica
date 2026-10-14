@@ -75,8 +75,8 @@ export async function semear(): Promise<Semeadura> {
       return id;
     };
 
-    const clara = await professor('Clara Souza', 'clara@exemplo.test', CODIGO_CLARA);
-    const bruno = await professor('Bruno Lima', 'bruno@exemplo.test', CODIGO_BRUNO);
+    const clara = await professor('Clara Souza', 'clara@example.test', CODIGO_CLARA);
+    const bruno = await professor('Bruno Lima', 'bruno@example.test', CODIGO_BRUNO);
     return {
       clara,
       bruno,

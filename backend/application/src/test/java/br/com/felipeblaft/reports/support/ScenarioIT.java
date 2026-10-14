@@ -92,11 +92,11 @@ public class ScenarioIT {
     }
 
     public Teacher clara() {
-        return teacher("Clara Souza", "clara@exemplo.test", CODE_CLARA);
+        return teacher("Clara Souza", "clara@example.test", CODE_CLARA);
     }
 
     public Teacher bruno() {
-        return teacher("Bruno Lima", "bruno@exemplo.test", CODE_BRUNO);
+        return teacher("Bruno Lima", "bruno@example.test", CODE_BRUNO);
     }
 
     public Student student(Teacher teacher, String name, String instrument) {
@@ -138,7 +138,7 @@ public class ScenarioIT {
                                 ""),
                         java.util.List.of(),
                         0,
-                        br.com.felipeblaft.reports.domain.report.ReportStatus.APROVADO,
+                        br.com.felipeblaft.reports.domain.report.ReportStatus.APPROVED,
                         null,
                         1,
                         br.com.felipeblaft.reports.domain.common.Channel.WEB,
@@ -154,14 +154,14 @@ public class ScenarioIT {
         lessonReports.save(report);
         br.com.felipeblaft.reports.domain.report.ReportVersion version =
                 br.com.felipeblaft.reports.domain.report.ReportVersion.create(
-                        br.com.felipeblaft.reports.domain.common.ReportType.AULA,
+                        br.com.felipeblaft.reports.domain.common.ReportType.LESSON,
                         report.id(),
                         1,
                         report.content(),
-                        br.com.felipeblaft.reports.domain.report.VersionOrigin.ESTRUTURACAO_INICIAL,
+                        br.com.felipeblaft.reports.domain.report.VersionOrigin.INITIAL_STRUCTURING,
                         null,
                         br.com.felipeblaft.reports.domain.common.Channel.WEB,
-                        "estruturacao-aula.v1",
+                        "lesson-structuring.v1",
                         now);
         versions.save(version);
         documents.generateOfficial(report, version);

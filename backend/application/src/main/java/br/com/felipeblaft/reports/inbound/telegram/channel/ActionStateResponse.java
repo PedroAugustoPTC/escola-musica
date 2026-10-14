@@ -7,4 +7,4 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record ActionStateResponse(
-        String versao, String acaoId, String estado, String codigoMotivo) {}
+        String version, String actionId, String state, String reasonCode) {}

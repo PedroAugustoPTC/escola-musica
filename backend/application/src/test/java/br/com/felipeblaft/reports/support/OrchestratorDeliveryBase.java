@@ -38,8 +38,8 @@ import tools.jackson.databind.JsonNode;
  */
 @TestPropertySource(
         properties = {
-            "reports.telegram-channel.proactive-delivery=ORQUESTRADOR",
-            "reports.telegram-channel.orchestrator-token=segredo-do-orquestrador",
+            "reports.telegram-channel.proactive-delivery=ORCHESTRATOR",
+            "reports.telegram-channel.orchestrator-token=orchestrator-secret",
             "reports.telegram-channel.dispatch-interval-ms=3600000",
             "reports.telegram-channel.connection-timeout-ms=500",
             "reports.telegram-channel.response-timeout-ms=1500"
@@ -48,7 +48,7 @@ public abstract class OrchestratorDeliveryBase extends TelegramConversationBase 
 
     public static final WireMockServer ORCHESTRATOR =
             new WireMockServer(wireMockConfig().dynamicPort());
-    public static final String PATH = "/webhook/segredo-no-caminho-123";
+    public static final String PATH = "/webhook/secret-in-path-123";
 
     static {
         ORCHESTRATOR.start();
@@ -111,7 +111,7 @@ public abstract class OrchestratorDeliveryBase extends TelegramConversationBase 
 
     /** Corpo da entrega, validado contra {@code #/$defs/LoteEntrega}. */
     protected JsonNode body(LoggedRequest delivery) {
-        ActionsSchemaV1.require("LoteEntrega", delivery.getBodyAsString());
+        ActionsSchemaV1.require("DeliveryBatch", delivery.getBodyAsString());
         return JSON.readTree(delivery.getBodyAsString());
     }
 
@@ -127,7 +127,7 @@ public abstract class OrchestratorDeliveryBase extends TelegramConversationBase 
                 return;
             }
             for (int k = handledDeliveries; k < all.size(); k++) {
-                orchestratorExecutor().run(body(all.get(k)).get("acoes"));
+                orchestratorExecutor().run(body(all.get(k)).get("actions"));
             }
             handledDeliveries = all.size();
         }

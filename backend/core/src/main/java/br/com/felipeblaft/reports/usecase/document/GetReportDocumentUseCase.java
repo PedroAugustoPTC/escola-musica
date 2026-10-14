@@ -59,26 +59,26 @@ public class GetReportDocumentUseCase {
     }
 
     public ObtainedDocument review(UUID teacherId, ReportType type, UUID reportId, int number) {
-        if (type == ReportType.SEMESTRAL) {
+        if (type == ReportType.SEMESTER) {
             return semesterSource().review(teacherId, reportId, number);
         }
         LessonReport report = access.lessonReport(teacherId, reportId);
         String name = lessonName(report, "-v" + number);
-        return read(report.id(), number, DocumentType.CONFERENCIA, name);
+        return read(report.id(), number, DocumentType.REVIEW, name);
     }
 
     public ObtainedDocument official(UUID teacherId, ReportType type, UUID reportId) {
-        if (type == ReportType.SEMESTRAL) {
+        if (type == ReportType.SEMESTER) {
             return semesterSource().official(teacherId, reportId);
         }
         LessonReport report = access.lessonReport(teacherId, reportId);
-        if (report.status() != ReportStatus.APROVADO) {
+        if (report.status() != ReportStatus.APPROVED) {
             throw notFound();
         }
         return read(
                 report.id(),
                 report.approvedVersion(),
-                DocumentType.OFICIAL,
+                DocumentType.OFFICIAL,
                 lessonName(report, ""));
     }
 
@@ -89,7 +89,7 @@ public class GetReportDocumentUseCase {
 
     private ObtainedDocument read(UUID reportId, int number, DocumentType type, String name) {
         Optional<PdfDocument> document =
-                versions.search(ReportType.AULA, reportId, number)
+                versions.search(ReportType.LESSON, reportId, number)
                         .flatMap(v -> documents.search(v.id(), type));
         byte[] bytes =
                 document.flatMap(generation::open).orElseThrow(GetReportDocumentUseCase::notFound);
@@ -104,6 +104,6 @@ public class GetReportDocumentUseCase {
     }
 
     private static DomainException notFound() {
-        return new DomainException(ErrorCode.RECURSO_NAO_ENCONTRADO);
+        return new DomainException(ErrorCode.RESOURCE_NOT_FOUND);
     }
 }

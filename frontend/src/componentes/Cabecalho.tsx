@@ -18,7 +18,7 @@ export interface ContextoCabecalho {
 export const ITENS_NAVEGACAO: { chave: ItemNavegacao; rotulo: string; icone: string; rota: string }[] = [
   { chave: 'painel', rotulo: 'Painel', icone: 'space_dashboard', rota: '/' },
   { chave: 'alunos', rotulo: 'Alunos', icone: 'group', rota: '/alunos' },
-  { chave: 'registrar', rotulo: msg('BOTAO_REGISTRAR_AULA'), icone: 'mic', rota: '/alunos?registrar=1' },
+  { chave: 'registrar', rotulo: msg('REGISTER_LESSON_BUTTON'), icone: 'mic', rota: '/alunos?registrar=1' },
 ];
 
 /** Iniciais do primeiro e do último nome ("Miguel de Castro Torrente" → "MT"). */
@@ -35,7 +35,7 @@ function MenuProfessor({ aoFechar }: { aoFechar: () => void }) {
   const sessao = useSessao();
   const encerrar = useEncerrarSessao();
   const navegar = useNavigate();
-  const nome = sessao.data?.professor.nome ?? '';
+  const nome = sessao.data?.teacher.name ?? '';
   const escuro = tema === 'escuro';
 
   return (
@@ -71,7 +71,7 @@ function MenuProfessor({ aoFechar }: { aoFechar: () => void }) {
           }
         >
           <Icone nome="logout" />
-          <span>{msg('BOTAO_ENCERRAR_SESSAO')}</span>
+          <span>{msg('END_SESSION_BUTTON')}</span>
         </button>
         {encerrar.isError ? (
           <div role="alert" className="campo__erro" style={{ padding: '6px 12px' }}>
@@ -97,7 +97,7 @@ export function Cabecalho({
   const sessao = useSessao();
   const [menuAberto, setMenuAberto] = useState(false);
   const [busca, setBusca] = useState('');
-  const nome = sessao.data?.professor.nome ?? '';
+  const nome = sessao.data?.teacher.name ?? '';
 
   const botaoMenu = (
     <button

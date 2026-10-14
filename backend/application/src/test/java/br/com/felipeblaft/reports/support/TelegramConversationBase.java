@@ -34,8 +34,8 @@ import tools.jackson.databind.json.JsonMapper;
 @AutoConfigureMockMvc
 public abstract class TelegramConversationBase extends IntegrationBase {
 
-    public static final String SECRET = "segredo-webhook-teste";
-    public static final String TOKEN = "123456:TESTE";
+    public static final String SECRET = "secret-webhook-test";
+    public static final String TOKEN = "123456:TEST";
     protected static final long USER_CLARA = 7001L;
     protected static final long USER_BRUNO = 7002L;
     protected static final JsonMapper JSON = JsonMapper.builder().build();
@@ -55,7 +55,7 @@ public abstract class TelegramConversationBase extends IntegrationBase {
      */
     public static final String TRANSPORT = System.getProperty("telegram.transport", "webhook");
 
-    public static final String TOKEN_SERVICE = "token-servico-atual-teste";
+    public static final String TOKEN_SERVICE = "current-service-token-test";
 
     @Autowired protected MockMvc mvc;
 
@@ -110,7 +110,7 @@ public abstract class TelegramConversationBase extends IntegrationBase {
         var result =
                 mvc.perform(
                                 org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-                                        .post("/interno/v1/canal/telegram/atualizacao")
+                                        .post("/internal/v1/channel/telegram/update")
                                         .header("X-N8N-Service-Token", TOKEN_SERVICE)
                                         .header("X-Telegram-Bot-Api-Secret-Token", SECRET)
                                         .contentType(MediaType.APPLICATION_JSON)
@@ -118,8 +118,8 @@ public abstract class TelegramConversationBase extends IntegrationBase {
                         .andExpect(status().isOk())
                         .andReturn();
         String body = result.getResponse().getContentAsString();
-        ActionsSchemaV1.require("RespostaAtualizacao", body);
-        orchestratorExecutor().run(JSON.readTree(body).get("acoes"));
+        ActionsSchemaV1.require("UpdateResponse", body);
+        orchestratorExecutor().run(JSON.readTree(body).get("actions"));
     }
 
     /** O "n8n" dos testes, ligado ao MockMvc e à API de bots simulada. */

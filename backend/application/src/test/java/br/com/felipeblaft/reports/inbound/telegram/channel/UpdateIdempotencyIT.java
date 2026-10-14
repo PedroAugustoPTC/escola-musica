@@ -29,12 +29,12 @@ import tools.jackson.databind.JsonNode;
  */
 class UpdateIdempotencyIT extends TelegramConversationBase {
 
-    private static final String BASE = "/interno/v1/canal/telegram";
+    private static final String BASE = "/internal/v1/channel/telegram";
 
     private JsonNode update(String json) throws Exception {
         String body =
                 mvc.perform(
-                                post(BASE + "/atualizacao")
+                                post(BASE + "/update")
                                         .header("X-N8N-Service-Token", TOKEN_SERVICE)
                                         .header("X-Telegram-Bot-Api-Secret-Token", SECRET)
                                         .contentType(MediaType.APPLICATION_JSON)
@@ -43,22 +43,21 @@ class UpdateIdempotencyIT extends TelegramConversationBase {
                         .andReturn()
                         .getResponse()
                         .getContentAsString();
-        ActionsSchemaV1.require("RespostaAtualizacao", body);
+        ActionsSchemaV1.require("UpdateResponse", body);
         return JSON.readTree(body);
     }
 
     private void confirm(String resultsBody) throws Exception {
         mvc.perform(
-                        post(BASE + "/confirmacoes")
+                        post(BASE + "/confirmations")
                                 .header("X-N8N-Service-Token", TOKEN_SERVICE)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(
-                                        "{\"versao\":\"v1\",\"resultados\":[" + resultsBody + "]}"))
+                                .content("{\"version\":\"v1\",\"results\":[" + resultsBody + "]}"))
                 .andExpect(status().isOk());
     }
 
     private static String ok(String id) {
-        return "{\"acaoId\":\"" + id + "\",\"situacao\":\"EXECUTADA\"}";
+        return "{\"actionId\":\"" + id + "\",\"outcome\":\"EXECUTED\"}";
     }
 
     /**
@@ -67,7 +66,7 @@ class UpdateIdempotencyIT extends TelegramConversationBase {
      */
     private String unlinkedCallback(long update) {
         return """
-                {"update_id": %d, "callback_query": {"id": "cb%d", "data": "v1:reg:",
+                {"update_id": %d, "callback_query": {"id": "cb%d", "data": "v1:register:",
                  "from": {"id": %d, "is_bot": false, "first_name": "Teste"},
                  "message": {"message_id": 55, "date": 1, "chat": {"id": %d, "type": "private"}}}}
                 """
@@ -83,11 +82,10 @@ class UpdateIdempotencyIT extends TelegramConversationBase {
         JsonNode second = update(json);
         JsonNode third = update(json);
 
-        assertThat(first.get("acoes")).hasSize(2);
-        assertThat(second.get("acoes")).isEqualTo(first.get("acoes"));
-        assertThat(third.get("acoes")).isEqualTo(first.get("acoes"));
-        assertThat(first.get("acoes").get(0).path("tipo").asString())
-                .isEqualTo("RESPOSTA_CALLBACK");
+        assertThat(first.get("actions")).hasSize(2);
+        assertThat(second.get("actions")).isEqualTo(first.get("actions"));
+        assertThat(third.get("actions")).isEqualTo(first.get("actions"));
+        assertThat(first.get("actions").get(0).path("type").asString()).isEqualTo("CALLBACK_REPLY");
         assertThat(jdbc.queryForObject("select count(*) from channel_action", Integer.class))
                 .isEqualTo(2);
         assertThat(
@@ -107,7 +105,7 @@ class UpdateIdempotencyIT extends TelegramConversationBase {
 
         JsonNode repeated = update(json);
 
-        assertThat(repeated.get("acoes")).isEmpty();
+        assertThat(repeated.get("actions")).isEmpty();
         assertThat(repeated.path("updateId").asLong()).isEqualTo(update);
     }
 
@@ -120,9 +118,9 @@ class UpdateIdempotencyIT extends TelegramConversationBase {
 
         JsonNode repeated = update(json);
 
-        assertThat(repeated.get("acoes")).hasSize(1);
-        assertThat(repeated.get("acoes").get(0)).isEqualTo(original.get("acoes").get(1));
-        assertThat(repeated.get("acoes").get(0).path("acaoId").asString())
+        assertThat(repeated.get("actions")).hasSize(1);
+        assertThat(repeated.get("actions").get(0)).isEqualTo(original.get("actions").get(1));
+        assertThat(repeated.get("actions").get(0).path("actionId").asString())
                 .isEqualTo("u" + update + "-1");
     }
 
@@ -132,10 +130,10 @@ class UpdateIdempotencyIT extends TelegramConversationBase {
         String json = unlinkedCallback(update);
         update(json);
         confirm(
-                "{\"acaoId\":\"u"
+                "{\"actionId\":\"u"
                         + update
-                        + "-0\",\"situacao\":\"FALHOU\",\"codigoMotivo\":\"ERRO_TELEGRAM\"}");
-        assertThat(update(json).get("acoes")).hasSize(1);
+                        + "-0\",\"outcome\":\"FAILED\",\"reasonCode\":\"TELEGRAM_ERROR\"}");
+        assertThat(update(json).get("actions")).hasSize(1);
     }
 
     @Test
@@ -160,8 +158,8 @@ class UpdateIdempotencyIT extends TelegramConversationBase {
         JsonNode b = calls.get(1).get();
         pool.shutdown();
 
-        assertThat(a.get("acoes")).isNotEmpty();
-        assertThat(b.get("acoes")).isEqualTo(a.get("acoes"));
+        assertThat(a.get("actions")).isNotEmpty();
+        assertThat(b.get("actions")).isEqualTo(a.get("actions"));
         // o interpretador rodou uma só vez: um vínculo e uma só linha de update
         assertThat(jdbc.queryForObject("select count(*) from telegram_link", Integer.class))
                 .isEqualTo(1);
@@ -171,7 +169,7 @@ class UpdateIdempotencyIT extends TelegramConversationBase {
                                 Integer.class,
                                 update))
                 .isEqualTo(1);
-        assertThat(a.get("acoes").get(0).path("texto").asString())
+        assertThat(a.get("actions").get(0).path("text").asString())
                 .startsWith("Conta vinculada com sucesso, Clara!");
     }
 
@@ -186,7 +184,7 @@ class UpdateIdempotencyIT extends TelegramConversationBase {
                                 USER_CLARA,
                                 "\"text\": \"" + ScenarioIT.CODE_CLARA + "\""));
 
-        assertThat(response.get("acoes")).isNotEmpty();
+        assertThat(response.get("actions")).isNotEmpty();
         assertThat(jdbc.queryForObject("select count(*) from telegram_link", Integer.class))
                 .isEqualTo(1);
         for (String method :
@@ -199,20 +197,20 @@ class UpdateIdempotencyIT extends TelegramConversationBase {
     void lostRowWithoutConclusionForMoreThan30sBecomesInternalErrorWithStableId() throws Exception {
         long update = nextUpdate();
         jdbc.update(
-                "insert into processed_telegram_update (update_id, received_at, origin) values (?, ?, 'INTERNO')",
+                "insert into processed_telegram_update (update_id, received_at, origin) values (?, ?, 'INTERNAL')",
                 update,
                 Timestamp.from(AdjustableClock.DEFAULT.minus(Duration.ofSeconds(31))));
         String json = messageJson(update, USER_CLARA, "\"text\": \"oi\"");
 
         JsonNode first = update(json);
 
-        assertThat(first.get("acoes")).hasSize(1);
-        assertThat(first.get("acoes").get(0).path("acaoId").asString())
+        assertThat(first.get("actions")).hasSize(1);
+        assertThat(first.get("actions").get(0).path("actionId").asString())
                 .isEqualTo("u" + update + "-e0");
-        assertThat(first.get("acoes").get(0).path("tipo").asString()).isEqualTo("MENSAGEM");
+        assertThat(first.get("actions").get(0).path("type").asString()).isEqualTo("MESSAGE");
         // repetir devolve a mesma ação, sem gerar outra
         JsonNode second = update(json);
-        assertThat(second.get("acoes")).isEqualTo(first.get("acoes"));
+        assertThat(second.get("actions")).isEqualTo(first.get("actions"));
         assertThat(jdbc.queryForObject("select count(*) from channel_action", Integer.class))
                 .isEqualTo(1);
     }
@@ -221,11 +219,11 @@ class UpdateIdempotencyIT extends TelegramConversationBase {
     void recentRowInProcessingReturnsEmptyListWithoutInventingError() throws Exception {
         long update = nextUpdate();
         jdbc.update(
-                "insert into processed_telegram_update (update_id, received_at, origin) values (?, ?, 'INTERNO')",
+                "insert into processed_telegram_update (update_id, received_at, origin) values (?, ?, 'INTERNAL')",
                 update,
                 Timestamp.from(AdjustableClock.DEFAULT.minus(Duration.ofSeconds(2))));
         JsonNode response = update(messageJson(update, USER_CLARA, "\"text\": \"oi\""));
-        assertThat(response.get("acoes")).isEmpty();
+        assertThat(response.get("actions")).isEmpty();
         assertThat(jdbc.queryForObject("select count(*) from channel_action", Integer.class))
                 .isZero();
     }
@@ -243,7 +241,7 @@ class UpdateIdempotencyIT extends TelegramConversationBase {
 
         JsonNode response = update(json);
 
-        assertThat(response.get("acoes")).isEmpty();
+        assertThat(response.get("actions")).isEmpty();
         assertThat(jdbc.queryForObject("select count(*) from channel_action", Integer.class))
                 .isZero();
     }

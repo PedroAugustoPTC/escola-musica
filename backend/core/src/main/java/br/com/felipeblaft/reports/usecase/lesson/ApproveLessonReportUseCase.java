@@ -46,7 +46,7 @@ public class ApproveLessonReportUseCase {
         report.approve(confirmedVersion, channel, clock.now());
         reports.save(report);
         ReportVersion version =
-                versions.search(ReportType.AULA, report.id(), report.approvedVersion())
+                versions.search(ReportType.LESSON, report.id(), report.approvedVersion())
                         .orElseThrow();
         documents.generateOfficial(report, version);
         return new Approval(report.id(), report.approvedVersion(), report.approvedAt());

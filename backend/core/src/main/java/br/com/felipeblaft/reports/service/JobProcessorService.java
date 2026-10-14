@@ -187,10 +187,10 @@ public class JobProcessorService {
                 return;
             }
             switch (job.type()) {
-                case REGISTRO_AULA -> registerLesson(job);
-                case NOVA_TENTATIVA -> newAttempt(job);
-                case RESPOSTA_PERGUNTAS -> answer(job);
-                case ALTERACAO -> changeLesson(job);
+                case LESSON_REGISTRATION -> registerLesson(job);
+                case RETRY -> newAttempt(job);
+                case QUESTION_ANSWER -> answer(job);
+                case CHANGE -> changeLesson(job);
                 default -> throw new IllegalStateException("tipo de trabalho sem processador");
             }
         } catch (RuntimeException | Error unexpected) {
@@ -205,10 +205,10 @@ public class JobProcessorService {
 
     private void registerLesson(ProcessingJob job) {
         notification.notifyStep(job);
-        advance(job, JobStep.TRANSCREVENDO);
+        advance(job, JobStep.TRANSCRIBING);
         Optional<TranscriptionResult> transcription = transcribe(job);
         if (transcription.isEmpty()) {
-            complete(job, JobResult.AUDIO_NAO_PROCESSAVEL);
+            complete(job, JobResult.AUDIO_NOT_PROCESSABLE);
             return;
         }
         if (discarded(job)) {
@@ -232,10 +232,10 @@ public class JobProcessorService {
                                             job.requestChannel(),
                                             now);
                             reports.save(created);
-                            job.linkReport(ReportType.AULA, created.id());
+                            job.linkReport(ReportType.LESSON, created.id());
                             // a transcrição foi registrada antes de o relatório existir (FR-056)
-                            costs.linkReport(job.id(), ReportType.AULA, created.id());
-                            job.advance(JobStep.ESTRUTURANDO);
+                            costs.linkReport(job.id(), ReportType.LESSON, created.id());
+                            job.advance(JobStep.STRUCTURING);
                             queue.update(job);
                             return created;
                         });
@@ -245,7 +245,7 @@ public class JobProcessorService {
 
     private void newAttempt(ProcessingJob job) {
         LessonReport report = reports.searchById(job.reportId()).orElseThrow();
-        advance(job, JobStep.ESTRUTURANDO);
+        advance(job, JobStep.STRUCTURING);
         structure(job, report);
     }
 
@@ -253,8 +253,8 @@ public class JobProcessorService {
         Optional<ResponseLlm<AiLessonReportOutput>> response =
                 callLlm(
                         job,
-                        TaskLlm.ESTRUTURACAO_AULA,
-                        AiTask.ESTRUTURACAO,
+                        TaskLlm.LESSON_STRUCTURING,
+                        AiTask.STRUCTURING,
                         new TaskInput.LessonStructuring(report.transcription()));
         if (response.isEmpty()) {
             boolean saved =
@@ -265,7 +265,7 @@ public class JobProcessorService {
                                 return true;
                             });
             if (saved) {
-                complete(job, JobResult.FALHA_ESTRUTURACAO);
+                complete(job, JobResult.STRUCTURING_FAILED);
             }
             return;
         }
@@ -283,7 +283,7 @@ public class JobProcessorService {
                             if (review[0]) {
                                 createVersion(
                                         current,
-                                        VersionOrigin.ESTRUTURACAO_INICIAL,
+                                        VersionOrigin.INITIAL_STRUCTURING,
                                         null,
                                         job,
                                         prompt);
@@ -291,9 +291,7 @@ public class JobProcessorService {
                             return true;
                         });
         if (saved) {
-            complete(
-                    job,
-                    review[0] ? JobResult.PRONTO_PARA_CONFERENCIA : JobResult.PERGUNTAS_PENDENTES);
+            complete(job, review[0] ? JobResult.READY_FOR_REVIEW : JobResult.PENDING_QUESTIONS);
         }
     }
 
@@ -302,7 +300,7 @@ public class JobProcessorService {
     private void answer(ProcessingJob job) {
         Optional<String> text = requestText(job);
         if (text.isEmpty()) {
-            endStepWithoutChange(job, JobResult.FALHA_RESPOSTA);
+            endStepWithoutChange(job, JobResult.ANSWER_FAILED);
             return;
         }
         LessonReport report = reports.searchById(job.reportId()).orElseThrow();
@@ -310,17 +308,17 @@ public class JobProcessorService {
             withOpenReport(
                     job,
                     current -> {
-                        current.startStep(ReportStep.INCORPORANDO_RESPOSTAS, clock.now());
+                        current.startStep(ReportStep.INCORPORATING_ANSWERS, clock.now());
                         return true;
                     });
         }
-        advance(job, JobStep.INCORPORANDO_RESPOSTAS);
+        advance(job, JobStep.INCORPORATING_ANSWERS);
         int round = report.questionRounds();
         Optional<ResponseLlm<AiLessonReportOutput>> response =
                 callLlm(
                         job,
-                        TaskLlm.INCORPORACAO_RESPOSTAS,
-                        AiTask.INCORPORACAO_RESPOSTAS,
+                        TaskLlm.ANSWER_INCORPORATION,
+                        AiTask.ANSWER_INCORPORATION,
                         new TaskInput.AnswerIncorporation(
                                 report.content(), report.pendingQuestions(), text.get(), round));
         if (response.isEmpty()) {
@@ -331,16 +329,16 @@ public class JobProcessorService {
                                 registerInteraction(
                                         current,
                                         job,
-                                        InteractionType.RESPOSTA_PERGUNTAS,
+                                        InteractionType.QUESTION_ANSWER,
                                         text.get(),
                                         round,
-                                        InteractionResult.FALHOU,
+                                        InteractionResult.FAILED,
                                         null);
                                 current.completeStep(clock.now());
                                 return true;
                             });
             if (saved) {
-                complete(job, JobResult.FALHA_RESPOSTA);
+                complete(job, JobResult.ANSWER_FAILED);
             }
             return;
         }
@@ -354,10 +352,10 @@ public class JobProcessorService {
                                     registerInteraction(
                                             current,
                                             job,
-                                            InteractionType.RESPOSTA_PERGUNTAS,
+                                            InteractionType.QUESTION_ANSWER,
                                             text.get(),
                                             round,
-                                            InteractionResult.APLICADA,
+                                            InteractionResult.APPLIED,
                                             null);
                             review[0] =
                                     current.incorporateAnswer(
@@ -367,7 +365,7 @@ public class JobProcessorService {
                             if (review[0]) {
                                 createVersion(
                                         current,
-                                        VersionOrigin.RESPOSTA_PERGUNTAS,
+                                        VersionOrigin.QUESTION_ANSWER,
                                         interaction,
                                         job,
                                         response.get().versionPrompt());
@@ -375,9 +373,7 @@ public class JobProcessorService {
                             return true;
                         });
         if (saved) {
-            complete(
-                    job,
-                    review[0] ? JobResult.PRONTO_PARA_CONFERENCIA : JobResult.PERGUNTAS_PENDENTES);
+            complete(job, review[0] ? JobResult.READY_FOR_REVIEW : JobResult.PENDING_QUESTIONS);
         }
     }
 
@@ -386,7 +382,7 @@ public class JobProcessorService {
     private void changeLesson(ProcessingJob job) {
         Optional<String> text = requestText(job);
         if (text.isEmpty()) {
-            endStepWithoutChange(job, JobResult.FALHA_ALTERACAO);
+            endStepWithoutChange(job, JobResult.CHANGE_FAILED);
             return;
         }
         int baseVersion =
@@ -400,31 +396,31 @@ public class JobProcessorService {
                                 registerInteraction(
                                         current,
                                         job,
-                                        InteractionType.ALTERACAO,
+                                        InteractionType.CHANGE,
                                         text.get(),
                                         null,
-                                        InteractionResult.RECUSADA_VERSAO_DESATUALIZADA,
+                                        InteractionResult.REJECTED_STALE_VERSION,
                                         null);
                                 current.completeStep(clock.now());
                                 return true;
                             });
             if (saved) {
-                complete(job, JobResult.VERSAO_DESATUALIZADA);
+                complete(job, JobResult.STALE_VERSION);
             }
             return;
         }
         withOpenReport(
                 job,
                 current -> {
-                    current.startStep(ReportStep.APLICANDO_ALTERACAO, clock.now());
+                    current.startStep(ReportStep.APPLYING_CHANGE, clock.now());
                     return true;
                 });
-        advance(job, JobStep.APLICANDO_ALTERACAO);
+        advance(job, JobStep.APPLYING_CHANGE);
         Optional<ResponseLlm<AiLessonReportOutput>> response =
                 callLlm(
                         job,
-                        TaskLlm.REVISAO_AULA,
-                        AiTask.REVISAO,
+                        TaskLlm.LESSON_REVISION,
+                        AiTask.REVISION,
                         new TaskInput.LessonRevision(report.content(), text.get()));
         if (response.isEmpty()) {
             boolean saved =
@@ -434,16 +430,16 @@ public class JobProcessorService {
                                 registerInteraction(
                                         current,
                                         job,
-                                        InteractionType.ALTERACAO,
+                                        InteractionType.CHANGE,
                                         text.get(),
                                         null,
-                                        InteractionResult.FALHOU,
+                                        InteractionResult.FAILED,
                                         null);
                                 current.completeStep(clock.now());
                                 return true;
                             });
             if (saved) {
-                complete(job, JobResult.FALHA_ALTERACAO);
+                complete(job, JobResult.CHANGE_FAILED);
             }
             return;
         }
@@ -458,21 +454,21 @@ public class JobProcessorService {
                                     || output.content().equals(current.content())) {
                                 InteractionResult withoutChange =
                                         output.withoutChange() && output.indicatedActionRequest()
-                                                ? InteractionResult.PEDIDO_DE_ACAO_IGNORADO
-                                                : InteractionResult.SEM_ALTERACAO_DE_CONTEUDO;
+                                                ? InteractionResult.ACTION_REQUEST_IGNORED
+                                                : InteractionResult.NO_CONTENT_CHANGE;
                                 registerInteraction(
                                         current,
                                         job,
-                                        InteractionType.ALTERACAO,
+                                        InteractionType.CHANGE,
                                         text.get(),
                                         null,
                                         withoutChange,
                                         null);
                                 current.completeStep(now);
                                 result[0] =
-                                        withoutChange == InteractionResult.PEDIDO_DE_ACAO_IGNORADO
-                                                ? JobResult.PEDIDO_DE_ACAO_IGNORADO
-                                                : JobResult.SEM_ALTERACAO_DE_CONTEUDO;
+                                        withoutChange == InteractionResult.ACTION_REQUEST_IGNORED
+                                                ? JobResult.ACTION_REQUEST_IGNORED
+                                                : JobResult.NO_CONTENT_CHANGE;
                                 return true;
                             }
                             int created = current.applyChange(output.content(), now);
@@ -480,18 +476,18 @@ public class JobProcessorService {
                                     registerInteraction(
                                             current,
                                             job,
-                                            InteractionType.ALTERACAO,
+                                            InteractionType.CHANGE,
                                             text.get(),
                                             null,
-                                            InteractionResult.APLICADA,
+                                            InteractionResult.APPLIED,
                                             created);
                             createVersion(
                                     current,
-                                    VersionOrigin.ALTERACAO,
+                                    VersionOrigin.CHANGE,
                                     interaction,
                                     job,
                                     response.get().versionPrompt());
-                            result[0] = JobResult.NOVA_VERSAO;
+                            result[0] = JobResult.NEW_VERSION;
                             return true;
                         });
         if (saved) {
@@ -503,10 +499,10 @@ public class JobProcessorService {
 
     /** Texto digitado ou transcrito do áudio; vazio se a transcrição falhou (nada é aplicado). */
     private Optional<String> requestText(ProcessingJob job) {
-        if (job.medium() == Medium.TEXTO) {
+        if (job.medium() == Medium.TEXT) {
             return job.parameter(ProcessingJob.TEXT);
         }
-        advance(job, JobStep.TRANSCREVENDO_PEDIDO);
+        advance(job, JobStep.TRANSCRIBING_REQUEST);
         Optional<TranscriptionResult> transcription = transcribe(job);
         transcription.ifPresent(
                 t -> {
@@ -538,7 +534,7 @@ public class JobProcessorService {
                             job.id(),
                             job.reportType(),
                             job.reportId(),
-                            AiTask.TRANSCRICAO,
+                            AiTask.TRANSCRIPTION,
                             result.modelProvider(),
                             BigDecimal.valueOf(result.durationSeconds()),
                             null,
@@ -552,7 +548,7 @@ public class JobProcessorService {
         } catch (AudioNotProcessableException
                 | UnsupportedFormatException
                 | ProviderUnavailableException failure) {
-            registerAiFailure(job, AiTask.TRANSCRICAO, failureCode(failure), start);
+            registerAiFailure(job, AiTask.TRANSCRIPTION, failureCode(failure), start);
             return Optional.empty();
         } finally {
             job.defineTemporaryFile(null);
@@ -611,9 +607,9 @@ public class JobProcessorService {
     static String failureCode(RuntimeException failure) {
         return switch (failure) {
             case AudioNotProcessableException a -> "AUDIO_" + a.reason().name();
-            case UnsupportedFormatException f -> "FORMATO_NAO_SUPORTADO";
-            case InvalidAiOutputException s -> "SAIDA_INVALIDA";
-            default -> "PROVEDOR_INDISPONIVEL";
+            case UnsupportedFormatException f -> "UNSUPPORTED_FORMAT";
+            case InvalidAiOutputException s -> "INVALID_OUTPUT";
+            default -> "PROVIDER_UNAVAILABLE";
         };
     }
 
@@ -681,7 +677,7 @@ public class JobProcessorService {
             String prompt) {
         ReportVersion version =
                 ReportVersion.create(
-                        ReportType.AULA,
+                        ReportType.LESSON,
                         report.id(),
                         report.currentVersion(),
                         report.content(),
@@ -708,7 +704,7 @@ public class JobProcessorService {
                         .orElse(report.currentVersion());
         ReportInteraction interaction =
                 ReportInteraction.create(
-                        ReportType.AULA,
+                        ReportType.LESSON,
                         report.id(),
                         type,
                         job.requestChannel(),
@@ -739,8 +735,8 @@ public class JobProcessorService {
                     () -> {
                         LessonReport current =
                                 reports.searchForUpdate(job.reportId()).orElseThrow();
-                        if (current.status() == ReportStatus.CANCELADO
-                                || current.status() == ReportStatus.APROVADO
+                        if (current.status() == ReportStatus.CANCELLED
+                                || current.status() == ReportStatus.APPROVED
                                 || isDiscarded(job)) {
                             return false;
                         }
@@ -750,7 +746,7 @@ public class JobProcessorService {
                     });
         } catch (ConcurrencyConflictException conflict) {
             LessonReport current = reports.searchById(job.reportId()).orElseThrow();
-            if (current.status() == ReportStatus.CANCELADO || isDiscarded(job)) {
+            if (current.status() == ReportStatus.CANCELLED || isDiscarded(job)) {
                 markDiscarded(job);
                 return false;
             }
@@ -759,7 +755,7 @@ public class JobProcessorService {
     }
 
     private boolean isDiscarded(ProcessingJob job) {
-        return queue.searchById(job.id()).map(t -> t.status() == JobStatus.DESCARTADO).orElse(true);
+        return queue.searchById(job.id()).map(t -> t.status() == JobStatus.DISCARDED).orElse(true);
     }
 
     /** Verifica o descarte; se descartado, encerra o trabalho sem resultado. */
@@ -793,10 +789,10 @@ public class JobProcessorService {
                     queue.update(job);
                     if (complement != null
                             && job.reportType() != null
-                            && job.reportType() != ReportType.AULA) {
+                            && job.reportType() != ReportType.LESSON) {
                         complement.registerTime(job);
                     }
-                    if (job.reportId() != null && job.reportType() == ReportType.AULA) {
+                    if (job.reportId() != null && job.reportType() == ReportType.LESSON) {
                         reports.searchById(job.reportId())
                                 .ifPresent(
                                         report -> {
@@ -812,22 +808,22 @@ public class JobProcessorService {
     private void unexpectedFailure(ProcessingJob job) {
         JobResult result =
                 switch (job.type()) {
-                    case RESPOSTA_PERGUNTAS -> JobResult.FALHA_RESPOSTA;
-                    case ALTERACAO -> JobResult.FALHA_ALTERACAO;
-                    case CONSOLIDACAO_SEMESTRAL -> JobResult.FALHA_CONSOLIDACAO;
+                    case QUESTION_ANSWER -> JobResult.ANSWER_FAILED;
+                    case CHANGE -> JobResult.CHANGE_FAILED;
+                    case SEMESTER_CONSOLIDATION -> JobResult.CONSOLIDATION_FAILED;
                     default ->
                             job.reportId() == null
-                                    ? JobResult.AUDIO_NAO_PROCESSAVEL
-                                    : JobResult.FALHA_ESTRUTURACAO;
+                                    ? JobResult.AUDIO_NOT_PROCESSABLE
+                                    : JobResult.STRUCTURING_FAILED;
                 };
         try {
             if (complement != null && complement.serves(job)) {
                 complement.failed(job);
-            } else if (job.reportId() != null && job.reportType() == ReportType.AULA) {
+            } else if (job.reportId() != null && job.reportType() == ReportType.LESSON) {
                 withOpenReport(
                         job,
                         current -> {
-                            if (current.status() == ReportStatus.EM_PROCESSAMENTO) {
+                            if (current.status() == ReportStatus.PROCESSING) {
                                 current.failStructuring(clock.now());
                             } else {
                                 current.completeStep(clock.now());

@@ -79,7 +79,7 @@ public class SemesterReportSections {
     public String periodLabel(String periodKey) {
         SemesterPeriod period = SemesterPeriod.of(periodKey);
         return catalog.text(
-                "SEMESTRE_ROTULO", Map.of("numero", period.semester(), "ano", period.year()));
+                "SEMESTER_LABEL_TEXT", Map.of("number", period.semester(), "year", period.year()));
     }
 
     /** Seção 1 (sistema) seguida das seções 2 a 10 (IA). */
@@ -88,17 +88,16 @@ public class SemesterReportSections {
         sections.add(
                 new Section(
                         1,
-                        catalog.text("SECAO_INFORMACOES_GERAIS"),
+                        catalog.text("GENERAL_INFORMATION_SECTION"),
                         List.of(
-                                text("INFO_NOME", info.name()),
+                                text("INFO_NAME", info.name()),
                                 text(
-                                        "INFO_IDADE",
-                                        catalog.text(
-                                                "INFO_IDADE_VALOR", Map.of("idade", info.age()))),
-                                text("INFO_INSTRUMENTO", info.instrument()),
-                                text("INFO_PROFESSOR", info.teacher()),
+                                        "INFO_AGE",
+                                        catalog.text("AGE_VALUE_INFO", Map.of("age", info.age()))),
+                                text("INFO_INSTRUMENT", info.instrument()),
+                                text("INFO_TEACHER", info.teacher()),
                                 text(
-                                        "INFO_PERIODO",
+                                        "INFO_PERIOD",
                                         periodLabel(info.periodKey())
                                                 + " ("
                                                 + formatting.data(info.periodStart())
@@ -106,7 +105,7 @@ public class SemesterReportSections {
                                                 + formatting.data(info.periodEnd())
                                                 + ")"),
                                 text(
-                                        "INFO_AULAS_CONSIDERADAS",
+                                        "CONSIDERED_LESSONS_INFO",
                                         Integer.toString(info.consideredLessonCount())))));
         sections.addAll(contentSections(content));
         return sections;
@@ -123,65 +122,65 @@ public class SemesterReportSections {
         return List.of(
                 new Section(
                         2,
-                        catalog.text("SECAO_FREQUENCIA_E_ESTUDO"),
+                        catalog.text("ATTENDANCE_AND_STUDY_SECTION"),
                         List.of(
-                                text("CAMPO_FREQUENCIA_AULAS", f.lessonAttendance()),
-                                text("CAMPO_REGULARIDADE_ESTUDO_EM_CASA", f.homeStudyRegularity()),
-                                text("CAMPO_ENGAJAMENTO", f.engagement()),
-                                text("CAMPO_COMENTARIO_GERAL", f.generalComment()))),
+                                text("LESSON_ATTENDANCE_FIELD", f.lessonAttendance()),
+                                text("HOME_STUDY_REGULARITY_FIELD", f.homeStudyRegularity()),
+                                text("ENGAGEMENT_FIELD", f.engagement()),
+                                text("GENERAL_COMMENT_FIELD", f.generalComment()))),
                 new Section(
                         3,
-                        catalog.text("SECAO_TECNICA"),
+                        catalog.text("TECHNIQUE_SECTION"),
                         List.of(
-                                list("CAMPO_CONTEUDOS_TRABALHADOS", t.workedTopics()),
-                                text("CAMPO_EVOLUCAO_TECNICA", t.technicalProgress()),
-                                list("CAMPO_PONTOS_A_DESENVOLVER", t.pointsToDevelop()),
-                                list("CAMPO_ESTUDOS_REALIZADOS", t.completedStudies()))),
+                                list("WORKED_TOPICS_FIELD", t.workedTopics()),
+                                text("TECHNICAL_PROGRESS_FIELD", t.technicalProgress()),
+                                list("POINTS_TO_DEVELOP_FIELD", t.pointsToDevelop()),
+                                list("PERFORMED_STUDIES_FIELD", t.completedStudies()))),
                 new Section(
                         4,
-                        catalog.text("SECAO_MUSICALIDADE"),
+                        catalog.text("MUSICALITY_SECTION"),
                         List.of(
-                                list("CAMPO_REPERTORIO_ESTUDADO", m.studiedRepertoire()),
-                                text("CAMPO_SOM", m.sound()),
-                                text("CAMPO_RITMO", m.rhythm()),
-                                text("CAMPO_FRASEADO", m.phrasing()),
-                                text("CAMPO_ARTICULACAO", m.articulation()),
-                                text("CAMPO_ESTILO", m.style()),
-                                text("CAMPO_COMENTARIO_MUSICAL", m.musicalComment()))),
+                                list("STUDIED_REPERTOIRE_FIELD", m.studiedRepertoire()),
+                                text("SOUND_FIELD", m.sound()),
+                                text("RHYTHM_FIELD", m.rhythm()),
+                                text("PHRASING_FIELD", m.phrasing()),
+                                text("ARTICULATION_FIELD", m.articulation()),
+                                text("STYLE_FIELD", m.style()),
+                                text("MUSICAL_COMMENT_FIELD", m.musicalComment()))),
                 new Section(
                         5,
-                        catalog.text("SECAO_LEITURA_E_MEMORIZACAO"),
+                        catalog.text("READING_AND_MEMORIZATION_SECTION"),
                         List.of(
-                                text("CAMPO_AVALIACAO", l.assessment()),
-                                text("CAMPO_COMENTARIO", l.comment()))),
+                                text("ASSESSMENT_FIELD", l.assessment()),
+                                text("COMMENT_FIELD", l.comment()))),
                 new Section(
                         6,
-                        catalog.text("SECAO_PONTOS_DE_ATENCAO"),
+                        catalog.text("ATTENTION_POINTS_SECTION"),
                         List.of(new Field(null, c.attentionPoints().items(), ""))),
                 new Section(
                         7,
-                        catalog.text("SECAO_ESTRATEGIAS_PEDAGOGICAS"),
+                        catalog.text("PEDAGOGICAL_STRATEGIES_SECTION"),
                         List.of(new Field(null, c.pedagogicalStrategies().items(), ""))),
                 new Section(
                         8,
-                        catalog.text("SECAO_ACOMPANHAMENTO_FAMILIAR"),
+                        catalog.text("FAMILY_SUPPORT_SECTION"),
                         List.of(
-                                text("CAMPO_NIVEL_DE_PRESENCA", a.presenceLevel()),
-                                text("CAMPO_OBSERVACAO_DO_PROFESSOR", a.teacherObservation()))),
+                                text("PRESENCE_LEVEL_FIELD", a.presenceLevel()),
+                                text("TEACHER_OBSERVATION_FIELD", a.teacherObservation()))),
                 new Section(
                         9,
-                        catalog.text("SECAO_PLANEJAMENTO_PROXIMO_SEMESTRE"),
+                        catalog.text("NEXT_SEMESTER_PLAN_SECTION"),
                         List.of(
-                                list("CAMPO_METAS_TECNICAS", p.technicalGoals()),
-                                list("CAMPO_METAS_MUSICAIS", p.musicalGoals()),
-                                list("CAMPO_HABITOS_DE_ESTUDO", p.studyHabits()),
-                                list("CAMPO_REPERTORIO_PROPOSTO", p.proposedRepertoire()),
-                                list("CAMPO_ESTUDOS_TECNICOS", p.technicalStudies()),
-                                list("CAMPO_LEITURA_E_TEORIA", p.readingAndTheory()),
-                                text("CAMPO_PROJETO_DO_SEMESTRE", p.semesterProject()))),
+                                list("TECHNICAL_GOALS_FIELD", p.technicalGoals()),
+                                list("MUSICAL_GOALS_FIELD", p.musicalGoals()),
+                                list("STUDY_HABITS_FIELD", p.studyHabits()),
+                                list("PROPOSED_REPERTOIRE_FIELD", p.proposedRepertoire()),
+                                list("TECHNICAL_STUDIES_FIELD", p.technicalStudies()),
+                                list("READING_AND_THEORY_FIELD", p.readingAndTheory()),
+                                text("SEMESTER_PROJECT_FIELD", p.semesterProject()))),
                 new Section(
                         10,
-                        catalog.text("SECAO_PARECER_FINAL"),
+                        catalog.text("FINAL_OPINION_SECTION"),
                         List.of(new Field(null, List.of(), c.finalOpinion()))));
     }
 

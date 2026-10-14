@@ -37,21 +37,21 @@ import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Feature 003, FR-015 e R-03 (verificação 2): dados gravados na V6, com as chaves e os nomes
- * antigos, continuam legíveis pelos ADAPTADORES REAIS depois da V7. O contexto da aplicação sobe
- * num esquema próprio parado na V6; o teste grava um relatório de aula com versão, um semestral,
- * uma conversa do Telegram com áudio pendente e confirmação, um trabalho de consolidação, uma ação
- * da outbox com teclado e um documento de canal; migra para a V7 e lê tudo pelas portas, exigindo
- * os mesmos objetos de domínio e textos.
+ * antigos, continuam legíveis pelos ADAPTADORES REAIS depois da V8 (a V7 renomeia nomes e chaves; a
+ * V8, os valores). O contexto da aplicação sobe num esquema próprio parado na V6; o teste grava um
+ * relatório de aula com versão, um semestral, uma conversa do Telegram com áudio pendente e
+ * confirmação, um trabalho de consolidação, uma ação da outbox com teclado e um documento de canal;
+ * migra para a V8 e lê tudo pelas portas, exigindo os mesmos objetos de domínio e textos.
  */
 @SpringBootTest(
         properties = {
-            "spring.flyway.target=7",
-            "spring.flyway.schemas=" + MigrationV7ReadableDataIT.SCHEMA,
-            "spring.flyway.default-schema=" + MigrationV7ReadableDataIT.SCHEMA,
+            "spring.flyway.target=8",
+            "spring.flyway.schemas=" + MigrationV8ReadableDataIT.SCHEMA,
+            "spring.flyway.default-schema=" + MigrationV8ReadableDataIT.SCHEMA,
         })
 @ActiveProfiles("test")
 @Import(ConfigTest.class)
-class MigrationV7ReadableDataIT {
+class MigrationV8ReadableDataIT {
 
     static final String SCHEMA = "migration_v7_data_test";
     private static final JsonMapper JSON = JsonMapper.builder().build();
@@ -117,10 +117,13 @@ class MigrationV7ReadableDataIT {
     private static final String JOB_PARAMETERS =
             "{\"periodoChave\": \"2026-1\", \"confirmarMesmoComEmAberto\": \"true\"}";
     private static final String FLOW_DATA =
-            "{\"confirmacao\": \"aprovar\", \"semAluno\": \"z\", \"semPeriodo\": \"2026-1\"}";
+            "{\"confirmacao\": \"aprovar:1\", \"semAluno\": \"z\", \"semPeriodo\": \"2026-1\"}";
+    private static final String EXPECTED_ACTION_PAYLOAD =
+            "{\"actionId\":\"u1-0\",\"type\":\"MESSAGE\",\"chatId\":7,\"text\":\"Olá, Clara\",\"keyboard\":{\"rows\":"
+                    + "[[{\"label\":\"Aprovar\",\"data\":\"v1:approve:1\"}]]}}";
     private static final String ACTION_PAYLOAD =
             "{\"acaoId\":\"u1-0\",\"tipo\":\"MENSAGEM\",\"chatId\":7,\"texto\":\"Olá, Clara\",\"teclado\":{\"linhas\":"
-                    + "[[{\"rotulo\":\"Aprovar\",\"dados\":\"v1:aprovar:1\"}]]}}";
+                    + "[[{\"rotulo\":\"Aprovar\",\"dados\":\"v1:aprov:1\"}]]}}";
 
     private static final UUID TEACHER = UUID.randomUUID();
     private static final UUID STUDENT = UUID.randomUUID();
@@ -143,7 +146,7 @@ class MigrationV7ReadableDataIT {
     }
 
     @BeforeAll
-    static void seedV6AndMigrateToV7() throws Exception {
+    static void seedV6AndMigrateToV8() throws Exception {
         dropSchema();
         Flyway.configure()
                 .dataSource(BASE_URL, USER, PASSWORD)
@@ -228,22 +231,22 @@ class MigrationV7ReadableDataIT {
                 TEACHER,
                 LESSON_REPORT);
 
-        // ---- migra para a V7 ----
+        // ---- migra para a V8 ----
         Flyway.configure()
                 .dataSource(BASE_URL, USER, PASSWORD)
                 .schemas(SCHEMA)
                 .defaultSchema(SCHEMA)
                 .locations("classpath:db/migration")
-                .target("7")
+                .target("8")
                 .load()
                 .migrate();
     }
 
     @Test
-    void v6DataStaysReadableThroughTheRealAdaptersAfterV7() throws Exception {
+    void v6DataStaysReadableThroughTheRealAdaptersAfterV8() throws Exception {
         // ---- lê pelos adaptadores reais ----
         LessonReport report = lessonReports.searchById(LESSON_REPORT).orElseThrow();
-        assertThat(report.status()).isEqualTo(ReportStatus.AGUARDANDO_CONFERENCIA);
+        assertThat(report.status()).isEqualTo(ReportStatus.AWAITING_REVIEW);
         assertThat(report.transcription()).isEqualTo("Transcrição da aula");
         assertThat(report.pendingQuestions()).containsExactly("Qual peça?");
         assertThat(report.content())
@@ -264,9 +267,9 @@ class MigrationV7ReadableDataIT {
                 .contains("Presente em todas", "Aprovada com louvor", "Recital");
 
         TelegramLink link = telegramLinks.searchByTelegramUserId(777).orElseThrow();
-        assertThat(link.conversation().flow()).isEqualTo(ConversationFlow.SEMESTRAL);
-        assertThat(link.conversation().step()).isEqualTo(ConversationFlowStep.ESCOLHENDO_SEMESTRE);
-        assertThat(link.conversation().pendingConfirmation()).contains("aprovar");
+        assertThat(link.conversation().flow()).isEqualTo(ConversationFlow.SEMESTER);
+        assertThat(link.conversation().step()).isEqualTo(ConversationFlowStep.CHOOSING_SEMESTER);
+        assertThat(link.conversation().pendingConfirmation()).contains("approve:1");
         assertThat(link.conversation().data("semesterStudent")).contains("z");
         assertThat(link.conversation().data("semesterPeriod")).contains("2026-1");
         assertThat(link.conversation().pendingAudio()).isPresent();
@@ -280,7 +283,10 @@ class MigrationV7ReadableDataIT {
         assertThat(jobs.searchConsolidationInProgress(TEACHER, STUDENT, "2026-1")).isPresent();
 
         ChannelAction action = actions.searchById("u1-0").orElseThrow();
-        assertThat(JSON.readTree(action.payload())).isEqualTo(JSON.readTree(ACTION_PAYLOAD));
+        // a V8 trocou as chaves do JSON do fio, o valor de `type` e a ação do botão (aprov →
+        // approve)
+        assertThat(JSON.readTree(action.payload()))
+                .isEqualTo(JSON.readTree(EXPECTED_ACTION_PAYLOAD));
 
         assertThat(documents.searchByHash(TOKEN_HASH).orElseThrow().fileName())
                 .isEqualTo("relatorio-aula-2026-09-01-v1.pdf");

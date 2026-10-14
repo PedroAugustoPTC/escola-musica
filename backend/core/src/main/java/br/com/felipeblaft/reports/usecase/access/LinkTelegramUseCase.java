@@ -39,10 +39,10 @@ public class LinkTelegramUseCase {
         Teacher teacher =
                 authentication.authenticate(Channel.TELEGRAM, Long.toString(telegramUserId), code);
         if (links.searchByTelegramUserId(telegramUserId).isPresent()) {
-            throw new DomainException(ErrorCode.TELEGRAM_JA_VINCULADO);
+            throw new DomainException(ErrorCode.TELEGRAM_ALREADY_LINKED);
         }
         if (links.searchByTeacherId(teacher.id()).isPresent()) {
-            throw new DomainException(ErrorCode.PROFESSOR_JA_VINCULADO);
+            throw new DomainException(ErrorCode.TEACHER_ALREADY_LINKED);
         }
         TelegramLink link = TelegramLink.create(teacher.id(), telegramUserId, chatId, clock.now());
         links.save(link);

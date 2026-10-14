@@ -100,7 +100,7 @@ final class DemoContents {
                                     "Arcadas longas diante do espelho",
                                     "Escala de Ré maior com afinador",
                                     "Tocar o minueto devagar, em partes")),
-                    "canto",
+                    "corner",
                     new Instrument(
                             List.of(
                                     "Vocalises de Concone, nº 1",

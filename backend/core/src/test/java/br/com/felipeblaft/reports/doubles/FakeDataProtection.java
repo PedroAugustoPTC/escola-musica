@@ -13,7 +13,7 @@ public class FakeDataProtection implements DataProtectionPort {
 
     @Override
     public byte[] encryptCpf(Cpf cpf) {
-        return ("cifrado:" + new StringBuilder(cpf.digits()).reverse())
+        return ("encrypted:" + new StringBuilder(cpf.digits()).reverse())
                 .getBytes(StandardCharsets.UTF_8);
     }
 
@@ -24,12 +24,12 @@ public class FakeDataProtection implements DataProtectionPort {
 
     @Override
     public String hashAccessCode(AccessCode code) {
-        return "codigo:" + code.value();
+        return "code:" + code.value();
     }
 
     @Override
     public String originHash(Channel channel, String origin) {
-        return "origem:" + channel + ":" + origin;
+        return "origin:" + channel + ":" + origin;
     }
 
     @Override

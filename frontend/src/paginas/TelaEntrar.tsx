@@ -52,7 +52,7 @@ export function TelaEntrar() {
         } else if (erro instanceof ErroApi && erro.status < 500) {
           setSituacao({ tipo: 'invalido', mensagem: erro.message });
         } else {
-          setSituacao({ tipo: 'erro', mensagem: msg('ERRO_INTERNO') });
+          setSituacao({ tipo: 'erro', mensagem: msg('INTERNAL_ERROR') });
         }
       },
     });
@@ -77,18 +77,18 @@ export function TelaEntrar() {
                   relatórios.
                 </p>
               </div>
-              {motivo === 'SESSAO_EXPIRADA' && situacao.tipo === 'normal' ? (
+              {motivo === 'SESSION_EXPIRED' && situacao.tipo === 'normal' ? (
                 <div role="status" className="alerta alerta--info">
                   <Icone nome="info" />
-                  <div className="alerta__texto">{msg('SESSAO_EXPIRADA')}</div>
+                  <div className="alerta__texto">{msg('SESSION_EXPIRED')}</div>
                 </div>
               ) : null}
               {bloqueado ? (
                 <div role="alert" className="alerta alerta--aviso">
                   <Icone nome="lock_clock" />
                   <div className="alerta__texto">
-                    {msg('BLOQUEADO_TEMPORARIAMENTE', {
-                      minutos: Math.max(1, Math.ceil(segundosRestantes / 60)),
+                    {msg('TEMPORARILY_BLOCKED', {
+                      minutes: Math.max(1, Math.ceil(segundosRestantes / 60)),
                     })}
                   </div>
                 </div>
@@ -96,7 +96,7 @@ export function TelaEntrar() {
               {situacao.tipo === 'sem-conexao' ? (
                 <div role="alert" className="alerta alerta--erro">
                   <Icone nome="wifi_off" />
-                  <div className="alerta__texto">{msg('SEM_CONEXAO')}</div>
+                  <div className="alerta__texto">{msg('NO_CONNECTION')}</div>
                 </div>
               ) : null}
               {situacao.tipo === 'erro' ? (

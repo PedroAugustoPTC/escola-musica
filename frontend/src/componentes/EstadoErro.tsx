@@ -6,7 +6,7 @@ import { Icone } from './Icone';
 /** Texto do catálogo para qualquer erro (nunca detalhe interno, FR-054). */
 export function textoDoErro(erro: unknown): string {
   if (erro instanceof ErroApi) return erro.message;
-  return msg('ERRO_INTERNO');
+  return msg('INTERNAL_ERROR');
 }
 
 /** Alerta de erro dentro de uma tela, com "Tentar novamente" opcional. */

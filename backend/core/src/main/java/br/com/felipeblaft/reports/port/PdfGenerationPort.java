@@ -18,8 +18,8 @@ public interface PdfGenerationPort {
     GeneratedDocument generateSemesterReport(SemesterReportPdfModel model);
 
     enum DocumentStatus {
-        CONFERENCIA,
-        OFICIAL
+        REVIEW,
+        OFFICIAL
     }
 
     /** Quem aprovou, quando e qual versão (FR-030). */
@@ -40,7 +40,7 @@ public interface PdfGenerationPort {
             Objects.requireNonNull(lessonDate);
             Objects.requireNonNull(content);
             Objects.requireNonNull(status);
-            if (status == DocumentStatus.OFICIAL) {
+            if (status == DocumentStatus.OFFICIAL) {
                 Objects.requireNonNull(approval);
             }
         }
@@ -60,7 +60,7 @@ public interface PdfGenerationPort {
             Objects.requireNonNull(generalInformation);
             Objects.requireNonNull(content);
             Objects.requireNonNull(status);
-            if (status == DocumentStatus.OFICIAL) {
+            if (status == DocumentStatus.OFFICIAL) {
                 Objects.requireNonNull(approval);
             }
         }

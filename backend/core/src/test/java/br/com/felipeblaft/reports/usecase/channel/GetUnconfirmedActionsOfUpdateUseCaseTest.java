@@ -32,14 +32,14 @@ class GetUnconfirmedActionsOfUpdateUseCaseTest {
                                 Duration.ofHours(24)))
                 .run(
                         "u5",
-                        ChannelActionOrigin.RESPOSTA_UPDATE,
+                        ChannelActionOrigin.UPDATE_REPLY,
                         5L,
                         List.of(create("u5-0"), create("u5-1"), create("u5-2")));
     }
 
     private static NewAction create(String id) {
         return new NewAction(
-                id, ChannelActionType.MENSAGEM, 1L, null, null, "{\"texto\":\"x\"}", null);
+                id, ChannelActionType.MESSAGE, 1L, null, null, "{\"text\":\"x\"}", null);
     }
 
     @Test
@@ -69,7 +69,7 @@ class GetUnconfirmedActionsOfUpdateUseCaseTest {
                         a ->
                                 repository
                                         .stored(a.id())
-                                        .confirmFailure("ERRO_TELEGRAM", clock.now()));
+                                        .confirmFailure("TELEGRAM_ERROR", clock.now()));
         assertThat(get.run(5L)).isEmpty();
     }
 

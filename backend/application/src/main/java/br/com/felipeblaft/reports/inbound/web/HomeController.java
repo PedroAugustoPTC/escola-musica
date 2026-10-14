@@ -19,7 +19,7 @@ public class HomeController {
         this.audioLimitMb = properties.audio().limitMb();
     }
 
-    @GetMapping("/api/v1/inicio")
+    @GetMapping("/api/v1/home")
     public HomeDto start(@AuthenticationPrincipal AuthenticatedTeacher teacher) {
         return HomeMapper.start(getHome.run(teacher.teacher()), audioLimitMb);
     }

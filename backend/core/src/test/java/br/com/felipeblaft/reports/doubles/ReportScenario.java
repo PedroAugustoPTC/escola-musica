@@ -161,8 +161,8 @@ public class ReportScenario extends AccessScenario {
         getDocument.registerSemesterSource(getSemester);
     }
 
-    public final Teacher clara = teacher("Clara Souza", "clara@exemplo.test", "K7QM2XPA");
-    public final Teacher bruno = teacher("Bruno Lima", "bruno@exemplo.test", "BRUN2XPA");
+    public final Teacher clara = teacher("Clara Souza", "clara@example.test", "K7QM2XPA");
+    public final Teacher bruno = teacher("Bruno Lima", "bruno@example.test", "BRUN2XPA");
     public final Student matteo = student(clara, "Matteo Mafra", "Piano");
     public final Student helena = student(bruno, "Helena Prado", "Flauta");
 
@@ -179,7 +179,7 @@ public class ReportScenario extends AccessScenario {
                 "",
                 questions,
                 false,
-                "NENHUM");
+                "NONE");
     }
 
     public static AiLessonReportOutput revision(
@@ -208,9 +208,9 @@ public class ReportScenario extends AccessScenario {
 
     /** Registra uma aula e processa até a conferência na versão 1 (sem perguntas). */
     public LessonReport reportInReview() {
-        llm.schedule(TaskLlm.ESTRUTURACAO_AULA, output("Evoluiu na articulação.", List.of()));
+        llm.schedule(TaskLlm.LESSON_STRUCTURING, output("Evoluiu na articulação.", List.of()));
         ProcessingJob job =
-                register.run(clara.id(), matteo.id(), file("aula.ogg", 1000), Channel.WEB);
+                register.run(clara.id(), matteo.id(), file("lesson.ogg", 1000), Channel.WEB);
         processQueue();
         return reports.searchById(queue.searchById(job.id()).orElseThrow().reportId())
                 .orElseThrow();
@@ -219,10 +219,10 @@ public class ReportScenario extends AccessScenario {
     /** Registra uma aula que fica aguardando respostas (rodada 1). */
     public LessonReport reportWithQuestions() {
         llm.schedule(
-                TaskLlm.ESTRUTURACAO_AULA,
+                TaskLlm.LESSON_STRUCTURING,
                 output("Evoluiu.", List.of("Qual repertório foi trabalhado?", "Estudou em casa?")));
         ProcessingJob job =
-                register.run(clara.id(), matteo.id(), file("aula.ogg", 1000), Channel.TELEGRAM);
+                register.run(clara.id(), matteo.id(), file("lesson.ogg", 1000), Channel.TELEGRAM);
         processQueue();
         return reports.searchById(queue.searchById(job.id()).orElseThrow().reportId())
                 .orElseThrow();
@@ -231,7 +231,7 @@ public class ReportScenario extends AccessScenario {
     /** Outro aluno de Clara com relatório aguardando respostas. */
     public LessonReport reportWithQuestionsOfOtherStudent() {
         Student olavo = student(clara, "Olavo Torrente", "Violão");
-        llm.schedule(TaskLlm.ESTRUTURACAO_AULA, output("x", List.of("Qual peça?")));
+        llm.schedule(TaskLlm.LESSON_STRUCTURING, output("x", List.of("Qual peça?")));
         ProcessingJob job =
                 register.run(clara.id(), olavo.id(), file("olavo.ogg", 10), Channel.WEB);
         processQueue();
@@ -257,7 +257,7 @@ public class ReportScenario extends AccessScenario {
                                 List.of(content), "Evoluiu em " + data, List.of(), List.of(), ""),
                         List.of(),
                         0,
-                        br.com.felipeblaft.reports.domain.report.ReportStatus.APROVADO,
+                        br.com.felipeblaft.reports.domain.report.ReportStatus.APPROVED,
                         null,
                         1,
                         Channel.WEB,
@@ -293,6 +293,6 @@ public class ReportScenario extends AccessScenario {
                         null,
                         opinion),
                 false,
-                "NENHUM");
+                "NONE");
     }
 }

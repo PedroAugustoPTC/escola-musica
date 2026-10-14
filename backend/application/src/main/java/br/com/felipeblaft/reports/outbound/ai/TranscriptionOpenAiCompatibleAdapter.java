@@ -52,7 +52,7 @@ public class TranscriptionOpenAiCompatibleAdapter implements TranscriptionPort {
         } catch (IOException error) {
             throw new UncheckedIOException(error);
         }
-        String boundary = "----transcricao" + UUID.randomUUID();
+        String boundary = "----transcription" + UUID.randomUUID();
         byte[] body = multipart(boundary, bytes);
         AiHttpClient.Response response =
                 http.run(
@@ -70,16 +70,16 @@ public class TranscriptionOpenAiCompatibleAdapter implements TranscriptionPort {
             if (response.status() == 401 || response.status() == 403) {
                 throw new ProviderUnavailableException("status-" + response.status());
             }
-            throw new AudioNotProcessableException(AudioNotProcessableException.Reason.FORMATO);
+            throw new AudioNotProcessableException(AudioNotProcessableException.Reason.FORMAT);
         }
         String text;
         try {
             text = JSON.readTree(response.body()).path("text").asString("");
         } catch (JacksonException error) {
-            throw new ProviderUnavailableException("resposta-invalida");
+            throw new ProviderUnavailableException("invalid-answer");
         }
         if (text.isBlank()) {
-            throw new AudioNotProcessableException(AudioNotProcessableException.Reason.SEM_FALA);
+            throw new AudioNotProcessableException(AudioNotProcessableException.Reason.NO_SPEECH);
         }
         BigDecimal price = Objects.requireNonNullElse(config.priceUsdPerHour(), BigDecimal.ZERO);
         BigDecimal cost =

@@ -151,9 +151,9 @@ public class DeliverPendingActionsUseCase {
     private Optional<Long> stepMessage(ChannelAction action) {
         // a compensação existe justamente porque a mensagem não pôde ser editada: envia mensagem
         // nova
-        if (action.type() != ChannelActionType.MENSAGEM_ETAPA
+        if (action.type() != ChannelActionType.STEP_MESSAGE
                 || action.jobId() == null
-                || action.origin() == ChannelActionOrigin.COMPENSACAO) {
+                || action.origin() == ChannelActionOrigin.COMPENSATION) {
             return Optional.empty();
         }
         return queue.searchById(action.jobId())

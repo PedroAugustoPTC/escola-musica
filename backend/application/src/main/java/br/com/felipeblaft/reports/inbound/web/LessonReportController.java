@@ -77,112 +77,113 @@ public class LessonReportController {
     }
 
     @PostMapping(
-            path = "/alunos/{alunoId}/relatorios-aula",
+            path = "/students/{studentId}/lesson-reports",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public JobRefDto register(
             @AuthenticationPrincipal AuthenticatedTeacher teacher,
-            @PathVariable UUID alunoId,
+            @PathVariable UUID studentId,
             @RequestPart("audio") MultipartFile audio) {
         TemporaryFile file = reception.receive(audio);
-        return LessonReportMapper.reference(register.run(teacher.id(), alunoId, file, Channel.WEB));
+        return LessonReportMapper.reference(
+                register.run(teacher.id(), studentId, file, Channel.WEB));
     }
 
     /** Relatório em aberto do aluno (FR-034): 200 com o relatório ou 204 se não houver. */
-    @GetMapping("/alunos/{alunoId}/relatorio-em-aberto")
+    @GetMapping("/students/{studentId}/open-report")
     public ResponseEntity<OpenReportDto> openReport(
-            @AuthenticationPrincipal AuthenticatedTeacher teacher, @PathVariable UUID alunoId) {
-        return getOpen.run(teacher.id(), alunoId)
+            @AuthenticationPrincipal AuthenticatedTeacher teacher, @PathVariable UUID studentId) {
+        return getOpen.run(teacher.id(), studentId)
                 .map(HomeMapper::open)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
-    @GetMapping("/relatorios-aula/{relatorioId}")
+    @GetMapping("/lesson-reports/{reportId}")
     public LessonReportDto get(
-            @AuthenticationPrincipal AuthenticatedTeacher teacher, @PathVariable UUID relatorioId) {
-        return LessonReportMapper.report(get.run(teacher.id(), relatorioId));
+            @AuthenticationPrincipal AuthenticatedTeacher teacher, @PathVariable UUID reportId) {
+        return LessonReportMapper.report(get.run(teacher.id(), reportId));
     }
 
     @PostMapping(
-            path = "/relatorios-aula/{relatorioId}/respostas",
+            path = "/lesson-reports/{reportId}/answers",
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public JobRefDto answerText(
             @AuthenticationPrincipal AuthenticatedTeacher teacher,
-            @PathVariable UUID relatorioId,
+            @PathVariable UUID reportId,
             @Valid @RequestBody TextAnswerRequest request) {
         return LessonReportMapper.reference(
-                answer.answerText(teacher.id(), relatorioId, request.texto(), Channel.WEB));
+                answer.answerText(teacher.id(), reportId, request.text(), Channel.WEB));
     }
 
     @PostMapping(
-            path = "/relatorios-aula/{relatorioId}/respostas",
+            path = "/lesson-reports/{reportId}/answers",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public JobRefDto answerAudio(
             @AuthenticationPrincipal AuthenticatedTeacher teacher,
-            @PathVariable UUID relatorioId,
+            @PathVariable UUID reportId,
             @RequestPart("audio") MultipartFile audio) {
         TemporaryFile file = reception.receive(audio);
         return LessonReportMapper.reference(
-                answer.answerAudio(teacher.id(), relatorioId, file, Channel.WEB));
+                answer.answerAudio(teacher.id(), reportId, file, Channel.WEB));
     }
 
     @PostMapping(
-            path = "/relatorios-aula/{relatorioId}/alteracoes",
+            path = "/lesson-reports/{reportId}/changes",
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public JobRefDto changeByText(
             @AuthenticationPrincipal AuthenticatedTeacher teacher,
-            @PathVariable UUID relatorioId,
+            @PathVariable UUID reportId,
             @Valid @RequestBody ChangeTextRequest request) {
         return LessonReportMapper.reference(
                 change.changeByText(
                         teacher.id(),
-                        relatorioId,
-                        request.texto(),
-                        request.versaoBase(),
+                        reportId,
+                        request.text(),
+                        request.baseVersion(),
                         Channel.WEB));
     }
 
     @PostMapping(
-            path = "/relatorios-aula/{relatorioId}/alteracoes",
+            path = "/lesson-reports/{reportId}/changes",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public JobRefDto changeByAudio(
             @AuthenticationPrincipal AuthenticatedTeacher teacher,
-            @PathVariable UUID relatorioId,
+            @PathVariable UUID reportId,
             @RequestPart("audio") MultipartFile audio,
-            @RequestParam("versaoBase") String baseVersion) {
+            @RequestParam("baseVersion") String baseVersion) {
         int base = baseVersion(baseVersion);
         TemporaryFile file = reception.receive(audio);
         return LessonReportMapper.reference(
-                change.changeByAudio(teacher.id(), relatorioId, file, base, Channel.WEB));
+                change.changeByAudio(teacher.id(), reportId, file, base, Channel.WEB));
     }
 
-    @PostMapping("/relatorios-aula/{relatorioId}/nova-tentativa")
+    @PostMapping("/lesson-reports/{reportId}/retry")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public JobRefDto newAttempt(
-            @AuthenticationPrincipal AuthenticatedTeacher teacher, @PathVariable UUID relatorioId) {
-        return LessonReportMapper.reference(retry.run(teacher.id(), relatorioId, Channel.WEB));
+            @AuthenticationPrincipal AuthenticatedTeacher teacher, @PathVariable UUID reportId) {
+        return LessonReportMapper.reference(retry.run(teacher.id(), reportId, Channel.WEB));
     }
 
     @PostMapping(
-            path = "/relatorios-aula/{relatorioId}/aprovacao",
+            path = "/lesson-reports/{reportId}/approval",
             consumes = MediaType.APPLICATION_JSON_VALUE)
     public ApprovalDto approve(
             @AuthenticationPrincipal AuthenticatedTeacher teacher,
-            @PathVariable UUID relatorioId,
+            @PathVariable UUID reportId,
             @Valid @RequestBody ApprovalRequest request) {
         return LessonReportMapper.approval(
-                approve.run(teacher.id(), relatorioId, request.versaoConfirmada(), Channel.WEB));
+                approve.run(teacher.id(), reportId, request.confirmedVersion(), Channel.WEB));
     }
 
-    @PostMapping("/relatorios-aula/{relatorioId}/cancelamento")
+    @PostMapping("/lesson-reports/{reportId}/cancellation")
     public ResponseEntity<Void> cancel(
-            @AuthenticationPrincipal AuthenticatedTeacher teacher, @PathVariable UUID relatorioId) {
-        cancel.cancel(teacher.id(), relatorioId);
+            @AuthenticationPrincipal AuthenticatedTeacher teacher, @PathVariable UUID reportId) {
+        cancel.cancel(teacher.id(), reportId);
         return ResponseEntity.noContent().build();
     }
 
@@ -190,11 +191,11 @@ public class LessonReportController {
         try {
             int version = Integer.parseInt(value.strip());
             if (version < 1) {
-                throw new DomainException(ErrorCode.DADOS_INVALIDOS);
+                throw new DomainException(ErrorCode.INVALID_DATA);
             }
             return version;
         } catch (NumberFormatException invalid) {
-            throw new DomainException(ErrorCode.DADOS_INVALIDOS);
+            throw new DomainException(ErrorCode.INVALID_DATA);
         }
     }
 }

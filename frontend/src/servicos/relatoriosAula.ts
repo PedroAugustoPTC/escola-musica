@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { api, type Esquemas } from './clienteApi';
 
-export type RelatorioAulaDto = Esquemas['RelatorioAulaDto'];
-export type TrabalhoRefDto = Esquemas['TrabalhoRefDto'];
-export type AprovacaoDto = Esquemas['AprovacaoDto'];
+export type RelatorioAulaDto = Esquemas['LessonReportDto'];
+export type TrabalhoRefDto = Esquemas['JobRefDto'];
+export type AprovacaoDto = Esquemas['ApprovalDto'];
 
 /** Áudio pronto para envio: gravação do navegador ou arquivo escolhido. */
 export interface AudioSelecionado {
@@ -26,33 +26,33 @@ function formularioAudio(audio: AudioSelecionado, extras: Record<string, string>
 export function useRelatorioAula(id: string | undefined) {
   return useQuery<RelatorioAulaDto>({
     queryKey: chaveRelatorioAula(id),
-    queryFn: ({ signal }) => api.get<RelatorioAulaDto>(`/relatorios-aula/${id}`, signal),
+    queryFn: ({ signal }) => api.get<RelatorioAulaDto>(`/lesson-reports/${id}`, signal),
     enabled: Boolean(id),
   });
 }
 
 export const relatoriosAula = {
-  obter: (id: string) => api.get<RelatorioAulaDto>(`/relatorios-aula/${id}`),
+  obter: (id: string) => api.get<RelatorioAulaDto>(`/lesson-reports/${id}`),
   registrar: (alunoId: string, audio: AudioSelecionado) =>
-    api.postFormulario<TrabalhoRefDto>(`/alunos/${alunoId}/relatorios-aula`, formularioAudio(audio)),
+    api.postFormulario<TrabalhoRefDto>(`/students/${alunoId}/lesson-reports`, formularioAudio(audio)),
   responderTexto: (id: string, texto: string) =>
-    api.post<TrabalhoRefDto>(`/relatorios-aula/${id}/respostas`, { texto }),
+    api.post<TrabalhoRefDto>(`/lesson-reports/${id}/answers`, { text: texto }),
   responderAudio: (id: string, audio: AudioSelecionado) =>
-    api.postFormulario<TrabalhoRefDto>(`/relatorios-aula/${id}/respostas`, formularioAudio(audio)),
+    api.postFormulario<TrabalhoRefDto>(`/lesson-reports/${id}/answers`, formularioAudio(audio)),
   alterarTexto: (id: string, texto: string, versaoBase: number) =>
-    api.post<TrabalhoRefDto>(`/relatorios-aula/${id}/alteracoes`, { texto, versaoBase }),
+    api.post<TrabalhoRefDto>(`/lesson-reports/${id}/changes`, { text: texto, baseVersion: versaoBase }),
   alterarAudio: (id: string, audio: AudioSelecionado, versaoBase: number) =>
     api.postFormulario<TrabalhoRefDto>(
-      `/relatorios-aula/${id}/alteracoes`,
-      formularioAudio(audio, { versaoBase: String(versaoBase) }),
+      `/lesson-reports/${id}/changes`,
+      formularioAudio(audio, { baseVersion: String(versaoBase) }),
     ),
-  novaTentativa: (id: string) => api.post<TrabalhoRefDto>(`/relatorios-aula/${id}/nova-tentativa`),
+  novaTentativa: (id: string) => api.post<TrabalhoRefDto>(`/lesson-reports/${id}/retry`),
   aprovar: (id: string, versaoConfirmada: number) =>
-    api.post<AprovacaoDto>(`/relatorios-aula/${id}/aprovacao`, { versaoConfirmada }),
-  cancelar: (id: string) => api.post<void>(`/relatorios-aula/${id}/cancelamento`),
+    api.post<AprovacaoDto>(`/lesson-reports/${id}/approval`, { confirmedVersion: versaoConfirmada }),
+  cancelar: (id: string) => api.post<void>(`/lesson-reports/${id}/cancellation`),
 };
 
 /** Caminho do PDF de conferência de uma versão (entregue por rota autorizada, R-11). */
 export function caminhoPdfConferencia(id: string, versao: number): string {
-  return `/relatorios-aula/${id}/versoes/${versao}/pdf`;
+  return `/lesson-reports/${id}/versions/${versao}/pdf`;
 }

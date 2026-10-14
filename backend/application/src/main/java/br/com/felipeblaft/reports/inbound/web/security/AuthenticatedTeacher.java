@@ -20,6 +20,6 @@ public record AuthenticatedTeacher(Teacher teacher, Instant sessionExpiresAt) {
 
     @Override
     public String toString() {
-        return "ProfessorAutenticado[" + teacher.id() + "]";
+        return "AuthenticatedTeacher[" + teacher.id() + "]";
     }
 }

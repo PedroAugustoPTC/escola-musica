@@ -33,7 +33,7 @@ public class FakeOpenReportsQuery implements OpenReportsQueryPort {
     public Optional<OpenReport> searchByStudent(UUID teacherId, UUID studentId) {
         return listByTeacher(teacherId).stream()
                 .filter(r -> r.studentId().equals(studentId))
-                .filter(r -> r.type() == br.com.felipeblaft.reports.domain.common.ReportType.AULA)
+                .filter(r -> r.type() == br.com.felipeblaft.reports.domain.common.ReportType.LESSON)
                 .findFirst();
     }
 

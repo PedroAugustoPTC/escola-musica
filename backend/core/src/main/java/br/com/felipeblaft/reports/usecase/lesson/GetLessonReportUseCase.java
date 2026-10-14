@@ -68,16 +68,16 @@ public class GetLessonReportUseCase {
         String teacher = teachers.searchById(report.teacherId()).orElseThrow().name();
         boolean pdf =
                 report.currentVersion() > 0
-                        && versions.search(ReportType.AULA, report.id(), report.currentVersion())
-                                .flatMap(v -> documents.search(v.id(), DocumentType.CONFERENCIA))
+                        && versions.search(ReportType.LESSON, report.id(), report.currentVersion())
+                                .flatMap(v -> documents.search(v.id(), DocumentType.REVIEW))
                                 .isPresent();
         return new LessonReportView(
                 report,
                 lesson,
                 student,
                 teacher,
-                interactions.last(ReportType.AULA, report.id()),
-                queue.searchInProgressByReport(ReportType.AULA, report.id()),
+                interactions.last(ReportType.LESSON, report.id()),
+                queue.searchInProgressByReport(ReportType.LESSON, report.id()),
                 pdf);
     }
 }

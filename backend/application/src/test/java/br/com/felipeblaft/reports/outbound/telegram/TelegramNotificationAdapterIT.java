@@ -64,7 +64,7 @@ class TelegramNotificationAdapterIT extends TelegramConversationBase {
         assertThat(notice.get("text").asString())
                 .isEqualTo("O relatório de Matteo Ferreira tem perguntas pendentes.");
         assertThat(buttonLabels(notice)).containsExactly("Continuar no chat");
-        assertThat(buttons(notice)).containsExactly("v1:foco:a" + reportId());
+        assertThat(buttons(notice)).containsExactly("v1:focus:a" + reportId());
         assertThat(editedTexts()).isEmpty();
         assertThat(jdbc.queryForObject("select focused_report_id from telegram_link", UUID.class))
                 .isNull();
@@ -99,7 +99,7 @@ class TelegramNotificationAdapterIT extends TelegramConversationBase {
                 .isEqualTo("O relatório de Matteo Ferreira tem perguntas pendentes.");
         assertThat(jdbc.queryForObject("select count(*) from channel_action", Integer.class))
                 .isZero();
-        assertThat(properties.telegramChannel().proactiveDelivery().name()).isEqualTo("DIRETA");
+        assertThat(properties.telegramChannel().proactiveDelivery().name()).isEqualTo("DIRECT");
     }
 
     @Test
@@ -110,15 +110,15 @@ class TelegramNotificationAdapterIT extends TelegramConversationBase {
 
         assertThat(calls("sendMessage")).isEmpty();
         assertThat(jdbc.queryForObject("select status from lesson_report", String.class))
-                .isEqualTo("AGUARDANDO_RESPOSTAS");
+                .isEqualTo("AWAITING_ANSWERS");
     }
 
     @Test
     void telegramJobWarnsItIsTakingLongOnceAt3Minutes() throws Exception {
         link(USER_CLARA, ScenarioIT.CODE_CLARA);
         sendText(USER_CLARA, "Matteo");
-        sendVoice(USER_CLARA, "lenta", 1000);
-        sendCallback(USER_CLARA, "v1:confal:");
+        sendVoice(USER_CLARA, "slow", 1000);
+        sendCallback(USER_CLARA, "v1:confirm-student:");
         API_BOTS.resetRequests();
 
         clock.advance(Duration.ofMinutes(2));

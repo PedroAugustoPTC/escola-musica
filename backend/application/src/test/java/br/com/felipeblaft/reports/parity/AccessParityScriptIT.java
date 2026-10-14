@@ -70,13 +70,13 @@ class AccessParityScriptIT extends TelegramConversationBase {
         assertThat(bot).containsExactlyElementsOf(web);
         assertThat(web)
                 .contains(
-                        "código errado = CODIGO_INVALIDO",
-                        "código certo bloqueado = BLOQUEADO_TEMPORARIAMENTE",
-                        "fim do bloqueio = SUCESSO",
+                        "código errado = INVALID_CODE",
+                        "código certo bloqueado = TEMPORARILY_BLOCKED",
+                        "fim do bloqueio = SUCCESS",
                         "início = HomeSummary[totalStudents=3, students=[Matteo Mafra, Miguel de Castro Torrente, Olavo Torrente]]",
-                        "busca com um = SearchResult[type=ENCONTRADOS, students=[Matteo Mafra]]",
-                        "busca com vários = SearchResult[type=ENCONTRADOS, students=[Miguel de Castro Torrente, Olavo Torrente]]",
-                        "busca sem resultado = SearchResult[type=NENHUM, students=[Matteo Mafra, Miguel de Castro Torrente, Olavo Torrente]]",
-                        "encerrar = ENCERRADO");
+                        "busca com um = SearchResult[type=FOUND, students=[Matteo Mafra]]",
+                        "busca com vários = SearchResult[type=FOUND, students=[Miguel de Castro Torrente, Olavo Torrente]]",
+                        "busca sem resultado = SearchResult[type=NONE, students=[Matteo Mafra, Miguel de Castro Torrente, Olavo Torrente]]",
+                        "encerrar = ENDED");
     }
 }

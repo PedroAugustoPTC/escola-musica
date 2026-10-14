@@ -1662,18 +1662,21 @@
     },
     {
       "id": "legacy-schema-names",
-      "scope": "file: testes das migrações V6/V7 (nomes do esquema ANTIGO) e o mapa de renomeação do banco",
+      "scope": "file: testes das migrações V6, V7 e V8 (nomes e valores do esquema ANTIGO), o teste do botão no formato antigo e os mapas de renomeação do banco",
       "terms": [
         "*"
       ],
-      "reason": "Os testes de migração gravam dados no esquema da V6 e provam a V7: precisam citar as tabelas, colunas, restrições, índices e chaves JSON com os nomes antigos (as migrações V1–V6 são imutáveis). O esquema RESULTANTE continua varrido pelo teste de catálogo (R-05).",
+      "reason": "Os testes de migração gravam dados no esquema da V6/V7 e provam a V7/V8: precisam citar tabelas, colunas, restrições, índices, chaves JSON e valores de enumeração com os nomes antigos (as migrações V1–V8 são imutáveis). O teste do botão antigo (OldButtonFormatIT) envia o vocabulário de ação em português de mensagens já enviadas. O esquema RESULTANTE continua varrido pelo teste de catálogo (R-05).",
       "constitutionCategory": "nomes de terceiros ou exigidos por ferramenta (permitido pelo Princípio VI)",
       "mode": "skip-file",
       "paths": [
         "backend/*/src/test/resources/db/rename-map.json",
         "backend/*/src/test/java/**/MigrationV6IT.java",
         "backend/*/src/test/java/**/MigrationV7*IT.java",
-        "backend/*/src/test/java/**/MigrationTestSupport.java"
+        "backend/*/src/test/java/**/MigrationTestSupport.java",
+        "backend/*/src/test/java/**/MigrationV8*IT.java",
+        "backend/*/src/test/resources/db/v8-values.json",
+        "backend/*/src/test/java/**/OldButtonFormatIT.java"
       ],
       "appliesTo": [
         "java",
@@ -1682,7 +1685,7 @@
     },
     {
       "id": "teacher-keywords",
-      "scope": "string-literal: entrada/telegram/PalavrasChaveTelegram (→ TelegramKeywords) e seus testes",
+      "scope": "string-literal: TelegramKeywords, o registro dos comandos do bot (TelegramConfig), o LLM simulado e os testes que digitam as palavras",
       "terms": [
         "start",
         "inicio",
@@ -1709,7 +1712,10 @@
       "where": "literal",
       "paths": [
         "backend/**/PalavrasChaveTelegram*.java",
-        "backend/**/TelegramKeywords*.java"
+        "backend/**/TelegramKeywords*.java",
+        "backend/**/TelegramConfig.java",
+        "backend/**/SimulatedLlmAdapter.java",
+        "backend/*/src/test/java/**"
       ],
       "appliesTo": [
         "java"
@@ -1791,7 +1797,8 @@
       "scope": "string-literal: nome do PDF mostrado ao usuário (download no Portal e documento enviado no Telegram)",
       "terms": [
         "relatorio-aula",
-        "relatorio-semestral"
+        "relatorio-semestral",
+        "oficial.pdf"
       ],
       "reason": "FR-026 e US1-3: o nome do arquivo que o usuário vê e baixa permanece em português; só o nome interno de armazenamento (storage_key) passa a inglês. Vale para o gerador do nome (casos de uso de documento) e para as asserções dos testes (AcaoCanalMapeadorTeste, HistoricoConversaIT).",
       "constitutionCategory": "texto do usuário (explicitamente em português no Princípio VI)",
@@ -1799,6 +1806,73 @@
       "where": "literal",
       "paths": [
         "backend/**/*.java"
+      ],
+      "appliesTo": [
+        "java"
+      ]
+    },
+    {
+      "id": "hmac-domain-prefixes",
+      "scope": "string-literal: prefixos que entram no HMAC do código de acesso e da origem (DataProtectionAdapter)",
+      "terms": [
+        "codigo:",
+        "origem:"
+      ],
+      "reason": "O prefixo faz parte da entrada do HMAC cujo resultado está gravado no banco (access_code_hash, origin_hash). Trocar a palavra mudaria todos os hashes e invalidaria os códigos e os vínculos já emitidos, o que seria mudança de comportamento (a feature 003 é só renomeação). DataProtectionStoredFormatTest fixa o formato.",
+      "constitutionCategory": "proposta para a emenda 2.1.0: nomes próprios e material de referência (fora das 4 categorias fechadas do Princípio VI)",
+      "mode": "term",
+      "where": "literal",
+      "paths": [
+        "backend/application/src/main/java/**/DataProtectionAdapter.java",
+        "backend/application/src/test/java/**/DataProtectionStoredFormatTest.java"
+      ],
+      "appliesTo": [
+        "java"
+      ]
+    },
+    {
+      "id": "feature-folder-names",
+      "scope": "string-literal: caminhos das pastas de feature em specs/ citados pelos testes de contrato",
+      "terms": [
+        "001-fluxo-relatorios",
+        "002-api-interna-canal-telegram"
+      ],
+      "reason": "As pastas de feature do Spec Kit (specs/NNN-nome) mantêm o nome em português: specs/ é documentação, fora do escopo de renomeação (constituição, Princípio VI). Os testes de contrato só montam o caminho até elas.",
+      "constitutionCategory": "proposta para a emenda 2.1.0: nomes próprios e material de referência (fora das 4 categorias fechadas do Princípio VI)",
+      "mode": "term",
+      "where": "literal",
+      "paths": [
+        "backend/*/src/test/java/**/ActionsSchemaV1.java",
+        "backend/*/src/test/java/**/ContractApiBase.java"
+      ],
+      "appliesTo": [
+        "java"
+      ]
+    },
+    {
+      "id": "user-text-samples",
+      "scope": "string-literal: textos de exemplo do usuário e rótulos dos testes",
+      "terms": [
+        "aviso",
+        "etapa",
+        "alternativa",
+        "segredo",
+        "diferente",
+        "mude",
+        "segue",
+        "causa",
+        "pronto",
+        "aluno",
+        "professor",
+        "encerrar",
+        "responder"
+      ],
+      "reason": "Textos de exemplo que os testes enviam como conteúdo do usuário (campo text de uma ação, legenda, observação), rótulos de passos dos roteiros de paridade e as palavras de rótulo do PDF e das mensagens que as asserções conferem: são texto do usuário e permanecem em português; trocar a palavra alteraria a expectativa de texto, o que a feature 003 proíbe.",
+      "constitutionCategory": "texto do usuário (explicitamente em português no Princípio VI)",
+      "mode": "term",
+      "where": "literal",
+      "paths": [
+        "backend/*/src/test/java/**"
       ],
       "appliesTo": [
         "java"

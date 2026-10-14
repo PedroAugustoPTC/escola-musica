@@ -34,6 +34,6 @@ public class ReportAccessService {
     private LessonReport ofOwner(java.util.Optional<LessonReport> report, UUID teacherId) {
         return report.filter(r -> r.teacherId().equals(teacherId))
                 .filter(r -> assignments.exists(teacherId, r.studentId()))
-                .orElseThrow(() -> new DomainException(ErrorCode.RECURSO_NAO_ENCONTRADO));
+                .orElseThrow(() -> new DomainException(ErrorCode.RESOURCE_NOT_FOUND));
     }
 }

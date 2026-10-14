@@ -31,7 +31,7 @@ public class EmitAccessCodeUseCase {
     public IssuedCode run(String email) {
         Teacher teacher =
                 teachers.searchByEmail(Teacher.normalizeEmail(email))
-                        .orElseThrow(() -> new DomainException(ErrorCode.PROFESSOR_INEXISTENTE));
+                        .orElseThrow(() -> new DomainException(ErrorCode.TEACHER_NOT_FOUND));
         Instant now = clock.now();
         AccessCode code = issuance.emit(teacher, now);
         teachers.save(teacher);

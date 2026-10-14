@@ -39,14 +39,14 @@ public class RetryLessonReportUseCase {
         reports.save(report);
         ProcessingJob job =
                 ProcessingJob.create(
-                        JobType.NOVA_TENTATIVA,
+                        JobType.RETRY,
                         teacherId,
                         report.studentId(),
-                        ReportType.AULA,
+                        ReportType.LESSON,
                         report.id(),
                         channel,
-                        Medium.TEXTO,
-                        JobStep.ESTRUTURANDO,
+                        Medium.TEXT,
+                        JobStep.STRUCTURING,
                         clock.now());
         queue.enqueue(job);
         return job;

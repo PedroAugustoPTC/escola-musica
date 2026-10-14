@@ -118,7 +118,7 @@ public class ProcessingJob {
                 medium,
                 Map.of(),
                 null,
-                JobStatus.PENDENTE,
+                JobStatus.PENDING,
                 initialStep,
                 null,
                 null,
@@ -146,10 +146,10 @@ public class ProcessingJob {
     }
 
     public void start(Instant now) {
-        if (status != JobStatus.PENDENTE) {
+        if (status != JobStatus.PENDING) {
             throw new IllegalStateException("trabalho não está pendente");
         }
-        status = JobStatus.EM_EXECUCAO;
+        status = JobStatus.RUNNING;
         attempts++;
         if (startedAt == null) {
             startedAt = now;
@@ -167,13 +167,13 @@ public class ProcessingJob {
     }
 
     public void complete(JobResult finalResult, Instant now) {
-        status = finalResult.success() ? JobStatus.CONCLUIDO : JobStatus.FALHOU;
-        if (finalResult == JobResult.DESCARTADO) {
-            status = JobStatus.DESCARTADO;
+        status = finalResult.success() ? JobStatus.COMPLETED : JobStatus.FAILED;
+        if (finalResult == JobResult.DISCARDED) {
+            status = JobStatus.DISCARDED;
         }
         result = finalResult;
         if (finalResult.success()) {
-            step = JobStep.PRONTO;
+            step = JobStep.READY;
         }
         completedAt = now;
     }
@@ -183,16 +183,16 @@ public class ProcessingJob {
         if (!status.inProgress()) {
             return false;
         }
-        status = JobStatus.DESCARTADO;
-        result = JobResult.DESCARTADO;
+        status = JobStatus.DISCARDED;
+        result = JobResult.DISCARDED;
         completedAt = now;
         return true;
     }
 
     /** Volta à fila (trabalho travado recuperado após reinício). */
     public void returnToQueue() {
-        if (status == JobStatus.EM_EXECUCAO) {
-            status = JobStatus.PENDENTE;
+        if (status == JobStatus.RUNNING) {
+            status = JobStatus.PENDING;
         }
     }
 
@@ -289,6 +289,6 @@ public class ProcessingJob {
 
     @Override
     public String toString() {
-        return "TrabalhoProcessamento[id=" + id + ", tipo=" + type + ", status=" + status + "]";
+        return "ProcessingJob[id=" + id + ", type=" + type + ", status=" + status + "]";
     }
 }

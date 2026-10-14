@@ -1,0 +1,3 @@
+catálogo: 217 chaves na base, 217 no novo, 217 chaves e 23 marcadores pelo mapa
+mensagens.json: 0 divergências
+0 divergências

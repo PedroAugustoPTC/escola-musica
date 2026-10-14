@@ -17,54 +17,54 @@ class ProcessingJobTest {
 
     private static ProcessingJob create() {
         return ProcessingJob.create(
-                JobType.REGISTRO_AULA,
+                JobType.LESSON_REGISTRATION,
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 null,
                 null,
                 Channel.WEB,
                 Medium.AUDIO,
-                JobStep.ENVIANDO,
+                JobStep.UPLOADING,
                 T0);
     }
 
     @Test
     void cycle() {
         ProcessingJob job = create();
-        assertThat(job.status()).isEqualTo(JobStatus.PENDENTE);
+        assertThat(job.status()).isEqualTo(JobStatus.PENDING);
         job.start(T0.plusSeconds(1));
-        assertThat(job.status()).isEqualTo(JobStatus.EM_EXECUCAO);
+        assertThat(job.status()).isEqualTo(JobStatus.RUNNING);
         assertThat(job.attempts()).isEqualTo(1);
         assertThatThrownBy(() -> job.start(T0)).isInstanceOf(IllegalStateException.class);
-        job.advance(JobStep.TRANSCREVENDO);
+        job.advance(JobStep.TRANSCRIBING);
         UUID report = UUID.randomUUID();
-        job.linkReport(ReportType.AULA, report);
+        job.linkReport(ReportType.LESSON, report);
         assertThat(job.resultingReportId()).isEqualTo(report);
-        job.complete(JobResult.PRONTO_PARA_CONFERENCIA, T0.plusSeconds(31));
-        assertThat(job.status()).isEqualTo(JobStatus.CONCLUIDO);
-        assertThat(job.step()).isEqualTo(JobStep.PRONTO);
+        job.complete(JobResult.READY_FOR_REVIEW, T0.plusSeconds(31));
+        assertThat(job.status()).isEqualTo(JobStatus.COMPLETED);
+        assertThat(job.step()).isEqualTo(JobStep.READY);
         assertThat(job.durationMs()).isEqualTo(30_000);
         assertThat(job.discard(T0)).isFalse();
-        assertThat(job.toString()).contains("REGISTRO_AULA");
+        assertThat(job.toString()).contains("LESSON_REGISTRATION");
     }
 
     @Test
     void failureAndDiscard() {
         ProcessingJob failed = create();
         failed.start(T0);
-        failed.complete(JobResult.AUDIO_NAO_PROCESSAVEL, T0);
-        assertThat(failed.status()).isEqualTo(JobStatus.FALHOU);
-        assertThat(failed.step()).isEqualTo(JobStep.ENVIANDO);
+        failed.complete(JobResult.AUDIO_NOT_PROCESSABLE, T0);
+        assertThat(failed.status()).isEqualTo(JobStatus.FAILED);
+        assertThat(failed.step()).isEqualTo(JobStep.UPLOADING);
 
         ProcessingJob discarded = create();
         assertThat(discarded.discard(T0)).isTrue();
-        assertThat(discarded.status()).isEqualTo(JobStatus.DESCARTADO);
-        assertThat(discarded.result()).isEqualTo(JobResult.DESCARTADO);
+        assertThat(discarded.status()).isEqualTo(JobStatus.DISCARDED);
+        assertThat(discarded.result()).isEqualTo(JobResult.DISCARDED);
         assertThat(discarded.durationMs()).isZero();
 
         ProcessingJob completedDiscarded = create();
-        completedDiscarded.complete(JobResult.DESCARTADO, T0);
-        assertThat(completedDiscarded.status()).isEqualTo(JobStatus.DESCARTADO);
+        completedDiscarded.complete(JobResult.DISCARDED, T0);
+        assertThat(completedDiscarded.status()).isEqualTo(JobStatus.DISCARDED);
     }
 
     @Test
@@ -74,7 +74,7 @@ class ProcessingJobTest {
         assertThat(job.delayed(T0.plus(Duration.ofMinutes(3)))).isTrue();
         job.markDelayNotice();
         assertThat(job.delayNoticeSent()).isTrue();
-        job.complete(JobResult.NOVA_VERSAO, T0);
+        job.complete(JobResult.NEW_VERSION, T0);
         assertThat(job.delayed(T0.plus(Duration.ofMinutes(5)))).isFalse();
     }
 
@@ -89,14 +89,14 @@ class ProcessingJobTest {
         job.defineTemporaryFile("/tmp/audios/a.ogg");
         assertThat(job.temporaryFile()).isEqualTo("/tmp/audios/a.ogg");
         job.returnToQueue();
-        assertThat(job.status()).isEqualTo(JobStatus.PENDENTE);
+        assertThat(job.status()).isEqualTo(JobStatus.PENDING);
         job.start(T0);
         job.returnToQueue();
-        assertThat(job.status()).isEqualTo(JobStatus.PENDENTE);
+        assertThat(job.status()).isEqualTo(JobStatus.PENDING);
         job.start(T0.plusSeconds(10));
         assertThat(job.attempts()).isEqualTo(2);
         assertThat(job.startedAt()).isEqualTo(T0);
-        assertThat(JobResult.NOVA_VERSAO.success()).isTrue();
-        assertThat(JobStatus.FALHOU.inProgress()).isFalse();
+        assertThat(JobResult.NEW_VERSION.success()).isTrue();
+        assertThat(JobStatus.FAILED.inProgress()).isFalse();
     }
 }

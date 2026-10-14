@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @ConditionalOnProperty(
         prefix = "reports.telegram-channel",
         name = "proactive-delivery",
-        havingValue = "DIRETA",
+        havingValue = "DIRECT",
         matchIfMissing = true)
 public class TelegramDirectPublicationAdapter implements TelegramActionPublicationPort {
 

@@ -24,7 +24,7 @@ class LinkTelegramUseCaseTest {
     private final EndTelegramLinkUseCase end = new EndTelegramLinkUseCase(c.links);
     private final UpdateTelegramConversationUseCase update =
             new UpdateTelegramConversationUseCase(c.links, c.clock);
-    private final Teacher clara = c.teacher("Clara Souza", "clara@exemplo.test", "K7QM2XPA");
+    private final Teacher clara = c.teacher("Clara Souza", "clara@example.test", "K7QM2XPA");
 
     private static void failWith(ThrowingCallable action, ErrorCode code) {
         assertThatThrownBy(action)
@@ -43,32 +43,32 @@ class LinkTelegramUseCaseTest {
         assertThat(result.teacher().id()).isEqualTo(clara.id());
         assertThat(result.link().chatId()).isEqualTo(999L);
         assertThat(c.links.searchByTelegramUserId(111L)).isPresent();
-        assertThat(clara.accessCodeHash()).isEqualTo("codigo:K7QM2XPA");
+        assertThat(clara.accessCodeHash()).isEqualTo("code:K7QM2XPA");
     }
 
     @Test
     void accountAlreadyLinkedOrTeacherAlreadyLinked() {
-        Teacher bruno = c.teacher("Bruno Lima", "bruno@exemplo.test", "BRUN2XPA");
+        Teacher bruno = c.teacher("Bruno Lima", "bruno@example.test", "BRUN2XPA");
         linkUseCase.run(111L, 1L, "K7QM2XPA");
-        failWith(() -> linkUseCase.run(111L, 1L, "BRUN2XPA"), ErrorCode.TELEGRAM_JA_VINCULADO);
-        failWith(() -> linkUseCase.run(222L, 2L, "K7QM2XPA"), ErrorCode.PROFESSOR_JA_VINCULADO);
+        failWith(() -> linkUseCase.run(111L, 1L, "BRUN2XPA"), ErrorCode.TELEGRAM_ALREADY_LINKED);
+        failWith(() -> linkUseCase.run(222L, 2L, "K7QM2XPA"), ErrorCode.TEACHER_ALREADY_LINKED);
         assertThat(c.links.searchByTeacherId(bruno.id())).isEmpty();
     }
 
     @Test
     void checksLockBeforeCodeAndExpiredCode() {
         for (int i = 0; i < 5; i++) {
-            failWith(() -> linkUseCase.run(111L, 1L, "ERRADO22"), ErrorCode.CODIGO_INVALIDO);
+            failWith(() -> linkUseCase.run(111L, 1L, "WRONG222"), ErrorCode.INVALID_CODE);
         }
-        failWith(() -> linkUseCase.run(111L, 1L, "K7QM2XPA"), ErrorCode.BLOQUEADO_TEMPORARIAMENTE);
+        failWith(() -> linkUseCase.run(111L, 1L, "K7QM2XPA"), ErrorCode.TEMPORARILY_BLOCKED);
         c.clock.advance(Duration.ofDays(8));
-        failWith(() -> linkUseCase.run(111L, 1L, "K7QM2XPA"), ErrorCode.CODIGO_EXPIRADO);
+        failWith(() -> linkUseCase.run(111L, 1L, "K7QM2XPA"), ErrorCode.EXPIRED_CODE);
     }
 
     @Test
     void inactiveTeacherCannotLink() {
         clara.updateRegistry(clara.name(), false, c.clock.now());
-        failWith(() -> linkUseCase.run(111L, 1L, "K7QM2XPA"), ErrorCode.CODIGO_INVALIDO);
+        failWith(() -> linkUseCase.run(111L, 1L, "K7QM2XPA"), ErrorCode.INVALID_CODE);
     }
 
     @Test
@@ -96,7 +96,7 @@ class LinkTelegramUseCaseTest {
     @Test
     void updatesConversationAndEndsLink() {
         TelegramLink link = linkUseCase.run(111L, 1L, "K7QM2XPA").link();
-        link.conversation().startFlow(ConversationFlow.HISTORICO, link.conversation().step());
+        link.conversation().startFlow(ConversationFlow.HISTORY, link.conversation().step());
         c.clock.advance(Duration.ofMinutes(1));
         update.run(link);
         assertThat(c.links.searchByTelegramUserId(111L).orElseThrow().updatedAt())

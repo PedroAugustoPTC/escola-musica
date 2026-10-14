@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /** Entrar, consultar e encerrar a sessão do portal (FR-004, FR-007, FR-008). */
 @RestController
-@RequestMapping("/api/v1/sessao")
+@RequestMapping("/api/v1/session")
 public class SessionController {
 
     private final SignInPortalUseCase signIn;
@@ -44,7 +44,7 @@ public class SessionController {
     @PostMapping
     public ResponseEntity<SessionDto> signIn(
             @Valid @RequestBody SignInRequest request, HttpServletRequest http) {
-        SignInPortalUseCase.Result result = signIn.run(request.codigo(), origin.resolver(http));
+        SignInPortalUseCase.Result result = signIn.run(request.code(), origin.resolver(http));
         SessionDto body =
                 new SessionDto(
                         HomeMapper.teacher(result.teacher()),

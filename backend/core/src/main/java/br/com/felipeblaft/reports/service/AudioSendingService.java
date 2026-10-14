@@ -27,7 +27,7 @@ public class AudioSendingService {
     public void requireWithinLimit(AudioInput input) {
         if (input.size() > parameters.audioLimitBytes()) {
             throw new DomainException(
-                    ErrorCode.AUDIO_MUITO_GRANDE, Map.of("limiteMb", parameters.audioLimitMb()));
+                    ErrorCode.AUDIO_TOO_LARGE, Map.of("limitMb", parameters.audioLimitMb()));
         }
     }
 

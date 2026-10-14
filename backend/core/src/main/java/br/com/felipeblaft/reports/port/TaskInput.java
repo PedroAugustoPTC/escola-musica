@@ -23,7 +23,7 @@ public sealed interface TaskInput
 
         @Override
         public String toString() {
-            return "EstruturacaoAula[***]";
+            return "LessonStructuring[***]";
         }
     }
 
@@ -40,7 +40,7 @@ public sealed interface TaskInput
 
         @Override
         public String toString() {
-            return "IncorporacaoRespostas[rodada=" + round + "]";
+            return "AnswerIncorporation[round=" + round + "]";
         }
     }
 
@@ -54,7 +54,7 @@ public sealed interface TaskInput
 
         @Override
         public String toString() {
-            return "RevisaoAula[***]";
+            return "LessonRevision[***]";
         }
     }
 }

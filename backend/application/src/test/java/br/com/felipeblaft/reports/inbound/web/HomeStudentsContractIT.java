@@ -33,57 +33,57 @@ class HomeStudentsContractIT extends ContractApiBase {
 
     @Test
     void homeWithTotalStudentsAndLimit() throws Exception {
-        mvc.perform(get("/api/v1/inicio").cookie(session))
+        mvc.perform(get("/api/v1/home").cookie(session))
                 .andExpect(status().isOk())
                 .andExpect(followsContract())
-                .andExpect(jsonPath("$.professor.nome").value("Clara Souza"))
-                .andExpect(jsonPath("$.totalAlunos").value(3))
-                .andExpect(jsonPath("$.alunos", hasSize(3)))
-                .andExpect(jsonPath("$.alunos[0].nome").value("Matteo Mafra"))
-                .andExpect(jsonPath("$.relatoriosEmAberto", hasSize(0)))
-                .andExpect(jsonPath("$.limiteAudioMb").value(50));
+                .andExpect(jsonPath("$.teacher.name").value("Clara Souza"))
+                .andExpect(jsonPath("$.totalStudents").value(3))
+                .andExpect(jsonPath("$.students", hasSize(3)))
+                .andExpect(jsonPath("$.students[0].name").value("Matteo Mafra"))
+                .andExpect(jsonPath("$.openReports", hasSize(0)))
+                .andExpect(jsonPath("$.audioLimitMb").value(50));
     }
 
     @Test
     void searchAllFoundAndNone() throws Exception {
-        mvc.perform(get("/api/v1/alunos").cookie(session))
+        mvc.perform(get("/api/v1/students").cookie(session))
                 .andExpect(status().isOk())
                 .andExpect(followsContract())
-                .andExpect(jsonPath("$.resultado").value("TODOS"))
-                .andExpect(jsonPath("$.alunos", hasSize(3)));
-        mvc.perform(get("/api/v1/alunos").param("busca", "TÓRR").cookie(session))
+                .andExpect(jsonPath("$.result").value("ALL"))
+                .andExpect(jsonPath("$.students", hasSize(3)));
+        mvc.perform(get("/api/v1/students").param("search", "TÓRR").cookie(session))
                 .andExpect(status().isOk())
                 .andExpect(followsContract())
-                .andExpect(jsonPath("$.resultado").value("ENCONTRADOS"))
-                .andExpect(jsonPath("$.alunos", hasSize(2)));
-        mvc.perform(get("/api/v1/alunos").param("busca", "Helena").cookie(session))
+                .andExpect(jsonPath("$.result").value("FOUND"))
+                .andExpect(jsonPath("$.students", hasSize(2)));
+        mvc.perform(get("/api/v1/students").param("search", "Helena").cookie(session))
                 .andExpect(status().isOk())
                 .andExpect(followsContract())
-                .andExpect(jsonPath("$.resultado").value("NENHUM"))
-                .andExpect(jsonPath("$.alunos", hasSize(3)));
+                .andExpect(jsonPath("$.result").value("NONE"))
+                .andExpect(jsonPath("$.students", hasSize(3)));
     }
 
     @Test
     void studentSummaryAndCrossAccess() throws Exception {
-        mvc.perform(get("/api/v1/alunos/{id}", matteo.id()).cookie(session))
+        mvc.perform(get("/api/v1/students/{id}", matteo.id()).cookie(session))
                 .andExpect(status().isOk())
                 .andExpect(followsContract())
-                .andExpect(jsonPath("$.nome").value("Matteo Mafra"))
-                .andExpect(jsonPath("$.possuiRelatorioEmAberto").value(false));
-        mvc.perform(get("/api/v1/alunos/{id}", helena.id()).cookie(session))
+                .andExpect(jsonPath("$.name").value("Matteo Mafra"))
+                .andExpect(jsonPath("$.hasOpenReport").value(false));
+        mvc.perform(get("/api/v1/students/{id}", helena.id()).cookie(session))
                 .andExpect(status().isForbidden())
                 .andExpect(followsContract())
-                .andExpect(jsonPath("$.codigo").value("ALUNO_NAO_ASSOCIADO"))
-                .andExpect(jsonPath("$.mensagem").value("Este aluno não está associado a você."));
-        mvc.perform(get("/api/v1/alunos/{id}", "nao-e-uuid").cookie(session))
+                .andExpect(jsonPath("$.code").value("STUDENT_NOT_ASSIGNED"))
+                .andExpect(jsonPath("$.message").value("Este aluno não está associado a você."));
+        mvc.perform(get("/api/v1/students/{id}", "not-a-uuid").cookie(session))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     void withoutSessionEverythingIs401() throws Exception {
-        mvc.perform(get("/api/v1/inicio"))
+        mvc.perform(get("/api/v1/home"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(followsContract());
-        mvc.perform(get("/api/v1/alunos")).andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/v1/students")).andExpect(status().isUnauthorized());
     }
 }

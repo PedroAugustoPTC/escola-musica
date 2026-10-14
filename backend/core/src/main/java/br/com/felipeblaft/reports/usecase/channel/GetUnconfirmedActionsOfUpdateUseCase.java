@@ -20,7 +20,7 @@ public class GetUnconfirmedActionsOfUpdateUseCase {
 
     public List<ChannelAction> run(long updateId) {
         return actions.searchByUpdate(updateId).stream()
-                .filter(action -> action.state() == ChannelActionState.ENTREGUE)
+                .filter(action -> action.state() == ChannelActionState.DELIVERED)
                 .filter(action -> action.payload() != null)
                 .toList();
     }

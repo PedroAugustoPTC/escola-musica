@@ -16,13 +16,13 @@ import java.nio.charset.StandardCharsets;
  */
 public class SimulatedTranscriptionAdapter implements TranscriptionPort {
 
-    public static final String PROVIDER = "simulado/transcricao";
+    public static final String PROVIDER = "simulated/transcription";
     static final double MINIMUM_WITH_SPEECH = 2.0;
 
     @Override
     public TranscriptionResult transcribe(NormalizedAudio audio) {
         if (audio.durationSeconds() < MINIMUM_WITH_SPEECH) {
-            throw new AudioNotProcessableException(AudioNotProcessableException.Reason.SEM_FALA);
+            throw new AudioNotProcessableException(AudioNotProcessableException.Reason.NO_SPEECH);
         }
         try (InputStream input =
                 SimulatedTranscriptionAdapter.class

@@ -66,10 +66,10 @@ public class WebAudioReception {
 
     public TemporaryFile receive(MultipartFile file) {
         if (file == null || file.isEmpty()) {
-            throw new DomainException(ErrorCode.DADOS_INVALIDOS);
+            throw new DomainException(ErrorCode.INVALID_DATA);
         }
         if (file.getSize() > limitBytes) {
-            throw new DomainException(ErrorCode.AUDIO_MUITO_GRANDE, Map.of("limiteMb", limitMb));
+            throw new DomainException(ErrorCode.AUDIO_TOO_LARGE, Map.of("limitMb", limitMb));
         }
         String mime = type(file.getContentType(), file.getOriginalFilename());
         Path destination = directory.resolve("web-" + UUID.randomUUID() + extension(mime));
@@ -100,7 +100,7 @@ public class WebAudioReception {
                 return byExtension;
             }
         }
-        throw new DomainException(ErrorCode.FORMATO_NAO_SUPORTADO);
+        throw new DomainException(ErrorCode.UNSUPPORTED_FORMAT);
     }
 
     private static String extension(String mime) {

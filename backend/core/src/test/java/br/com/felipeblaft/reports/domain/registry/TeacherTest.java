@@ -12,15 +12,15 @@ class TeacherTest {
     private static final Duration SEVEN_DAYS = Duration.ofDays(7);
 
     private Teacher withCode() {
-        Teacher teacher = Teacher.create("Clara Souza", " Clara@Exemplo.TEST ", true, T0);
+        Teacher teacher = Teacher.create("Clara Souza", " Clara@Example.TEST ", true, T0);
         teacher.replaceCode("hash-1", T0, SEVEN_DAYS);
         return teacher;
     }
 
     @Test
     void newNormalizesEmailAndHasNoCode() {
-        Teacher teacher = Teacher.create("Clara Souza", " Clara@Exemplo.TEST ", true, T0);
-        assertThat(teacher.email()).isEqualTo("clara@exemplo.test");
+        Teacher teacher = Teacher.create("Clara Souza", " Clara@Example.TEST ", true, T0);
+        assertThat(teacher.email()).isEqualTo("clara@example.test");
         assertThat(teacher.accessCodeHash()).isNull();
         assertThat(teacher.validCodeAt(T0)).isFalse();
         assertThat(teacher.codeExpiredAt(T0)).isFalse();

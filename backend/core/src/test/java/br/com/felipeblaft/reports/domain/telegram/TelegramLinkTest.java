@@ -19,7 +19,7 @@ class TelegramLinkTest {
         assertThat(link.telegramUserId()).isEqualTo(111L);
         assertThat(link.chatId()).isEqualTo(222L);
         assertThat(link.linkedAt()).isEqualTo(T0);
-        assertThat(link.conversation().flow()).isEqualTo(ConversationFlow.NENHUM);
+        assertThat(link.conversation().flow()).isEqualTo(ConversationFlow.NONE);
         assertThat(link.version()).isZero();
         assertThat(link.id()).isNotNull();
 

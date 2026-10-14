@@ -47,7 +47,7 @@
     },
     {
       "prefix": "frontend/src/mensagens",
-      "slice": 4
+      "slice": 5
     },
     {
       "prefix": "frontend/src/messages",
@@ -92,6 +92,14 @@
     {
       "prefix": "backend/application/src/main/resources/pdf/images/",
       "slice": 5
+    },
+    {
+      "prefix": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/seed/DemoDataIT.java",
+      "slice": 6
+    },
+    {
+      "prefix": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/seed/SeedCommandIT.java",
+      "slice": 6
     }
   ]
 }

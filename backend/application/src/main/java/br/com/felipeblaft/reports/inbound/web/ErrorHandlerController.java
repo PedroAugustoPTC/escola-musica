@@ -41,30 +41,30 @@ public class ErrorHandlerController {
         for (ErrorCode code : ErrorCode.values()) {
             STATUS.put(code, HttpStatus.BAD_REQUEST);
         }
-        STATUS.put(ErrorCode.CODIGO_INVALIDO, HttpStatus.UNAUTHORIZED);
-        STATUS.put(ErrorCode.CODIGO_EXPIRADO, HttpStatus.UNAUTHORIZED);
-        STATUS.put(ErrorCode.SESSAO_EXPIRADA, HttpStatus.UNAUTHORIZED);
-        STATUS.put(ErrorCode.NAO_AUTENTICADO, HttpStatus.UNAUTHORIZED);
-        STATUS.put(ErrorCode.BLOQUEADO_TEMPORARIAMENTE, HttpStatus.TOO_MANY_REQUESTS);
-        STATUS.put(ErrorCode.TELEGRAM_JA_VINCULADO, HttpStatus.CONFLICT);
-        STATUS.put(ErrorCode.PROFESSOR_JA_VINCULADO, HttpStatus.CONFLICT);
-        STATUS.put(ErrorCode.ALUNO_NAO_ASSOCIADO, HttpStatus.FORBIDDEN);
-        STATUS.put(ErrorCode.RECURSO_NAO_ENCONTRADO, HttpStatus.NOT_FOUND);
-        STATUS.put(ErrorCode.PROFESSOR_INEXISTENTE, HttpStatus.NOT_FOUND);
-        STATUS.put(ErrorCode.PROCESSAMENTO_EM_ANDAMENTO, HttpStatus.CONFLICT);
-        STATUS.put(ErrorCode.AUDIO_MUITO_GRANDE, HttpStatus.CONTENT_TOO_LARGE);
-        STATUS.put(ErrorCode.FORMATO_NAO_SUPORTADO, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
-        STATUS.put(ErrorCode.AUDIO_NAO_PROCESSAVEL, HttpStatus.UNPROCESSABLE_CONTENT);
-        STATUS.put(ErrorCode.VERSAO_DESATUALIZADA, HttpStatus.CONFLICT);
-        STATUS.put(ErrorCode.RELATORIO_JA_APROVADO, HttpStatus.CONFLICT);
-        STATUS.put(ErrorCode.RELATORIO_CANCELADO, HttpStatus.CONFLICT);
-        STATUS.put(ErrorCode.ACAO_NAO_PERMITIDA_NA_ETAPA, HttpStatus.CONFLICT);
-        STATUS.put(ErrorCode.RELATORIO_EM_ABERTO, HttpStatus.CONFLICT);
-        STATUS.put(ErrorCode.SEM_AULAS_APROVADAS_NO_PERIODO, HttpStatus.CONFLICT);
-        STATUS.put(ErrorCode.HA_RELATORIOS_EM_ABERTO, HttpStatus.CONFLICT);
-        STATUS.put(ErrorCode.SEMESTRAL_JA_APROVADO, HttpStatus.CONFLICT);
-        STATUS.put(ErrorCode.ERRO_INTERNO, HttpStatus.INTERNAL_SERVER_ERROR);
-        STATUS.put(ErrorCode.SERVICO_INDISPONIVEL, HttpStatus.SERVICE_UNAVAILABLE);
+        STATUS.put(ErrorCode.INVALID_CODE, HttpStatus.UNAUTHORIZED);
+        STATUS.put(ErrorCode.EXPIRED_CODE, HttpStatus.UNAUTHORIZED);
+        STATUS.put(ErrorCode.SESSION_EXPIRED, HttpStatus.UNAUTHORIZED);
+        STATUS.put(ErrorCode.NOT_AUTHENTICATED, HttpStatus.UNAUTHORIZED);
+        STATUS.put(ErrorCode.TEMPORARILY_BLOCKED, HttpStatus.TOO_MANY_REQUESTS);
+        STATUS.put(ErrorCode.TELEGRAM_ALREADY_LINKED, HttpStatus.CONFLICT);
+        STATUS.put(ErrorCode.TEACHER_ALREADY_LINKED, HttpStatus.CONFLICT);
+        STATUS.put(ErrorCode.STUDENT_NOT_ASSIGNED, HttpStatus.FORBIDDEN);
+        STATUS.put(ErrorCode.RESOURCE_NOT_FOUND, HttpStatus.NOT_FOUND);
+        STATUS.put(ErrorCode.TEACHER_NOT_FOUND, HttpStatus.NOT_FOUND);
+        STATUS.put(ErrorCode.PROCESSING_IN_PROGRESS, HttpStatus.CONFLICT);
+        STATUS.put(ErrorCode.AUDIO_TOO_LARGE, HttpStatus.CONTENT_TOO_LARGE);
+        STATUS.put(ErrorCode.UNSUPPORTED_FORMAT, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+        STATUS.put(ErrorCode.AUDIO_NOT_PROCESSABLE, HttpStatus.UNPROCESSABLE_CONTENT);
+        STATUS.put(ErrorCode.STALE_VERSION, HttpStatus.CONFLICT);
+        STATUS.put(ErrorCode.REPORT_ALREADY_APPROVED, HttpStatus.CONFLICT);
+        STATUS.put(ErrorCode.REPORT_CANCELLED, HttpStatus.CONFLICT);
+        STATUS.put(ErrorCode.ACTION_NOT_ALLOWED_AT_STEP, HttpStatus.CONFLICT);
+        STATUS.put(ErrorCode.REPORT_ALREADY_OPEN, HttpStatus.CONFLICT);
+        STATUS.put(ErrorCode.NO_APPROVED_LESSONS_IN_PERIOD, HttpStatus.CONFLICT);
+        STATUS.put(ErrorCode.OPEN_REPORTS_EXIST, HttpStatus.CONFLICT);
+        STATUS.put(ErrorCode.SEMESTER_REPORT_ALREADY_APPROVED, HttpStatus.CONFLICT);
+        STATUS.put(ErrorCode.INTERNAL_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+        STATUS.put(ErrorCode.SERVICE_UNAVAILABLE, HttpStatus.SERVICE_UNAVAILABLE);
     }
 
     private final MessageCatalog catalog;
@@ -86,12 +86,12 @@ public class ErrorHandlerController {
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<ErrorResponse> largeFile(MaxUploadSizeExceededException error) {
-        return response(ErrorCode.AUDIO_MUITO_GRANDE, Map.of());
+        return response(ErrorCode.AUDIO_TOO_LARGE, Map.of());
     }
 
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
     public ResponseEntity<ErrorResponse> unsupportedType(HttpMediaTypeNotSupportedException error) {
-        return response(ErrorCode.FORMATO_NAO_SUPORTADO, Map.of());
+        return response(ErrorCode.UNSUPPORTED_FORMAT, Map.of());
     }
 
     @ExceptionHandler({
@@ -104,7 +104,7 @@ public class ErrorHandlerController {
         MultipartException.class
     })
     public ResponseEntity<ErrorResponse> invalidData(Exception error) {
-        return response(ErrorCode.DADOS_INVALIDOS, Map.of());
+        return response(ErrorCode.INVALID_DATA, Map.of());
     }
 
     @ExceptionHandler({
@@ -112,14 +112,14 @@ public class ErrorHandlerController {
         HttpRequestMethodNotSupportedException.class
     })
     public ResponseEntity<ErrorResponse> notFound(Exception error) {
-        return response(ErrorCode.RECURSO_NAO_ENCONTRADO, Map.of());
+        return response(ErrorCode.RESOURCE_NOT_FOUND, Map.of());
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> unexpected(Exception error) {
         // sem a mensagem nem a causa: podem trazer SQL, caminhos ou dados de aluno (FR-054, FR-055)
-        LOG.error("erro-inesperado tipo={} local={}", error.getClass().getName(), localOf(error));
-        return response(ErrorCode.ERRO_INTERNO, Map.of());
+        LOG.error("unexpected-error type={} local={}", error.getClass().getName(), localOf(error));
+        return response(ErrorCode.INTERNAL_ERROR, Map.of());
     }
 
     /**
@@ -135,7 +135,7 @@ public class ErrorHandlerController {
                         + point.getLineNumber();
             }
         }
-        return "desconhecido";
+        return "unknown";
     }
 
     ResponseEntity<ErrorResponse> response(ErrorCode code, Map<String, Object> details) {
@@ -144,8 +144,8 @@ public class ErrorHandlerController {
                 new HashMap<>(parameters.errorParameters(code, details));
         Integer retryAfter = null;
         ResponseEntity.BodyBuilder body = ResponseEntity.status(status);
-        if (code == ErrorCode.BLOQUEADO_TEMPORARIAMENTE
-                && details.get("segundosRestantes") instanceof Number seconds) {
+        if (code == ErrorCode.TEMPORARILY_BLOCKED
+                && details.get("remainingSeconds") instanceof Number seconds) {
             retryAfter = seconds.intValue();
             body.header(HttpHeaders.RETRY_AFTER, String.valueOf(retryAfter));
         }

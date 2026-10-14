@@ -11,53 +11,53 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public sealed interface ActionDto {
 
-    String MESSAGE_TYPE = "MENSAGEM";
-    String EDIT_TYPE = "EDICAO";
-    String DOCUMENT_TYPE = "DOCUMENTO";
-    String CALLBACK_REPLY_TYPE = "RESPOSTA_CALLBACK";
-    String STEP_MESSAGE_TYPE = "MENSAGEM_ETAPA";
+    String MESSAGE_TYPE = "MESSAGE";
+    String EDIT_TYPE = "EDIT";
+    String DOCUMENT_TYPE = "DOCUMENT";
+    String CALLBACK_REPLY_TYPE = "CALLBACK_REPLY";
+    String STEP_MESSAGE_TYPE = "STEP_MESSAGE";
 
-    String acaoId();
+    String actionId();
 
-    String tipo();
+    String type();
 
     /** Botão do teclado em linha: {@code dados} é o {@code callback_data} (v1:acao:argumento). */
-    record ButtonDto(String rotulo, String dados) {}
+    record ButtonDto(String label, String data) {}
 
-    record KeyboardDto(List<List<ButtonDto>> linhas) {}
+    record KeyboardDto(List<List<ButtonDto>> rows) {}
 
     record MessageActionDto(
-            String acaoId, String tipo, long chatId, String texto, KeyboardDto teclado)
+            String actionId, String type, long chatId, String text, KeyboardDto keyboard)
             implements ActionDto {}
 
     record EditActionDto(
-            String acaoId,
-            String tipo,
+            String actionId,
+            String type,
             long chatId,
-            long mensagemId,
-            String texto,
-            KeyboardDto teclado)
+            long messageId,
+            String text,
+            KeyboardDto keyboard)
             implements ActionDto {}
 
     record DocumentActionDto(
-            String acaoId,
-            String tipo,
+            String actionId,
+            String type,
             long chatId,
-            String documentoId,
-            String nomeArquivo,
-            String tipoConteudo,
-            String legenda)
+            String documentId,
+            String fileName,
+            String contentType,
+            String caption)
             implements ActionDto {}
 
-    record CallbackReplyActionDto(String acaoId, String tipo, String callbackId)
+    record CallbackReplyActionDto(String actionId, String type, String callbackId)
             implements ActionDto {}
 
     record StepMessageActionDto(
-            String acaoId,
-            String tipo,
+            String actionId,
+            String type,
             long chatId,
-            String texto,
-            String trabalhoId,
-            Long editarMensagemId)
+            String text,
+            String jobId,
+            Long editMessageId)
             implements ActionDto {}
 }

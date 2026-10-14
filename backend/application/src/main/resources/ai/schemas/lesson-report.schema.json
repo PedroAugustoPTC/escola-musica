@@ -12,6 +12,6 @@
     "observations": { "type": "string", "maxLength": 4000 },
     "pendingQuestions": { "type": "array", "items": { "type": "string", "maxLength": 300 }, "maxItems": 5 },
     "noContentChange": { "type": "boolean" },
-    "actionRequest": { "enum": ["NENHUM", "APROVAR", "CANCELAR"] }
+    "actionRequest": { "enum": ["NONE", "APPROVE", "CANCEL"] }
   }
 }

@@ -41,7 +41,7 @@ public class ChannelWebDriver implements ChannelDriver {
     public String signIn(String code) throws Exception {
         MockHttpServletResponse response =
                 mvc.perform(
-                                post("/api/v1/sessao")
+                                post("/api/v1/session")
                                         .with(csrf().asHeader())
                                         .with(
                                                 r -> {
@@ -49,15 +49,15 @@ public class ChannelWebDriver implements ChannelDriver {
                                                     return r;
                                                 })
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .content("{\"codigo\":\"" + code + "\"}"))
+                                        .content("{\"code\":\"" + code + "\"}"))
                         .andReturn()
                         .getResponse();
         if (response.getStatus() == 200) {
-            Cookie cookie = response.getCookie("sessao");
+            Cookie cookie = response.getCookie("session");
             session = new Cookie(cookie.getName(), cookie.getValue());
-            return "SUCESSO";
+            return "SUCCESS";
         }
-        return JSON.readTree(response.getContentAsString()).get("codigo").asString();
+        return JSON.readTree(response.getContentAsString()).get("code").asString();
     }
 
     private JsonNode fetchJson(String path) throws Exception {
@@ -68,32 +68,32 @@ public class ChannelWebDriver implements ChannelDriver {
 
     @Override
     public HomeSummary start() throws Exception {
-        JsonNode start = fetchJson("/api/v1/inicio");
+        JsonNode start = fetchJson("/api/v1/home");
         List<String> names = new ArrayList<>();
-        start.get("alunos").forEach(a -> names.add(a.get("nome").asString()));
-        return new HomeSummary(start.get("totalAlunos").asInt(), names);
+        start.get("students").forEach(a -> names.add(a.get("name").asString()));
+        return new HomeSummary(start.get("totalStudents").asInt(), names);
     }
 
     @Override
     public SearchResult search(String text) throws Exception {
         MockHttpServletResponse response =
-                mvc.perform(get("/api/v1/alunos").param("busca", text).cookie(session))
+                mvc.perform(get("/api/v1/students").param("search", text).cookie(session))
                         .andReturn()
                         .getResponse();
         JsonNode search = JSON.readTree(response.getContentAsString());
         List<String> names = new ArrayList<>();
-        search.get("alunos").forEach(a -> names.add(a.get("nome").asString()));
-        return new SearchResult(search.get("resultado").asString(), names);
+        search.get("students").forEach(a -> names.add(a.get("name").asString()));
+        return new SearchResult(search.get("result").asString(), names);
     }
 
     @Override
     public String end() throws Exception {
-        mvc.perform(delete("/api/v1/sessao").cookie(session).with(csrf().asHeader()));
+        mvc.perform(delete("/api/v1/session").cookie(session).with(csrf().asHeader()));
         int status =
-                mvc.perform(get("/api/v1/inicio").cookie(session))
+                mvc.perform(get("/api/v1/home").cookie(session))
                         .andReturn()
                         .getResponse()
                         .getStatus();
-        return status == 401 ? "ENCERRADO" : "ATIVO";
+        return status == 401 ? "ENDED" : "ACTIVE";
     }
 }

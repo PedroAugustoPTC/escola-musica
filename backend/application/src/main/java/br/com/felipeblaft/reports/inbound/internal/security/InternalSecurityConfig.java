@@ -32,7 +32,7 @@ public class InternalSecurityConfig {
             throws Exception {
         ApplicationProperties.TelegramChannel channel = properties.telegramChannel();
         warnIfThereIsNoToken(channel);
-        http.securityMatcher("/interno/**")
+        http.securityMatcher("/internal/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -64,7 +64,7 @@ public class InternalSecurityConfig {
     static void warnIfThereIsNoToken(ApplicationProperties.TelegramChannel channel) {
         if (empty(channel.currentToken()) && empty(channel.nextToken())) {
             LOG.warn(
-                    "canal-telegram-sem-token-de-servico: a area /interno/** recusa todas as"
+                    "telegram-channel-without-service-token: a area /internal/** recusa todas as"
                             + " requisicoes ate que TELEGRAM_CHANNEL_CURRENT_TOKEN seja definido");
         }
     }

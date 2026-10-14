@@ -112,12 +112,12 @@ class LogWithoutSensitiveDataIT extends TelegramConversationBase {
     private Cookie signIn(String code) throws Exception {
         MvcResult input =
                 mvc.perform(
-                                post("/api/v1/sessao")
+                                post("/api/v1/session")
                                         .with(csrf().asHeader())
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .content("{\"codigo\":\"" + code + "\"}"))
+                                        .content("{\"code\":\"" + code + "\"}"))
                         .andReturn();
-        Cookie cookie = input.getResponse().getCookie("sessao");
+        Cookie cookie = input.getResponse().getCookie("session");
         return cookie == null ? null : new Cookie(cookie.getName(), cookie.getValue());
     }
 
@@ -145,26 +145,26 @@ class LogWithoutSensitiveDataIT extends TelegramConversationBase {
                 .process(any());
         ProcessingJob job =
                 ProcessingJob.create(
-                        JobType.REGISTRO_AULA,
+                        JobType.LESSON_REGISTRATION,
                         UUID.randomUUID(),
                         UUID.randomUUID(),
                         null,
                         null,
                         Channel.WEB,
                         Medium.AUDIO,
-                        JobStep.ENVIANDO,
+                        JobStep.UPLOADING,
                         clock.now());
 
         ReflectionTestUtils.invokeMethod(worker, "run", job);
 
         String logs = logText();
         assertThat(logs)
-                .contains("trabalho-falhou tipo=REGISTRO_AULA")
+                .contains("job-failed type=LESSON_REGISTRATION")
                 .contains("IllegalStateException");
         assertThat(logs).doesNotContain("Matteo", CPF, RESPONSE, CHANGE, "causa com", "\tat ");
         assertThat(
                         events.list.stream()
-                                .filter(e -> e.getFormattedMessage().contains("trabalho-falhou"))
+                                .filter(e -> e.getFormattedMessage().contains("job-failed"))
                                 .allMatch(e -> e.getThrowableProxy() == null))
                 .as("sem a exceção anexada ao evento")
                 .isTrue();
@@ -178,7 +178,7 @@ class LogWithoutSensitiveDataIT extends TelegramConversationBase {
                 new SeedFile(
                         List.of(
                                 new SeedFile.SeedTeacher(
-                                        "clara@exemplo.test", "Clara Souza", true)),
+                                        "clara@example.test", "Clara Souza", true)),
                         List.of(
                                 new SeedFile.SeedStudent(
                                         "529.982.247-25",
@@ -186,25 +186,25 @@ class LogWithoutSensitiveDataIT extends TelegramConversationBase {
                                         "1998-02-01",
                                         null,
                                         "Violão",
-                                        List.of("clara@exemplo.test")),
+                                        List.of("clara@example.test")),
                                 new SeedFile.SeedStudent(
                                         "111.111.111-11",
                                         "Aluno Com Cpf Invalido",
                                         "2010-01-01",
                                         null,
                                         "Piano",
-                                        List.of("clara@exemplo.test")))),
+                                        List.of("clara@example.test")))),
                 false);
 
         // Web: código errado, código certo, registro, resposta, alteração e aprovação
         signIn("ZZZZ2222");
         Cookie session = signIn(ScenarioIT.CODE_CLARA);
         mvc.perform(
-                multipart("/api/v1/alunos/{id}/relatorios-aula", matteo.id())
+                multipart("/api/v1/students/{id}/lesson-reports", matteo.id())
                         .file(
                                 new MockMultipartFile(
                                         "audio",
-                                        "aula.webm",
+                                        "lesson.webm",
                                         "audio/webm",
                                         AudioNormalizationTest.AUDIO_WITH_SPEECH))
                         .cookie(session)
@@ -213,18 +213,15 @@ class LogWithoutSensitiveDataIT extends TelegramConversationBase {
         UUID id = report();
         postJson(
                 session,
-                "/api/v1/relatorios-aula/" + id + "/respostas",
-                "{\"texto\":\"" + RESPONSE + "\"}");
+                "/api/v1/lesson-reports/" + id + "/answers",
+                "{\"text\":\"" + RESPONSE + "\"}");
         scenario.processQueue();
         postJson(
                 session,
-                "/api/v1/relatorios-aula/" + id + "/alteracoes",
-                "{\"texto\":\"" + CHANGE + "\",\"versaoBase\":1}");
+                "/api/v1/lesson-reports/" + id + "/changes",
+                "{\"text\":\"" + CHANGE + "\",\"baseVersion\":1}");
         scenario.processQueue();
-        postJson(
-                session,
-                "/api/v1/relatorios-aula/" + id + "/aprovacao",
-                "{\"versaoConfirmada\":2}");
+        postJson(session, "/api/v1/lesson-reports/" + id + "/approval", "{\"confirmedVersion\":2}");
 
         // Telegram: código errado, vínculo, busca de aluno, áudio inválido e áudio com fala
         sendText(USER_BRUNO, "ZZZZ2222");
@@ -232,13 +229,13 @@ class LogWithoutSensitiveDataIT extends TelegramConversationBase {
         sendText(USER_CLARA, "Aluno Que Nao Existe");
         sendText(USER_CLARA, "registrar aula");
         sendText(USER_CLARA, "Olavo");
-        prepareTelegramFile("voz-invalida", AudioNormalizationTest.INVALID.getBytes());
-        sendVoice(USER_CLARA, "voz-invalida", 10);
-        sendCallback(USER_CLARA, "v1:confal:");
+        prepareTelegramFile("invalid-voice", AudioNormalizationTest.INVALID.getBytes());
+        sendVoice(USER_CLARA, "invalid-voice", 10);
+        sendCallback(USER_CLARA, "v1:confirm-student:");
         scenario.processQueue();
-        prepareTelegramFile("voz-boa", AudioNormalizationTest.AUDIO_WITH_SPEECH);
-        sendVoice(USER_CLARA, "voz-boa", 100);
-        sendCallback(USER_CLARA, "v1:confal:");
+        prepareTelegramFile("good-voice", AudioNormalizationTest.AUDIO_WITH_SPEECH);
+        sendVoice(USER_CLARA, "good-voice", 100);
+        sendCallback(USER_CLARA, "v1:confirm-student:");
         scenario.processQueue();
         sendText(USER_CLARA, RESPONSE);
         scenario.processQueue();
@@ -260,11 +257,11 @@ class LogWithoutSensitiveDataIT extends TelegramConversationBase {
                         Map.entry("código errado", "ZZZZ2222"),
                         Map.entry("token do bot", TOKEN),
                         Map.entry("token de sessão", session.getValue()),
-                        Map.entry("resposta", RESPONSE),
+                        Map.entry("response", RESPONSE),
                         Map.entry("alteração", CHANGE),
                         Map.entry("transcrição", transcription.substring(0, 40)),
                         Map.entry("conteúdo do relatório", "Czerny"),
-                        Map.entry("bytes do áudio", "AUDIO-DE-AULA-FICTICIO"));
+                        Map.entry("bytes do áudio", "FICTITIOUS-LESSON-AUDIO"));
         forbidden.forEach(
                 (description, value) -> assertThat(logs).as(description).doesNotContain(value));
     }

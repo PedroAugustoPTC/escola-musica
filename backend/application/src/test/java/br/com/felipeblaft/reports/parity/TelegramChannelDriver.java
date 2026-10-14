@@ -62,8 +62,8 @@ public class TelegramChannelDriver implements ChannelDriver {
     @Override
     public String signIn(String code) throws Exception {
         String text = lastText(conversation.send(code));
-        if (text.startsWith(catalog.text("VINCULO_CRIADO").substring(0, 20))) {
-            return "SUCESSO";
+        if (text.startsWith(catalog.text("LINK_CREATED").substring(0, 20))) {
+            return "SUCCESS";
         }
         return textCode(text);
     }
@@ -88,21 +88,21 @@ public class TelegramChannelDriver implements ChannelDriver {
         String response = message.get("text").asString();
         String code = textCode(response);
         List<String> names = new ArrayList<>();
-        if ("ALUNO_SELECIONADO".equals(code)) {
+        if ("SELECTED_STUDENT".equals(code)) {
             Matcher m = Pattern.compile(", com (.+?)\\. Envie").matcher(response);
             if (m.find()) {
                 names.add(m.group(1));
             }
-            return new SearchResult("ENCONTRADOS", names);
+            return new SearchResult("FOUND", names);
         }
         for (JsonNode line : message.path("reply_markup").path("inline_keyboard")) {
             for (JsonNode button : line) {
-                if (button.get("callback_data").asString().startsWith("v1:aluno:")) {
+                if (button.get("callback_data").asString().startsWith("v1:student:")) {
                     names.add(button.get("text").asString().replace(" · Em aberto", ""));
                 }
             }
         }
-        String type = "NENHUM_ALUNO_ENCONTRADO".equals(code) ? "NENHUM" : "ENCONTRADOS";
+        String type = "NO_STUDENT_FOUND".equals(code) ? "NONE" : "FOUND";
         return new SearchResult(type, names);
     }
 
@@ -110,6 +110,6 @@ public class TelegramChannelDriver implements ChannelDriver {
     public String end() throws Exception {
         conversation.send("sair");
         conversation.send("sim");
-        return links.get() == 0 ? "ENCERRADO" : "ATIVO";
+        return links.get() == 0 ? "ENDED" : "ACTIVE";
     }
 }
