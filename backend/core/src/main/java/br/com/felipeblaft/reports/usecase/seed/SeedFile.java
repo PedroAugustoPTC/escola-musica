@@ -5,29 +5,29 @@ import java.util.Collections;
 import java.util.List;
 
 /** Conteúdo do arquivo de carga inicial (contracts/carga-inicial.md), já lido pelo adaptador. */
-public record SeedFile(List<SeedTeacher> professores, List<SeedStudent> alunos) {
+public record SeedFile(List<SeedTeacher> teachers, List<SeedStudent> students) {
 
     public SeedFile {
-        professores = professores == null ? List.of() : List.copyOf(professores);
-        alunos = alunos == null ? List.of() : List.copyOf(alunos);
+        teachers = teachers == null ? List.of() : List.copyOf(teachers);
+        students = students == null ? List.of() : List.copyOf(students);
     }
 
-    public record SeedTeacher(String email, String nome, Boolean ativo) {}
+    public record SeedTeacher(String email, String name, Boolean active) {}
 
     /** Datas chegam como texto (AAAA-MM-DD) para que a validação aconteça no núcleo. */
     public record SeedStudent(
             String cpf,
-            String nome,
-            String dataNascimento,
-            String nomeResponsavel,
-            String instrumento,
-            List<String> professores) {
+            String name,
+            String birthDate,
+            String guardianName,
+            String instrument,
+            List<String> teachers) {
 
         public SeedStudent {
-            professores =
-                    professores == null
+            teachers =
+                    teachers == null
                             ? List.of()
-                            : Collections.unmodifiableList(new ArrayList<>(professores));
+                            : Collections.unmodifiableList(new ArrayList<>(teachers));
         }
     }
 }

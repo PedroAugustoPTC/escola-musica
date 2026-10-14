@@ -15,10 +15,10 @@ public sealed interface TaskInput
                 SemesterTaskInput {
 
     /** ESTRUTURACAO_AULA: só a transcrição. */
-    record LessonStructuring(String transcricao) implements TaskInput {
+    record LessonStructuring(String transcription) implements TaskInput {
 
         public LessonStructuring {
-            Objects.requireNonNull(transcricao);
+            Objects.requireNonNull(transcription);
         }
 
         @Override
@@ -29,27 +29,27 @@ public sealed interface TaskInput
 
     /** INCORPORACAO_RESPOSTAS: conteúdo atual, perguntas pendentes, resposta e rodada atual. */
     record AnswerIncorporation(
-            LessonReportContent conteudoAtual, List<String> perguntas, String resposta, int rodada)
+            LessonReportContent currentContent, List<String> questions, String response, int round)
             implements TaskInput {
 
         public AnswerIncorporation {
-            Objects.requireNonNull(conteudoAtual);
-            perguntas = List.copyOf(perguntas);
-            Objects.requireNonNull(resposta);
+            Objects.requireNonNull(currentContent);
+            questions = List.copyOf(questions);
+            Objects.requireNonNull(response);
         }
 
         @Override
         public String toString() {
-            return "IncorporacaoRespostas[rodada=" + rodada + "]";
+            return "IncorporacaoRespostas[rodada=" + round + "]";
         }
     }
 
     /** REVISAO_AULA: conteúdo atual e o pedido de alteração. */
-    record LessonRevision(LessonReportContent conteudoAtual, String pedido) implements TaskInput {
+    record LessonRevision(LessonReportContent currentContent, String request) implements TaskInput {
 
         public LessonRevision {
-            Objects.requireNonNull(conteudoAtual);
-            Objects.requireNonNull(pedido);
+            Objects.requireNonNull(currentContent);
+            Objects.requireNonNull(request);
         }
 
         @Override

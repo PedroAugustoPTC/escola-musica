@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <title th:text="${title}">Relatório Semestral</title>
+  <style th:utext="${styles}"></style>
+  <style th:utext="${paginationStyle}"></style>
+  <style>
+    /* Páginas 2+ do modelo: cabeçalho corrido com a marca e a identificação do relatório. */
+    @page { margin-top: 84pt; @top-center { content: element(running); vertical-align: bottom; } }
+    @page :first { margin-top: 46pt; @top-center { content: none; } }
+  </style>
+</head>
+<body>
+  <div class="running">
+    <table>
+      <tr>
+        <td><img th:src="${images['wordmark']}" alt="Instituto Musical Felipe Blaft"/></td>
+        <td class="identification" th:text="${title + ' · ' + student + ' · ' + periodLabel}">Relatório Semestral · Aluno · 1º semestre 2026</td>
+      </tr>
+    </table>
+  </div>
+  <div class="footer">
+    <img th:src="${images['divider']}" alt=""/>
+    <table>
+      <tr>
+        <td th:text="${footerText}">Instituto Musical Felipe Blaft — relatório pedagógico semestral.</td>
+        <td class="page"><span class="pagination"></span></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="review-band" th:if="${review}" th:text="${banner}">Documento em conferência — não oficial</div>
+
+  <div class="header">
+    <img th:src="${images['logo']}" alt="Instituto Musical Felipe Blaft"/>
+    <div class="kicker">RELATÓRIO PEDAGÓGICO</div>
+    <h1 th:text="${title}">Relatório Semestral</h1>
+  </div>
+
+  <table class="data">
+    <tr>
+      <td class="first"><div class="label">ALUNO</div><div class="value" th:text="${student}">Aluno</div></td>
+      <td><div class="label">PROFESSOR</div><div class="value" th:text="${teacher}">Professor</div></td>
+      <td><div class="label">PERÍODO</div><div class="value" th:text="${period}">1º semestre 2026</div></td>
+    </tr>
+  </table>
+  <div class="note" th:text="${consolidation}">Consolidação de 8 relatórios de aula aprovados no período.</div>
+
+  <div class="section" th:each="section, iteration : ${sections}" th:unless="${iteration.last}">
+    <table class="numbered">
+      <tr>
+        <td class="number" th:text="${section.number}">1</td>
+        <td>
+          <h2 th:text="${section.title}">Seção</h2>
+          <div th:each="field : ${section.fields}">
+            <div class="field-subtitle" th:if="${field.label != null}" th:text="${field.label}">Campo</div>
+            <ul th:unless="${field.items.isEmpty()}">
+              <li th:each="item : ${field.items}" th:text="${item}">item</li>
+            </ul>
+            <p th:if="${field.items.isEmpty()}" th:text="${field.empty() ? '—' : field.text}">texto</p>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- a última seção fica com as assinaturas: nunca sobra uma página só com elas -->
+  <div class="end" th:with="section=${sections.get(sections.size() - 1)}">
+  <div class="section">
+    <table class="numbered">
+      <tr>
+        <td class="number" th:text="${section.number}">1</td>
+        <td>
+          <h2 th:text="${section.title}">Seção</h2>
+          <div th:each="field : ${section.fields}">
+            <div class="field-subtitle" th:if="${field.label != null}" th:text="${field.label}">Campo</div>
+            <ul th:unless="${field.items.isEmpty()}">
+              <li th:each="item : ${field.items}" th:text="${item}">item</li>
+            </ul>
+            <p th:if="${field.items.isEmpty()}" th:text="${field.empty() ? '—' : field.text}">texto</p>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="approval" th:if="${approval == null}" th:text="${versionText}">Versão 1</div>
+
+  <table class="signatures" th:if="${approval != null}">
+    <tr>
+      <td><span th:text="${teacher}">Professor</span><br/><span class="support">Professor responsável</span></td>
+      <td class="space"></td>
+      <td><span th:text="${approvedAt}">Aprovado em …</span><br/><span class="support" th:text="${versionText}">Versão 1</span></td>
+    </tr>
+  </table>
+  </div>
+</body>
+</html>

@@ -10,41 +10,40 @@ import java.util.Objects;
  * descartados e seções ausentes tratadas como vazias.
  */
 public record SemesterReportContent(
-        AttendanceAndStudy frequenciaEEstudo,
-        Technique tecnica,
-        Musicality musicalidade,
-        ReadingAndMemorization leituraEMemorizacao,
-        Items pontosDeAtencao,
-        Items estrategiasPedagogicas,
-        FamilySupport acompanhamentoFamiliar,
-        NextSemesterPlan planejamentoProximoSemestre,
-        String parecerFinal)
+        AttendanceAndStudy attendanceAndStudy,
+        Technique technique,
+        Musicality musicality,
+        ReadingAndMemorization readingAndMemorization,
+        Items attentionPoints,
+        Items pedagogicalStrategies,
+        FamilySupport familySupport,
+        NextSemesterPlan nextSemesterPlan,
+        String finalOpinion)
         implements VersionContent {
 
     public SemesterReportContent {
-        frequenciaEEstudo =
+        attendanceAndStudy =
                 Objects.requireNonNullElseGet(
-                        frequenciaEEstudo, () -> new AttendanceAndStudy(null, null, null, null));
-        tecnica =
-                Objects.requireNonNullElseGet(tecnica, () -> new Technique(null, null, null, null));
-        musicalidade =
+                        attendanceAndStudy, () -> new AttendanceAndStudy(null, null, null, null));
+        technique =
                 Objects.requireNonNullElseGet(
-                        musicalidade,
-                        () -> new Musicality(null, null, null, null, null, null, null));
-        leituraEMemorizacao =
+                        technique, () -> new Technique(null, null, null, null));
+        musicality =
                 Objects.requireNonNullElseGet(
-                        leituraEMemorizacao, () -> new ReadingAndMemorization(null, null));
-        pontosDeAtencao = Objects.requireNonNullElseGet(pontosDeAtencao, () -> new Items(null));
-        estrategiasPedagogicas =
-                Objects.requireNonNullElseGet(estrategiasPedagogicas, () -> new Items(null));
-        acompanhamentoFamiliar =
+                        musicality, () -> new Musicality(null, null, null, null, null, null, null));
+        readingAndMemorization =
                 Objects.requireNonNullElseGet(
-                        acompanhamentoFamiliar, () -> new FamilySupport(null, null));
-        planejamentoProximoSemestre =
+                        readingAndMemorization, () -> new ReadingAndMemorization(null, null));
+        attentionPoints = Objects.requireNonNullElseGet(attentionPoints, () -> new Items(null));
+        pedagogicalStrategies =
+                Objects.requireNonNullElseGet(pedagogicalStrategies, () -> new Items(null));
+        familySupport =
+                Objects.requireNonNullElseGet(familySupport, () -> new FamilySupport(null, null));
+        nextSemesterPlan =
                 Objects.requireNonNullElseGet(
-                        planejamentoProximoSemestre,
+                        nextSemesterPlan,
                         () -> new NextSemesterPlan(null, null, null, null, null, null, null));
-        parecerFinal = text(parecerFinal);
+        finalOpinion = text(finalOpinion);
     }
 
     public static SemesterReportContent empty() {
@@ -67,86 +66,86 @@ public record SemesterReportContent(
     }
 
     public record AttendanceAndStudy(
-            String frequenciaAulas,
-            String regularidadeEstudoEmCasa,
-            String engajamento,
-            String comentarioGeral) {
+            String lessonAttendance,
+            String homeStudyRegularity,
+            String engagement,
+            String generalComment) {
         public AttendanceAndStudy {
-            frequenciaAulas = text(frequenciaAulas);
-            regularidadeEstudoEmCasa = text(regularidadeEstudoEmCasa);
-            engajamento = text(engajamento);
-            comentarioGeral = text(comentarioGeral);
+            lessonAttendance = text(lessonAttendance);
+            homeStudyRegularity = text(homeStudyRegularity);
+            engagement = text(engagement);
+            generalComment = text(generalComment);
         }
     }
 
     public record Technique(
-            List<String> conteudosTrabalhados,
-            String evolucaoTecnica,
-            List<String> pontosADesenvolver,
-            List<String> estudosRealizados) {
+            List<String> workedTopics,
+            String technicalProgress,
+            List<String> pointsToDevelop,
+            List<String> completedStudies) {
         public Technique {
-            conteudosTrabalhados = items(conteudosTrabalhados);
-            evolucaoTecnica = text(evolucaoTecnica);
-            pontosADesenvolver = items(pontosADesenvolver);
-            estudosRealizados = items(estudosRealizados);
+            workedTopics = items(workedTopics);
+            technicalProgress = text(technicalProgress);
+            pointsToDevelop = items(pointsToDevelop);
+            completedStudies = items(completedStudies);
         }
     }
 
     public record Musicality(
-            List<String> repertorioEstudado,
-            String som,
-            String ritmo,
-            String fraseado,
-            String articulacao,
-            String estilo,
-            String comentarioMusical) {
+            List<String> studiedRepertoire,
+            String sound,
+            String rhythm,
+            String phrasing,
+            String articulation,
+            String style,
+            String musicalComment) {
         public Musicality {
-            repertorioEstudado = items(repertorioEstudado);
-            som = text(som);
-            ritmo = text(ritmo);
-            fraseado = text(fraseado);
-            articulacao = text(articulacao);
-            estilo = text(estilo);
-            comentarioMusical = text(comentarioMusical);
+            studiedRepertoire = items(studiedRepertoire);
+            sound = text(sound);
+            rhythm = text(rhythm);
+            phrasing = text(phrasing);
+            articulation = text(articulation);
+            style = text(style);
+            musicalComment = text(musicalComment);
         }
     }
 
-    public record ReadingAndMemorization(String avaliacao, String comentario) {
+    public record ReadingAndMemorization(String assessment, String comment) {
         public ReadingAndMemorization {
-            avaliacao = text(avaliacao);
-            comentario = text(comentario);
+            assessment = text(assessment);
+            comment = text(comment);
         }
     }
 
-    public record Items(List<String> itens) {
+    public record Items(List<String> items) {
         public Items {
-            itens = SemesterReportContent.items(itens);
+            items = SemesterReportContent.items(items);
         }
     }
 
-    public record FamilySupport(String nivelDePresenca, String observacaoDoProfessor) {
+    public record FamilySupport(String presenceLevel, String teacherObservation) {
         public FamilySupport {
-            nivelDePresenca = text(nivelDePresenca);
-            observacaoDoProfessor = text(observacaoDoProfessor);
+            presenceLevel = text(presenceLevel);
+            teacherObservation = text(teacherObservation);
         }
     }
 
     public record NextSemesterPlan(
-            List<String> metasTecnicas,
-            List<String> metasMusicais,
-            List<String> habitosDeEstudo,
-            List<String> repertorioProposto,
-            List<String> estudosTecnicos,
-            List<String> leituraETeoria,
-            String projetoDoSemestre) {
+            List<String> technicalGoals,
+            List<String> musicalGoals,
+            List<String> studyHabits,
+            List<String> proposedRepertoire,
+            List<String> technicalStudies,
+            List<String> readingAndTheory,
+            String semesterProject) {
         public NextSemesterPlan {
-            metasTecnicas = items(metasTecnicas);
-            metasMusicais = items(metasMusicais);
-            habitosDeEstudo = items(habitosDeEstudo);
-            repertorioProposto = items(repertorioProposto);
-            estudosTecnicos = items(estudosTecnicos);
-            leituraETeoria = items(leituraETeoria);
-            projetoDoSemestre = text(projetoDoSemestre);
+            technicalGoals = items(technicalGoals);
+            musicalGoals = items(musicalGoals);
+            studyHabits = items(studyHabits);
+            proposedRepertoire = items(proposedRepertoire);
+            technicalStudies = items(technicalStudies);
+            readingAndTheory = items(readingAndTheory);
+            semesterProject = text(semesterProject);
         }
     }
 }

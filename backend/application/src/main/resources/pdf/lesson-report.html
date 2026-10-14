@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <title th:text="${title}">Relatório de Aula</title>
+  <style th:utext="${styles}"></style>
+  <style th:utext="${paginationStyle}"></style>
+</head>
+<body>
+  <div class="footer">
+    <img th:src="${images['divider']}" alt=""/>
+    <table>
+      <tr>
+        <td th:text="${footerText}">Instituto Musical Felipe Blaft — relatório pedagógico de aula.</td>
+        <td class="page"><span class="pagination"></span></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="review-band" th:if="${review}" th:text="${banner}">Documento em conferência — não oficial</div>
+
+  <div class="header">
+    <img th:src="${images['logo']}" alt="Instituto Musical Felipe Blaft"/>
+    <div class="kicker">RELATÓRIO PEDAGÓGICO</div>
+    <h1 th:text="${title}">Relatório de Aula</h1>
+  </div>
+
+  <table class="data">
+    <tr>
+      <td class="first"><div class="label">ALUNO</div><div class="value" th:text="${student}">Aluno</div></td>
+      <td><div class="label">PROFESSOR</div><div class="value" th:text="${teacher}">Professor</div></td>
+      <td><div class="label">DATA DA AULA</div><div class="value" th:text="${data}">30/09/2026</div></td>
+    </tr>
+  </table>
+
+  <div class="section" th:each="section : ${sections}">
+    <h2 th:text="${section.title}">Seção</h2>
+    <ul th:unless="${section.items.isEmpty()}">
+      <li th:each="item : ${section.items}" th:text="${item}">item</li>
+    </ul>
+    <p th:if="${section.items.isEmpty()}" th:text="${section.text}">texto</p>
+  </div>
+
+  <div class="approval" th:if="${approval != null}" th:text="${approval}">Aprovado por … · versão 2</div>
+  <div class="approval" th:if="${approval == null}" th:text="${versionText}">Versão 1</div>
+</body>
+</html>

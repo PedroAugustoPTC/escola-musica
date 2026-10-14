@@ -75,8 +75,8 @@ class SemesterDomainTest {
         GeneralInformation inCurrent =
                 GeneralInformation.calculate("Matteo", birth, "Piano", "Clara", current, 2, today);
 
-        assertThat(inPast.idade()).isEqualTo(13);
-        assertThat(inCurrent.idade()).isEqualTo(13);
+        assertThat(inPast.age()).isEqualTo(13);
+        assertThat(inCurrent.age()).isEqualTo(13);
         assertThat(
                         GeneralInformation.calculate(
                                         "Matteo",
@@ -86,10 +86,10 @@ class SemesterDomainTest {
                                         current,
                                         2,
                                         LocalDate.of(2026, 9, 21))
-                                .idade())
+                                .age())
                 .isEqualTo(14);
-        assertThat(inPast.periodoChave()).isEqualTo("2025-1");
-        assertThat(inPast.quantidadeAulasConsideradas()).isEqualTo(4);
+        assertThat(inPast.periodKey()).isEqualTo("2025-1");
+        assertThat(inPast.consideredLessonCount()).isEqualTo(4);
     }
 
     @Test
@@ -107,10 +107,10 @@ class SemesterDomainTest {
                         null,
                         "  Parecer  ");
 
-        assertThat(content.tecnica().conteudosTrabalhados()).containsExactly("Escalas");
-        assertThat(content.frequenciaEEstudo().comentarioGeral()).isEmpty();
-        assertThat(content.pontosDeAtencao().itens()).isEmpty();
-        assertThat(content.parecerFinal()).isEqualTo("Parecer");
+        assertThat(content.technique().workedTopics()).containsExactly("Escalas");
+        assertThat(content.attendanceAndStudy().generalComment()).isEmpty();
+        assertThat(content.attentionPoints().items()).isEmpty();
+        assertThat(content.finalOpinion()).isEqualTo("Parecer");
         assertThat(SemesterReportContent.empty()).isEqualTo(SemesterReportContent.empty());
     }
 

@@ -17,7 +17,7 @@ public class TelegramConversation {
     /**
      * Chave dos dados do fluxo com a confirmação pendente (aprovar, cancelar, descartar, sair…).
      */
-    public static final String CONFIRMATION = "confirmacao";
+    public static final String CONFIRMATION = "confirmation";
 
     private UUID selectedStudentId;
     private ConversationFlow flow;

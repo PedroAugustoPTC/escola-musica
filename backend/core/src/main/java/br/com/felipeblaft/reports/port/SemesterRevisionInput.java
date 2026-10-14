@@ -4,11 +4,11 @@ import br.com.felipeblaft.reports.domain.semester.SemesterReportContent;
 import java.util.Objects;
 
 /** Entrada da revisão do semestral: conteúdo atual (seções 2 a 10) e o pedido do professor. */
-public record SemesterRevisionInput(SemesterReportContent conteudoAtual, String pedido)
+public record SemesterRevisionInput(SemesterReportContent currentContent, String request)
         implements SemesterTaskInput {
 
     public SemesterRevisionInput {
-        Objects.requireNonNull(conteudoAtual);
-        Objects.requireNonNull(pedido);
+        Objects.requireNonNull(currentContent);
+        Objects.requireNonNull(request);
     }
 }

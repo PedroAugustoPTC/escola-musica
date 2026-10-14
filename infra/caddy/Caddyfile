@@ -1,13 +1,13 @@
 # Ponto de entrada HTTPS único (R-15, Princípio IV). Serve o SPA e faz proxy de /api/* para o backend.
-# DOMINIO=localhost (padrão) usa a CA interna do Caddy; um domínio real obtém certificado automático.
-# CERTIFICADOS_LOCAIS=local_certs força a CA interna para nomes sem domínio público (pilha de testes).
+# DOMAIN=localhost (padrão) usa a CA interna do Caddy; um domínio real obtém certificado automático.
+# LOCAL_CERTIFICATES=local_certs força a CA interna para nomes sem domínio público (pilha de testes).
 {
 	email {$ACME_EMAIL:admin@localhost}
 	admin off
-	{$CERTIFICADOS_LOCAIS}
+	{$LOCAL_CERTIFICATES}
 }
 
-{$DOMINIO:localhost} {
+{$DOMAIN:localhost} {
 	encode zstd gzip
 
 	header {

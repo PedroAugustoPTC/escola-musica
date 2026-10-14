@@ -6,7 +6,7 @@
 //   - `terms`: termos retidos (B1/B2/B3) dentro de arquivos já migrados, com dono = fatia 4.
 //
 //   node gen-exclusions.mjs --init --existing /tmp/main-files.txt        # primeira vez (fatia 1)
-//   node gen-exclusions.mjs [--held-back tools/held-back/slice-2.json]   # a cada fatia: só encolhe
+//   node gen-exclusions.mjs [--held-back tools/held-back/slice-2.json[,slice-3.json]]   # a cada fatia: só encolhe
 //
 // Regras: arquivo sem violação sai da lista; arquivo cujas violações restantes são todas termos retidos vira
 // entradas de termo; arquivo novo com violação NÃO entra (é erro: o guardião tem de pegá-lo); nunca acrescenta
@@ -26,13 +26,13 @@ const option = (name, fallback = null) => {
 const root = resolve(option('--root', process.cwd()));
 const outPath = resolve(root, option('--out', '.specify/memory/glossary-temporary-exclusions.json'));
 const reportPaths = (option('--reports') ?? [
-  'backend/aplicacao/target/guard-violations-java.json',
-  'backend/aplicacao/target/guard-violations-artifacts.json',
+  'backend/application/target/guard-violations-java.json',
+  'backend/application/target/guard-violations-artifacts.json',
   'frontend/test-results/guard-violations.json',
 ].join(',')).split(',').map((path) => resolve(root, path));
 const init = flag('--init');
 const allowNew = flag('--allow-new');
-const heldBackPath = option('--held-back');
+const heldBackPaths = (option('--held-back') ?? '').split(',').filter(Boolean);
 const existingList = option('--existing');
 // Fatia que MOVE arquivos: `--remap de=>para,…` reescreve, em ordem, o início dos caminhos da lista anterior;
 // `--migrated-prefix p1,p2` marca a área já migrada: ali só podem sobrar literais (a receita nunca os altera) e
@@ -66,7 +66,7 @@ for (const reportPath of reportPaths) {
 
 const heldBack = new Map();
 const heldTexts = new Set(); // nomes retidos: constantes (B1), componentes de record (B2) e chaves literais (B3)
-if (heldBackPath) {
+for (const heldBackPath of heldBackPaths) {
   const held = JSON.parse(readFileSync(resolve(root, heldBackPath), 'utf8'));
   for (const item of held.items ?? []) heldBack.set(item.path, new Set(item.terms));
   for (const group of [held.B1, held.B2]) for (const entry of Object.values(group ?? {})) for (const member of entry.members) heldTexts.add(member);
@@ -98,6 +98,7 @@ if (init) {
   for (const { path, slice } of previous.files) {
     const current = violations.get(path);
     if (!current) continue; // migrou: sai da lista
+    if (migratedPrefixes.some((prefix) => path.startsWith(prefix))) continue; // área migrada: vira termo retido abaixo
     const held = heldBack.get(path);
     if (held && [...current].every((term) => held.has(term))) {
       for (const term of [...current].sort()) next.terms.push({ path, term, slice: owners.heldBackTermSlice });
@@ -108,6 +109,9 @@ if (init) {
   for (const entry of previous.terms) {
     if (violations.get(entry.path)?.has(entry.term)) next.terms.push(entry);
   }
+  // arquivos migrados cujo conteúdo retido é de outra fatia (catálogo de mensagens, nomes de infraestrutura em Dockerfile e
+  // application*.yaml, imagens de marca): `retainedFiles` de slice-owners.json dá o dono; tudo neles vira termo retido
+  const retainedOwner = (path) => owners.retainedFiles?.filter(({ prefix }) => path.startsWith(prefix)).sort((a, b) => b.prefix.length - a.prefix.length)[0]?.slice ?? null;
   // área migrada: literais e identificadores retidos viram termos (dono = fatia dos termos retidos)
   const migratedHandled = new Set();
   for (const [path, entries] of details) {
@@ -115,14 +119,15 @@ if (init) {
     migratedHandled.add(path);
     const seenTerms = new Set();
     for (const { term, kind, text } of entries) {
-      const retained = kind === 'literal' || heldTexts.has(text);
+      const owner = retainedOwner(path);
+      const retained = kind === 'literal' || kind === 'embedded-code' || heldTexts.has(text) || owner !== null;
       if (!retained) {
         rejected.push(`${path}: ${kind} "${text}" (${term}) não está na lista de retenção`);
         continue;
       }
       if (seenTerms.has(term)) continue;
       seenTerms.add(term);
-      next.terms.push({ path, term, slice: owners.heldBackTermSlice });
+      next.terms.push({ path, term, slice: owner ?? owners.heldBackTermSlice });
     }
   }
   const listedTerms = new Set(next.terms.map(({ path, term }) => `${path}\u0000${term}`));

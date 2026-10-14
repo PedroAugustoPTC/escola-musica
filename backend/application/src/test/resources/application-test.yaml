@@ -1,0 +1,40 @@
+# Perfil dos testes de integração (rodam contra o postgres-teste de infra/compose.test.yaml).
+spring:
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/relatorios_teste}
+    username: ${DATABASE_USER:relatorios}
+    password: ${DATABASE_PASSWORD:teste}
+  servlet:
+    multipart:
+      location: ${java.io.tmpdir}
+
+reports:
+  audio:
+    limit-mb: 50
+    temp-dir: ${java.io.tmpdir}/relatorios-teste/audios
+  session:
+    cookie-secure: true
+  security:
+    cpf-encryption-key: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+    hmac-secret: segredo-hmac-de-testes-com-mais-de-32-bytes
+  documents:
+    dir: ${java.io.tmpdir}/relatorios-teste/documentos
+  telegram:
+    enabled: false
+    token: "123456:TESTE"
+    webhook-secret: segredo-webhook-teste
+    api-url: http://localhost:1
+    files-dir: ${java.io.tmpdir}/relatorios-teste/telegram
+  telegram-channel:
+    current-token: token-servico-atual-teste
+    next-token: token-servico-proximo-teste
+    proactive-delivery: DIRETA
+    orchestrator-url: ""
+  providers:
+    mode: simulated
+  jobs:
+    workers: 0
+
+logging:
+  level:
+    root: WARN

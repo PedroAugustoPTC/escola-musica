@@ -85,7 +85,7 @@ class ProcessingJobTest {
         job.defineParameter(ProcessingJob.TEXT, null);
         assertThat(job.parameter(ProcessingJob.TEXT)).isEmpty();
         job.defineParameter(ProcessingJob.BASE_VERSION, "2");
-        assertThat(job.parameters()).containsEntry("versaoBase", "2");
+        assertThat(job.parameters()).containsEntry("baseVersion", "2");
         job.defineTemporaryFile("/tmp/audios/a.ogg");
         assertThat(job.temporaryFile()).isEqualTo("/tmp/audios/a.ogg");
         job.returnToQueue();

@@ -279,7 +279,7 @@ public class JobProcessorService {
                             Instant now = clock.now();
                             review[0] =
                                     current.registerStructuring(
-                                            output.content(), output.perguntasPendentes(), now);
+                                            output.content(), output.pendingQuestions(), now);
                             if (review[0]) {
                                 createVersion(
                                         current,
@@ -362,7 +362,7 @@ public class JobProcessorService {
                             review[0] =
                                     current.incorporateAnswer(
                                             output.content(),
-                                            output.perguntasPendentes(),
+                                            output.pendingQuestions(),
                                             clock.now());
                             if (review[0]) {
                                 createVersion(

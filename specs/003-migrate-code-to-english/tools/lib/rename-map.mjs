@@ -49,7 +49,10 @@ export function loadRenameMap(root, slice) {
       ident.get(antigo) === novo ||
       explicit.methodIdentifiers?.[antigo] === novo ||
       explicit.variableIdentifiers?.[antigo] === novo ||
-      Object.entries(explicit.qualifiedMethods ?? {}).some(([chave, valor]) => chave.endsWith(`#${antigo}`) && valor === novo),
+      explicit.cliTerms?.[antigo] === novo ||
+      explicit.packageSegments?.[antigo] === novo ||
+      Object.entries(explicit.qualifiedMethods ?? {}).some(([chave, valor]) => chave.endsWith(`#${antigo}`) && valor === novo) ||
+      Object.entries(explicit.qualifiedFields ?? {}).some(([chave, valor]) => chave.endsWith(`#${antigo}`) && valor === novo),
   };
 }
 

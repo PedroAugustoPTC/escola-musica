@@ -24,16 +24,16 @@ public class ProcessingJob {
     public static final int MAX_ATTEMPTS = 2;
 
     // chaves conhecidas dos parâmetros
-    public static final String TEXT = "texto";
-    public static final String BASE_VERSION = "versaoBase";
-    public static final String UNDERSTOOD_TEXT = "textoEntendido";
-    public static final String CHANNEL_FILE = "arquivoCanal";
-    public static final String UNIQUE_CHANNEL_FILE = "arquivoCanalUnico";
-    public static final String FILE_MIME = "arquivoMime";
-    public static final String FILE_SIZE = "arquivoTamanho";
-    public static final String STEP_MESSAGE = "mensagemEtapa";
-    public static final String PERIOD_KEY = "periodoChave";
-    public static final String CONFIRM_OPEN = "confirmarMesmoComEmAberto";
+    public static final String TEXT = "text";
+    public static final String BASE_VERSION = "baseVersion";
+    public static final String UNDERSTOOD_TEXT = "understoodText";
+    public static final String CHANNEL_FILE = "channelFile";
+    public static final String UNIQUE_CHANNEL_FILE = "uniqueChannelFile";
+    public static final String FILE_MIME = "fileMime";
+    public static final String FILE_SIZE = "fileSize";
+    public static final String STEP_MESSAGE = "stepMessage";
+    public static final String PERIOD_KEY = "periodKey";
+    public static final String CONFIRM_OPEN = "confirmEvenWithOpen";
 
     private final UUID id;
     private final JobType type;

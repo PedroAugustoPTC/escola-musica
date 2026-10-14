@@ -90,7 +90,7 @@ public class DocumentGenerationService {
                         approval);
         GeneratedDocument generated = pdfGeneration.generateLessonReport(model);
         String file =
-                status == DocumentStatus.OFICIAL ? "oficial.pdf" : "v" + version.number() + ".pdf";
+                status == DocumentStatus.OFICIAL ? "official.pdf" : "v" + version.number() + ".pdf";
         return store(ReportType.AULA, report.id(), version, status, generated, file);
     }
 
@@ -119,7 +119,7 @@ public class DocumentGenerationService {
                         approval);
         GeneratedDocument generated = pdfGeneration.generateSemesterReport(model);
         String file =
-                status == DocumentStatus.OFICIAL ? "oficial.pdf" : "v" + version.number() + ".pdf";
+                status == DocumentStatus.OFICIAL ? "official.pdf" : "v" + version.number() + ".pdf";
         return store(ReportType.SEMESTRAL, report.id(), version, status, generated, file);
     }
 

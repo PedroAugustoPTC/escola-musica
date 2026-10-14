@@ -8,32 +8,32 @@ import java.util.List;
  * {@code semAlteracaoDeConteudo} e {@code pedidoDeAcao} só valem na revisão.
  */
 public record AiLessonReportOutput(
-        List<String> conteudosTrabalhados,
-        String evolucao,
-        List<String> dificuldades,
-        List<String> atividadesPropostas,
-        String observacoes,
-        List<String> perguntasPendentes,
-        Boolean semAlteracaoDeConteudo,
-        String pedidoDeAcao) {
+        List<String> workedTopics,
+        String progress,
+        List<String> difficulties,
+        List<String> proposedActivities,
+        String observations,
+        List<String> pendingQuestions,
+        Boolean noContentChange,
+        String actionRequest) {
 
     public static final String NONE = "NENHUM";
 
     public AiLessonReportOutput {
-        perguntasPendentes = perguntasPendentes == null ? List.of() : perguntasPendentes;
+        pendingQuestions = pendingQuestions == null ? List.of() : pendingQuestions;
     }
 
     public LessonReportContent content() {
         return new LessonReportContent(
-                conteudosTrabalhados, evolucao, dificuldades, atividadesPropostas, observacoes);
+                workedTopics, progress, difficulties, proposedActivities, observations);
     }
 
     public boolean withoutChange() {
-        return Boolean.TRUE.equals(semAlteracaoDeConteudo);
+        return Boolean.TRUE.equals(noContentChange);
     }
 
     /** O pedido era para aprovar ou cancelar: nunca é executado (FR-027a). */
     public boolean indicatedActionRequest() {
-        return pedidoDeAcao != null && !NONE.equals(pedidoDeAcao);
+        return actionRequest != null && !NONE.equals(actionRequest);
     }
 }

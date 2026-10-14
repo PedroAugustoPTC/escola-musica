@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 const aqui = dirname(fileURLToPath(import.meta.url));
 const origem = resolve(
   aqui,
-  '../../backend/aplicacao/src/main/resources/mensagens/mensagens_pt_BR.properties',
+  '../../backend/application/src/main/resources/messages/messages_pt_BR.properties',
 );
 const destino = resolve(aqui, '../src/mensagens/mensagens.json');
 

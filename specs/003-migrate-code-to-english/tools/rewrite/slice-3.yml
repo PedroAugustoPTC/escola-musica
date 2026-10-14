@@ -1,0 +1,109 @@
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: br.com.felipeblaft.migration.Slice3.Packages
+displayName: "Fatia 3 — pacotes"
+description: "Pacotes da aplicação pelo mapa (entrada→inbound, saida→outbound, …)."
+recipeList:
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.reports.configuracao
+      newPackageName: br.com.felipeblaft.reports.config
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.reports.configuracao.log
+      newPackageName: br.com.felipeblaft.reports.config.log
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.reports.entrada.carga
+      newPackageName: br.com.felipeblaft.reports.inbound.seed
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.reports.entrada.interno.seguranca
+      newPackageName: br.com.felipeblaft.reports.inbound.internal.security
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.reports.entrada.telegram
+      newPackageName: br.com.felipeblaft.reports.inbound.telegram
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.reports.entrada.telegram.canal
+      newPackageName: br.com.felipeblaft.reports.inbound.telegram.channel
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.reports.entrada.web
+      newPackageName: br.com.felipeblaft.reports.inbound.web
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.reports.entrada.web.seguranca
+      newPackageName: br.com.felipeblaft.reports.inbound.web.security
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.reports.iareal
+      newPackageName: br.com.felipeblaft.reports.realai
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.reports.paridade
+      newPackageName: br.com.felipeblaft.reports.parity
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.reports.privacidade
+      newPackageName: br.com.felipeblaft.reports.privacy
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.reports.saida.armazenamento
+      newPackageName: br.com.felipeblaft.reports.outbound.storage
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.reports.saida.audio
+      newPackageName: br.com.felipeblaft.reports.outbound.audio
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.reports.saida.fila
+      newPackageName: br.com.felipeblaft.reports.outbound.queue
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.reports.saida.ia
+      newPackageName: br.com.felipeblaft.reports.outbound.ai
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.reports.saida.ia.simulado
+      newPackageName: br.com.felipeblaft.reports.outbound.ai.simulated
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.reports.saida.pdf
+      newPackageName: br.com.felipeblaft.reports.outbound.pdf
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.reports.saida.persistencia
+      newPackageName: br.com.felipeblaft.reports.outbound.persistence
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.reports.saida.seguranca
+      newPackageName: br.com.felipeblaft.reports.outbound.security
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.reports.saida.telegram
+      newPackageName: br.com.felipeblaft.reports.outbound.telegram
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.reports.seguranca
+      newPackageName: br.com.felipeblaft.reports.security
+      recursive: false
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: br.com.felipeblaft.reports.suporte
+      newPackageName: br.com.felipeblaft.reports.support
+      recursive: false
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: br.com.felipeblaft.migration.Slice3.Members
+displayName: "Fatia 3 — membros"
+description: "Tipos, métodos, campos, parâmetros, variáveis e componentes de record da aplicação pelo mapa, menos a retenção."
+recipeList:
+  - br.com.felipeblaft.migration.rewrite.RenameMembersByMap
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: br.com.felipeblaft.migration.Slice3.All
+displayName: "Fatia 3 — tudo"
+description: "Membros (receita Java própria, com os tipos íntegros) e depois pacotes (ChangePackage)."
+recipeList:
+  - br.com.felipeblaft.migration.Slice3.Members
+  - br.com.felipeblaft.migration.Slice3.Packages

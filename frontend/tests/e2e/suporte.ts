@@ -8,9 +8,9 @@ import pg from 'pg';
  * oferece os passos comuns da interface.
  */
 
-const BANCO_URL = process.env.E2E_BANCO_URL ?? 'postgres://relatorios:e2e@localhost:5432/relatorios';
-const CPF_CHAVE = process.env.E2E_CPF_CHAVE ?? 'MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=';
-const SEGREDO_HMAC = process.env.E2E_SEGREDO_HMAC ?? 'segredo-hmac-de-testes-e2e-com-mais-de-32-bytes';
+const BANCO_URL = process.env.E2E_DATABASE_URL ?? 'postgres://relatorios:e2e@localhost:5432/relatorios';
+const CPF_CHAVE = process.env.E2E_CPF_KEY ?? 'MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=';
+const SEGREDO_HMAC = process.env.E2E_HMAC_SECRET ?? 'segredo-hmac-de-testes-e2e-com-mais-de-32-bytes';
 
 export const CODIGO_CLARA = 'K7QM2XPA';
 export const CODIGO_BRUNO = 'BRUN2XPA';
@@ -55,8 +55,8 @@ export async function semear(): Promise<Semeadura> {
     const professor = async (nome: string, email: string, codigo: string) => {
       const id = randomUUID();
       await banco.query(
-        `insert into professor (id, nome, email, ativo, codigo_acesso_hash, codigo_acesso_expira_em,
-           codigo_acesso_renovado_em, criado_em, atualizado_em) values ($1, $2, $3, true, $4, $5, $6, $6, $6)`,
+        `insert into teacher (id, name, email, active, access_code_hash, access_code_expires_at,
+           access_code_renewed_at, created_at, updated_at) values ($1, $2, $3, true, $4, $5, $6, $6, $6)`,
         [id, nome, email, hmac(`codigo:${codigo}`), validade, agora],
       );
       return id;
@@ -64,12 +64,12 @@ export async function semear(): Promise<Semeadura> {
     const aluno = async (professorId: string, nome: string, cpf: string, instrumento: string) => {
       const id = randomUUID();
       await banco.query(
-        `insert into aluno (id, nome, data_nascimento, cpf_cifrado, cpf_hash, nome_responsavel, instrumento,
-           ativo, criado_em, atualizado_em) values ($1, $2, '2012-05-10', $3, $4, null, $5, true, $6, $6)`,
+        `insert into student (id, name, birth_date, cpf_encrypted, cpf_hash, guardian_name, instrument,
+           active, created_at, updated_at) values ($1, $2, '2012-05-10', $3, $4, null, $5, true, $6, $6)`,
         [id, nome, cifrarCpf(cpf), hmac(`cpf:${cpf}`), instrumento, agora],
       );
       await banco.query(
-        'insert into professor_aluno (id, professor_id, aluno_id, criado_em) values ($1, $2, $3, $4)',
+        'insert into teacher_student_assignment (id, teacher_id, student_id, created_at) values ($1, $2, $3, $4)',
         [randomUUID(), professorId, id, agora],
       );
       return id;

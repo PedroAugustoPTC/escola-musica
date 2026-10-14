@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:reports:schema:lesson-report",
+  "title": "Saída da IA para o relatório de aula (estruturação, incorporação de respostas e revisão)",
+  "type": "object",
+  "required": ["workedTopics", "progress", "difficulties", "proposedActivities", "observations", "pendingQuestions"],
+  "properties": {
+    "workedTopics": { "type": "array", "items": { "type": "string", "maxLength": 500 }, "maxItems": 30 },
+    "progress": { "type": "string", "maxLength": 4000 },
+    "difficulties": { "type": "array", "items": { "type": "string", "maxLength": 500 }, "maxItems": 30 },
+    "proposedActivities": { "type": "array", "items": { "type": "string", "maxLength": 500 }, "maxItems": 30 },
+    "observations": { "type": "string", "maxLength": 4000 },
+    "pendingQuestions": { "type": "array", "items": { "type": "string", "maxLength": 300 }, "maxItems": 5 },
+    "noContentChange": { "type": "boolean" },
+    "actionRequest": { "enum": ["NENHUM", "APROVAR", "CANCELAR"] }
+  }
+}

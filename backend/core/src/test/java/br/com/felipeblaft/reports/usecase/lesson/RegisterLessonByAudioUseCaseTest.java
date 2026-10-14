@@ -34,7 +34,7 @@ class RegisterLessonByAudioUseCaseTest {
         assertThat(job.requestChannel()).isEqualTo(Channel.WEB);
         assertThat(job.step()).isEqualTo(JobStep.ENVIANDO);
         assertThat(job.temporaryFile()).isEqualTo(Path.of("/tmp/audios/web.webm").toString());
-        assertThat(job.parameters()).containsEntry("arquivoTamanho", "2048");
+        assertThat(job.parameters()).containsEntry("fileSize", "2048");
         assertThat(c.queue.jobs).containsKey(job.id());
     }
 
@@ -46,9 +46,9 @@ class RegisterLessonByAudioUseCaseTest {
 
         assertThat(job.temporaryFile()).isNull();
         assertThat(job.parameters())
-                .containsEntry("arquivoCanal", "file-1")
-                .containsEntry("arquivoCanalUnico", "u-1")
-                .containsEntry("arquivoMime", "audio/ogg");
+                .containsEntry("channelFile", "file-1")
+                .containsEntry("uniqueChannelFile", "u-1")
+                .containsEntry("fileMime", "audio/ogg");
     }
 
     @Test

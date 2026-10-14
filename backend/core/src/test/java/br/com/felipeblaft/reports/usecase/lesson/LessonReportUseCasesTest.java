@@ -111,7 +111,7 @@ class LessonReportUseCasesTest {
         ProcessingJob job =
                 c.change.changeByAudio(
                         c.clara.id(), report.id(), ReportScenario.file("b.ogg", 1), 1, Channel.WEB);
-        assertThat(job.parameters()).containsEntry("versaoBase", "1");
+        assertThat(job.parameters()).containsEntry("baseVersion", "1");
         assertThat(report.step()).isEqualTo(ReportStep.TRANSCREVENDO_PEDIDO);
     }
 
@@ -128,7 +128,7 @@ class LessonReportUseCasesTest {
         assertThat(report.approvalChannel()).isEqualTo(Channel.TELEGRAM);
         assertThat(c.pdf.models.getLast().status()).isEqualTo(DocumentStatus.OFICIAL);
         assertThat(c.pdf.models.getLast().approval().teacherName()).isEqualTo("Clara Souza");
-        assertThat(c.storage.files).containsKey("relatorios/aula/" + report.id() + "/oficial.pdf");
+        assertThat(c.storage.files).containsKey("relatorios/aula/" + report.id() + "/official.pdf");
         failWith(
                 () -> c.approve.run(c.clara.id(), report.id(), 1, Channel.WEB),
                 ErrorCode.RELATORIO_JA_APROVADO);

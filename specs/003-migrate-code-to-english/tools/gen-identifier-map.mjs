@@ -254,7 +254,7 @@ function translateRun(words, glossary, options, reasons) {
 /** Raízes de varredura de cada fatia (plan.md, "Fatias"). Os imports em outros módulos entram pelo compilador. */
 const SLICE_ROOTS = {
   2: ['backend/nucleo'],
-  3: ['backend/aplicacao'],
+  3: ['backend/aplicacao', 'infra/.env.example', 'infra/compose.yaml', 'infra/compose.dev.yaml', 'infra/compose.prod.yaml', 'infra/compose.test.yaml', 'infra/scripts/local.sh', 'infra/carga', 'frontend/tests/e2e/suporte.ts', 'frontend/playwright.config.ts'],
   4: ['backend/aplicacao/src/main/resources/mensagens', 'specs/001-fluxo-relatorios/contracts', 'specs/002-api-interna-canal-telegram/contracts'],
   5: ['frontend'],
   6: ['infra', '.github'],
@@ -355,6 +355,19 @@ function main() {
     item.novo = reviewed[item.antigo] === '=' ? item.novo : (reviewed[item.antigo] ?? item.antigo);
     item.needsReview = false;
     item.revisado = true;
+  }
+  // Herança (`--inherit 2,…`): o mesmo nome antigo já decidido numa fatia anterior mantém o nome novo decidido lá.
+  const inheritFrom = (option('--inherit') ?? '').split(',').filter(Boolean);
+  for (const earlier of inheritFrom) {
+    const earlierPath = resolve(root, `specs/003-migrate-code-to-english/tools/maps/slice-${earlier}.json`);
+    for (const done of JSON.parse(readFileSync(earlierPath, 'utf8'))) {
+      const item = map.find((candidate) => candidate.antigo === done.antigo);
+      if (!item || Object.hasOwn(reviewed, item.antigo)) continue;
+      item.sugestao = item.novo;
+      item.novo = done.novo;
+      item.needsReview = false;
+      item.herdado = Number(earlier);
+    }
   }
   const finalMap = map.filter((item) => item.novo !== item.antigo || item.needsReview);
   const outPath = resolve(root, option('--out', `specs/003-migrate-code-to-english/tools/maps/slice-${slice}.json`));

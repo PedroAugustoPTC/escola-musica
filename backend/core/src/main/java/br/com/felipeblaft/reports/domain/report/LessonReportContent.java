@@ -8,19 +8,19 @@ import java.util.Objects;
  * (FR-020): textos são normalizados e itens em branco descartados.
  */
 public record LessonReportContent(
-        List<String> conteudosTrabalhados,
-        String evolucao,
-        List<String> dificuldades,
-        List<String> atividadesPropostas,
-        String observacoes)
+        List<String> workedTopics,
+        String progress,
+        List<String> difficulties,
+        List<String> proposedActivities,
+        String observations)
         implements VersionContent {
 
     public LessonReportContent {
-        conteudosTrabalhados = items(conteudosTrabalhados);
-        evolucao = text(evolucao);
-        dificuldades = items(dificuldades);
-        atividadesPropostas = items(atividadesPropostas);
-        observacoes = text(observacoes);
+        workedTopics = items(workedTopics);
+        progress = text(progress);
+        difficulties = items(difficulties);
+        proposedActivities = items(proposedActivities);
+        observations = text(observations);
     }
 
     public static LessonReportContent empty() {
@@ -43,10 +43,10 @@ public record LessonReportContent(
     }
 
     public boolean isEmpty() {
-        return conteudosTrabalhados.isEmpty()
-                && evolucao.isEmpty()
-                && dificuldades.isEmpty()
-                && atividadesPropostas.isEmpty()
-                && observacoes.isEmpty();
+        return workedTopics.isEmpty()
+                && progress.isEmpty()
+                && difficulties.isEmpty()
+                && proposedActivities.isEmpty()
+                && observations.isEmpty();
     }
 }

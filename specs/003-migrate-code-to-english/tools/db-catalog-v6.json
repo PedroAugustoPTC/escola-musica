@@ -1,0 +1,3135 @@
+{
+  "tables": [
+    {
+      "name": "acao_canal",
+      "columns": [
+        {
+          "name": "id",
+          "type": "character varying(120)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "seq",
+          "type": "bigint",
+          "notNull": true,
+          "default": null,
+          "identity": "a",
+          "generated": ""
+        },
+        {
+          "name": "lote_id",
+          "type": "character varying(120)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "canal",
+          "type": "character varying(12)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "origem",
+          "type": "character varying(16)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "update_id",
+          "type": "bigint",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "chat_id",
+          "type": "bigint",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "professor_id",
+          "type": "uuid",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "trabalho_id",
+          "type": "uuid",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "tipo",
+          "type": "character varying(20)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "payload",
+          "type": "jsonb",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "compensacao",
+          "type": "jsonb",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "estado",
+          "type": "character varying(18)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "tentativas",
+          "type": "integer",
+          "notNull": true,
+          "default": "0",
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "proxima_tentativa_em",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "prazo_em",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "versao",
+          "type": "integer",
+          "notNull": true,
+          "default": "0",
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "entregue_em",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "finalizado_em",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "codigo_motivo",
+          "type": "character varying(40)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    },
+    {
+      "name": "aluno",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "nome",
+          "type": "character varying(255)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "data_nascimento",
+          "type": "date",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "cpf_cifrado",
+          "type": "bytea",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "cpf_hash",
+          "type": "character varying(64)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "nome_responsavel",
+          "type": "character varying(255)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "instrumento",
+          "type": "character varying(80)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "ativo",
+          "type": "boolean",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "atualizado_em",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    },
+    {
+      "name": "aula",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "professor_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "aluno_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "data_aula",
+          "type": "date",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    },
+    {
+      "name": "chamada_ia",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "trabalho_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "relatorio_tipo",
+          "type": "character varying(12)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "relatorio_id",
+          "type": "uuid",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "tarefa",
+          "type": "character varying(30)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "provedor_modelo",
+          "type": "character varying(120)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "segundos_audio",
+          "type": "numeric(10,2)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "tokens_entrada",
+          "type": "integer",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "tokens_saida",
+          "type": "integer",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "duracao_ms",
+          "type": "bigint",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "custo_estimado_usd",
+          "type": "numeric(12,6)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "sucesso",
+          "type": "boolean",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "codigo_erro",
+          "type": "character varying(60)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    },
+    {
+      "name": "documento_canal",
+      "columns": [
+        {
+          "name": "token_hash",
+          "type": "character(64)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "professor_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "relatorio_tipo",
+          "type": "character varying(12)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "relatorio_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "versao",
+          "type": "integer",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "nome_arquivo",
+          "type": "character varying(120)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "expira_em",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    },
+    {
+      "name": "documento_pdf",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "versao_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "tipo",
+          "type": "character varying(12)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "chave_armazenamento",
+          "type": "character varying(255)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "tamanho_bytes",
+          "type": "bigint",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "sha256",
+          "type": "character varying(64)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "gerado_em",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    },
+    {
+      "name": "interacao_relatorio",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "relatorio_tipo",
+          "type": "character varying(12)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "relatorio_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "tipo",
+          "type": "character varying(30)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "canal",
+          "type": "character varying(12)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "meio",
+          "type": "character varying(10)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "texto",
+          "type": "text",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "versao_base",
+          "type": "integer",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "rodada",
+          "type": "integer",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "resultado",
+          "type": "character varying(40)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "versao_resultante",
+          "type": "integer",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    },
+    {
+      "name": "professor",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "nome",
+          "type": "character varying(255)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "email",
+          "type": "character varying(255)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "ativo",
+          "type": "boolean",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "codigo_acesso_hash",
+          "type": "character varying(64)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "codigo_acesso_expira_em",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "codigo_acesso_renovado_em",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "atualizado_em",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    },
+    {
+      "name": "professor_aluno",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "professor_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "aluno_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    },
+    {
+      "name": "relatorio_aula",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "aula_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "professor_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "aluno_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "transcricao",
+          "type": "text",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "conteudo",
+          "type": "jsonb",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "perguntas_pendentes",
+          "type": "jsonb",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "rodadas_perguntas",
+          "type": "integer",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "status",
+          "type": "character varying(30)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "etapa_processamento",
+          "type": "character varying(30)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "versao_vigente",
+          "type": "integer",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "canal_origem",
+          "type": "character varying(12)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "motivo_falha",
+          "type": "character varying(40)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "atualizado_em",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "aprovado_em",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "versao_aprovada",
+          "type": "integer",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "canal_aprovacao",
+          "type": "character varying(12)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "cancelado_em",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "tempo_processamento_ms",
+          "type": "bigint",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "bloqueio_otimista",
+          "type": "bigint",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    },
+    {
+      "name": "relatorio_semestral",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "professor_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "aluno_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "periodo_chave",
+          "type": "character varying(6)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "periodo_inicio",
+          "type": "date",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "periodo_fim",
+          "type": "date",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "quantidade_aulas_consideradas",
+          "type": "integer",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "quantidade_relatorios_em_aberto",
+          "type": "integer",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "informacoes_gerais",
+          "type": "jsonb",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "conteudo",
+          "type": "jsonb",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "status",
+          "type": "character varying(30)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "etapa_processamento",
+          "type": "character varying(30)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "versao_vigente",
+          "type": "integer",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "canal_origem",
+          "type": "character varying(12)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "atualizado_em",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "aprovado_em",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "versao_aprovada",
+          "type": "integer",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "canal_aprovacao",
+          "type": "character varying(12)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "cancelado_em",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "tempo_processamento_ms",
+          "type": "bigint",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "bloqueio_otimista",
+          "type": "bigint",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    },
+    {
+      "name": "sessao_web",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "professor_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "token_hash",
+          "type": "character varying(64)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "criada_em",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "ultimo_uso_em",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "expira_em",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    },
+    {
+      "name": "tentativa_acesso",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "canal",
+          "type": "character varying(12)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "origem_hash",
+          "type": "character varying(64)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "tentativas_incorretas",
+          "type": "integer",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "bloqueado_ate",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "atualizado_em",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    },
+    {
+      "name": "trabalho_processamento",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "tipo",
+          "type": "character varying(30)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "professor_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "aluno_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "relatorio_tipo",
+          "type": "character varying(12)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "relatorio_id",
+          "type": "uuid",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "canal_solicitacao",
+          "type": "character varying(12)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "meio",
+          "type": "character varying(10)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "parametros",
+          "type": "jsonb",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "arquivo_temporario",
+          "type": "character varying(255)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "status",
+          "type": "character varying(20)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "etapa",
+          "type": "character varying(30)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "resultado_codigo",
+          "type": "character varying(60)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "relatorio_resultante_id",
+          "type": "uuid",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "tentativas",
+          "type": "integer",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "aviso_demora_enviado",
+          "type": "boolean",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "iniciado_em",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "concluido_em",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    },
+    {
+      "name": "update_telegram_processado",
+      "columns": [
+        {
+          "name": "update_id",
+          "type": "bigint",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "recebido_em",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "total_acoes",
+          "type": "integer",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "origem",
+          "type": "character varying(10)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    },
+    {
+      "name": "versao_relatorio",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "relatorio_tipo",
+          "type": "character varying(12)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "relatorio_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "numero",
+          "type": "integer",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "conteudo",
+          "type": "jsonb",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "origem",
+          "type": "character varying(30)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "interacao_id",
+          "type": "uuid",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "canal",
+          "type": "character varying(12)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "prompt_versao",
+          "type": "character varying(40)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "criada_em",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    },
+    {
+      "name": "vinculo_telegram",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "professor_id",
+          "type": "uuid",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "telegram_usuario_id",
+          "type": "bigint",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "chat_id",
+          "type": "bigint",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "vinculado_em",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "aluno_selecionado_id",
+          "type": "uuid",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "fluxo",
+          "type": "character varying(20)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "etapa_fluxo",
+          "type": "character varying(40)",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "dados_fluxo",
+          "type": "jsonb",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "audio_pendente_file_id",
+          "type": "character varying(255)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "audio_pendente_file_unique_id",
+          "type": "character varying(64)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "audio_pendente_mime",
+          "type": "character varying(100)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "audio_pendente_tamanho",
+          "type": "bigint",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "audio_pendente_recebido_em",
+          "type": "timestamp with time zone",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "relatorio_foco_tipo",
+          "type": "character varying(12)",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "relatorio_foco_id",
+          "type": "uuid",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "versao_apresentada",
+          "type": "integer",
+          "notNull": false,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "atualizado_em",
+          "type": "timestamp with time zone",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "bloqueio_otimista",
+          "type": "bigint",
+          "notNull": true,
+          "default": null,
+          "identity": "",
+          "generated": ""
+        }
+      ]
+    }
+  ],
+  "constraints": [
+    {
+      "table": "acao_canal",
+      "name": "acao_canal_canal_not_null",
+      "type": "n",
+      "definition": "NOT NULL canal"
+    },
+    {
+      "table": "acao_canal",
+      "name": "acao_canal_chat_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL chat_id"
+    },
+    {
+      "table": "acao_canal",
+      "name": "acao_canal_criado_em_not_null",
+      "type": "n",
+      "definition": "NOT NULL criado_em"
+    },
+    {
+      "table": "acao_canal",
+      "name": "acao_canal_estado_not_null",
+      "type": "n",
+      "definition": "NOT NULL estado"
+    },
+    {
+      "table": "acao_canal",
+      "name": "acao_canal_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table": "acao_canal",
+      "name": "acao_canal_lote_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL lote_id"
+    },
+    {
+      "table": "acao_canal",
+      "name": "acao_canal_origem_not_null",
+      "type": "n",
+      "definition": "NOT NULL origem"
+    },
+    {
+      "table": "acao_canal",
+      "name": "acao_canal_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "acao_canal",
+      "name": "acao_canal_prazo_em_not_null",
+      "type": "n",
+      "definition": "NOT NULL prazo_em"
+    },
+    {
+      "table": "acao_canal",
+      "name": "acao_canal_seq_not_null",
+      "type": "n",
+      "definition": "NOT NULL seq"
+    },
+    {
+      "table": "acao_canal",
+      "name": "acao_canal_tentativas_not_null",
+      "type": "n",
+      "definition": "NOT NULL tentativas"
+    },
+    {
+      "table": "acao_canal",
+      "name": "acao_canal_tipo_not_null",
+      "type": "n",
+      "definition": "NOT NULL tipo"
+    },
+    {
+      "table": "acao_canal",
+      "name": "acao_canal_versao_not_null",
+      "type": "n",
+      "definition": "NOT NULL versao"
+    },
+    {
+      "table": "acao_canal",
+      "name": "ck_acao_canal_estado",
+      "type": "c",
+      "definition": "CHECK (((estado)::text = ANY ((ARRAY['PENDENTE'::character varying, 'ENTREGUE'::character varying, 'EXECUTADA'::character varying, 'FALHOU'::character varying, 'FALHA_DEFINITIVA'::character varying, 'DESCARTADA'::character varying])::text[])))"
+    },
+    {
+      "table": "acao_canal",
+      "name": "ck_acao_canal_origem",
+      "type": "c",
+      "definition": "CHECK (((origem)::text = ANY ((ARRAY['RESPOSTA_UPDATE'::character varying, 'PROATIVA'::character varying, 'COMPENSACAO'::character varying])::text[])))"
+    },
+    {
+      "table": "acao_canal",
+      "name": "ck_acao_canal_resposta_update",
+      "type": "c",
+      "definition": "CHECK ((((origem)::text <> 'RESPOSTA_UPDATE'::text) OR (update_id IS NOT NULL)))"
+    },
+    {
+      "table": "acao_canal",
+      "name": "ck_acao_canal_tentativas",
+      "type": "c",
+      "definition": "CHECK ((tentativas >= 0))"
+    },
+    {
+      "table": "acao_canal",
+      "name": "ck_acao_canal_tipo",
+      "type": "c",
+      "definition": "CHECK (((tipo)::text = ANY ((ARRAY['MENSAGEM'::character varying, 'EDICAO'::character varying, 'DOCUMENTO'::character varying, 'RESPOSTA_CALLBACK'::character varying, 'MENSAGEM_ETAPA'::character varying])::text[])))"
+    },
+    {
+      "table": "acao_canal",
+      "name": "uk_acao_canal_seq",
+      "type": "u",
+      "definition": "UNIQUE (seq)"
+    },
+    {
+      "table": "aluno",
+      "name": "aluno_ativo_not_null",
+      "type": "n",
+      "definition": "NOT NULL ativo"
+    },
+    {
+      "table": "aluno",
+      "name": "aluno_atualizado_em_not_null",
+      "type": "n",
+      "definition": "NOT NULL atualizado_em"
+    },
+    {
+      "table": "aluno",
+      "name": "aluno_cpf_cifrado_not_null",
+      "type": "n",
+      "definition": "NOT NULL cpf_cifrado"
+    },
+    {
+      "table": "aluno",
+      "name": "aluno_cpf_hash_not_null",
+      "type": "n",
+      "definition": "NOT NULL cpf_hash"
+    },
+    {
+      "table": "aluno",
+      "name": "aluno_criado_em_not_null",
+      "type": "n",
+      "definition": "NOT NULL criado_em"
+    },
+    {
+      "table": "aluno",
+      "name": "aluno_data_nascimento_not_null",
+      "type": "n",
+      "definition": "NOT NULL data_nascimento"
+    },
+    {
+      "table": "aluno",
+      "name": "aluno_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table": "aluno",
+      "name": "aluno_nome_not_null",
+      "type": "n",
+      "definition": "NOT NULL nome"
+    },
+    {
+      "table": "aluno",
+      "name": "aluno_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "aluno",
+      "name": "uk_aluno_cpf_hash",
+      "type": "u",
+      "definition": "UNIQUE (cpf_hash)"
+    },
+    {
+      "table": "aula",
+      "name": "aula_aluno_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (aluno_id) REFERENCES aluno(id)"
+    },
+    {
+      "table": "aula",
+      "name": "aula_aluno_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL aluno_id"
+    },
+    {
+      "table": "aula",
+      "name": "aula_criado_em_not_null",
+      "type": "n",
+      "definition": "NOT NULL criado_em"
+    },
+    {
+      "table": "aula",
+      "name": "aula_data_aula_not_null",
+      "type": "n",
+      "definition": "NOT NULL data_aula"
+    },
+    {
+      "table": "aula",
+      "name": "aula_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table": "aula",
+      "name": "aula_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "aula",
+      "name": "aula_professor_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (professor_id) REFERENCES professor(id)"
+    },
+    {
+      "table": "aula",
+      "name": "aula_professor_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL professor_id"
+    },
+    {
+      "table": "chamada_ia",
+      "name": "chamada_ia_criado_em_not_null",
+      "type": "n",
+      "definition": "NOT NULL criado_em"
+    },
+    {
+      "table": "chamada_ia",
+      "name": "chamada_ia_duracao_ms_not_null",
+      "type": "n",
+      "definition": "NOT NULL duracao_ms"
+    },
+    {
+      "table": "chamada_ia",
+      "name": "chamada_ia_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table": "chamada_ia",
+      "name": "chamada_ia_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "chamada_ia",
+      "name": "chamada_ia_sucesso_not_null",
+      "type": "n",
+      "definition": "NOT NULL sucesso"
+    },
+    {
+      "table": "chamada_ia",
+      "name": "chamada_ia_tarefa_not_null",
+      "type": "n",
+      "definition": "NOT NULL tarefa"
+    },
+    {
+      "table": "chamada_ia",
+      "name": "chamada_ia_trabalho_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (trabalho_id) REFERENCES trabalho_processamento(id)"
+    },
+    {
+      "table": "chamada_ia",
+      "name": "chamada_ia_trabalho_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL trabalho_id"
+    },
+    {
+      "table": "documento_canal",
+      "name": "ck_documento_canal_tipo",
+      "type": "c",
+      "definition": "CHECK (((relatorio_tipo)::text = ANY ((ARRAY['AULA'::character varying, 'SEMESTRAL'::character varying])::text[])))"
+    },
+    {
+      "table": "documento_canal",
+      "name": "ck_documento_canal_versao",
+      "type": "c",
+      "definition": "CHECK (((versao IS NULL) OR (versao > 0)))"
+    },
+    {
+      "table": "documento_canal",
+      "name": "documento_canal_criado_em_not_null",
+      "type": "n",
+      "definition": "NOT NULL criado_em"
+    },
+    {
+      "table": "documento_canal",
+      "name": "documento_canal_expira_em_not_null",
+      "type": "n",
+      "definition": "NOT NULL expira_em"
+    },
+    {
+      "table": "documento_canal",
+      "name": "documento_canal_nome_arquivo_not_null",
+      "type": "n",
+      "definition": "NOT NULL nome_arquivo"
+    },
+    {
+      "table": "documento_canal",
+      "name": "documento_canal_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (token_hash)"
+    },
+    {
+      "table": "documento_canal",
+      "name": "documento_canal_professor_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL professor_id"
+    },
+    {
+      "table": "documento_canal",
+      "name": "documento_canal_relatorio_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL relatorio_id"
+    },
+    {
+      "table": "documento_canal",
+      "name": "documento_canal_relatorio_tipo_not_null",
+      "type": "n",
+      "definition": "NOT NULL relatorio_tipo"
+    },
+    {
+      "table": "documento_canal",
+      "name": "documento_canal_token_hash_not_null",
+      "type": "n",
+      "definition": "NOT NULL token_hash"
+    },
+    {
+      "table": "documento_pdf",
+      "name": "documento_pdf_chave_armazenamento_not_null",
+      "type": "n",
+      "definition": "NOT NULL chave_armazenamento"
+    },
+    {
+      "table": "documento_pdf",
+      "name": "documento_pdf_gerado_em_not_null",
+      "type": "n",
+      "definition": "NOT NULL gerado_em"
+    },
+    {
+      "table": "documento_pdf",
+      "name": "documento_pdf_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table": "documento_pdf",
+      "name": "documento_pdf_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "documento_pdf",
+      "name": "documento_pdf_sha256_not_null",
+      "type": "n",
+      "definition": "NOT NULL sha256"
+    },
+    {
+      "table": "documento_pdf",
+      "name": "documento_pdf_tamanho_bytes_not_null",
+      "type": "n",
+      "definition": "NOT NULL tamanho_bytes"
+    },
+    {
+      "table": "documento_pdf",
+      "name": "documento_pdf_tipo_not_null",
+      "type": "n",
+      "definition": "NOT NULL tipo"
+    },
+    {
+      "table": "documento_pdf",
+      "name": "documento_pdf_versao_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (versao_id) REFERENCES versao_relatorio(id)"
+    },
+    {
+      "table": "documento_pdf",
+      "name": "documento_pdf_versao_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL versao_id"
+    },
+    {
+      "table": "documento_pdf",
+      "name": "uk_documento_pdf",
+      "type": "u",
+      "definition": "UNIQUE (versao_id, tipo)"
+    },
+    {
+      "table": "interacao_relatorio",
+      "name": "interacao_relatorio_canal_not_null",
+      "type": "n",
+      "definition": "NOT NULL canal"
+    },
+    {
+      "table": "interacao_relatorio",
+      "name": "interacao_relatorio_criado_em_not_null",
+      "type": "n",
+      "definition": "NOT NULL criado_em"
+    },
+    {
+      "table": "interacao_relatorio",
+      "name": "interacao_relatorio_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table": "interacao_relatorio",
+      "name": "interacao_relatorio_meio_not_null",
+      "type": "n",
+      "definition": "NOT NULL meio"
+    },
+    {
+      "table": "interacao_relatorio",
+      "name": "interacao_relatorio_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "interacao_relatorio",
+      "name": "interacao_relatorio_relatorio_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL relatorio_id"
+    },
+    {
+      "table": "interacao_relatorio",
+      "name": "interacao_relatorio_relatorio_tipo_not_null",
+      "type": "n",
+      "definition": "NOT NULL relatorio_tipo"
+    },
+    {
+      "table": "interacao_relatorio",
+      "name": "interacao_relatorio_resultado_not_null",
+      "type": "n",
+      "definition": "NOT NULL resultado"
+    },
+    {
+      "table": "interacao_relatorio",
+      "name": "interacao_relatorio_texto_not_null",
+      "type": "n",
+      "definition": "NOT NULL texto"
+    },
+    {
+      "table": "interacao_relatorio",
+      "name": "interacao_relatorio_tipo_not_null",
+      "type": "n",
+      "definition": "NOT NULL tipo"
+    },
+    {
+      "table": "interacao_relatorio",
+      "name": "interacao_relatorio_versao_base_not_null",
+      "type": "n",
+      "definition": "NOT NULL versao_base"
+    },
+    {
+      "table": "professor",
+      "name": "ck_professor_email_minusculo",
+      "type": "c",
+      "definition": "CHECK (((email)::text = lower((email)::text)))"
+    },
+    {
+      "table": "professor",
+      "name": "professor_ativo_not_null",
+      "type": "n",
+      "definition": "NOT NULL ativo"
+    },
+    {
+      "table": "professor",
+      "name": "professor_atualizado_em_not_null",
+      "type": "n",
+      "definition": "NOT NULL atualizado_em"
+    },
+    {
+      "table": "professor",
+      "name": "professor_criado_em_not_null",
+      "type": "n",
+      "definition": "NOT NULL criado_em"
+    },
+    {
+      "table": "professor",
+      "name": "professor_email_not_null",
+      "type": "n",
+      "definition": "NOT NULL email"
+    },
+    {
+      "table": "professor",
+      "name": "professor_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table": "professor",
+      "name": "professor_nome_not_null",
+      "type": "n",
+      "definition": "NOT NULL nome"
+    },
+    {
+      "table": "professor",
+      "name": "professor_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "professor",
+      "name": "uk_professor_email",
+      "type": "u",
+      "definition": "UNIQUE (email)"
+    },
+    {
+      "table": "professor_aluno",
+      "name": "professor_aluno_aluno_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (aluno_id) REFERENCES aluno(id)"
+    },
+    {
+      "table": "professor_aluno",
+      "name": "professor_aluno_aluno_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL aluno_id"
+    },
+    {
+      "table": "professor_aluno",
+      "name": "professor_aluno_criado_em_not_null",
+      "type": "n",
+      "definition": "NOT NULL criado_em"
+    },
+    {
+      "table": "professor_aluno",
+      "name": "professor_aluno_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table": "professor_aluno",
+      "name": "professor_aluno_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "professor_aluno",
+      "name": "professor_aluno_professor_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (professor_id) REFERENCES professor(id)"
+    },
+    {
+      "table": "professor_aluno",
+      "name": "professor_aluno_professor_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL professor_id"
+    },
+    {
+      "table": "professor_aluno",
+      "name": "uk_professor_aluno",
+      "type": "u",
+      "definition": "UNIQUE (professor_id, aluno_id)"
+    },
+    {
+      "table": "relatorio_aula",
+      "name": "ck_relatorio_aula_rodadas",
+      "type": "c",
+      "definition": "CHECK (((rodadas_perguntas >= 0) AND (rodadas_perguntas <= 2)))"
+    },
+    {
+      "table": "relatorio_aula",
+      "name": "relatorio_aula_aluno_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (aluno_id) REFERENCES aluno(id)"
+    },
+    {
+      "table": "relatorio_aula",
+      "name": "relatorio_aula_aluno_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL aluno_id"
+    },
+    {
+      "table": "relatorio_aula",
+      "name": "relatorio_aula_atualizado_em_not_null",
+      "type": "n",
+      "definition": "NOT NULL atualizado_em"
+    },
+    {
+      "table": "relatorio_aula",
+      "name": "relatorio_aula_aula_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (aula_id) REFERENCES aula(id)"
+    },
+    {
+      "table": "relatorio_aula",
+      "name": "relatorio_aula_aula_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL aula_id"
+    },
+    {
+      "table": "relatorio_aula",
+      "name": "relatorio_aula_bloqueio_otimista_not_null",
+      "type": "n",
+      "definition": "NOT NULL bloqueio_otimista"
+    },
+    {
+      "table": "relatorio_aula",
+      "name": "relatorio_aula_canal_origem_not_null",
+      "type": "n",
+      "definition": "NOT NULL canal_origem"
+    },
+    {
+      "table": "relatorio_aula",
+      "name": "relatorio_aula_conteudo_not_null",
+      "type": "n",
+      "definition": "NOT NULL conteudo"
+    },
+    {
+      "table": "relatorio_aula",
+      "name": "relatorio_aula_criado_em_not_null",
+      "type": "n",
+      "definition": "NOT NULL criado_em"
+    },
+    {
+      "table": "relatorio_aula",
+      "name": "relatorio_aula_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table": "relatorio_aula",
+      "name": "relatorio_aula_perguntas_pendentes_not_null",
+      "type": "n",
+      "definition": "NOT NULL perguntas_pendentes"
+    },
+    {
+      "table": "relatorio_aula",
+      "name": "relatorio_aula_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "relatorio_aula",
+      "name": "relatorio_aula_professor_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (professor_id) REFERENCES professor(id)"
+    },
+    {
+      "table": "relatorio_aula",
+      "name": "relatorio_aula_professor_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL professor_id"
+    },
+    {
+      "table": "relatorio_aula",
+      "name": "relatorio_aula_rodadas_perguntas_not_null",
+      "type": "n",
+      "definition": "NOT NULL rodadas_perguntas"
+    },
+    {
+      "table": "relatorio_aula",
+      "name": "relatorio_aula_status_not_null",
+      "type": "n",
+      "definition": "NOT NULL status"
+    },
+    {
+      "table": "relatorio_aula",
+      "name": "relatorio_aula_tempo_processamento_ms_not_null",
+      "type": "n",
+      "definition": "NOT NULL tempo_processamento_ms"
+    },
+    {
+      "table": "relatorio_aula",
+      "name": "relatorio_aula_transcricao_not_null",
+      "type": "n",
+      "definition": "NOT NULL transcricao"
+    },
+    {
+      "table": "relatorio_aula",
+      "name": "relatorio_aula_versao_vigente_not_null",
+      "type": "n",
+      "definition": "NOT NULL versao_vigente"
+    },
+    {
+      "table": "relatorio_aula",
+      "name": "uk_relatorio_aula_aula",
+      "type": "u",
+      "definition": "UNIQUE (aula_id)"
+    },
+    {
+      "table": "relatorio_semestral",
+      "name": "ck_relatorio_semestral_aulas",
+      "type": "c",
+      "definition": "CHECK ((quantidade_aulas_consideradas >= 1))"
+    },
+    {
+      "table": "relatorio_semestral",
+      "name": "ck_relatorio_semestral_em_aberto",
+      "type": "c",
+      "definition": "CHECK ((quantidade_relatorios_em_aberto >= 0))"
+    },
+    {
+      "table": "relatorio_semestral",
+      "name": "ck_relatorio_semestral_periodo",
+      "type": "c",
+      "definition": "CHECK (((periodo_chave)::text ~ '^[0-9]{4}-[12]$'::text))"
+    },
+    {
+      "table": "relatorio_semestral",
+      "name": "relatorio_semestral_aluno_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (aluno_id) REFERENCES aluno(id)"
+    },
+    {
+      "table": "relatorio_semestral",
+      "name": "relatorio_semestral_aluno_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL aluno_id"
+    },
+    {
+      "table": "relatorio_semestral",
+      "name": "relatorio_semestral_atualizado_em_not_null",
+      "type": "n",
+      "definition": "NOT NULL atualizado_em"
+    },
+    {
+      "table": "relatorio_semestral",
+      "name": "relatorio_semestral_bloqueio_otimista_not_null",
+      "type": "n",
+      "definition": "NOT NULL bloqueio_otimista"
+    },
+    {
+      "table": "relatorio_semestral",
+      "name": "relatorio_semestral_canal_origem_not_null",
+      "type": "n",
+      "definition": "NOT NULL canal_origem"
+    },
+    {
+      "table": "relatorio_semestral",
+      "name": "relatorio_semestral_conteudo_not_null",
+      "type": "n",
+      "definition": "NOT NULL conteudo"
+    },
+    {
+      "table": "relatorio_semestral",
+      "name": "relatorio_semestral_criado_em_not_null",
+      "type": "n",
+      "definition": "NOT NULL criado_em"
+    },
+    {
+      "table": "relatorio_semestral",
+      "name": "relatorio_semestral_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table": "relatorio_semestral",
+      "name": "relatorio_semestral_informacoes_gerais_not_null",
+      "type": "n",
+      "definition": "NOT NULL informacoes_gerais"
+    },
+    {
+      "table": "relatorio_semestral",
+      "name": "relatorio_semestral_periodo_chave_not_null",
+      "type": "n",
+      "definition": "NOT NULL periodo_chave"
+    },
+    {
+      "table": "relatorio_semestral",
+      "name": "relatorio_semestral_periodo_fim_not_null",
+      "type": "n",
+      "definition": "NOT NULL periodo_fim"
+    },
+    {
+      "table": "relatorio_semestral",
+      "name": "relatorio_semestral_periodo_inicio_not_null",
+      "type": "n",
+      "definition": "NOT NULL periodo_inicio"
+    },
+    {
+      "table": "relatorio_semestral",
+      "name": "relatorio_semestral_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "relatorio_semestral",
+      "name": "relatorio_semestral_professor_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (professor_id) REFERENCES professor(id)"
+    },
+    {
+      "table": "relatorio_semestral",
+      "name": "relatorio_semestral_professor_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL professor_id"
+    },
+    {
+      "table": "relatorio_semestral",
+      "name": "relatorio_semestral_quantidade_aulas_consideradas_not_null",
+      "type": "n",
+      "definition": "NOT NULL quantidade_aulas_consideradas"
+    },
+    {
+      "table": "relatorio_semestral",
+      "name": "relatorio_semestral_quantidade_relatorios_em_aberto_not_null",
+      "type": "n",
+      "definition": "NOT NULL quantidade_relatorios_em_aberto"
+    },
+    {
+      "table": "relatorio_semestral",
+      "name": "relatorio_semestral_status_not_null",
+      "type": "n",
+      "definition": "NOT NULL status"
+    },
+    {
+      "table": "relatorio_semestral",
+      "name": "relatorio_semestral_tempo_processamento_ms_not_null",
+      "type": "n",
+      "definition": "NOT NULL tempo_processamento_ms"
+    },
+    {
+      "table": "relatorio_semestral",
+      "name": "relatorio_semestral_versao_vigente_not_null",
+      "type": "n",
+      "definition": "NOT NULL versao_vigente"
+    },
+    {
+      "table": "sessao_web",
+      "name": "sessao_web_criada_em_not_null",
+      "type": "n",
+      "definition": "NOT NULL criada_em"
+    },
+    {
+      "table": "sessao_web",
+      "name": "sessao_web_expira_em_not_null",
+      "type": "n",
+      "definition": "NOT NULL expira_em"
+    },
+    {
+      "table": "sessao_web",
+      "name": "sessao_web_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table": "sessao_web",
+      "name": "sessao_web_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "sessao_web",
+      "name": "sessao_web_professor_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (professor_id) REFERENCES professor(id)"
+    },
+    {
+      "table": "sessao_web",
+      "name": "sessao_web_professor_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL professor_id"
+    },
+    {
+      "table": "sessao_web",
+      "name": "sessao_web_token_hash_not_null",
+      "type": "n",
+      "definition": "NOT NULL token_hash"
+    },
+    {
+      "table": "sessao_web",
+      "name": "sessao_web_ultimo_uso_em_not_null",
+      "type": "n",
+      "definition": "NOT NULL ultimo_uso_em"
+    },
+    {
+      "table": "sessao_web",
+      "name": "uk_sessao_web_token",
+      "type": "u",
+      "definition": "UNIQUE (token_hash)"
+    },
+    {
+      "table": "tentativa_acesso",
+      "name": "ck_tentativa_acesso_positiva",
+      "type": "c",
+      "definition": "CHECK ((tentativas_incorretas >= 0))"
+    },
+    {
+      "table": "tentativa_acesso",
+      "name": "tentativa_acesso_atualizado_em_not_null",
+      "type": "n",
+      "definition": "NOT NULL atualizado_em"
+    },
+    {
+      "table": "tentativa_acesso",
+      "name": "tentativa_acesso_canal_not_null",
+      "type": "n",
+      "definition": "NOT NULL canal"
+    },
+    {
+      "table": "tentativa_acesso",
+      "name": "tentativa_acesso_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table": "tentativa_acesso",
+      "name": "tentativa_acesso_origem_hash_not_null",
+      "type": "n",
+      "definition": "NOT NULL origem_hash"
+    },
+    {
+      "table": "tentativa_acesso",
+      "name": "tentativa_acesso_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "tentativa_acesso",
+      "name": "tentativa_acesso_tentativas_incorretas_not_null",
+      "type": "n",
+      "definition": "NOT NULL tentativas_incorretas"
+    },
+    {
+      "table": "tentativa_acesso",
+      "name": "uk_tentativa_acesso_origem",
+      "type": "u",
+      "definition": "UNIQUE (canal, origem_hash)"
+    },
+    {
+      "table": "trabalho_processamento",
+      "name": "trabalho_processamento_aluno_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (aluno_id) REFERENCES aluno(id)"
+    },
+    {
+      "table": "trabalho_processamento",
+      "name": "trabalho_processamento_aluno_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL aluno_id"
+    },
+    {
+      "table": "trabalho_processamento",
+      "name": "trabalho_processamento_aviso_demora_enviado_not_null",
+      "type": "n",
+      "definition": "NOT NULL aviso_demora_enviado"
+    },
+    {
+      "table": "trabalho_processamento",
+      "name": "trabalho_processamento_canal_solicitacao_not_null",
+      "type": "n",
+      "definition": "NOT NULL canal_solicitacao"
+    },
+    {
+      "table": "trabalho_processamento",
+      "name": "trabalho_processamento_criado_em_not_null",
+      "type": "n",
+      "definition": "NOT NULL criado_em"
+    },
+    {
+      "table": "trabalho_processamento",
+      "name": "trabalho_processamento_etapa_not_null",
+      "type": "n",
+      "definition": "NOT NULL etapa"
+    },
+    {
+      "table": "trabalho_processamento",
+      "name": "trabalho_processamento_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table": "trabalho_processamento",
+      "name": "trabalho_processamento_meio_not_null",
+      "type": "n",
+      "definition": "NOT NULL meio"
+    },
+    {
+      "table": "trabalho_processamento",
+      "name": "trabalho_processamento_parametros_not_null",
+      "type": "n",
+      "definition": "NOT NULL parametros"
+    },
+    {
+      "table": "trabalho_processamento",
+      "name": "trabalho_processamento_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "trabalho_processamento",
+      "name": "trabalho_processamento_professor_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (professor_id) REFERENCES professor(id)"
+    },
+    {
+      "table": "trabalho_processamento",
+      "name": "trabalho_processamento_professor_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL professor_id"
+    },
+    {
+      "table": "trabalho_processamento",
+      "name": "trabalho_processamento_status_not_null",
+      "type": "n",
+      "definition": "NOT NULL status"
+    },
+    {
+      "table": "trabalho_processamento",
+      "name": "trabalho_processamento_tentativas_not_null",
+      "type": "n",
+      "definition": "NOT NULL tentativas"
+    },
+    {
+      "table": "trabalho_processamento",
+      "name": "trabalho_processamento_tipo_not_null",
+      "type": "n",
+      "definition": "NOT NULL tipo"
+    },
+    {
+      "table": "update_telegram_processado",
+      "name": "ck_update_telegram_origem",
+      "type": "c",
+      "definition": "CHECK (((origem IS NULL) OR ((origem)::text = 'INTERNO'::text)))"
+    },
+    {
+      "table": "update_telegram_processado",
+      "name": "ck_update_telegram_total_acoes",
+      "type": "c",
+      "definition": "CHECK (((total_acoes IS NULL) OR (total_acoes >= 0)))"
+    },
+    {
+      "table": "update_telegram_processado",
+      "name": "update_telegram_processado_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (update_id)"
+    },
+    {
+      "table": "update_telegram_processado",
+      "name": "update_telegram_processado_recebido_em_not_null",
+      "type": "n",
+      "definition": "NOT NULL recebido_em"
+    },
+    {
+      "table": "update_telegram_processado",
+      "name": "update_telegram_processado_update_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL update_id"
+    },
+    {
+      "table": "versao_relatorio",
+      "name": "ck_versao_relatorio_numero",
+      "type": "c",
+      "definition": "CHECK ((numero >= 1))"
+    },
+    {
+      "table": "versao_relatorio",
+      "name": "uk_versao_relatorio",
+      "type": "u",
+      "definition": "UNIQUE (relatorio_tipo, relatorio_id, numero)"
+    },
+    {
+      "table": "versao_relatorio",
+      "name": "versao_relatorio_canal_not_null",
+      "type": "n",
+      "definition": "NOT NULL canal"
+    },
+    {
+      "table": "versao_relatorio",
+      "name": "versao_relatorio_conteudo_not_null",
+      "type": "n",
+      "definition": "NOT NULL conteudo"
+    },
+    {
+      "table": "versao_relatorio",
+      "name": "versao_relatorio_criada_em_not_null",
+      "type": "n",
+      "definition": "NOT NULL criada_em"
+    },
+    {
+      "table": "versao_relatorio",
+      "name": "versao_relatorio_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table": "versao_relatorio",
+      "name": "versao_relatorio_interacao_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (interacao_id) REFERENCES interacao_relatorio(id)"
+    },
+    {
+      "table": "versao_relatorio",
+      "name": "versao_relatorio_numero_not_null",
+      "type": "n",
+      "definition": "NOT NULL numero"
+    },
+    {
+      "table": "versao_relatorio",
+      "name": "versao_relatorio_origem_not_null",
+      "type": "n",
+      "definition": "NOT NULL origem"
+    },
+    {
+      "table": "versao_relatorio",
+      "name": "versao_relatorio_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "versao_relatorio",
+      "name": "versao_relatorio_relatorio_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL relatorio_id"
+    },
+    {
+      "table": "versao_relatorio",
+      "name": "versao_relatorio_relatorio_tipo_not_null",
+      "type": "n",
+      "definition": "NOT NULL relatorio_tipo"
+    },
+    {
+      "table": "vinculo_telegram",
+      "name": "uk_vinculo_telegram_professor",
+      "type": "u",
+      "definition": "UNIQUE (professor_id)"
+    },
+    {
+      "table": "vinculo_telegram",
+      "name": "uk_vinculo_telegram_usuario",
+      "type": "u",
+      "definition": "UNIQUE (telegram_usuario_id)"
+    },
+    {
+      "table": "vinculo_telegram",
+      "name": "vinculo_telegram_aluno_selecionado_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (aluno_selecionado_id) REFERENCES aluno(id)"
+    },
+    {
+      "table": "vinculo_telegram",
+      "name": "vinculo_telegram_atualizado_em_not_null",
+      "type": "n",
+      "definition": "NOT NULL atualizado_em"
+    },
+    {
+      "table": "vinculo_telegram",
+      "name": "vinculo_telegram_bloqueio_otimista_not_null",
+      "type": "n",
+      "definition": "NOT NULL bloqueio_otimista"
+    },
+    {
+      "table": "vinculo_telegram",
+      "name": "vinculo_telegram_chat_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL chat_id"
+    },
+    {
+      "table": "vinculo_telegram",
+      "name": "vinculo_telegram_dados_fluxo_not_null",
+      "type": "n",
+      "definition": "NOT NULL dados_fluxo"
+    },
+    {
+      "table": "vinculo_telegram",
+      "name": "vinculo_telegram_etapa_fluxo_not_null",
+      "type": "n",
+      "definition": "NOT NULL etapa_fluxo"
+    },
+    {
+      "table": "vinculo_telegram",
+      "name": "vinculo_telegram_fluxo_not_null",
+      "type": "n",
+      "definition": "NOT NULL fluxo"
+    },
+    {
+      "table": "vinculo_telegram",
+      "name": "vinculo_telegram_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL id"
+    },
+    {
+      "table": "vinculo_telegram",
+      "name": "vinculo_telegram_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "vinculo_telegram",
+      "name": "vinculo_telegram_professor_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (professor_id) REFERENCES professor(id)"
+    },
+    {
+      "table": "vinculo_telegram",
+      "name": "vinculo_telegram_professor_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL professor_id"
+    },
+    {
+      "table": "vinculo_telegram",
+      "name": "vinculo_telegram_telegram_usuario_id_not_null",
+      "type": "n",
+      "definition": "NOT NULL telegram_usuario_id"
+    },
+    {
+      "table": "vinculo_telegram",
+      "name": "vinculo_telegram_vinculado_em_not_null",
+      "type": "n",
+      "definition": "NOT NULL vinculado_em"
+    }
+  ],
+  "indexes": [
+    {
+      "table": "acao_canal",
+      "name": "acao_canal_pkey",
+      "definition": "CREATE UNIQUE INDEX acao_canal_pkey ON public.acao_canal USING btree (id)"
+    },
+    {
+      "table": "acao_canal",
+      "name": "ix_acao_canal_chat_vivas",
+      "definition": "CREATE INDEX ix_acao_canal_chat_vivas ON public.acao_canal USING btree (chat_id, seq) WHERE ((estado)::text = ANY ((ARRAY['PENDENTE'::character varying, 'ENTREGUE'::character varying])::text[]))"
+    },
+    {
+      "table": "acao_canal",
+      "name": "ix_acao_canal_entrega",
+      "definition": "CREATE INDEX ix_acao_canal_entrega ON public.acao_canal USING btree (proxima_tentativa_em) WHERE ((estado)::text = 'PENDENTE'::text)"
+    },
+    {
+      "table": "acao_canal",
+      "name": "ix_acao_canal_expurgo",
+      "definition": "CREATE INDEX ix_acao_canal_expurgo ON public.acao_canal USING btree (finalizado_em) WHERE (finalizado_em IS NOT NULL)"
+    },
+    {
+      "table": "acao_canal",
+      "name": "ix_acao_canal_lote",
+      "definition": "CREATE INDEX ix_acao_canal_lote ON public.acao_canal USING btree (lote_id, seq)"
+    },
+    {
+      "table": "acao_canal",
+      "name": "ix_acao_canal_update",
+      "definition": "CREATE INDEX ix_acao_canal_update ON public.acao_canal USING btree (update_id, seq) WHERE (update_id IS NOT NULL)"
+    },
+    {
+      "table": "acao_canal",
+      "name": "uk_acao_canal_seq",
+      "definition": "CREATE UNIQUE INDEX uk_acao_canal_seq ON public.acao_canal USING btree (seq)"
+    },
+    {
+      "table": "aluno",
+      "name": "aluno_pkey",
+      "definition": "CREATE UNIQUE INDEX aluno_pkey ON public.aluno USING btree (id)"
+    },
+    {
+      "table": "aluno",
+      "name": "uk_aluno_cpf_hash",
+      "definition": "CREATE UNIQUE INDEX uk_aluno_cpf_hash ON public.aluno USING btree (cpf_hash)"
+    },
+    {
+      "table": "aula",
+      "name": "aula_pkey",
+      "definition": "CREATE UNIQUE INDEX aula_pkey ON public.aula USING btree (id)"
+    },
+    {
+      "table": "aula",
+      "name": "ix_aula_professor_aluno",
+      "definition": "CREATE INDEX ix_aula_professor_aluno ON public.aula USING btree (professor_id, aluno_id, data_aula)"
+    },
+    {
+      "table": "aula",
+      "name": "ix_aula_professor_aluno_data",
+      "definition": "CREATE INDEX ix_aula_professor_aluno_data ON public.aula USING btree (professor_id, aluno_id, data_aula)"
+    },
+    {
+      "table": "chamada_ia",
+      "name": "chamada_ia_pkey",
+      "definition": "CREATE UNIQUE INDEX chamada_ia_pkey ON public.chamada_ia USING btree (id)"
+    },
+    {
+      "table": "chamada_ia",
+      "name": "ix_chamada_ia_relatorio",
+      "definition": "CREATE INDEX ix_chamada_ia_relatorio ON public.chamada_ia USING btree (relatorio_tipo, relatorio_id)"
+    },
+    {
+      "table": "documento_canal",
+      "name": "documento_canal_pkey",
+      "definition": "CREATE UNIQUE INDEX documento_canal_pkey ON public.documento_canal USING btree (token_hash)"
+    },
+    {
+      "table": "documento_canal",
+      "name": "ix_documento_canal_expira",
+      "definition": "CREATE INDEX ix_documento_canal_expira ON public.documento_canal USING btree (expira_em)"
+    },
+    {
+      "table": "documento_pdf",
+      "name": "documento_pdf_pkey",
+      "definition": "CREATE UNIQUE INDEX documento_pdf_pkey ON public.documento_pdf USING btree (id)"
+    },
+    {
+      "table": "documento_pdf",
+      "name": "uk_documento_pdf",
+      "definition": "CREATE UNIQUE INDEX uk_documento_pdf ON public.documento_pdf USING btree (versao_id, tipo)"
+    },
+    {
+      "table": "interacao_relatorio",
+      "name": "interacao_relatorio_pkey",
+      "definition": "CREATE UNIQUE INDEX interacao_relatorio_pkey ON public.interacao_relatorio USING btree (id)"
+    },
+    {
+      "table": "interacao_relatorio",
+      "name": "ix_interacao_relatorio",
+      "definition": "CREATE INDEX ix_interacao_relatorio ON public.interacao_relatorio USING btree (relatorio_tipo, relatorio_id, criado_em)"
+    },
+    {
+      "table": "professor",
+      "name": "professor_pkey",
+      "definition": "CREATE UNIQUE INDEX professor_pkey ON public.professor USING btree (id)"
+    },
+    {
+      "table": "professor",
+      "name": "uk_professor_codigo_acesso_hash",
+      "definition": "CREATE UNIQUE INDEX uk_professor_codigo_acesso_hash ON public.professor USING btree (codigo_acesso_hash) WHERE (codigo_acesso_hash IS NOT NULL)"
+    },
+    {
+      "table": "professor",
+      "name": "uk_professor_email",
+      "definition": "CREATE UNIQUE INDEX uk_professor_email ON public.professor USING btree (email)"
+    },
+    {
+      "table": "professor_aluno",
+      "name": "ix_professor_aluno_aluno",
+      "definition": "CREATE INDEX ix_professor_aluno_aluno ON public.professor_aluno USING btree (aluno_id)"
+    },
+    {
+      "table": "professor_aluno",
+      "name": "professor_aluno_pkey",
+      "definition": "CREATE UNIQUE INDEX professor_aluno_pkey ON public.professor_aluno USING btree (id)"
+    },
+    {
+      "table": "professor_aluno",
+      "name": "uk_professor_aluno",
+      "definition": "CREATE UNIQUE INDEX uk_professor_aluno ON public.professor_aluno USING btree (professor_id, aluno_id)"
+    },
+    {
+      "table": "relatorio_aula",
+      "name": "ix_relatorio_aula_aprovados",
+      "definition": "CREATE INDEX ix_relatorio_aula_aprovados ON public.relatorio_aula USING btree (professor_id, aluno_id) WHERE ((status)::text = 'APROVADO'::text)"
+    },
+    {
+      "table": "relatorio_aula",
+      "name": "relatorio_aula_pkey",
+      "definition": "CREATE UNIQUE INDEX relatorio_aula_pkey ON public.relatorio_aula USING btree (id)"
+    },
+    {
+      "table": "relatorio_aula",
+      "name": "uk_relatorio_aula_aula",
+      "definition": "CREATE UNIQUE INDEX uk_relatorio_aula_aula ON public.relatorio_aula USING btree (aula_id)"
+    },
+    {
+      "table": "relatorio_aula",
+      "name": "uk_relatorio_aula_em_aberto",
+      "definition": "CREATE UNIQUE INDEX uk_relatorio_aula_em_aberto ON public.relatorio_aula USING btree (professor_id, aluno_id) WHERE ((status)::text = ANY ((ARRAY['EM_PROCESSAMENTO'::character varying, 'FALHA_PROCESSAMENTO'::character varying, 'AGUARDANDO_RESPOSTAS'::character varying, 'AGUARDANDO_CONFERENCIA'::character varying])::text[]))"
+    },
+    {
+      "table": "relatorio_semestral",
+      "name": "relatorio_semestral_pkey",
+      "definition": "CREATE UNIQUE INDEX relatorio_semestral_pkey ON public.relatorio_semestral USING btree (id)"
+    },
+    {
+      "table": "relatorio_semestral",
+      "name": "uk_relatorio_semestral_aprovado",
+      "definition": "CREATE UNIQUE INDEX uk_relatorio_semestral_aprovado ON public.relatorio_semestral USING btree (professor_id, aluno_id, periodo_chave) WHERE ((status)::text = 'APROVADO'::text)"
+    },
+    {
+      "table": "relatorio_semestral",
+      "name": "uk_relatorio_semestral_em_aberto",
+      "definition": "CREATE UNIQUE INDEX uk_relatorio_semestral_em_aberto ON public.relatorio_semestral USING btree (professor_id, aluno_id, periodo_chave) WHERE ((status)::text = 'AGUARDANDO_CONFERENCIA'::text)"
+    },
+    {
+      "table": "sessao_web",
+      "name": "ix_sessao_web_expira",
+      "definition": "CREATE INDEX ix_sessao_web_expira ON public.sessao_web USING btree (expira_em)"
+    },
+    {
+      "table": "sessao_web",
+      "name": "sessao_web_pkey",
+      "definition": "CREATE UNIQUE INDEX sessao_web_pkey ON public.sessao_web USING btree (id)"
+    },
+    {
+      "table": "sessao_web",
+      "name": "uk_sessao_web_token",
+      "definition": "CREATE UNIQUE INDEX uk_sessao_web_token ON public.sessao_web USING btree (token_hash)"
+    },
+    {
+      "table": "tentativa_acesso",
+      "name": "tentativa_acesso_pkey",
+      "definition": "CREATE UNIQUE INDEX tentativa_acesso_pkey ON public.tentativa_acesso USING btree (id)"
+    },
+    {
+      "table": "tentativa_acesso",
+      "name": "uk_tentativa_acesso_origem",
+      "definition": "CREATE UNIQUE INDEX uk_tentativa_acesso_origem ON public.tentativa_acesso USING btree (canal, origem_hash)"
+    },
+    {
+      "table": "trabalho_processamento",
+      "name": "ix_trabalho_pendente",
+      "definition": "CREATE INDEX ix_trabalho_pendente ON public.trabalho_processamento USING btree (criado_em) WHERE ((status)::text = 'PENDENTE'::text)"
+    },
+    {
+      "table": "trabalho_processamento",
+      "name": "ix_trabalho_relatorio",
+      "definition": "CREATE INDEX ix_trabalho_relatorio ON public.trabalho_processamento USING btree (relatorio_tipo, relatorio_id)"
+    },
+    {
+      "table": "trabalho_processamento",
+      "name": "trabalho_processamento_pkey",
+      "definition": "CREATE UNIQUE INDEX trabalho_processamento_pkey ON public.trabalho_processamento USING btree (id)"
+    },
+    {
+      "table": "trabalho_processamento",
+      "name": "uk_trabalho_consolidacao_em_curso",
+      "definition": "CREATE UNIQUE INDEX uk_trabalho_consolidacao_em_curso ON public.trabalho_processamento USING btree (professor_id, aluno_id, ((parametros ->> 'periodoChave'::text))) WHERE (((tipo)::text = 'CONSOLIDACAO_SEMESTRAL'::text) AND ((status)::text = ANY ((ARRAY['PENDENTE'::character varying, 'EM_EXECUCAO'::character varying])::text[])))"
+    },
+    {
+      "table": "trabalho_processamento",
+      "name": "uk_trabalho_registro_em_curso",
+      "definition": "CREATE UNIQUE INDEX uk_trabalho_registro_em_curso ON public.trabalho_processamento USING btree (professor_id, aluno_id) WHERE (((tipo)::text = 'REGISTRO_AULA'::text) AND ((status)::text = ANY ((ARRAY['PENDENTE'::character varying, 'EM_EXECUCAO'::character varying])::text[])))"
+    },
+    {
+      "table": "update_telegram_processado",
+      "name": "ix_update_telegram_recebido",
+      "definition": "CREATE INDEX ix_update_telegram_recebido ON public.update_telegram_processado USING btree (recebido_em)"
+    },
+    {
+      "table": "update_telegram_processado",
+      "name": "update_telegram_processado_pkey",
+      "definition": "CREATE UNIQUE INDEX update_telegram_processado_pkey ON public.update_telegram_processado USING btree (update_id)"
+    },
+    {
+      "table": "versao_relatorio",
+      "name": "uk_versao_relatorio",
+      "definition": "CREATE UNIQUE INDEX uk_versao_relatorio ON public.versao_relatorio USING btree (relatorio_tipo, relatorio_id, numero)"
+    },
+    {
+      "table": "versao_relatorio",
+      "name": "versao_relatorio_pkey",
+      "definition": "CREATE UNIQUE INDEX versao_relatorio_pkey ON public.versao_relatorio USING btree (id)"
+    },
+    {
+      "table": "vinculo_telegram",
+      "name": "uk_vinculo_telegram_professor",
+      "definition": "CREATE UNIQUE INDEX uk_vinculo_telegram_professor ON public.vinculo_telegram USING btree (professor_id)"
+    },
+    {
+      "table": "vinculo_telegram",
+      "name": "uk_vinculo_telegram_usuario",
+      "definition": "CREATE UNIQUE INDEX uk_vinculo_telegram_usuario ON public.vinculo_telegram USING btree (telegram_usuario_id)"
+    },
+    {
+      "table": "vinculo_telegram",
+      "name": "vinculo_telegram_pkey",
+      "definition": "CREATE UNIQUE INDEX vinculo_telegram_pkey ON public.vinculo_telegram USING btree (id)"
+    }
+  ],
+  "sequences": [
+    {
+      "name": "acao_canal_seq_seq",
+      "dataType": "bigint",
+      "start": 1,
+      "increment": 1,
+      "cycle": false,
+      "ownedBy": "acao_canal.seq"
+    }
+  ]
+}

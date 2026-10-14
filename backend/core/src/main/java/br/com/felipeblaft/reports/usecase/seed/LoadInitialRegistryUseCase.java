@@ -68,7 +68,7 @@ public class LoadInitialRegistryUseCase {
         List<SeedError> errors = new ArrayList<>();
         Map<Integer, Cpf> validCpfs = new HashMap<>();
         Map<Integer, LocalDate> births = new HashMap<>();
-        validateTeachers(file.professores(), errors);
+        validateTeachers(file.teachers(), errors);
         validateStudents(file, today, errors, validCpfs, births);
 
         if (!errors.isEmpty()) {
@@ -79,10 +79,10 @@ public class LoadInitialRegistryUseCase {
         List<IssuedCode> codes = new ArrayList<>();
         Map<String, Teacher> teachersByEmail = new LinkedHashMap<>();
         int[] teacherCount = new int[3];
-        for (SeedTeacher seed : file.professores()) {
+        for (SeedTeacher seed : file.teachers()) {
             String email = Teacher.normalizeEmail(seed.email());
-            String name = seed.nome().strip();
-            boolean active = seed.ativo() == null || seed.ativo();
+            String name = seed.name().strip();
+            boolean active = seed.active() == null || seed.active();
             var existing = teachers.searchByEmail(email);
             Teacher teacher;
             if (existing.isPresent()) {
@@ -107,14 +107,14 @@ public class LoadInitialRegistryUseCase {
 
         int[] studentCount = new int[3];
         int createdAssignments = 0;
-        List<SeedStudent> studentList = file.alunos();
+        List<SeedStudent> studentList = file.students();
         for (int i = 0; i < studentList.size(); i++) {
             SeedStudent seed = studentList.get(i);
             Cpf cpf = validCpfs.get(i);
             LocalDate birth = births.get(i);
-            String name = seed.nome().strip();
-            String guardian = optionalText(seed.nomeResponsavel());
-            String instrument = optionalText(seed.instrumento());
+            String name = seed.name().strip();
+            String guardian = optionalText(seed.guardianName());
+            String instrument = optionalText(seed.instrument());
             String hash = protection.hashCpf(cpf);
             var existing = students.searchByCpfHash(hash);
             Student student;
@@ -141,7 +141,7 @@ public class LoadInitialRegistryUseCase {
                 save(simulate, () -> students.save(student));
             }
             Set<String> studentEmails = new HashSet<>();
-            for (String teacherEmail : seed.professores()) {
+            for (String teacherEmail : seed.teachers()) {
                 String email = Teacher.normalizeEmail(teacherEmail);
                 if (!studentEmails.add(email)) {
                     continue;
@@ -189,14 +189,14 @@ public class LoadInitialRegistryUseCase {
             SeedTeacher seed = list.get(i);
             String email = Teacher.normalizeEmail(seed.email());
             if (email == null || !EMAIL_FORMAT.matcher(email).matches()) {
-                errors.add(new SeedError("professores", i, "email", ErrorCode.EMAIL_INVALIDO));
+                errors.add(new SeedError("teachers", i, "email", ErrorCode.EMAIL_INVALIDO));
             } else if (!emails.add(email)) {
                 errors.add(
                         new SeedError(
-                                "professores", i, "email", ErrorCode.EMAIL_DUPLICADO_NO_ARQUIVO));
+                                "teachers", i, "email", ErrorCode.EMAIL_DUPLICADO_NO_ARQUIVO));
             }
-            if (optionalText(seed.nome()) == null) {
-                errors.add(new SeedError("professores", i, "nome", ErrorCode.NOME_OBRIGATORIO));
+            if (optionalText(seed.name()) == null) {
+                errors.add(new SeedError("teachers", i, "name", ErrorCode.NOME_OBRIGATORIO));
             }
         }
     }
@@ -208,18 +208,18 @@ public class LoadInitialRegistryUseCase {
             Map<Integer, Cpf> validCpfs,
             Map<Integer, LocalDate> births) {
         Set<String> fileEmails = new HashSet<>();
-        for (SeedTeacher teacher : file.professores()) {
+        for (SeedTeacher teacher : file.teachers()) {
             String email = Teacher.normalizeEmail(teacher.email());
             if (email != null) {
                 fileEmails.add(email);
             }
         }
         Set<Cpf> seenCpfs = new HashSet<>();
-        List<SeedStudent> list = file.alunos();
+        List<SeedStudent> list = file.students();
         for (int i = 0; i < list.size(); i++) {
             SeedStudent seed = list.get(i);
-            if (optionalText(seed.nome()) == null) {
-                errors.add(new SeedError("alunos", i, "nome", ErrorCode.NOME_OBRIGATORIO));
+            if (optionalText(seed.name()) == null) {
+                errors.add(new SeedError("students", i, "name", ErrorCode.NOME_OBRIGATORIO));
             }
             try {
                 Cpf cpf = Cpf.of(seed.cpf());
@@ -227,29 +227,29 @@ public class LoadInitialRegistryUseCase {
                     validCpfs.put(i, cpf);
                 } else {
                     errors.add(
-                            new SeedError("alunos", i, "cpf", ErrorCode.CPF_DUPLICADO_NO_ARQUIVO));
+                            new SeedError("students", i, "cpf", ErrorCode.CPF_DUPLICADO_NO_ARQUIVO));
                 }
             } catch (DomainException error) {
-                errors.add(new SeedError("alunos", i, "cpf", ErrorCode.CPF_INVALIDO));
+                errors.add(new SeedError("students", i, "cpf", ErrorCode.CPF_INVALIDO));
             }
-            LocalDate birth = readDate(seed.dataNascimento());
+            LocalDate birth = readDate(seed.birthDate());
             if (birth == null || birth.isAfter(today)) {
                 errors.add(
                         new SeedError(
-                                "alunos", i, "dataNascimento", ErrorCode.DATA_NASCIMENTO_INVALIDA));
+                                "students", i, "birthDate", ErrorCode.DATA_NASCIMENTO_INVALIDA));
             } else {
                 births.put(i, birth);
                 if (Student.requiresGuardian(birth, today)
-                        && optionalText(seed.nomeResponsavel()) == null) {
+                        && optionalText(seed.guardianName()) == null) {
                     errors.add(
                             new SeedError(
-                                    "alunos",
+                                    "students",
                                     i,
-                                    "nomeResponsavel",
+                                    "guardianName",
                                     ErrorCode.RESPONSAVEL_OBRIGATORIO));
                 }
             }
-            List<String> emails = seed.professores();
+            List<String> emails = seed.teachers();
             for (int j = 0; j < emails.size(); j++) {
                 String email = Teacher.normalizeEmail(emails.get(j));
                 boolean exists =
@@ -259,9 +259,9 @@ public class LoadInitialRegistryUseCase {
                 if (!exists) {
                     errors.add(
                             new SeedError(
-                                    "alunos",
+                                    "students",
                                     i,
-                                    "professores[" + j + "]",
+                                    "teachers[" + j + "]",
                                     ErrorCode.PROFESSOR_INEXISTENTE));
                 }
             }

@@ -46,7 +46,7 @@ class AnswersChangesJobProcessorTest {
 
         assertThat(result(job)).isEqualTo(JobResult.PRONTO_PARA_CONFERENCIA);
         assertThat(report.status()).isEqualTo(ReportStatus.AGUARDANDO_CONFERENCIA);
-        assertThat(report.content().evolucao()).isEqualTo("Estudou três vezes.");
+        assertThat(report.content().progress()).isEqualTo("Estudou três vezes.");
         assertThat(c.versions.versions)
                 .singleElement()
                 .extracting(v -> v.origin())
@@ -59,9 +59,9 @@ class AnswersChangesJobProcessorTest {
         assertThat(c.versions.versions.getFirst().interactionId()).isEqualTo(interaction.id());
         TaskInput.AnswerIncorporation input =
                 (TaskInput.AnswerIncorporation) c.llm.inputs.getLast();
-        assertThat(input.perguntas())
+        assertThat(input.questions())
                 .containsExactly("Qual repertório foi trabalhado?", "Estudou em casa?");
-        assertThat(input.resposta()).isEqualTo("Czerny; estudou três vezes.");
+        assertThat(input.response()).isEqualTo("Czerny; estudou três vezes.");
     }
 
     @Test
@@ -80,7 +80,7 @@ class AnswersChangesJobProcessorTest {
 
         assertThat(result(job)).isEqualTo(JobResult.PERGUNTAS_PENDENTES);
         assertThat(c.queue.searchById(job.id()).orElseThrow().parameters())
-                .containsEntry("textoEntendido", "Foi o Czerny.");
+                .containsEntry("understoodText", "Foi o Czerny.");
         assertThat(report.questionRounds()).isEqualTo(2);
         assertThat(report.step()).isNull();
         assertThat(c.interactions.interactions.getFirst().medium()).isEqualTo(Medium.AUDIO);
@@ -110,7 +110,7 @@ class AnswersChangesJobProcessorTest {
         assertThat(report.status()).isEqualTo(ReportStatus.AGUARDANDO_CONFERENCIA);
         assertThat(report.questionRounds()).isEqualTo(2);
         assertThat(report.pendingQuestions()).isEmpty();
-        assertThat(report.content().evolucao()).isEqualTo("Segunda rodada.");
+        assertThat(report.content().progress()).isEqualTo("Segunda rodada.");
         assertThat(report.currentVersion()).isEqualTo(1);
         assertThat(c.versions.versions)
                 .singleElement()
@@ -127,8 +127,8 @@ class AnswersChangesJobProcessorTest {
                 .allMatch(i -> i.result() == InteractionResult.APLICADA);
         TaskInput.AnswerIncorporation input =
                 (TaskInput.AnswerIncorporation) c.llm.inputs.getLast();
-        assertThat(input.rodada()).isEqualTo(2);
-        assertThat(input.perguntas()).containsExactly("E a escala?");
+        assertThat(input.round()).isEqualTo(2);
+        assertThat(input.questions()).containsExactly("E a escala?");
     }
 
     @Test
@@ -178,7 +178,7 @@ class AnswersChangesJobProcessorTest {
 
         assertThat(result(job)).isEqualTo(JobResult.NOVA_VERSAO);
         assertThat(report.currentVersion()).isEqualTo(2);
-        assertThat(report.content().evolucao()).isEqualTo("Leitura mais fácil.");
+        assertThat(report.content().progress()).isEqualTo("Leitura mais fácil.");
         assertThat(c.versions.versions).hasSize(2);
         assertThat(c.versions.versions.getFirst().content())
                 .isNotEqualTo(c.versions.versions.getLast().content());
@@ -206,8 +206,8 @@ class AnswersChangesJobProcessorTest {
 
         assertThat(result(job)).isEqualTo(JobResult.NOVA_VERSAO);
         assertThat(c.queue.searchById(job.id()).orElseThrow().parameters())
-                .containsEntry("textoEntendido", "Troque a observação para: estudou pouco.");
-        assertThat(((TaskInput.LessonRevision) c.llm.inputs.getLast()).pedido())
+                .containsEntry("understoodText", "Troque a observação para: estudou pouco.");
+        assertThat(((TaskInput.LessonRevision) c.llm.inputs.getLast()).request())
                 .isEqualTo("Troque a observação para: estudou pouco.");
         assertThat(c.interactions.interactions.getLast().medium()).isEqualTo(Medium.AUDIO);
     }

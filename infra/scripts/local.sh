@@ -38,22 +38,22 @@ exigir_env() {
     exit 1
   fi
   faltando=""
-  for chave in POSTGRES_PASSWORD CPF_CHAVE_CIFRAGEM SEGREDO_HMAC; do
+  for chave in POSTGRES_PASSWORD CPF_ENCRYPTION_KEY HMAC_SECRET; do
     [ -n "$(valor "$chave")" ] || faltando="$faltando $chave"
   done
-  if [ "$(valor TELEGRAM_HABILITADO)" = "true" ]; then
-    for chave in TELEGRAM_BOT_TOKEN TELEGRAM_API_ID TELEGRAM_API_HASH TELEGRAM_SEGREDO_WEBHOOK; do
+  if [ "$(valor TELEGRAM_ENABLED)" = "true" ]; then
+    for chave in TELEGRAM_BOT_TOKEN TELEGRAM_API_ID TELEGRAM_API_HASH TELEGRAM_WEBHOOK_SECRET; do
       [ -n "$(valor "$chave")" ] || faltando="$faltando $chave"
     done
   fi
-  if [ "$(valor PROVEDORES_IA)" = "real" ]; then
-    for chave in TRANSCRICAO_CHAVE LLM_CHAVE; do
+  if [ "$(valor AI_PROVIDERS)" = "real" ]; then
+    for chave in TRANSCRIPTION_API_KEY LLM_API_KEY; do
       [ -n "$(valor "$chave")" ] || faltando="$faltando $chave"
     done
   fi
   if [ -n "$faltando" ]; then
     echo "Preencha em infra/.env:$faltando" >&2
-    echo "(sem o bot: TELEGRAM_HABILITADO=false; sem chaves de IA: PROVEDORES_IA=simulado)" >&2
+    echo "(sem o bot: TELEGRAM_ENABLED=false; sem chaves de IA: AI_PROVIDERS=simulated)" >&2
     exit 1
   fi
 }
@@ -66,7 +66,7 @@ zerar_dados() {
 }
 
 servicos() {
-  if [ "$(valor TELEGRAM_HABILITADO)" = "true" ]; then
+  if [ "$(valor TELEGRAM_ENABLED)" = "true" ]; then
     echo "web backend postgres telegram-bot-api"
   else
     echo "web backend postgres"
@@ -123,7 +123,7 @@ case "$comando" in
     aguardar
     if [ "$massa" = "true" ]; then
       echo "Gerando a massa de demonstração (cadastros, aulas, semestrais e PDFs)..."
-      if saida_massa="$($LOCAL run --rm backend massa --arquivo /carga/demonstracao.json 2>&1)"; then
+      if saida_massa="$($LOCAL run --rm backend demo-data --file /carga/demonstracao.json 2>&1)"; then
         echo "$saida_massa" | grep -v -e '^{' -e '^Picked up' -e 'Container ' -e 'WARN ' -e 'INFO::' || true
       else
         echo "$saida_massa" | grep -v -e '^{' -e '^Picked up' -e 'Container ' -e 'WARN ' -e 'INFO::' >&2 || true
@@ -132,8 +132,8 @@ case "$comando" in
       fi
     fi
     echo
-    echo "Portal: https://$(valor DOMINIO | sed 's/^$/localhost/')  (certificado local do Caddy: aceite no navegador)"
-    echo "IA: $(valor PROVEDORES_IA) · Telegram: $(valor TELEGRAM_HABILITADO)"
+    echo "Portal: https://$(valor DOMAIN | sed 's/^$/localhost/')  (certificado local do Caddy: aceite no navegador)"
+    echo "IA: $(valor AI_PROVIDERS) · Telegram: $(valor TELEGRAM_ENABLED)"
     case "$massa" in
       true) echo "Massa carregada: entre com o código da Clara mostrado acima." ;;
       false) echo "Sistema vazio. Para cadastros de exemplo: sh infra/scripts/local.sh carga" ;;
@@ -147,12 +147,12 @@ case "$comando" in
       infra/carga/*) ;;
       *) echo "O arquivo precisa estar em infra/carga/ (montado em /carga no contêiner)." >&2; exit 1 ;;
     esac
-    $LOCAL run --rm backend carga --arquivo "/carga/${arquivo#infra/carga/}"
+    $LOCAL run --rm backend seed --file "/carga/${arquivo#infra/carga/}"
     ;;
   codigo)
     exigir_env
     [ "$#" -ge 1 ] || { echo "Uso: sh infra/scripts/local.sh codigo <email-do-professor>" >&2; exit 2; }
-    $LOCAL run --rm backend emitir-codigo --email "$1"
+    $LOCAL run --rm backend issue-code --email "$1"
     ;;
   status)
     $LOCAL ps
@@ -171,7 +171,7 @@ case "$comando" in
   banco-porta)
     exigir_env
     $LOCAL -f infra/compose.banco.yaml up -d postgres
-    porta="$(valor BANCO_PORTA_LOCAL)"
+    porta="$(valor LOCAL_DATABASE_PORT)"
     echo "Banco publicado só nesta máquina: host localhost, porta ${porta:-5432}, banco relatorios,"
     echo "usuário relatorios, senha = POSTGRES_PASSWORD do infra/.env."
     echo "Ao terminar: sh infra/scripts/local.sh banco-fechar"
@@ -190,9 +190,9 @@ case "$comando" in
       ia-real)
         exigir_env
         # a suíte lê as chaves do ambiente; sem elas, é ignorada
-        TRANSCRICAO_CHAVE="$(valor TRANSCRICAO_CHAVE)" LLM_CHAVE="$(valor LLM_CHAVE)" \
-          $TESTES run --rm -e TRANSCRICAO_CHAVE -e LLM_CHAVE testes-ia-real
-        echo "Relatório: backend/aplicacao/target/ia-real/relatorio.md"
+        TRANSCRIPTION_API_KEY="$(valor TRANSCRIPTION_API_KEY)" LLM_API_KEY="$(valor LLM_API_KEY)" \
+          $TESTES run --rm -e TRANSCRIPTION_API_KEY -e LLM_API_KEY testes-ia-real
+        echo "Relatório: backend/application/target/ia-real/relatorio.md"
         ;;
       todos)
         $TESTES run --rm testes-backend

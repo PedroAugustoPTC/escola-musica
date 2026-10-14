@@ -9,7 +9,7 @@ services:
       dockerfile: frontend/Dockerfile
     image: relatorios-web
     environment:
-      DOMINIO: ${DOMINIO:-localhost}
+      DOMAIN: ${DOMAIN:-localhost}
       ACME_EMAIL: ${ACME_EMAIL:-admin@localhost}
     volumes:
       - caddy-dados:/data
@@ -27,18 +27,18 @@ services:
   backend:
     build:
       context: ../backend
-      dockerfile: aplicacao/Dockerfile
+      dockerfile: application/Dockerfile
     image: relatorios-backend
     env_file: .env
     environment:
-      BANCO_URL: jdbc:postgresql://postgres:5432/relatorios
-      BANCO_USUARIO: relatorios
-      BANCO_SENHA: ${POSTGRES_PASSWORD}
+      DATABASE_URL: jdbc:postgresql://postgres:5432/relatorios
+      DATABASE_USER: relatorios
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
       TELEGRAM_API_URL: http://telegram-bot-api:8081
       TELEGRAM_WEBHOOK_URL: http://backend:8080/telegram/webhook
-      TELEGRAM_ARQUIVOS_DIR: /var/lib/telegram-bot-api
-      DOCUMENTOS_DIR: /dados/documentos
-      AUDIOS_TEMP_DIR: /tmp/audios
+      TELEGRAM_FILES_DIR: /var/lib/telegram-bot-api
+      DOCUMENTS_DIR: /dados/documentos
+      AUDIO_TEMP_DIR: /tmp/audios
     volumes:
       - documentos:/dados/documentos
       - telegram-bot-api-dados:/var/lib/telegram-bot-api

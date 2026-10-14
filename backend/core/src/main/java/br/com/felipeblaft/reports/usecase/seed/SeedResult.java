@@ -27,7 +27,7 @@ public record SeedResult(
 
     public record Count(int created, int updated, int unchanged) {}
 
-    /** {@code secao} é "professores" ou "alunos"; {@code indice} começa em 0. */
+    /** {@code secao} é "teachers" ou "students"; {@code indice} começa em 0. */
     public record SeedError(String section, int index, String field, ErrorCode code) {}
 
     public record IssuedCode(String email, String code, Instant validUntil) {

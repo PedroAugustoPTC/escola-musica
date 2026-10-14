@@ -1,0 +1,702 @@
+[
+  {
+    "file": "backend/application/src/main/java/br/com/felipeblaft/reports/outbound/pdf/OpenHtmlToPdfGenerationAdapter.java",
+    "line": 127,
+    "kind": "manual",
+    "from": "relatorio-aula",
+    "to": "lesson-report"
+  },
+  {
+    "file": "backend/application/src/main/java/br/com/felipeblaft/reports/outbound/pdf/OpenHtmlToPdfGenerationAdapter.java",
+    "line": 161,
+    "kind": "manual",
+    "from": "relatorio-semestral",
+    "to": "semester-report"
+  },
+  {
+    "file": "backend/application/src/main/java/br/com/felipeblaft/reports/outbound/persistence/ReportEntities.java",
+    "line": 19,
+    "kind": "jpa-name",
+    "from": "AulaEntidade",
+    "to": "LessonEntity"
+  },
+  {
+    "file": "backend/application/src/main/java/br/com/felipeblaft/reports/outbound/persistence/ReportEntities.java",
+    "line": 37,
+    "kind": "jpa-name",
+    "from": "RelatorioAulaEntidade",
+    "to": "LessonReportEntity"
+  },
+  {
+    "file": "backend/application/src/main/java/br/com/felipeblaft/reports/outbound/persistence/ReportEntities.java",
+    "line": 106,
+    "kind": "jpa-name",
+    "from": "VersaoRelatorioEntidade",
+    "to": "ReportVersionEntity"
+  },
+  {
+    "file": "backend/application/src/main/java/br/com/felipeblaft/reports/outbound/persistence/ReportEntities.java",
+    "line": 140,
+    "kind": "jpa-name",
+    "from": "InteracaoRelatorioEntidade",
+    "to": "ReportInteractionEntity"
+  },
+  {
+    "file": "backend/application/src/main/java/br/com/felipeblaft/reports/outbound/persistence/ReportEntities.java",
+    "line": 178,
+    "kind": "jpa-name",
+    "from": "DocumentoPdfEntidade",
+    "to": "PdfDocumentEntity"
+  },
+  {
+    "file": "backend/application/src/main/java/br/com/felipeblaft/reports/outbound/persistence/ReportEntities.java",
+    "line": 202,
+    "kind": "jpa-name",
+    "from": "TrabalhoProcessamentoEntidade",
+    "to": "ProcessingJobEntity"
+  },
+  {
+    "file": "backend/application/src/main/java/br/com/felipeblaft/reports/outbound/persistence/ReportEntities.java",
+    "line": 263,
+    "kind": "jpa-name",
+    "from": "ChamadaIaEntidade",
+    "to": "AiCallEntity"
+  },
+  {
+    "file": "backend/application/src/main/java/br/com/felipeblaft/reports/outbound/persistence/OpenReportsQueryAdapter.java",
+    "line": 121,
+    "kind": "sql",
+    "from": " join relatorio_aula r on r.aula_id = a.id",
+    "to": " join lesson_report r on r.lesson_id = a.id"
+  },
+  {
+    "file": "backend/application/src/main/java/br/com/felipeblaft/reports/outbound/persistence/OpenReportsQueryAdapter.java",
+    "line": 122,
+    "kind": "sql",
+    "from": " where a.professor_id = ? and r.status <> 'CANCELADO' group by a.aluno_id",
+    "to": " where a.teacher_id = ? and r.status <> 'CANCELADO' group by a.student_id"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/seed/DemoDataIT.java",
+    "line": 82,
+    "kind": "sql",
+    "from": "relatorio_aula",
+    "to": "lesson_report"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/seed/DemoDataIT.java",
+    "line": 87,
+    "kind": "sql",
+    "from": "relatorio_semestral",
+    "to": "semester_report"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/seed/DemoDataIT.java",
+    "line": 106,
+    "kind": "sql",
+    "from": " where a.nome in ('Lucas Pimentel', 'Sofia Rangel')",
+    "to": " where a.name in ('Lucas Pimentel', 'Sofia Rangel')"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/seed/SeedCommandIT.java",
+    "line": 52,
+    "kind": "sql",
+    "from": "professor",
+    "to": "teacher"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/seed/SeedCommandIT.java",
+    "line": 53,
+    "kind": "sql",
+    "from": "aluno",
+    "to": "student"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/seed/SeedCommandIT.java",
+    "line": 54,
+    "kind": "sql",
+    "from": "professor_aluno",
+    "to": "teacher_student_assignment"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/seed/SeedCommandIT.java",
+    "line": 75,
+    "kind": "sql",
+    "from": "aluno",
+    "to": "student"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/seed/SeedCommandIT.java",
+    "line": 98,
+    "kind": "sql",
+    "from": "professor",
+    "to": "teacher"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/seed/SeedCommandIT.java",
+    "line": 99,
+    "kind": "sql",
+    "from": "aluno",
+    "to": "student"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/seed/SeedCommandIT.java",
+    "line": 110,
+    "kind": "sql",
+    "from": "professor",
+    "to": "teacher"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/seed/SeedCommandIT.java",
+    "line": 111,
+    "kind": "sql",
+    "from": "aluno",
+    "to": "student"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/telegram/SemesterConversationIT.java",
+    "line": 159,
+    "kind": "sql",
+    "from": " versao_aprovada = null, canal_aprovacao = null",
+    "to": " approved_version = null, approval_channel = null"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/telegram/SemesterConversationIT.java",
+    "line": 160,
+    "kind": "sql",
+    "from": " where id = (select r.id from relatorio_aula r join aula a on a.id = r.aula_id",
+    "to": " where id = (select r.id from lesson_report r join lesson a on a.id = r.lesson_id"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/telegram/SemesterConversationIT.java",
+    "line": 161,
+    "kind": "sql",
+    "from": " where a.data_aula = '2026-05-20')",
+    "to": " where a.lesson_date = '2026-05-20')"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/web/SemesterReportContractIT.java",
+    "line": 219,
+    "kind": "sql",
+    "from": " versao_aprovada = null, canal_aprovacao = null",
+    "to": " approved_version = null, approval_channel = null"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/web/SemesterReportContractIT.java",
+    "line": 220,
+    "kind": "sql",
+    "from": " where id = (select r.id from relatorio_aula r join aula a on a.id = r.aula_id",
+    "to": " where id = (select r.id from lesson_report r join lesson a on a.id = r.lesson_id"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/web/SemesterReportContractIT.java",
+    "line": 221,
+    "kind": "sql",
+    "from": " where a.data_aula = '2026-05-20')",
+    "to": " where a.lesson_date = '2026-05-20')"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/outbound/persistence/CostRecordPersistenceIT.java",
+    "line": 109,
+    "kind": "sql",
+    "from": " and relatorio_id is null",
+    "to": " and report_id is null"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/outbound/telegram/ChannelActionsDeliveryIT.java",
+    "line": 208,
+    "kind": "sql",
+    "from": " from acao_canal where id = ?",
+    "to": " from channel_action where id = ?"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/parity/LessonReportParityScriptIT.java",
+    "line": 79,
+    "kind": "sql",
+    "from": " || ' duracao=' || bool_and(duracao_ms is not null)",
+    "to": " || ' duracao=' || bool_and(duration_ms is not null)"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/parity/LessonReportParityScriptIT.java",
+    "line": 80,
+    "kind": "sql",
+    "from": " || ' custo=' || bool_and(custo_estimado_usd is not null)",
+    "to": " || ' custo=' || bool_and(estimated_cost_usd is not null)"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/parity/LessonReportParityScriptIT.java",
+    "line": 81,
+    "kind": "sql",
+    "from": " from chamada_ia where relatorio_tipo = 'AULA' and relatorio_id = ?",
+    "to": " from ai_call where report_type = 'AULA' and report_id = ?"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/parity/LessonReportParityScriptIT.java",
+    "line": 82,
+    "kind": "sql",
+    "from": " group by tarefa order by tarefa",
+    "to": " group by task order by task"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/parity/LessonReportParityScriptIT.java",
+    "line": 98,
+    "kind": "sql",
+    "from": " where aluno_id = ? and tipo = ? and meio = ?",
+    "to": " where student_id = ? and type = ? and medium = ?"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/parity/LessonReportParityScriptIT.java",
+    "line": 99,
+    "kind": "sql",
+    "from": " order by concluido_em desc limit 1",
+    "to": " order by completed_at desc limit 1"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/parity/LessonReportParityScriptIT.java",
+    "line": 120,
+    "kind": "sql",
+    "from": " || ' aprovada=' || coalesce(versao_aprovada::text, '-')",
+    "to": " || ' aprovada=' || coalesce(approved_version::text, '-')"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/parity/LessonReportParityScriptIT.java",
+    "line": 121,
+    "kind": "sql",
+    "from": " || ' canalOrigem=' || canal_origem",
+    "to": " || ' canalOrigem=' || origin_channel"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/parity/LessonReportParityScriptIT.java",
+    "line": 122,
+    "kind": "sql",
+    "from": " || ' canalAprovacao=' || coalesce(canal_aprovacao, '-')",
+    "to": " || ' canalAprovacao=' || coalesce(approval_channel, '-')"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/parity/LessonReportParityScriptIT.java",
+    "line": 123,
+    "kind": "sql",
+    "from": " from relatorio_aula where id = ?",
+    "to": " from lesson_report where id = ?"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/parity/LessonReportParityScriptIT.java",
+    "line": 129,
+    "kind": "sql",
+    "from": " || ' resultante=' || coalesce(versao_resultante::text, '-')",
+    "to": " || ' resultante=' || coalesce(resulting_version::text, '-')"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/parity/LessonReportParityScriptIT.java",
+    "line": 130,
+    "kind": "sql",
+    "from": " || ' canal=' || canal",
+    "to": " || ' canal=' || channel"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/parity/LessonReportParityScriptIT.java",
+    "line": 131,
+    "kind": "sql",
+    "from": " from interacao_relatorio where relatorio_id = ? order by versao_base, tipo",
+    "to": " from report_interaction where report_id = ? order by base_version, type"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/parity/LessonReportParityScriptIT.java",
+    "line": 137,
+    "kind": "sql",
+    "from": " from versao_relatorio where relatorio_id = ? order by numero",
+    "to": " from report_version where report_id = ? order by number"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/parity/LessonReportParityScriptIT.java",
+    "line": 144,
+    "kind": "sql",
+    "from": " where v.relatorio_id = ? order by v.numero, d.tipo",
+    "to": " where v.report_id = ? order by v.number, d.type"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/parity/LessonReportParityScriptIT.java",
+    "line": 420,
+    "kind": "sql",
+    "from": " where relatorio_id = ? and tipo = 'RESPOSTA_PERGUNTAS' order by rodada",
+    "to": " where report_id = ? and type = 'RESPOSTA_PERGUNTAS' order by round"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/parity/LessonReportParityScriptIT.java",
+    "line": 466,
+    "kind": "sql",
+    "from": " from relatorio_aula where id = ?",
+    "to": " from lesson_report where id = ?"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/parity/SemesterParityScriptIT.java",
+    "line": 81,
+    "kind": "sql",
+    "from": " || ' duracao=' || bool_and(duracao_ms is not null)",
+    "to": " || ' duracao=' || bool_and(duration_ms is not null)"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/parity/SemesterParityScriptIT.java",
+    "line": 82,
+    "kind": "sql",
+    "from": " || ' custo=' || bool_and(custo_estimado_usd is not null)",
+    "to": " || ' custo=' || bool_and(estimated_cost_usd is not null)"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/parity/SemesterParityScriptIT.java",
+    "line": 83,
+    "kind": "sql",
+    "from": " from chamada_ia where relatorio_tipo = 'SEMESTRAL' and relatorio_id = ?",
+    "to": " from ai_call where report_type = 'SEMESTRAL' and report_id = ?"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/parity/SemesterParityScriptIT.java",
+    "line": 84,
+    "kind": "sql",
+    "from": " group by tarefa order by tarefa",
+    "to": " group by task order by task"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/parity/SemesterParityScriptIT.java",
+    "line": 258,
+    "kind": "sql",
+    "from": " || ' aulas=' || quantidade_aulas_consideradas || ' periodo=' || periodo_chave",
+    "to": " || ' aulas=' || considered_lesson_count || ' periodo=' || period_key"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/parity/SemesterParityScriptIT.java",
+    "line": 259,
+    "kind": "sql",
+    "from": " || ' origem=' || canal_origem || ' aprovacao=' || canal_aprovacao",
+    "to": " || ' origem=' || origin_channel || ' aprovacao=' || approval_channel"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/parity/SemesterParityScriptIT.java",
+    "line": 260,
+    "kind": "sql",
+    "from": " || ' parecer=' || (conteudo ->> 'parecerFinal')",
+    "to": " || ' parecer=' || (content ->> 'finalOpinion')"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/parity/SemesterParityScriptIT.java",
+    "line": 261,
+    "kind": "sql",
+    "from": " from relatorio_semestral where id = ?",
+    "to": " from semester_report where id = ?"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/parity/SemesterParityScriptIT.java",
+    "line": 267,
+    "kind": "sql",
+    "from": " from interacao_relatorio where relatorio_id = ? order by versao_base",
+    "to": " from report_interaction where report_id = ? order by base_version"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/parity/SemesterParityScriptIT.java",
+    "line": 273,
+    "kind": "sql",
+    "from": " join documento_pdf d on d.versao_id = v.id where v.relatorio_id = ?",
+    "to": " join pdf_document d on d.version_id = v.id where v.report_id = ?"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/parity/SemesterParityScriptIT.java",
+    "line": 274,
+    "kind": "sql",
+    "from": " order by v.numero, d.tipo",
+    "to": " order by v.number, d.type"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/internal/security/InternalSecurityWithoutTokenIT.java",
+    "line": 20,
+    "kind": "prop-assign",
+    "from": "relatorios.canal-telegram.token-atual=",
+    "to": "reports.telegram-channel.current-token="
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/internal/security/InternalSecurityWithoutTokenIT.java",
+    "line": 21,
+    "kind": "prop-assign",
+    "from": "relatorios.canal-telegram.token-proximo=",
+    "to": "reports.telegram-channel.next-token="
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/realai/RealAiSuiteIT.java",
+    "line": 50,
+    "kind": "prop-assign",
+    "from": "relatorios.provedores.modo=real",
+    "to": "reports.providers.mode=real"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/realai/RealAiSuiteIT.java",
+    "line": 51,
+    "kind": "prop-assign",
+    "from": "relatorios.teste.normalizacao-simulada=false",
+    "to": "reports.test.simulated-normalization=false"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/support/OrchestratorDeliveryBase.java",
+    "line": 41,
+    "kind": "prop-assign",
+    "from": "relatorios.canal-telegram.entrega-proativa=ORQUESTRADOR",
+    "to": "reports.telegram-channel.proactive-delivery=ORQUESTRADOR"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/support/OrchestratorDeliveryBase.java",
+    "line": 42,
+    "kind": "prop-assign",
+    "from": "relatorios.canal-telegram.orquestrador-token=segredo-do-orquestrador",
+    "to": "reports.telegram-channel.orchestrator-token=segredo-do-orquestrador"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/support/OrchestratorDeliveryBase.java",
+    "line": 43,
+    "kind": "prop-assign",
+    "from": "relatorios.canal-telegram.intervalo-despacho-ms=3600000",
+    "to": "reports.telegram-channel.dispatch-interval-ms=3600000"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/support/OrchestratorDeliveryBase.java",
+    "line": 44,
+    "kind": "prop-assign",
+    "from": "relatorios.canal-telegram.conexao-timeout-ms=500",
+    "to": "reports.telegram-channel.connection-timeout-ms=500"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/support/OrchestratorDeliveryBase.java",
+    "line": 45,
+    "kind": "prop-assign",
+    "from": "relatorios.canal-telegram.resposta-timeout-ms=1500",
+    "to": "reports.telegram-channel.response-timeout-ms=1500"
+  },
+  {
+    "file": "backend/application/src/main/java/br/com/felipeblaft/reports/config/TelegramConfig.java",
+    "line": 20,
+    "kind": "config",
+    "from": "!carga",
+    "to": "!seed"
+  },
+  {
+    "file": "backend/application/src/main/java/br/com/felipeblaft/reports/outbound/audio/TemporaryAudioCleanupTask.java",
+    "line": 24,
+    "kind": "config",
+    "from": "!carga",
+    "to": "!seed"
+  },
+  {
+    "file": "backend/application/src/main/java/br/com/felipeblaft/reports/outbound/persistence/AccessSweepTask.java",
+    "line": 16,
+    "kind": "config",
+    "from": "!carga",
+    "to": "!seed"
+  },
+  {
+    "file": "backend/application/src/main/java/br/com/felipeblaft/reports/outbound/queue/ChannelActionsCleanupTask.java",
+    "line": 15,
+    "kind": "config",
+    "from": "!carga",
+    "to": "!seed"
+  },
+  {
+    "file": "backend/application/src/main/java/br/com/felipeblaft/reports/outbound/queue/ChannelActionsDeliveryTask.java",
+    "line": 26,
+    "kind": "config",
+    "from": "!carga",
+    "to": "!seed"
+  },
+  {
+    "file": "backend/application/src/main/java/br/com/felipeblaft/reports/outbound/queue/ChannelActionsDeliveryTask.java",
+    "line": 27,
+    "kind": "config-value",
+    "from": "!'${relatorios.canal-telegram.orquestrador-url:}'.isBlank()",
+    "to": "!'${reports.telegram-channel.orchestrator-url:}'.isBlank()"
+  },
+  {
+    "file": "backend/application/src/main/java/br/com/felipeblaft/reports/outbound/queue/ChannelActionsDeliveryTask.java",
+    "line": 92,
+    "kind": "config-value",
+    "from": "${relatorios.canal-telegram.intervalo-despacho-ms:2000}",
+    "to": "${reports.telegram-channel.dispatch-interval-ms:2000}"
+  },
+  {
+    "file": "backend/application/src/main/java/br/com/felipeblaft/reports/outbound/queue/ChannelActionsDeliveryTask.java",
+    "line": 93,
+    "kind": "config-value",
+    "from": "${relatorios.canal-telegram.intervalo-despacho-ms:2000}",
+    "to": "${reports.telegram-channel.dispatch-interval-ms:2000}"
+  },
+  {
+    "file": "backend/application/src/main/java/br/com/felipeblaft/reports/outbound/queue/DelayNoticeTask.java",
+    "line": 16,
+    "kind": "config",
+    "from": "!carga",
+    "to": "!seed"
+  },
+  {
+    "file": "backend/application/src/main/java/br/com/felipeblaft/reports/outbound/queue/JobWorker.java",
+    "line": 27,
+    "kind": "config",
+    "from": "!carga",
+    "to": "!seed"
+  },
+  {
+    "file": "backend/application/src/main/java/br/com/felipeblaft/reports/outbound/queue/JobWorker.java",
+    "line": 62,
+    "kind": "config-value",
+    "from": "${relatorios.trabalhos.intervalo-ms:500}",
+    "to": "${reports.jobs.interval-ms:500}"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/telegram/LessonRegistrationConversationIT.java",
+    "line": 88,
+    "kind": "jdbc-label",
+    "from": "aluno_selecionado_id",
+    "to": "selected_student_id"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/telegram/LessonRegistrationConversationIT.java",
+    "line": 103,
+    "kind": "jdbc-label",
+    "from": "audio_pendente_file_id",
+    "to": "pending_audio_file_id"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/telegram/LessonRegistrationConversationIT.java",
+    "line": 121,
+    "kind": "jdbc-label",
+    "from": "audio_pendente_file_id",
+    "to": "pending_audio_file_id"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/telegram/LessonRegistrationConversationIT.java",
+    "line": 139,
+    "kind": "jdbc-label",
+    "from": "audio_pendente_file_id",
+    "to": "pending_audio_file_id"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/telegram/LessonRegistrationConversationIT.java",
+    "line": 148,
+    "kind": "jdbc-label",
+    "from": "audio_pendente_file_id",
+    "to": "pending_audio_file_id"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/telegram/LessonRegistrationConversationIT.java",
+    "line": 157,
+    "kind": "jdbc-label",
+    "from": "audio_pendente_file_id",
+    "to": "pending_audio_file_id"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/telegram/LessonRegistrationConversationIT.java",
+    "line": 175,
+    "kind": "jdbc-label",
+    "from": "audio_pendente_file_id",
+    "to": "pending_audio_file_id"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/telegram/LessonRegistrationConversationIT.java",
+    "line": 224,
+    "kind": "jdbc-label",
+    "from": "relatorio_foco_tipo",
+    "to": "focused_report_type"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/telegram/LessonRegistrationConversationIT.java",
+    "line": 225,
+    "kind": "jdbc-label",
+    "from": "relatorio_foco_id",
+    "to": "focused_report_id"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/telegram/LessonRegistrationConversationIT.java",
+    "line": 277,
+    "kind": "jdbc-label",
+    "from": "audio_pendente_file_id",
+    "to": "pending_audio_file_id"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/telegram/ReviewConversationIT.java",
+    "line": 90,
+    "kind": "jdbc-label",
+    "from": "versao_apresentada",
+    "to": "presented_version"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/telegram/ReviewConversationIT.java",
+    "line": 102,
+    "kind": "jdbc-label",
+    "from": "audio_pendente_file_id",
+    "to": "pending_audio_file_id"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/telegram/ReviewConversationIT.java",
+    "line": 144,
+    "kind": "jdbc-label",
+    "from": "versao_apresentada",
+    "to": "presented_version"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/telegram/ReviewConversationIT.java",
+    "line": 182,
+    "kind": "jdbc-label",
+    "from": "relatorio_foco_id",
+    "to": "focused_report_id"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/telegram/ReviewConversationIT.java",
+    "line": 207,
+    "kind": "jdbc-label",
+    "from": "relatorio_foco_id",
+    "to": "focused_report_id"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/telegram/ReviewConversationIT.java",
+    "line": 208,
+    "kind": "jdbc-label",
+    "from": "aluno_selecionado_id",
+    "to": "selected_student_id"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/telegram/ReviewConversationIT.java",
+    "line": 263,
+    "kind": "jdbc-label",
+    "from": "relatorio_foco_id",
+    "to": "focused_report_id"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/telegram/ReviewConversationIT.java",
+    "line": 313,
+    "kind": "jdbc-label",
+    "from": "relatorio_foco_id",
+    "to": "focused_report_id"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/telegram/ReviewConversationIT.java",
+    "line": 321,
+    "kind": "jdbc-label",
+    "from": "relatorio_foco_id",
+    "to": "focused_report_id"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/telegram/ReviewConversationIT.java",
+    "line": 328,
+    "kind": "jdbc-label",
+    "from": "relatorio_foco_id",
+    "to": "focused_report_id"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/telegram/SemesterConversationIT.java",
+    "line": 103,
+    "kind": "jdbc-label",
+    "from": "relatorio_foco_tipo",
+    "to": "focused_report_type"
+  },
+  {
+    "file": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/telegram/SemesterConversationIT.java",
+    "line": 193,
+    "kind": "jdbc-label",
+    "from": "relatorio_foco_id",
+    "to": "focused_report_id"
+  }
+]

@@ -6,7 +6,7 @@ WORKDIR /repo/frontend
 COPY frontend/package.json frontend/package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm npm ci
 COPY frontend/ ./
-COPY backend/aplicacao/src/main/resources/mensagens/ /repo/backend/aplicacao/src/main/resources/mensagens/
+COPY backend/application/src/main/resources/messages/ /repo/backend/application/src/main/resources/messages/
 COPY specs/001-fluxo-relatorios/contracts/api-portal.openapi.yaml /repo/specs/001-fluxo-relatorios/contracts/api-portal.openapi.yaml
 RUN npm run build
 

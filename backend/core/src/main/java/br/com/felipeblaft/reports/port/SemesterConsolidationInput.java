@@ -11,22 +11,22 @@ import java.util.Objects;
  * (FR-044, Princípio IV).
  */
 public record SemesterConsolidationInput(
-        List<ConsolidatedLesson> aulas,
-        int quantidadeAulas,
-        LocalDate periodoInicio,
-        LocalDate periodoFim)
+        List<ConsolidatedLesson> lessons,
+        int lessonCount,
+        LocalDate periodStart,
+        LocalDate periodEnd)
         implements SemesterTaskInput {
 
     public SemesterConsolidationInput {
-        aulas = List.copyOf(aulas);
-        Objects.requireNonNull(periodoInicio);
-        Objects.requireNonNull(periodoFim);
+        lessons = List.copyOf(lessons);
+        Objects.requireNonNull(periodStart);
+        Objects.requireNonNull(periodEnd);
     }
 
-    public record ConsolidatedLesson(LocalDate dataAula, LessonReportContent relatorio) {
+    public record ConsolidatedLesson(LocalDate lessonDate, LessonReportContent report) {
         public ConsolidatedLesson {
-            Objects.requireNonNull(dataAula);
-            Objects.requireNonNull(relatorio);
+            Objects.requireNonNull(lessonDate);
+            Objects.requireNonNull(report);
         }
     }
 }

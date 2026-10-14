@@ -244,19 +244,19 @@ class LoadInitialRegistryUseCaseTest {
         assertThat(result.errors())
                 .extracting(SeedError::section, SeedError::index, SeedError::field, SeedError::code)
                 .containsExactlyInAnyOrder(
-                        tuple("professores", 1, "email", ErrorCode.EMAIL_DUPLICADO_NO_ARQUIVO),
-                        tuple("professores", 1, "nome", ErrorCode.NOME_OBRIGATORIO),
-                        tuple("professores", 2, "email", ErrorCode.EMAIL_INVALIDO),
-                        tuple("professores", 3, "email", ErrorCode.EMAIL_INVALIDO),
-                        tuple("alunos", 1, "cpf", ErrorCode.CPF_DUPLICADO_NO_ARQUIVO),
-                        tuple("alunos", 2, "nome", ErrorCode.NOME_OBRIGATORIO),
-                        tuple("alunos", 2, "cpf", ErrorCode.CPF_INVALIDO),
-                        tuple("alunos", 2, "dataNascimento", ErrorCode.DATA_NASCIMENTO_INVALIDA),
-                        tuple("alunos", 2, "professores[0]", ErrorCode.PROFESSOR_INEXISTENTE),
-                        tuple("alunos", 3, "nomeResponsavel", ErrorCode.RESPONSAVEL_OBRIGATORIO),
-                        tuple("alunos", 3, "professores[0]", ErrorCode.PROFESSOR_INEXISTENTE),
-                        tuple("alunos", 4, "dataNascimento", ErrorCode.DATA_NASCIMENTO_INVALIDA),
-                        tuple("alunos", 5, "dataNascimento", ErrorCode.DATA_NASCIMENTO_INVALIDA));
+                        tuple("teachers", 1, "email", ErrorCode.EMAIL_DUPLICADO_NO_ARQUIVO),
+                        tuple("teachers", 1, "name", ErrorCode.NOME_OBRIGATORIO),
+                        tuple("teachers", 2, "email", ErrorCode.EMAIL_INVALIDO),
+                        tuple("teachers", 3, "email", ErrorCode.EMAIL_INVALIDO),
+                        tuple("students", 1, "cpf", ErrorCode.CPF_DUPLICADO_NO_ARQUIVO),
+                        tuple("students", 2, "name", ErrorCode.NOME_OBRIGATORIO),
+                        tuple("students", 2, "cpf", ErrorCode.CPF_INVALIDO),
+                        tuple("students", 2, "birthDate", ErrorCode.DATA_NASCIMENTO_INVALIDA),
+                        tuple("students", 2, "teachers[0]", ErrorCode.PROFESSOR_INEXISTENTE),
+                        tuple("students", 3, "guardianName", ErrorCode.RESPONSAVEL_OBRIGATORIO),
+                        tuple("students", 3, "teachers[0]", ErrorCode.PROFESSOR_INEXISTENTE),
+                        tuple("students", 4, "birthDate", ErrorCode.DATA_NASCIMENTO_INVALIDA),
+                        tuple("students", 5, "birthDate", ErrorCode.DATA_NASCIMENTO_INVALIDA));
         assertThat(result.errors().toString()).doesNotContain("52998224725", "529.982");
         assertThat(result.teachers()).isEqualTo(new Count(0, 0, 0));
         assertThat(result.issuedCodes()).isEmpty();
@@ -284,8 +284,8 @@ class LoadInitialRegistryUseCaseTest {
         assertThat(result.success()).isTrue();
         assertThat(result.students()).isEqualTo(new Count(1, 0, 0));
         assertThat(result.createdAssignments()).isEqualTo(1);
-        assertThat(new SeedFile(null, null).alunos()).isEmpty();
-        assertThat(new SeedStudent("c", "n", "d", null, null, null).professores()).isEmpty();
+        assertThat(new SeedFile(null, null).students()).isEmpty();
+        assertThat(new SeedStudent("c", "n", "d", null, null, null).teachers()).isEmpty();
         assertThat(LocalDate.parse("2012-03-03")).isNotNull();
     }
 }

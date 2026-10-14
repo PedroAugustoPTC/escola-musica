@@ -1,0 +1,37 @@
+{
+  "attendanceAndStudy": {
+    "lessonAttendance": "Frequentou as aulas com regularidade ao longo do semestre.",
+    "homeStudyRegularity": "Estudou em casa na maior parte das semanas.",
+    "engagement": "Demonstrou interesse e boa participação nas aulas.",
+    "generalComment": ""
+  },
+  "technique": {
+    "workedTopics": ["Escalas maiores em duas oitavas", "Estudos de Czerny, op. 599"],
+    "technicalProgress": "Ganhou segurança na articulação e na independência entre as mãos.",
+    "pointsToDevelop": ["Independência entre as mãos em passagens rápidas"],
+    "completedStudies": ["Estudo nº 5 de Czerny"]
+  },
+  "musicality": {
+    "studiedRepertoire": [],
+    "sound": "",
+    "rhythm": "Manteve o andamento estável nas peças estudadas.",
+    "phrasing": "",
+    "articulation": "",
+    "style": "",
+    "musicalComment": ""
+  },
+  "readingAndMemorization": { "assessment": "", "comment": "" },
+  "attentionPoints": { "items": ["Manter o estudo diário com mãos separadas nos trechos difíceis"] },
+  "pedagogicalStrategies": { "items": ["Estudo por trechos curtos com mãos separadas"] },
+  "familySupport": { "presenceLevel": "", "teacherObservation": "" },
+  "nextSemesterPlan": {
+    "technicalGoals": ["Consolidar a independência entre as mãos"],
+    "musicalGoals": [],
+    "studyHabits": ["Estudar 15 minutos por dia"],
+    "proposedRepertoire": [],
+    "technicalStudies": ["Continuar os estudos de Czerny"],
+    "readingAndTheory": [],
+    "semesterProject": ""
+  },
+  "finalOpinion": "O aluno teve um semestre de evolução consistente, com boa frequência e progresso técnico."
+}

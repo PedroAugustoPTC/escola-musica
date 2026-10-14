@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:reports:schema:semester-report",
+  "title": "Saída da IA para o relatório semestral (consolidação e revisão), seções 2 a 10",
+  "$defs": {
+    "text": { "type": "string", "maxLength": 4000 },
+    "list": { "type": "array", "items": { "type": "string", "maxLength": 500 }, "maxItems": 30 }
+  },
+  "type": "object",
+  "required": [
+    "attendanceAndStudy", "technique", "musicality", "readingAndMemorization", "attentionPoints",
+    "pedagogicalStrategies", "familySupport", "nextSemesterPlan", "finalOpinion"
+  ],
+  "properties": {
+    "attendanceAndStudy": {
+      "type": "object",
+      "properties": {
+        "lessonAttendance": { "$ref": "#/$defs/text" },
+        "homeStudyRegularity": { "$ref": "#/$defs/text" },
+        "engagement": { "$ref": "#/$defs/text" },
+        "generalComment": { "$ref": "#/$defs/text" }
+      }
+    },
+    "technique": {
+      "type": "object",
+      "properties": {
+        "workedTopics": { "$ref": "#/$defs/list" },
+        "technicalProgress": { "$ref": "#/$defs/text" },
+        "pointsToDevelop": { "$ref": "#/$defs/list" },
+        "completedStudies": { "$ref": "#/$defs/list" }
+      }
+    },
+    "musicality": {
+      "type": "object",
+      "properties": {
+        "studiedRepertoire": { "$ref": "#/$defs/list" },
+        "sound": { "$ref": "#/$defs/text" },
+        "rhythm": { "$ref": "#/$defs/text" },
+        "phrasing": { "$ref": "#/$defs/text" },
+        "articulation": { "$ref": "#/$defs/text" },
+        "style": { "$ref": "#/$defs/text" },
+        "musicalComment": { "$ref": "#/$defs/text" }
+      }
+    },
+    "readingAndMemorization": {
+      "type": "object",
+      "properties": {
+        "assessment": { "$ref": "#/$defs/text" },
+        "comment": { "$ref": "#/$defs/text" }
+      }
+    },
+    "attentionPoints": { "type": "object", "properties": { "items": { "$ref": "#/$defs/list" } } },
+    "pedagogicalStrategies": { "type": "object", "properties": { "items": { "$ref": "#/$defs/list" } } },
+    "familySupport": {
+      "type": "object",
+      "properties": {
+        "presenceLevel": { "$ref": "#/$defs/text" },
+        "teacherObservation": { "$ref": "#/$defs/text" }
+      }
+    },
+    "nextSemesterPlan": {
+      "type": "object",
+      "properties": {
+        "technicalGoals": { "$ref": "#/$defs/list" },
+        "musicalGoals": { "$ref": "#/$defs/list" },
+        "studyHabits": { "$ref": "#/$defs/list" },
+        "proposedRepertoire": { "$ref": "#/$defs/list" },
+        "technicalStudies": { "$ref": "#/$defs/list" },
+        "readingAndTheory": { "$ref": "#/$defs/list" },
+        "semesterProject": { "$ref": "#/$defs/text" }
+      }
+    },
+    "finalOpinion": { "type": "string", "maxLength": 6000 },
+    "noContentChange": { "type": "boolean" },
+    "actionRequest": { "enum": ["NENHUM", "APROVAR", "CANCELAR"] }
+  }
+}

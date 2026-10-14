@@ -1,39 +1,39 @@
 {
-  "professores": [
-    { "email": "clara@exemplo.test", "nome": "Clara Souza", "ativo": true },
-    { "email": "bruno@exemplo.test", "nome": "Bruno Lima", "ativo": true }
+  "teachers": [
+    { "email": "clara@exemplo.test", "name": "Clara Souza", "active": true },
+    { "email": "bruno@exemplo.test", "name": "Bruno Lima", "active": true }
   ],
-  "alunos": [
+  "students": [
     {
       "cpf": "529.982.247-25",
-      "nome": "Matteo Mafra",
-      "dataNascimento": "2014-05-10",
-      "nomeResponsavel": "Responsável Fictício de Matteo",
-      "instrumento": "Piano",
-      "professores": ["clara@exemplo.test"]
+      "name": "Matteo Mafra",
+      "birthDate": "2014-05-10",
+      "guardianName": "Responsável Fictício de Matteo",
+      "instrument": "Piano",
+      "teachers": ["clara@exemplo.test"]
     },
     {
       "cpf": "123.456.789-09",
-      "nome": "Olavo Torrente",
-      "dataNascimento": "1998-02-01",
-      "instrumento": "Violão",
-      "professores": ["clara@exemplo.test"]
+      "name": "Olavo Torrente",
+      "birthDate": "1998-02-01",
+      "instrument": "Violão",
+      "teachers": ["clara@exemplo.test"]
     },
     {
       "cpf": "704.512.836-35",
-      "nome": "Miguel de Castro Torrente",
-      "dataNascimento": "2016-08-20",
-      "nomeResponsavel": "Responsável Fictício de Miguel",
-      "instrumento": "Violino",
-      "professores": ["clara@exemplo.test"]
+      "name": "Miguel de Castro Torrente",
+      "birthDate": "2016-08-20",
+      "guardianName": "Responsável Fictício de Miguel",
+      "instrument": "Violino",
+      "teachers": ["clara@exemplo.test"]
     },
     {
       "cpf": "318.264.597-82",
-      "nome": "Helena Prado",
-      "dataNascimento": "2010-11-03",
-      "nomeResponsavel": "Responsável Fictício de Helena",
-      "instrumento": "Flauta",
-      "professores": ["bruno@exemplo.test"]
+      "name": "Helena Prado",
+      "birthDate": "2010-11-03",
+      "guardianName": "Responsável Fictício de Helena",
+      "instrument": "Flauta",
+      "teachers": ["bruno@exemplo.test"]
     }
   ]
 }

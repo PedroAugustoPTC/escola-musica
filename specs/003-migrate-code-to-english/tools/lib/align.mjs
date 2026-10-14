@@ -14,6 +14,7 @@
 // em `explicit-pairs.json` → `literals` com motivo.
 import { importText, isSingleWord, lex } from './java-lexer.mjs';
 import { scanTypes } from './java-types.mjs';
+import { classifyLiterals, literalBody, transformLiteral } from './literal-classes.mjs';
 
 const isLower = (text) => /^[a-z_$]/.test(text);
 const BASE_PACKAGE = ['br', '.', 'com', '.', 'felipeblaft', '.'];
@@ -120,6 +121,7 @@ export function alignJava(baseSource, workSource, { map, file = '' }) {
     producers: new Map(), // novo → Set(antigo), para detectar colisões
     declared: new Map(), // novo → Map(antigo → Set(papel de declaração)), colisão que importa
     singleWordLiterals: [],
+    codeLiterals: [], // literais que são código (consulta, nome de tabela/coluna, chave de configuração), pela classe
     manualLiterals: [],
     commentsChanged: 0,
     tokens: base.body.length,
@@ -147,11 +149,14 @@ export function alignJava(baseSource, workSource, { map, file = '' }) {
     });
   }
   const heldStarts = heldPositions(baseTokens, map);
+  const literalClasses = map.codeLiterals === false ? new Map() : classifyLiterals(baseTokens, { envNames: new Set(map.explicit.envNames ?? []), path: file });
   for (let i = 0; i < baseTokens.length; i++) {
     const a = baseTokens[i];
     const b = workTokens[i];
     if (a.type !== b.type) {
-      result.errors.push({ kind: 'tipo-de-token', line: a.line, from: a.value, to: b.value });
+      const typeEdit = tokenEdits.find((entry) => entry.from === a.value && entry.to === b.value);
+      if (typeEdit) result.manualLiterals.push({ line: a.line, from: a.value, to: b.value, reason: typeEdit.reason });
+      else result.errors.push({ kind: 'tipo-de-token', line: a.line, from: a.value, to: b.value });
       continue;
     }
     if (a.type === 'ident') {
@@ -180,7 +185,9 @@ export function alignJava(baseSource, workSource, { map, file = '' }) {
       if (a.value === b.value) continue;
       const manual = allowed.find((entry) => entry.from === a.value && entry.to === b.value);
       if (manual) result.manualLiterals.push({ line: a.line, from: a.value, to: b.value, reason: manual.reason });
-      else if (a.type === 'string' && isSingleWord(a.value) && isSingleWord(b.value) && map.isValidPair(a.value, b.value)) {
+      else if (literalClasses.has(i) && transformLiteral(literalClasses.get(i), literalBody(a), map) === literalBody(b)) {
+        result.codeLiterals.push({ line: a.line, kind: literalClasses.get(i), from: a.value, to: b.value });
+      } else if (a.type === 'string' && isSingleWord(a.value) && isSingleWord(b.value) && map.isValidPair(a.value, b.value)) {
         result.singleWordLiterals.push({ line: a.line, from: a.value, to: b.value });
       } else if (a.type === 'textblock' && mapEmbedded(a.value, map) === b.value) {
         result.singleWordLiterals.push({ line: a.line, from: '(bloco de texto)', to: '(identificadores pelo mapa)' });

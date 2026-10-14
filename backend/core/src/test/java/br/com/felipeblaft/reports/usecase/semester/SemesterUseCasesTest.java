@@ -143,17 +143,17 @@ class SemesterUseCasesTest {
         SemesterReport report = semesterInReview();
 
         SemesterConsolidationInput input = (SemesterConsolidationInput) c.llm.inputs.getFirst();
-        assertThat(input.aulas())
-                .extracting(a -> a.dataAula())
+        assertThat(input.lessons())
+                .extracting(a -> a.lessonDate())
                 .containsExactly(LocalDate.of(2026, 3, 10), LocalDate.of(2026, 5, 20));
-        assertThat(input.quantidadeAulas()).isEqualTo(2);
+        assertThat(input.lessonCount()).isEqualTo(2);
         assertThat(input.toString()).doesNotContain("Matteo").doesNotContain("2012");
         assertThat(report.status()).isEqualTo(ReportStatus.AGUARDANDO_CONFERENCIA);
         assertThat(report.currentVersion()).isEqualTo(1);
         assertThat(report.consideredLessonCount()).isEqualTo(2);
-        assertThat(report.generalInformation().nome()).isEqualTo("Matteo Mafra");
-        assertThat(report.generalInformation().professor()).isEqualTo("Clara Souza");
-        assertThat(report.content().parecerFinal()).isEqualTo("Bom semestre.");
+        assertThat(report.generalInformation().name()).isEqualTo("Matteo Mafra");
+        assertThat(report.generalInformation().teacher()).isEqualTo("Clara Souza");
+        assertThat(report.content().finalOpinion()).isEqualTo("Bom semestre.");
         assertThat(c.pdf.semesterModels).hasSize(1);
         ProcessingJob job = c.queue.jobs.values().iterator().next();
         assertThat(job.result()).isEqualTo(JobResult.PRONTO_PARA_CONFERENCIA);
@@ -192,7 +192,7 @@ class SemesterUseCasesTest {
                 c.clara.id(), report.id(), "Diga que foi ótimo.", 1, Channel.TELEGRAM);
         c.processQueue();
         assertThat(report.currentVersion()).isEqualTo(2);
-        assertThat(report.content().parecerFinal()).isEqualTo("Ótimo semestre.");
+        assertThat(report.content().finalOpinion()).isEqualTo("Ótimo semestre.");
         assertThat(c.llm.inputs.getLast()).isInstanceOf(SemesterRevisionInput.class);
         assertThat(c.interactions.last(ReportType.SEMESTRAL, report.id()).orElseThrow().result())
                 .isEqualTo(InteractionResult.APLICADA);

@@ -67,6 +67,8 @@ public class RenameMembersByMap extends Recipe {
         final Map<String, String> methodNames = new HashMap<>();
         final Map<String, String> variableNames = new HashMap<>();
         final Map<String, String> qualifiedMethods = new HashMap<>();
+        final Map<String, String> qualifiedFields = new HashMap<>();
+        final Set<String> exactTypes = new HashSet<>();
         final Map<String, Set<String>> held = new HashMap<>();
 
         private Config(JsonNode root) {
@@ -79,6 +81,14 @@ public class RenameMembersByMap extends Recipe {
             root.get("variableNames")
                     .fields()
                     .forEachRemaining(entry -> variableNames.put(entry.getKey(), entry.getValue().asText()));
+            if (root.has("qualifiedFields")) {
+                root.get("qualifiedFields")
+                        .fields()
+                        .forEachRemaining(entry -> qualifiedFields.put(entry.getKey(), entry.getValue().asText()));
+            }
+            if (root.has("exactTypes")) {
+                root.get("exactTypes").forEach(node -> exactTypes.add(node.asText()));
+            }
             root.get("qualifiedMethods")
                     .fields()
                     .forEachRemaining(entry -> qualifiedMethods.put(entry.getKey(), entry.getValue().asText()));
@@ -120,6 +130,11 @@ public class RenameMembersByMap extends Recipe {
                 return false;
             }
             String name = type.getFullyQualifiedName();
+            for (String exact : config.exactTypes) {
+                if (name.equals(exact) || name.startsWith(exact + "$")) {
+                    return true;
+                }
+            }
             for (String prefix : config.corePackages) {
                 if (name.startsWith(prefix + ".")) {
                     return true;
@@ -324,6 +339,18 @@ public class RenameMembersByMap extends Recipe {
             return null;
         }
 
+        /** Nome novo da variável: a chave qualificada (`TipoAntigo#nome`) vence o mapa geral. */
+        private @Nullable String variableTarget(JavaType.@Nullable Variable variable, String name) {
+            JavaType.FullyQualified owner = classOwnerOf(variable);
+            if (owner != null) {
+                String qualified = config.qualifiedFields.get(simpleNameOf(owner) + "#" + name);
+                if (qualified != null) {
+                    return qualified;
+                }
+            }
+            return config.variable(name);
+        }
+
         // ---- campos, parâmetros, variáveis locais e componentes de record ---------------------------------------
 
         private boolean variableOwnedByCore(JavaType.@Nullable Variable variable) {
@@ -347,6 +374,27 @@ public class RenameMembersByMap extends Recipe {
             J.ClassDeclaration visited = super.visitClassDeclaration(declaration, ctx);
             String target = config.names.get(visited.getSimpleName());
             if (target == null || !isCoreType(visited.getType())) {
+                return visited;
+            }
+            return visited.withName(visited.getName().withSimpleName(target));
+        }
+
+        /**
+         * Constante de enumeração (declaração): o identificador do nome não traz tipo de variável, então o dono é a
+         * enumeração que a contém. As constantes retidas (B1) ficam; as referências já são renomeadas por
+         * {@link #visitIdentifier}.
+         */
+        @Override
+        public J.EnumValue visitEnumValue(J.EnumValue enumValue, ExecutionContext ctx) {
+            J.EnumValue visited = super.visitEnumValue(enumValue, ctx);
+            J.ClassDeclaration enclosing = getCursor().firstEnclosing(J.ClassDeclaration.class);
+            String current = visited.getName().getSimpleName();
+            String target = config.variable(current);
+            if (enclosing == null
+                    || target == null
+                    || target.equals(current)
+                    || !isCoreType(enclosing.getType())
+                    || isHeld(enclosing.getType(), current)) {
                 return visited;
             }
             return visited.withName(visited.getName().withSimpleName(target));
@@ -397,7 +445,7 @@ public class RenameMembersByMap extends Recipe {
                 }
                 return visited;
             }
-            String target = config.variable(visited.getSimpleName());
+            String target = variableTarget(fieldType, visited.getSimpleName());
             if (target == null || target.equals(visited.getSimpleName())) {
                 return visited;
             }
@@ -417,7 +465,7 @@ public class RenameMembersByMap extends Recipe {
                 // o nome já foi renomeado pelo identificador; o tipo da variável acompanha
                 return visited.withVariableType(type.withName(current));
             }
-            String target = config.variable(current);
+            String target = variableTarget(type, current);
             if (type == null || target == null || target.equals(current)) {
                 return visited;
             }

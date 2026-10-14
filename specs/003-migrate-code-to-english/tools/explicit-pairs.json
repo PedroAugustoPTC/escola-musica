@@ -1,10 +1,16 @@
 {
   "descricao": "Exceções ao mapa de identificadores (tools/maps/slice-<N>.json), usadas pelo rename-check e pelos geradores de receita. Cada par foi conferido contra .specify/memory/glossary.json (inclusive 'contextual') e contracts/identifier-map.md §9. Só entram aqui as exceções; o resto vem do mapa. methodIdentifiers/variableIdentifiers: o mesmo nome antigo vira nomes diferentes por papel quando o mapa geral cairia em palavra reservada do Java (novo/nova/padrao). qualifiedMethods: \"TipoAntigo#metodoAntigo\" → nome novo, quando o mesmo nome antigo precisa de nomes diferentes conforme o tipo dono (aqui: emAberto). tokenEdits: troca manual de identificador (arquivo, from, to, reason) que não é renomeação pelo mapa, permitida só no arquivo indicado e sempre com motivo.",
   "packageSegments": {
-    "inicio": "home"
+    "inicio": "home",
+    "entrada": "inbound",
+    "saida": "outbound"
   },
   "pathSegments": {},
-  "identifiers": {},
+  "identifiers": {
+    "excecoes": "exceptions",
+    "exige401": "requires401",
+    "dividir": "splitText"
+  },
   "literals": [
     {
       "file": "core/src/test/java/br/com/felipeblaft/reports/architecture/ArchitectureRulesTest.java",
@@ -101,23 +107,636 @@
       "from": "CasoDeUso",
       "to": "UseCase",
       "reason": "decorador casa casos de uso pelo sufixo do nome da classe (T041)"
+    },
+    {
+      "slice": 3,
+      "file": "core/src/main/java/br/com/felipeblaft/reports/domain/job/ProcessingJob.java",
+      "from": "texto",
+      "to": "text",
+      "reason": "chave de documento jsonb gravado (processing_job.parameters / telegram_link.flow_data): renomeada junto da V7 (T076)"
+    },
+    {
+      "slice": 3,
+      "file": "core/src/main/java/br/com/felipeblaft/reports/domain/job/ProcessingJob.java",
+      "from": "versaoBase",
+      "to": "baseVersion",
+      "reason": "chave de documento jsonb gravado (processing_job.parameters / telegram_link.flow_data): renomeada junto da V7 (T076)"
+    },
+    {
+      "slice": 3,
+      "file": "core/src/main/java/br/com/felipeblaft/reports/domain/job/ProcessingJob.java",
+      "from": "textoEntendido",
+      "to": "understoodText",
+      "reason": "chave de documento jsonb gravado (processing_job.parameters / telegram_link.flow_data): renomeada junto da V7 (T076)"
+    },
+    {
+      "slice": 3,
+      "file": "core/src/main/java/br/com/felipeblaft/reports/domain/job/ProcessingJob.java",
+      "from": "arquivoCanal",
+      "to": "channelFile",
+      "reason": "chave de documento jsonb gravado (processing_job.parameters / telegram_link.flow_data): renomeada junto da V7 (T076)"
+    },
+    {
+      "slice": 3,
+      "file": "core/src/main/java/br/com/felipeblaft/reports/domain/job/ProcessingJob.java",
+      "from": "arquivoCanalUnico",
+      "to": "uniqueChannelFile",
+      "reason": "chave de documento jsonb gravado (processing_job.parameters / telegram_link.flow_data): renomeada junto da V7 (T076)"
+    },
+    {
+      "slice": 3,
+      "file": "core/src/main/java/br/com/felipeblaft/reports/domain/job/ProcessingJob.java",
+      "from": "arquivoMime",
+      "to": "fileMime",
+      "reason": "chave de documento jsonb gravado (processing_job.parameters / telegram_link.flow_data): renomeada junto da V7 (T076)"
+    },
+    {
+      "slice": 3,
+      "file": "core/src/main/java/br/com/felipeblaft/reports/domain/job/ProcessingJob.java",
+      "from": "arquivoTamanho",
+      "to": "fileSize",
+      "reason": "chave de documento jsonb gravado (processing_job.parameters / telegram_link.flow_data): renomeada junto da V7 (T076)"
+    },
+    {
+      "slice": 3,
+      "file": "core/src/main/java/br/com/felipeblaft/reports/domain/job/ProcessingJob.java",
+      "from": "mensagemEtapa",
+      "to": "stepMessage",
+      "reason": "chave de documento jsonb gravado (processing_job.parameters / telegram_link.flow_data): renomeada junto da V7 (T076)"
+    },
+    {
+      "slice": 3,
+      "file": "core/src/main/java/br/com/felipeblaft/reports/domain/job/ProcessingJob.java",
+      "from": "periodoChave",
+      "to": "periodKey",
+      "reason": "chave de documento jsonb gravado (processing_job.parameters / telegram_link.flow_data): renomeada junto da V7 (T076)"
+    },
+    {
+      "slice": 3,
+      "file": "core/src/main/java/br/com/felipeblaft/reports/domain/job/ProcessingJob.java",
+      "from": "confirmarMesmoComEmAberto",
+      "to": "confirmEvenWithOpen",
+      "reason": "chave de documento jsonb gravado (processing_job.parameters / telegram_link.flow_data): renomeada junto da V7 (T076)"
+    },
+    {
+      "slice": 3,
+      "file": "core/src/main/java/br/com/felipeblaft/reports/domain/telegram/TelegramConversation.java",
+      "from": "confirmacao",
+      "to": "confirmation",
+      "reason": "chave de documento jsonb gravado (processing_job.parameters / telegram_link.flow_data): renomeada junto da V7 (T076)"
+    },
+    {
+      "slice": 3,
+      "file": "core/src/test/java/br/com/felipeblaft/reports/domain/job/ProcessingJobTest.java",
+      "from": "versaoBase",
+      "to": "baseVersion",
+      "reason": "chave de documento jsonb gravado (processing_job.parameters / telegram_link.flow_data): renomeada junto da V7 (T076); asserção da mesma chave"
+    },
+    {
+      "slice": 3,
+      "file": "core/src/test/java/br/com/felipeblaft/reports/service/AnswersChangesJobProcessorTest.java",
+      "from": "textoEntendido",
+      "to": "understoodText",
+      "reason": "chave de documento jsonb gravado (processing_job.parameters / telegram_link.flow_data): renomeada junto da V7 (T076); asserção da mesma chave"
+    },
+    {
+      "slice": 3,
+      "file": "core/src/test/java/br/com/felipeblaft/reports/usecase/lesson/LessonReportUseCasesTest.java",
+      "from": "versaoBase",
+      "to": "baseVersion",
+      "reason": "chave de documento jsonb gravado (processing_job.parameters / telegram_link.flow_data): renomeada junto da V7 (T076); asserção da mesma chave (parâmetro) e da chave de armazenamento do PDF (T077)"
+    },
+    {
+      "slice": 3,
+      "file": "core/src/test/java/br/com/felipeblaft/reports/usecase/lesson/LessonReportUseCasesTest.java",
+      "from": "/oficial.pdf",
+      "to": "/official.pdf",
+      "reason": "chave de documento jsonb gravado (processing_job.parameters / telegram_link.flow_data): renomeada junto da V7 (T076); asserção da mesma chave (parâmetro) e da chave de armazenamento do PDF (T077)"
+    },
+    {
+      "slice": 3,
+      "file": "core/src/test/java/br/com/felipeblaft/reports/usecase/lesson/RegisterLessonByAudioUseCaseTest.java",
+      "from": "arquivoTamanho",
+      "to": "fileSize",
+      "reason": "chave de documento jsonb gravado (processing_job.parameters / telegram_link.flow_data): renomeada junto da V7 (T076); asserção da mesma chave"
+    },
+    {
+      "slice": 3,
+      "file": "core/src/test/java/br/com/felipeblaft/reports/usecase/lesson/RegisterLessonByAudioUseCaseTest.java",
+      "from": "arquivoCanal",
+      "to": "channelFile",
+      "reason": "chave de documento jsonb gravado (processing_job.parameters / telegram_link.flow_data): renomeada junto da V7 (T076); asserção da mesma chave"
+    },
+    {
+      "slice": 3,
+      "file": "core/src/test/java/br/com/felipeblaft/reports/usecase/lesson/RegisterLessonByAudioUseCaseTest.java",
+      "from": "arquivoCanalUnico",
+      "to": "uniqueChannelFile",
+      "reason": "chave de documento jsonb gravado (processing_job.parameters / telegram_link.flow_data): renomeada junto da V7 (T076); asserção da mesma chave"
+    },
+    {
+      "slice": 3,
+      "file": "core/src/test/java/br/com/felipeblaft/reports/usecase/lesson/RegisterLessonByAudioUseCaseTest.java",
+      "from": "arquivoMime",
+      "to": "fileMime",
+      "reason": "chave de documento jsonb gravado (processing_job.parameters / telegram_link.flow_data): renomeada junto da V7 (T076); asserção da mesma chave"
+    },
+    {
+      "slice": 3,
+      "file": "core/src/main/java/br/com/felipeblaft/reports/service/DocumentGenerationService.java",
+      "from": "oficial.pdf",
+      "to": "official.pdf",
+      "reason": "nome interno de armazenamento de documento NOVO (FR-026, T077); o nome exibido ao usuário não muda"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/main/java/br/com/felipeblaft/reports/inbound/telegram/TelegramHistoryFlow.java",
+      "from": "histAluno",
+      "to": "historyStudent",
+      "reason": "chave de documento jsonb gravado (processing_job.parameters / telegram_link.flow_data): renomeada junto da V7 (T076)"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/main/java/br/com/felipeblaft/reports/inbound/telegram/TelegramHistoryFlow.java",
+      "from": "histItens",
+      "to": "historyItems",
+      "reason": "chave de documento jsonb gravado (processing_job.parameters / telegram_link.flow_data): renomeada junto da V7 (T076)"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/main/java/br/com/felipeblaft/reports/inbound/telegram/TelegramLessonRegistrationFlow.java",
+      "from": "alunoEmAberto",
+      "to": "studentWithOpenReport",
+      "reason": "chave de documento jsonb gravado (processing_job.parameters / telegram_link.flow_data): renomeada junto da V7 (T076)"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/main/java/br/com/felipeblaft/reports/inbound/telegram/TelegramSemesterFlow.java",
+      "from": "semAluno",
+      "to": "semesterStudent",
+      "reason": "chave de documento jsonb gravado (processing_job.parameters / telegram_link.flow_data): renomeada junto da V7 (T076)"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/main/java/br/com/felipeblaft/reports/inbound/telegram/TelegramSemesterFlow.java",
+      "from": "semOpcoes",
+      "to": "semesterOptions",
+      "reason": "chave de documento jsonb gravado (processing_job.parameters / telegram_link.flow_data): renomeada junto da V7 (T076)"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/main/java/br/com/felipeblaft/reports/inbound/telegram/TelegramSemesterFlow.java",
+      "from": "semPeriodo",
+      "to": "semesterPeriod",
+      "reason": "chave de documento jsonb gravado (processing_job.parameters / telegram_link.flow_data): renomeada junto da V7 (T076)"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/main/java/br/com/felipeblaft/reports/inbound/telegram/TelegramConversationInterpreter.java",
+      "from": "opcoes",
+      "to": "options",
+      "reason": "chave de documento jsonb gravado (processing_job.parameters / telegram_link.flow_data): renomeada junto da V7 (T076)"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/main/java/br/com/felipeblaft/reports/outbound/ai/LlmOpenAiCompatibleAdapter.java",
+      "from": "estruturacao-aula.v1",
+      "to": "lesson-structuring.v1",
+      "reason": "nome do arquivo de prompt/esquema/resposta simulada renomeado (identifier-map.md §8): o literal é o caminho do recurso"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/main/java/br/com/felipeblaft/reports/outbound/ai/LlmOpenAiCompatibleAdapter.java",
+      "from": "incorporacao-respostas.v1",
+      "to": "answer-incorporation.v1",
+      "reason": "nome do arquivo de prompt/esquema/resposta simulada renomeado (identifier-map.md §8): o literal é o caminho do recurso"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/main/java/br/com/felipeblaft/reports/outbound/ai/LlmOpenAiCompatibleAdapter.java",
+      "from": "revisao-aula.v1",
+      "to": "lesson-revision.v1",
+      "reason": "nome do arquivo de prompt/esquema/resposta simulada renomeado (identifier-map.md §8): o literal é o caminho do recurso"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/main/java/br/com/felipeblaft/reports/outbound/ai/LlmOpenAiCompatibleAdapter.java",
+      "from": "consolidacao-semestral.v1",
+      "to": "semester-consolidation.v1",
+      "reason": "nome do arquivo de prompt/esquema/resposta simulada renomeado (identifier-map.md §8): o literal é o caminho do recurso"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/main/java/br/com/felipeblaft/reports/outbound/ai/LlmOpenAiCompatibleAdapter.java",
+      "from": "revisao-semestral.v1",
+      "to": "semester-revision.v1",
+      "reason": "nome do arquivo de prompt/esquema/resposta simulada renomeado (identifier-map.md §8): o literal é o caminho do recurso"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/main/java/br/com/felipeblaft/reports/outbound/ai/LlmOpenAiCompatibleAdapter.java",
+      "from": "correcao-json.v1",
+      "to": "json-correction.v1",
+      "reason": "nome do arquivo de prompt/esquema/resposta simulada renomeado (identifier-map.md §8): o literal é o caminho do recurso"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/main/java/br/com/felipeblaft/reports/outbound/ai/LlmOpenAiCompatibleAdapter.java",
+      "from": "relatorio-aula",
+      "to": "lesson-report",
+      "reason": "nome do arquivo de prompt/esquema/resposta simulada renomeado (identifier-map.md §8): o literal é o caminho do recurso"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/main/java/br/com/felipeblaft/reports/outbound/ai/LlmOpenAiCompatibleAdapter.java",
+      "from": "relatorio-semestral",
+      "to": "semester-report",
+      "reason": "nome do arquivo de prompt/esquema/resposta simulada renomeado (identifier-map.md §8): o literal é o caminho do recurso"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/main/java/br/com/felipeblaft/reports/outbound/ai/LlmOpenAiCompatibleAdapter.java",
+      "from": "ia/schemas/",
+      "to": "ai/schemas/",
+      "reason": "nome do arquivo de prompt/esquema/resposta simulada renomeado (identifier-map.md §8): o literal é o caminho do recurso"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/main/java/br/com/felipeblaft/reports/outbound/ai/simulated/SimulatedLlmAdapter.java",
+      "from": "ia/simulado/estruturacao-aula.json",
+      "to": "ai/simulated/lesson-structuring.json",
+      "reason": "nome do arquivo de prompt/esquema/resposta simulada renomeado (identifier-map.md §8): o literal é o caminho do recurso"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/main/java/br/com/felipeblaft/reports/outbound/ai/simulated/SimulatedLlmAdapter.java",
+      "from": "ia/simulado/consolidacao-semestral.json",
+      "to": "ai/simulated/semester-consolidation.json",
+      "reason": "nome do arquivo de prompt/esquema/resposta simulada renomeado (identifier-map.md §8): o literal é o caminho do recurso"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/main/java/br/com/felipeblaft/reports/outbound/ai/simulated/SimulatedTranscriptionAdapter.java",
+      "from": "ia/simulado/transcricao.txt",
+      "to": "ai/simulated/transcription.txt",
+      "reason": "nome do arquivo de prompt/esquema/resposta simulada renomeado (identifier-map.md §8): o literal é o caminho do recurso"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/main/java/br/com/felipeblaft/reports/inbound/seed/DemoDataCommand.java",
+      "from": "estruturacao-aula.v1",
+      "to": "lesson-structuring.v1",
+      "reason": "nome do arquivo de prompt/esquema/resposta simulada renomeado (identifier-map.md §8): o literal é o caminho do recurso"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/main/java/br/com/felipeblaft/reports/inbound/seed/DemoDataCommand.java",
+      "from": "consolidacao-semestral.v1",
+      "to": "semester-consolidation.v1",
+      "reason": "nome do arquivo de prompt/esquema/resposta simulada renomeado (identifier-map.md §8): o literal é o caminho do recurso"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/main/java/br/com/felipeblaft/reports/inbound/seed/DemoDataCommand.java",
+      "from": "ia/simulado/consolidacao-semestral.json",
+      "to": "ai/simulated/semester-consolidation.json",
+      "reason": "nome do arquivo de prompt/esquema/resposta simulada renomeado (identifier-map.md §8): o literal é o caminho do recurso"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/main/java/br/com/felipeblaft/reports/config/MessageCatalog.java",
+      "from": "mensagens/mensagens_pt_BR.properties",
+      "to": "messages/messages_pt_BR.properties",
+      "reason": "caminho do catálogo de mensagens movido (T079)"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/main/java/br/com/felipeblaft/reports/outbound/pdf/OpenHtmlToPdfGenerationAdapter.java",
+      "from": "fontes/",
+      "to": "fonts/",
+      "reason": "caminho de recurso do PDF renomeado (T074)"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/main/java/br/com/felipeblaft/reports/outbound/pdf/OpenHtmlToPdfGenerationAdapter.java",
+      "from": "estilos-pdf.css",
+      "to": "pdf-styles.css",
+      "reason": "caminho de recurso do PDF renomeado (T074)"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/main/java/br/com/felipeblaft/reports/outbound/pdf/OpenHtmlToPdfGenerationAdapter.java",
+      "from": "imagens/",
+      "to": "images/",
+      "reason": "caminho de recurso do PDF renomeado (T074)"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/test/java/br/com/felipeblaft/reports/privacy/LogWithoutSensitiveDataIT.java",
+      "from": "src/main/resources/ia/simulado/transcricao.txt",
+      "to": "src/main/resources/ai/simulated/transcription.txt",
+      "reason": "nome do arquivo de prompt/esquema/resposta simulada renomeado (identifier-map.md §8): o literal é o caminho do recurso"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/test/java/br/com/felipeblaft/reports/outbound/ai/LlmOpenAiCompatibleAdapterIT.java",
+      "from": "estruturacao-aula.v1",
+      "to": "lesson-structuring.v1",
+      "reason": "a versão do prompt gravada é o nome do arquivo de prompt (T073); asserção do mesmo valor"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/test/java/br/com/felipeblaft/reports/support/TelegramConversationBase.java",
+      "from": "telegram.transporte",
+      "to": "telegram.transport",
+      "reason": "propriedade de sistema do transporte do Telegram e seu valor, definida no pom (T080)"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/test/java/br/com/felipeblaft/reports/support/TelegramConversationBase.java",
+      "from": "interno",
+      "to": "internal",
+      "reason": "propriedade de sistema do transporte do Telegram e seu valor, definida no pom (T080)"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/test/java/br/com/felipeblaft/reports/inbound/telegram/LessonRegistrationConversationIT.java",
+      "from": "interno",
+      "to": "internal",
+      "reason": "valor da propriedade de sistema do transporte (T080)"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/test/java/br/com/felipeblaft/reports/outbound/persistence/MigrationV6IT.java",
+      "from": "BANCO_URL",
+      "to": "DATABASE_URL",
+      "reason": "nome de variável de ambiente (lista fechada); o resto do teste, que opera na V6, não troca nomes de tabela"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/test/java/br/com/felipeblaft/reports/outbound/persistence/MigrationV6IT.java",
+      "from": "BANCO_USUARIO",
+      "to": "DATABASE_USER",
+      "reason": "nome de variável de ambiente (lista fechada); o resto do teste, que opera na V6, não troca nomes de tabela"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/test/java/br/com/felipeblaft/reports/outbound/persistence/MigrationV6IT.java",
+      "from": "BANCO_SENHA",
+      "to": "DATABASE_PASSWORD",
+      "reason": "nome de variável de ambiente (lista fechada); o resto do teste, que opera na V6, não troca nomes de tabela"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/test/java/br/com/felipeblaft/reports/architecture/AdapterRulesTest.java",
+      "from": ".entrada.web..",
+      "to": ".inbound.web..",
+      "reason": "regra ArchUnit da aplicação: pacote ou sufixo renomeado (T080, T100)"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/test/java/br/com/felipeblaft/reports/architecture/AdapterRulesTest.java",
+      "from": ".entrada.web",
+      "to": ".inbound.web",
+      "reason": "regra ArchUnit da aplicação: pacote ou sufixo renomeado (T080, T100)"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/test/java/br/com/felipeblaft/reports/architecture/AdapterRulesTest.java",
+      "from": ".entrada.telegram.canal..",
+      "to": ".inbound.telegram.channel..",
+      "reason": "regra ArchUnit da aplicação: pacote ou sufixo renomeado (T080, T100)"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/test/java/br/com/felipeblaft/reports/architecture/AdapterRulesTest.java",
+      "from": ".entrada.telegram.canal",
+      "to": ".inbound.telegram.channel",
+      "reason": "regra ArchUnit da aplicação: pacote ou sufixo renomeado (T080, T100)"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/test/java/br/com/felipeblaft/reports/architecture/AdapterRulesTest.java",
+      "from": ".entrada.interno..",
+      "to": ".inbound.internal..",
+      "reason": "regra ArchUnit da aplicação: pacote ou sufixo renomeado (T080, T100)"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/test/java/br/com/felipeblaft/reports/architecture/AdapterRulesTest.java",
+      "from": ".entrada..",
+      "to": ".inbound..",
+      "reason": "regra ArchUnit da aplicação: pacote ou sufixo renomeado (T080, T100)"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/test/java/br/com/felipeblaft/reports/architecture/AdapterRulesTest.java",
+      "from": ".saida..",
+      "to": ".outbound..",
+      "reason": "regra ArchUnit da aplicação: pacote ou sufixo renomeado (T080, T100)"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/test/java/br/com/felipeblaft/reports/architecture/AdapterRulesTest.java",
+      "from": "Controlador",
+      "to": "Controller",
+      "reason": "regra ArchUnit da aplicação: pacote ou sufixo renomeado (T080, T100)"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/test/java/br/com/felipeblaft/reports/architecture/AdapterRulesTest.java",
+      "from": "Adaptador",
+      "to": "Adapter",
+      "reason": "regra ArchUnit da aplicação: pacote ou sufixo renomeado (T080, T100)"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/test/java/br/com/felipeblaft/reports/architecture/AdapterRulesTest.java",
+      "from": "Requisicao",
+      "to": "Request",
+      "reason": "regra ArchUnit da aplicação: pacote ou sufixo renomeado (T080, T100)"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/test/java/br/com/felipeblaft/reports/architecture/AdapterRulesTest.java",
+      "from": "Resposta",
+      "to": "Response",
+      "reason": "regra ArchUnit da aplicação: pacote ou sufixo renomeado (T080, T100)"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/main/java/br/com/felipeblaft/reports/outbound/pdf/OpenHtmlToPdfGenerationAdapter.java",
+      "from": "relatorio-aula",
+      "to": "lesson-report",
+      "reason": "nome do modelo de PDF (arquivo pdf/lesson-report.html renomeado, T074)"
+    },
+    {
+      "slice": 3,
+      "file": "application/src/main/java/br/com/felipeblaft/reports/outbound/pdf/OpenHtmlToPdfGenerationAdapter.java",
+      "from": "relatorio-semestral",
+      "to": "semester-report",
+      "reason": "nome do modelo de PDF (arquivo pdf/semester-report.html renomeado, T074)"
+    },
+    {
+      "file": "inbound/seed/SeedCommandIT.java",
+      "from": "\n                {\"professores\":[{\"email\":\"clara@exemplo.test\",\"nome\":\"Clara\"}],\n                 \"alunos\":[{\"cpf\":\"529.982.247-25\",\"nome\":\"Matteo\",\"dataNascimento\":\"2014-05-10\",\n                            \"nomeResponsavel\":\"R\",\"professores\":[\"clara@exemplo.test\"]},\n                           {\"cpf\":\"111.111.111-11\",\"nome\":\"X\",\"dataNascimento\":\"2000-01-01\",\n                            \"professores\":[]}]}\n                ",
+      "to": "\n                {\"teachers\":[{\"email\":\"clara@exemplo.test\",\"name\":\"Clara\"}],\n                 \"students\":[{\"cpf\":\"529.982.247-25\",\"name\":\"Matteo\",\"birthDate\":\"2014-05-10\",\n                            \"guardianName\":\"R\",\"teachers\":[\"clara@exemplo.test\"]},\n                           {\"cpf\":\"111.111.111-11\",\"name\":\"X\",\"birthDate\":\"2000-01-01\",\n                            \"teachers\":[]}]}\n                ",
+      "slice": 3,
+      "reason": "o arquivo de carga passa a usar chaves em inglês (professores→teachers, alunos→students…); o JSON do teste e o caminho do erro as acompanham (T073)"
+    },
+    {
+      "file": "inbound/seed/SeedCommandIT.java",
+      "from": "alunos[1].cpf: CPF_INVALIDO — CPF inválido.",
+      "to": "students[1].cpf: CPF_INVALIDO — CPF inválido.",
+      "slice": 3,
+      "reason": "o arquivo de carga passa a usar chaves em inglês (professores→teachers, alunos→students…); o JSON do teste e o caminho do erro as acompanham (T073)"
+    },
+    {
+      "file": "outbound/ai/LlmOpenAiCompatibleAdapterIT.java",
+      "from": "\n            {\"conteudosTrabalhados\":[\"Escala de Dó maior\"],\"evolucao\":\"Boa evolução.\",\n             \"dificuldades\":[],\"atividadesPropostas\":[\"Estudar a escala\"],\"observacoes\":\"\",\n             \"perguntasPendentes\":[],\"campoInventado\":\"descartar\"}\n            ",
+      "to": "\n            {\"workedTopics\":[\"Escala de Dó maior\"],\"progress\":\"Boa evolução.\",\n             \"difficulties\":[],\"proposedActivities\":[\"Estudar a escala\"],\"observations\":\"\",\n             \"pendingQuestions\":[],\"campoInventado\":\"descartar\"}\n            ",
+      "slice": 3,
+      "reason": "a saída da IA segue o esquema JSON migrado (chaves em inglês); o stub do teste usa as mesmas chaves (T067)"
+    },
+    {
+      "file": "outbound/ai/LlmOpenAiCompatibleAdapterIT.java",
+      "from": "{\\\"evolucao\\\": 3}",
+      "to": "{\\\"progress\\\": 3}",
+      "slice": 3,
+      "reason": "a saída da IA segue o esquema JSON migrado (chaves em inglês); o stub do teste usa as mesmas chaves (T067)"
+    },
+    {
+      "file": "core/src/main/java/br/com/felipeblaft/reports/usecase/seed/LoadInitialRegistryUseCase.java",
+      "from": "professores[",
+      "to": "teachers[",
+      "slice": 3,
+      "reason": "o caminho do erro de carga cita a chave do arquivo de carga, agora em inglês (T073)"
+    },
+    {
+      "file": "core/src/test/java/br/com/felipeblaft/reports/usecase/seed/LoadInitialRegistryUseCaseTest.java",
+      "from": "professores[0]",
+      "to": "teachers[0]",
+      "slice": 3,
+      "reason": "idem: a asserção cita o caminho da chave do arquivo de carga (T073)"
+    },
+    {
+      "file": "core/src/test/java/br/com/felipeblaft/reports/usecase/seed/LoadInitialRegistryUseCaseTest.java",
+      "from": "professores[0]",
+      "to": "teachers[0]",
+      "slice": 3,
+      "reason": "idem: a asserção cita o caminho da chave do arquivo de carga (T073)"
+    },
+    {
+      "file": "application/src/main/java/br/com/felipeblaft/reports/outbound/pdf/OpenHtmlToPdfGenerationAdapter.java",
+      "from": ".paginacao::after { content: \\\"",
+      "to": ".pagination::after { content: \\\"",
+      "slice": 3,
+      "reason": "nome citado em literal que o pipeline não classifica como código (classe CSS, chave do YAML, toString de record, tabela/coluna em information_schema); revisado após a rodada final da suíte (T098)"
+    },
+    {
+      "file": "application/src/test/java/br/com/felipeblaft/reports/inbound/telegram/ReplyWithinFiveSecondsIT.java",
+      "from": "intervalo-despacho-ms:\\\\s*\\\\$\\\\{[A-Z_]+:(\\\\d+)\\\\}",
+      "to": "dispatch-interval-ms:\\\\s*\\\\$\\\\{[A-Z_]+:(\\\\d+)\\\\}",
+      "slice": 3,
+      "reason": "nome citado em literal que o pipeline não classifica como código (classe CSS, chave do YAML, toString de record, tabela/coluna em information_schema); revisado após a rodada final da suíte (T098)"
+    },
+    {
+      "file": "application/src/test/java/br/com/felipeblaft/reports/inbound/telegram/ReplyWithinFiveSecondsIT.java",
+      "from": "intervalo-despacho-ms no application.yaml",
+      "to": "dispatch-interval-ms no application.yaml",
+      "slice": 3,
+      "reason": "nome citado em literal que o pipeline não classifica como código (classe CSS, chave do YAML, toString de record, tabela/coluna em information_schema); revisado após a rodada final da suíte (T098)"
+    },
+    {
+      "file": "application/src/test/java/br/com/felipeblaft/reports/parity/AccessParityScriptIT.java",
+      "from": "início = ResumoInicio[totalAlunos=3, alunos=[Matteo Mafra, Miguel de Castro Torrente, Olavo Torrente]]",
+      "to": "início = HomeSummary[totalStudents=3, students=[Matteo Mafra, Miguel de Castro Torrente, Olavo Torrente]]",
+      "slice": 3,
+      "reason": "nome citado em literal que o pipeline não classifica como código (classe CSS, chave do YAML, toString de record, tabela/coluna em information_schema); revisado após a rodada final da suíte (T098)"
+    },
+    {
+      "file": "application/src/test/java/br/com/felipeblaft/reports/parity/AccessParityScriptIT.java",
+      "from": "busca com um = ResultadoBusca[tipo=ENCONTRADOS, alunos=[Matteo Mafra]]",
+      "to": "busca com um = SearchResult[type=ENCONTRADOS, students=[Matteo Mafra]]",
+      "slice": 3,
+      "reason": "nome citado em literal que o pipeline não classifica como código (classe CSS, chave do YAML, toString de record, tabela/coluna em information_schema); revisado após a rodada final da suíte (T098)"
+    },
+    {
+      "file": "application/src/test/java/br/com/felipeblaft/reports/parity/AccessParityScriptIT.java",
+      "from": "busca com vários = ResultadoBusca[tipo=ENCONTRADOS, alunos=[Miguel de Castro Torrente, Olavo Torrente]]",
+      "to": "busca com vários = SearchResult[type=ENCONTRADOS, students=[Miguel de Castro Torrente, Olavo Torrente]]",
+      "slice": 3,
+      "reason": "nome citado em literal que o pipeline não classifica como código (classe CSS, chave do YAML, toString de record, tabela/coluna em information_schema); revisado após a rodada final da suíte (T098)"
+    },
+    {
+      "file": "application/src/test/java/br/com/felipeblaft/reports/parity/AccessParityScriptIT.java",
+      "from": "busca sem resultado = ResultadoBusca[tipo=NENHUM, alunos=[Matteo Mafra, Miguel de Castro Torrente, Olavo Torrente]]",
+      "to": "busca sem resultado = SearchResult[type=NENHUM, students=[Matteo Mafra, Miguel de Castro Torrente, Olavo Torrente]]",
+      "slice": 3,
+      "reason": "nome citado em literal que o pipeline não classifica como código (classe CSS, chave do YAML, toString de record, tabela/coluna em information_schema); revisado após a rodada final da suíte (T098)"
+    },
+    {
+      "file": "application/src/test/java/br/com/felipeblaft/reports/privacy/AudioNonRetentionIT.java",
+      "from": "aluno.cpf_cifrado",
+      "to": "student.cpf_encrypted",
+      "slice": 3,
+      "reason": "nome citado em literal que o pipeline não classifica como código (classe CSS, chave do YAML, toString de record, tabela/coluna em information_schema); revisado após a rodada final da suíte (T098)"
+    },
+    {
+      "file": "application/src/test/java/br/com/felipeblaft/reports/outbound/persistence/RegistryPersistenceIT.java",
+      "from": "select column_name from information_schema.columns where table_name = 'aluno'",
+      "to": "select column_name from information_schema.columns where table_name = 'student'",
+      "slice": 3,
+      "reason": "nome citado em literal que o pipeline não classifica como código (classe CSS, chave do YAML, toString de record, tabela/coluna em information_schema); revisado após a rodada final da suíte (T098)"
+    },
+    {
+      "file": "application/src/main/java/br/com/felipeblaft/reports/config/TelegramChannelConfig.java",
+      "from": "relatorios.canal-telegram.lease-segundos deve ser maior que",
+      "to": "reports.telegram-channel.lease-seconds deve ser maior que",
+      "slice": 3,
+      "reason": "a mensagem de erro de configuração cita a chave renomeada; o texto e a asserção acompanham o nome citado (decisão 8)"
+    },
+    {
+      "file": "application/src/main/java/br/com/felipeblaft/reports/config/TelegramChannelConfig.java",
+      "from": " conexao-timeout-ms + resposta-timeout-ms",
+      "to": " connection-timeout-ms + response-timeout-ms",
+      "slice": 3,
+      "reason": "a mensagem de erro de configuração cita a chave renomeada; o texto e a asserção acompanham o nome citado (decisão 8)"
     }
   ],
   "methodIdentifiers": {
     "novo": "create",
     "nova": "create",
-    "padrao": "defaults"
+    "padrao": "defaults",
+    "privado": "privateChat",
+    "continuar": "proceed",
+    "transitoria": "isTransient",
+    "protegido": "guarded",
+    "voltar": "back",
+    "curto": "shortAudio"
   },
   "variableIdentifiers": {
     "novo": "created",
     "nova": "created",
     "novas": "newActions",
     "padrao": "defaults",
-    "vincular": "linkUseCase"
+    "vincular": "linkUseCase",
+    "privado": "privateChat",
+    "finais": "finalActions",
+    "voltar": "back",
+    "longo": "longText",
+    "falso": "fakeFile",
+    "continuar": "proceed",
+    "curto": "shortAudio"
   },
   "qualifiedMethods": {
     "StatusRelatorio#emAberto": "isOpen",
-    "InicioCasosDeUsoTeste#emAberto": "openReport"
+    "InicioCasosDeUsoTeste#emAberto": "openReport",
+    "AlunoEntidade#getCpfCifrado": "getCpfEncrypted",
+    "TentativaAcessoEntidade#getOrigemHash": "getSourceHash",
+    "CanalWebDriver#obter": "fetchJson",
+    "IaRealSuiteIT#postar": "postJson",
+    "MascaramentoDadosSensiveisConversor#mascarar": "maskText"
   },
   "tokenEdits": [
     {
@@ -126,6 +745,18 @@
       "to": "endsWith",
       "reason": "o prefixo Entrada virou o sufixo Input; a asserção exclui os mesmos tipos (T039)",
       "occurrence": 1
+    },
+    {
+      "file": "outbound/persistence/MigrationV6IT.java",
+      "from": "null",
+      "to": "6",
+      "reason": "o teste migra até a V6 (alvo 6), a versão que ele verifica; com a V7 no classpath, migrar tudo mudaria o esquema que ele afirma (T080)"
+    },
+    {
+      "file": "application/src/main/resources/pdf/semester-report.html",
+      "from": "/* Páginas 2+ do modelo: cabeçalho corrido com a marca e a identificação do relatório. */\n    @page { margin-top: 84pt; @top-center { content: element(corrido); vertical-align: bottom; } }\n    @page :first { margin-top: 46pt; @top-center { content: none; } }",
+      "to": "/* Páginas 2+ do modelo: cabeçalho corrido com a marca e a identificação do relatório. */\n    @page { margin-top: 84pt; @top-center { content: element(running); vertical-align: bottom; } }\n    @page :first { margin-top: 46pt; @top-center { content: none; } }",
+      "reason": "nome citado em literal que o pipeline não classifica como código (classe CSS, chave do YAML, toString de record, tabela/coluna em information_schema); revisado após a rodada final da suíte (T098)"
     }
   ],
   "textEdits": [
@@ -205,6 +836,559 @@
         "proximo"
       ],
       "reason": "revisada: o código compila, então as declarações estão em escopos distintos (métodos diferentes); sem sombreamento"
+    },
+    {
+      "file": "config/TelegramChannelConfig.java",
+      "novo": "invalid",
+      "antigos": [
+        "invalida",
+        "invalido"
+      ],
+      "reason": "parâmetros de dois blocos catch distintos; o código compila, sem sombreamento"
+    },
+    {
+      "file": "inbound/telegram/channel/TelegramChannelController.java",
+      "novo": "lost",
+      "antigos": [
+        "perdida",
+        "perdido"
+      ],
+      "reason": "variável local e parâmetro de métodos diferentes"
+    },
+    {
+      "file": "outbound/persistence/ReportEntities.java",
+      "novo": "createdAt",
+      "antigos": [
+        "criadaEm",
+        "criadoEm"
+      ],
+      "reason": "campos de classes aninhadas distintas (entidades de versão e de relatório), colunas created_at"
+    },
+    {
+      "file": "outbound/persistence/OpenReportsQueryAdapter.java",
+      "novo": "listByTeacher",
+      "antigos": [
+        "listByTeacher",
+        "listarDoProfessor"
+      ],
+      "reason": "método da interface interna Source e método do adaptador: tipos diferentes"
+    },
+    {
+      "file": "privacy/InternalChannelLogWithoutSensitiveDataIT.java",
+      "novo": "forbidden",
+      "antigos": [
+        "proibido",
+        "proibidos"
+      ],
+      "reason": "variável de laço e mapa de métodos diferentes"
+    },
+    {
+      "file": "outbound/persistence/ChannelActionRepositoryAdapterIT.java",
+      "novo": "read",
+      "antigos": [
+        "lida",
+        "lido"
+      ],
+      "reason": "variáveis de testes diferentes"
+    },
+    {
+      "file": "outbound/telegram/ChannelActionsDeliveryIT.java",
+      "novo": "first",
+      "antigos": [
+        "primeira",
+        "primeiras"
+      ],
+      "reason": "variáveis de testes diferentes"
+    },
+    {
+      "file": "support/SimulatedActionsExecutorTest.java",
+      "novo": "status",
+      "antigos": [
+        "situacao",
+        "status"
+      ],
+      "reason": "componente de record e variável local de outro método"
+    },
+    {
+      "file": "domain/semester/SemesterReportContent.java",
+      "novo": "items",
+      "antigos": [
+        "items",
+        "itens"
+      ],
+      "reason": "componente de record aninhado e parâmetro de método auxiliar; compila e mantém a assinatura"
+    }
+  ],
+  "qualifiedFields": {
+    "AlunoEntidade#cpfCifrado": "cpfEncrypted",
+    "ChamadaIaEntidade#provedorModelo": "providerModel",
+    "TentativaAcessoEntidade#origemHash": "sourceHash",
+    "CasosDeUsoConfiguracao#semestrais": "semesterReports",
+    "MassaDemonstracaoComando#dados": "teacherData",
+    "ComparadorSegredo#configurados": "configuredSecrets",
+    "AcaoCanalRepositorioAdaptadorIT#futuros": "futures",
+    "LogCanalInternoSemDadosSensiveisIT#recusadas": "refusedRequests"
+  },
+  "keepTokens": [
+    "DIRETA",
+    "ORQUESTRADOR"
+  ],
+  "configValues": {
+    "simulado": "simulated",
+    "carga": "seed"
+  },
+  "envNames": [
+    "BANCO_URL",
+    "BANCO_USUARIO",
+    "BANCO_SENHA",
+    "BANCO_POOL",
+    "CPF_CHAVE_CIFRAGEM",
+    "SEGREDO_HMAC",
+    "SESSAO_WEB_HORAS",
+    "SESSAO_COOKIE_SEGURO",
+    "ACESSO_MAX_TENTATIVAS",
+    "ACESSO_BLOQUEIO_MINUTOS",
+    "CODIGO_VALIDADE_DIAS",
+    "DOMINIO",
+    "CERTIFICADOS_LOCAIS",
+    "TELEGRAM_HABILITADO",
+    "TELEGRAM_SEGREDO_WEBHOOK",
+    "TELEGRAM_ARQUIVOS_DIR",
+    "AUDIO_PENDENTE_MINUTOS",
+    "AUDIO_LIMITE_MB",
+    "AUDIOS_TEMP_DIR",
+    "MULTIPART_LIMITE_MB",
+    "DOCUMENTOS_DIR",
+    "PROVEDORES_IA",
+    "TRANSCRICAO_URL",
+    "TRANSCRICAO_MODELO",
+    "TRANSCRICAO_CHAVE",
+    "LLM_MODELO",
+    "LLM_CHAVE",
+    "TRANSCRICAO_PRECO_USD_POR_HORA",
+    "LLM_PRECO_USD_POR_MILHAO_ENTRADA",
+    "LLM_PRECO_USD_POR_MILHAO_SAIDA",
+    "ESCOLA_FUSO_HORARIO",
+    "TRABALHOS_WORKERS",
+    "TRABALHOS_INTERVALO_MS",
+    "BANCO_PORTA_LOCAL",
+    "CANAL_TELEGRAM_ENTREGA",
+    "CANAL_TELEGRAM_TOKEN_ATUAL",
+    "CANAL_TELEGRAM_TOKEN_PROXIMO",
+    "CANAL_TELEGRAM_ORQUESTRADOR_URL",
+    "CANAL_TELEGRAM_ORQUESTRADOR_TOKEN",
+    "CANAL_TELEGRAM_CONEXAO_TIMEOUT_MS",
+    "CANAL_TELEGRAM_RESPOSTA_TIMEOUT_MS",
+    "CANAL_TELEGRAM_RETENTATIVA_INICIAL_S",
+    "CANAL_TELEGRAM_RETENTATIVA_TETO_S",
+    "CANAL_TELEGRAM_PRAZO_H",
+    "CANAL_TELEGRAM_CONFIRMACAO_MAX_S",
+    "CANAL_TELEGRAM_LEASE_S",
+    "CANAL_TELEGRAM_INTERVALO_DESPACHO_MS",
+    "CANAL_TELEGRAM_LOTE_MAX",
+    "CANAL_TELEGRAM_RETENCAO_PAYLOAD_H",
+    "CANAL_TELEGRAM_RETENCAO_REGISTRO_D",
+    "E2E_CPF_CHAVE",
+    "E2E_SEGREDO_HMAC",
+    "E2E_BANCO_URL"
+  ],
+  "jsonKeys": [
+    "conteudosTrabalhados",
+    "evolucao",
+    "dificuldades",
+    "atividadesPropostas",
+    "observacoes",
+    "frequenciaEEstudo",
+    "frequenciaAulas",
+    "regularidadeEstudoEmCasa",
+    "engajamento",
+    "comentarioGeral",
+    "tecnica",
+    "evolucaoTecnica",
+    "pontosADesenvolver",
+    "estudosRealizados",
+    "musicalidade",
+    "repertorioEstudado",
+    "som",
+    "ritmo",
+    "fraseado",
+    "articulacao",
+    "estilo",
+    "comentarioMusical",
+    "leituraEMemorizacao",
+    "avaliacao",
+    "comentario",
+    "pontosDeAtencao",
+    "estrategiasPedagogicas",
+    "itens",
+    "acompanhamentoFamiliar",
+    "nivelDePresenca",
+    "observacaoDoProfessor",
+    "planejamentoProximoSemestre",
+    "metasTecnicas",
+    "metasMusicais",
+    "habitosDeEstudo",
+    "repertorioProposto",
+    "estudosTecnicos",
+    "leituraETeoria",
+    "projetoDoSemestre",
+    "parecerFinal",
+    "nome",
+    "idade",
+    "instrumento",
+    "professor",
+    "periodoChave",
+    "periodoInicio",
+    "periodoFim",
+    "quantidadeAulasConsideradas",
+    "texto",
+    "versaoBase",
+    "textoEntendido",
+    "arquivoCanal",
+    "arquivoCanalUnico",
+    "arquivoMime",
+    "arquivoTamanho",
+    "mensagemEtapa",
+    "confirmarMesmoComEmAberto",
+    "confirmacao",
+    "opcoes",
+    "histAluno",
+    "histItens",
+    "alunoEmAberto",
+    "semAluno",
+    "semOpcoes",
+    "semPeriodo"
+  ],
+  "cliTerms": {
+    "carga": "seed",
+    "massa": "demo-data",
+    "emitir-codigo": "issue-code",
+    "--arquivo": "--file",
+    "--simular": "--simulate"
+  },
+  "fileEdits": {
+    "backend/pom.xml": [
+      {
+        "from": "<!-- Convenção do projeto: testes unitários terminam em `Test` (Princípio VI, inglês). Até as\n                             fatias 2 e 3 da feature 003 migrarem as classes existentes, `*Teste` continua aceito. -->",
+        "to": "<!-- Convenção do projeto: testes unitários terminam em `Test` (Princípio VI, inglês). -->",
+        "count": 1,
+        "reason": "todas as classes de teste já terminam em Test (fatias 2 e 3): o sufixo antigo deixa de ser aceito (T080)"
+      },
+      {
+        "from": "                            <include>**/*Teste.java</include>\n",
+        "to": "",
+        "count": 1,
+        "reason": "idem (T080)"
+      },
+      {
+        "from": "<module>aplicacao</module>",
+        "to": "<module>application</module>",
+        "count": 1,
+        "reason": "o módulo aplicacao virou application (T060)"
+      }
+    ],
+    "backend/application/pom.xml": [
+      {
+        "from": "**/iareal/**",
+        "to": "**/realai/**",
+        "count": 1,
+        "reason": "pacote de teste iareal → realai (T080)"
+      },
+      {
+        "from": "**/entrada/telegram/*ConversaIT.java",
+        "to": "**/inbound/telegram/*ConversationIT.java",
+        "count": 1,
+        "reason": "pacote e sufixo dos testes de conversa (T080)"
+      },
+      {
+        "from": "**/paridade/RoteiroParidade*IT.java",
+        "to": "**/parity/*ParityScriptIT.java",
+        "count": 1,
+        "reason": "pacote e nome dos roteiros de paridade (T080)"
+      },
+      {
+        "from": "**/privacidade/NaoRetencaoAudioIT.java",
+        "to": "**/privacy/AudioNonRetentionIT.java",
+        "count": 1,
+        "reason": "teste de privacidade renomeado (T080)"
+      },
+      {
+        "from": "**/privacidade/LogSemDadosSensiveisIT.java",
+        "to": "**/privacy/LogWithoutSensitiveDataIT.java",
+        "count": 1,
+        "reason": "teste de privacidade renomeado (T080)"
+      },
+      {
+        "from": "**/iareal/*IT.java",
+        "to": "**/realai/*IT.java",
+        "count": 1,
+        "reason": "suíte com IA real: pacote renomeado (T080)"
+      },
+      {
+        "from": "<id>transporte-interno</id>",
+        "to": "<id>internal-transport</id>",
+        "count": 2,
+        "reason": "id da execução do Failsafe (mapa: transporte-interno → internal-transport)"
+      },
+      {
+        "from": "(telegram.transporte=interno)",
+        "to": "(telegram.transport=internal)",
+        "count": 1,
+        "reason": "propriedade de sistema citada no comentário"
+      },
+      {
+        "from": "<telegram.transporte>interno</telegram.transporte>",
+        "to": "<telegram.transport>internal</telegram.transport>",
+        "count": 1,
+        "reason": "propriedade de sistema lida por TelegramConversationBase (T080)"
+      },
+      {
+        "from": "<reportNameSuffix>interno</reportNameSuffix>",
+        "to": "<reportNameSuffix>internal</reportNameSuffix>",
+        "count": 1,
+        "reason": "sufixo do relatório da execução"
+      },
+      {
+        "from": "mvn -Pia-real verify",
+        "to": "mvn -Preal-ai verify",
+        "count": 1,
+        "reason": "perfil Maven da suíte com IA real (comentário)"
+      },
+      {
+        "from": "<id>ia-real</id>",
+        "to": "<id>real-ai</id>",
+        "count": 1,
+        "reason": "perfil Maven da suíte com IA real"
+      },
+      {
+        "from": "<artifactId>aplicacao</artifactId>",
+        "to": "<artifactId>application</artifactId>",
+        "count": 1,
+        "reason": "artefato do módulo (T060)"
+      },
+      {
+        "from": "<finalName>aplicacao</finalName>",
+        "to": "<finalName>application</finalName>",
+        "count": 1,
+        "reason": "nome do jar (T060)"
+      }
+    ],
+    "infra/compose.test.yaml": [
+      {
+        "from": "mvn -B -ntp -Pia-real verify",
+        "to": "mvn -B -ntp -Preal-ai verify",
+        "count": 1,
+        "reason": "o perfil Maven mudou de nome junto do pom (o serviço testes-ia-real só muda na fatia 6)"
+      },
+      {
+        "from": "dockerfile: aplicacao/Dockerfile",
+        "to": "dockerfile: application/Dockerfile",
+        "count": 1,
+        "reason": "caminho do Dockerfile do módulo (T061)"
+      }
+    ],
+    "frontend/Dockerfile": [
+      {
+        "from": "backend/aplicacao/src/main/resources/mensagens/",
+        "to": "backend/application/src/main/resources/messages/",
+        "count": 2,
+        "reason": "o catálogo mudou de módulo e de pasta (T061, T079); chaves e textos intactos"
+      }
+    ],
+    "frontend/scripts/gerar-mensagens.mjs": [
+      {
+        "from": "../../backend/aplicacao/src/main/resources/mensagens/mensagens_pt_BR.properties",
+        "to": "../../backend/application/src/main/resources/messages/messages_pt_BR.properties",
+        "count": 1,
+        "reason": "caminho lido do catálogo (T079)"
+      }
+    ],
+    "backend/application/docker-entrypoint.sh": [
+      {
+        "from": "`carga ...`, `emitir-codigo ...` e `massa ...` rodam os comandos operacionais\n# (contracts/carga-inicial.md) no perfil `carga`, sem servidor web.",
+        "to": "`seed ...`, `issue-code ...` e `demo-data ...` rodam os comandos operacionais\n# (contracts/carga-inicial.md) no perfil `seed`, sem servidor web.",
+        "count": 1,
+        "reason": "comentário cita os comandos e o perfil do CLI (T070)"
+      },
+      {
+        "from": "aplicacao.jar",
+        "to": "application.jar",
+        "count": 2,
+        "reason": "nome do jar (T060)"
+      }
+    ],
+    "backend/application/Dockerfile": [
+      {
+        "from": "aplicacao",
+        "to": "application",
+        "count": 9,
+        "reason": "módulo e jar (T060, T061)"
+      }
+    ],
+    "infra/compose.yaml": [
+      {
+        "from": "dockerfile: aplicacao/Dockerfile",
+        "to": "dockerfile: application/Dockerfile",
+        "count": 1,
+        "reason": "caminho do Dockerfile do módulo (T061)"
+      }
+    ],
+    "infra/scripts/local.sh": [
+      {
+        "from": "backend/aplicacao/target/ia-real/relatorio.md",
+        "to": "backend/application/target/ia-real/relatorio.md",
+        "count": 1,
+        "reason": "caminho do relatório no módulo (T061)"
+      },
+      {
+        "from": "backend massa --arquivo /carga/demonstracao.json",
+        "to": "backend demo-data --file /carga/demonstracao.json",
+        "count": 1,
+        "reason": "comandos e opção do CLI renomeados (T070)"
+      },
+      {
+        "from": "backend carga --arquivo \"/carga/",
+        "to": "backend seed --file \"/carga/",
+        "count": 1,
+        "reason": "idem (T070)"
+      },
+      {
+        "from": "backend emitir-codigo --email",
+        "to": "backend issue-code --email",
+        "count": 1,
+        "reason": "idem (T070)"
+      }
+    ],
+    "backend/application/src/main/resources/ai/schemas/lesson-report.schema.json": [
+      {
+        "from": "urn:relatorios:schema:relatorio-aula",
+        "to": "urn:reports:schema:lesson-report",
+        "count": 1,
+        "reason": "$id do esquema, como no contrato novo (T071)"
+      }
+    ],
+    "backend/application/src/main/resources/ai/schemas/semester-report.schema.json": [
+      {
+        "from": "urn:relatorios:schema:relatorio-semestral",
+        "to": "urn:reports:schema:semester-report",
+        "count": 1,
+        "reason": "$id do esquema, como no contrato novo (T071)"
+      }
+    ],
+    "backend/application/src/main/resources/logback-spring.xml": [
+      {
+        "from": "br.com.felipeblaft.reports.configuracao.log.MascaramentoDadosSensiveisConversor",
+        "to": "br.com.felipeblaft.reports.config.log.SensitiveDataMaskingConverter",
+        "count": 1,
+        "reason": "nome qualificado do mascarador de dados sensíveis, cuja classe e pacote mudaram (T082)"
+      },
+      {
+        "from": "<springProfile name=\"carga\">",
+        "to": "<springProfile name=\"seed\">",
+        "count": 1,
+        "reason": "perfil Spring do CLI renomeado (T070)"
+      },
+      {
+        "from": "<springProfile name=\"!carga\">",
+        "to": "<springProfile name=\"!seed\">",
+        "count": 1,
+        "reason": "idem (T070)"
+      },
+      {
+        "from": "\"SAIDA\"",
+        "to": "\"CONSOLE\"",
+        "count": 2,
+        "reason": "nome do appender de console (identificador do arquivo)"
+      }
+    ]
+  },
+  "literalEditExclusions": [
+    {
+      "file": "outbound/persistence/MigrationV6IT.java",
+      "reason": "o teste opera no esquema da V6 (alvo 6): tabelas e colunas ainda têm os nomes antigos"
+    },
+    {
+      "file": "MigrationV7JsonKeysIT.java",
+      "reason": "teste novo escrito à mão: cita os nomes do esquema ANTIGO ou NOVO de propósito"
+    },
+    {
+      "file": "MigrationV7ReadableDataIT.java",
+      "reason": "teste novo escrito à mão: cita os nomes do esquema ANTIGO ou NOVO de propósito"
+    },
+    {
+      "file": "MigrationV7ProtectionsIT.java",
+      "reason": "teste novo escrito à mão: cita os nomes do esquema ANTIGO ou NOVO de propósito"
+    },
+    {
+      "file": "MigrationV7StructureIT.java",
+      "reason": "teste novo escrito à mão: cita os nomes do esquema ANTIGO ou NOVO de propósito"
+    },
+    {
+      "file": "MigrationTestSupport.java",
+      "reason": "teste novo escrito à mão: cita os nomes do esquema ANTIGO ou NOVO de propósito"
+    }
+  ],
+  "residualRenames": [
+    {
+      "files": [
+        "inbound/internal/security/InternalSecurityConfig.java",
+        "inbound/web/security/SecurityConfig.java"
+      ],
+      "from": "excecoes",
+      "to": "exceptions"
+    },
+    {
+      "files": [
+        "inbound/telegram/TelegramPresenter.java",
+        "inbound/telegram/channel/ChannelActionMapper.java",
+        "outbound/telegram/TelegramMessagingAdapter.java"
+      ],
+      "from": "divide",
+      "to": "splitText",
+      "base": "dividir"
+    },
+    {
+      "files": [
+        "inbound/internal/security/InternalSecurityWithoutTokenIT.java"
+      ],
+      "from": "exige401",
+      "to": "requires401"
+    }
+  ],
+  "newFiles": [
+    {
+      "file": "outbound/persistence/MigrationV7StructureIT.java",
+      "reason": "teste novo da fatia 3 (T090)"
+    },
+    {
+      "file": "outbound/persistence/MigrationV7ProtectionsIT.java",
+      "reason": "teste novo da fatia 3 (T092)"
+    },
+    {
+      "file": "outbound/persistence/MigrationV7JsonKeysIT.java",
+      "reason": "teste novo da fatia 3 (T093)"
+    },
+    {
+      "file": "outbound/persistence/MigrationV7ReadableDataIT.java",
+      "reason": "teste novo da fatia 3 (T091)"
+    },
+    {
+      "file": "outbound/storage/PdfFileNamesIT.java",
+      "reason": "teste novo da fatia 3 (T094)"
+    },
+    {
+      "file": "support/MigrationTestSupport.java",
+      "reason": "apoio dos testes de migração (T089)"
+    },
+    {
+      "file": "inbound/web/SemesterReportContentDto.java",
+      "reason": "DTO de fio do conteúdo semestral: o registro do núcleo já usa nomes em inglês e o contrato do Portal só migra na fatia 4"
+    }
+  ],
+  "structuralEdits": [
+    {
+      "file": "inbound/web/SemesterReportController.java",
+      "reason": "o conteúdo semestral deixa de ser serializado direto do registro do núcleo (já em inglês): o controlador usa SemesterReportContentDto.from(...) para manter o fio em português até a fatia 4; é a única alteração estrutural da fatia, coberta por SemesterReportContractIT"
     }
   ]
 }

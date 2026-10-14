@@ -26,10 +26,10 @@ class ReportDomainTest {
                         null,
                         List.of("Escala"),
                         "  obs ");
-        assertThat(content.conteudosTrabalhados()).containsExactly("Czerny");
-        assertThat(content.evolucao()).isEmpty();
-        assertThat(content.dificuldades()).isEmpty();
-        assertThat(content.observacoes()).isEqualTo("obs");
+        assertThat(content.workedTopics()).containsExactly("Czerny");
+        assertThat(content.progress()).isEmpty();
+        assertThat(content.difficulties()).isEmpty();
+        assertThat(content.observations()).isEqualTo("obs");
         assertThat(content.isEmpty()).isFalse();
         assertThat(LessonReportContent.empty().isEmpty()).isTrue();
         assertThat(new LessonReportContent(List.of(), "x", List.of(), List.of(), "").isEmpty())

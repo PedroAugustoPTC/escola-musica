@@ -14,52 +14,52 @@ import br.com.felipeblaft.reports.domain.semester.SemesterReportContent.Techniqu
  * a IA mandar essa chave, ela é descartada na leitura (FR-044).
  */
 public record AiSemesterReportOutput(
-        AttendanceAndStudy frequenciaEEstudo,
-        Technique tecnica,
-        Musicality musicalidade,
-        ReadingAndMemorization leituraEMemorizacao,
-        Items pontosDeAtencao,
-        Items estrategiasPedagogicas,
-        FamilySupport acompanhamentoFamiliar,
-        NextSemesterPlan planejamentoProximoSemestre,
-        String parecerFinal,
-        Boolean semAlteracaoDeConteudo,
-        String pedidoDeAcao) {
+        AttendanceAndStudy attendanceAndStudy,
+        Technique technique,
+        Musicality musicality,
+        ReadingAndMemorization readingAndMemorization,
+        Items attentionPoints,
+        Items pedagogicalStrategies,
+        FamilySupport familySupport,
+        NextSemesterPlan nextSemesterPlan,
+        String finalOpinion,
+        Boolean noContentChange,
+        String actionRequest) {
 
     public SemesterReportContent content() {
         return new SemesterReportContent(
-                frequenciaEEstudo,
-                tecnica,
-                musicalidade,
-                leituraEMemorizacao,
-                pontosDeAtencao,
-                estrategiasPedagogicas,
-                acompanhamentoFamiliar,
-                planejamentoProximoSemestre,
-                parecerFinal);
+                attendanceAndStudy,
+                technique,
+                musicality,
+                readingAndMemorization,
+                attentionPoints,
+                pedagogicalStrategies,
+                familySupport,
+                nextSemesterPlan,
+                finalOpinion);
     }
 
     public static AiSemesterReportOutput of(
-            SemesterReportContent content, boolean withoutChange, String pedidoDeAcao) {
+            SemesterReportContent content, boolean withoutChange, String actionRequest) {
         return new AiSemesterReportOutput(
-                content.frequenciaEEstudo(),
-                content.tecnica(),
-                content.musicalidade(),
-                content.leituraEMemorizacao(),
-                content.pontosDeAtencao(),
-                content.estrategiasPedagogicas(),
-                content.acompanhamentoFamiliar(),
-                content.planejamentoProximoSemestre(),
-                content.parecerFinal(),
+                content.attendanceAndStudy(),
+                content.technique(),
+                content.musicality(),
+                content.readingAndMemorization(),
+                content.attentionPoints(),
+                content.pedagogicalStrategies(),
+                content.familySupport(),
+                content.nextSemesterPlan(),
+                content.finalOpinion(),
                 withoutChange,
-                pedidoDeAcao);
+                actionRequest);
     }
 
     public boolean withoutChange() {
-        return Boolean.TRUE.equals(semAlteracaoDeConteudo);
+        return Boolean.TRUE.equals(noContentChange);
     }
 
     public boolean indicatedActionRequest() {
-        return pedidoDeAcao != null && !AiLessonReportOutput.NONE.equals(pedidoDeAcao);
+        return actionRequest != null && !AiLessonReportOutput.NONE.equals(actionRequest);
     }
 }

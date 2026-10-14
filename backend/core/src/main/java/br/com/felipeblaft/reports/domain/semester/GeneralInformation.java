@@ -9,38 +9,38 @@ import java.util.Objects;
  * ela. A idade é calculada no fim do período ou hoje, o que vier antes.
  */
 public record GeneralInformation(
-        String nome,
-        int idade,
-        String instrumento,
-        String professor,
-        String periodoChave,
-        LocalDate periodoInicio,
-        LocalDate periodoFim,
-        int quantidadeAulasConsideradas) {
+        String name,
+        int age,
+        String instrument,
+        String teacher,
+        String periodKey,
+        LocalDate periodStart,
+        LocalDate periodEnd,
+        int consideredLessonCount) {
 
     public GeneralInformation {
-        Objects.requireNonNull(nome);
-        Objects.requireNonNull(professor);
-        Objects.requireNonNull(periodoChave);
-        Objects.requireNonNull(periodoInicio);
-        Objects.requireNonNull(periodoFim);
+        Objects.requireNonNull(name);
+        Objects.requireNonNull(teacher);
+        Objects.requireNonNull(periodKey);
+        Objects.requireNonNull(periodStart);
+        Objects.requireNonNull(periodEnd);
     }
 
     public static GeneralInformation calculate(
-            String nome,
+            String name,
             LocalDate birthDate,
-            String instrumento,
-            String professor,
+            String instrument,
+            String teacher,
             SemesterPeriod period,
             int lessonCount,
             LocalDate today) {
         LocalDate reference = period.end().isBefore(today) ? period.end() : today;
-        int idade = Math.max(0, Period.between(birthDate, reference).getYears());
+        int age = Math.max(0, Period.between(birthDate, reference).getYears());
         return new GeneralInformation(
-                nome,
-                idade,
-                instrumento,
-                professor,
+                name,
+                age,
+                instrument,
+                teacher,
                 period.key(),
                 period.start(),
                 period.end(),
