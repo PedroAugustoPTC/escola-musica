@@ -1,13 +1,13 @@
 # Configuração lida do ambiente (infra/.env.example). Nenhum segredo fica versionado (Princípio IV).
 spring:
   application:
-    name: relatorios
+    name: reports
   threads:
     virtual:
       enabled: true
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/relatorios}
-    username: ${DATABASE_USER:relatorios}
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/reports}
+    username: ${DATABASE_USER:reports}
     password: ${DATABASE_PASSWORD:}
     hikari:
       maximum-pool-size: ${DATABASE_POOL:10}
@@ -68,7 +68,7 @@ reports:
     cpf-encryption-key: ${CPF_ENCRYPTION_KEY:}
     hmac-secret: ${HMAC_SECRET:}
   documents:
-    dir: ${DOCUMENTS_DIR:/dados/documentos}
+    dir: ${DOCUMENTS_DIR:/data/documents}
   telegram:
     enabled: ${TELEGRAM_ENABLED:false}
     api-url: ${TELEGRAM_API_URL:http://telegram-bot-api:8081}

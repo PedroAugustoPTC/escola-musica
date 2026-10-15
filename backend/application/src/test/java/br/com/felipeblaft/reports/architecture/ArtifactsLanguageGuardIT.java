@@ -24,7 +24,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
  * Guardião de idioma dos artefatos de dados e configuração (feature 003, FR-019): o catálogo do
  * banco depois de todas as migrações (tabelas, colunas, índices, constraints e sequências, exceto
  * {@code flyway_schema_history}) e os arquivos de infraestrutura, workflows, recursos, build,
- * scripts e contratos. Roda contra o {@code postgres-teste}: as migrações são aplicadas num banco
+ * scripts e contratos. Roda contra o {@code postgres-test}: as migrações são aplicadas num banco
  * descartável, criado e apagado pelo próprio teste.
  *
  * <p>Modo relatório: {@code GUARD_REPORT=1} grava {@code target/guard-violations-artifacts.json}.

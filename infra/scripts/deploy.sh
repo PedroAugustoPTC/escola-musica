@@ -1,12 +1,12 @@
 #!/bin/sh
 # Implantação na VPS (R-15): atualiza o código, reconstrói as imagens e sobe a pilha de
 # produção. Roda na própria VPS, na raiz do repositório, com infra/.env de produção já preenchido.
-#   infra/scripts/implantar.sh            # branch atual
-#   infra/scripts/implantar.sh main       # troca para a branch indicada antes de atualizar
+#   infra/scripts/deploy.sh            # branch atual
+#   infra/scripts/deploy.sh main       # troca para a branch indicada antes de atualizar
 set -eu
 
-RAIZ="$(cd "$(dirname "$0")/../.." && pwd)"
-cd "$RAIZ"
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+cd "$ROOT"
 
 if [ ! -f infra/.env ]; then
   echo "infra/.env não encontrado: copie infra/.env.example e preencha os segredos de produção." >&2
@@ -24,10 +24,10 @@ $COMPOSE up -d --remove-orphans
 docker image prune -f >/dev/null
 
 echo "Aguardando os serviços ficarem saudáveis…"
-tentativas=0
-while [ "$tentativas" -lt 30 ]; do
+attempts=0
+while [ "$attempts" -lt 30 ]; do
   if $COMPOSE ps --format '{{.Service}} {{.Health}}' | grep -Eq ' (starting|unhealthy)$'; then
-    tentativas=$((tentativas + 1))
+    attempts=$((attempts + 1))
     sleep 10
   else
     $COMPOSE ps

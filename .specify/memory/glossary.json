@@ -1838,17 +1838,34 @@
       ]
     },
     {
+      "id": "typed-confirmation-word",
+      "scope": "string de comando: palavra que o operador digita para confirmar a limpeza dos dados locais",
+      "terms": [
+        "apagar"
+      ],
+      "reason": "O local.sh clean pede ao operador que digite a palavra mostrada na pergunta (em português) antes de apagar o banco, os PDFs e os certificados locais. A palavra é a que a pessoa digita, texto do usuário; traduzi-la mudaria a interação do script, o que a feature 003 proíbe.",
+      "constitutionCategory": "texto do usuário (explicitamente em português no Princípio VI)",
+      "mode": "term",
+      "paths": [
+        "infra/scripts/local.sh"
+      ],
+      "appliesTo": [
+        "artifacts"
+      ]
+    },
+    {
       "id": "spec-folder-references",
-      "scope": "string de comando: caminho da pasta da feature 001 em specs/ citado pelos scripts e pelo Dockerfile do frontend",
+      "scope": "string de comando: caminho da pasta da feature 001 em specs/ citado pelos scripts, pelo Dockerfile do frontend e pelo compose de testes",
       "terms": [
         "001-fluxo-relatorios"
       ],
-      "reason": "A pasta specs/001-fluxo-relatorios mantém o nome em português (specs/ é documentação, fora do escopo de renomeação); o contrato OpenAPI do Portal continua nela, e o script generate:api e o Dockerfile do frontend só montam o caminho até ele.",
+      "reason": "A pasta specs/001-fluxo-relatorios mantém o nome em português (specs/ é documentação, fora do escopo de renomeação); o contrato OpenAPI do Portal continua nela, e o script generate:api, o Dockerfile do frontend e a variável CONTRACT_API do compose de testes só montam o caminho até ele.",
       "constitutionCategory": "proposta para a emenda 2.1.0: nomes próprios e material de referência (fora das 4 categorias fechadas do Princípio VI)",
       "mode": "term",
       "paths": [
         "frontend/package.json",
-        "frontend/Dockerfile"
+        "frontend/Dockerfile",
+        "infra/compose.test.yaml"
       ],
       "appliesTo": [
         "artifacts"

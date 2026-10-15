@@ -6,4 +6,4 @@ services:
       - "127.0.0.1:80:80"
   backend:
     volumes:
-      - ./carga:/carga:ro
+      - ./seed:/seed:ro

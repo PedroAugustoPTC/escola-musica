@@ -33,10 +33,9 @@ public final class MigrationTestSupport {
     private final String schema;
     private final String url =
             System.getenv()
-                    .getOrDefault(
-                            "DATABASE_URL", "jdbc:postgresql://localhost:5432/relatorios_teste");
-    private final String user = System.getenv().getOrDefault("DATABASE_USER", "relatorios");
-    private final String password = System.getenv().getOrDefault("DATABASE_PASSWORD", "teste");
+                    .getOrDefault("DATABASE_URL", "jdbc:postgresql://localhost:5432/reports_test");
+    private final String user = System.getenv().getOrDefault("DATABASE_USER", "reports");
+    private final String password = System.getenv().getOrDefault("DATABASE_PASSWORD", "test");
 
     public MigrationTestSupport(String schema) {
         this.schema = schema;

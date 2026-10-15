@@ -1,0 +1,145 @@
+rename-check — fatia 6: 27 arquivos pareados, 27 com troca, 329 trechos explicados pela tabela, 2 arquivos movidos idênticos
+arquivos de operação revisados à mão (fora desta verificação): infra/README.md, infra/scripts/README.md
+trechos fora da tabela / arquivos sem par / escopo morto: 0
+trechos em comentário ou texto (só nomes mudaram; conferir): 141
+  infra/.env.example:24: relatorios → reports   | # Senha do usuário `reports` (o banco e o usuário são fixos no compose). Obrigatória.
+  infra/.env.example:120: banco-porta → database-port   | # Porta do banco publicada em 127.0.0.1 por `local.sh database-port` (só local). Opcional — padrão 5432.
+  infra/.env.example:132: ENTREGA → TELEGRAM_CHANNEL_DELIVERY   | # Webhook do n8n que recebe os lotes proativos (obrigatório com TELEGRAM_CHANNEL_DELIVERY=ORCHESTRATOR) e o SEGREDO
+  infra/.env.example:155: relatorios → reports   | #DATABASE_URL=jdbc:postgresql://localhost:5432/reports
+  infra/.env.example:156: relatorios → reports   | #DATABASE_USER=reports
+  infra/.env.example:161: dados → data   | #DOCUMENTS_DIR=/data/documents
+  infra/.env.example:161: documentos → documents   | #DOCUMENTS_DIR=/data/documents
+  infra/caddy/Caddyfile:36: estaticos → static   | header @static Cache-Control "public, max-age=31536000, immutable"
+  infra/compose.yaml:15: caddy-dados → caddy-data   | - caddy-data:/data
+  infra/compose.yaml:43: documentos → documents   | - documents:/data/documents
+  infra/compose.yaml:43: dados → data   | - documents:/data/documents
+  infra/compose.yaml:43: documentos → documents   | - documents:/data/documents
+  infra/compose.yaml:44: telegram-bot-api-dados → telegram-bot-api-data   | - telegram-bot-api-data:/var/lib/telegram-bot-api
+  infra/compose.yaml:68: relatorios → reports   | test: ["CMD-SHELL", "pg_isready -U reports -d reports"]
+  infra/compose.yaml:68: relatorios → reports   | test: ["CMD-SHELL", "pg_isready -U reports -d reports"]
+  infra/compose.yaml:84: telegram-bot-api-dados → telegram-bot-api-data   | - telegram-bot-api-data:/var/lib/telegram-bot-api
+  infra/compose.dev.yaml:9: carga → seed   | - ./seed:/seed:ro
+  infra/compose.dev.yaml:9: carga → seed   | - ./seed:/seed:ro
+  infra/compose.test.yaml:2: testes-backend → tests-backend   | #   docker compose -f infra/compose.test.yaml run --rm tests-backend
+  infra/compose.test.yaml:3: testes-frontend → tests-frontend   | #   docker compose -f infra/compose.test.yaml run --rm tests-frontend
+  infra/compose.test.yaml:4: testes-e2e → tests-e2e   | #   docker compose -f infra/compose.test.yaml run --rm tests-e2e
+  infra/compose.test.yaml:5: testes-ia-real → tests-real-ai   | #   docker compose -f infra/compose.test.yaml run --rm tests-real-ai
+  infra/compose.test.yaml:36: relatorios → reports   | test: ["CMD-SHELL", "pg_isready -U reports -d reports_test"]
+  infra/compose.test.yaml:36: relatorios_teste → reports_test   | test: ["CMD-SHELL", "pg_isready -U reports -d reports_test"]
+  infra/compose.test.yaml:43: FfmpegNormalizacaoAudioAdaptadorIT → FfmpegAudioNormalizationAdapterIT   | # FFmpeg para FfmpegAudioNormalizationAdapterIT (o mesmo binário da imagem do backend)
+  infra/compose.test.yaml:82: relatorios → reports   | test: ["CMD-SHELL", "pg_isready -U reports -d reports"]
+  infra/compose.test.yaml:82: relatorios → reports   | test: ["CMD-SHELL", "pg_isready -U reports -d reports"]
+  infra/compose.database.yaml:2: banco-porta → database-port   | # pgAdmin). Use com:  sh infra/scripts/local.sh database-port   (e database-close ao terminar).
+  infra/compose.database.yaml:2: banco-fechar → database-close   | # pgAdmin). Use com:  sh infra/scripts/local.sh database-port   (e database-close ao terminar).
+  infra/scripts/local.sh:4: subir → up   | #   sh infra/scripts/local.sh up              # build + sobe web, backend, postgres (e o bot, se habilitado)
+  infra/scripts/local.sh:5: massa → demo-data   | #        --demo-data=true                     #   zera os dados locais e sobe com a massa de demonstração
+  infra/scripts/local.sh:6: massa → demo-data   | #        --demo-data=false                    #   zera os dados locais e sobe só o sistema, vazio
+  infra/scripts/local.sh:7: massa → demo-data   | #        (sem --demo-data)                    #   mantém os dados que já existem
+  infra/scripts/local.sh:8: carga → seed   | #   sh infra/scripts/local.sh seed [file]     # carga inicial (padrão: infra/seed/example.json) e códigos
+  infra/scripts/local.sh:8: arq → file   | #   sh infra/scripts/local.sh seed [file]     # carga inicial (padrão: infra/seed/example.json) e códigos
+  infra/scripts/local.sh:8: carga → seed   | #   sh infra/scripts/local.sh seed [file]     # carga inicial (padrão: infra/seed/example.json) e códigos
+  infra/scripts/local.sh:8: exemplo → example   | #   sh infra/scripts/local.sh seed [file]     # carga inicial (padrão: infra/seed/example.json) e códigos
+  infra/scripts/local.sh:9: codigo → code   | #   sh infra/scripts/local.sh code <email>    # reemite o código de acesso de um professor
+  infra/scripts/local.sh:12: banco → database   | #   sh infra/scripts/local.sh database        # abre o psql no banco local (como administrador)
+  infra/scripts/local.sh:13: banco-porta → database-port   | #   sh infra/scripts/local.sh database-port   # publica o banco em 127.0.0.1 para DBeaver/pgAdmin
+  infra/scripts/local.sh:14: banco-fechar → database-close   | #   sh infra/scripts/local.sh database-close  # volta a deixar o banco só na rede interna
+  infra/scripts/local.sh:15: testes → tests   | #   sh infra/scripts/local.sh tests [suite]   # backend | frontend | e2e | real-ai | all (padrão: all)
+  infra/scripts/local.sh:15: qual → suite   | #   sh infra/scripts/local.sh tests [suite]   # backend | frontend | e2e | real-ai | all (padrão: all)
+  infra/scripts/local.sh:15: ia-real → real-ai   | #   sh infra/scripts/local.sh tests [suite]   # backend | frontend | e2e | real-ai | all (padrão: all)
+  infra/scripts/local.sh:15: todos → all   | #   sh infra/scripts/local.sh tests [suite]   # backend | frontend | e2e | real-ai | all (padrão: all)
+  infra/scripts/local.sh:15: todos → all   | #   sh infra/scripts/local.sh tests [suite]   # backend | frontend | e2e | real-ai | all (padrão: all)
+  infra/scripts/local.sh:16: parar → stop   | #   sh infra/scripts/local.sh stop            # para a pilha local (mantém os dados)
+  infra/scripts/local.sh:17: limpar → clean   | #   sh infra/scripts/local.sh clean           # para e APAGA os dados locais (banco, PDFs, certificados)
+  infra/scripts/local.sh:22: carga → seed   | # Git Bash (Windows) converte "/seed/..." em caminho do Windows antes de passar ao Docker.
+  infra/scripts/local.sh:25: RAIZ → ROOT   | ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+  infra/scripts/local.sh:29: TESTES → TESTS   | TESTS="docker compose -f infra/compose.test.yaml"
+  infra/scripts/local.sh:42: valor → value   | [ -n "$(value "$key")" ] || missing="$missing $key"
+  infra/scripts/local.sh:42: chave → key   | [ -n "$(value "$key")" ] || missing="$missing $key"
+  infra/scripts/local.sh:42: faltando → missing   | [ -n "$(value "$key")" ] || missing="$missing $key"
+  infra/scripts/local.sh:42: faltando → missing   | [ -n "$(value "$key")" ] || missing="$missing $key"
+  infra/scripts/local.sh:42: chave → key   | [ -n "$(value "$key")" ] || missing="$missing $key"
+  infra/scripts/local.sh:44: valor → value   | if [ "$(value TELEGRAM_ENABLED)" = "true" ]; then
+  infra/scripts/local.sh:46: valor → value   | [ -n "$(value "$key")" ] || missing="$missing $key"
+  infra/scripts/local.sh:46: chave → key   | [ -n "$(value "$key")" ] || missing="$missing $key"
+  infra/scripts/local.sh:46: faltando → missing   | [ -n "$(value "$key")" ] || missing="$missing $key"
+  infra/scripts/local.sh:46: faltando → missing   | [ -n "$(value "$key")" ] || missing="$missing $key"
+  infra/scripts/local.sh:46: chave → key   | [ -n "$(value "$key")" ] || missing="$missing $key"
+  infra/scripts/local.sh:49: valor → value   | if [ "$(value AI_PROVIDERS)" = "real" ]; then
+  infra/scripts/local.sh:51: valor → value   | [ -n "$(value "$key")" ] || missing="$missing $key"
+  infra/scripts/local.sh:51: chave → key   | [ -n "$(value "$key")" ] || missing="$missing $key"
+  infra/scripts/local.sh:51: faltando → missing   | [ -n "$(value "$key")" ] || missing="$missing $key"
+  infra/scripts/local.sh:51: faltando → missing   | [ -n "$(value "$key")" ] || missing="$missing $key"
+  infra/scripts/local.sh:51: chave → key   | [ -n "$(value "$key")" ] || missing="$missing $key"
+  infra/scripts/local.sh:55: faltando → missing   | echo "Preencha em infra/.env:$missing" >&2
+  infra/scripts/local.sh:57:  → echo " Se o seu infra / . env é anterior à feature 003 , regere-o a partir de infra / . env . example . " > & 2   | echo "Se o seu infra/.env é anterior à feature 003, regere-o a partir de infra/.env.example." >&2
+  infra/scripts/local.sh:70: valor → value   | if [ "$(value TELEGRAM_ENABLED)" = "true" ]; then
+  infra/scripts/local.sh:81: estados → states   | states="$($LOCAL ps --format '{{.Service}} {{.Health}}' 2>/dev/null || true)"
+  infra/scripts/local.sh:82: estados → states   | if echo "$states" | grep -q '^backend healthy' && echo "$states" | grep -q '^web healthy'; then
+  infra/scripts/local.sh:82: estados → states   | if echo "$states" | grep -q '^backend healthy' && echo "$states" | grep -q '^web healthy'; then
+  infra/scripts/local.sh:112: massa → demo-data   | *) echo "Opção desconhecida: $1 (use --demo-data=true ou --demo-data=false)" >&2; exit 2 ;;
+  infra/scripts/local.sh:112: massa → demo-data   | *) echo "Opção desconhecida: $1 (use --demo-data=true ou --demo-data=false)" >&2; exit 2 ;;
+  infra/scripts/local.sh:118: massa → demo-data   | *) echo "Use --demo-data=true ou --demo-data=false" >&2; exit 2 ;;
+  infra/scripts/local.sh:118: massa → demo-data   | *) echo "Use --demo-data=true ou --demo-data=false" >&2; exit 2 ;;
+  infra/scripts/local.sh:125: massa → demo_data   | if [ "$demo_data" = "true" ]; then
+  infra/scripts/local.sh:127: saida_massa → demo_data_output   | if demo_data_output="$($LOCAL run --rm backend demo-data --file /seed/demo.json 2>&1)"; then
+  infra/scripts/local.sh:127: carga → seed   | if demo_data_output="$($LOCAL run --rm backend demo-data --file /seed/demo.json 2>&1)"; then
+  infra/scripts/local.sh:127: demonstracao → demo   | if demo_data_output="$($LOCAL run --rm backend demo-data --file /seed/demo.json 2>&1)"; then
+  infra/scripts/local.sh:136: valor → value   | echo "Portal: https://$(value DOMAIN | sed 's/^$/localhost/')  (certificado local do Caddy: aceite no navegador)"
+  infra/scripts/local.sh:137: valor → value   | echo "IA: $(value AI_PROVIDERS) · Telegram: $(value TELEGRAM_ENABLED)"
+  infra/scripts/local.sh:137: valor → value   | echo "IA: $(value AI_PROVIDERS) · Telegram: $(value TELEGRAM_ENABLED)"
+  infra/scripts/local.sh:140: carga → seed   | false) echo "Sistema vazio. Para cadastros de exemplo: sh infra/scripts/local.sh seed" ;;
+  infra/scripts/local.sh:141: subir → up   | *) echo "Dados mantidos. Massa de demonstração: sh infra/scripts/local.sh up --demo-data=true" ;;
+  infra/scripts/local.sh:141: massa → demo-data   | *) echo "Dados mantidos. Massa de demonstração: sh infra/scripts/local.sh up --demo-data=true" ;;
+  infra/scripts/local.sh:149: carga → seed   | *) echo "O arquivo precisa estar em infra/seed/ (montado em /seed no contêiner)." >&2; exit 1 ;;
+  infra/scripts/local.sh:149: carga → seed   | *) echo "O arquivo precisa estar em infra/seed/ (montado em /seed no contêiner)." >&2; exit 1 ;;
+  infra/scripts/local.sh:155: codigo → code   | [ "$#" -ge 1 ] || { echo "Uso: sh infra/scripts/local.sh code <email-do-professor>" >&2; exit 2; }
+  infra/scripts/local.sh:165: banco → database   | # com terminal: psql interativo; sem terminal (ex.: echo "select ..." | local.sh database): -T
+  infra/scripts/local.sh:175: porta → port   | port="$(value LOCAL_DATABASE_PORT)"
+  infra/scripts/local.sh:175: valor → value   | port="$(value LOCAL_DATABASE_PORT)"
+  infra/scripts/local.sh:176: porta → port   | echo "Banco publicado só nesta máquina: host localhost, porta ${port:-5432}, banco reports,"
+  infra/scripts/local.sh:176: relatorios → reports   | echo "Banco publicado só nesta máquina: host localhost, porta ${port:-5432}, banco reports,"
+  infra/scripts/local.sh:177: relatorios → reports   | echo "usuário reports, senha = POSTGRES_PASSWORD do infra/.env."
+  infra/scripts/local.sh:178: banco-fechar → database-close   | echo "Ao terminar: sh infra/scripts/local.sh database-close"
+  infra/scripts/local.sh:194: valor → value   | TRANSCRIPTION_API_KEY="$(value TRANSCRIPTION_API_KEY)" LLM_API_KEY="$(value LLM_API_KEY)" \
+  infra/scripts/local.sh:194: valor → value   | TRANSCRIPTION_API_KEY="$(value TRANSCRIPTION_API_KEY)" LLM_API_KEY="$(value LLM_API_KEY)" \
+  infra/scripts/local.sh:196: ia-real → real-ai   | echo "Relatório: backend/application/target/real-ai/report.md"
+  infra/scripts/local.sh:196: relatorio → report   | echo "Relatório: backend/application/target/real-ai/report.md"
+  infra/scripts/local.sh:203: ia-real → real-ai   | *) echo "Use: backend | frontend | e2e | real-ai | all" >&2; exit 2 ;;
+  infra/scripts/local.sh:203: todos → all   | *) echo "Use: backend | frontend | e2e | real-ai | all" >&2; exit 2 ;;
+  infra/scripts/local.sh:213: confirmacao → confirmation   | [ "$confirmation" = "apagar" ] || { echo "Cancelado."; exit 0; }
+  infra/scripts/local.sh:220: comando → command   | echo "Comando desconhecido: $command" >&2
+  infra/scripts/deploy.sh:4: implantar → deploy   | #   infra/scripts/deploy.sh            # branch atual
+  infra/scripts/deploy.sh:5: implantar → deploy   | #   infra/scripts/deploy.sh main       # troca para a branch indicada antes de atualizar
+  infra/scripts/deploy.sh:8: RAIZ → ROOT   | ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+  .github/workflows/deploy.yml:1: producao → production   | # Implantação manual na VPS (infra/README.md). O ambiente "production" deve exigir aprovação
+  .github/workflows/deploy.yml:33: implantar → deploy   | - name: Executar deploy.sh na VPS
+  .github/workflows/deploy.yml:44: VPS_DIRETORIO → VPS_DIRECTORY   | "cd '$VPS_DIRECTORY' && sh infra/scripts/deploy.sh '$BRANCH'"
+  .github/workflows/deploy.yml:44: implantar → deploy   | "cd '$VPS_DIRECTORY' && sh infra/scripts/deploy.sh '$BRANCH'"
+  .gitignore:19: ia-real → real-ai   | # Gravações de teste (grandes; usadas só pela suíte real-ai, montadas somente leitura)
+  backend/application/src/test/resources/application-test.yaml:1: postgres-teste → postgres-test   | # Perfil dos testes de integração (rodam contra o postgres-test de infra/compose.test.yaml).
+  backend/application/src/test/java/br/com/felipeblaft/reports/inbound/seed/DemoDataIT.java:24: subir → up   | /** Massa de demonstração do ambiente local (local.sh up --demo-data=true). */
+  backend/application/src/test/java/br/com/felipeblaft/reports/inbound/seed/DemoDataIT.java:24: massa → demo-data   | /** Massa de demonstração do ambiente local (local.sh up --demo-data=true). */
+  backend/application/src/test/java/br/com/felipeblaft/reports/inbound/seed/DemoDataIT.java:28: carga → seed   | List.of("demo-data", "--file", "../../infra/seed/demo.json");
+  backend/application/src/test/java/br/com/felipeblaft/reports/inbound/seed/DemoDataIT.java:28: demonstracao → demo   | List.of("demo-data", "--file", "../../infra/seed/demo.json");
+  backend/application/src/test/java/br/com/felipeblaft/reports/outbound/persistence/MigrationV6IT.java:27: relatorios_teste → reports_test   | .getOrDefault("DATABASE_URL", "jdbc:postgresql://localhost:5432/reports_test");
+  backend/application/src/test/java/br/com/felipeblaft/reports/outbound/persistence/MigrationV6IT.java:28: relatorios → reports   | private final String user = System.getenv().getOrDefault("DATABASE_USER", "reports");
+  backend/application/src/test/java/br/com/felipeblaft/reports/outbound/persistence/MigrationV6IT.java:29: teste → test   | private final String password = System.getenv().getOrDefault("DATABASE_PASSWORD", "test");
+  backend/application/src/test/java/br/com/felipeblaft/reports/outbound/persistence/MigrationV8ReadableDataIT.java:60: relatorios_teste → reports_test   | .getOrDefault("DATABASE_URL", "jdbc:postgresql://localhost:5432/reports_test");
+  backend/application/src/test/java/br/com/felipeblaft/reports/outbound/persistence/MigrationV8ReadableDataIT.java:61: relatorios → reports   | private static final String USER = System.getenv().getOrDefault("DATABASE_USER", "reports");
+  backend/application/src/test/java/br/com/felipeblaft/reports/outbound/persistence/MigrationV8ReadableDataIT.java:63: teste → test   | System.getenv().getOrDefault("DATABASE_PASSWORD", "test");
+  backend/application/src/test/java/br/com/felipeblaft/reports/support/MigrationTestSupport.java:36: relatorios_teste → reports_test   | .getOrDefault("DATABASE_URL", "jdbc:postgresql://localhost:5432/reports_test");
+  backend/application/src/test/java/br/com/felipeblaft/reports/support/MigrationTestSupport.java:37: relatorios → reports   | private final String user = System.getenv().getOrDefault("DATABASE_USER", "reports");
+  backend/application/src/test/java/br/com/felipeblaft/reports/support/MigrationTestSupport.java:38: teste → test   | private final String password = System.getenv().getOrDefault("DATABASE_PASSWORD", "test");
+  backend/application/src/test/java/br/com/felipeblaft/reports/support/IntegrationBase.java:12: postgres-teste → postgres-test   | * Base dos testes de integração: Spring Boot contra o {@code postgres-test} de
+  backend/application/src/test/java/br/com/felipeblaft/reports/architecture/ArtifactsLanguageGuardIT.java:27: postgres-teste → postgres-test   | * scripts e contratos. Roda contra o {@code postgres-test}: as migrações são aplicadas num banco
+  backend/application/src/test/java/br/com/felipeblaft/reports/outbound/audio/FfmpegAudioNormalizationAdapterIT.java:26: testes-backend → tests-backend   | * ignorado; no contêiner {@code tests-backend} ele roda.
+  backend/application/src/main/java/br/com/felipeblaft/reports/inbound/seed/DemoDataCommand.java:44: subir → up   | * ({@code local.sh up --demo-data=true}). Faz a carga dos cadastros fictícios e cria, pelos mesmos
+  backend/application/src/main/java/br/com/felipeblaft/reports/inbound/seed/DemoDataCommand.java:44: massa → demo-data   | * ({@code local.sh up --demo-data=true}). Faz a carga dos cadastros fictícios e cria, pelos mesmos
+  backend/application/src/main/java/br/com/felipeblaft/reports/inbound/seed/DemoDataCommand.java:121: subir → up   | + " Use: local.sh up --demo-data=true, que zera os dados locais antes.");
+  backend/application/src/main/java/br/com/felipeblaft/reports/inbound/seed/DemoDataCommand.java:121: massa → demo-data   | + " Use: local.sh up --demo-data=true, que zera os dados locais antes.");
+  frontend/playwright.config.ts:4: testes-e2e → tests-e2e   | * Testes ponta a ponta contra a pilha de `infra/compose.test.yaml` (serviço `tests-e2e`), com IA
+  backend/application/src/main/java/br/com/felipeblaft/reports/inbound/seed/SeedCommandsExecutor.java:14: carga → seed   | * No perfil {@code seed}, executa o comando pedido na linha de comando e encerra o processo com o
+  backend/application/src/main/java/br/com/felipeblaft/reports/inbound/seed/SeedCommandsExecutor.java:19: carga → seed   | @Profile("seed & !test")
+  backend/application/src/main/java/br/com/felipeblaft/reports/inbound/seed/SeedCommandsExecutor.java:19: teste → test   | @Profile("seed & !test")
+  backend/application/src/main/java/br/com/felipeblaft/reports/inbound/seed/SeedCommandsExecutor.java:54: massa → demo-data   | + " | demo-data --file <cadastros.json>");
+  backend/application/src/main/java/br/com/felipeblaft/reports/inbound/seed/SeedCommandsExecutor.java:54: arquivo → file   | + " | demo-data --file <cadastros.json>");

@@ -23,7 +23,7 @@ import org.junit.jupiter.api.io.TempDir;
 /**
  * Normalização com o FFmpeg de verdade (R-07). As amostras são geradas pelo próprio FFmpeg no
  * diretório temporário do teste (tom sintético, sem voz de ninguém). Sem FFmpeg instalado o teste é
- * ignorado; no contêiner {@code testes-backend} ele roda.
+ * ignorado; no contêiner {@code tests-backend} ele roda.
  */
 class FfmpegAudioNormalizationAdapterIT {
 

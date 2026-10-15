@@ -57,11 +57,10 @@ class MigrationV8ReadableDataIT {
     private static final JsonMapper JSON = JsonMapper.builder().build();
     private static final String BASE_URL =
             System.getenv()
-                    .getOrDefault(
-                            "DATABASE_URL", "jdbc:postgresql://localhost:5432/relatorios_teste");
-    private static final String USER = System.getenv().getOrDefault("DATABASE_USER", "relatorios");
+                    .getOrDefault("DATABASE_URL", "jdbc:postgresql://localhost:5432/reports_test");
+    private static final String USER = System.getenv().getOrDefault("DATABASE_USER", "reports");
     private static final String PASSWORD =
-            System.getenv().getOrDefault("DATABASE_PASSWORD", "teste");
+            System.getenv().getOrDefault("DATABASE_PASSWORD", "test");
 
     @DynamicPropertySource
     static void database(DynamicPropertyRegistry registry) {

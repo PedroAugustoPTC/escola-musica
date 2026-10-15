@@ -1,0 +1,747 @@
+[
+  {
+    "antigo": "--massa",
+    "novo": "--demo-data",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "./carga",
+    "novo": "./seed",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra/compose.yaml",
+      "infra/compose.dev.yaml",
+      "infra/compose.prod.yaml",
+      "infra/compose.test.yaml",
+      "infra/compose.database.yaml"
+    ]
+  },
+  {
+    "antigo": ".github/workflows/implantar.yml",
+    "novo": ".github/workflows/deploy.yml",
+    "needsReview": false,
+    "motivo": "arquivo movido",
+    "exemplos": [
+      ".github/workflows/deploy.yml"
+    ]
+  },
+  {
+    "antigo": "@estaticos",
+    "novo": "@static",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra/caddy/Caddyfile"
+    ]
+  },
+  {
+    "antigo": "/carga",
+    "novo": "/seed",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "/dados/documentos",
+    "novo": "/data/documents",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "/fontes/*",
+    "novo": "/fonts/*",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra/caddy/Caddyfile"
+    ]
+  },
+  {
+    "antigo": "aguardar",
+    "novo": "wait_until_healthy",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra/scripts/local.sh"
+    ]
+  },
+  {
+    "antigo": "ajuda",
+    "novo": "help",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra/scripts/local.sh"
+    ]
+  },
+  {
+    "antigo": "arq",
+    "novo": "file",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "arquivo",
+    "novo": "file",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra/scripts/local.sh"
+    ]
+  },
+  {
+    "antigo": "backend/application/target/ia-real/relatorio.md",
+    "novo": "backend/application/target/real-ai/report.md",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra/scripts/local.sh"
+    ]
+  },
+  {
+    "antigo": "banco",
+    "novo": "database",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "banco-fechar",
+    "novo": "database-close",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "banco-porta",
+    "novo": "database-port",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "caddy-dados",
+    "novo": "caddy-data",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "carga",
+    "novo": "seed",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "chave",
+    "novo": "key",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra/scripts/local.sh"
+    ]
+  },
+  {
+    "antigo": "codigo",
+    "novo": "code",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "comando",
+    "novo": "command",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra/scripts/local.sh"
+    ]
+  },
+  {
+    "antigo": "compose.banco.yaml",
+    "novo": "compose.database.yaml",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "confirmacao",
+    "novo": "confirmation",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra/scripts/local.sh"
+    ]
+  },
+  {
+    "antigo": "demonstracao.json",
+    "novo": "demo.json",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "documentos",
+    "novo": "documents",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "backend/application/src/test/resources/application-test.yaml"
+    ]
+  },
+  {
+    "antigo": "ENTREGA",
+    "novo": "TELEGRAM_CHANNEL_DELIVERY",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra/.env.example"
+    ]
+  },
+  {
+    "antigo": "estados",
+    "novo": "states",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra/scripts/local.sh"
+    ]
+  },
+  {
+    "antigo": "exemplo.json",
+    "novo": "example.json",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "exigir_env",
+    "novo": "require_env",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra/scripts/local.sh"
+    ]
+  },
+  {
+    "antigo": "faltando",
+    "novo": "missing",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra/scripts/local.sh"
+    ]
+  },
+  {
+    "antigo": "FfmpegNormalizacaoAudioAdaptadorIT",
+    "novo": "FfmpegAudioNormalizationAdapterIT",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra/compose.test.yaml"
+    ]
+  },
+  {
+    "antigo": "ia-real",
+    "novo": "real-ai",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "id_implantacao",
+    "novo": "id_deploy",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      ".github/workflows/deploy.yml"
+    ]
+  },
+  {
+    "antigo": "implantar",
+    "novo": "deploy",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      ".github/workflows/deploy.yml"
+    ]
+  },
+  {
+    "antigo": "implantar.sh",
+    "novo": "deploy.sh",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "infra/carga",
+    "novo": "infra/seed",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "infra/carga/demonstracao.json",
+    "novo": "infra/seed/demo.json",
+    "needsReview": false,
+    "motivo": "arquivo movido",
+    "exemplos": [
+      "infra/seed/demo.json"
+    ]
+  },
+  {
+    "antigo": "infra/carga/exemplo.json",
+    "novo": "infra/seed/example.json",
+    "needsReview": false,
+    "motivo": "arquivo movido",
+    "exemplos": [
+      "infra/seed/example.json"
+    ]
+  },
+  {
+    "antigo": "infra/compose.banco.yaml",
+    "novo": "infra/compose.database.yaml",
+    "needsReview": false,
+    "motivo": "arquivo movido",
+    "exemplos": [
+      "infra/compose.database.yaml"
+    ]
+  },
+  {
+    "antigo": "infra/scripts/implantar.sh",
+    "novo": "infra/scripts/deploy.sh",
+    "needsReview": false,
+    "motivo": "arquivo movido",
+    "exemplos": [
+      "infra/scripts/deploy.sh"
+    ]
+  },
+  {
+    "antigo": "interna",
+    "novo": "internal",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra/compose.yaml",
+      "infra/compose.dev.yaml",
+      "infra/compose.prod.yaml",
+      "infra/compose.test.yaml",
+      "infra/compose.database.yaml"
+    ]
+  },
+  {
+    "antigo": "jacoco-nucleo",
+    "novo": "jacoco-core",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      ".github/workflows/ci.yml"
+    ]
+  },
+  {
+    "antigo": "limpar",
+    "novo": "clean",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "massa",
+    "novo": "demo_data",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra/scripts/local.sh"
+    ]
+  },
+  {
+    "antigo": "parar",
+    "novo": "stop",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "porta",
+    "novo": "port",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra/scripts/local.sh"
+    ]
+  },
+  {
+    "antigo": "postgres-teste",
+    "novo": "postgres-test",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "producao",
+    "novo": "production",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      ".github/workflows/deploy.yml"
+    ]
+  },
+  {
+    "antigo": "qual",
+    "novo": "suite",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra/scripts/local.sh"
+    ]
+  },
+  {
+    "antigo": "RAIZ",
+    "novo": "ROOT",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra/scripts/local.sh",
+      "infra/scripts/deploy.sh"
+    ]
+  },
+  {
+    "antigo": "relatorios",
+    "novo": "reports",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "relatorios_documentos",
+    "novo": "reports_documents",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "relatorios_pgdata",
+    "novo": "reports_pgdata",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "relatorios_teste",
+    "novo": "reports_test",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "relatorios-backend",
+    "novo": "reports-backend",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "relatorios-teste",
+    "novo": "reports-test",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "relatorios-testes",
+    "novo": "reports-tests",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "relatorios-web",
+    "novo": "reports-web",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "saida_massa",
+    "novo": "demo_data_output",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra/scripts/local.sh"
+    ]
+  },
+  {
+    "antigo": "segredo-hmac-de-testes-com-mais-de-32-bytes",
+    "novo": "test-hmac-secret-with-more-than-32-bytes",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "backend/application/src/test/resources/application-test.yaml"
+    ]
+  },
+  {
+    "antigo": "servicos",
+    "novo": "services",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra/scripts/local.sh"
+    ]
+  },
+  {
+    "antigo": "subir",
+    "novo": "up",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "telegram-bot-api-dados",
+    "novo": "telegram-bot-api-data",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "tentativas",
+    "novo": "attempts",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra/scripts/local.sh"
+    ]
+  },
+  {
+    "antigo": "teste",
+    "novo": "test",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra/compose.test.yaml"
+    ]
+  },
+  {
+    "antigo": "TESTE",
+    "novo": "TEST",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "backend/application/src/test/resources/application-test.yaml"
+    ]
+  },
+  {
+    "antigo": "testes",
+    "novo": "tests",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "TESTES",
+    "novo": "TESTS",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra/scripts/local.sh"
+    ]
+  },
+  {
+    "antigo": "testes-backend",
+    "novo": "tests-backend",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "testes-e2e",
+    "novo": "tests-e2e",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "testes-frontend",
+    "novo": "tests-frontend",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "testes-ia-real",
+    "novo": "tests-real-ai",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra",
+      ".github"
+    ]
+  },
+  {
+    "antigo": "todos",
+    "novo": "all",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra/scripts/local.sh"
+    ]
+  },
+  {
+    "antigo": "valor",
+    "novo": "value",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra/scripts/local.sh"
+    ]
+  },
+  {
+    "antigo": "VPS_CHAVE_SSH",
+    "novo": "VPS_SSH_KEY",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      ".github/workflows/deploy.yml"
+    ]
+  },
+  {
+    "antigo": "VPS_DIRETORIO",
+    "novo": "VPS_DIRECTORY",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      ".github/workflows/deploy.yml"
+    ]
+  },
+  {
+    "antigo": "VPS_HOST_CONHECIDO",
+    "novo": "VPS_KNOWN_HOST",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      ".github/workflows/deploy.yml"
+    ]
+  },
+  {
+    "antigo": "VPS_USUARIO",
+    "novo": "VPS_USER",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      ".github/workflows/deploy.yml"
+    ]
+  },
+  {
+    "antigo": "zerar_dados",
+    "novo": "reset_data",
+    "needsReview": false,
+    "motivo": "revisado à mão (tools/lib/slice6-rules.mjs)",
+    "exemplos": [
+      "infra/scripts/local.sh"
+    ]
+  }
+]

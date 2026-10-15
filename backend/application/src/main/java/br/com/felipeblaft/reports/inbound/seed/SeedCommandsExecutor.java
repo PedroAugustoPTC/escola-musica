@@ -11,12 +11,12 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 /**
- * No perfil {@code carga}, executa o comando pedido na linha de comando e encerra o processo com o
+ * No perfil {@code seed}, executa o comando pedido na linha de comando e encerra o processo com o
  * código de saída do comando. Os argumentos de configuração do Spring ({@code --spring.*}) são
  * ignorados.
  */
 @Component
-@Profile("carga & !teste")
+@Profile("seed & !test")
 class SeedCommandsExecutor implements ApplicationRunner {
 
     private final SeedCommand seed;
@@ -51,7 +51,7 @@ class SeedCommandsExecutor implements ApplicationRunner {
                     default -> {
                         output.println(
                                 "Comandos: seed --file <arquivo.json> [--simulate] | issue-code --email <email>"
-                                        + " | massa --arquivo <cadastros.json>");
+                                        + " | demo-data --file <cadastros.json>");
                         yield 2;
                     }
                 };

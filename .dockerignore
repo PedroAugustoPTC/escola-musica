@@ -4,6 +4,6 @@
 assets
 .git
 infra/.env
-infra/carga
+infra/seed
 frontend/playwright-report
 frontend/test-results

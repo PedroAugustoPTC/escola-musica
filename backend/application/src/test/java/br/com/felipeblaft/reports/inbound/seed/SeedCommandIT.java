@@ -17,7 +17,7 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("seed")
 class SeedCommandIT extends IntegrationBase {
 
-    private static final String EXAMPLE = Path.of("../../infra/carga/exemplo.json").toString();
+    private static final String EXAMPLE = Path.of("../../infra/seed/example.json").toString();
 
     @Autowired SeedCommand seed;
     @Autowired IssueCodeCommand issueCode;

@@ -23,12 +23,12 @@ jobs:
       - name: Garantir que não há exclusões temporárias do guardião
         run: test ! -e .specify/memory/glossary-temporary-exclusions.json
       - name: Testes do backend
-        run: docker compose -f infra/compose.test.yaml run --rm testes-backend
+        run: docker compose -f infra/compose.test.yaml run --rm tests-backend
       - name: Relatório de cobertura do núcleo
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: jacoco-nucleo
+          name: jacoco-core
           path: backend/core/target/site/jacoco/
           if-no-files-found: ignore
       - name: Derrubar serviços
@@ -42,7 +42,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Testes do frontend
-        run: docker compose -f infra/compose.test.yaml run --rm testes-frontend
+        run: docker compose -f infra/compose.test.yaml run --rm tests-frontend
 
   e2e:
     name: Ponta a ponta e acessibilidade (Playwright + axe)
@@ -52,7 +52,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Testes ponta a ponta
-        run: docker compose -f infra/compose.test.yaml run --rm --build testes-e2e
+        run: docker compose -f infra/compose.test.yaml run --rm --build tests-e2e
       - name: Relatório do Playwright
         if: failure()
         uses: actions/upload-artifact@v4

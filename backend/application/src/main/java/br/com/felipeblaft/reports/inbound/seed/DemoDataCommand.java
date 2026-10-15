@@ -41,7 +41,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Comando {@code massa --arquivo <cadastros.json>}: massa de DEMONSTRAÇÃO para o ambiente local
- * ({@code local.sh subir --massa=true}). Faz a carga dos cadastros fictícios e cria, pelos mesmos
+ * ({@code local.sh up --demo-data=true}). Faz a carga dos cadastros fictícios e cria, pelos mesmos
  * objetos de domínio e pelo mesmo gerador de PDF do sistema, aulas aprovadas no semestre anterior e
  * no atual (PDFs de conferência e oficiais), um semestral aprovado, um semestral em conferência e
  * relatórios de aula em aberto. Só roda com o banco vazio, para nunca misturar dados fictícios com
@@ -118,7 +118,7 @@ public class DemoDataCommand {
         if (existing != null && existing > 0) {
             output.println(
                     "A massa de demonstração só é criada em banco vazio (há professores cadastrados)."
-                            + " Use: local.sh subir --massa=true, que zera os dados locais antes.");
+                            + " Use: local.sh up --demo-data=true, que zera os dados locais antes.");
             return 1;
         }
         SeedFile registries;

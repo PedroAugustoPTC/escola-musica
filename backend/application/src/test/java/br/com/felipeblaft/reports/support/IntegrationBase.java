@@ -9,7 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
 /**
- * Base dos testes de integração: Spring Boot contra o {@code postgres-teste} de
+ * Base dos testes de integração: Spring Boot contra o {@code postgres-test} de
  * infra/compose.test.yaml, com as tabelas limpas antes de cada teste e relógio fixo.
  */
 @SpringBootTest

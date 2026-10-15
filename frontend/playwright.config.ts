@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Testes ponta a ponta contra a pilha de `infra/compose.test.yaml` (serviço `testes-e2e`), com IA
+ * Testes ponta a ponta contra a pilha de `infra/compose.test.yaml` (serviço `tests-e2e`), com IA
  * simulada. O banco é compartilhado: os testes rodam em série e cada um semeia os dados de que precisa.
  */
 export default defineConfig({

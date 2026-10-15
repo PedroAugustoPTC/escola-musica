@@ -8,7 +8,7 @@ import pg from 'pg';
  * oferece os passos comuns da interface.
  */
 
-const DATABASE_URL = process.env.E2E_DATABASE_URL ?? 'postgres://relatorios:e2e@localhost:5432/relatorios';
+const DATABASE_URL = process.env.E2E_DATABASE_URL ?? 'postgres://reports:e2e@localhost:5432/reports';
 const CPF_KEY = process.env.E2E_CPF_KEY ?? 'MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=';
 const HMAC_SECRET = process.env.E2E_HMAC_SECRET ?? 'hmac-secret-for-e2e-tests-with-more-than-32-bytes';
 

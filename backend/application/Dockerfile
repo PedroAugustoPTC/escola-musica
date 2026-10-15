@@ -15,15 +15,15 @@ FROM eclipse-temurin:25-jre
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ffmpeg \
     && rm -rf /var/lib/apt/lists/* \
-    && groupadd --system relatorios \
-    && useradd --system --gid relatorios --home-dir /app --shell /usr/sbin/nologin relatorios \
-    && mkdir -p /app /tmp/audios /dados/documentos \
-    && chown -R relatorios:relatorios /app /tmp/audios /dados/documentos
+    && groupadd --system reports \
+    && useradd --system --gid reports --home-dir /app --shell /usr/sbin/nologin reports \
+    && mkdir -p /app /tmp/audios /data/documents \
+    && chown -R reports:reports /app /tmp/audios /data/documents
 WORKDIR /app
 COPY --from=build /build/application/target/application.jar /app/application.jar
 COPY application/docker-entrypoint.sh /app/docker-entrypoint.sh
 RUN chmod 0755 /app/docker-entrypoint.sh
-USER relatorios
+USER reports
 EXPOSE 8080
 ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75 -Dfile.encoding=UTF-8"
 ENTRYPOINT ["/app/docker-entrypoint.sh"]

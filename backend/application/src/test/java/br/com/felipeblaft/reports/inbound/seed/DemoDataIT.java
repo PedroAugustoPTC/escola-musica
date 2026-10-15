@@ -21,11 +21,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-/** Massa de demonstração do ambiente local (local.sh subir --massa=true). */
+/** Massa de demonstração do ambiente local (local.sh up --demo-data=true). */
 class DemoDataIT extends IntegrationBase {
 
     private static final List<String> ARGUMENTS =
-            List.of("demo-data", "--file", "../../infra/carga/demonstracao.json");
+            List.of("demo-data", "--file", "../../infra/seed/demo.json");
 
     @Autowired private LoadInitialRegistryUseCase seed;
     @Autowired private TeacherRepository teachers;
