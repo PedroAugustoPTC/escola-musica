@@ -1,0 +1,7 @@
+# SÓ PARA O AMBIENTE LOCAL: publica o PostgreSQL em 127.0.0.1 para ferramentas gráficas (DBeaver,
+# pgAdmin). Use com:  sh infra/scripts/local.sh database-port   (e database-close ao terminar).
+# Nunca use em produção: lá o banco fica só na rede interna (Princípio IV).
+services:
+  postgres:
+    ports:
+      - "127.0.0.1:${LOCAL_DATABASE_PORT:-5432}:5432"

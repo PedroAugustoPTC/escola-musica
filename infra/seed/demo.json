@@ -1,0 +1,95 @@
+{
+  "comment": "Massa de DEMONSTRAÇÃO, 100% fictícia (nomes, CPFs e responsáveis inventados). Usada por `local.sh subir --massa=true`.",
+  "teachers": [
+    {
+      "email": "clara@example.test",
+      "name": "Clara Souza",
+      "active": true
+    },
+    {
+      "email": "bruno@example.test",
+      "name": "Bruno Lima",
+      "active": true
+    }
+  ],
+  "students": [
+    {
+      "cpf": "300.007.919-03",
+      "name": "Matteo Mafra",
+      "birthDate": "2014-05-10",
+      "guardianName": "Responsável Fictício de Matteo",
+      "instrument": "Piano",
+      "teachers": [
+        "clara@example.test"
+      ]
+    },
+    {
+      "cpf": "300.015.838-32",
+      "name": "Olavo Torrente",
+      "birthDate": "1998-02-01",
+      "instrument": "Violão",
+      "teachers": [
+        "clara@example.test"
+      ]
+    },
+    {
+      "cpf": "300.023.757-70",
+      "name": "Miguel de Castro Torrente",
+      "birthDate": "2016-08-20",
+      "guardianName": "Responsável Fictício de Miguel",
+      "instrument": "Violino",
+      "teachers": [
+        "clara@example.test"
+      ]
+    },
+    {
+      "cpf": "300.031.676-07",
+      "name": "Beatriz Arruda",
+      "birthDate": "2009-11-14",
+      "guardianName": "Responsável Fictícia de Beatriz",
+      "instrument": "Canto",
+      "teachers": [
+        "clara@example.test"
+      ]
+    },
+    {
+      "cpf": "300.039.595-46",
+      "name": "Lucas Pimentel",
+      "birthDate": "2012-03-03",
+      "guardianName": "Responsável Fictício de Lucas",
+      "instrument": "Piano",
+      "teachers": [
+        "clara@example.test"
+      ]
+    },
+    {
+      "cpf": "300.047.514-18",
+      "name": "Sofia Rangel",
+      "birthDate": "2001-07-22",
+      "instrument": "Violão",
+      "teachers": [
+        "clara@example.test"
+      ]
+    },
+    {
+      "cpf": "300.055.433-55",
+      "name": "Helena Prado",
+      "birthDate": "2010-11-03",
+      "guardianName": "Responsável Fictícia de Helena",
+      "instrument": "Flauta",
+      "teachers": [
+        "bruno@example.test"
+      ]
+    },
+    {
+      "cpf": "300.063.352-92",
+      "name": "Davi Coutinho",
+      "birthDate": "2013-09-30",
+      "guardianName": "Responsável Fictício de Davi",
+      "instrument": "Bateria",
+      "teachers": [
+        "bruno@example.test"
+      ]
+    }
+  ]
+}

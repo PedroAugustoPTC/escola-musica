@@ -1,0 +1,18 @@
+rename-check — fatia 4: 454 arquivos Java pareados, 254435 tokens alinhados
+0 pares fora do mapa
+0 literais de texto alterados
+0 arquivos sem par
+0 colisões
+0 outras divergências (tokens, tipo de token, imports, retido alterado)
+(informativo) 196 pares distintos aplicados, 2 literais de uma palavra pelo mapa, 1 comentários alterados
+(informativo) literais Java que são código, por classe: callback-action: 103, jpql: 15, prop-assign: 1, sql: 50, wire: 2239
+(informativo) 24 arquivos que não são Java pareados (path: 21, identical: 3), 0 tokens alinhados
+(informativo) 0 colisões aceitas em explicit-pairs.json (revisadas, com motivo)
+(informativo) 61 edições manuais de literal permitidas em explicit-pairs.json
+
+
+== rename-check --frontend (fatia 4) ==
+rename-check --frontend — fatia 4: 44 arquivos comparados, 1305 palavras trocadas pelo mapa
+0 palavras trocadas fora do mapa
+0 trechos com contagem de palavras diferente
+(informativo) 21 propriedades abreviadas ganharam a chave nova (de { x } para { novaChave: x })

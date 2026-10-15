@@ -2,8 +2,8 @@
 target/
 node_modules/
 frontend/dist/
-frontend/src/mensagens/mensagens.json
-frontend/src/servicos/api-tipos.ts
+frontend/src/messages/messages.json
+frontend/src/services/api-types.ts
 frontend/test-results/
 frontend/playwright-report/
 coverage/
@@ -12,11 +12,11 @@ coverage/
 infra/.env
 infra/.env.*
 !infra/.env.example
-infra/carga/*.json
-!infra/carga/exemplo.json
-!infra/carga/demonstracao.json
+infra/seed/*.json
+!infra/seed/example.json
+!infra/seed/demo.json
 
-# Gravações de teste (grandes; usadas só pela suíte ia-real, montadas somente leitura)
+# Gravações de teste (grandes; usadas só pela suíte real-ai, montadas somente leitura)
 assets/*.ogg
 assets/*.mp4
 

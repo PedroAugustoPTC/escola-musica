@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Receita OpenRewrite da feature 003 (T033): renomeia métodos, campos, parâmetros, variáveis e componentes de record
+  a partir do mapa de identificadores. É ferramenta de migração, fora do build do produto: não é módulo de backend/ e
+  não entra em nenhum pom do produto. Compilar e instalar no cache do Maven (ver ../README.md).
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>br.com.felipeblaft.migration</groupId>
+  <artifactId>rename-recipes</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+
+  <properties>
+    <maven.compiler.release>21</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <rewrite.version>8.89.0</rewrite.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.openrewrite</groupId>
+      <artifactId>rewrite-java</artifactId>
+      <version>${rewrite.version}</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+</project>

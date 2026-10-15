@@ -1,0 +1,83 @@
+/* Tipografia: Cinzel nos sobretítulos, Cormorant Garamond nos títulos, Source Sans 3 na interface. */
+.kicker {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--gs);
+}
+
+.section-label {
+  margin: 0;
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--mu);
+}
+
+.data-label {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--mu);
+}
+
+.page-title {
+  margin: 6px 0 8px;
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 600;
+  font-size: 34px;
+  line-height: 1.1;
+  text-wrap: pretty;
+}
+
+.card-title {
+  margin: 0;
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 1.15;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--mu);
+  text-wrap: pretty;
+}
+
+.support-text {
+  font-size: 14px;
+  color: var(--mu);
+}
+
+.icon {
+  font-family: 'Material Symbols Outlined';
+  font-weight: 300;
+  font-style: normal;
+  font-size: 22px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+.icon-small {
+  font-size: 16px;
+}
+
+.icon-medium {
+  font-size: 20px;
+}
+
+.icon-large {
+  font-size: 28px;
+}

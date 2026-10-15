@@ -1,0 +1,7 @@
+rename-check --frontend — fatia 5: 97 arquivos pareados, 96 comparados, 6903 trocas pelo mapa
+0 pares fora do mapa
+0 literais/textos para pessoas alterados
+0 arquivos sem par ou sobrando
+0 binários/arquivos não-código com SHA-256 diferente
+0 outras divergências (tipo ou quantidade de tokens)
+(informativo) 4 arquivos com comentários alterados · 30 propriedades que viraram abreviadas · 2 texto(s) de erro de desenvolvimento revisado(s) em config.reviewedText · 1 arquivo(s) revisado(s) à mão (config.manualFiles)

@@ -120,9 +120,21 @@ de trabalho. Não é código de produção e não entra no build.
    conferência rápida.
 3. **Alinha token a token** (ordenando blocos de `import`, que o Spotless reordena). Exige o mesmo número de
    tokens. Cada diferença é classificada:
-   - identificador ↔ identificador: o par `(antigo → novo)` DEVE existir no mapa aprovado (palavra a
-     palavra pelo `glossary.json` ou par explícito do `identifier-map.md`);
-   - literal de texto (tem espaço, acento ou maiúscula inicial isolada): DEVE ser **idêntico byte a byte**;
+   - identificador ↔ identificador: o par `(antigo → novo)` DEVE existir no **mapa completo de
+     identificadores** da fatia (`tools/maps/slice-<N>.json`). O português põe o adjetivo depois do
+     substantivo (`RelatorioAula`→`LessonReport`, `codigo_acesso_hash`→`access_code_hash`), então a
+     tradução NÃO é palavra a palavra: `tools/gen-identifier-map.mjs` extrai todos os identificadores da
+     fatia, sugere o par (palavras do `glossary.json`, reordenação substantivo-adjetivo, conectivos
+     descartados, valores com hífen em camelCase, entradas `contextual`) e marca `needsReview`; **todo
+     item marcado é revisado à mão** antes da receita. `explicit-pairs.json` guarda só as exceções;
+   - **código embutido em literal** (SQL/JPQL em `@Query`, JSON em *text blocks* de teste, URLs, rotas):
+     tem espaço mas NÃO é texto para pessoas; é verificado **token a token** pelo mapa (cada identificador
+     dentro do literal segue a regra acima) e o resto do literal fica idêntico. O verificador decide pelo
+     contexto sintático (anotação `@Query`/`@Sql`, argumento de `jsonPath`, *text block* que parseia como
+     JSON ou SQL), e o que não parsear vai para revisão manual, nunca para "texto";
+   - literal de texto (tem espaço, acento ou maiúscula inicial isolada) que não é código embutido: DEVE
+     ser **idêntico byte a byte**; o nome do PDF mostrado ao usuário (`relatorio-aula-…pdf`) é exceção
+     documentada `download-file-name` e também deve permanecer idêntico;
    - literal de uma palavra: DEVE estar no mapa, como identificador;
    - número, operador, palavra-chave, anotação: DEVEM ser idênticos.
 4. **Injetividade**: dois nomes antigos diferentes não podem virar o mesmo nome novo no mesmo escopo
@@ -218,7 +230,10 @@ falhou, o banco fica na versão anterior.
 - **PDFs já gravados**: `chave_armazenamento` é *dado* (caminho opaco que o serviço lê do próprio registro,
   `documento.chaveArmazenamento()`); documentos antigos continuam legíveis com a chave antiga. Só os novos
   usam nomes internos em inglês (`official.pdf`, `v<n>.pdf`, pasta por `LESSON`/`SEMESTER`); nenhum arquivo
-  é movido. O nome mostrado ao usuário continua em português (FR-026).
+  é movido. O nome mostrado ao usuário continua em português (FR-026). A troca do literal `"oficial.pdf"`
+  (`GeracaoDocumentoServico`, `core`) é feita na **fatia 3** como renomeação de dado persistido novo (B3), com
+  teste próprio que prova que o nome mostrado não mudou e que um documento novo usa a chave nova; a pasta
+  por tipo de relatório vem da enumeração e muda com B1, na fatia 4.
 - **Conteúdo de texto** (relatórios, perguntas, transcrição, `text` das ações): intocado.
 
 ### Verificação automatizada (testes de integração em `application`, contra o `postgres-test`)
@@ -258,7 +273,10 @@ chave de um erro é o próprio `CodigoErro` (`chaveMensagem()` devolve `name()`,
 2. **Marcadores são identificadores**: `{minutos}` → `{minutes}`, `{nome}` → `{name}`, `{alunoAtual}` →
    `{currentStudent}`, `{limiteMb}` → `{limitMb}`, etc., por um mapa de marcadores, aplicado nos valores
    *apenas dentro de chaves `{}`* e nos pontos de chamada (`Map.of("minutos", …)`, `msg(c, {minutos})`).
-3. **Troca nos pontos de uso** por correspondência exata com o conjunto **fechado** das chaves antigas
+3. **Marcadores guardados**: como `{minutos}` é identificador (item 2) mas está dentro de texto para
+   pessoas, o guardião de artefatos varre, nos **valores** do `.properties`, apenas o padrão
+   `{[A-Za-z]+}` (nada do resto do texto), de modo que um marcador novo em português reprova.
+4. **Troca nos pontos de uso** por correspondência exata com o conjunto **fechado** das chaves antigas
    (um literal igual a uma chave do catálogo é, por construção, um uso; colisões com valores de enumeração
    são listadas e decididas uma a uma, não trocadas em massa).
 4. **Fatiamento**: nas fatias 2 e 3 as chaves continuam em português (B3), com `chaveMensagem()` intocado;
@@ -305,7 +323,11 @@ logs, documentação, FR-023); pastas fora do escopo (`portal-do-professor-desig
 se alguma não tiver motivo.
 
 **Exclusões temporárias (FR-035)**: arquivo à parte, `.specify/memory/glossary-temporary-exclusions.json`,
-só na branch. Cada commit remove o que migrou; o commit 7 o apaga. O guardião lê o arquivo se existir; um
+só na branch. Ele lista **arquivos existentes na fatia 1** (por caminho) e, dentro de arquivos já migrados,
+**termos retidos** (B1/B2/B3); arquivos novos ou renomeados nunca estão na lista, então já nascem varridos
+(e é assim que a prova de que o guardião barra funciona em arquivo novo). Cada fatia regenera a lista a
+partir do modo relatório dos guardiões (`GUARD_REPORT=1` + `tools/gen-exclusions.mjs`), que só encolhe. Cada
+commit remove o que migrou; o commit 7 o apaga. O guardião lê o arquivo se existir; um
 passo do `ci.yml` (`test ! -e …`) reprova o PR se ele existir, de modo que a `main` nunca o recebe. O CI só
 roda em PR e em `push` na `main` (não em cada commit da branch), então o estado conferido é o do último commit.
 
@@ -331,12 +353,24 @@ já exige `testes-backend` e `testes-frontend`, então nenhum workflow novo é n
    - *catálogo do banco*: depois de todas as migrações, consulta `information_schema` e `pg_catalog`
      (tabelas, colunas, índices, constraints, sequências) e falha por nome em português, exceto
      `flyway_schema_history`;
-   - *arquivos*: SQL `V9` em diante; YAML (`application*.yaml`, compose, workflows, OpenAPI) com SnakeYAML:
+   - *arquivos*: SQL `V9` em diante; YAML (`application*.yaml`, compose, workflows, OpenAPI inclusive os de `specs/**/contracts/`) com SnakeYAML:
      chaves e valores de uma palavra; JSON (esquemas, cargas, `package.json` scripts) com Jackson; `.env.example`
      (nomes), `.properties` (só as **chaves**), `.sh`, `Dockerfile`, `Caddyfile`, `pom.xml`, `logback-spring.xml`,
      HTML e CSS de PDF (atributos, expressões `${…}`, classes); nomes de arquivos e pastas de `infra/`,
      `.github/` e recursos. Raízes explícitas de varredura; pula `target`, `node_modules`, `.git`,
      relatórios do Playwright.
+
+**Recorte dos contratos em `specs/`**: a pasta `specs/` é isenta, **exceto** `specs/**/contracts/*.yaml` e
+`*.json` (os contratos de fio e de IA), que SÃO varridos (FR-019, "contratos"). Os `.md` de contrato e a
+prosa das specs não são varridos. O guardião de artefatos também varre os arquivos de ignorar
+(`.gitignore`, `.dockerignore`, `backend/.dockerignore`) por caminhos com palavras do glossário.
+
+**Separadores**: além de camelCase, `snake_case`, `kebab-case`, ponto e barra, a divisão usa `: = ? & ;`, de
+modo que ações de botão (`v1:aprovar:7`), *query strings* e rotas sejam examinadas palavra a palavra.
+
+**Categoria das exceções**: cada exceção do `glossary.json` traz `constitutionCategory`. As que não cabem nas
+quatro categorias fechadas do Princípio VI (nomes próprios e material de referência) são ratificadas pela
+emenda 2.1.0 e listadas na descrição do PR (plan.md, *Complexity Tracking*).
 
 **Mensagem de falha (FR-021)**: `caminho:linha: "periodoChave" contém "periodo" → use "period"`, com a
 lista de todas as ocorrências antes de reprovar (não para na primeira).
@@ -430,6 +464,10 @@ configurações a mais); um só guardião em um idioma (o pedido pede Java/ArchU
   `implantar.yml` → `deploy.yml`.
 - **Dockerfile do frontend** copia o catálogo por caminho (`COPY backend/aplicacao/…/mensagens/`): muda com o
   diretório (commit 3) e com a pasta de recursos.
+- **Arquivos de ignorar**: `.gitignore` (linhas que ignoram `infra/carga/*.json` e liberam `exemplo.json` e
+  `demonstracao.json`) e `.dockerignore` (`infra/carga`) citam a pasta que vira `infra/seed`. Eles protegem
+  cargas com dados reais de aluno (Princípio IV): mudam **no mesmo commit** do `git mv` (fatia 6), com prova
+  por `git check-ignore -v` de que uma carga real em `infra/seed/` continua ignorada e os dois exemplos não.
 - **Semente do e2e**: `frontend/tests/e2e/suporte.ts` semeia o banco com SQL próprio (`insert into professor …`,
   `insert into aluno …`, `insert into professor_aluno …`) e lista `pg_tables` para limpar. Os nomes de tabela e
   coluna dessa semente são referência fora do backend: mudam no **commit 3** (V7) e os valores de

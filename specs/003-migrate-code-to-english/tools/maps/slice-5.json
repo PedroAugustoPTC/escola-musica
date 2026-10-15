@@ -1,0 +1,8782 @@
+[
+  {
+    "antigo": "--foco",
+    "novo": "--focus",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "variavel-css"
+  },
+  {
+    "antigo": "--sombra-dialogo",
+    "novo": "--dialog-shadow",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "variavel-css",
+    "sugestao": "--dialog-shadow",
+    "revisado": true
+  },
+  {
+    "antigo": "--sombra-menu",
+    "novo": "--menu-shadow",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "variavel-css",
+    "sugestao": "--shadow-menu",
+    "revisado": true
+  },
+  {
+    "antigo": "--tinta",
+    "novo": "--ink",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/tokens.css"
+    ],
+    "tipo": "variavel-css"
+  },
+  {
+    "antigo": ".abas",
+    "novo": ".tabs",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".abas__aba",
+    "novo": ".tabs__aba",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".alerta",
+    "novo": ".alert",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".alerta__texto",
+    "novo": ".alert__text",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".alerta--aviso",
+    "novo": ".alert--notice",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".alerta--coluna",
+    "novo": ".alert--column",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".alerta--erro",
+    "novo": ".alert--error",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".alerta--info",
+    "novo": ".alert--info",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".alerta--ok",
+    "novo": ".alert--ok",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".aprovado__acoes",
+    "novo": ".approved__actions",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".aprovado__acoes-secundarias",
+    "novo": ".approved__secondary-actions",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".approved__secondary-actions",
+    "revisado": true
+  },
+  {
+    "antigo": ".aprovado__dados",
+    "novo": ".approved__data",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".aprovado__filete",
+    "novo": ".approved__divider",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".aprovado__rotulo",
+    "novo": ".approved__label",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".aprovado__valor",
+    "novo": ".approved__value",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".area-texto",
+    "novo": ".text-area",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".area-text",
+    "revisado": true
+  },
+  {
+    "antigo": ".aviso-flutuante",
+    "novo": ".floating-notice",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".floating-notice",
+    "revisado": true
+  },
+  {
+    "antigo": ".barra-acoes",
+    "novo": ".actions-bar",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".actions-bar",
+    "revisado": true
+  },
+  {
+    "antigo": ".barra-acoes__conteudo",
+    "novo": ".actions-bar__content",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".actions-bar__content",
+    "revisado": true
+  },
+  {
+    "antigo": ".barra-acoes__conteudo--estreita",
+    "novo": ".actions-bar__content--narrow",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".actions-bar__content--narrow",
+    "revisado": true
+  },
+  {
+    "antigo": ".botao",
+    "novo": ".button",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".botao--aviso",
+    "novo": ".button--notice",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".botao--bloco",
+    "novo": ".button--block",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".botao--compacto",
+    "novo": ".button--compact",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".botao--grande",
+    "novo": ".button--large",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".botao--icone",
+    "novo": ".button--icon",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".botao--link",
+    "novo": ".button--link",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".botao--link-perigo",
+    "novo": ".button--link-danger",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".botao--perigo",
+    "novo": ".button--danger",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".botao--perigo-cheio",
+    "novo": ".button--filled-danger",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".button--full-danger",
+    "revisado": true
+  },
+  {
+    "antigo": ".botao--primario",
+    "novo": ".button--primary",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".botao--secundario",
+    "novo": ".button--secondary",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".busca",
+    "novo": ".search",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".cabecalho",
+    "novo": ".header",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".cabecalho__busca",
+    "novo": ".header__search",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".cabecalho__contexto",
+    "novo": ".header__context",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".cabecalho__contexto-sobretitulo",
+    "novo": ".header__context-kicker",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".header__kicker-context",
+    "revisado": true
+  },
+  {
+    "antigo": ".cabecalho__contexto-titulo",
+    "novo": ".header__context-title",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".header__title-context",
+    "revisado": true
+  },
+  {
+    "antigo": ".cabecalho__espaco",
+    "novo": ".header__space",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".cabecalho__filete",
+    "novo": ".header__divider",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".cabecalho__marca",
+    "novo": ".header__brand",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".cabecalho__marca--movel",
+    "novo": ".header__brand--mobile",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".cabecalho__nav",
+    "novo": ".header__nav",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".cabecalho__nav-item",
+    "novo": ".header__nav-item",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".cabecalho__professor",
+    "novo": ".header__teacher",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".cabecalho__professor-nome",
+    "novo": ".header__teacher-name",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".header__name-teacher",
+    "revisado": true
+  },
+  {
+    "antigo": ".cabecalho--computador",
+    "novo": ".header--desktop",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".header--computer",
+    "revisado": true
+  },
+  {
+    "antigo": ".cabecalho--movel",
+    "novo": ".header--mobile",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".campo",
+    "novo": ".field",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".campo__ajuda",
+    "novo": ".field__help",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".campo__erro",
+    "novo": ".field__error",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".campo__rotulo",
+    "novo": ".field__label",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".cartao",
+    "novo": ".card",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".cartao--destaque",
+    "novo": ".card--highlight",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".cartao--falha",
+    "novo": ".card--failure",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".cartao--retomada",
+    "novo": ".card--resumption",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".cartao-aluno__acoes",
+    "novo": ".student-card__actions",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".student-card__actions",
+    "revisado": true
+  },
+  {
+    "antigo": ".cartao-aluno__identidade",
+    "novo": ".student-card__identity",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".student-card__identity",
+    "revisado": true
+  },
+  {
+    "antigo": ".cartao-aluno__principal",
+    "novo": ".student-card__main",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".student-card__principal",
+    "revisado": true
+  },
+  {
+    "antigo": ".cartao-aluno__topo",
+    "novo": ".student-card__top",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".student-card__top",
+    "revisado": true
+  },
+  {
+    "antigo": ".chip--aviso",
+    "novo": ".chip--notice",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".chip--contorno",
+    "novo": ".chip--outline",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".circulo-icone",
+    "novo": ".icon-circle",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".icon-circle",
+    "revisado": true
+  },
+  {
+    "antigo": ".circulo-icone--aviso",
+    "novo": ".icon-circle--notice",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".icon-circle--notice",
+    "revisado": true
+  },
+  {
+    "antigo": ".circulo-icone--erro",
+    "novo": ".icon-circle--error",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".icon-circle--error",
+    "revisado": true
+  },
+  {
+    "antigo": ".circulo-icone--neutro",
+    "novo": ".icon-circle--neutral",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".icon-circle--neutral",
+    "revisado": true
+  },
+  {
+    "antigo": ".circulo-icone--ok",
+    "novo": ".icon-circle--ok",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".icon-circle--ok",
+    "revisado": true
+  },
+  {
+    "antigo": ".conferencia",
+    "novo": ".review",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".conferencia__ajustar",
+    "novo": ".review__adjust",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".conferencia__chips",
+    "novo": ".review__chips",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".conferencia__texto",
+    "novo": ".review__text",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".conferencia--lado-a-lado",
+    "novo": ".review--side-by-side",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".review--side-a-side",
+    "revisado": true
+  },
+  {
+    "antigo": ".consolidacao",
+    "novo": ".consolidation",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".consolidacao__numero",
+    "novo": ".consolidation__number",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".dados-relatorio",
+    "novo": ".report-data",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".report-data",
+    "revisado": true
+  },
+  {
+    "antigo": ".dialogo",
+    "novo": ".dialog",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".dialogo__acoes",
+    "novo": ".dialog__actions",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".dialogo__icone",
+    "novo": ".dialog__icon",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".dialogo__texto",
+    "novo": ".dialog__text",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".dialogo__titulo",
+    "novo": ".dialog__title",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".dialogo-fundo",
+    "novo": ".dialog-backdrop",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".background-dialog",
+    "revisado": true
+  },
+  {
+    "antigo": ".entrada",
+    "novo": ".input",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".inbound",
+    "revisado": true
+  },
+  {
+    "antigo": ".entrada--codigo",
+    "novo": ".input--code",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".inbound--code",
+    "revisado": true
+  },
+  {
+    "antigo": ".entrar",
+    "novo": ".sign-in",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".signin",
+    "revisado": true
+  },
+  {
+    "antigo": ".entrar__formulario",
+    "novo": ".sign-in__form",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".signin__form",
+    "revisado": true
+  },
+  {
+    "antigo": ".entrar__lado-formulario",
+    "novo": ".sign-in__form-side",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".signin__form-side",
+    "revisado": true
+  },
+  {
+    "antigo": ".entrar__marca",
+    "novo": ".sign-in__brand",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".signin__brand",
+    "revisado": true
+  },
+  {
+    "antigo": ".entrar__titulo",
+    "novo": ".sign-in__title",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".signin__title",
+    "revisado": true
+  },
+  {
+    "antigo": ".esqueleto",
+    "novo": ".skeleton",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".estado-vazio",
+    "novo": ".empty-state",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".empty-state",
+    "revisado": true
+  },
+  {
+    "antigo": ".estado-vazio__icone",
+    "novo": ".empty-state__icon",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".empty-state__icon",
+    "revisado": true
+  },
+  {
+    "antigo": ".estado-vazio__texto",
+    "novo": ".empty-state__text",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".empty-state__text",
+    "revisado": true
+  },
+  {
+    "antigo": ".estado-vazio--solido",
+    "novo": ".empty-state--solid",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".empty-state--solid",
+    "revisado": true
+  },
+  {
+    "antigo": ".etapas",
+    "novo": ".steps",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".etapas__barra",
+    "novo": ".steps__bar",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".etapas__item",
+    "novo": ".steps__item",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".etapas__item--atual",
+    "novo": ".steps__item--current",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".etapas__item--concluida",
+    "novo": ".steps__item--completed",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".etapas__ok",
+    "novo": ".steps__ok",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".etapas__progresso",
+    "novo": ".steps__progress",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".etapas__rotulo",
+    "novo": ".steps__label",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".girador--grande",
+    "novo": ".spinner--large",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".girador--large",
+    "revisado": true
+  },
+  {
+    "antigo": ".grade-cartoes",
+    "novo": ".card-grid",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".cards-grade",
+    "revisado": true
+  },
+  {
+    "antigo": ".gravador",
+    "novo": ".recorder",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".gravador__acoes",
+    "novo": ".recorder__actions",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".gravador__arquivo",
+    "novo": ".recorder__file",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".gravador__arquivo-nome",
+    "novo": ".recorder__file-name",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".recorder__name-file",
+    "revisado": true
+  },
+  {
+    "antigo": ".gravador__arquivo-texto",
+    "novo": ".recorder__file-text",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".recorder__text-file",
+    "revisado": true
+  },
+  {
+    "antigo": ".gravador__botao",
+    "novo": ".recorder__button",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".gravador__botao--gravando",
+    "novo": ".recorder__button--recording",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".gravador__dica",
+    "novo": ".recorder__tip",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".gravador__enviar-arquivo",
+    "novo": ".recorder__send-file",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".gravador__enviar-rotulo",
+    "novo": ".recorder__send-label",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".gravador__painel",
+    "novo": ".recorder__panel",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".recorder__dashboard",
+    "revisado": true
+  },
+  {
+    "antigo": ".gravador__ponto",
+    "novo": ".recorder__dot",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".recorder__point",
+    "revisado": true
+  },
+  {
+    "antigo": ".gravador__situacao",
+    "novo": ".recorder__state",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".recorder__status",
+    "revisado": true
+  },
+  {
+    "antigo": ".gravador__status",
+    "novo": ".recorder__status",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".gravador__tempo",
+    "novo": ".recorder__time",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".gravador--compacto",
+    "novo": ".recorder--compact",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".historico",
+    "novo": ".history",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".historico__aprovado",
+    "novo": ".history__approved",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".historico__corpo",
+    "novo": ".history__body",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".historico__dia",
+    "novo": ".history__day",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".historico__etiqueta",
+    "novo": ".history__label",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".historico__item",
+    "novo": ".history__item",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".historico__mes",
+    "novo": ".history__month",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".historico__pdf",
+    "novo": ".history__pdf",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".historico__selo",
+    "novo": ".history__seal",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".historico__titulo",
+    "novo": ".history__title",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".icone",
+    "novo": ".icon",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".icone-grande",
+    "novo": ".icon-large",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/tipografia.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".large-icon",
+    "revisado": true
+  },
+  {
+    "antigo": ".icone-medio",
+    "novo": ".icon-medium",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/tipografia.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".medio-icon",
+    "revisado": true
+  },
+  {
+    "antigo": ".icone-pequeno",
+    "novo": ".icon-small",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/tipografia.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".small-icon",
+    "revisado": true
+  },
+  {
+    "antigo": ".iniciais",
+    "novo": ".initials",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".initial",
+    "revisado": true
+  },
+  {
+    "antigo": ".iniciais--grande",
+    "novo": ".initials--large",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".initial--large",
+    "revisado": true
+  },
+  {
+    "antigo": ".interruptor",
+    "novo": ".switch",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".interruptor__botao",
+    "novo": ".switch__button",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".interruptor--ligado",
+    "novo": ".switch--on",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".lista-alunos",
+    "novo": ".student-list",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".students-list",
+    "revisado": true
+  },
+  {
+    "antigo": ".lista-alunos__item",
+    "novo": ".student-list__item",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".students-list__item",
+    "revisado": true
+  },
+  {
+    "antigo": ".lista-alunos__nome",
+    "novo": ".student-list__name",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".students-list__name",
+    "revisado": true
+  },
+  {
+    "antigo": ".lista-alunos__texto",
+    "novo": ".student-list__text",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".students-list__text",
+    "revisado": true
+  },
+  {
+    "antigo": ".menu-fundo",
+    "novo": ".menu-backdrop",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".menu-background",
+    "revisado": true
+  },
+  {
+    "antigo": ".menu-professor",
+    "novo": ".teacher-menu",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".menu-teacher",
+    "revisado": true
+  },
+  {
+    "antigo": ".menu-professor__identidade",
+    "novo": ".teacher-menu__identity",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".menu-teacher__identity",
+    "revisado": true
+  },
+  {
+    "antigo": ".menu-professor__item",
+    "novo": ".teacher-menu__item",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".menu-teacher__item",
+    "revisado": true
+  },
+  {
+    "antigo": ".nav-inferior",
+    "novo": ".bottom-nav",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".nav-lower",
+    "revisado": true
+  },
+  {
+    "antigo": ".nav-inferior__item",
+    "novo": ".bottom-nav__item",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".nav-lower__item",
+    "revisado": true
+  },
+  {
+    "antigo": ".oculto-visual",
+    "novo": ".visually-hidden",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".hidden-visual",
+    "revisado": true
+  },
+  {
+    "antigo": ".pagina",
+    "novo": ".page",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".pagina--aprovado",
+    "novo": ".page--approved",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".pagina--centro",
+    "novo": ".page--center",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".pagina--conferencia",
+    "novo": ".page--review",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".pagina--estreita",
+    "novo": ".page--narrow",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".pagina--larga",
+    "novo": ".page--wide",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".pagina--media",
+    "novo": ".page--medium",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".page--media",
+    "revisado": true
+  },
+  {
+    "antigo": ".painel__alunos",
+    "novo": ".dashboard__students",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".painel__destaques",
+    "novo": ".dashboard__highlights",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".painel__em-aberto",
+    "novo": ".dashboard__open-report",
+    "needsReview": false,
+    "motivo": "reordenado; conectivo",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".dashboard__open-in",
+    "revisado": true
+  },
+  {
+    "antigo": ".painel__registrar",
+    "novo": ".dashboard__register",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".painel__registrar-apoio",
+    "novo": ".dashboard__register-support",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".painel__registrar-icone",
+    "novo": ".dashboard__register-icon",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".painel__registrar-texto",
+    "novo": ".dashboard__register-text",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".painel__registrar-titulo",
+    "novo": ".dashboard__register-title",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".painel__subtitulo",
+    "novo": ".dashboard__subtitle",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".painel__total",
+    "novo": ".dashboard__total",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".painel__total-numero",
+    "novo": ".dashboard__total-number",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".dashboard__number-total",
+    "revisado": true
+  },
+  {
+    "antigo": ".painel__total-rotulo",
+    "novo": ".dashboard__total-label",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".dashboard__label-total",
+    "revisado": true
+  },
+  {
+    "antigo": ".painel__total-valor",
+    "novo": ".dashboard__total-value",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".dashboard__value-total",
+    "revisado": true
+  },
+  {
+    "antigo": ".perguntas",
+    "novo": ".questions",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".perguntas__item",
+    "novo": ".questions__item",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".perguntas__numero",
+    "novo": ".questions__number",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".periodos",
+    "novo": ".periods",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".periodos__opcao",
+    "novo": ".periods__option",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".periodos__opcoes",
+    "novo": ".periods__options",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".pilha-acoes",
+    "novo": ".actions-stack",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".actions-stack",
+    "revisado": true
+  },
+  {
+    "antigo": ".rodape",
+    "novo": ".footer",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".rodape__marca",
+    "novo": ".footer__brand",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".rotulo-dado",
+    "novo": ".data-label",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/tipografia.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".data-label",
+    "revisado": true
+  },
+  {
+    "antigo": ".rotulo-secao",
+    "novo": ".section-label",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/tipografia.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".section-label",
+    "revisado": true
+  },
+  {
+    "antigo": ".secoes",
+    "novo": ".sections",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".secoes__campo",
+    "novo": ".sections__field",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".secoes__lista",
+    "novo": ".sections__list",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".secoes__marcador",
+    "novo": ".sections__marker",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".secoes__numero",
+    "novo": ".sections__number",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".secoes__rotulo",
+    "novo": ".sections__label",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".secoes__secao",
+    "novo": ".sections__section",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".secoes__texto",
+    "novo": ".sections__text",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".secoes__titulo",
+    "novo": ".sections__title",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".secoes__titulo--numerado",
+    "novo": ".sections__title--numbered",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".secoes__vazia",
+    "novo": ".sections__empty",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".secoes--esmaecido",
+    "novo": ".sections--faded",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".separador-ou",
+    "novo": ".or-separator",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".separator-ou",
+    "revisado": true
+  },
+  {
+    "antigo": ".so-computador",
+    "novo": ".desktop-only",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".so-computer",
+    "revisado": true
+  },
+  {
+    "antigo": ".so-movel",
+    "novo": ".mobile-only",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/base.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".so-mobile",
+    "revisado": true
+  },
+  {
+    "antigo": ".sobretitulo",
+    "novo": ".kicker",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/tipografia.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".subtitulo",
+    "novo": ".subtitle",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/tipografia.css"
+    ],
+    "tipo": "classe-css"
+  },
+  {
+    "antigo": ".texto-apoio",
+    "novo": ".support-text",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/tipografia.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".support-text",
+    "revisado": true
+  },
+  {
+    "antigo": ".titulo-cartao",
+    "novo": ".card-title",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/tipografia.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".card-title",
+    "revisado": true
+  },
+  {
+    "antigo": ".titulo-pagina",
+    "novo": ".page-title",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/tipografia.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".page-title",
+    "revisado": true
+  },
+  {
+    "antigo": ".titulo-pagina--maior",
+    "novo": ".page-title--larger",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".page-title--larger",
+    "revisado": true
+  },
+  {
+    "antigo": ".titulo-pagina--menor",
+    "novo": ".page-title--smaller",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".page-title--smaller",
+    "revisado": true
+  },
+  {
+    "antigo": ".visualizador-pdf",
+    "novo": ".pdf-viewer",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".viewer-pdf",
+    "revisado": true
+  },
+  {
+    "antigo": ".visualizador-pdf__gerando",
+    "novo": ".pdf-viewer__generating",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".viewer-pdf__generating",
+    "revisado": true
+  },
+  {
+    "antigo": ".visualizador-pdf__gerando-titulo",
+    "novo": ".pdf-viewer__generating-title",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".viewer-pdf__title-generating",
+    "revisado": true
+  },
+  {
+    "antigo": ".visualizador-pdf__quadro",
+    "novo": ".pdf-viewer__frame",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".viewer-pdf__board",
+    "revisado": true
+  },
+  {
+    "antigo": ".visualizador-pdf__rotulo",
+    "novo": ".pdf-viewer__label",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".viewer-pdf__label",
+    "revisado": true
+  },
+  {
+    "antigo": ".visualizador-pdf__topo",
+    "novo": ".pdf-viewer__top",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/estilos/registro-aula.css"
+    ],
+    "tipo": "classe-css",
+    "sugestao": ".viewer-pdf__top",
+    "revisado": true
+  },
+  {
+    "antigo": "aba-texto",
+    "novo": "text-tab",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ],
+    "sugestao": "aba-text",
+    "revisado": true
+  },
+  {
+    "antigo": "abas",
+    "novo": "tabs",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/paginas/RegistroAula.test.tsx"
+    ]
+  },
+  {
+    "antigo": "aberto",
+    "novo": "open",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Cabecalho.tsx"
+    ]
+  },
+  {
+    "antigo": "abrindo",
+    "novo": "opening",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaHistorico.tsx"
+    ]
+  },
+  {
+    "antigo": "abrir",
+    "novo": "open",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/VisualizadorPdf.tsx"
+    ]
+  },
+  {
+    "antigo": "abrirPdf",
+    "novo": "openPdf",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/VisualizadorPdf.tsx"
+    ]
+  },
+  {
+    "antigo": "abrirRelatorioEmAberto",
+    "novo": "openOpenReport",
+    "needsReview": false,
+    "motivo": "reordenado; conectivo",
+    "exemplos": [
+      "tests/e2e/acessibilidade.spec.ts"
+    ],
+    "sugestao": "openOpenInReport",
+    "revisado": true
+  },
+  {
+    "antigo": "abriu",
+    "novo": "opened",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/VisualizadorPdf.tsx"
+    ]
+  },
+  {
+    "antigo": "acao",
+    "novo": "action",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/EstadoVazio.tsx"
+    ]
+  },
+  {
+    "antigo": "ACEITOS",
+    "novo": "ACCEPTED",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "acessibilidade",
+    "novo": "accessibility",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/tests/e2e/acessibilidade.spec.ts"
+    ]
+  },
+  {
+    "antigo": "acompanhamentoFamiliar",
+    "novo": "familySupport",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ],
+    "sugestao": "familySupport",
+    "revisado": true
+  },
+  {
+    "antigo": "agora",
+    "novo": "now",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaEntrar.tsx"
+    ]
+  },
+  {
+    "antigo": "ajuste",
+    "novo": "adjustment",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ]
+  },
+  {
+    "antigo": "AlertaErro",
+    "novo": "ErrorAlert",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/componentes/EstadoErro.tsx"
+    ],
+    "sugestao": "ErrorAlert",
+    "revisado": true
+  },
+  {
+    "antigo": "alterarAudio",
+    "novo": "changeAudio",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ]
+  },
+  {
+    "antigo": "alterarTexto",
+    "novo": "changeText",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ]
+  },
+  {
+    "antigo": "alternar",
+    "novo": "toggle",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/TemaProvedor.tsx"
+    ]
+  },
+  {
+    "antigo": "altura",
+    "novo": "height",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/EstadoCarregando.tsx"
+    ]
+  },
+  {
+    "antigo": "aluno",
+    "novo": "student",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/CartaoAluno.tsx",
+      "src/servicos/alunos.ts"
+    ]
+  },
+  {
+    "antigo": "ALUNO",
+    "novo": "STUDENT",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/paginas/RegistroAula.test.tsx"
+    ]
+  },
+  {
+    "antigo": "ALUNO_DTO",
+    "novo": "STUDENT_DTO",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/paginas/TelaHistorico.test.tsx"
+    ]
+  },
+  {
+    "antigo": "ALUNO_ID",
+    "novo": "STUDENT_ID",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/paginas/AudioPerguntasConferencia.test.tsx"
+    ]
+  },
+  {
+    "antigo": "alunoId",
+    "novo": "studentId",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaGravacao.tsx"
+    ]
+  },
+  {
+    "antigo": "alunoNome",
+    "novo": "studentName",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaAprovado.tsx"
+    ],
+    "sugestao": "nameStudent",
+    "revisado": true
+  },
+  {
+    "antigo": "AlunoResumoDto",
+    "novo": "StudentSummaryDto",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/componentes/CartaoAluno.tsx"
+    ],
+    "sugestao": "SummaryStudentDto",
+    "revisado": true
+  },
+  {
+    "antigo": "alunos",
+    "novo": "students",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/src/servicos/alunos.ts",
+      "src/paginas/TelaAlunos.tsx",
+      "src/componentes/Cabecalho.tsx"
+    ]
+  },
+  {
+    "antigo": "Alunos",
+    "novo": "Students",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Cabecalho.tsx"
+    ]
+  },
+  {
+    "antigo": "ALUNOS",
+    "novo": "STUDENTS",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/paginas/TelaAlunos.test.tsx"
+    ]
+  },
+  {
+    "antigo": "alvo",
+    "novo": "target",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/clienteApi.ts"
+    ]
+  },
+  {
+    "antigo": "amostras",
+    "novo": "samples",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/e2e/suporte.ts"
+    ]
+  },
+  {
+    "antigo": "ano",
+    "novo": "year",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/formatacao.ts"
+    ]
+  },
+  {
+    "antigo": "anterior",
+    "novo": "previous",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/DialogoConfirmacao.tsx"
+    ]
+  },
+  {
+    "antigo": "aoConfirmar",
+    "novo": "onConfirm",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/DialogoConfirmacao.tsx"
+    ],
+    "sugestao": "aoConfirm",
+    "revisado": true
+  },
+  {
+    "antigo": "aoExpirar",
+    "novo": "onExpire",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/GuardaSessao.tsx"
+    ],
+    "sugestao": "aoExpire",
+    "revisado": true
+  },
+  {
+    "antigo": "aoFechar",
+    "novo": "onClose",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Cabecalho.tsx"
+    ],
+    "sugestao": "aoClose",
+    "revisado": true
+  },
+  {
+    "antigo": "aoFecharRef",
+    "novo": "onCloseRef",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/DialogoConfirmacao.tsx"
+    ],
+    "sugestao": "aoCloseRef",
+    "revisado": true
+  },
+  {
+    "antigo": "aoMudar",
+    "novo": "onChange",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/useEhMovel.ts"
+    ],
+    "sugestao": "aoChange",
+    "revisado": true
+  },
+  {
+    "antigo": "aoTeclar",
+    "novo": "onKeyDown",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/DialogoConfirmacao.tsx"
+    ],
+    "sugestao": "aoType",
+    "revisado": true
+  },
+  {
+    "antigo": "aoTentarDeNovo",
+    "novo": "onRetry",
+    "needsReview": false,
+    "motivo": "conectivo",
+    "exemplos": [
+      "src/app/GuardaSessao.tsx"
+    ],
+    "sugestao": "aoRetryNew",
+    "revisado": true
+  },
+  {
+    "antigo": "api-tipos",
+    "novo": "api-types",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/src/servicos/api-tipos.ts"
+    ]
+  },
+  {
+    "antigo": "aplicando",
+    "novo": "applying",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ]
+  },
+  {
+    "antigo": "aprovacao",
+    "novo": "approval",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ]
+  },
+  {
+    "antigo": "AprovacaoDto",
+    "novo": "ApprovalDto",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/relatoriosAula.ts"
+    ]
+  },
+  {
+    "antigo": "Aprovado",
+    "novo": "Approved",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaAprovado.tsx"
+    ]
+  },
+  {
+    "antigo": "aprovadoEm",
+    "novo": "approvedAt",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaAprovado.tsx"
+    ]
+  },
+  {
+    "antigo": "aprovar",
+    "novo": "approve",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ]
+  },
+  {
+    "antigo": "arquivo",
+    "novo": "file",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "arquivoDeAudio",
+    "novo": "audioFile",
+    "needsReview": false,
+    "motivo": "reordenado; conectivo",
+    "exemplos": [
+      "tests/paginas/AudioPerguntasConferencia.test.tsx"
+    ],
+    "sugestao": "audioFile",
+    "revisado": true
+  },
+  {
+    "antigo": "articulacao",
+    "novo": "articulation",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ]
+  },
+  {
+    "antigo": "assinar",
+    "novo": "sign",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/useEhMovel.ts"
+    ]
+  },
+  {
+    "antigo": "ATRASO_BUSCA_MS",
+    "novo": "SEARCH_DELAY_MS",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaAlunos.tsx"
+    ],
+    "sugestao": "SEARCH_DELAY_MS",
+    "revisado": true
+  },
+  {
+    "antigo": "atual",
+    "novo": "current",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/TemaProvedor.tsx"
+    ]
+  },
+  {
+    "antigo": "atualizado",
+    "novo": "updated",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ]
+  },
+  {
+    "antigo": "audioDeTeste",
+    "novo": "testAudio",
+    "needsReview": false,
+    "motivo": "sufixo; conectivo",
+    "exemplos": [
+      "tests/e2e/fluxo-aula.spec.ts"
+    ],
+    "sugestao": "audioTest",
+    "revisado": true
+  },
+  {
+    "antigo": "AudioPerguntasConferencia",
+    "novo": "AudioQuestionsReview",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "frontend/tests/paginas/AudioPerguntasConferencia.test.tsx"
+    ],
+    "sugestao": "ReviewQuestionsAudio",
+    "revisado": true
+  },
+  {
+    "antigo": "AudioSelecionado",
+    "novo": "SelectedAudio",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ],
+    "sugestao": "SelectedAudio",
+    "revisado": true
+  },
+  {
+    "antigo": "aula",
+    "novo": "lesson",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaAprovado.tsx"
+    ]
+  },
+  {
+    "antigo": "AULA",
+    "novo": "LESSON",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/paginas/AudioPerguntasConferencia.test.tsx"
+    ]
+  },
+  {
+    "antigo": "avaliacao",
+    "novo": "assessment",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ]
+  },
+  {
+    "antigo": "aviso",
+    "novo": "notice",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/VisualizadorPdf.tsx",
+      "src/componentes/Botao.tsx"
+    ]
+  },
+  {
+    "antigo": "Aviso",
+    "novo": "Notice",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ]
+  },
+  {
+    "antigo": "avisoAtual",
+    "novo": "currentNotice",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ],
+    "sugestao": "currentNotice",
+    "revisado": true
+  },
+  {
+    "antigo": "avisoDoResultado",
+    "novo": "resultNotice",
+    "needsReview": false,
+    "motivo": "reordenado; conectivo",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ],
+    "sugestao": "resultNotice",
+    "revisado": true
+  },
+  {
+    "antigo": "banco",
+    "novo": "database",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/e2e/suporte.ts"
+    ]
+  },
+  {
+    "antigo": "BANCO_URL",
+    "novo": "DATABASE_URL",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/e2e/suporte.ts"
+    ],
+    "sugestao": "DATABASE_URL",
+    "revisado": true
+  },
+  {
+    "antigo": "barraAcoes",
+    "novo": "actionsBar",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/componentes/Estrutura.tsx"
+    ],
+    "sugestao": "actionsBar",
+    "revisado": true
+  },
+  {
+    "antigo": "barraEstreita",
+    "novo": "narrowBar",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/componentes/Estrutura.tsx"
+    ],
+    "sugestao": "narrowBar",
+    "revisado": true
+  },
+  {
+    "antigo": "BASE_SEMESTRAL",
+    "novo": "SEMESTER_BASE",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "tests/paginas/AudioPerguntasConferencia.test.tsx"
+    ],
+    "sugestao": "SEMESTER_BASE",
+    "revisado": true
+  },
+  {
+    "antigo": "bloco",
+    "novo": "block",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Botao.tsx"
+    ]
+  },
+  {
+    "antigo": "bloqueado",
+    "novo": "blocked",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaEntrar.tsx"
+    ]
+  },
+  {
+    "antigo": "botao",
+    "novo": "button",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/componentes/ComponentesComuns.test.tsx",
+      "src/componentes/Botao.tsx"
+    ]
+  },
+  {
+    "antigo": "Botao",
+    "novo": "Button",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/src/componentes/Botao.tsx",
+      "src/componentes/Botao.tsx",
+      "tests/componentes/ComponentesComuns.test.tsx"
+    ]
+  },
+  {
+    "antigo": "botaoMenu",
+    "novo": "menuButton",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Cabecalho.tsx"
+    ],
+    "sugestao": "buttonMenu",
+    "revisado": true
+  },
+  {
+    "antigo": "busca",
+    "novo": "search",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Cabecalho.tsx",
+      "src/paginas/TelaAlunos.tsx"
+    ]
+  },
+  {
+    "antigo": "BuscaAlunosDto",
+    "novo": "StudentSearchDto",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/servicos/alunos.ts"
+    ],
+    "sugestao": "StudentsSearchDto",
+    "revisado": true
+  },
+  {
+    "antigo": "buscar",
+    "novo": "search",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Cabecalho.tsx"
+    ]
+  },
+  {
+    "antigo": "Cabecalho",
+    "novo": "Header",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/src/componentes/Cabecalho.tsx",
+      "src/componentes/Cabecalho.tsx",
+      "tests/componentes/ComponentesComuns.test.tsx"
+    ]
+  },
+  {
+    "antigo": "CABECALHO_CSRF",
+    "novo": "HEADER_CSRF",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/clienteApi.ts"
+    ]
+  },
+  {
+    "antigo": "cabecalhos",
+    "novo": "headers",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/utilitarios.tsx"
+    ]
+  },
+  {
+    "antigo": "caixa",
+    "novo": "box",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/DialogoConfirmacao.tsx"
+    ]
+  },
+  {
+    "antigo": "caminho",
+    "novo": "path",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/utilitarios.tsx"
+    ]
+  },
+  {
+    "antigo": "caminhoInicial",
+    "novo": "initialPath",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "tests/utilitarios.tsx"
+    ],
+    "sugestao": "initialPath",
+    "revisado": true
+  },
+  {
+    "antigo": "caminhoPdfConferencia",
+    "novo": "reviewPdfPath",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ],
+    "sugestao": "pathPdfReview",
+    "revisado": true
+  },
+  {
+    "antigo": "caminhoPdfSemestral",
+    "novo": "semesterPdfPath",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferenciaSemestral.tsx"
+    ],
+    "sugestao": "pathPdfSemester",
+    "revisado": true
+  },
+  {
+    "antigo": "campo",
+    "novo": "field",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/SecoesSemestral.tsx"
+    ]
+  },
+  {
+    "antigo": "campos",
+    "novo": "fields",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/SecoesSemestral.tsx"
+    ]
+  },
+  {
+    "antigo": "CampoSemestral",
+    "novo": "SemesterField",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ],
+    "sugestao": "SemesterField",
+    "revisado": true
+  },
+  {
+    "antigo": "canal",
+    "novo": "channel",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaRelatorioEmAberto.tsx"
+    ]
+  },
+  {
+    "antigo": "cancelado",
+    "novo": "cancelled",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/paginas/TelaSemestral.test.tsx"
+    ]
+  },
+  {
+    "antigo": "cancelando",
+    "novo": "cancelling",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaPerguntas.tsx"
+    ]
+  },
+  {
+    "antigo": "cancelar",
+    "novo": "cancel",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ]
+  },
+  {
+    "antigo": "carregando",
+    "novo": "loading",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Botao.tsx"
+    ]
+  },
+  {
+    "antigo": "Carregando",
+    "novo": "Loading",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/GuardaSessao.tsx"
+    ]
+  },
+  {
+    "antigo": "CartaoAluno",
+    "novo": "StudentCard",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "frontend/src/componentes/CartaoAluno.tsx",
+      "src/componentes/CartaoAluno.tsx"
+    ],
+    "sugestao": "StudentCard",
+    "revisado": true
+  },
+  {
+    "antigo": "catalogo",
+    "novo": "catalog",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/mensagens/mensagens.ts"
+    ]
+  },
+  {
+    "antigo": "chamada",
+    "novo": "call",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/paginas/TelaHistorico.test.tsx"
+    ]
+  },
+  {
+    "antigo": "chamadas",
+    "novo": "calls",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/utilitarios.tsx"
+    ]
+  },
+  {
+    "antigo": "chave",
+    "novo": "key",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/utilitarios.tsx"
+    ]
+  },
+  {
+    "antigo": "CHAVE",
+    "novo": "KEY",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/TemaProvedor.tsx"
+    ]
+  },
+  {
+    "antigo": "CHAVE_INICIO",
+    "novo": "HOME_KEY",
+    "needsReview": false,
+    "motivo": "reordenado; contextual: inicio (start|home)",
+    "exemplos": [
+      "src/servicos/inicio.ts"
+    ],
+    "sugestao": "START_KEY",
+    "revisado": true
+  },
+  {
+    "antigo": "CHAVE_SESSAO",
+    "novo": "SESSION_KEY",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/app/GuardaSessao.tsx"
+    ],
+    "sugestao": "SESSION_KEY",
+    "revisado": true
+  },
+  {
+    "antigo": "chaveGravador",
+    "novo": "recorderKey",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ],
+    "sugestao": "recorderKey",
+    "revisado": true
+  },
+  {
+    "antigo": "chaveRelatorioAula",
+    "novo": "lessonReportKey",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ],
+    "sugestao": "lessonReportKey",
+    "revisado": true
+  },
+  {
+    "antigo": "chaveRelatorioSemestral",
+    "novo": "semesterReportKey",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaConferenciaSemestral.tsx"
+    ],
+    "sugestao": "semesterReportKey",
+    "revisado": true
+  },
+  {
+    "antigo": "cifra",
+    "novo": "cipher",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/e2e/suporte.ts"
+    ]
+  },
+  {
+    "antigo": "cifrarCpf",
+    "novo": "encryptCpf",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/e2e/suporte.ts"
+    ]
+  },
+  {
+    "antigo": "claro",
+    "novo": "light",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/TemaProvedor.tsx"
+    ]
+  },
+  {
+    "antigo": "cliente",
+    "novo": "client",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/utilitarios.tsx"
+    ]
+  },
+  {
+    "antigo": "clienteApi",
+    "novo": "apiClient",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/src/servicos/clienteApi.ts"
+    ],
+    "sugestao": "clientApi",
+    "revisado": true
+  },
+  {
+    "antigo": "clienteConsultas",
+    "novo": "queryClient",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/app/App.tsx"
+    ],
+    "sugestao": "queriesClient",
+    "revisado": true
+  },
+  {
+    "antigo": "codigo",
+    "novo": "code",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/mensagens/mensagens.ts",
+      "src/paginas/TelaEntrar.tsx"
+    ]
+  },
+  {
+    "antigo": "CODIGO_BRUNO",
+    "novo": "CODE_BRUNO",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/e2e/suporte.ts"
+    ]
+  },
+  {
+    "antigo": "CODIGO_CLARA",
+    "novo": "CODE_CLARA",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/e2e/acessibilidade.spec.ts"
+    ]
+  },
+  {
+    "antigo": "CodigoMensagem",
+    "novo": "MessageCode",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/mensagens/mensagens.ts"
+    ],
+    "sugestao": "MessageCode",
+    "revisado": true
+  },
+  {
+    "antigo": "comBanco",
+    "novo": "withDatabase",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "tests/e2e/suporte.ts"
+    ],
+    "sugestao": "databaseCom",
+    "revisado": true
+  },
+  {
+    "antigo": "comentario",
+    "novo": "comment",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ]
+  },
+  {
+    "antigo": "comentarioGeral",
+    "novo": "generalComment",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ],
+    "sugestao": "generalComment",
+    "revisado": true
+  },
+  {
+    "antigo": "comentarioMusical",
+    "novo": "commentMusical",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ]
+  },
+  {
+    "antigo": "compacto",
+    "novo": "compact",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx",
+      "src/componentes/Botao.tsx"
+    ]
+  },
+  {
+    "antigo": "componentes",
+    "novo": "components",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/src/componentes/Botao.tsx",
+      "frontend/src/componentes/Cabecalho.tsx",
+      "frontend/src/componentes/CartaoAluno.tsx"
+    ]
+  },
+  {
+    "antigo": "ComponentesComuns",
+    "novo": "CommonComponents",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "frontend/tests/componentes/ComponentesComuns.test.tsx"
+    ],
+    "sugestao": "CommonComponents",
+    "revisado": true
+  },
+  {
+    "antigo": "concluida",
+    "novo": "completed",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/EtapasProcessamento.tsx",
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "concluido",
+    "novo": "completed",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ]
+  },
+  {
+    "antigo": "conferencia",
+    "novo": "review",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/paginas/RegistroAula.test.tsx"
+    ]
+  },
+  {
+    "antigo": "configuracao",
+    "novo": "config",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/tests/configuracao.ts"
+    ]
+  },
+  {
+    "antigo": "confirmando",
+    "novo": "confirming",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ]
+  },
+  {
+    "antigo": "confirmar",
+    "novo": "confirm",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ]
+  },
+  {
+    "antigo": "confirmarCancelamento",
+    "novo": "confirmCancellation",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaPerguntas.tsx"
+    ]
+  },
+  {
+    "antigo": "confirmarDescarte",
+    "novo": "confirmDiscard",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaSemestral.tsx"
+    ]
+  },
+  {
+    "antigo": "confirmarMesmoComEmAberto",
+    "novo": "confirmDespiteOpenReports",
+    "needsReview": false,
+    "motivo": "reordenado; conectivo",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ],
+    "sugestao": "confirmOpenInComSame",
+    "revisado": true
+  },
+  {
+    "antigo": "consulta",
+    "novo": "query",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/configuracao.ts"
+    ]
+  },
+  {
+    "antigo": "CONSULTA",
+    "novo": "QUERY",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/useEhMovel.ts"
+    ]
+  },
+  {
+    "antigo": "consultas",
+    "novo": "queries",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/paginas/AudioPerguntasConferencia.test.tsx"
+    ]
+  },
+  {
+    "antigo": "conteudo",
+    "novo": "content",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/SecoesRelatorio.tsx",
+      "src/componentes/Estrutura.tsx"
+    ]
+  },
+  {
+    "antigo": "Conteudo",
+    "novo": "Content",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/SecoesRelatorio.tsx"
+    ]
+  },
+  {
+    "antigo": "contexto",
+    "novo": "context",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/TemaProvedor.tsx"
+    ]
+  },
+  {
+    "antigo": "Contexto",
+    "novo": "ThemeContext",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/TemaProvedor.tsx"
+    ],
+    "sugestao": "Context",
+    "revisado": true
+  },
+  {
+    "antigo": "ContextoCabecalho",
+    "novo": "HeaderContext",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/componentes/Cabecalho.tsx"
+    ],
+    "sugestao": "HeaderContext",
+    "revisado": true
+  },
+  {
+    "antigo": "ContextoTema",
+    "novo": "ThemeContextValue",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/app/TemaProvedor.tsx"
+    ],
+    "sugestao": "ThemeContext",
+    "revisado": true
+  },
+  {
+    "antigo": "controle",
+    "novo": "control",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/pdf.ts"
+    ]
+  },
+  {
+    "antigo": "corpo",
+    "novo": "body",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/utilitarios.tsx"
+    ]
+  },
+  {
+    "antigo": "corpoErro",
+    "novo": "errorBody",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/servicos/clienteApi.ts"
+    ],
+    "sugestao": "errorBody",
+    "revisado": true
+  },
+  {
+    "antigo": "CPF_CHAVE",
+    "novo": "CPF_KEY",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/e2e/suporte.ts"
+    ]
+  },
+  {
+    "antigo": "criada",
+    "novo": "created",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/pdf.ts"
+    ]
+  },
+  {
+    "antigo": "criarClienteConsultas",
+    "novo": "createQueryClient",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/app/App.tsx"
+    ],
+    "sugestao": "createQueriesClient",
+    "revisado": true
+  },
+  {
+    "antigo": "dados",
+    "novo": "data",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaAlunos.tsx"
+    ]
+  },
+  {
+    "antigo": "DATA_FUSO",
+    "novo": "DATE_FORMATTER",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/servicos/formatacao.ts"
+    ],
+    "sugestao": "TIMEZONE_DATE",
+    "revisado": true
+  },
+  {
+    "antigo": "dataDoInstante",
+    "novo": "instantDate",
+    "needsReview": false,
+    "motivo": "conectivo",
+    "exemplos": [
+      "src/paginas/TelaAprovado.tsx"
+    ],
+    "sugestao": "dataInstant",
+    "revisado": true
+  },
+  {
+    "antigo": "definicao",
+    "novo": "definition",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/utilitarios.tsx"
+    ]
+  },
+  {
+    "antigo": "desabilitado",
+    "novo": "disabled",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "desatualizada",
+    "novo": "stale",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ]
+  },
+  {
+    "antigo": "descartando",
+    "novo": "discarding",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaRelatorioEmAberto.tsx"
+    ]
+  },
+  {
+    "antigo": "descartar",
+    "novo": "discard",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaRelatorioEmAberto.tsx"
+    ]
+  },
+  {
+    "antigo": "descartarConsolidacao",
+    "novo": "discardConsolidation",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaSemestral.tsx"
+    ]
+  },
+  {
+    "antigo": "descricao",
+    "novo": "description",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/CartaoAluno.tsx"
+    ]
+  },
+  {
+    "antigo": "descricaoAluno",
+    "novo": "studentDescription",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/componentes/CartaoAluno.tsx"
+    ],
+    "sugestao": "studentDescription",
+    "revisado": true
+  },
+  {
+    "antigo": "destino",
+    "novo": "destination",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/GuardaSessao.tsx"
+    ]
+  },
+  {
+    "antigo": "destinoDoResultado",
+    "novo": "resultDestination",
+    "needsReview": false,
+    "motivo": "reordenado; conectivo",
+    "exemplos": [
+      "src/paginas/TelaProcessando.tsx"
+    ],
+    "sugestao": "resultDestination",
+    "revisado": true
+  },
+  {
+    "antigo": "destinos",
+    "novo": "destinations",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/e2e/historico.spec.ts"
+    ]
+  },
+  {
+    "antigo": "destinoSeguro",
+    "novo": "safeDestination",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaEntrar.tsx"
+    ],
+    "sugestao": "safeDestination",
+    "revisado": true
+  },
+  {
+    "antigo": "detalhes",
+    "novo": "details",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/clienteApi.ts"
+    ]
+  },
+  {
+    "antigo": "dia",
+    "novo": "day",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaHistorico.tsx"
+    ]
+  },
+  {
+    "antigo": "dialogo",
+    "novo": "dialog",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ]
+  },
+  {
+    "antigo": "DialogoConfirmacao",
+    "novo": "ConfirmationDialog",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "frontend/src/componentes/DialogoConfirmacao.tsx",
+      "src/componentes/DialogoConfirmacao.tsx",
+      "tests/componentes/ComponentesComuns.test.tsx"
+    ],
+    "sugestao": "ConfirmationDialog",
+    "revisado": true
+  },
+  {
+    "antigo": "dica",
+    "novo": "tip",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "digitos",
+    "novo": "digits",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/e2e/suporte.ts"
+    ]
+  },
+  {
+    "antigo": "disponivel",
+    "novo": "available",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/VisualizadorPdf.tsx"
+    ]
+  },
+  {
+    "antigo": "elemento",
+    "novo": "element",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/utilitarios.tsx"
+    ]
+  },
+  {
+    "antigo": "encerrar",
+    "novo": "end",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Cabecalho.tsx"
+    ]
+  },
+  {
+    "antigo": "engajamento",
+    "novo": "engagement",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ]
+  },
+  {
+    "antigo": "entendido",
+    "novo": "understood",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ]
+  },
+  {
+    "antigo": "entrada",
+    "novo": "input",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/utilitarios.tsx"
+    ],
+    "sugestao": "inbound",
+    "revisado": true
+  },
+  {
+    "antigo": "entradaArquivo",
+    "novo": "fileInput",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ],
+    "sugestao": "fileInbound",
+    "revisado": true
+  },
+  {
+    "antigo": "entrar",
+    "novo": "signin",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaEntrar.tsx"
+    ]
+  },
+  {
+    "antigo": "Entrar",
+    "novo": "SignIn",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaEntrar.tsx"
+    ]
+  },
+  {
+    "antigo": "enviando",
+    "novo": "uploading",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaGravacao.tsx"
+    ]
+  },
+  {
+    "antigo": "enviandoAjuste",
+    "novo": "uploadingAdjustment",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ],
+    "sugestao": "adjustmentUploading",
+    "revisado": true
+  },
+  {
+    "antigo": "enviar",
+    "novo": "send",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaEntrar.tsx"
+    ]
+  },
+  {
+    "antigo": "Enviar",
+    "novo": "Send",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/componentes/ComponentesComuns.test.tsx"
+    ]
+  },
+  {
+    "antigo": "enviarAudio",
+    "novo": "sendAudio",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/e2e/acessibilidade.spec.ts"
+    ]
+  },
+  {
+    "antigo": "envio",
+    "novo": "sending",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/paginas/AudioPerguntasConferencia.test.tsx"
+    ]
+  },
+  {
+    "antigo": "erro",
+    "novo": "error",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/App.tsx",
+      "src/paginas/TelaConferencia.tsx"
+    ]
+  },
+  {
+    "antigo": "erroAcao",
+    "novo": "actionError",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaProcessando.tsx"
+    ],
+    "sugestao": "actionError",
+    "revisado": true
+  },
+  {
+    "antigo": "erroAjuste",
+    "novo": "adjustmentError",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ],
+    "sugestao": "adjustmentError",
+    "revisado": true
+  },
+  {
+    "antigo": "ErroApi",
+    "novo": "ApiError",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/App.tsx",
+      "src/servicos/clienteApi.ts"
+    ],
+    "sugestao": "ErrorApi",
+    "revisado": true
+  },
+  {
+    "antigo": "erroCancelamento",
+    "novo": "cancellationError",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaPerguntas.tsx"
+    ],
+    "sugestao": "cancellationError",
+    "revisado": true
+  },
+  {
+    "antigo": "ErroContrato",
+    "novo": "ContractError",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/servicos/clienteApi.ts"
+    ],
+    "sugestao": "ContractError",
+    "revisado": true
+  },
+  {
+    "antigo": "erroDescarte",
+    "novo": "discardError",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaSemestral.tsx"
+    ],
+    "sugestao": "discardError",
+    "revisado": true
+  },
+  {
+    "antigo": "erroDialogo",
+    "novo": "dialogError",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ],
+    "sugestao": "dialogError",
+    "revisado": true
+  },
+  {
+    "antigo": "erroLocal",
+    "novo": "localError",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaPerguntas.tsx"
+    ],
+    "sugestao": "localError",
+    "revisado": true
+  },
+  {
+    "antigo": "escolherArquivo",
+    "novo": "chooseFile",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "escolhido",
+    "novo": "chosen",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "escuro",
+    "novo": "dark",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/TemaProvedor.tsx"
+    ]
+  },
+  {
+    "antigo": "esmaecido",
+    "novo": "faded",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/SecoesRelatorio.tsx"
+    ]
+  },
+  {
+    "antigo": "espera",
+    "novo": "wait",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaAlunos.tsx"
+    ]
+  },
+  {
+    "antigo": "EsqueletoCartoes",
+    "novo": "CardsSkeleton",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/componentes/EstadoCarregando.tsx"
+    ],
+    "sugestao": "CardsSkeleton",
+    "revisado": true
+  },
+  {
+    "antigo": "Esquemas",
+    "novo": "Schemas",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/alunos.ts"
+    ]
+  },
+  {
+    "antigo": "estado",
+    "novo": "state",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "EstadoCarregando",
+    "novo": "LoadingState",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "frontend/src/componentes/EstadoCarregando.tsx",
+      "src/app/GuardaSessao.tsx"
+    ],
+    "sugestao": "LoadingState",
+    "revisado": true
+  },
+  {
+    "antigo": "EstadoErro",
+    "novo": "ErrorState",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "frontend/src/componentes/EstadoErro.tsx",
+      "src/app/GuardaSessao.tsx"
+    ],
+    "sugestao": "ErrorState",
+    "revisado": true
+  },
+  {
+    "antigo": "EstadoGravacao",
+    "novo": "RecordingState",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ],
+    "sugestao": "RecordingState",
+    "revisado": true
+  },
+  {
+    "antigo": "estadoInicial",
+    "novo": "initialState",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ],
+    "sugestao": "initialState",
+    "revisado": true
+  },
+  {
+    "antigo": "Estados",
+    "novo": "States",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/componentes/ComponentesComuns.test.tsx"
+    ]
+  },
+  {
+    "antigo": "EstadoVazio",
+    "novo": "EmptyState",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "frontend/src/componentes/EstadoVazio.tsx",
+      "src/app/rotas.tsx"
+    ],
+    "sugestao": "EmptyState",
+    "revisado": true
+  },
+  {
+    "antigo": "estilo",
+    "novo": "style",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ]
+  },
+  {
+    "antigo": "estilos",
+    "novo": "styles",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/src/estilos/base.css",
+      "frontend/src/estilos/fontes.css",
+      "frontend/src/estilos/fontes/LICENSE-MaterialSymbols.txt"
+    ]
+  },
+  {
+    "antigo": "estrategiasPedagogicas",
+    "novo": "pedagogicalStrategies",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ],
+    "sugestao": "pedagogicalsStrategies",
+    "revisado": true
+  },
+  {
+    "antigo": "Estrutura",
+    "novo": "Layout",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/src/componentes/Estrutura.tsx",
+      "src/app/rotas.tsx"
+    ],
+    "sugestao": "Structure",
+    "revisado": true
+  },
+  {
+    "antigo": "estudosRealizados",
+    "novo": "completedStudies",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ],
+    "sugestao": "performedStudies",
+    "revisado": true
+  },
+  {
+    "antigo": "estudosTecnicos",
+    "novo": "technicalStudies",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ],
+    "sugestao": "technicalStudies",
+    "revisado": true
+  },
+  {
+    "antigo": "etapa",
+    "novo": "step",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/EtapasProcessamento.tsx"
+    ]
+  },
+  {
+    "antigo": "Etapa",
+    "novo": "Step",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/EtapasProcessamento.tsx"
+    ]
+  },
+  {
+    "antigo": "etapas",
+    "novo": "steps",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/EtapasProcessamento.tsx"
+    ]
+  },
+  {
+    "antigo": "ETAPAS_POR_TIPO",
+    "novo": "STEPS_BY_TYPE",
+    "needsReview": false,
+    "motivo": "sufixo; reordenado",
+    "exemplos": [
+      "src/componentes/EtapasProcessamento.tsx"
+    ],
+    "sugestao": "POR_STEPS_TYPE",
+    "revisado": true
+  },
+  {
+    "antigo": "etapasDoTrabalho",
+    "novo": "jobSteps",
+    "needsReview": false,
+    "motivo": "reordenado; conectivo",
+    "exemplos": [
+      "src/componentes/EtapasProcessamento.tsx"
+    ],
+    "sugestao": "jobSteps",
+    "revisado": true
+  },
+  {
+    "antigo": "EtapasProcessamento",
+    "novo": "ProcessingSteps",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "frontend/src/componentes/EtapasProcessamento.tsx",
+      "src/componentes/EtapasProcessamento.tsx"
+    ],
+    "sugestao": "ProcessingSteps",
+    "revisado": true
+  },
+  {
+    "antigo": "evento",
+    "novo": "event",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/GuardaSessao.tsx"
+    ]
+  },
+  {
+    "antigo": "EVENTO_SESSAO_EXPIRADA",
+    "novo": "SESSION_EXPIRED_EVENT",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/app/GuardaSessao.tsx"
+    ],
+    "sugestao": "EXPIRED_SESSION_EVENT",
+    "revisado": true
+  },
+  {
+    "antigo": "evolucaoTecnica",
+    "novo": "technicalProgress",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ],
+    "sugestao": "techniqueProgress",
+    "revisado": true
+  },
+  {
+    "antigo": "excedeuLimite",
+    "novo": "limitExceeded",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaProcessando.tsx"
+    ],
+    "sugestao": "limitExceeded",
+    "revisado": true
+  },
+  {
+    "antigo": "excedidoEm",
+    "novo": "exceededAt",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/trabalhos.ts"
+    ]
+  },
+  {
+    "antigo": "executar",
+    "novo": "run",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/clienteApi.ts"
+    ]
+  },
+  {
+    "antigo": "existeMensagem",
+    "novo": "hasMessage",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/mensagens/mensagens.ts"
+    ],
+    "sugestao": "messageExists",
+    "revisado": true
+  },
+  {
+    "antigo": "extensao",
+    "novo": "extension",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "faixa",
+    "novo": "track",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ],
+    "sugestao": "range",
+    "revisado": true
+  },
+  {
+    "antigo": "falha",
+    "novo": "failure",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/VisualizadorPdf.tsx"
+    ]
+  },
+  {
+    "antigo": "falhou",
+    "novo": "failed",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaProcessando.tsx"
+    ]
+  },
+  {
+    "antigo": "falso",
+    "novo": "false",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/utilitarios.tsx"
+    ]
+  },
+  {
+    "antigo": "fb-filete-marfim",
+    "novo": "fb-divider-ivory",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "frontend/public/marca/fb-filete-marfim.png"
+    ],
+    "sugestao": "fb-ivory-divider",
+    "revisado": true
+  },
+  {
+    "antigo": "fb-filete-ouro",
+    "novo": "fb-divider-gold",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "frontend/public/marca/fb-filete-ouro.png"
+    ],
+    "sugestao": "fb-gold-divider",
+    "revisado": true
+  },
+  {
+    "antigo": "fb-filete-ouroclaro",
+    "novo": "fb-divider-lightgold",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "frontend/public/marca/fb-filete-ouroclaro.png"
+    ],
+    "sugestao": "fb-lightgold-divider",
+    "revisado": true
+  },
+  {
+    "antigo": "fb-filete-preto",
+    "novo": "fb-divider-black",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "frontend/public/marca/fb-filete-preto.png"
+    ],
+    "sugestao": "fb-black-divider",
+    "revisado": true
+  },
+  {
+    "antigo": "fb-logo-marfim",
+    "novo": "fb-logo-ivory",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/public/marca/fb-logo-marfim.png"
+    ]
+  },
+  {
+    "antigo": "fb-logo-ouro",
+    "novo": "fb-logo-gold",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/public/marca/fb-logo-ouro.png"
+    ]
+  },
+  {
+    "antigo": "fb-logo-preto",
+    "novo": "fb-logo-black",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/public/marca/fb-logo-preto.png"
+    ]
+  },
+  {
+    "antigo": "fb-monograma-marfim",
+    "novo": "fb-monogram-ivory",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/public/marca/fb-monograma-marfim.png"
+    ],
+    "sugestao": "fb-monograma-ivory",
+    "revisado": true
+  },
+  {
+    "antigo": "fb-monograma-ouro",
+    "novo": "fb-monogram-gold",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/public/marca/fb-monograma-ouro.png"
+    ],
+    "sugestao": "fb-monograma-gold",
+    "revisado": true
+  },
+  {
+    "antigo": "fb-monograma-ouroclaro",
+    "novo": "fb-monogram-lightgold",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/public/marca/fb-monograma-ouroclaro.png"
+    ],
+    "sugestao": "fb-monograma-lightgold",
+    "revisado": true
+  },
+  {
+    "antigo": "fb-monograma-preto",
+    "novo": "fb-monogram-black",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/public/marca/fb-monograma-preto.png"
+    ],
+    "sugestao": "fb-monograma-black",
+    "revisado": true
+  },
+  {
+    "antigo": "fb-wordmark-marfim",
+    "novo": "fb-wordmark-ivory",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/public/marca/fb-wordmark-marfim.png"
+    ]
+  },
+  {
+    "antigo": "fb-wordmark-ouro",
+    "novo": "fb-wordmark-gold",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/public/marca/fb-wordmark-ouro.png"
+    ]
+  },
+  {
+    "antigo": "fb-wordmark-preto",
+    "novo": "fb-wordmark-black",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/public/marca/fb-wordmark-preto.png"
+    ]
+  },
+  {
+    "antigo": "fim",
+    "novo": "end",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/DialogoConfirmacao.tsx"
+    ]
+  },
+  {
+    "antigo": "finalizado",
+    "novo": "finalized",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ]
+  },
+  {
+    "antigo": "fluxo",
+    "novo": "flow",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "fluxo-aula",
+    "novo": "lesson-flow",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "frontend/tests/e2e/fluxo-aula.spec.ts"
+    ],
+    "sugestao": "lesson-flow",
+    "revisado": true
+  },
+  {
+    "antigo": "fluxo-semestral",
+    "novo": "semester-flow",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "frontend/tests/e2e/fluxo-semestral.spec.ts"
+    ],
+    "sugestao": "semester-flow",
+    "revisado": true
+  },
+  {
+    "antigo": "focaveis",
+    "novo": "focusable",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/DialogoConfirmacao.tsx"
+    ]
+  },
+  {
+    "antigo": "FOCAVEIS",
+    "novo": "FOCUSABLE",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/DialogoConfirmacao.tsx"
+    ]
+  },
+  {
+    "antigo": "foco",
+    "novo": "focus",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaAlunos.tsx"
+    ]
+  },
+  {
+    "antigo": "fontes",
+    "novo": "fonts",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/src/estilos/fontes.css",
+      "frontend/src/estilos/fontes/LICENSE-MaterialSymbols.txt",
+      "frontend/src/estilos/fontes/LICENSE-SourceSans3.md"
+    ]
+  },
+  {
+    "antigo": "formatacao",
+    "novo": "formatting",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/src/servicos/formatacao.ts"
+    ]
+  },
+  {
+    "antigo": "formatar",
+    "novo": "format",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/package.json"
+    ]
+  },
+  {
+    "antigo": "formatarData",
+    "novo": "formatDate",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/CartaoAluno.tsx"
+    ]
+  },
+  {
+    "antigo": "formatarTamanho",
+    "novo": "formatSize",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "formatarTempo",
+    "novo": "formatTime",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "formato",
+    "novo": "format",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "Formato",
+    "novo": "Format",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ]
+  },
+  {
+    "antigo": "formatoGravacao",
+    "novo": "recordingFormat",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ],
+    "sugestao": "recordingFormat",
+    "revisado": true
+  },
+  {
+    "antigo": "formulario",
+    "novo": "form",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/clienteApi.ts"
+    ]
+  },
+  {
+    "antigo": "formularioAudio",
+    "novo": "audioForm",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/servicos/relatoriosAula.ts"
+    ],
+    "sugestao": "audioForm",
+    "revisado": true
+  },
+  {
+    "antigo": "fraseado",
+    "novo": "phrasing",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ]
+  },
+  {
+    "antigo": "frequenciaAulas",
+    "novo": "lessonAttendance",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ],
+    "sugestao": "lessonsAttendance",
+    "revisado": true
+  },
+  {
+    "antigo": "frequenciaEEstudo",
+    "novo": "attendanceAndStudy",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ],
+    "sugestao": "attendanceEStudy",
+    "revisado": true
+  },
+  {
+    "antigo": "FUSO_ESCOLA",
+    "novo": "SCHOOL_TIMEZONE",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/servicos/formatacao.ts"
+    ],
+    "sugestao": "SCHOOL_TIMEZONE",
+    "revisado": true
+  },
+  {
+    "antigo": "garantirCsrf",
+    "novo": "ensureCsrf",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/clienteApi.ts"
+    ]
+  },
+  {
+    "antigo": "gerando",
+    "novo": "generating",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaSemestral.tsx"
+    ]
+  },
+  {
+    "antigo": "gerar",
+    "novo": "generate",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaSemestral.tsx",
+      "frontend/package.json"
+    ]
+  },
+  {
+    "antigo": "gerar-mensagens",
+    "novo": "generate-messages",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/scripts/gerar-mensagens.mjs"
+    ]
+  },
+  {
+    "antigo": "grande",
+    "novo": "large",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/componentes/GravadorAudio.test.tsx",
+      "src/componentes/Botao.tsx"
+    ]
+  },
+  {
+    "antigo": "gravacao",
+    "novo": "recording",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "gravacaoDisponivel",
+    "novo": "recordingAvailable",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ],
+    "sugestao": "availableRecording",
+    "revisado": true
+  },
+  {
+    "antigo": "gravador",
+    "novo": "recorder",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "GravadorAudio",
+    "novo": "AudioRecorder",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "frontend/src/componentes/GravadorAudio.tsx",
+      "frontend/tests/componentes/GravadorAudio.test.tsx",
+      "src/componentes/GravadorAudio.tsx"
+    ],
+    "sugestao": "AudioRecorder",
+    "revisado": true
+  },
+  {
+    "antigo": "GravadorFalso",
+    "novo": "FakeRecorder",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "tests/componentes/GravadorAudio.test.tsx"
+    ],
+    "sugestao": "FalseRecorder",
+    "revisado": true
+  },
+  {
+    "antigo": "gravando",
+    "novo": "recording",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "grupo",
+    "novo": "group",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/paginas/TelaSemestral.test.tsx"
+    ]
+  },
+  {
+    "antigo": "GUARDADO",
+    "novo": "STORED",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/TemaProvedor.tsx"
+    ]
+  },
+  {
+    "antigo": "GuardaSessao",
+    "novo": "SessionGuard",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "frontend/src/app/GuardaSessao.tsx",
+      "src/app/GuardaSessao.tsx"
+    ],
+    "sugestao": "SessionGuard",
+    "revisado": true
+  },
+  {
+    "antigo": "h-alunos",
+    "novo": "h-students",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaPainel.tsx"
+    ]
+  },
+  {
+    "antigo": "habitosDeEstudo",
+    "novo": "studyHabits",
+    "needsReview": false,
+    "motivo": "reordenado; conectivo",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ],
+    "sugestao": "studyHabits",
+    "revisado": true
+  },
+  {
+    "antigo": "historico",
+    "novo": "history",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/src/servicos/historico.ts",
+      "frontend/tests/e2e/historico.spec.ts",
+      "src/paginas/TelaHistorico.tsx"
+    ]
+  },
+  {
+    "antigo": "HistoricoDto",
+    "novo": "HistoryDto",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/historico.ts"
+    ]
+  },
+  {
+    "antigo": "hojeNaEscola",
+    "novo": "todayAtSchool",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaGravacao.tsx"
+    ],
+    "sugestao": "todayNaSchool",
+    "revisado": true
+  },
+  {
+    "antigo": "HORA_FUSO",
+    "novo": "TIME_FORMATTER",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/formatacao.ts"
+    ],
+    "sugestao": "HORA_TIMEZONE",
+    "revisado": true
+  },
+  {
+    "antigo": "horaDoInstante",
+    "novo": "instantTime",
+    "needsReview": false,
+    "motivo": "conectivo",
+    "exemplos": [
+      "src/paginas/TelaAprovado.tsx"
+    ],
+    "sugestao": "horaInstant",
+    "revisado": true
+  },
+  {
+    "antigo": "icone",
+    "novo": "icon",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/rotas.tsx",
+      "src/componentes/Botao.tsx"
+    ]
+  },
+  {
+    "antigo": "Icone",
+    "novo": "Icon",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/src/componentes/Icone.tsx",
+      "src/componentes/Botao.tsx"
+    ]
+  },
+  {
+    "antigo": "icones-incluidos",
+    "novo": "included-icons",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "frontend/src/estilos/fontes/icones-incluidos.txt"
+    ],
+    "sugestao": "included-icons",
+    "revisado": true
+  },
+  {
+    "antigo": "idAjuda",
+    "novo": "helpId",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ],
+    "sugestao": "idHelp",
+    "revisado": true
+  },
+  {
+    "antigo": "idAjuste",
+    "novo": "adjustmentId",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ],
+    "sugestao": "idAdjustment",
+    "revisado": true
+  },
+  {
+    "antigo": "idMensagem",
+    "novo": "messageId",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaEntrar.tsx"
+    ],
+    "sugestao": "idMessage",
+    "revisado": true
+  },
+  {
+    "antigo": "idResposta",
+    "novo": "responseId",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaPerguntas.tsx"
+    ],
+    "sugestao": "idResponse",
+    "revisado": true
+  },
+  {
+    "antigo": "idTexto",
+    "novo": "textId",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/DialogoConfirmacao.tsx"
+    ],
+    "sugestao": "idText",
+    "revisado": true
+  },
+  {
+    "antigo": "idTitulo",
+    "novo": "titleId",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/DialogoConfirmacao.tsx"
+    ],
+    "sugestao": "idTitle",
+    "revisado": true
+  },
+  {
+    "antigo": "indice",
+    "novo": "index",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/EtapasProcessamento.tsx"
+    ]
+  },
+  {
+    "antigo": "indiceAtual",
+    "novo": "currentIndex",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/componentes/EtapasProcessamento.tsx"
+    ],
+    "sugestao": "currentIndex",
+    "revisado": true
+  },
+  {
+    "antigo": "indisponivel",
+    "novo": "unavailable",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "iniciais",
+    "novo": "initials",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Cabecalho.tsx"
+    ],
+    "sugestao": "initial",
+    "revisado": true
+  },
+  {
+    "antigo": "iniciar",
+    "novo": "start",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "inicio",
+    "novo": "start",
+    "needsReview": false,
+    "motivo": "contextual: inicio (start|home)",
+    "exemplos": [
+      "frontend/src/servicos/inicio.ts",
+      "src/componentes/DialogoConfirmacao.tsx",
+      "src/servicos/inicio.ts"
+    ],
+    "sugestao": "start",
+    "revisado": true
+  },
+  {
+    "antigo": "INICIO",
+    "novo": "HOME",
+    "needsReview": false,
+    "motivo": "contextual: inicio (start|home)",
+    "exemplos": [
+      "tests/paginas/RegistroAula.test.tsx"
+    ],
+    "sugestao": "START",
+    "revisado": true
+  },
+  {
+    "antigo": "InicioDto",
+    "novo": "HomeDto",
+    "needsReview": false,
+    "motivo": "contextual: inicio (start|home)",
+    "exemplos": [
+      "src/servicos/inicio.ts"
+    ],
+    "sugestao": "StartDto",
+    "revisado": true
+  },
+  {
+    "antigo": "instante",
+    "novo": "instant",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/formatacao.ts"
+    ]
+  },
+  {
+    "antigo": "instrumento",
+    "novo": "instrument",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/e2e/suporte.ts"
+    ]
+  },
+  {
+    "antigo": "intervalo",
+    "novo": "interval",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaSemestral.tsx"
+    ]
+  },
+  {
+    "antigo": "INTERVALO_POLLING_MS",
+    "novo": "INTERVAL_POLLING_MS",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/trabalhos.ts"
+    ]
+  },
+  {
+    "antigo": "invalido",
+    "novo": "invalid",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaEntrar.tsx"
+    ]
+  },
+  {
+    "antigo": "ItemHistoricoDto",
+    "novo": "HistoryItemDto",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaHistorico.tsx"
+    ],
+    "sugestao": "HistoryItemDto",
+    "revisado": true
+  },
+  {
+    "antigo": "ItemNavegacao",
+    "novo": "NavigationItem",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/componentes/Cabecalho.tsx"
+    ],
+    "sugestao": "NavigationItem",
+    "revisado": true
+  },
+  {
+    "antigo": "itens",
+    "novo": "items",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/SecoesRelatorio.tsx"
+    ]
+  },
+  {
+    "antigo": "ITENS",
+    "novo": "ITEMS",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/paginas/TelaHistorico.test.tsx"
+    ]
+  },
+  {
+    "antigo": "ITENS_NAVEGACAO",
+    "novo": "NAVIGATION_ITEMS",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/componentes/Cabecalho.tsx"
+    ],
+    "sugestao": "NAVIGATION_ITEMS",
+    "revisado": true
+  },
+  {
+    "antigo": "largura",
+    "novo": "width",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/e2e/acessibilidade.spec.ts"
+    ]
+  },
+  {
+    "antigo": "LARGURAS",
+    "novo": "WIDTHS",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/e2e/acessibilidade.spec.ts"
+    ]
+  },
+  {
+    "antigo": "leituraEMemorizacao",
+    "novo": "readingAndMemorization",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ],
+    "sugestao": "readingEMemorization",
+    "revisado": true
+  },
+  {
+    "antigo": "leituraETeoria",
+    "novo": "readingAndTheory",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ],
+    "sugestao": "readingETeoria",
+    "revisado": true
+  },
+  {
+    "antigo": "lerCookie",
+    "novo": "readCookie",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/clienteApi.ts"
+    ],
+    "sugestao": "readCookie",
+    "revisado": true
+  },
+  {
+    "antigo": "lerPreferencia",
+    "novo": "readPreference",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/app/TemaProvedor.tsx"
+    ],
+    "sugestao": "preferenceRead",
+    "revisado": true
+  },
+  {
+    "antigo": "liberarMicrofone",
+    "novo": "releaseMicrophone",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "LIMITE_PADRAO_MB",
+    "novo": "DEFAULT_LIMIT_MB",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaGravacao.tsx"
+    ],
+    "sugestao": "DEFAULT_LIMIT_MB",
+    "revisado": true
+  },
+  {
+    "antigo": "LIMITE_POLLING_MS",
+    "novo": "LIMIT_POLLING_MS",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/trabalhos.ts"
+    ]
+  },
+  {
+    "antigo": "limiteBytes",
+    "novo": "limitBytes",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "limiteMb",
+    "novo": "limitMb",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "linha",
+    "novo": "line",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ]
+  },
+  {
+    "antigo": "linhas",
+    "novo": "rows",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/EstadoCarregando.tsx"
+    ]
+  },
+  {
+    "antigo": "link-perigo",
+    "novo": "link-danger",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Botao.tsx"
+    ]
+  },
+  {
+    "antigo": "lista",
+    "novo": "list",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/useEhMovel.ts"
+    ]
+  },
+  {
+    "antigo": "logado",
+    "novo": "authenticated",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/paginas/TelaEntrar.test.tsx"
+    ]
+  },
+  {
+    "antigo": "marca",
+    "novo": "brand",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/public/marca/fb-filete-marfim.png",
+      "frontend/public/marca/fb-filete-ouro.png",
+      "frontend/public/marca/fb-filete-ouroclaro.png"
+    ]
+  },
+  {
+    "antigo": "marfim",
+    "novo": "ivory",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/TemaProvedor.tsx"
+    ]
+  },
+  {
+    "antigo": "mensagem",
+    "novo": "message",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaEntrar.tsx"
+    ]
+  },
+  {
+    "antigo": "mensagens",
+    "novo": "messages",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/src/mensagens/mensagens.json",
+      "frontend/src/mensagens/mensagens.ts",
+      "frontend/package.json"
+    ]
+  },
+  {
+    "antigo": "menuAberto",
+    "novo": "menuOpen",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Cabecalho.tsx"
+    ]
+  },
+  {
+    "antigo": "MenuProfessor",
+    "novo": "TeacherMenu",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Cabecalho.tsx"
+    ],
+    "sugestao": "MenuTeacher",
+    "revisado": true
+  },
+  {
+    "antigo": "mes",
+    "novo": "month",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaHistorico.tsx"
+    ]
+  },
+  {
+    "antigo": "MESES",
+    "novo": "MONTHS",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/historico.ts"
+    ]
+  },
+  {
+    "antigo": "mesInicio",
+    "novo": "startMonth",
+    "needsReview": false,
+    "motivo": "reordenado; contextual: inicio (start|home)",
+    "exemplos": [
+      "src/servicos/historico.ts"
+    ],
+    "sugestao": "startMonth",
+    "revisado": true
+  },
+  {
+    "antigo": "mesmoComEmAberto",
+    "novo": "despiteOpenReports",
+    "needsReview": false,
+    "motivo": "reordenado; conectivo",
+    "exemplos": [
+      "src/paginas/TelaSemestral.tsx"
+    ],
+    "sugestao": "sameOpenInCom",
+    "revisado": true
+  },
+  {
+    "antigo": "metasMusicais",
+    "novo": "goalsMusicais",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ]
+  },
+  {
+    "antigo": "metasTecnicas",
+    "novo": "technicalGoals",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ],
+    "sugestao": "techniquesGoals",
+    "revisado": true
+  },
+  {
+    "antigo": "metodo",
+    "novo": "method",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/utilitarios.tsx"
+    ]
+  },
+  {
+    "antigo": "midia",
+    "novo": "media",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "minutos",
+    "novo": "minutes",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "modelo",
+    "novo": "model",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/mensagens/mensagens.ts"
+    ]
+  },
+  {
+    "antigo": "mostrarPdf",
+    "novo": "showPdf",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ]
+  },
+  {
+    "antigo": "mostrarTexto",
+    "novo": "showText",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ]
+  },
+  {
+    "antigo": "motivo",
+    "novo": "reason",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/GuardaSessao.tsx"
+    ]
+  },
+  {
+    "antigo": "movel",
+    "novo": "mobile",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Cabecalho.tsx"
+    ]
+  },
+  {
+    "antigo": "musicalidade",
+    "novo": "musicality",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ]
+  },
+  {
+    "antigo": "navAtiva",
+    "novo": "activeNav",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Cabecalho.tsx"
+    ],
+    "sugestao": "navActive",
+    "revisado": true
+  },
+  {
+    "antigo": "navegar",
+    "novo": "navigate",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/GuardaSessao.tsx"
+    ]
+  },
+  {
+    "antigo": "navInferior",
+    "novo": "bottomNav",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Estrutura.tsx"
+    ],
+    "sugestao": "navLower",
+    "revisado": true
+  },
+  {
+    "antigo": "negado",
+    "novo": "denied",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/componentes/GravadorAudio.test.tsx"
+    ],
+    "sugestao": "denied",
+    "revisado": true
+  },
+  {
+    "antigo": "nivelDePresenca",
+    "novo": "presenceLevel",
+    "needsReview": false,
+    "motivo": "reordenado; conectivo",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ],
+    "sugestao": "presenceLevel",
+    "revisado": true
+  },
+  {
+    "antigo": "nome",
+    "novo": "name",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Botao.tsx"
+    ]
+  },
+  {
+    "antigo": "nomeAluno",
+    "novo": "studentName",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "tests/e2e/suporte.ts"
+    ],
+    "sugestao": "studentName",
+    "revisado": true
+  },
+  {
+    "antigo": "nomeArquivo",
+    "novo": "fileName",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/componentes/VisualizadorPdf.tsx"
+    ],
+    "sugestao": "fileName",
+    "revisado": true
+  },
+  {
+    "antigo": "novaTentativa",
+    "novo": "newAttempt",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaProcessando.tsx"
+    ],
+    "sugestao": "newAttempt",
+    "revisado": true
+  },
+  {
+    "antigo": "novo",
+    "novo": "nextValue",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/TemaProvedor.tsx"
+    ],
+    "sugestao": "new",
+    "revisado": true
+  },
+  {
+    "antigo": "novos",
+    "novo": "nextParams",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaAlunos.tsx"
+    ],
+    "sugestao": "new",
+    "revisado": true
+  },
+  {
+    "antigo": "numero",
+    "novo": "number",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/SecoesSemestral.tsx"
+    ]
+  },
+  {
+    "antigo": "Objeto",
+    "novo": "JsonObject",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ],
+    "sugestao": "Object",
+    "revisado": true
+  },
+  {
+    "antigo": "observacaoDoProfessor",
+    "novo": "teacherObservation",
+    "needsReview": false,
+    "motivo": "reordenado; conectivo",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ],
+    "sugestao": "teacherObservation",
+    "revisado": true
+  },
+  {
+    "antigo": "observar",
+    "novo": "observe",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/e2e/historico.spec.ts"
+    ]
+  },
+  {
+    "antigo": "obter",
+    "novo": "get",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ]
+  },
+  {
+    "antigo": "ocioso",
+    "novo": "idle",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "opcoes",
+    "novo": "options",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/clienteApi.ts"
+    ]
+  },
+  {
+    "antigo": "OpcoesRequisicao",
+    "novo": "RequestOptions",
+    "needsReview": false,
+    "motivo": "sufixo",
+    "exemplos": [
+      "src/servicos/clienteApi.ts"
+    ],
+    "sugestao": "OptionsRequest",
+    "revisado": true
+  },
+  {
+    "antigo": "ouro",
+    "novo": "gold",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/TemaProvedor.tsx"
+    ]
+  },
+  {
+    "antigo": "ouroclaro",
+    "novo": "lightgold",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/TemaProvedor.tsx"
+    ]
+  },
+  {
+    "antigo": "ouvir",
+    "novo": "listen",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "Ouvir",
+    "novo": "Listen",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "PaginaProvisoria",
+    "novo": "PlaceholderPage",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/app/rotas.tsx"
+    ],
+    "sugestao": "ProvisionalPage",
+    "revisado": true
+  },
+  {
+    "antigo": "paginas",
+    "novo": "pages",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/src/paginas/TelaAlunos.tsx",
+      "frontend/src/paginas/TelaAprovado.tsx",
+      "frontend/src/paginas/TelaConferencia.tsx"
+    ]
+  },
+  {
+    "antigo": "painel",
+    "novo": "dashboard",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Cabecalho.tsx"
+    ]
+  },
+  {
+    "antigo": "Painel",
+    "novo": "Dashboard",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Cabecalho.tsx"
+    ]
+  },
+  {
+    "antigo": "painel-pdf",
+    "novo": "pdf-panel",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ],
+    "sugestao": "dashboard-pdf",
+    "revisado": true
+  },
+  {
+    "antigo": "painel-texto",
+    "novo": "text-panel",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ],
+    "sugestao": "text-dashboard",
+    "revisado": true
+  },
+  {
+    "antigo": "parametros",
+    "novo": "params",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/GuardaSessao.tsx"
+    ],
+    "sugestao": "parameters",
+    "revisado": true
+  },
+  {
+    "antigo": "Parametros",
+    "novo": "MessageParams",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/mensagens/mensagens.ts"
+    ],
+    "sugestao": "Parameters",
+    "revisado": true
+  },
+  {
+    "antigo": "parar",
+    "novo": "stop",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "pararRelogio",
+    "novo": "stopClock",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "pararReproducao",
+    "novo": "stopPlayback",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ],
+    "sugestao": "stopPlayback",
+    "revisado": true
+  },
+  {
+    "antigo": "parte",
+    "novo": "part",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/clienteApi.ts"
+    ]
+  },
+  {
+    "antigo": "partes",
+    "novo": "parts",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Cabecalho.tsx"
+    ]
+  },
+  {
+    "antigo": "pdfOficial",
+    "novo": "pdfOfficial",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaHistorico.tsx"
+    ]
+  },
+  {
+    "antigo": "pequeno",
+    "novo": "small",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/CartaoAluno.tsx"
+    ]
+  },
+  {
+    "antigo": "pergunta",
+    "novo": "question",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaPerguntas.tsx"
+    ]
+  },
+  {
+    "antigo": "perguntando",
+    "novo": "asking",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/paginas/AudioPerguntasConferencia.test.tsx"
+    ]
+  },
+  {
+    "antigo": "perigo",
+    "novo": "danger",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/DialogoConfirmacao.tsx",
+      "src/componentes/Botao.tsx"
+    ]
+  },
+  {
+    "antigo": "perigo-cheio",
+    "novo": "filled-danger",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/componentes/Botao.tsx"
+    ],
+    "sugestao": "full-danger",
+    "revisado": true
+  },
+  {
+    "antigo": "periodoChave",
+    "novo": "periodKey",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ],
+    "sugestao": "keyPeriod",
+    "revisado": true
+  },
+  {
+    "antigo": "permitir",
+    "novo": "allow",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/componentes/GravadorAudio.test.tsx"
+    ]
+  },
+  {
+    "antigo": "planejamentoProximoSemestre",
+    "novo": "nextSemesterPlan",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ],
+    "sugestao": "semesterNextPlan",
+    "revisado": true
+  },
+  {
+    "antigo": "podeAjustar",
+    "novo": "canAdjust",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ],
+    "sugestao": "adjustCan",
+    "revisado": true
+  },
+  {
+    "antigo": "podeGerar",
+    "novo": "canGenerate",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaSemestral.tsx"
+    ],
+    "sugestao": "generateCan",
+    "revisado": true
+  },
+  {
+    "antigo": "pontosADesenvolver",
+    "novo": "pointsToDevelop",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ],
+    "sugestao": "pointsADevelop",
+    "revisado": true
+  },
+  {
+    "antigo": "pontosDeAtencao",
+    "novo": "attentionPoints",
+    "needsReview": false,
+    "motivo": "reordenado; conectivo",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ],
+    "sugestao": "attentionPoints",
+    "revisado": true
+  },
+  {
+    "antigo": "postFormulario",
+    "novo": "postForm",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/clienteApi.ts"
+    ]
+  },
+  {
+    "antigo": "preto",
+    "novo": "black",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/TemaProvedor.tsx"
+    ]
+  },
+  {
+    "antigo": "previa",
+    "novo": "preview",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaSemestral.tsx"
+    ]
+  },
+  {
+    "antigo": "previa-semestral",
+    "novo": "semester-preview",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ],
+    "sugestao": "semester-preview",
+    "revisado": true
+  },
+  {
+    "antigo": "PreviaSemestralDto",
+    "novo": "SemesterPreviewDto",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ],
+    "sugestao": "SemesterPreviewDto",
+    "revisado": true
+  },
+  {
+    "antigo": "primario",
+    "novo": "primary",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Botao.tsx"
+    ]
+  },
+  {
+    "antigo": "primeira",
+    "novo": "first",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Cabecalho.tsx"
+    ]
+  },
+  {
+    "antigo": "primeiro",
+    "novo": "first",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/DialogoConfirmacao.tsx"
+    ]
+  },
+  {
+    "antigo": "primeiroNome",
+    "novo": "firstName",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaPainel.tsx"
+    ]
+  },
+  {
+    "antigo": "Processando",
+    "novo": "Processing",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaProcessando.tsx"
+    ]
+  },
+  {
+    "antigo": "professor",
+    "novo": "teacher",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/e2e/suporte.ts"
+    ]
+  },
+  {
+    "antigo": "professorId",
+    "novo": "teacherId",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/e2e/suporte.ts"
+    ]
+  },
+  {
+    "antigo": "projetoDoSemestre",
+    "novo": "semesterProject",
+    "needsReview": false,
+    "motivo": "reordenado; conectivo",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ],
+    "sugestao": "semesterProject",
+    "revisado": true
+  },
+  {
+    "antigo": "PropsBotao",
+    "novo": "ButtonProps",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Botao.tsx"
+    ],
+    "sugestao": "PropsButton",
+    "revisado": true
+  },
+  {
+    "antigo": "PropsDialogo",
+    "novo": "DialogProps",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/DialogoConfirmacao.tsx"
+    ],
+    "sugestao": "PropsDialog",
+    "revisado": true
+  },
+  {
+    "antigo": "protegida",
+    "novo": "protected",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/rotas.tsx"
+    ]
+  },
+  {
+    "antigo": "quadro",
+    "novo": "board",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/e2e/historico.spec.ts"
+    ]
+  },
+  {
+    "antigo": "quando",
+    "novo": "when",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaRelatorioEmAberto.tsx"
+    ]
+  },
+  {
+    "antigo": "quantidade",
+    "novo": "quantity",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/EstadoCarregando.tsx"
+    ]
+  },
+  {
+    "antigo": "raiz",
+    "novo": "root",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/main.tsx"
+    ]
+  },
+  {
+    "antigo": "recarregar",
+    "novo": "reload",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ]
+  },
+  {
+    "antigo": "Recarregar",
+    "novo": "Reload",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/paginas/RegistroAula.test.tsx"
+    ]
+  },
+  {
+    "antigo": "referencia",
+    "novo": "reference",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaAprovado.tsx"
+    ]
+  },
+  {
+    "antigo": "registrando",
+    "novo": "registering",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaAlunos.tsx"
+    ],
+    "sugestao": "registering",
+    "revisado": true
+  },
+  {
+    "antigo": "registrar",
+    "novo": "register",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaGravacao.tsx",
+      "src/componentes/Cabecalho.tsx"
+    ]
+  },
+  {
+    "antigo": "registrarAulaAprovada",
+    "novo": "registerApprovedLesson",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "tests/e2e/acessibilidade.spec.ts"
+    ],
+    "sugestao": "registerApprovedLesson",
+    "revisado": true
+  },
+  {
+    "antigo": "registro-aula",
+    "novo": "lesson-registration",
+    "needsReview": false,
+    "motivo": "reordenado; contextual",
+    "exemplos": [
+      "frontend/src/estilos/registro-aula.css"
+    ],
+    "sugestao": "lesson-registration",
+    "revisado": true
+  },
+  {
+    "antigo": "RegistroAula",
+    "novo": "LessonRegistration",
+    "needsReview": false,
+    "motivo": "reordenado; contextual",
+    "exemplos": [
+      "frontend/tests/paginas/RegistroAula.test.tsx"
+    ],
+    "sugestao": "LessonRegistration",
+    "revisado": true
+  },
+  {
+    "antigo": "regravar",
+    "novo": "rerecord",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "Regravar",
+    "novo": "Rerecord",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/componentes/GravadorAudio.test.tsx"
+    ]
+  },
+  {
+    "antigo": "regularidadeEstudoEmCasa",
+    "novo": "homeStudyRegularity",
+    "needsReview": false,
+    "motivo": "reordenado; conectivo",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ],
+    "sugestao": "homeInStudyRegularity",
+    "revisado": true
+  },
+  {
+    "antigo": "relatorio",
+    "novo": "report",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaAprovado.tsx"
+    ]
+  },
+  {
+    "antigo": "RELATORIO",
+    "novo": "REPORT",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/paginas/RegistroAula.test.tsx"
+    ]
+  },
+  {
+    "antigo": "relatorio-aula",
+    "novo": "lesson-report",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/servicos/relatoriosAula.ts"
+    ],
+    "sugestao": "lesson-report",
+    "revisado": true
+  },
+  {
+    "antigo": "relatorio-em-aberto",
+    "novo": "open-report",
+    "needsReview": false,
+    "motivo": "reordenado; conectivo",
+    "exemplos": [
+      "src/paginas/TelaRelatorioEmAberto.tsx"
+    ],
+    "sugestao": "open-in-report",
+    "revisado": true
+  },
+  {
+    "antigo": "relatorio-semestral",
+    "novo": "semester-report",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ],
+    "sugestao": "semester-report",
+    "revisado": true
+  },
+  {
+    "antigo": "relatorioAula",
+    "novo": "lessonReport",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "tests/paginas/AudioPerguntasConferencia.test.tsx"
+    ],
+    "sugestao": "lessonReport",
+    "revisado": true
+  },
+  {
+    "antigo": "RelatorioAulaDto",
+    "novo": "LessonReportDto",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/componentes/SecoesRelatorio.tsx"
+    ],
+    "sugestao": "LessonReportDto",
+    "revisado": true
+  },
+  {
+    "antigo": "RelatorioEmAbertoDto",
+    "novo": "OpenReportDto",
+    "needsReview": false,
+    "motivo": "reordenado; conectivo",
+    "exemplos": [
+      "src/paginas/TelaPainel.tsx"
+    ],
+    "sugestao": "OpenInReportDto",
+    "revisado": true
+  },
+  {
+    "antigo": "relatorioId",
+    "novo": "reportId",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaAprovado.tsx"
+    ]
+  },
+  {
+    "antigo": "relatoriosAula",
+    "novo": "lessonReports",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "frontend/src/servicos/relatoriosAula.ts",
+      "src/paginas/TelaConferencia.tsx"
+    ],
+    "sugestao": "lessonReports",
+    "revisado": true
+  },
+  {
+    "antigo": "relatorioSemestral",
+    "novo": "semesterReport",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaAprovado.tsx"
+    ],
+    "sugestao": "semesterReport",
+    "revisado": true
+  },
+  {
+    "antigo": "RelatorioSemestralDto",
+    "novo": "SemesterReportDto",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ],
+    "sugestao": "SemesterReportDto",
+    "revisado": true
+  },
+  {
+    "antigo": "relogio",
+    "novo": "clock",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "removerArquivo",
+    "novo": "removeFile",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "renderizar",
+    "novo": "renderWithProviders",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/utilitarios.tsx"
+    ],
+    "sugestao": "render",
+    "revisado": true
+  },
+  {
+    "antigo": "renderizarRotas",
+    "novo": "renderRoutes",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/utilitarios.tsx"
+    ]
+  },
+  {
+    "antigo": "repertorioEstudado",
+    "novo": "studiedRepertoire",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ],
+    "sugestao": "studiedRepertoire",
+    "revisado": true
+  },
+  {
+    "antigo": "repertorioProposto",
+    "novo": "proposedRepertoire",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ],
+    "sugestao": "proposedRepertoire",
+    "revisado": true
+  },
+  {
+    "antigo": "reprodutor",
+    "novo": "player",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "requisitar",
+    "novo": "request",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/clienteApi.ts"
+    ]
+  },
+  {
+    "antigo": "requisitarBlob",
+    "novo": "requestBlob",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/clienteApi.ts"
+    ]
+  },
+  {
+    "antigo": "responderAudio",
+    "novo": "answerAudio",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaPerguntas.tsx"
+    ]
+  },
+  {
+    "antigo": "responderPerguntas",
+    "novo": "answerQuestions",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/e2e/fluxo-aula.spec.ts"
+    ]
+  },
+  {
+    "antigo": "responderTexto",
+    "novo": "answerText",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaPerguntas.tsx"
+    ]
+  },
+  {
+    "antigo": "resposta",
+    "novo": "response",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/utilitarios.tsx"
+    ]
+  },
+  {
+    "antigo": "RespostaSimulada",
+    "novo": "SimulatedResponse",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "tests/utilitarios.tsx"
+    ],
+    "sugestao": "SimulatedResponse",
+    "revisado": true
+  },
+  {
+    "antigo": "resto",
+    "novo": "rest",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Botao.tsx"
+    ]
+  },
+  {
+    "antigo": "resultado",
+    "novo": "result",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/utilitarios.tsx"
+    ]
+  },
+  {
+    "antigo": "ResultadoNavegacao",
+    "novo": "NavigationResult",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ],
+    "sugestao": "NavigationResult",
+    "revisado": true
+  },
+  {
+    "antigo": "resumo",
+    "novo": "summary",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/e2e/acessibilidade.spec.ts"
+    ]
+  },
+  {
+    "antigo": "retomada",
+    "novo": "resume",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/tests/e2e/retomada.spec.ts"
+    ],
+    "sugestao": "resumption",
+    "revisado": true
+  },
+  {
+    "antigo": "ritmo",
+    "novo": "rhythm",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ]
+  },
+  {
+    "antigo": "rolagem",
+    "novo": "scroll",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/e2e/acessibilidade.spec.ts"
+    ]
+  },
+  {
+    "antigo": "rota",
+    "novo": "route",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Cabecalho.tsx"
+    ]
+  },
+  {
+    "antigo": "rotaContinuar",
+    "novo": "continueRoute",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaPainel.tsx"
+    ],
+    "sugestao": "continueRoute",
+    "revisado": true
+  },
+  {
+    "antigo": "rotaDaEtapa",
+    "novo": "stepRoute",
+    "needsReview": false,
+    "motivo": "reordenado; conectivo",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ],
+    "sugestao": "stepRoute",
+    "revisado": true
+  },
+  {
+    "antigo": "rotaDeContinuacao",
+    "novo": "continuationRoute",
+    "needsReview": false,
+    "motivo": "reordenado; conectivo",
+    "exemplos": [
+      "src/paginas/TelaRelatorioEmAberto.tsx"
+    ],
+    "sugestao": "continuationRoute",
+    "revisado": true
+  },
+  {
+    "antigo": "rotaEntrar",
+    "novo": "signInRoute",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/app/GuardaSessao.tsx"
+    ],
+    "sugestao": "signInRoute",
+    "revisado": true
+  },
+  {
+    "antigo": "rotaRegistrarAula",
+    "novo": "registerLessonRoute",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/componentes/CartaoAluno.tsx"
+    ],
+    "sugestao": "lessonRegisterRoute",
+    "revisado": true
+  },
+  {
+    "antigo": "rotas",
+    "novo": "routes",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/src/app/rotas.tsx",
+      "tests/utilitarios.tsx"
+    ]
+  },
+  {
+    "antigo": "RotaSimulada",
+    "novo": "SimulatedRoute",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "tests/utilitarios.tsx"
+    ],
+    "sugestao": "SimulatedRoute",
+    "revisado": true
+  },
+  {
+    "antigo": "roteador",
+    "novo": "router",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/utilitarios.tsx"
+    ]
+  },
+  {
+    "antigo": "rotulo",
+    "novo": "label",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/GuardaSessao.tsx"
+    ]
+  },
+  {
+    "antigo": "rotuloConfirmar",
+    "novo": "confirmLabel",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/componentes/DialogoConfirmacao.tsx"
+    ],
+    "sugestao": "confirmLabel",
+    "revisado": true
+  },
+  {
+    "antigo": "rotuloVoltar",
+    "novo": "backLabel",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/componentes/DialogoConfirmacao.tsx"
+    ],
+    "sugestao": "returnLabel",
+    "revisado": true
+  },
+  {
+    "antigo": "salvo",
+    "novo": "saved",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/TemaProvedor.tsx"
+    ]
+  },
+  {
+    "antigo": "secao",
+    "novo": "section",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/SecoesRelatorio.tsx"
+    ]
+  },
+  {
+    "antigo": "Secao",
+    "novo": "Section",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/SecoesRelatorio.tsx"
+    ]
+  },
+  {
+    "antigo": "SecaoSemestral",
+    "novo": "SemesterSection",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/componentes/SecoesSemestral.tsx"
+    ],
+    "sugestao": "SemesterSection",
+    "revisado": true
+  },
+  {
+    "antigo": "secoes",
+    "novo": "sections",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/SecoesSemestral.tsx"
+    ]
+  },
+  {
+    "antigo": "secoesDaAula",
+    "novo": "lessonSections",
+    "needsReview": false,
+    "motivo": "reordenado; conectivo",
+    "exemplos": [
+      "src/componentes/SecoesRelatorio.tsx"
+    ],
+    "sugestao": "lessonSections",
+    "revisado": true
+  },
+  {
+    "antigo": "SecoesRelatorio",
+    "novo": "ReportSections",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "frontend/src/componentes/SecoesRelatorio.tsx",
+      "src/componentes/SecoesRelatorio.tsx"
+    ],
+    "sugestao": "ReportSections",
+    "revisado": true
+  },
+  {
+    "antigo": "secoesSemestral",
+    "novo": "semesterSections",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaConferenciaSemestral.tsx"
+    ],
+    "sugestao": "semesterSections",
+    "revisado": true
+  },
+  {
+    "antigo": "SecoesSemestral",
+    "novo": "SemesterSections",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "frontend/src/componentes/SecoesSemestral.tsx",
+      "src/componentes/SecoesSemestral.tsx"
+    ],
+    "sugestao": "SemesterSections",
+    "revisado": true
+  },
+  {
+    "antigo": "secundario",
+    "novo": "secondary",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Botao.tsx"
+    ]
+  },
+  {
+    "antigo": "SEGREDO_HMAC",
+    "novo": "HMAC_SECRET",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/e2e/suporte.ts"
+    ],
+    "sugestao": "SECRET_HMAC",
+    "revisado": true
+  },
+  {
+    "antigo": "segredo-hmac-de-testes-e2e-com-mais-de-32-bytes",
+    "novo": "hmac-secret-for-e2e-tests-with-more-than-32-bytes",
+    "needsReview": false,
+    "motivo": "sufixo; conectivo; reordenado",
+    "exemplos": [
+      "tests/e2e/suporte.ts"
+    ],
+    "sugestao": "secret-hmac-tests-e2e-more-com-32-bytes",
+    "revisado": true
+  },
+  {
+    "antigo": "segundos",
+    "novo": "seconds",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "segundosRestantes",
+    "novo": "remainingSeconds",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaEntrar.tsx"
+    ],
+    "sugestao": "remainingSeconds",
+    "revisado": true
+  },
+  {
+    "antigo": "selecionado",
+    "novo": "selected",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaSemestral.tsx"
+    ]
+  },
+  {
+    "antigo": "selecionar",
+    "novo": "select",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "selo",
+    "novo": "seal",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaHistorico.tsx"
+    ]
+  },
+  {
+    "antigo": "seloDoItem",
+    "novo": "itemSeal",
+    "needsReview": false,
+    "motivo": "conectivo",
+    "exemplos": [
+      "src/paginas/TelaHistorico.tsx"
+    ],
+    "sugestao": "sealItem",
+    "revisado": true
+  },
+  {
+    "antigo": "sem-conexao",
+    "novo": "no-connection",
+    "needsReview": false,
+    "motivo": "reordenado; conectivo",
+    "exemplos": [
+      "src/paginas/TelaEntrar.tsx"
+    ],
+    "sugestao": "connection-without",
+    "revisado": true
+  },
+  {
+    "antigo": "semAlunos",
+    "novo": "noStudents",
+    "needsReview": false,
+    "motivo": "reordenado; conectivo",
+    "exemplos": [
+      "src/paginas/TelaPainel.tsx"
+    ],
+    "sugestao": "studentsWithout",
+    "revisado": true
+  },
+  {
+    "antigo": "Semeadura",
+    "novo": "Seeding",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/e2e/acessibilidade.spec.ts"
+    ]
+  },
+  {
+    "antigo": "semear",
+    "novo": "seed",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/e2e/acessibilidade.spec.ts"
+    ]
+  },
+  {
+    "antigo": "semestral",
+    "novo": "semester",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/src/servicos/semestral.ts",
+      "src/app/rotas.tsx"
+    ]
+  },
+  {
+    "antigo": "Semestral",
+    "novo": "Semester",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/paginas/TelaHistorico.test.tsx"
+    ]
+  },
+  {
+    "antigo": "SEMESTRAL",
+    "novo": "SEMESTER",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/paginas/AudioPerguntasConferencia.test.tsx"
+    ]
+  },
+  {
+    "antigo": "semestre",
+    "novo": "semester",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaSemestral.tsx"
+    ]
+  },
+  {
+    "antigo": "SemestreDto",
+    "novo": "SemesterDto",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaSemestral.tsx"
+    ]
+  },
+  {
+    "antigo": "semestres",
+    "novo": "semesters",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaSemestral.tsx",
+      "src/servicos/semestral.ts"
+    ]
+  },
+  {
+    "antigo": "SEMESTRES",
+    "novo": "SEMESTERS",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/paginas/TelaSemestral.test.tsx"
+    ]
+  },
+  {
+    "antigo": "semRelatorio",
+    "novo": "noReport",
+    "needsReview": false,
+    "motivo": "reordenado; conectivo",
+    "exemplos": [
+      "src/paginas/TelaProcessando.tsx"
+    ],
+    "sugestao": "reportWithout",
+    "revisado": true
+  },
+  {
+    "antigo": "servicos",
+    "novo": "services",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/src/servicos/alunos.ts",
+      "frontend/src/servicos/api-tipos.ts",
+      "frontend/src/servicos/clienteApi.ts"
+    ]
+  },
+  {
+    "antigo": "sessao",
+    "novo": "session",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/src/servicos/sessao.ts",
+      "src/app/GuardaSessao.tsx",
+      "src/servicos/sessao.ts"
+    ]
+  },
+  {
+    "antigo": "SESSAO_CLARA",
+    "novo": "LIGHT_SESSION",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/utilitarios.tsx"
+    ],
+    "sugestao": "SESSION_CLARA",
+    "revisado": true
+  },
+  {
+    "antigo": "SessaoDto",
+    "novo": "SessionDto",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/sessao.ts"
+    ]
+  },
+  {
+    "antigo": "setAbrindo",
+    "novo": "setOpening",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaHistorico.tsx"
+    ],
+    "sugestao": "setOpening",
+    "revisado": true
+  },
+  {
+    "antigo": "setAcao",
+    "novo": "setAction",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaProcessando.tsx"
+    ]
+  },
+  {
+    "antigo": "setAgora",
+    "novo": "setNow",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaEntrar.tsx"
+    ]
+  },
+  {
+    "antigo": "setAjuste",
+    "novo": "setAdjustment",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ]
+  },
+  {
+    "antigo": "setArquivo",
+    "novo": "setFile",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "setAviso",
+    "novo": "setNotice",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/VisualizadorPdf.tsx"
+    ]
+  },
+  {
+    "antigo": "setBusca",
+    "novo": "setSearch",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Cabecalho.tsx"
+    ]
+  },
+  {
+    "antigo": "setCancelando",
+    "novo": "setCancelling",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaPerguntas.tsx"
+    ]
+  },
+  {
+    "antigo": "setChaveGravador",
+    "novo": "setRecorderKey",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ],
+    "sugestao": "setRecorderKey",
+    "revisado": true
+  },
+  {
+    "antigo": "setCodigo",
+    "novo": "setCode",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaEntrar.tsx"
+    ]
+  },
+  {
+    "antigo": "setConfirmando",
+    "novo": "setConfirming",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ]
+  },
+  {
+    "antigo": "setConfirmar",
+    "novo": "setConfirm",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaRelatorioEmAberto.tsx"
+    ]
+  },
+  {
+    "antigo": "setConfirmarCancelamento",
+    "novo": "setConfirmCancellation",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaPerguntas.tsx"
+    ]
+  },
+  {
+    "antigo": "setDesatualizada",
+    "novo": "setStale",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ]
+  },
+  {
+    "antigo": "setDescartando",
+    "novo": "setDiscarding",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaRelatorioEmAberto.tsx"
+    ]
+  },
+  {
+    "antigo": "setDescartar",
+    "novo": "setDiscard",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaSemestral.tsx"
+    ]
+  },
+  {
+    "antigo": "setDialogo",
+    "novo": "setDialog",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ]
+  },
+  {
+    "antigo": "setEnviando",
+    "novo": "setUploading",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaGravacao.tsx"
+    ]
+  },
+  {
+    "antigo": "setEnviandoAjuste",
+    "novo": "setUploadingAdjustment",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ],
+    "sugestao": "setAdjustmentUploading",
+    "revisado": true
+  },
+  {
+    "antigo": "setErro",
+    "novo": "setError",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "setErroAcao",
+    "novo": "setActionError",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaProcessando.tsx"
+    ],
+    "sugestao": "setActionError",
+    "revisado": true
+  },
+  {
+    "antigo": "setErroAjuste",
+    "novo": "setAdjustmentError",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ],
+    "sugestao": "setAdjustmentError",
+    "revisado": true
+  },
+  {
+    "antigo": "setErroCancelamento",
+    "novo": "setCancellationError",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaPerguntas.tsx"
+    ],
+    "sugestao": "setCancellationError",
+    "revisado": true
+  },
+  {
+    "antigo": "setErroDescarte",
+    "novo": "setDiscardError",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaSemestral.tsx"
+    ],
+    "sugestao": "setDiscardError",
+    "revisado": true
+  },
+  {
+    "antigo": "setErroDialogo",
+    "novo": "setDialogError",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ],
+    "sugestao": "setDialogError",
+    "revisado": true
+  },
+  {
+    "antigo": "setErroLocal",
+    "novo": "setLocalError",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaPerguntas.tsx"
+    ],
+    "sugestao": "setLocalError",
+    "revisado": true
+  },
+  {
+    "antigo": "setEscolhido",
+    "novo": "setChosen",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaSemestral.tsx"
+    ]
+  },
+  {
+    "antigo": "setEstado",
+    "novo": "setState",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "setExcedidoEm",
+    "novo": "setExceededAt",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/trabalhos.ts"
+    ]
+  },
+  {
+    "antigo": "setGerando",
+    "novo": "setGenerating",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaSemestral.tsx"
+    ]
+  },
+  {
+    "antigo": "setGravacao",
+    "novo": "setRecording",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "setIndisponivel",
+    "novo": "setUnavailable",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "setMenuAberto",
+    "novo": "setMenuOpen",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Cabecalho.tsx"
+    ]
+  },
+  {
+    "antigo": "setParametros",
+    "novo": "setParams",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaAlunos.tsx"
+    ],
+    "sugestao": "setParameters",
+    "revisado": true
+  },
+  {
+    "antigo": "setSegundos",
+    "novo": "setSeconds",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "setSituacao",
+    "novo": "setStatus",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaEntrar.tsx"
+    ]
+  },
+  {
+    "antigo": "setTema",
+    "novo": "setTheme",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/TemaProvedor.tsx"
+    ]
+  },
+  {
+    "antigo": "setTermo",
+    "novo": "setTerm",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaAlunos.tsx"
+    ]
+  },
+  {
+    "antigo": "setTexto",
+    "novo": "setText",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaPerguntas.tsx"
+    ]
+  },
+  {
+    "antigo": "setTocando",
+    "novo": "setPlaying",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "setTrabalhoAlteracao",
+    "novo": "setChangeJob",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ],
+    "sugestao": "setChangeJob",
+    "revisado": true
+  },
+  {
+    "antigo": "simularApi",
+    "novo": "mockApi",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/utilitarios.tsx"
+    ],
+    "sugestao": "simulateApi",
+    "revisado": true
+  },
+  {
+    "antigo": "simularMicrofone",
+    "novo": "mockMicrophone",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/componentes/GravadorAudio.test.tsx"
+    ],
+    "sugestao": "simulateMicrophone",
+    "revisado": true
+  },
+  {
+    "antigo": "sinal",
+    "novo": "signal",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/clienteApi.ts"
+    ]
+  },
+  {
+    "antigo": "situacao",
+    "novo": "status",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaEntrar.tsx"
+    ]
+  },
+  {
+    "antigo": "Situacao",
+    "novo": "Status",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaEntrar.tsx"
+    ]
+  },
+  {
+    "antigo": "situacaoDoRelatorio",
+    "novo": "reportStatus",
+    "needsReview": false,
+    "motivo": "reordenado; conectivo",
+    "exemplos": [
+      "src/paginas/TelaPainel.tsx"
+    ],
+    "sugestao": "reportStatus",
+    "revisado": true
+  },
+  {
+    "antigo": "sobrescrever",
+    "novo": "overwrite",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/paginas/AudioPerguntasConferencia.test.tsx"
+    ]
+  },
+  {
+    "antigo": "sobretitulo",
+    "novo": "kicker",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Cabecalho.tsx"
+    ]
+  },
+  {
+    "antigo": "solicitarAlteracao",
+    "novo": "requestChange",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ]
+  },
+  {
+    "antigo": "solido",
+    "novo": "solid",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/EstadoVazio.tsx"
+    ]
+  },
+  {
+    "antigo": "som",
+    "novo": "sound",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ]
+  },
+  {
+    "antigo": "suporta",
+    "novo": "supports",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "suporte",
+    "novo": "support",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/tests/e2e/suporte.ts"
+    ]
+  },
+  {
+    "antigo": "tabelas",
+    "novo": "tables",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/e2e/suporte.ts"
+    ]
+  },
+  {
+    "antigo": "tamanho",
+    "novo": "size",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Botao.tsx"
+    ]
+  },
+  {
+    "antigo": "taxa",
+    "novo": "rate",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/e2e/suporte.ts"
+    ]
+  },
+  {
+    "antigo": "tecnica",
+    "novo": "technique",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/semestral.ts"
+    ]
+  },
+  {
+    "antigo": "TelaAlunos",
+    "novo": "StudentsScreen",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "frontend/src/paginas/TelaAlunos.tsx",
+      "frontend/tests/paginas/TelaAlunos.test.tsx",
+      "src/app/rotas.tsx"
+    ],
+    "sugestao": "StudentsScreen",
+    "revisado": true
+  },
+  {
+    "antigo": "TelaAprovado",
+    "novo": "ApprovedScreen",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "frontend/src/paginas/TelaAprovado.tsx",
+      "src/app/rotas.tsx"
+    ],
+    "sugestao": "ApprovedScreen",
+    "revisado": true
+  },
+  {
+    "antigo": "TelaConferencia",
+    "novo": "ReviewScreen",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "frontend/src/paginas/TelaConferencia.tsx",
+      "src/app/rotas.tsx"
+    ],
+    "sugestao": "ReviewScreen",
+    "revisado": true
+  },
+  {
+    "antigo": "TelaConferenciaSemestral",
+    "novo": "SemesterReviewScreen",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "frontend/src/paginas/TelaConferenciaSemestral.tsx",
+      "frontend/tests/paginas/TelaConferenciaSemestral.test.tsx",
+      "src/app/rotas.tsx"
+    ],
+    "sugestao": "SemesterReviewScreen",
+    "revisado": true
+  },
+  {
+    "antigo": "TelaEntrar",
+    "novo": "SignInScreen",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "frontend/src/paginas/TelaEntrar.tsx",
+      "frontend/tests/paginas/TelaEntrar.test.tsx",
+      "src/app/rotas.tsx"
+    ],
+    "sugestao": "SignInScreen",
+    "revisado": true
+  },
+  {
+    "antigo": "TelaGravacao",
+    "novo": "RecordingScreen",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "frontend/src/paginas/TelaGravacao.tsx",
+      "src/app/rotas.tsx"
+    ],
+    "sugestao": "RecordingScreen",
+    "revisado": true
+  },
+  {
+    "antigo": "TelaHistorico",
+    "novo": "HistoryScreen",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "frontend/src/paginas/TelaHistorico.tsx",
+      "frontend/tests/paginas/TelaHistorico.test.tsx",
+      "src/app/rotas.tsx"
+    ],
+    "sugestao": "HistoryScreen",
+    "revisado": true
+  },
+  {
+    "antigo": "TelaPainel",
+    "novo": "DashboardScreen",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "frontend/src/paginas/TelaPainel.tsx",
+      "frontend/tests/paginas/TelaPainel.test.tsx",
+      "src/app/rotas.tsx"
+    ],
+    "sugestao": "DashboardScreen",
+    "revisado": true
+  },
+  {
+    "antigo": "TelaPerguntas",
+    "novo": "QuestionsScreen",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "frontend/src/paginas/TelaPerguntas.tsx",
+      "src/app/rotas.tsx"
+    ],
+    "sugestao": "QuestionsScreen",
+    "revisado": true
+  },
+  {
+    "antigo": "TelaProcessando",
+    "novo": "ProcessingScreen",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "frontend/src/paginas/TelaProcessando.tsx",
+      "src/app/rotas.tsx"
+    ],
+    "sugestao": "ProcessingScreen",
+    "revisado": true
+  },
+  {
+    "antigo": "TelaRelatorioEmAberto",
+    "novo": "OpenReportScreen",
+    "needsReview": false,
+    "motivo": "reordenado; conectivo",
+    "exemplos": [
+      "frontend/src/paginas/TelaRelatorioEmAberto.tsx",
+      "frontend/tests/paginas/TelaRelatorioEmAberto.test.tsx",
+      "src/app/rotas.tsx"
+    ],
+    "sugestao": "OpenInReportScreen",
+    "revisado": true
+  },
+  {
+    "antigo": "TelaSemestral",
+    "novo": "SemesterScreen",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "frontend/src/paginas/TelaSemestral.tsx",
+      "frontend/tests/paginas/TelaSemestral.test.tsx",
+      "src/app/rotas.tsx"
+    ],
+    "sugestao": "SemesterScreen",
+    "revisado": true
+  },
+  {
+    "antigo": "tema",
+    "novo": "theme",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/TemaProvedor.tsx"
+    ]
+  },
+  {
+    "antigo": "Tema",
+    "novo": "Theme",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/TemaProvedor.tsx"
+    ]
+  },
+  {
+    "antigo": "TemaProvedor",
+    "novo": "ThemeProvider",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "frontend/src/app/TemaProvedor.tsx",
+      "tests/utilitarios.tsx"
+    ],
+    "sugestao": "ProviderTheme",
+    "revisado": true
+  },
+  {
+    "antigo": "TEMAS",
+    "novo": "THEMES",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/e2e/acessibilidade.spec.ts"
+    ]
+  },
+  {
+    "antigo": "tentar",
+    "novo": "retry",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/componentes/ComponentesComuns.test.tsx",
+      "src/paginas/TelaProcessando.tsx"
+    ]
+  },
+  {
+    "antigo": "tentarNovamente",
+    "novo": "tryAgain",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaProcessando.tsx"
+    ],
+    "sugestao": "retryAgain",
+    "revisado": true
+  },
+  {
+    "antigo": "tentativas",
+    "novo": "attempts",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/App.tsx"
+    ]
+  },
+  {
+    "antigo": "termo",
+    "novo": "term",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Cabecalho.tsx"
+    ]
+  },
+  {
+    "antigo": "texto",
+    "novo": "text",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/rotas.tsx",
+      "src/paginas/TelaConferencia.tsx"
+    ]
+  },
+  {
+    "antigo": "Texto",
+    "novo": "Text",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/paginas/RegistroAula.test.tsx"
+    ]
+  },
+  {
+    "antigo": "TEXTO_FALHA_ALTERACAO",
+    "novo": "CHANGE_FAILURE_TEXT",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "tests/paginas/AudioPerguntasConferencia.test.tsx"
+    ],
+    "sugestao": "CHANGE_FAILURE_TEXT",
+    "revisado": true
+  },
+  {
+    "antigo": "textoAprovadoEm",
+    "novo": "approvedAtText",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaHistorico.tsx"
+    ],
+    "sugestao": "approvedTextAt",
+    "revisado": true
+  },
+  {
+    "antigo": "textoDoErro",
+    "novo": "errorText",
+    "needsReview": false,
+    "motivo": "reordenado; conectivo",
+    "exemplos": [
+      "src/componentes/Cabecalho.tsx"
+    ],
+    "sugestao": "errorText",
+    "revisado": true
+  },
+  {
+    "antigo": "textoEmAberto",
+    "novo": "openReportText",
+    "needsReview": false,
+    "motivo": "reordenado; conectivo",
+    "exemplos": [
+      "src/paginas/TelaSemestral.tsx"
+    ],
+    "sugestao": "openInText",
+    "revisado": true
+  },
+  {
+    "antigo": "textoEntendido",
+    "novo": "understoodText",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ],
+    "sugestao": "understoodText",
+    "revisado": true
+  },
+  {
+    "antigo": "tinta",
+    "novo": "ink",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/TemaProvedor.tsx"
+    ]
+  },
+  {
+    "antigo": "tintaOuro",
+    "novo": "goldInk",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/app/TemaProvedor.tsx"
+    ],
+    "sugestao": "goldInk",
+    "revisado": true
+  },
+  {
+    "antigo": "tipo",
+    "novo": "type",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/EtapasProcessamento.tsx"
+    ]
+  },
+  {
+    "antigo": "tipografia",
+    "novo": "typography",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/src/estilos/tipografia.css"
+    ]
+  },
+  {
+    "antigo": "titulo",
+    "novo": "title",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/rotas.tsx"
+    ]
+  },
+  {
+    "antigo": "tituloEtapa",
+    "novo": "stepTitle",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaProcessando.tsx"
+    ],
+    "sugestao": "stepTitle",
+    "revisado": true
+  },
+  {
+    "antigo": "tocando",
+    "novo": "playing",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ]
+  },
+  {
+    "antigo": "token-teste",
+    "novo": "test-token",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/paginas/TelaEntrar.test.tsx"
+    ],
+    "sugestao": "token-test",
+    "revisado": true
+  },
+  {
+    "antigo": "trabalho",
+    "novo": "job",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/EtapasProcessamento.tsx",
+      "src/servicos/trabalhos.ts"
+    ]
+  },
+  {
+    "antigo": "trabalhoAlteracao",
+    "novo": "changeJob",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ],
+    "sugestao": "changeJob",
+    "revisado": true
+  },
+  {
+    "antigo": "TrabalhoDto",
+    "novo": "JobDto",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/EtapasProcessamento.tsx"
+    ]
+  },
+  {
+    "antigo": "trabalhoEmCurso",
+    "novo": "activeJob",
+    "needsReview": false,
+    "motivo": "reordenado; conectivo",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ],
+    "sugestao": "courseInJob",
+    "revisado": true
+  },
+  {
+    "antigo": "trabalhoFinalizado",
+    "novo": "finalizedJob",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/servicos/trabalhos.ts"
+    ],
+    "sugestao": "finalizedJob",
+    "revisado": true
+  },
+  {
+    "antigo": "trabalhoId",
+    "novo": "jobId",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaProcessando.tsx"
+    ]
+  },
+  {
+    "antigo": "TrabalhoRefDto",
+    "novo": "JobRefDto",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/servicos/relatoriosAula.ts"
+    ]
+  },
+  {
+    "antigo": "trabalhos",
+    "novo": "jobs",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/src/servicos/trabalhos.ts"
+    ]
+  },
+  {
+    "antigo": "Transcrevendo",
+    "novo": "Transcribing",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/paginas/RegistroAula.test.tsx"
+    ]
+  },
+  {
+    "antigo": "tratarConflito",
+    "novo": "handleConflict",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ]
+  },
+  {
+    "antigo": "ultima",
+    "novo": "last",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Cabecalho.tsx"
+    ]
+  },
+  {
+    "antigo": "urlReproducao",
+    "novo": "playbackUrl",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/GravadorAudio.tsx"
+    ],
+    "sugestao": "urlPlayback",
+    "revisado": true
+  },
+  {
+    "antigo": "useAluno",
+    "novo": "useStudent",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaGravacao.tsx"
+    ]
+  },
+  {
+    "antigo": "useAlunos",
+    "novo": "useStudents",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaAlunos.tsx"
+    ]
+  },
+  {
+    "antigo": "useEhMovel",
+    "novo": "useIsMobile",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/src/app/useEhMovel.ts",
+      "src/app/useEhMovel.ts"
+    ],
+    "sugestao": "useEhMobile",
+    "revisado": true
+  },
+  {
+    "antigo": "useEncerrarSessao",
+    "novo": "useEndSession",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Cabecalho.tsx"
+    ]
+  },
+  {
+    "antigo": "useEntrar",
+    "novo": "useSignIn",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaEntrar.tsx"
+    ]
+  },
+  {
+    "antigo": "useHistorico",
+    "novo": "useHistory",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaHistorico.tsx"
+    ]
+  },
+  {
+    "antigo": "useInicio",
+    "novo": "useHome",
+    "needsReview": false,
+    "motivo": "contextual: inicio (start|home)",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ],
+    "sugestao": "useStart",
+    "revisado": true
+  },
+  {
+    "antigo": "usePollingTrabalho",
+    "novo": "useJobPolling",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaConferencia.tsx"
+    ],
+    "sugestao": "usePollingJob",
+    "revisado": true
+  },
+  {
+    "antigo": "usePreviaSemestral",
+    "novo": "useSemesterPreview",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaSemestral.tsx"
+    ],
+    "sugestao": "useSemesterPreview",
+    "revisado": true
+  },
+  {
+    "antigo": "useRelatorioAula",
+    "novo": "useLessonReport",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaAprovado.tsx"
+    ],
+    "sugestao": "useLessonReport",
+    "revisado": true
+  },
+  {
+    "antigo": "useRelatorioSemestral",
+    "novo": "useSemesterReport",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/paginas/TelaAprovado.tsx"
+    ],
+    "sugestao": "useSemesterReport",
+    "revisado": true
+  },
+  {
+    "antigo": "useSemestres",
+    "novo": "useSemesters",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/paginas/TelaSemestral.tsx"
+    ]
+  },
+  {
+    "antigo": "useSessao",
+    "novo": "useSession",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/GuardaSessao.tsx"
+    ]
+  },
+  {
+    "antigo": "useTema",
+    "novo": "useTheme",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/TemaProvedor.tsx"
+    ]
+  },
+  {
+    "antigo": "usuario",
+    "novo": "user",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/componentes/ComponentesComuns.test.tsx"
+    ]
+  },
+  {
+    "antigo": "utilitarios",
+    "novo": "utilities",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/tests/utilitarios.tsx"
+    ]
+  },
+  {
+    "antigo": "validade",
+    "novo": "validity",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/e2e/suporte.ts"
+    ]
+  },
+  {
+    "antigo": "valor",
+    "novo": "value",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/app/TemaProvedor.tsx"
+    ]
+  },
+  {
+    "antigo": "valorAtual",
+    "novo": "currentValue",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/app/useEhMovel.ts"
+    ],
+    "sugestao": "currentValue",
+    "revisado": true
+  },
+  {
+    "antigo": "VarianteBotao",
+    "novo": "ButtonVariant",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/Botao.tsx"
+    ],
+    "sugestao": "VarianteButton",
+    "revisado": true
+  },
+  {
+    "antigo": "vazia",
+    "novo": "empty",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/SecoesRelatorio.tsx"
+    ]
+  },
+  {
+    "antigo": "vazio",
+    "novo": "empty",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/SecoesSemestral.tsx"
+    ]
+  },
+  {
+    "antigo": "verificar",
+    "novo": "verify",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/e2e/acessibilidade.spec.ts"
+    ]
+  },
+  {
+    "antigo": "versao",
+    "novo": "version",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "src/componentes/VisualizadorPdf.tsx"
+    ]
+  },
+  {
+    "antigo": "versaoBase",
+    "novo": "baseVersion",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/servicos/relatoriosAula.ts"
+    ],
+    "sugestao": "baseVersion",
+    "revisado": true
+  },
+  {
+    "antigo": "versaoConfirmada",
+    "novo": "confirmedVersion",
+    "needsReview": false,
+    "motivo": "reordenado",
+    "exemplos": [
+      "src/servicos/relatoriosAula.ts"
+    ],
+    "sugestao": "confirmedVersion",
+    "revisado": true
+  },
+  {
+    "antigo": "VisualizadorPdf",
+    "novo": "PdfViewer",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "frontend/src/componentes/VisualizadorPdf.tsx",
+      "src/componentes/VisualizadorPdf.tsx"
+    ],
+    "sugestao": "ViewerPdf",
+    "revisado": true
+  },
+  {
+    "antigo": "voltar",
+    "novo": "back",
+    "needsReview": false,
+    "motivo": "",
+    "exemplos": [
+      "tests/componentes/ComponentesComuns.test.tsx"
+    ],
+    "sugestao": "return",
+    "revisado": true
+  },
+  {
+    "antigo": "voltarPara",
+    "novo": "backTo",
+    "needsReview": false,
+    "motivo": "conectivo",
+    "exemplos": [
+      "src/componentes/Cabecalho.tsx"
+    ],
+    "sugestao": "returnFor",
+    "revisado": true
+  },
+  {
+    "antigo": "conteudosTrabalhados",
+    "novo": "workedTopics",
+    "needsReview": false,
+    "motivo": "revisado",
+    "exemplos": [],
+    "sugestao": "workedTopics",
+    "revisado": true
+  },
+  {
+    "antigo": "fb-monograma",
+    "novo": "fb-monogram",
+    "needsReview": false,
+    "motivo": "revisado",
+    "exemplos": [],
+    "sugestao": "fb-monogram",
+    "revisado": true
+  },
+  {
+    "antigo": "medio",
+    "novo": "medium",
+    "needsReview": false,
+    "motivo": "revisado",
+    "exemplos": [],
+    "sugestao": "medium",
+    "revisado": true
+  },
+  {
+    "antigo": ".app__principal",
+    "novo": ".app__main",
+    "needsReview": false,
+    "motivo": "revisado",
+    "exemplos": [],
+    "tipo": "classe-css",
+    "sugestao": ".app__main",
+    "revisado": true
+  },
+  {
+    "antigo": ".girador",
+    "novo": ".spinner",
+    "needsReview": false,
+    "motivo": "revisado",
+    "exemplos": [],
+    "tipo": "classe-css",
+    "sugestao": ".spinner",
+    "revisado": true
+  },
+  {
+    "antigo": "variante",
+    "novo": "variant",
+    "needsReview": false,
+    "motivo": "revisado",
+    "exemplos": [],
+    "sugestao": "variant",
+    "revisado": true
+  },
+  {
+    "antigo": "monograma",
+    "novo": "monogram",
+    "needsReview": false,
+    "motivo": "revisado",
+    "exemplos": [],
+    "sugestao": "monogram",
+    "revisado": true
+  },
+  {
+    "antigo": "cor",
+    "novo": "color",
+    "needsReview": false,
+    "motivo": "revisado",
+    "exemplos": [],
+    "sugestao": "color",
+    "revisado": true
+  },
+  {
+    "antigo": "aba",
+    "novo": "tab",
+    "needsReview": false,
+    "motivo": "revisado",
+    "exemplos": [],
+    "sugestao": "tab",
+    "revisado": true
+  },
+  {
+    "antigo": "Aba",
+    "novo": "Tab",
+    "needsReview": false,
+    "motivo": "revisado",
+    "exemplos": [],
+    "sugestao": "Tab",
+    "revisado": true
+  },
+  {
+    "antigo": "setAba",
+    "novo": "setTab",
+    "needsReview": false,
+    "motivo": "revisado",
+    "exemplos": [],
+    "sugestao": "setTab",
+    "revisado": true
+  },
+  {
+    "antigo": "ate",
+    "novo": "until",
+    "needsReview": false,
+    "motivo": "revisado",
+    "exemplos": [],
+    "sugestao": "until",
+    "revisado": true
+  }
+]

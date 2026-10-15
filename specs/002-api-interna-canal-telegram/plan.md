@@ -1,5 +1,10 @@
 # Implementation Plan: API interna de canal do Telegram para orquestrador externo
 
+> **Nota de histórico (feature 003)**: este documento foi escrito antes da migração do código para
+> inglês e cita nomes anteriores a ela (classes, arquivos, tabelas, rotas, variáveis). Ele permanece como
+> histórico, sem reescrita. Para o nome atual de cada termo, consulte o glossário em
+> [`.specify/memory/glossary.json`](../../.specify/memory/glossary.json) e o Princípio VI da constituição.
+
 **Branch**: `002-api-interna-canal-telegram` | **Date**: 2026-10-02 | **Spec**: [spec.md](./spec.md)
 
 **Input**: Feature specification from `specs/002-api-interna-canal-telegram/spec.md`
@@ -11,7 +16,7 @@ nada do que o professor vê. Esta feature entrega **só a API interna do backend
 entrada "canal Telegram", independente de transporte, que recebe o update bruto, o interpreta com o
 **mesmo** `InterpretadorConversaTelegram` do webhook atual e devolve a lista ordenada de ações a
 executar no chat, em DTOs v1 versionados. O workflow do n8n, a composição de contêineres, o proxy e a
-troca do webhook registrado no Telegram ficam para a feature `003`.
+troca do webhook registrado no Telegram ficam para a feature `004`.
 
 **Abordagem técnica** (decisões em [research.md](./research.md); a reversão de R-04 da 001 é R-01):
 
@@ -59,7 +64,7 @@ transportes (`webhook`, `interno`). Tudo via `docker compose -f infra/compose.te
 testes-backend`
 
 **Target Platform**: contêineres Linux (Docker Compose), local e VPS; esta feature não
-altera `infra/compose*.yaml` nem o Caddy (feature `003`)
+altera `infra/compose*.yaml` nem o Caddy (feature `004`)
 
 **Project Type**: web-service (backend) com um terceiro tipo de adaptador de entrada (API interna de
 serviço), no mesmo processo
@@ -87,13 +92,13 @@ Constituição **v1.4.0**. Avaliação **antes** da pesquisa e **refeita depois*
 | **I. Domínio independente de canal e fornecedor** | A nova entrada é só um adaptador: chama o mesmo interpretador e não tem regra de conversa (FR-005). A regra de entrega (estado, retentativa, compensação) fica em `dominio.canal`/`casodeuso.canal` no `nucleo`, sem Spring e sem citar o n8n; portas `AcaoCanalRepositorio`, `DocumentoCanalRepositorio`, `OrquestradorCanalPorta`. ArchUnit estendido (`n8n` entra na lista de fornecedores proibidos no núcleo). Paridade Web × Telegram inalterada (mesmos casos de uso). | ✅ | ✅ |
 | **II. Fonte única da verdade** | O n8n só transporta: recebe o update, o repassa, executa as ações e confirma. Não decide, não autoriza, não valida, não chama IA e não grava dado de domínio; **a idempotência dele é sem estado** (consulta `GET /acoes/{id}`). Estado da conversa continua só no backend; reiniciar o n8n não perde nada (a outbox reentrega). | ✅ | ✅ |
 | **III. Humano no controle da IA** | Nenhuma mudança no ciclo de vida do relatório nem na aprovação; as ações carregam exatamente o que o interpretador produz, inclusive o botão de aprovar da versão vigente. | ✅ | ✅ |
-| **IV. Privacidade desde o design** | Token de serviço do ambiente, comparado em tempo constante, até dois (rotação), fail-closed (R-09). `/interno/**` não é publicado pelo proxy (só `/api/*`). Áudio nunca vai ao n8n (FR-028). PDF só por id opaco, com checagem de dono repetida na leitura (R-08). Logs só com ids e códigos; payload da outbox zerado após a retenção (R-11). Comunicação backend → n8n é interna à rede de serviços (HTTP, sem exposição pública); qualquer exposição pública usaria HTTPS (decisão da `003`). **Ponto a confirmar com o dono do produto**: leitura de FR-029 (R-11). | ✅ | ✅ (com ponto registrado) |
+| **IV. Privacidade desde o design** | Token de serviço do ambiente, comparado em tempo constante, até dois (rotação), fail-closed (R-09). `/interno/**` não é publicado pelo proxy (só `/api/*`). Áudio nunca vai ao n8n (FR-028). PDF só por id opaco, com checagem de dono repetida na leitura (R-08). Logs só com ids e códigos; payload da outbox zerado após a retenção (R-11). Comunicação backend → n8n é interna à rede de serviços (HTTP, sem exposição pública); qualquer exposição pública usaria HTTPS (decisão da `004`). **Ponto a confirmar com o dono do produto**: leitura de FR-029 (R-11). | ✅ | ✅ (com ponto registrado) |
 | **V. Qualidade obrigatória** | Regras no `nucleo` com ≥ 90% de linhas e branches (R-12); contrato por JSON Schema + OpenAPI; testes de segurança por matriz de credenciais; ITs de conversa/paridade nos dois transportes; dublês para o orquestrador (WireMock). | ✅ | ✅ |
 | **VI. Nomenclatura e linguagem ubíqua** | Pacotes e tipos em português sem acento com os sufixos da constituição (`*CasoDeUso`, `*Controlador`, `*Servico`, `*Repositorio`, `*Porta`, `*Adaptador`, `*Mapeador`, `*Dto`/`*Requisicao`/`*Resposta`). Exceções permitidas: rótulos de protocolo (`X-N8N-Service-Token`, `Idempotency-Key`, `EXECUTADA`…). Regras ArchUnit novas (R-13). | ✅ | ✅ |
-| **VII. Simplicidade e foco** | Sem broker, sem biblioteca de retry, sem dependência nova; reaproveita fila Postgres, `update_telegram_processado`, cliente HTTP JDK e as bibliotecas de teste. Acréscimos que a spec exige estão justificados em "Complexity Tracking". Nada de roadmap (workflows, compose, troca de webhook ficam na `003`). | ✅ | ✅ (acréscimos justificados) |
+| **VII. Simplicidade e foco** | Sem broker, sem biblioteca de retry, sem dependência nova; reaproveita fila Postgres, `update_telegram_processado`, cliente HTTP JDK e as bibliotecas de teste. Acréscimos que a spec exige estão justificados em "Complexity Tracking". Nada de roadmap (workflows, compose, troca de webhook ficam na `004`). | ✅ | ✅ (acréscimos justificados) |
 | **VIII. Fluxo de trabalho** | Branch dedicada `002-api-interna-canal-telegram`; commit e PR para a `main` ao concluir, sem merge pelo autor nem auto-merge. | ✅ | ✅ |
 | **IX. Identidade visual e acessibilidade** | Sem alteração de UI, PDF ou texto do bot: as ações carregam os textos do catálogo atual. | ✅ | ✅ |
-| **Restrições: n8n só como transporte; workflows como código; segredos fora dos JSON; contêiner com versão fixada** | Esta feature não cria workflows nem serviço n8n (escopo da `003`); entrega o contrato que eles seguirão, com obrigações explícitas ([contracts/canal-telegram-interno.md](./contracts/canal-telegram-interno.md) §4). | ✅ | ✅ |
+| **Restrições: n8n só como transporte; workflows como código; segredos fora dos JSON; contêiner com versão fixada** | Esta feature não cria workflows nem serviço n8n (escopo da `004`); entrega o contrato que eles seguirão, com obrigações explícitas ([contracts/canal-telegram-interno.md](./contracts/canal-telegram-interno.md) §4). | ✅ | ✅ |
 | **Quality gate: paridade** | Nenhuma funcionalidade fica restrita a um canal; nenhum desvio. | ✅ | ✅ |
 | **Quality gate: separação de responsabilidades em orquestração** | O contrato proíbe regra no orquestrador (§4) e dá ao backend a decisão de compensação (R-07). | ✅ | ✅ |
 
@@ -104,7 +109,7 @@ que assumem "sem n8n", abaixo). Nenhuma exige emenda.
 **Artefatos da 001 a anotar na implementação** (tarefa de documentação, sem reescrever histórico):
 `research.md` R-04 (apontar para R-01 desta feature), `plan.md` (Summary, linha II do Constitution
 Check, Structure Decision) e `contracts/telegram-conversa.md` §1 (transporte). Os arquivos de `infra/`
-que assumem "sem n8n" ficam para a `003` (conforme o Sync Impact Report da v1.4.0).
+que assumem "sem n8n" ficam para a `004` (conforme o Sync Impact Report da v1.4.0).
 
 ## Project Structure
 
@@ -216,7 +221,7 @@ ficar sob o gate de cobertura. Nenhum serviço de infraestrutura novo nesta feat
 | Segunda `SecurityFilterChain` (`/interno/**`) e `TokenServicoFiltro` | FR-024/FR-025/FR-027: isolamento nos dois sentidos sem tocar CSRF do portal | ramo por caminho na cadeia do portal mistura credenciais e arrisca regressão |
 | Comparação por digests, **dois** tokens, ambos sempre avaliados | FR-026a: rotação sem indisponibilidade e tempo constante | `equals` (como no MVP) vaza o prefixo; token único exige janela de recusa na troca |
 | Tabela `documento_canal` (hash de token, validade) | FR-020 a FR-023: PDF por id opaco, imprevisível, expirável, sem trafegar bytes na lista | token assinado sem estado expõe ids ou exige cifragem e não revoga; copiar o PDF duplica dado de menor |
-| Duas implementações exclusivas de `PublicacaoAcaoTelegramPorta` (direta × outbox) | FR-019: caminho atual como padrão e exatamente um ativo | remover o envio direto agora é escopo da `003`; um `if` em runtime deixa os dois vivos |
+| Duas implementações exclusivas de `PublicacaoAcaoTelegramPorta` (direta × outbox) | FR-019: caminho atual como padrão e exatamente um ativo | remover o envio direto agora é escopo da `004`; um `if` em runtime deixa os dois vivos |
 | Regras de entrega no `nucleo` (`dominio.canal`, `casodeuso.canal`) | FR-032/Princípio V: gate de 90% só existe no núcleo | deixar no adaptador esconde a parte mais arriscada da cobertura |
 | `GET /acoes/{acaoId}` (não pedida literalmente) | FR-013 exige idempotência do receptor, e o n8n **não** pode guardar estado (Princípio II) | pedir ao n8n um cache próprio viola o Princípio II e some num reinício |
 | `MensagemEtapa` também para edição de etapa (em vez de `Edicao`) | borda "mensagem de etapa apagada": a compensação precisa regravar o `mensagemId` para não gerar uma mensagem nova a cada etapa (R-07) | manter `Edicao` acumularia mensagens no chat |

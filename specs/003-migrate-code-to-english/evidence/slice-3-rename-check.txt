@@ -1,0 +1,20 @@
+== rename-check --slice 3 ==
+rename-check — fatia 3: 449 arquivos Java pareados, 248843 tokens alinhados
+0 pares fora do mapa
+0 literais de texto alterados
+0 arquivos sem par
+0 colisões
+0 outras divergências (tokens, tipo de token, imports, retido alterado)
+(informativo) 1917 pares distintos aplicados, 44 literais de uma palavra pelo mapa, 12 comentários alterados
+(informativo) literais Java que são código, por classe: cli: 34, config: 22, config-value: 4, env-name: 6, env-text: 6, jdbc-label: 24, jpa-name: 156, jpql: 26, prop-assign: 9, sql: 290, template-key: 22
+(informativo) 56 arquivos que não são Java pareados (config: 2, identical: 24, ident: 11, prompt: 6, env: 8, path: 5), 7978 tokens alinhados
+(informativo) 9 colisões aceitas em explicit-pairs.json (revisadas, com motivo)
+(informativo) 99 edições manuais de literal permitidas em explicit-pairs.json
+
+== rename-check --catalog (mensagens_pt_BR.properties: base x novo) ==
+catálogo: 217 chaves na base, 217 no novo, 0 chaves e 0 marcadores pelo mapa
+0 divergências
+
+== forma dos esquemas de IA (base com os nomes trocados pelo mapa x novo) ==
+backend/application/src/main/resources/ai/schemas/lesson-report.schema.json: forma idêntica à da base (só nomes trocados pelo mapa; $id é o identificador do esquema e muda com o nome)
+backend/application/src/main/resources/ai/schemas/semester-report.schema.json: forma idêntica à da base (só nomes trocados pelo mapa; $id é o identificador do esquema e muda com o nome)

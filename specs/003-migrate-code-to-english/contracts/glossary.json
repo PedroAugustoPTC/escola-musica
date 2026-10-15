@@ -1,8 +1,8 @@
 {
-  "version": 1,
-  "description": "Fonte de dados do teste guardião de idioma (feature 003, FR-016 a FR-021). 'words' é a lista de palavras em português que NÃO podem aparecer em identificadores; a chave é a palavra minúscula, sem acento, no singular, e o valor é o equivalente em inglês mostrado na falha. Inclui o glossário da constituição 2.0.0 (Princípio VI) e a tabela complementar aprovada em 2026-10-10. Na fatia 1 este arquivo é movido para .specify/memory/glossary.json e ampliado pelo inventário de palavras (research.md R-05); termos novos entram aqui ANTES do uso (FR-017).",
+  "version": 2,
+  "description": "Fonte de dados do teste guardião de idioma (feature 003, FR-016 a FR-021). 'words' é a lista de palavras em português que NÃO podem aparecer em identificadores; a chave é a palavra minúscula, sem acento, no singular, e o valor é o equivalente em inglês mostrado na falha. Inclui o glossário da constituição 2.0.0 (Princípio VI) e a tabela complementar aprovada em 2026-10-10. Na fatia 1 este arquivo é movido para .specify/memory/glossary.json e ampliado pelo inventário de palavras (research.md R-05); termos novos entram aqui ANTES do uso (FR-017). Versão 2 (análise de 2026-10-10): acrescenta \"contextual\" (palavras polissêmicas), \"notes\" (homônimos aceitos), sufixos fora da constituição, categoria de cada exceção em relação ao Princípio VI e o recorte dos contratos em specs/.",
   "matching": {
-    "split": "camelCase, PascalCase, snake_case, kebab-case, pontos e barras",
+    "split": "camelCase, PascalCase, snake_case, kebab-case, pontos, barras e também os separadores : = ? & ; (ações de botão `v1:aprovar:7`, query strings e rotas)",
     "plural": "o guardião tenta a palavra, sem 's' final e sem 'es' final",
     "ambiguousWords": [
       "data",
@@ -21,7 +21,11 @@
       "original",
       "plano"
     ],
-    "ambiguousPolicy": "palavras iguais nos dois idiomas, ou que existem em inglês com outro sentido, ficam FORA de 'words'; o termo vizinho do domínio (ex.: aula em dataAula) é quem aciona a falha"
+    "ambiguousPolicy": "palavras iguais nos dois idiomas, ou que existem em inglês com outro sentido, ficam FORA de 'words'; o termo vizinho do domínio (ex.: aula em dataAula) é quem aciona a falha",
+    "compound": "o guardião só reconhece PALAVRAS. A tradução de identificadores compostos NÃO é a concatenação palavra a palavra (o português põe o adjetivo depois do substantivo: RelatorioAula→LessonReport, codigo_acesso_hash→access_code_hash, dataNascimento→birthDate). Quem traduz compostos é o mapa completo de identificadores gerado por tools/gen-identifier-map.mjs e revisado item a item em cada fatia (tools/maps/slice-<N>.json).",
+    "hyphenatedValues": "valores com hífen (demo-data, sign-in, sign-out) valem para comandos, rotas e arquivos; em identificadores viram camelCase/PascalCase/SCREAMING_SNAKE conforme o contexto (DemoData, SignInScreen, signOut, SIGN_OUT).",
+    "connectors": "de, da, do, dos, das, em, sem, para: conectivos; o mapa completo decide se são descartados ou traduzidos (ex.: dados_fluxo→flow_data; sem→without). No campo words o valor entre parênteses indica que a palavra não gera termo próprio.",
+    "contextual": "entradas de \"contextual\" têm prioridade sobre \"words\" quando o contexto descrito casa; fora dele vale o valor de \"words\"."
   },
   "words": {
     "professor": "teacher",
@@ -95,7 +99,7 @@
     "ouro": "gold",
     "ouroclaro": "lightgold",
     "preto": "black",
-    "filete": "rule",
+    "filete": "divider",
     "canal": "channel",
     "acao": "action",
     "documento": "document",
@@ -244,7 +248,7 @@
     "registrar": "register",
     "gravacao": "recording",
     "gravador": "recorder",
-    "gravar": "record",
+    "gravar": "save",
     "visualizador": "viewer",
     "botao": "button",
     "cabecalho": "header",
@@ -333,13 +337,19 @@
     "regravar": "rerecord",
     "enviar": "send",
     "relatorios": "reports",
-    "em": "(de)",
+    "em": "(connector)",
     "de": "(of)",
     "da": "(of)",
     "dos": "(of)",
     "das": "(of)",
     "sem": "(without)",
-    "para": "(for)"
+    "para": "(for)",
+    "gravando": "recording",
+    "entidade": "entity",
+    "comando": "command",
+    "filtro": "filter",
+    "conversor": "converter",
+    "codificador": "codec"
   },
   "exceptions": [
     {
@@ -348,7 +358,8 @@
       "terms": [
         "br.com.felipeblaft"
       ],
-      "reason": "Nome de organização (domínio reverso do Instituto Musical Felipe Blaft); o pacote base muda só no sufixo (relatorios → reports)."
+      "reason": "Nome de organização (domínio reverso do Instituto Musical Felipe Blaft); o pacote base muda só no sufixo (relatorios → reports).",
+      "constitutionCategory": "proposta para a emenda 2.1.0: nomes próprios e material de referência (fora das 4 categorias fechadas do Princípio VI)"
     },
     {
       "id": "immutable-migrations",
@@ -356,7 +367,8 @@
       "terms": [
         "*"
       ],
-      "reason": "Migrações Flyway já aplicadas são imutáveis (checksum); a V7 e a V8 contêm os nomes antigos porque são quem os renomeia. O esquema RESULTANTE é verificado pelo teste de catálogo (R-05), e V9 em diante são varridas normalmente."
+      "reason": "Migrações Flyway já aplicadas são imutáveis (checksum); a V7 e a V8 contêm os nomes antigos porque são quem os renomeia. O esquema RESULTANTE é verificado pelo teste de catálogo (R-05), e V9 em diante são varridas normalmente.",
+      "constitutionCategory": "nomes de terceiros ou exigidos por ferramenta (permitido pelo Princípio VI)"
     },
     {
       "id": "teacher-keywords",
@@ -381,7 +393,8 @@
         "help",
         "sim"
       ],
-      "reason": "Palavras que o professor digita no bot são entrada do usuário (FR-011, constituição VI); permanecem em português, sem acento, como o reconhecedor as normaliza."
+      "reason": "Palavras que o professor digita no bot são entrada do usuário (FR-011, constituição VI); permanecem em português, sem acento, como o reconhecedor as normaliza.",
+      "constitutionCategory": "texto do usuário (explicitamente em português no Princípio VI)"
     },
     {
       "id": "vendor-font-files",
@@ -393,7 +406,8 @@
         "OFL",
         "LICENSE"
       ],
-      "reason": "Nomes de arquivos de fontes e de licenças de terceiros; a pasta 'fontes' passa a 'fonts', os arquivos não são renomeados."
+      "reason": "Nomes de arquivos de fontes e de licenças de terceiros; a pasta 'fontes' passa a 'fonts', os arquivos não são renomeados.",
+      "constitutionCategory": "nomes de terceiros ou exigidos por ferramenta (permitido pelo Princípio VI)"
     },
     {
       "id": "brand-prefix",
@@ -401,7 +415,8 @@
       "terms": [
         "fb-"
       ],
-      "reason": "Prefixo 'fb' é a sigla do Instituto Musical Felipe Blaft nos ativos da marca; as cores no nome do arquivo passam a inglês (marfim → ivory)."
+      "reason": "Prefixo 'fb' é a sigla do Instituto Musical Felipe Blaft nos ativos da marca; as cores no nome do arquivo passam a inglês (marfim → ivory).",
+      "constitutionCategory": "proposta para a emenda 2.1.0: nomes próprios e material de referência (fora das 4 categorias fechadas do Princípio VI)"
     },
     {
       "id": "public-domain",
@@ -409,7 +424,8 @@
       "terms": [
         "relatorios.felipeblaft.com.br"
       ],
-      "reason": "Nome de domínio público da organização; não é identificador de código. Confirmar com o dono do produto se o domínio real é este (ver plan.md, Pontos de decisão)."
+      "reason": "Nome de domínio público da organização; não é identificador de código. Confirmar com o dono do produto se o domínio real é este (ver plan.md, Pontos de decisão).",
+      "constitutionCategory": "proposta para a emenda 2.1.0: nomes próprios e material de referência (fora das 4 categorias fechadas do Princípio VI)"
     },
     {
       "id": "user-visible-text",
@@ -417,15 +433,27 @@
       "terms": [
         "*"
       ],
-      "reason": "Texto mostrado ao usuário, mensagens de log, comentários e documentação ficam em português (FR-023); o guardião só examina literais de uma palavra, sem espaço (identificadores, chaves, rotas)."
+      "reason": "Texto mostrado ao usuário, mensagens de log, comentários e documentação ficam em português (FR-023); o guardião só examina literais de uma palavra, sem espaço (identificadores, chaves, rotas).",
+      "constitutionCategory": "texto do usuário (explicitamente em português no Princípio VI)"
+    },
+    {
+      "id": "download-file-name",
+      "scope": "string-literal: nome do PDF mostrado ao usuário (download no Portal e documento enviado no Telegram)",
+      "terms": [
+        "relatorio-aula",
+        "relatorio-semestral"
+      ],
+      "reason": "FR-026 e US1-3: o nome do arquivo que o usuário vê e baixa permanece em português; só o nome interno de armazenamento (storage_key) passa a inglês. Vale para o gerador do nome (casos de uso de documento) e para as asserções dos testes (AcaoCanalMapeadorTeste, HistoricoConversaIT).",
+      "constitutionCategory": "texto do usuário (explicitamente em português no Princípio VI)"
     },
     {
       "id": "out-of-scope-folders",
-      "scope": "dir: portal-do-professor-design-system/, assets/, specs/, .claude/, .specify/templates, HANDOFF_MVP_Relatorios_Escola_Musica.md, PLANO_EXECUCAO_SPECKIT.md",
+      "scope": "dir: portal-do-professor-design-system/, assets/, specs/ (EXCETO specs/**/contracts/*.yaml e *.json, que SÃO varridos), .claude/, .specify/templates, HANDOFF_MVP_Relatorios_Escola_Musica.md, PLANO_EXECUCAO_SPECKIT.md, nomes das pastas specs/001-fluxo-relatorios e specs/002-api-interna-canal-telegram",
       "terms": [
         "*"
       ],
-      "reason": "Material de referência do cliente, histórico de specs e documentos de planejamento; não são código de produção (FR-023). Pastas e arquivos de documentação não são renomeados."
+      "reason": "Material de referência do cliente, histórico de specs e documentos de planejamento; não são código de produção (FR-023). Pastas e arquivos de documentação não são renomeados.",
+      "constitutionCategory": "proposta para a emenda 2.1.0: nomes próprios e material de referência (fora das 4 categorias fechadas do Princípio VI)"
     },
     {
       "id": "third-party-api-names",
@@ -439,13 +467,50 @@
         "update_id",
         "X-N8N-Service-Token"
       ],
-      "reason": "Nomes impostos pela API do Telegram, pelo n8n ou por ferramentas; já estão em inglês, listados só para documentar que não são tocados."
+      "reason": "Nomes impostos pela API do Telegram, pelo n8n ou por ferramentas; já estão em inglês, listados só para documentar que não são tocados.",
+      "constitutionCategory": "nomes de terceiros ou exigidos por ferramenta (permitido pelo Princípio VI)"
     },
     {
       "id": "temporary-per-slice",
       "scope": "preenchido durante a execução em fatias, só na branch (FR-035)",
       "terms": [],
-      "reason": "Exclusões temporárias por fatia ainda não migrada. Começa com o que as fatias 2 a 7 migrarão, encolhe a cada commit e DEVE estar vazia no commit final. A main nunca recebe o guardião com esta lista preenchida."
+      "reason": "Exclusões temporárias (FR-035): arquivos existentes na fatia 1 que ainda estão em português e, dentro de arquivos já migrados, termos retidos B1/B2/B3. Arquivos novos ou renomeados nunca entram. Encolhe a cada commit (regerada por tools/gen-exclusions.mjs) e DEVE estar vazia no commit final. A main nunca recebe o guardião com esta lista preenchida."
     }
+  ],
+  "contextual": [
+    {
+      "pt": "inicio",
+      "en": "home",
+      "context": "tela inicial do Portal e do bot: rota/API Home, enum Comando (INICIO), pacote usecase.inicio, services/inicio.ts, ação de botão v1:inicio",
+      "reason": "o glossário geral diz start (início de período, periodoInicio→periodStart); a tela inicial é home em todo o contrato (/home, HomeDto)"
+    },
+    {
+      "pt": "inicio",
+      "en": "start",
+      "context": "início de período ou de intervalo: periodoInicio, iniciado, inicio de fluxo",
+      "reason": "valor padrão"
+    },
+    {
+      "pt": "registro",
+      "en": "record",
+      "context": "registro como linha/log de dados: RegistroCustoPorta, registroUpdates, RETENCAO_REGISTRO_D, registro em curso",
+      "reason": "evita colidir com registration"
+    },
+    {
+      "pt": "registro",
+      "en": "registration",
+      "context": "registro de aula como ato do professor: REGISTRO_AULA, FluxoRegistroAula, registrar aula",
+      "reason": "valor padrão (LESSON_REGISTRATION)"
+    },
+    {
+      "pt": "gravar",
+      "en": "save",
+      "context": "persistir no banco ou na outbox: GravarAcoesCanal, gravarLote",
+      "reason": "gravar áudio usa gravador/gravando/gravacao (recorder/recording)"
+    }
+  ],
+  "notes": [
+    "Homônimos aceitos (um mesmo termo em inglês para dois conceitos próximos, sempre dentro de compostos que os distinguem): request (pedido do usuário em TRANSCRIBING_REQUEST/ACTION_REQUEST_IGNORED × sufixo HTTP *Request; mudar pedido exigiria alterar contrato e V8); home (tela inicial × homeStudyRegularity, só em composto); port (porta hexagonal × porta de rede); support (suporte de teste × acompanhamento pedagógico); page (pasta/rota) × screen (componente de tela, sufixo *Screen).",
+    "Sufixos fora da lista da constituição (propostos para a emenda 2.1.0, ver C1/M7 da análise): *Entity (entidade JPA), *Command (comando de CLI), *Filter, *Converter, *Codec, *Config (classe de configuração). *Jpa permanece como sigla (JPA) no nome da interface Spring Data."
   ]
 }

@@ -1,0 +1,7 @@
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: br.com.felipeblaft.migration.Slice3.B2
+displayName: "Fatia 3 — componentes de record retidos (B2)"
+description: "Componentes de record lidos pelo Jackson (esquemas de IA, jsonb, arquivo de carga) passam ao nome do esquema novo."
+recipeList:
+  - br.com.felipeblaft.migration.rewrite.RenameMembersByMap

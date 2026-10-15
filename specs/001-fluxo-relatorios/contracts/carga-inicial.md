@@ -10,15 +10,15 @@ exemplo fictício `infra/carga/exemplo.json` é versionado.
 ## Comandos
 
 ```text
-docker compose run --rm backend carga --arquivo /carga/<arquivo>.json [--simular]
-docker compose run --rm backend emitir-codigo --email <email-do-professor>
+docker compose run --rm backend seed --file /carga/<arquivo>.json [--simulate]
+docker compose run --rm backend issue-code --email <email-do-professor>
 ```
 
 | Comando | Efeito | Saída no terminal |
 |---|---|---|
-| `carga` | cria ou atualiza professores (por e-mail), alunos (por hash do CPF) e associações. Professor novo recebe código. Nunca apaga nada. | resumo (`criados`, `atualizados`, `inalterados`, `erros` por linha, sem mostrar CPF) e, para cada professor novo, `email → CÓDIGO (válido até dd/mm/aaaa hh:mm)` |
-| `carga --simular` | valida tudo e mostra o resumo, sem gravar | resumo |
-| `emitir-codigo` | gera um novo código para o professor, substitui o anterior e reinicia a validade de 7 dias. Não encerra sessões nem vínculos (revogação fica para a feature da secretaria). | `email → CÓDIGO (válido até …)` |
+| `seed` | cria ou atualiza professores (por e-mail), alunos (por hash do CPF) e associações. Professor novo recebe código. Nunca apaga nada. | resumo (`criados`, `atualizados`, `inalterados`, `erros` por linha, sem mostrar CPF) e, para cada professor novo, `email → CÓDIGO (válido até dd/mm/aaaa hh:mm)` |
+| `seed --simulate` | valida tudo e mostra o resumo, sem gravar | resumo |
+| `issue-code` | gera um novo código para o professor, substitui o anterior e reinicia a validade de 7 dias. Não encerra sessões nem vínculos (revogação fica para a feature da secretaria). | `email → CÓDIGO (válido até …)` |
 
 O código em claro **só** aparece nessa saída. No banco fica apenas o HMAC (R-12). Quem opera
 repassa o código ao professor fora do sistema.
@@ -27,17 +27,17 @@ repassa o código ao professor fora do sistema.
 
 ```json
 {
-  "professores": [
-    { "email": "clara@exemplo.test", "nome": "Clara Souza", "ativo": true }
+  "teachers": [
+    { "email": "clara@example.test", "name": "Clara Souza", "active": true }
   ],
-  "alunos": [
+  "students": [
     {
       "cpf": "000.000.000-00",
-      "nome": "Matteo Mafra",
-      "dataNascimento": "2014-05-10",
-      "nomeResponsavel": "Responsável Fictício",
-      "instrumento": "Piano",
-      "professores": ["clara@exemplo.test"]
+      "name": "Matteo Mafra",
+      "birthDate": "2014-05-10",
+      "guardianName": "Responsável Fictício",
+      "instrument": "Piano",
+      "teachers": ["clara@example.test"]
     }
   ]
 }
@@ -52,7 +52,7 @@ repassa o código ao professor fora do sistema.
 | CPF com 11 dígitos e dígitos verificadores válidos | `CPF_INVALIDO` |
 | CPF repetido no arquivo | `CPF_DUPLICADO_NO_ARQUIVO` |
 | data de nascimento válida e não futura (AAAA-MM-DD) | `DATA_NASCIMENTO_INVALIDA` |
-| menor de 18 anos exige `nomeResponsavel` | `RESPONSAVEL_OBRIGATORIO` |
+| menor de 18 anos exige `guardianName` | `RESPONSAVEL_OBRIGATORIO` |
 | professor da associação existe (no arquivo ou no banco) | `PROFESSOR_INEXISTENTE` |
 
 Com qualquer erro, **nada** é gravado: a carga é tudo ou nada, numa única transação. As linhas com

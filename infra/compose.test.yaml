@@ -1,9 +1,9 @@
 # Testes em contêiner (R-16): a máquina só precisa do runtime de contêineres.
-#   docker compose -f infra/compose.test.yaml run --rm testes-backend
-#   docker compose -f infra/compose.test.yaml run --rm testes-frontend
-#   docker compose -f infra/compose.test.yaml run --rm testes-e2e
-#   docker compose -f infra/compose.test.yaml run --rm testes-ia-real
-name: relatorios-testes
+#   docker compose -f infra/compose.test.yaml run --rm tests-backend
+#   docker compose -f infra/compose.test.yaml run --rm tests-frontend
+#   docker compose -f infra/compose.test.yaml run --rm tests-e2e
+#   docker compose -f infra/compose.test.yaml run --rm tests-real-ai
+name: reports-tests
 
 x-maven: &maven
   image: maven:3.9-eclipse-temurin-25
@@ -12,56 +12,56 @@ x-maven: &maven
     - ..:/work
     - m2:/root/.m2
   environment: &maven-env
-    BANCO_URL: jdbc:postgresql://postgres-teste:5432/relatorios_teste
-    BANCO_USUARIO: relatorios
-    BANCO_SENHA: teste
-    CONTRATO_API: /work/specs/001-fluxo-relatorios/contracts/api-portal.openapi.yaml
+    DATABASE_URL: jdbc:postgresql://postgres-test:5432/reports_test
+    DATABASE_USER: reports
+    DATABASE_PASSWORD: test
+    CONTRACT_API: /work/specs/001-fluxo-relatorios/contracts/api-portal.openapi.yaml
   depends_on:
-    postgres-teste:
+    postgres-test:
       condition: service_healthy
 
 services:
-  postgres-teste:
+  postgres-test:
     image: postgres:18
     # cada contexto de teste em cache abre o próprio pool (10 conexões); os testes com @MockitoSpyBean
     # criam contextos distintos, e o limite padrão de 100 conexões já não basta
     command: ["postgres", "-c", "max_connections=300"]
     environment:
-      POSTGRES_DB: relatorios_teste
-      POSTGRES_USER: relatorios
-      POSTGRES_PASSWORD: teste
+      POSTGRES_DB: reports_test
+      POSTGRES_USER: reports
+      POSTGRES_PASSWORD: test
     tmpfs:
       - /var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U relatorios -d relatorios_teste"]
+      test: ["CMD-SHELL", "pg_isready -U reports -d reports_test"]
       interval: 2s
       timeout: 3s
       retries: 30
 
-  testes-backend:
+  tests-backend:
     <<: *maven
-    # FFmpeg para FfmpegNormalizacaoAudioAdaptadorIT (o mesmo binário da imagem do backend)
+    # FFmpeg para FfmpegAudioNormalizationAdapterIT (o mesmo binário da imagem do backend)
     command: ["sh", "-c", "apt-get update -qq && apt-get install -y -qq ffmpeg >/dev/null && mvn -B -ntp verify"]
 
-  testes-ia-real:
+  tests-real-ai:
     <<: *maven
     environment:
       <<: *maven-env
-      PROVEDORES_IA: real
-      TRANSCRICAO_URL: ${TRANSCRICAO_URL:-https://api.groq.com/openai/v1}
-      TRANSCRICAO_MODELO: ${TRANSCRICAO_MODELO:-whisper-large-v3-turbo}
-      TRANSCRICAO_CHAVE: ${TRANSCRICAO_CHAVE:-}
+      AI_PROVIDERS: real
+      TRANSCRIPTION_URL: ${TRANSCRIPTION_URL:-https://api.groq.com/openai/v1}
+      TRANSCRIPTION_MODEL: ${TRANSCRIPTION_MODEL:-whisper-large-v3-turbo}
+      TRANSCRIPTION_API_KEY: ${TRANSCRIPTION_API_KEY:-}
       LLM_URL: ${LLM_URL:-https://api.groq.com/openai/v1}
-      LLM_MODELO: ${LLM_MODELO:-llama-3.3-70b-versatile}
-      LLM_CHAVE: ${LLM_CHAVE:-}
+      LLM_MODEL: ${LLM_MODEL:-llama-3.3-70b-versatile}
+      LLM_API_KEY: ${LLM_API_KEY:-}
       ASSETS_DIR: /assets
     volumes:
       - ..:/work
       - m2:/root/.m2
       - ../assets:/assets:ro
-    command: ["sh", "-c", "apt-get update -qq && apt-get install -y -qq ffmpeg >/dev/null && mvn -B -ntp -Pia-real verify"]
+    command: ["sh", "-c", "apt-get update -qq && apt-get install -y -qq ffmpeg >/dev/null && mvn -B -ntp -Preal-ai verify"]
 
-  testes-frontend:
+  tests-frontend:
     image: node:24-alpine
     working_dir: /work/frontend
     volumes:
@@ -73,13 +73,13 @@ services:
   postgres-e2e:
     image: postgres:18
     environment:
-      POSTGRES_DB: relatorios
-      POSTGRES_USER: relatorios
+      POSTGRES_DB: reports
+      POSTGRES_USER: reports
       POSTGRES_PASSWORD: e2e
     tmpfs:
       - /var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U relatorios -d relatorios"]
+      test: ["CMD-SHELL", "pg_isready -U reports -d reports"]
       interval: 2s
       timeout: 3s
       retries: 30
@@ -87,19 +87,19 @@ services:
   backend-e2e:
     build:
       context: ../backend
-      dockerfile: aplicacao/Dockerfile
-    image: relatorios-backend
+      dockerfile: application/Dockerfile
+    image: reports-backend
     environment:
-      BANCO_URL: jdbc:postgresql://postgres-e2e:5432/relatorios
-      BANCO_USUARIO: relatorios
-      BANCO_SENHA: e2e
-      PROVEDORES_IA: simulado
-      TELEGRAM_HABILITADO: "false"
-      CPF_CHAVE_CIFRAGEM: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
-      SEGREDO_HMAC: segredo-hmac-de-testes-e2e-com-mais-de-32-bytes
-      SESSAO_COOKIE_SEGURO: "true"
-      DOCUMENTOS_DIR: /dados/documentos
-      AUDIOS_TEMP_DIR: /tmp/audios
+      DATABASE_URL: jdbc:postgresql://postgres-e2e:5432/reports
+      DATABASE_USER: reports
+      DATABASE_PASSWORD: e2e
+      AI_PROVIDERS: simulated
+      TELEGRAM_ENABLED: "false"
+      CPF_ENCRYPTION_KEY: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+      HMAC_SECRET: hmac-secret-for-e2e-tests-with-more-than-32-bytes
+      SESSION_COOKIE_SECURE: "true"
+      DOCUMENTS_DIR: /data/documents
+      AUDIO_TEMP_DIR: /tmp/audios
     tmpfs:
       - /tmp/audios:mode=1777
     depends_on:
@@ -119,23 +119,23 @@ services:
     build:
       context: ..
       dockerfile: frontend/Dockerfile
-    image: relatorios-web
+    image: reports-web
     environment:
-      DOMINIO: web-e2e
-      CERTIFICADOS_LOCAIS: local_certs
+      DOMAIN: web-e2e
+      LOCAL_CERTIFICATES: local_certs
     depends_on:
       backend-e2e:
         condition: service_healthy
 
-  testes-e2e:
+  tests-e2e:
     image: mcr.microsoft.com/playwright:v1.63.0-noble
     working_dir: /work/frontend
     environment:
       E2E_URL: https://web-e2e
-      E2E_BANCO_URL: postgres://relatorios:e2e@postgres-e2e:5432/relatorios
+      E2E_DATABASE_URL: postgres://reports:e2e@postgres-e2e:5432/reports
       # Os mesmos segredos de testes do backend-e2e: a semeadura grava o HMAC e o CPF cifrado.
-      E2E_CPF_CHAVE: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
-      E2E_SEGREDO_HMAC: segredo-hmac-de-testes-e2e-com-mais-de-32-bytes
+      E2E_CPF_KEY: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+      E2E_HMAC_SECRET: hmac-secret-for-e2e-tests-with-more-than-32-bytes
     volumes:
       - ..:/work
       - node-modules-e2e:/work/frontend/node_modules

@@ -1,0 +1,11 @@
+{
+  "ETAPA_": "STEP_",
+  "TIPO_": "TYPE_",
+  "provedor": "provider",
+  "AUDIO_SEM_FALA": "AUDIO_NO_SPEECH",
+  "AUDIO_FORMATO": "AUDIO_FORMAT",
+  "AUDIO_VAZIO": "AUDIO_EMPTY",
+  "FORMATOS_E_LIMITE": "FORMATS_AND_LIMIT",
+  "STATUS_INEXISTENTE": null,
+  "conteudos": "contents"
+}

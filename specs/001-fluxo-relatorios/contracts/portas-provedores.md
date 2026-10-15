@@ -3,51 +3,51 @@
 **Feature**: `001-fluxo-relatorios` | Referências: Princípio I (portas sem nome de fornecedor), FR-017 a
 FR-023, FR-025, FR-027a, FR-043, FR-044, FR-049, FR-056; [research.md](../research.md) R-07 a R-11.
 
-As portas ficam em `nucleo` (pacote `...porta`) e são implementadas por `*Adaptador` em `aplicacao`.
+As portas ficam em `core` (pacote `...port`) e são implementadas por `*Adaptador` em `aplicacao`.
 As assinaturas abaixo são o contrato semântico. Os tipos são objetos do núcleo, nunca DTOs de
 fornecedor. Todas as portas são substituíveis por dublês nos testes unitários (Princípio V).
 
-## 1. `TranscricaoPorta`
+## 1. `TranscriptionPort`
 
 ```java
-ResultadoTranscricao transcrever(AudioNormalizado audio);
+TranscriptionResult transcribe(NormalizedAudio audio);
 // AudioNormalizado: caminho temporário (Ogg/Opus mono 16 kHz), duracaoSegundos, idioma = "pt"
 // ResultadoTranscricao: texto, duracaoSegundos, custoEstimado, provedorModelo (opaco para o núcleo)
 ```
 
 | Situação | Comportamento |
 |---|---|
-| Texto vazio ou só espaços | lança `AudioNaoProcessavelExcecao(SEM_FALA)` |
-| Provedor recusa o arquivo (4xx de conteúdo) | `AudioNaoProcessavelExcecao(FORMATO)` |
-| 429, 5xx, timeout ou rede | `ProvedorIndisponivelExcecao`; o worker tenta de novo 1 vez (R-08); depois, `AUDIO_NAO_PROCESSAVEL` para registro de aula e `FALHA_ALTERACAO` para pedido por áudio |
+| Texto vazio ou só espaços | lança `AudioNotProcessableException(SEM_FALA)` |
+| Provedor recusa o arquivo (4xx de conteúdo) | `AudioNotProcessableException(FORMATO)` |
+| 429, 5xx, timeout ou rede | `ProviderUnavailableException`; o worker tenta de novo 1 vez (R-08); depois, `AUDIO_NAO_PROCESSAVEL` para registro de aula e `FALHA_ALTERACAO` para pedido por áudio |
 
-A porta **não** guarda o áudio. Quem apaga o arquivo temporário é o `AudioTemporarioServico`, num
+A porta **não** guarda o áudio. Quem apaga o arquivo temporário é o `TemporaryAudioService`, num
 `finally` (FR-018).
 
-## 2. `NormalizacaoAudioPorta`
+## 2. `AudioNormalizationPort`
 
 ```java
-AudioNormalizado normalizar(ArquivoTemporario original, long limiteBytes);
+NormalizedAudio normalize(TemporaryFile original, long limiteBytes);
 ```
 
 Extrai a trilha de áudio (inclusive de MP4), converte para Ogg/Opus mono 16 kHz 24 kbit/s e mede a
-duração. Erros: `FormatoNaoSuportadoExcecao` quando não há trilha de áudio ou o contêiner é
-desconhecido; `AudioNaoProcessavelExcecao(VAZIO)` quando a duração é menor que 1 s. Implementação:
+duração. Erros: `UnsupportedFormatException` quando não há trilha de áudio ou o contêiner é
+desconhecido; `AudioNotProcessableException(VAZIO)` quando a duração é menor que 1 s. Implementação:
 FFmpeg (`FfmpegNormalizacaoAudioAdaptador`).
 
-## 3. `LlmPorta`
+## 3. `LlmPort`
 
 ```java
-<T> RespostaLlm<T> gerarJson(TarefaLlm tarefa, EntradaTarefa entrada, Class<T> tipoSaida);
+<T> ResponseLlm<T> generateJson(TaskLlm task, TaskInput input, Class<T> outputType);
 // TarefaLlm: ESTRUTURACAO_AULA, INCORPORACAO_RESPOSTAS, REVISAO_AULA, CONSOLIDACAO_SEMESTRAL, REVISAO_SEMESTRAL
 // RespostaLlm: saida (já validada contra o schema), versaoPrompt, tokensEntrada, tokensSaida, custoEstimado
 ```
 
 - O adaptador escolhe o prompt versionado da tarefa, chama o provedor em modo JSON, valida a saída
   contra o schema (seção 6) e, se ela for inválida, faz **uma** chamada de correção
-  (`correcao-json.v1`). Se falhar de novo, lança `SaidaIaInvalidaExcecao`.
+  (`correcao-json.v1`). Se falhar de novo, lança `InvalidAiOutputException`.
 - Campos ausentes viram vazios e campos desconhecidos são descartados na desserialização (FR-020).
-- **Minimização de dados** (FR-023, FR-044): `EntradaTarefa` só aceita os tipos abaixo. Nome, CPF,
+- **Minimização de dados** (FR-023, FR-044): `TaskInput` só aceita os tipos abaixo. Nome, CPF,
   data de nascimento e nome do responsável do aluno não existem nesses tipos, então não há como
   enviá-los.
 
@@ -59,11 +59,11 @@ FFmpeg (`FfmpegNormalizacaoAudioAdaptador`).
 | `CONSOLIDACAO_SEMESTRAL` | lista de conteúdos aprovados (5 seções cada) com a **data da aula**; quantidade de aulas; intervalo do período |
 | `REVISAO_SEMESTRAL` | conteúdo atual (seções 2 a 10), texto do pedido |
 
-## 4. `GeracaoPdfPorta`
+## 4. `PdfGenerationPort`
 
 ```java
-DocumentoGerado gerarRelatorioAula(ModeloPdfRelatorioAula modelo);
-DocumentoGerado gerarRelatorioSemestral(ModeloPdfRelatorioSemestral modelo);
+GeneratedDocument generateLessonReport(LessonReportPdfModel model);
+GeneratedDocument generateSemesterReport(SemesterReportPdfModel model);
 // modelo: cabeçalho (aluno, professor, data da aula ou período), seções, versão,
 //         situacao = CONFERENCIA | OFICIAL, aprovacao (professor, data e hora, versão) quando OFICIAL,
 //         quantidadeAulasConsideradas (semestral)
@@ -80,15 +80,15 @@ para seções vazias, rodapé institucional "Instituto Musical Felipe Blaft · P
 
 | Porta | Operações | Adaptador inicial |
 |---|---|---|
-| `ArmazenamentoDocumentoPorta` | `salvar(chave, bytes)`, `abrir(chave) → InputStream`, `existe(chave)` | sistema de arquivos (volume `documentos`) |
-| `RelogioPorta` | `agora()`, `hojeNoFusoDaEscola()` | relógio do sistema + `ESCOLA_FUSO_HORARIO` |
-| `GeradorCodigoAcessoPorta` | `gerar() → CodigoAcesso` | `SecureRandom` |
-| `ProtecaoDadosPorta` | `cifrarCpf`, `hashCpf`, `hashCodigoAcesso`, `hashOrigem` | AES-256-GCM / HMAC-SHA-256 |
-| `NotificacaoProfessorPorta` | `notificarEtapa(trabalho, etapa)`, `notificarResultado(trabalho, resultado)`, `avisarResultadoEmOutroCanal(professor, resumo)` | `NotificacaoTelegramAdaptador` (a Web consulta por polling e não precisa de adaptador de envio) |
-| `ArquivoCanalPorta` | `obterArquivo(referenciaArquivoCanal) → ArquivoTemporario` | `ArquivoTelegramAdaptador` (`getFile` no servidor local + cópia para o `tmpfs` + remoção do original) |
-| `FilaTrabalhoPorta` | `enfileirar(trabalho)`, `reservarProximo()`, `concluir`, `falhar` | tabela `trabalho_processamento` (R-06) |
-| `RegistroCustoPorta` | `registrar(ChamadaIa)` | tabela `chamada_ia` |
-| Repositórios (`*Repositorio`) | um por agregado: `ProfessorRepositorio`, `AlunoRepositorio`, `AssociacaoRepositorio`, `SessaoWebRepositorio`, `VinculoTelegramRepositorio`, `TentativaAcessoRepositorio`, `RelatorioAulaRepositorio`, `RelatorioSemestralRepositorio`, `VersaoRelatorioRepositorio`, `InteracaoRelatorioRepositorio`, `DocumentoPdfRepositorio` | JPA/PostgreSQL |
+| `DocumentStoragePort` | `save(key, bytes)`, `open(key) → InputStream`, `exists(key)` | sistema de arquivos (volume `documentos`) |
+| `ClockPort` | `now()`, `todayInSchoolTimezone()` | relógio do sistema + `ESCOLA_FUSO_HORARIO` |
+| `AccessCodeGeneratorPort` | `generate() → AccessCode` | `SecureRandom` |
+| `DataProtectionPort` | `encryptCpf`, `hashCpf`, `hashAccessCode`, `originHash` | AES-256-GCM / HMAC-SHA-256 |
+| `TeacherNotificationPort` | `notifyStep(job, etapa)`, `notifyResult(job, result)`, `avisarResultadoEmOutroCanal(professor, summary)` | `NotificacaoTelegramAdaptador` (a Web consulta por polling e não precisa de adaptador de envio) |
+| `ChannelFilePort` | `getFile(referenciaArquivoCanal) → TemporaryFile` | `ArquivoTelegramAdaptador` (`getFile` no servidor local + cópia para o `tmpfs` + remoção do original) |
+| `JobQueuePort` | `enqueue(job)`, `reserveNext()`, `complete`, `falhar` | tabela `trabalho_processamento` (R-06) |
+| `CostRecordPort` | `register(AiCall)` | tabela `chamada_ia` |
+| Repositórios (`*Repositorio`) | um por agregado: `TeacherRepository`, `StudentRepository`, `AssignmentRepository`, `WebSessionRepository`, `TelegramLinkRepository`, `AccessAttemptRepository`, `LessonReportRepository`, `SemesterReportRepository`, `ReportVersionRepository`, `ReportInteractionRepository`, `PdfDocumentRepository` | JPA/PostgreSQL |
 
 ## 6. Schemas de saída da IA (JSON Schema, draft 2020-12, resumidos)
 
@@ -128,7 +128,7 @@ Objeto com as chaves `frequenciaEEstudo`, `tecnica`, `musicalidade`, `leituraEMe
 `pontosDeAtencao`, `estrategiasPedagogicas`, `acompanhamentoFamiliar`,
 `planejamentoProximoSemestre` (subcampos como em [data-model.md](../data-model.md), seção 9) e
 `parecerFinal` (string, até 6000 caracteres), mais `semAlteracaoDeConteudo`/`pedidoDeAcao` na
-revisão. **Sem** `informacoesGerais`: se vier, a chave é descartada e o sistema preenche essa seção
+revisão. **Sem** `generalInformation`: se vier, a chave é descartada e o sistema preenche essa seção
 (FR-044).
 
 ## 7. Prompts versionados

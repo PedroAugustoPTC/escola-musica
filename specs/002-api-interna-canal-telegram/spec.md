@@ -1,5 +1,10 @@
 # Feature Specification: API interna de canal do Telegram para orquestrador externo
 
+> **Nota de histórico (feature 003)**: este documento foi escrito antes da migração do código para
+> inglês e cita nomes anteriores a ela (classes, arquivos, tabelas, rotas, variáveis). Ele permanece como
+> histórico, sem reescrita. Para o nome atual de cada termo, consulte o glossário em
+> [`.specify/memory/glossary.json`](../../.specify/memory/glossary.json) e o Princípio VI da constituição.
+
 **Feature Branch**: `002-api-interna-canal-telegram`
 
 **Created**: 2026-10-02
@@ -14,7 +19,7 @@
 - `specs/001-fluxo-relatorios/contracts/telegram-conversa.md` e `contracts/mensagens.md`: fonte de verdade do comportamento da conversa (10 estados, botões `v1:<acao>:<arg>`, palavras-chave, retomada, semestral, histórico e avisos entre canais). **Nada disso muda nesta feature.**
 - `specs/001-fluxo-relatorios/spec.md` (FR-015, FR-018, FR-021, FR-036 a FR-040): regras de áudio, avisos entre canais e conversa, que continuam valendo.
 
-**Escopo desta feature**: somente a **API interna do backend** que permite a um orquestrador externo fazer o transporte do Telegram. Fora de escopo (feature `003`): criar os workflows do n8n, alterar a composição de contêineres e o proxy, trocar o webhook registrado no Telegram, remover o caminho antigo de envio direto ao Telegram. O webhook atual continua funcionando integralmente durante e depois desta feature.
+**Escopo desta feature**: somente a **API interna do backend** que permite a um orquestrador externo fazer o transporte do Telegram. Fora de escopo (feature `004`): criar os workflows do n8n, alterar a composição de contêineres e o proxy, trocar o webhook registrado no Telegram, remover o caminho antigo de envio direto ao Telegram. O webhook atual continua funcionando integralmente durante e depois desta feature.
 
 ## Clarifications
 
@@ -117,7 +122,7 @@ Quando uma ação pede o envio de um documento (PDF de conferência ou PDF ofici
 
 O áudio nunca passa pelo orquestrador: o update traz apenas a referência do arquivo (`file_id`), e o backend baixa o arquivo, como hoje, pelo servidor local de API de bots (volume compartilhado, limite de 50 MB). O caminho antigo (webhook atual falando direto com o Telegram) segue funcionando, e a escolha de qual caminho entrega as mensagens proativas é configurável para não haver envio duplicado.
 
-**Why this priority**: protege privacidade (Princípio IV: áudio não retido, não circula por terceiros) e permite a troca gradual de transporte na feature `003` sem corte brusco.
+**Why this priority**: protege privacidade (Princípio IV: áudio não retido, não circula por terceiros) e permite a troca gradual de transporte na feature `004` sem corte brusco.
 
 **Independent Test**: enviar um update com mensagem de voz pela nova porta e confirmar que o backend resolve o arquivo sozinho e que nada com conteúdo de áudio aparece em ações, filas de entrega ou logs; alternar a configuração e confirmar que as mensagens proativas saem por um caminho só.
 
@@ -145,7 +150,7 @@ O áudio nunca passa pelo orquestrador: o update traz apenas a referência do ar
 - **Rotação do token de serviço**: com dois tokens aceitos ao mesmo tempo (FR-026a), a troca ocorre sem janela de recusas; nenhuma entrega pendente se perde por causa disso. Depois de removido o token antigo, chamadas com ele são recusadas.
 - **PDF muito grande ou indisponível no momento da busca**: o orquestrador recebe um erro claro e informa `DOCUMENTO_INDISPONIVEL` na confirmação; o backend nunca devolve conteúdo parcial e emite a compensação do FR-007c (aviso com o botão para pedir o PDF de novo).
 - **Ação entregue que nunca é confirmada**: ao vencer o prazo de entrega, ela chega a um estado final com código `SEM_CONFIRMACAO`, sem alterar o relatório nem contar como falha de entrega, e o payload é zerado como o das demais ações finalizadas (FR-029).
-- **Chamada à API interna vinda de fora da rede de serviços**: a decisão de exposição pública é da infraestrutura (feature `003`), mas a API recusa tudo que não traga o token, mesmo se alcançada.
+- **Chamada à API interna vinda de fora da rede de serviços**: a decisão de exposição pública é da infraestrutura (feature `004`), mas a API recusa tudo que não traga o token, mesmo se alcançada.
 
 ## Requirements *(mandatory)*
 
@@ -231,11 +236,11 @@ O áudio nunca passa pelo orquestrador: o update traz apenas a referência do ar
 
 ## Assumptions
 
-- O orquestrador é um consumidor confiável da rede interna de serviços, que fala com o backend por HTTP; a exposição pública e o proxy ficam para a feature `003`.
+- O orquestrador é um consumidor confiável da rede interna de serviços, que fala com o backend por HTTP; a exposição pública e o proxy ficam para a feature `004`.
 - Um update repetido devolve apenas as ações da primeira vez que o orquestrador ainda não confirmou como executadas. Isso evita que uma resposta perdida deixe o professor sem retorno e, ao mesmo tempo, que mensagens já enviadas sejam repetidas; o orquestrador não guarda estado de deduplicação, só confirma ao backend o que executou. Resta apenas a janela mínima entre executar uma ação no Telegram e a confirmação chegar ao backend.
 - O identificador de documento é válido por pelo menos o prazo máximo de tentativas de entrega, e o PDF obtido tem o mesmo conteúdo do que o portal entrega; a autorização de acesso a ele é dada pelo token de serviço, ficando a verificação de dono do relatório na geração do identificador.
 - O orquestrador informa o identificador da mensagem criada por meio de uma confirmação de execução enviada ao backend, que também registra a entrega como concluída.
 - O prazo máximo de tentativas padrão (24 h, FR-018) cobre um dia de indisponibilidade do orquestrador e é configurável. Se a entrega reaproveita a fila Postgres existente (`trabalho_processamento`) ou uma tabela própria é decisão do plano.
-- Por padrão (esta feature), as mensagens proativas continuam saindo pelo caminho atual; a ativação do caminho do orquestrador é uma configuração, a ser ligada pela feature `003` junto da troca do webhook.
+- Por padrão (esta feature), as mensagens proativas continuam saindo pelo caminho atual; a ativação do caminho do orquestrador é uma configuração, a ser ligada pela feature `004` junto da troca do webhook.
 - O servidor local de API de bots do Telegram e o volume de arquivos compartilhado continuam como estão; a única mudança em relação a áudio é garantir que o orquestrador não o toque.
-- Fora de escopo, por decisão do pedido: criação de workflows do n8n, alteração de `compose`/proxy, troca do webhook registrado no Telegram e remoção do adaptador antigo (feature `003`).
+- Fora de escopo, por decisão do pedido: criação de workflows do n8n, alteração de `compose`/proxy, troca do webhook registrado no Telegram e remoção do adaptador antigo (feature `004`).

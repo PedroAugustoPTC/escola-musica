@@ -1,0 +1,260 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://relatorios.felipeblaft.com.br/contracts/telegram-channel/actions-v1.schema.json",
+  "title": "Canal Telegram interno: formato v1",
+  "description": "Fonte normativa dos corpos JSON do canal Telegram interno (feature 002), com os nomes técnicos em inglês da feature 003. Cada definição em $defs é validada de forma independente nos testes de contrato (fragmento #/$defs/<Nome>). Os objetos produzidos pelo backend usam additionalProperties=false para que um campo acidental quebre o teste; o RECEPTOR (orquestrador) DEVE ignorar campos desconhecidos e responder ACTION_NOT_SUPPORTED a tipos de ação desconhecidos (FR-003a).",
+  "$defs": {
+    "Version": {
+      "const": "v1"
+    },
+    "ActionId": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 120,
+      "pattern": "^(u[0-9]+-(e?[0-9]+)(-c)?|p:[A-Za-z0-9:_.-]+:[0-9]+(-c)?)$",
+      "description": "Identificador estável da ação; igual em todas as entregas e tentativas. Respostas a update: u<update_id>-<position>. Proativas: p:<event>:<position>. Compensação: sufixo -c."
+    },
+    "BatchId": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 120,
+      "pattern": "^(u[0-9]+|p:[A-Za-z0-9:_.-]+|c:[A-Za-z0-9:_.-]+)$"
+    },
+    "ChatId": {
+      "type": "integer",
+      "description": "Identificador do chat no Telegram (pode ser negativo)."
+    },
+    "MessageId": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "Text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096,
+      "description": "Texto já escapado para parse_mode=HTML e já dividido no limite do Telegram; o orquestrador NUNCA reescreve nem divide."
+    },
+    "Button": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "data"],
+      "properties": {
+        "label": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "data": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "description": "callback_data no formato v1:<action>:<argument> (contracts/telegram-conversa.md §3 da feature 001)."
+        }
+      }
+    },
+    "Keyboard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rows"],
+      "properties": {
+        "rows": {
+          "type": "array",
+          "maxItems": 20,
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 8,
+            "items": { "$ref": "#/$defs/Button" }
+          }
+        }
+      }
+    },
+    "MessageAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actionId", "type", "chatId", "text"],
+      "properties": {
+        "actionId": { "$ref": "#/$defs/ActionId" },
+        "type": { "const": "MESSAGE" },
+        "chatId": { "$ref": "#/$defs/ChatId" },
+        "text": { "$ref": "#/$defs/Text" },
+        "keyboard": { "$ref": "#/$defs/Keyboard" }
+      }
+    },
+    "EditAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actionId", "type", "chatId", "messageId", "text"],
+      "properties": {
+        "actionId": { "$ref": "#/$defs/ActionId" },
+        "type": { "const": "EDIT" },
+        "chatId": { "$ref": "#/$defs/ChatId" },
+        "messageId": { "$ref": "#/$defs/MessageId" },
+        "text": { "$ref": "#/$defs/Text" },
+        "keyboard": { "$ref": "#/$defs/Keyboard" }
+      }
+    },
+    "DocumentAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actionId", "type", "chatId", "documentId", "fileName", "contentType"],
+      "properties": {
+        "actionId": { "$ref": "#/$defs/ActionId" },
+        "type": { "const": "DOCUMENT" },
+        "chatId": { "$ref": "#/$defs/ChatId" },
+        "documentId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{43}$",
+          "description": "Identificador opaco; os bytes se obtêm em GET /internal/v1/channel/telegram/documents/{documentId}. Nunca é URL nem caminho."
+        },
+        "fileName": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "contentType": { "const": "application/pdf" },
+        "caption": { "type": "string", "maxLength": 1024 }
+      }
+    },
+    "CallbackReplyAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actionId", "type", "callbackId"],
+      "properties": {
+        "actionId": { "$ref": "#/$defs/ActionId" },
+        "type": { "const": "CALLBACK_REPLY" },
+        "callbackId": { "type": "string", "minLength": 1, "maxLength": 128 }
+      }
+    },
+    "StepMessageAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actionId", "type", "chatId", "text", "jobId"],
+      "properties": {
+        "actionId": { "$ref": "#/$defs/ActionId" },
+        "type": { "const": "STEP_MESSAGE" },
+        "chatId": { "$ref": "#/$defs/ChatId" },
+        "text": { "$ref": "#/$defs/Text" },
+        "jobId": { "type": "string", "format": "uuid" },
+        "editMessageId": {
+          "$ref": "#/$defs/MessageId",
+          "description": "Se presente, edita essa mensagem no lugar; se ausente, envia mensagem nova. Em ambos os casos o orquestrador informa o messageId resultante na confirmação."
+        }
+      }
+    },
+    "Action": {
+      "oneOf": [
+        { "$ref": "#/$defs/MessageAction" },
+        { "$ref": "#/$defs/EditAction" },
+        { "$ref": "#/$defs/DocumentAction" },
+        { "$ref": "#/$defs/CallbackReplyAction" },
+        { "$ref": "#/$defs/StepMessageAction" }
+      ]
+    },
+    "UpdateResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "updateId", "batchId", "actions"],
+      "description": "Corpo 200 de POST /internal/v1/channel/telegram/update. Ações na ordem em que devem ser executadas; lista vazia = nada a executar (update ignorado, não suportado, ou já totalmente confirmado).",
+      "properties": {
+        "version": { "$ref": "#/$defs/Version" },
+        "updateId": { "type": ["integer", "null"] },
+        "batchId": { "type": ["string", "null"], "pattern": "^u[0-9]+$" },
+        "actions": {
+          "type": "array",
+          "maxItems": 100,
+          "items": { "$ref": "#/$defs/Action" }
+        }
+      }
+    },
+    "DeliveryBatch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "batchId", "origin", "createdAt", "attempt", "actions"],
+      "description": "Corpo enviado pelo backend ao webhook do orquestrador (entrega proativa). Cabeçalhos: X-Channel-Delivery-Token e Idempotency-Key = batchId.",
+      "properties": {
+        "version": { "$ref": "#/$defs/Version" },
+        "batchId": { "$ref": "#/$defs/BatchId" },
+        "origin": { "enum": ["PROACTIVE", "COMPENSATION"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "attempt": { "type": "integer", "minimum": 1 },
+        "actions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "items": { "$ref": "#/$defs/Action" }
+        }
+      }
+    },
+    "ReasonCode": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]{1,39}$",
+      "description": "Motivo de falha informado pelo orquestrador; nunca contém texto de aluno. Codigos conhecidos: MESSAGE_NOT_EDITABLE, CHAT_UNAVAILABLE, ACTION_NOT_SUPPORTED, DOCUMENT_UNAVAILABLE, RATE_LIMITED, TELEGRAM_ERROR. Aberto de proposito (evolucao aditiva, contracts/telegram-channel-internal.md secao 5): o backend trata um codigo desconhecido como TELEGRAM_ERROR em vez de recusar o lote."
+    },
+    "ActionResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actionId", "outcome"],
+      "properties": {
+        "actionId": { "$ref": "#/$defs/ActionId" },
+        "outcome": { "enum": ["EXECUTED", "FAILED"] },
+        "reasonCode": { "$ref": "#/$defs/ReasonCode" },
+        "messageId": {
+          "$ref": "#/$defs/MessageId",
+          "description": "Id da mensagem criada ou editada no Telegram; obrigatório para STEP_MESSAGE executada."
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "outcome": { "const": "FAILED" } }, "required": ["outcome"] },
+          "then": { "required": ["reasonCode"] }
+        }
+      ]
+    },
+    "ConfirmationRequest": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["version", "results"],
+      "description": "Corpo de POST /internal/v1/channel/telegram/confirmations. Este é um corpo RECEBIDO pelo backend: campos desconhecidos são ignorados (tolerância a evolução aditiva).",
+      "properties": {
+        "version": { "$ref": "#/$defs/Version" },
+        "results": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "items": { "$ref": "#/$defs/ActionResult" }
+        }
+      }
+    },
+    "ConfirmationResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "accepted", "ignored"],
+      "properties": {
+        "version": { "$ref": "#/$defs/Version" },
+        "accepted": { "type": "integer", "minimum": 0 },
+        "ignored": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ActionId" },
+          "description": "Ids desconhecidos, descartados, vencidos ou com resultado divergente do já registrado. Não é erro."
+        }
+      }
+    },
+    "ActionStateResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "actionId", "state"],
+      "description": "Corpo 200 de GET /internal/v1/channel/telegram/actions/{actionId}. Permite ao n8n, sem estado próprio, pular uma execução já registrada (idempotência, FR-013).",
+      "properties": {
+        "version": { "$ref": "#/$defs/Version" },
+        "actionId": { "$ref": "#/$defs/ActionId" },
+        "state": {
+          "enum": ["PENDING", "DELIVERED", "EXECUTED", "FAILED", "PERMANENTLY_FAILED", "DISCARDED"]
+        },
+        "reasonCode": { "type": "string", "maxLength": 40 }
+      }
+    },
+    "Error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "code"],
+      "description": "Corpo de erros 400/422 da área interna quando houver corpo. 401 e 404 NÃO têm corpo (FR-024, FR-022). Nunca contém dado de aluno nem eco do payload.",
+      "properties": {
+        "version": { "$ref": "#/$defs/Version" },
+        "code": { "enum": ["INVALID_REQUEST", "UNSUPPORTED_VERSION"] }
+      }
+    }
+  }
+}
