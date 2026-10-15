@@ -25,6 +25,8 @@ explicação de cada passo mora aqui. Endpoints do n8n: [n8n-endpoints.openapi.y
 | W6 | Nenhuma execução é salva; nenhum log traz corpo, URL ou token | `N8nPrivacyIT` |
 | W7 | Falha de execução **nunca** interrompe a lista; só falha de **transporte com o backend** a interrompe | `N8nFailureHandlingIT` |
 | W8 | O n8n não decide reenvio nem compensação; classifica e informa | `N8nFailureHandlingIT` |
+| W9 | Só executa ação `PENDING` ou `DELIVERED`: ação que o backend já decidiu (`EXECUTED`, `FAILED`, `PERMANENTLY_FAILED`, `DISCARDED`) ou desconhece (`404`) nunca é executada nem confirmada | `N8nFailureHandlingIT` (N10, N10b) |
+| W10 | Garantia de repetição na queda: ação já confirmada **nunca** repete; a única ação em voo (enviada ao Telegram e ainda não confirmada) pode repetir **uma vez** | `N8nResilienceIT` (N13b, N13c) |
 
 ## 2. `telegram-inbound` — único receptor de updates
 
@@ -73,7 +75,7 @@ Entrada: `actions` (lista v1). Percorre **em ordem**, uma ação por vez.
 
 | Etapa | Regra |
 |---|---|
-| E1. Estado | `GET {BACKEND_INTERNAL_URL}/internal/v1/channel/telegram/actions/{actionId}`. `state` `EXECUTED` ou `FAILED` → **pula** (nem executa nem confirma). Erro de conexão ou `5xx` → **aborta** a lista com falha de transporte. `404`, `PENDING`, `DELIVERED` → executa. Qualquer outro `4xx` (`401`) → aborta com falha de transporte (configuração errada deve aparecer, não ser engolida) |
+| E1. Estado | `GET {BACKEND_INTERNAL_URL}/internal/v1/channel/telegram/actions/{actionId}`. **Só `PENDING` e `DELIVERED` executam.** `state` `EXECUTED`, `FAILED`, `PERMANENTLY_FAILED` ou `DISCARDED` → **pula** (nem executa nem confirma): são decisões do backend (vínculo desfeito, prazo vencido, resultado já registrado) que o n8n não pode desfazer (Princípios II e IV). `404` (ação que o backend desconhece) → **pula**, sem confirmar, com log técnico só do `actionId`. Erro de conexão ou `5xx` → **aborta** a lista com falha de transporte. Qualquer outro `4xx` (`401`) → aborta com falha de transporte (configuração errada deve aparecer, não ser engolida). Esta leitura é mais estrita que a do contrato 002 §4 item 5 (que cita só `EXECUTED`/`FAILED`) e não o altera |
 | E2. Despacho por `type` | `MESSAGE`, `EDIT`, `DOCUMENT`, `CALLBACK_REPLY`, `STEP_MESSAGE`; qualquer outro valor → resultado `FAILED` `ACTION_NOT_SUPPORTED`, **sem chamada externa**, e segue (FR-019). Campos desconhecidos de ação conhecida são ignorados |
 | E3. Chamada à API de bots | `POST {TELEGRAM_API_URL}/bot{TELEGRAM_BOT_TOKEN}/<método>` conforme a tabela abaixo; sem retentativa própria; `neverError` |
 | E4. Classificação | tabela de erros abaixo; função pura |
@@ -135,9 +137,14 @@ e o caminho JSON do nó, **nunca** o valor encontrado.
 | N8 | ação de `type` novo + campo desconhecido em ação conhecida | a nova é `ACTION_NOT_SUPPORTED`; as demais executam; o campo extra é ignorado |
 | N9 | `STEP_MESSAGE` sem e com `editMessageId` | `sendMessage` com `messageId` de `result.message_id`; `editMessageText` com o `editMessageId` |
 | N10 | ação com estado `EXECUTED` ou `FAILED` | pulada, sem chamada à API de bots e sem confirmação |
+| N10b | ação com estado `PERMANENTLY_FAILED` ou `DISCARDED`, e ação com `404` | pulada, **sem** chamada à API de bots e sem confirmação; as demais ações do lote executam |
+| N10c | ação `PENDING` e ação `DELIVERED` | executadas e confirmadas |
 | N11 | entrega proativa sem token, com token errado | `401` sem corpo; nenhuma chamada a ninguém |
 | N12 | entrega proativa válida | `200` somente depois das confirmações; ordem preservada |
 | N13 | backend cai no meio da lista (a `GET` da 2ª ação falha) | a 1ª já executada e confirmada; resposta `503`; ao reenviar, só as restantes executam |
+| N13b | n8n derrubado **entre** duas ações (a 1ª já confirmada, a 2ª ainda não iniciada) | ao reenviar (update) ou reentregar (lote), a 1ª **não** repete e as restantes chegam uma vez |
+| N13c | n8n derrubado **na janela em voo** (após o `sendMessage` da 2ª ação, antes da confirmação dela) | a 2ª pode repetir no máximo **uma** vez; a 1ª e as seguintes seguem a regra de N13b; o teste registra a repetição como o comportamento documentado, não como falha |
 | N14 | `GET /deep` com backend `401`, com `getMe` falhando, tudo ok | `503 backend:unauthorized`, `503 botApi:down`, `200` |
 | N15 | update com `message` de áudio (voice/audio/document) | o corpo segue ao backend com `file_id`; **nenhuma** chamada a `getFile` nem download |
 | N16 | confirmação recusada (`5xx`) 3 vezes | a lista continua e a resposta ao Telegram é `200`; nada é reexecutado |
+| N17 | update de grupo, update de tipo não suportado ou corpo ilegível (backend devolve `PRIVATE_CONVERSATION_ONLY` ou `actions: []`) | grupo: a mensagem de atendimento só em conversa privada; tipo não suportado ou ilegível: `200`, nenhuma chamada à API de bots, nenhuma confirmação, nenhum erro ao Telegram |

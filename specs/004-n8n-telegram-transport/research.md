@@ -140,7 +140,7 @@ n8n no GitHub, "n8n 2.0 breaking changes" e "CLI commands" de docs.n8n.io.
   `Respond to Webhook 200`. Qualquer outro status (inclui `401`, `5xx`, conexão recusada) → `Respond to Webhook
   503` **sem corpo**: o Telegram reenvia (FR-015), o n8n não escreve texto algum.
 - **Fluxo de `execute-actions`** (por ação, em ordem, `splitInBatches` de 1):
-  1. `GET /actions/{actionId}`; `state` `EXECUTED` ou `FAILED` → pula; erro de conexão ou `5xx` → aborta a lista
+  1. `GET /actions/{actionId}`; só `PENDING` e `DELIVERED` executam; `EXECUTED`, `FAILED`, `PERMANENTLY_FAILED`, `DISCARDED` e `404` → pula (decisão do backend, Princípios II e IV); erro de conexão ou `5xx` → aborta a lista
      e devolve falha de transporte (o chamador responde `503`, e o reenvio retoma);
   2. `Switch` por `type`: `MESSAGE`, `EDIT`, `DOCUMENT`, `CALLBACK_REPLY`, `STEP_MESSAGE`, *fallback* →
      `ACTION_NOT_SUPPORTED` sem chamada externa;
@@ -368,7 +368,7 @@ n8n no GitHub, "n8n 2.0 breaking changes" e "CLI commands" de docs.n8n.io.
 
 - **Pré-condições (gate, FR-029)**: (1) suíte completa verde pelo n8n na `main`; (2) **7 dias corridos** de
   produção com os 4 sinais em zero e nenhum relato de diferença; (3) aprovação registrada do dono do produto;
-  (4) `evidence` anexada ao PR conforme data-model.md §5; (5) rollback do webhook para o backend ainda possível
+  (4) `evidence/parity.md` já registrada **na `main`** por PR de documentação, conforme data-model.md §5, e verificada pelo `ParityEvidenceGuardTest` que a entrega da S5 traz; (5) rollback do webhook para o backend ainda possível
   até o instante do merge — depois dele, a reversão é reimplantar a versão anterior (spec, Edge Cases).
 - **Inventário a confirmar com `get_impact_radius_tool` e `get_affected_flows_tool` no início de S5** (o grafo atual
   só indexa YAML/SQL, então o levantamento de Java usa `Grep` e `ArchUnit`):

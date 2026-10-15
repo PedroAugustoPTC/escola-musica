@@ -112,15 +112,24 @@ segredos) → ajustar `.env` → recriar `backend` → `setWebhook` → `verify`
 
 ```text
  recebida ─▶ GET /actions/{id}
-              ├─ EXECUTED | FAILED ─────────────────────▶ pulada (sem chamada, sem confirmação)
-              ├─ erro de conexão | 5xx ─────────────────▶ aborta a lista: falha de transporte (503 ao chamador)
-              └─ PENDING | DELIVERED | 404 ─▶ executa ─▶ classifica ─▶ POST /confirmations (EXECUTED | FAILED + reasonCode)
+              ├─ EXECUTED | FAILED | PERMANENTLY_FAILED | DISCARDED | 404 ─▶ pulada (sem chamada, sem confirmação)
+              ├─ erro de conexão | 5xx | 401 ───────────────────────────────▶ aborta a lista: falha de transporte (503 ao chamador)
+              └─ PENDING | DELIVERED ─▶ executa ─▶ classifica ─▶ POST /confirmations (EXECUTED | FAILED + reasonCode)
 ```
+
+O n8n só executa o que o backend ainda espera ver executado: o destino de uma ação já decidida (resultado
+registrado, vínculo desfeito, prazo vencido) é do backend e o n8n não o desfaz.
+
+**Janela em voo**: entre o sucesso da chamada ao Telegram e a confirmação ao backend existe um intervalo em que
+uma queda do n8n deixa a ação `DELIVERED`; no reenvio ela volta a ser executada. É a única repetição possível
+(no máximo uma ação por queda); as ações já confirmadas não repetem e as não iniciadas chegam uma vez.
 
 ## 5. Evidência de paridade (condição para a fatia S5, FR-029)
 
-Registro único, anexado ao PR da remoção (arquivo em `specs/004-n8n-telegram-transport/evidence/parity.md`,
-criado quando a observação começar; **não** é entidade de banco).
+Registro único em arquivo versionado **na `main`**: `specs/004-n8n-telegram-transport/evidence/parity.md`. É
+criado quando a observação começar e atualizado por PR de documentação (Princípio VIII); a entrega de remoção só
+nasce depois de ele estar completo na `main` e **traz um teste que reprova o build** se o arquivo faltar ou
+violar as colunas "exigido" abaixo (`ParityEvidenceGuardTest`). **Não** é entidade de banco.
 
 | Campo | Conteúdo |
 |---|---|
@@ -128,7 +137,7 @@ criado quando a observação começar; **não** é entidade de banco).
 | `observationDays` | ≥ 7 dias corridos contados de `switchedAt` |
 | `suiteRun` | identificador da execução de CI verde de `tests n8n` na `main` (inclui duplicidade e resiliência) |
 | `updatesWithoutReply` | contagem no período; exigido `0` |
-| `duplicateReplies` | contagem; exigido `0` |
+| `duplicateReplies` | contagem; exigido `0`. Única exceção: uma repetição isolada comprovadamente coincidente com queda **não planejada** do n8n (janela em voo, §4.3), listada com data e `actionId` e aceita por escrito pelo dono do produto |
 | `proactiveDefinitiveFailuresFromTransport` | ações `PERMANENTLY_FAILED` por transporte; exigido `0` |
 | `lostCallbackConfirmations` | toques sem `CALLBACK_REPLY` executado; exigido `0` |
 | `teacherReports` | relatos de diferença visível registrados pelo dono do produto; exigido `nenhum` |
@@ -153,9 +162,45 @@ existente na 002. A coleta passo a passo está em `quickstart.md` V16. Nenhum da
 | FR-017 a FR-020 | `N8nFailureHandlingIT` (6 códigos, tipo desconhecido, documento, `CALLBACK_REPLY`) | 2 |
 | FR-021 a FR-023, SC-006 | `N8nDeliveryWorkflowIT`, `N8nIdempotencyIT`, `N8nResilienceIT` | 2, 3 |
 | FR-024 a FR-027, SC-007 | `tests-rehearsal` (`switch`, `rollback`, recusa, segredo errado, tráfego) | 4 |
-| FR-028, SC-001, SC-002, SC-011 | suíte inteira com `TRANSPORT=n8n`, mais `duplicates=true` e queda no meio | 3 |
+| FR-028, SC-001, SC-002, SC-011 | suíte inteira com `TRANSPORT=n8n`, mais `duplicates=true` e queda no meio; `ConversationStateCoverageTest` (10 estados, §6.1) | 3 |
 | SC-003 | `N8nLatencyIT` (p95 ≤ 2 s) | 3 |
 | FR-029, FR-030, SC-010 | PR da S5 com evidência; guardião de órfãos; suíte inteira | S5 |
 | FR-031 | `N8nPrivacyIT` | 3 |
 | FR-032, FR-033, SC-010 | revisão de PR (lista de arquivos em plan.md) e `quickstart.md` | S4 |
 | Rotação do token | `tests-rehearsal` (`start`, `finish`, `abort`, com tráfego) | 4 |
+
+### 6.1 Matriz dos 10 estados da conversa (rastreio da paridade pelo n8n)
+
+Fonte dos estados: `specs/001-fluxo-relatorios/contracts/telegram-conversa.md` §4. A coluna "Teste candidato"
+sai da leitura dos nomes das classes da suíte existente e **deve ser confirmada** pela tarefa que anota os
+testes (`@ConversationState`); o meta-teste `ConversationStateCoverageTest` reprova o build se algum estado
+não tiver pelo menos um teste anotado dentro da execução `n8n-transport`.
+
+| # | Estado derivado | Teste candidato (a confirmar) |
+|---|---|---|
+| 1 | Não vinculado | `LinkingConversationIT` |
+| 2 | Aguardando confirmação de ação (aprovar, cancelar, descartar, sair) | `ReviewConversationIT` |
+| 3 | Relatório em foco `AWAITING_ANSWERS` | `LessonRegistrationConversationIT`, `ResumptionConversationIT` |
+| 4 | Relatório em foco `AWAITING_REVIEW` | `ReviewConversationIT` |
+| 5 | Relatório em processamento (`PROCESSING_IN_PROGRESS`) | `LessonRegistrationConversationIT` |
+| 6 | Relatório `PROCESSING_FAILED` (`PROCESSING_FAILURE_OPTIONS`) | `LessonRegistrationConversationIT` |
+| 7 | Áudio pendente de confirmação do aluno (inclui `PENDING_AUDIO_EXPIRED`) | `LessonRegistrationConversationIT` |
+| 8 | Fluxo `SEMESTER` | `SemesterConversationIT` |
+| 9 | Fluxo `HISTORY` | `HistoryConversationIT` |
+| 10 | Vinculado, sem foco (inclui `LESSON_REGISTRATION` e início/busca) | `HomeSearchConversationIT` |
+
+Fora da tabela, mas exigidos na mesma execução: botão antigo (`EXPIRED_ACTION`, `OldButtonFormatIT`),
+resposta em até 5 s (`ReplyWithinFiveSecondsIT`), update de grupo ou não suportado (cenário N17) e os roteiros
+`*ParityScriptIT`. Se a confirmação achar um estado **sem** teste na suíte existente, o teste é criado nessa
+mesma tarefa (é lacuna herdada da 001, não da 004), sem alterar nenhuma expectativa existente.
+
+### 6.2 Tipos de ação (cobertos pelos cenários de contrato dos workflows)
+
+| Tipo | Cenários |
+|---|---|
+| `MESSAGE` | N3, N6, N17 |
+| `EDIT` | N4, N5 |
+| `DOCUMENT` | N3, N7 |
+| `CALLBACK_REPLY` | N3, N4 |
+| `STEP_MESSAGE` | N9 |
+| tipo desconhecido | N8 |

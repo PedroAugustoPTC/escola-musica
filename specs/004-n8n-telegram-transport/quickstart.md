@@ -87,8 +87,8 @@ chat de cada cenário é idêntica à da passada sem duplicidade (SC-011).
 ## V8. Queda do n8n no meio de uma lista [S2]
 
 `N8nResilienceIT`, dentro de V5. Esperado: com o n8n derrubado e religado no meio de uma lista de ações —
-tanto de update quanto de lote proativo — as ações restantes chegam **uma vez** e as já executadas não se
-repetem; o reinício planejado volta a receber updates em até 60 s (SC-006). Vale também: backend fora do ar ao
+tanto de update quanto de lote proativo — as ações restantes chegam **uma vez** e as já confirmadas não se
+repetem (a única ação em voo no instante da queda pode repetir uma vez); o reinício planejado volta a receber updates em até 60 s (SC-006). Vale também: backend fora do ar ao
 chegar um update ⇒ o n8n devolve `503` e o professor é respondido quando o backend volta.
 
 ## V9. Privacidade: nada de aluno no n8n [S2]
@@ -168,8 +168,8 @@ mais "o n8n ainda será incluído" nem "o compose é da feature 004" (FR-032, SC
      `channel_action`);
    - toques sem `CALLBACK_REPLY` executado.
 3. Registre relatos de professores. Preencha `specs/004-n8n-telegram-transport/evidence/parity.md` (campos em
-   data-model §5) e peça a aprovação ao dono do produto.
-4. Só com tudo zerado e aprovado: crie a branch da S5 a partir da `main` atualizada, remova o caminho antigo
+   data-model §5) por **PR de documentação para a `main`** e peça a aprovação ao dono do produto (também por PR).
+4. Só com tudo zerado e aprovado: crie a branch da S5 a partir da `main` atualizada (já com a evidência), numa sessão nova, remova o caminho antigo
    (R-15), rode `sh infra/scripts/local.sh tests all` e abra o PR com a evidência anexada. Se qualquer item falhar:
    **a S5 não é aberta**; `rollback` segue disponível.
 
