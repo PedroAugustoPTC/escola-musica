@@ -1,0 +1,113 @@
+openapi: 3.1.0
+info:
+  title: Endpoints internos do n8n (transporte do canal Telegram)
+  version: v1
+  description: |
+    Rotas que o n8n expõe NA REDE INTERNA de serviços (nunca publicadas pelo proxy; ver research.md R-02).
+    Os corpos de ação, lote e confirmação são os do esquema v1 da feature 002
+    (`specs/002-api-interna-canal-telegram/contracts/actions-v1.schema.json`); esta feature não os altera.
+    O comportamento de cada rota está em `n8n-workflows.md`.
+servers:
+  - url: http://n8n:5678
+    description: rede interna de serviços (sem porta publicada)
+
+paths:
+  /webhook/telegram-update:
+    post:
+      operationId: receiveTelegramUpdate
+      summary: Recebe o update bruto do Telegram, repassa ao backend e executa as ações devolvidas
+      description: |
+        Único receptor de updates do bot. Chamado pelo servidor local da API de bots. Responde só depois de
+        executar a lista inteira; qualquer falha de transporte com o backend vira 503 para o Telegram reenviar.
+      parameters:
+        - name: X-Telegram-Bot-Api-Secret-Token
+          in: header
+          required: false
+          schema: { type: string }
+          description: repassado sem validação ao backend, que decide (ausente continua ausente)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, description: objeto `Update` do Telegram, repassado sem alterações }
+      responses:
+        "200":
+          description: lista executada (inclui lista vazia, update ignorado ou não suportado); sem corpo
+        "503":
+          description: backend inacessível, recusou (401/5xx) ou devolveu corpo ilegível; sem corpo; nada foi enviado ao chat
+
+  /webhook/channel-delivery:
+    post:
+      operationId: receiveProactiveDelivery
+      summary: Recebe um lote de ações proativas do backend, executa e confirma
+      description: |
+        Chamado pelo backend (`DeliveryBatch` v1). O 2xx só sai depois de executar e confirmar o lote (R-07).
+      parameters:
+        - name: X-Channel-Delivery-Token
+          in: header
+          required: true
+          schema: { type: string }
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema: { type: string }
+          description: igual a `batchId`; não é guardado pelo n8n
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../../002-api-interna-canal-telegram/contracts/actions-v1.schema.json#/$defs/DeliveryBatch"
+      responses:
+        "200":
+          description: lote executado e confirmado (ações já tratadas foram puladas); sem corpo
+        "401":
+          description: token de entrega ausente ou incorreto; sem corpo; nada foi executado
+        "503":
+          description: falha de transporte com o backend durante a execução; sem corpo; o backend reentrega os mesmos `actionId`
+
+  /webhook/transport-health/live:
+    get:
+      operationId: getLiveness
+      summary: Vivacidade local (o n8n subiu e os workflows estão publicados)
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [status]
+                properties:
+                  status: { const: UP }
+
+  /webhook/transport-health/deep:
+    get:
+      operationId: getDeepHealth
+      summary: Saúde ponta a ponta (token de serviço aceito pelo backend e token do bot aceito pela API de bots)
+      responses:
+        "200":
+          description: tudo ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeepHealth"
+        "503":
+          description: algum componente fora; o corpo diz qual
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeepHealth"
+
+components:
+  schemas:
+    DeepHealth:
+      type: object
+      additionalProperties: false
+      required: [status, backend, botApi]
+      description: Nunca contém token, URL, nome do bot nem versão.
+      properties:
+        status: { enum: [UP, DOWN] }
+        backend: { enum: [ok, unauthorized, down] }
+        botApi: { enum: [ok, down] }
