@@ -11,6 +11,7 @@ Schema, mensagens) e `checklists/`.
 |---|---|
 | `001-fluxo-relatorios` | Fluxo de relatórios por voz (aula e semestral), Portal e Telegram |
 | `002-api-interna-canal-telegram` | API interna que o n8n usa como transporte do Telegram |
+| `003-migrate-code-to-english` | Migração do código existente de português para inglês (refatoração, comportamento idêntico) |
 
 Regras:
 

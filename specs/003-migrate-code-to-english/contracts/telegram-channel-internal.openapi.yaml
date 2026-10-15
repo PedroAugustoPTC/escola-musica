@@ -1,0 +1,162 @@
+openapi: 3.1.0
+info:
+  title: API interna de canal do Telegram
+  version: v1
+  description: |
+    Rotas internas usadas pelo orquestrador de canal (n8n) para transportar o Telegram, com os nomes
+    técnicos em inglês da feature 003-migrate-code-to-english (Princípio VI).
+    O formato dos corpos é normativo em `actions-v1.schema.json` (mesma pasta); o texto de regras,
+    cabeçalhos de entrega e obrigações do orquestrador está em `telegram-channel-internal.md`.
+    A área `/internal/**` NÃO é publicada pelo proxy e não aceita sessão de portal.
+servers:
+  - url: http://backend:8080
+    description: rede interna de serviços
+security:
+  - serviceToken: []
+
+paths:
+  /internal/v1/channel/telegram/update:
+    post:
+      operationId: receiveUpdate
+      summary: Recebe o update bruto do Telegram e devolve as ações a executar
+      parameters:
+        - name: X-Telegram-Bot-Api-Secret-Token
+          in: header
+          required: true
+          schema: { type: string }
+          description: segredo do webhook do Telegram; comparado em tempo constante
+      requestBody:
+        required: true
+        description: objeto `Update` do Telegram, sem alterações
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "200":
+          description: ações na ordem de execução (pode ser lista vazia)
+          content:
+            application/json:
+              schema:
+                $ref: "./actions-v1.schema.json#/$defs/UpdateResponse"
+        "401":
+          $ref: "#/components/responses/NotAuthenticated"
+
+  /internal/v1/channel/telegram/confirmations:
+    post:
+      operationId: confirmExecution
+      summary: Informa o resultado da execução de ações (respostas a update e proativas)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./actions-v1.schema.json#/$defs/ConfirmationRequest"
+      responses:
+        "200":
+          description: confirmações registradas; `ignored` lista ids sem efeito (não é erro)
+          content:
+            application/json:
+              schema:
+                $ref: "./actions-v1.schema.json#/$defs/ConfirmationResponse"
+        "400":
+          description: corpo inválido ou versão não suportada
+          content:
+            application/json:
+              schema:
+                $ref: "./actions-v1.schema.json#/$defs/Error"
+        "401":
+          $ref: "#/components/responses/NotAuthenticated"
+
+  /internal/v1/channel/telegram/documents/{documentId}:
+    get:
+      operationId: getDocument
+      summary: Bytes do PDF referenciado por uma ação DOCUMENT
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+            description: identificador opaco da ação; nunca URL nem caminho
+      responses:
+        "200":
+          description: PDF idêntico ao do portal
+          headers:
+            Cache-Control:
+              schema: { type: string, const: no-store }
+            Content-Disposition:
+              schema: { type: string }
+          content:
+            application/pdf:
+              schema: { type: string, format: binary }
+        "401":
+          $ref: "#/components/responses/NotAuthenticated"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /internal/v1/channel/telegram/actions/{actionId}:
+    get:
+      operationId: getActionState
+      summary: Estado de uma ação (idempotência do receptor sem estado)
+      parameters:
+        - name: actionId
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 120
+      responses:
+        "200":
+          description: estado da ação
+          content:
+            application/json:
+              schema:
+                $ref: "./actions-v1.schema.json#/$defs/ActionStateResponse"
+        "401":
+          $ref: "#/components/responses/NotAuthenticated"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+webhooks:
+  proactiveDelivery:
+    post:
+      summary: Entrega de ações proativas do backend ao webhook do orquestrador
+      description: |
+        Chamada feita PELO backend à URL configurada em `TELEGRAM_CHANNEL_ORCHESTRATOR_URL`.
+        Qualquer `2xx` é aceite; qualquer outra resposta, timeout ou erro de conexão mantém a ação
+        pendente e a reenvia (30 s dobrando até 15 min, prazo de 24 h). O mesmo `batchId` e os mesmos
+        `actionId` seguem em todas as tentativas; o receptor DEVE tratar repetições como a mesma ação.
+      parameters:
+        - name: X-Channel-Delivery-Token
+          in: header
+          required: true
+          schema: { type: string }
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema: { type: string }
+          description: igual a `batchId`
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./actions-v1.schema.json#/$defs/DeliveryBatch"
+      responses:
+        "2XX":
+          description: lote aceito (a execução é provada pela confirmação)
+
+components:
+  securitySchemes:
+    serviceToken:
+      type: apiKey
+      in: header
+      name: X-N8N-Service-Token
+      description: |
+        Token de serviço do orquestrador. Até dois tokens válidos ao mesmo tempo (rotação), comparados
+        em tempo constante. Vale somente em `/internal/**`; não autentica nenhuma rota do portal.
+  responses:
+    NotAuthenticated:
+      description: token ausente, incorreto ou não configurado (e, em `/update`, segredo do webhook inválido); sem corpo
+    NotFound:
+      description: desconhecido, vencido ou malformado; sem corpo e indistinguível
