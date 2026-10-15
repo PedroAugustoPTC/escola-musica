@@ -100,6 +100,10 @@
     {
       "prefix": "backend/application/src/test/java/br/com/felipeblaft/reports/inbound/seed/SeedCommandIT.java",
       "slice": 6
+    },
+    {
+      "prefix": "frontend/tests/e2e/support.ts",
+      "slice": 6
     }
   ]
 }

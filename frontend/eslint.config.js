@@ -11,7 +11,7 @@ export default tseslint.config(
       'coverage',
       'playwright-report',
       'test-results',
-      'src/servicos/api-tipos.ts',
+      'src/services/api-types.ts',
     ],
   },
   {

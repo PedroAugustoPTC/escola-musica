@@ -247,6 +247,25 @@ function translateRun(words, glossary, options, reasons) {
   return result.flatMap((word) => (word === 'usecase' ? ['use', 'case'] : word.split('-')));
 }
 
+/** Classe ou variável CSS (`.menu-professor__item--ativo`, `--cor-fundo`): traduz cada trecho BEM/kebab separadamente. */
+export function translateBem(name, glossary) {
+  const prefix = name.startsWith('--') ? '--' : name.startsWith('.') ? '.' : '';
+  const body = name.slice(prefix.length);
+  let changed = false;
+  let review = false;
+  const reasons = [];
+  const mapped = body.split(/(__|--)/).map((piece) => {
+    if (piece === '__' || piece === '--' || !piece) return piece;
+    const result = translateIdentifier(piece, glossary);
+    if (!result) return piece;
+    changed = true;
+    review ||= result.needsReview;
+    if (result.motivo) reasons.push(result.motivo);
+    return result.novo;
+  });
+  return changed ? { novo: prefix + mapped.join(''), needsReview: review, motivo: [...new Set(reasons)].join('; ') } : null;
+}
+
 // ---------------------------------------------------------------------------------------------------------
 // Execução por fatia
 // ---------------------------------------------------------------------------------------------------------
@@ -303,7 +322,19 @@ function main() {
     if (!identifiers.has(identifier)) identifiers.set(identifier, new Set());
     if (identifiers.get(identifier).size < 3) identifiers.get(identifier).add(where);
   };
-  for (const rootPath of roots) {
+  // Fatia 5: o TypeScript e o CSS vêm do inventário (nomes em posição de código, nunca texto para pessoas) em vez da varredura de texto.
+  const inventoryPath = option('--inventory');
+  const kinds = new Map(); // nome → 'classe-css' | 'variavel-css'
+  if (inventoryPath) {
+    const inventory = JSON.parse(readFileSync(resolve(root, inventoryPath), 'utf8'));
+    for (const file of inventory.files) for (const segment of file.split('/')) for (const part of segment.split('.')) if (part) add(part, `frontend/${file}`);
+    for (const entry of inventory.identifiers) add(entry.name, entry.files[0] ?? '');
+    for (const entry of inventory.literals) add(entry.name, entry.files[0] ?? '');
+    for (const entry of inventory.cssClasses) { add(`.${entry.name}`, entry.files[0]); kinds.set(`.${entry.name}`, 'classe-css'); }
+    for (const entry of inventory.cssVariables) { add(`--${entry.name}`, entry.files[0]); kinds.set(`--${entry.name}`, 'variavel-css'); }
+    for (const name of Object.keys(inventory.scripts)) for (const part of name.split(':')) add(part, 'frontend/package.json');
+  }
+  for (const rootPath of inventoryPath ? [] : roots) {
     const absolute = resolve(root, rootPath);
     if (!existsSync(absolute)) continue;
     const files = statSync(absolute).isDirectory() ? [...walk(absolute)] : [absolute];
@@ -317,9 +348,9 @@ function main() {
   }
   const map = [];
   for (const [identifier, where] of [...identifiers].sort(([a], [b]) => a.localeCompare(b))) {
-    const result = translateIdentifier(identifier, glossary);
+    const result = kinds.has(identifier) ? translateBem(identifier, glossary) : translateIdentifier(identifier, glossary);
     if (!result || result.novo === identifier) continue;
-    map.push({ antigo: identifier, novo: result.novo, needsReview: result.needsReview, motivo: result.motivo, exemplos: [...where] });
+    map.push({ antigo: identifier, novo: result.novo, needsReview: result.needsReview, motivo: result.motivo, exemplos: [...where], ...(kinds.has(identifier) ? { tipo: kinds.get(identifier) } : {}) });
   }
   // Revisão humana (T032): `maps/slice-<N>.review.json` = { "antigo": "novo" | null }. O valor substitui a sugestão
   // e encerra o `needsReview`; `null` diz "revisado: não renomear". Chave fora da sugestão entra no mapa.
@@ -346,7 +377,11 @@ function main() {
       console.error(`"=" em "${antigo}", que não está na sugestão do gerador`);
       process.exit(1);
     }
-    if (!known.has(antigo)) map.push({ antigo, novo: novo ?? antigo, needsReview: false, motivo: 'revisado', exemplos: [] });
+    if (!known.has(antigo)) {
+      // revisão que acrescenta um nome que o gerador não sugeriu: `.classe` e `--variavel` são do CSS
+      const tipo = antigo.startsWith('--') ? 'variavel-css' : antigo.startsWith('.') ? 'classe-css' : undefined;
+      map.push({ antigo, novo: novo ?? antigo, needsReview: false, motivo: 'revisado', exemplos: [], ...(tipo ? { tipo } : {}) });
+    }
   }
   for (const item of map) {
     if (!Object.hasOwn(reviewed, item.antigo)) continue;

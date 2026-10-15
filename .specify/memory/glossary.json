@@ -1800,15 +1800,20 @@
         "relatorio-semestral",
         "oficial.pdf"
       ],
-      "reason": "FR-026 e US1-3: o nome do arquivo que o usuário vê e baixa permanece em português; só o nome interno de armazenamento (storage_key) passa a inglês. Vale para o gerador do nome (casos de uso de documento) e para as asserções dos testes (AcaoCanalMapeadorTeste, HistoricoConversaIT).",
+      "reason": "FR-026 e US1-3: o nome do arquivo que o usuário vê e baixa permanece em português; só o nome interno de armazenamento (storage_key) passa a inglês. Vale para o gerador do nome (casos de uso de documento) e para as asserções dos testes (AcaoCanalMapeadorTeste, HistoricoConversaIT) e, no frontend, para o nome sugerido ao baixar o PDF (services/history.ts e telas de conferência) e as asserções dos testes.",
       "constitutionCategory": "texto do usuário (explicitamente em português no Princípio VI)",
       "mode": "term",
       "where": "literal",
       "paths": [
-        "backend/**/*.java"
+        "backend/**/*.java",
+        "frontend/src/**/*.ts",
+        "frontend/src/**/*.tsx",
+        "frontend/tests/**/*.ts",
+        "frontend/tests/**/*.tsx"
       ],
       "appliesTo": [
-        "java"
+        "java",
+        "typescript"
       ]
     },
     {
@@ -1818,16 +1823,35 @@
         "codigo:",
         "origem:"
       ],
-      "reason": "O prefixo faz parte da entrada do HMAC cujo resultado está gravado no banco (access_code_hash, origin_hash). Trocar a palavra mudaria todos os hashes e invalidaria os códigos e os vínculos já emitidos, o que seria mudança de comportamento (a feature 003 é só renomeação). DataProtectionStoredFormatTest fixa o formato.",
+      "reason": "O prefixo faz parte da entrada do HMAC cujo resultado está gravado no banco (access_code_hash, origin_hash). Trocar a palavra mudaria todos os hashes e invalidaria os códigos e os vínculos já emitidos, o que seria mudança de comportamento (a feature 003 é só renomeação). DataProtectionStoredFormatTest fixa o formato. O semeador dos testes e2e (frontend/tests/e2e/support.ts) calcula o mesmo HMAC para gravar o código de acesso de teste.",
       "constitutionCategory": "proposta para a emenda 2.1.0: nomes próprios e material de referência (fora das 4 categorias fechadas do Princípio VI)",
       "mode": "term",
       "where": "literal",
       "paths": [
         "backend/application/src/main/java/**/DataProtectionAdapter.java",
-        "backend/application/src/test/java/**/DataProtectionStoredFormatTest.java"
+        "backend/application/src/test/java/**/DataProtectionStoredFormatTest.java",
+        "frontend/tests/e2e/support.ts"
       ],
       "appliesTo": [
-        "java"
+        "java",
+        "typescript"
+      ]
+    },
+    {
+      "id": "spec-folder-references",
+      "scope": "string de comando: caminho da pasta da feature 001 em specs/ citado pelos scripts e pelo Dockerfile do frontend",
+      "terms": [
+        "001-fluxo-relatorios"
+      ],
+      "reason": "A pasta specs/001-fluxo-relatorios mantém o nome em português (specs/ é documentação, fora do escopo de renomeação); o contrato OpenAPI do Portal continua nela, e o script generate:api e o Dockerfile do frontend só montam o caminho até ele.",
+      "constitutionCategory": "proposta para a emenda 2.1.0: nomes próprios e material de referência (fora das 4 categorias fechadas do Princípio VI)",
+      "mode": "term",
+      "paths": [
+        "frontend/package.json",
+        "frontend/Dockerfile"
+      ],
+      "appliesTo": [
+        "artifacts"
       ]
     },
     {

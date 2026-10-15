@@ -4,6 +4,6 @@ coverage
 playwright-report
 test-results
 package-lock.json
-src/servicos/api-tipos.ts
-src/mensagens/mensagens.json
-src/estilos/fontes
+src/services/api-types.ts
+src/messages/messages.json
+src/styles/fonts

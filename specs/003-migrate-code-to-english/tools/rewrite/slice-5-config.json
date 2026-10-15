@@ -1,0 +1,127 @@
+{
+  "comment": "Tabelas da fatia 5 usadas por tools/ts-rename.mjs. O mapa de identificadores é maps/slice-5.json.",
+  "literalOverrides": {
+    "inicio": "home",
+    "entrar": "sign-in",
+    "perigo-cheio": "filled-danger",
+    "sem-conexao": "no-connection"
+  },
+  "literalDeny": [],
+  "routeSegments": {
+    "entrar": "sign-in",
+    "alunos": "students",
+    "relatorio-em-aberto": "open-report",
+    "nova-aula": "new-lesson",
+    "trabalhos": "jobs",
+    "relatorios-aula": "lesson-reports",
+    "perguntas": "questions",
+    "aprovado": "approved",
+    "semestral": "semester",
+    "relatorios-semestrais": "semester-reports",
+    "historico": "history"
+  },
+  "routeParams": {
+    "alunoId": "studentId",
+    "trabalhoId": "jobId",
+    "relatorioId": "reportId"
+  },
+  "assetWords": [
+    [
+      "/marca/",
+      "/brand/"
+    ],
+    [
+      "fb-monograma",
+      "fb-monogram"
+    ],
+    [
+      "fb-filete",
+      "fb-divider"
+    ],
+    [
+      "-marfim.",
+      "-ivory."
+    ],
+    [
+      "-ouroclaro.",
+      "-lightgold."
+    ],
+    [
+      "-ouro.",
+      "-gold."
+    ],
+    [
+      "-preto.",
+      "-black."
+    ]
+  ],
+  "folderNames": {
+    "paginas": "pages",
+    "componentes": "components",
+    "servicos": "services",
+    "estilos": "styles",
+    "mensagens": "messages",
+    "fontes": "fonts",
+    "marca": "brand"
+  },
+  "stemOverrides": {
+    "inicio": "home",
+    "utilitarios": "utils",
+    "configuracao": "config"
+  },
+  "queryParams": {
+    "busca": "search",
+    "foco": "focus",
+    "motivo": "reason",
+    "destino": "destination",
+    "registrar": "register"
+  },
+  "queryValues": {
+    "busca": "search"
+  },
+  "symbolOverrides": {
+    "src/paginas/TelaAprovado.tsx:dados": "reportData",
+    "src/components/AudioRecorder.tsx:gravando": "isRecording",
+    "src/components/Header.tsx:buscar": "submitSearch"
+  },
+  "manualPairs": {
+    "protegida": "protectedRoute",
+    "__larguraTeste": "__testWidth",
+    "teste": "test",
+    "pedido": "request",
+    "longa": "long",
+    "ajuda": "help",
+    "relatorios": "reports",
+    "expirada": "expired",
+    "ehBlob": "isBlob",
+    "falso": "fakeFetch",
+    "gravando": "isRecording",
+    "catalogo": "catalog",
+    "ignorar401": "ignore401",
+    "aba-pdf": "pdf-tab",
+    "data-tema": "data-theme",
+    "buscar": "submitSearch",
+    "utilitarios": "utils",
+    "configuracao": "config"
+  },
+  "reviewedText": [
+    {
+      "path": "frontend/src/app/ThemeProvider.tsx",
+      "from": "useTema fora do TemaProvedor",
+      "to": "useTheme fora do ThemeProvider",
+      "reason": "mensagem de erro para desenvolvedores que cita o nome do hook e do provedor renomeados; não aparece para o usuário"
+    },
+    {
+      "path": "frontend/tests/utils.tsx",
+      "from": "XSRF-TOKEN=token-teste; path=/",
+      "to": "XSRF-TOKEN=test-token; path=/",
+      "reason": "valor do cookie CSRF simulado pelos testes; acompanha o token esperado nos testes de login (arbitrário, não é texto para o usuário)"
+    }
+  ],
+  "manualFiles": [
+    {
+      "path": "frontend/scripts/generate-messages.mjs",
+      "reason": "script de 25 linhas com variáveis locais traduzidas à mão (aqui→here, origem→source, destino→target, mensagens→messages, linha→line, texto→text, separador→separator); revisado linha a linha, a lógica e os textos não mudam"
+    }
+  ]
+}

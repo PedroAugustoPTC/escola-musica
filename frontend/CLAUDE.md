@@ -3,16 +3,16 @@
 **Portal do Professor**: SPA em React 19 + TypeScript + Vite, com TanStack Query e React Router.
 É um dos dois canais de entrada (o outro é o Telegram) e deve ter **paridade funcional** com ele.
 
-| Pasta | Conteúdo |
-|---|---|
-| `src/app/` | Raiz da aplicação, rotas, guarda de sessão, tema |
-| `src/paginas/` | Telas (`Tela*.tsx`), uma por fluxo |
-| `src/componentes/` | Componentes reutilizáveis |
-| `src/servicos/` | Clientes da API (`clienteApi.ts` e um módulo por contexto) |
-| `src/estilos/` | `tokens.css` (identidade visual), tipografia, fontes |
-| `src/mensagens/` | Textos da interface |
-| `tests/` | Vitest (`componentes/`, `paginas/`) e Playwright + axe (`e2e/`) |
-| `scripts/` | `gerar-mensagens.mjs` |
+| Pasta              | Conteúdo                                                        |
+| ------------------ | --------------------------------------------------------------- |
+| `src/app/`         | Raiz da aplicação, rotas, guarda de sessão, tema                |
+| `src/paginas/`     | Telas (`Tela*.tsx`), uma por fluxo                              |
+| `src/componentes/` | Componentes reutilizáveis                                       |
+| `src/servicos/`    | Clientes da API (`clienteApi.ts` e um módulo por contexto)      |
+| `src/estilos/`     | `tokens.css` (identidade visual), tipografia, fontes            |
+| `src/mensagens/`   | Textos da interface                                             |
+| `tests/`           | Vitest (`componentes/`, `paginas/`) e Playwright + axe (`e2e/`) |
+| `scripts/`         | `gerar-mensagens.mjs`                                           |
 
 Regras:
 

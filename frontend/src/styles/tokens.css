@@ -1,0 +1,57 @@
+/* Tokens do design system (Portal do Professor.dc.html). Tema claro é o padrão; o escuro é aplicado
+   por data-theme="dark" no elemento raiz (ThemeProvider). */
+:root {
+  --bg: #faf7f0;
+  --sf: #ffffff;
+  --sf2: #f2ede3;
+  --tx: #141414;
+  --mu: #5a554c;
+  --bd: #e3dcce;
+  --gd: #b8955a;
+  --gs: #7a5c30;
+  --gdp: #8c6d3f;
+  --pbg: #141414;
+  --ptx: #faf7f0;
+  --phov: #3a342c;
+  --ok: #4a5a26;
+  --okbg: #eef0e2;
+  --warn: #855412;
+  --warnbg: #f8eeda;
+  --err: #7d2330;
+  --errbg: #f7e7e7;
+  --erron: #ffffff;
+  --info: #1e5360;
+  --infobg: #e2edef;
+  /* Foco visível com contraste ≥ 3:1 nos dois temas (WCAG 1.4.11). */
+  --focus: #7a5c30;
+  --menu-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+  --dialog-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+  --ink: preto;
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --bg: #0b0b0b;
+  --sf: #151515;
+  --sf2: #1e1e1e;
+  --tx: #f3eee4;
+  --mu: #b3ab9c;
+  --bd: #2a2a2a;
+  --gd: #c9a96e;
+  --gs: #d9bc85;
+  --gdp: #8c6d3f;
+  --pbg: #c9a96e;
+  --ptx: #0b0b0b;
+  --phov: #d9bc85;
+  --ok: #aebf7e;
+  --okbg: #181c10;
+  --warn: #e3b66a;
+  --warnbg: #21190b;
+  --err: #e69aa2;
+  --errbg: #261013;
+  --erron: #1a0a0c;
+  --info: #8ec4cc;
+  --infobg: #0e1d20;
+  --focus: #c9a96e;
+  color-scheme: dark;
+}

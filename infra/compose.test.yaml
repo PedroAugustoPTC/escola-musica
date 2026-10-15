@@ -96,7 +96,7 @@ services:
       AI_PROVIDERS: simulated
       TELEGRAM_ENABLED: "false"
       CPF_ENCRYPTION_KEY: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
-      HMAC_SECRET: segredo-hmac-de-testes-e2e-com-mais-de-32-bytes
+      HMAC_SECRET: hmac-secret-for-e2e-tests-with-more-than-32-bytes
       SESSION_COOKIE_SECURE: "true"
       DOCUMENTS_DIR: /dados/documentos
       AUDIO_TEMP_DIR: /tmp/audios
@@ -135,7 +135,7 @@ services:
       E2E_DATABASE_URL: postgres://relatorios:e2e@postgres-e2e:5432/relatorios
       # Os mesmos segredos de testes do backend-e2e: a semeadura grava o HMAC e o CPF cifrado.
       E2E_CPF_KEY: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
-      E2E_HMAC_SECRET: segredo-hmac-de-testes-e2e-com-mais-de-32-bytes
+      E2E_HMAC_SECRET: hmac-secret-for-e2e-tests-with-more-than-32-bytes
     volumes:
       - ..:/work
       - node-modules-e2e:/work/frontend/node_modules
