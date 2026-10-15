@@ -17,8 +17,10 @@ Regras:
 
 - Não implemente sem spec aprovada; use as skills `speckit-*` (em `.claude/skills/`).
 - Idioma (Princípio VI): specs, planos, tasks e demais documentos em **português**; nomes de contratos
-  (rotas, campos, códigos de erro) em **inglês**. Os contratos e as specs 001 e 002 ainda usam
-  português, dívida da feature 003. Até a 003 ser mesclada, nenhuma feature nova pode ser iniciada.
+  (rotas, campos, códigos de erro) em **inglês**. Os contratos de fio (`contracts/*.yaml`, `*.json`) passaram a
+  inglês e o guardião de idioma os varre; as specs 001 e 002 são **histórico**: citam nomes anteriores à migração e
+  trazem uma nota no topo remetendo ao glossário (`.specify/memory/glossary.json`). Não as reescreva.
+  A pasta de cada feature mantém o nome em português (`001-fluxo-relatorios`).
 - Os `contracts/` são fonte de verdade: o backend os implementa e o frontend gera tipos a partir deles
   (`001-fluxo-relatorios/contracts/api-portal.openapi.yaml`). Mudança de API começa pelo contrato.
 - Specs descrevem comportamento de negócio, sem fixar stack; a stack é decidida e justificada no `plan.md`.

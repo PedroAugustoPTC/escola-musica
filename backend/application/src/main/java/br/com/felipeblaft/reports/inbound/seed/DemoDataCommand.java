@@ -56,16 +56,16 @@ public class DemoDataCommand {
     private static final String TRANSCRIPTION = "Transcrição de demonstração (massa fictícia).";
 
     /** Plano por aluno: aulas aprovadas no semestre anterior e no atual, e o dia da semana. */
-    private record Plano(int previous, int current, int offset) {}
+    private record Plan(int previous, int current, int offset) {}
 
-    private static final Map<String, Plano> PLANOS =
+    private static final Map<String, Plan> PLANS =
             Map.of(
-                    "Matteo Mafra", new Plano(12, 10, 0),
-                    "Olavo Torrente", new Plano(8, 8, 1),
-                    "Miguel de Castro Torrente", new Plano(0, 6, 2),
-                    "Beatriz Arruda", new Plano(0, 4, 3),
-                    "Helena Prado", new Plano(4, 3, 1),
-                    "Davi Coutinho", new Plano(0, 2, 4));
+                    "Matteo Mafra", new Plan(12, 10, 0),
+                    "Olavo Torrente", new Plan(8, 8, 1),
+                    "Miguel de Castro Torrente", new Plan(0, 6, 2),
+                    "Beatriz Arruda", new Plan(0, 4, 3),
+                    "Helena Prado", new Plan(4, 3, 1),
+                    "Davi Coutinho", new Plan(0, 2, 4));
 
     private final LoadInitialRegistryUseCase seed;
     private final TeacherRepository teachers;
@@ -176,14 +176,14 @@ public class DemoDataCommand {
                             .sorted(Comparator.comparing(Student::name))
                             .toList();
             for (Student student : ofTeacher) {
-                Plano plano = PLANOS.get(student.name());
-                if (plano == null) {
+                Plan plan = PLANS.get(student.name());
+                if (plan == null) {
                     continue; // sem histórico: serve para testar as telas vazias
                 }
                 List<LocalDate> previousDates =
-                        weeks(previous.start(), previous.end(), plano.offset(), plano.previous());
+                        weeks(previous.start(), previous.end(), plan.offset(), plan.previous());
                 List<LocalDate> currentDates =
-                        weeks(current.start(), today.minusDays(7), plano.offset(), plano.current());
+                        weeks(current.start(), today.minusDays(7), plan.offset(), plan.current());
                 int index = 0;
                 for (LocalDate data : concatenate(previousDates, currentDates)) {
                     approvedLesson(teacher, student, data, index++);
@@ -233,8 +233,8 @@ public class DemoDataCommand {
         return dates;
     }
 
-    private Instant as(LocalDate data, int hora, int minute) {
-        return data.atTime(hora, minute).atZone(clock.schoolTimezone()).toInstant();
+    private Instant as(LocalDate data, int hour, int minute) {
+        return data.atTime(hour, minute).atZone(clock.schoolTimezone()).toInstant();
     }
 
     private void approvedLesson(Teacher teacher, Student student, LocalDate data, int index) {

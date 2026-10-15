@@ -45,7 +45,7 @@ export function ApprovedScreen({ semester = false }: { semester?: boolean }) {
     'studentName' in reportData ? reportData.studentName : reportData.generalInformation.name;
   const approvedAt = reportData.approvedAt ?? reportData.updatedAt;
   const data = instantDate(approvedAt);
-  const hora = instantTime(approvedAt);
+  const time = instantTime(approvedAt);
   // como no protótipo: a aula pela data; o semestral pelo período
   const reference =
     'lessonDate' in reportData
@@ -65,7 +65,7 @@ export function ApprovedScreen({ semester = false }: { semester?: boolean }) {
           Relatório aprovado
         </h1>
         <img src={`/brand/fb-divider-${goldInk}.png`} alt="" className="approved__divider" />
-        <p className="subtitle">{msg('REPORT_APPROVED', { data, hora })}</p>
+        <p className="subtitle">{msg('REPORT_APPROVED', { data, time })}</p>
         <div className="approved__data">
           <div>
             <div className="approved__label">ALUNO</div>
@@ -74,7 +74,7 @@ export function ApprovedScreen({ semester = false }: { semester?: boolean }) {
           <div>
             <div className="approved__label">APROVADO EM</div>
             <div className="approved__value">
-              {data} {hora}
+              {data} {time}
             </div>
           </div>
         </div>

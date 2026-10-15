@@ -1626,7 +1626,19 @@
     "gerarsim": "generate",
     "trocal": "swapstudent",
     "confal": "confirmstudent",
-    "hitem": "historyitem"
+    "hitem": "historyitem",
+    "aba": "tab",
+    "ate": "until",
+    "alto": "high",
+    "cadeia": "chain",
+    "hora": "time",
+    "maio": "may",
+    "musicais": "musical",
+    "par": "pair",
+    "plano": "plan",
+    "planos": "plans",
+    "quinze": "fifteen",
+    "trinta": "thirty"
   },
   "exceptions": [
     {
@@ -1637,7 +1649,7 @@
         "br/com/felipeblaft"
       ],
       "reason": "Nome de organização (domínio reverso do Instituto Musical Felipe Blaft); o pacote base muda só no sufixo (relatorios → reports).",
-      "constitutionCategory": "proposta para a emenda 2.1.0: nomes próprios e material de referência (fora das 4 categorias fechadas do Princípio VI)",
+      "constitutionCategory": "nomes próprios e material de referência (Princípio VI, emenda 2.1.0)",
       "mode": "term",
       "appliesTo": [
         "java",
@@ -1750,7 +1762,7 @@
         "fb-"
       ],
       "reason": "Prefixo 'fb' é a sigla do Instituto Musical Felipe Blaft nos ativos da marca; as cores no nome do arquivo passam a inglês (marfim → ivory).",
-      "constitutionCategory": "proposta para a emenda 2.1.0: nomes próprios e material de referência (fora das 4 categorias fechadas do Princípio VI)",
+      "constitutionCategory": "nomes próprios e material de referência (Princípio VI, emenda 2.1.0)",
       "mode": "term",
       "paths": [
         "**/brand/**",
@@ -1770,7 +1782,7 @@
         "relatorios.felipeblaft.com.br"
       ],
       "reason": "Nome de domínio público da organização; não é identificador de código. Confirmar com o dono do produto se o domínio real é este (ver plan.md, Pontos de decisão).",
-      "constitutionCategory": "proposta para a emenda 2.1.0: nomes próprios e material de referência (fora das 4 categorias fechadas do Princípio VI)",
+      "constitutionCategory": "nomes próprios e material de referência (Princípio VI, emenda 2.1.0)",
       "mode": "term",
       "appliesTo": [
         "artifacts"
@@ -1824,7 +1836,7 @@
         "origem:"
       ],
       "reason": "O prefixo faz parte da entrada do HMAC cujo resultado está gravado no banco (access_code_hash, origin_hash). Trocar a palavra mudaria todos os hashes e invalidaria os códigos e os vínculos já emitidos, o que seria mudança de comportamento (a feature 003 é só renomeação). DataProtectionStoredFormatTest fixa o formato. O semeador dos testes e2e (frontend/tests/e2e/support.ts) calcula o mesmo HMAC para gravar o código de acesso de teste.",
-      "constitutionCategory": "proposta para a emenda 2.1.0: nomes próprios e material de referência (fora das 4 categorias fechadas do Princípio VI)",
+      "constitutionCategory": "nomes próprios e material de referência (Princípio VI, emenda 2.1.0)",
       "mode": "term",
       "where": "literal",
       "paths": [
@@ -1860,7 +1872,7 @@
         "001-fluxo-relatorios"
       ],
       "reason": "A pasta specs/001-fluxo-relatorios mantém o nome em português (specs/ é documentação, fora do escopo de renomeação); o contrato OpenAPI do Portal continua nela, e o script generate:api, o Dockerfile do frontend e a variável CONTRACT_API do compose de testes só montam o caminho até ele.",
-      "constitutionCategory": "proposta para a emenda 2.1.0: nomes próprios e material de referência (fora das 4 categorias fechadas do Princípio VI)",
+      "constitutionCategory": "nomes próprios e material de referência (Princípio VI, emenda 2.1.0)",
       "mode": "term",
       "paths": [
         "frontend/package.json",
@@ -1879,7 +1891,7 @@
         "002-api-interna-canal-telegram"
       ],
       "reason": "As pastas de feature do Spec Kit (specs/NNN-nome) mantêm o nome em português: specs/ é documentação, fora do escopo de renomeação (constituição, Princípio VI). Os testes de contrato só montam o caminho até elas.",
-      "constitutionCategory": "proposta para a emenda 2.1.0: nomes próprios e material de referência (fora das 4 categorias fechadas do Princípio VI)",
+      "constitutionCategory": "nomes próprios e material de referência (Princípio VI, emenda 2.1.0)",
       "mode": "term",
       "where": "literal",
       "paths": [
@@ -1926,7 +1938,7 @@
         "*"
       ],
       "reason": "Material de referência do cliente, histórico de specs e documentos de planejamento; não são código de produção (FR-023). Pastas e arquivos de documentação não são renomeados.",
-      "constitutionCategory": "proposta para a emenda 2.1.0: nomes próprios e material de referência (fora das 4 categorias fechadas do Princípio VI)",
+      "constitutionCategory": "nomes próprios e material de referência (Princípio VI, emenda 2.1.0)",
       "mode": "skip-file",
       "paths": [
         "portal-do-professor-design-system/**",
@@ -2030,6 +2042,8 @@
   ],
   "notes": [
     "Homônimos aceitos (um mesmo termo em inglês para dois conceitos próximos, sempre dentro de compostos que os distinguem): request (pedido do usuário em TRANSCRIBING_REQUEST/ACTION_REQUEST_IGNORED × sufixo HTTP *Request; mudar pedido exigiria alterar contrato e V8); home (tela inicial × homeStudyRegularity, só em composto); port (porta hexagonal × porta de rede); support (suporte de teste × acompanhamento pedagógico); page (pasta/rota) × screen (componente de tela, sufixo *Screen).",
-    "Sufixos fora da lista da constituição (propostos para a emenda 2.1.0, ver C1/M7 da análise): *Entity (entidade JPA), *Command (comando de CLI), *Filter, *Converter, *Codec, *Config (classe de configuração). *Jpa permanece como sigla (JPA) no nome da interface Spring Data."
+    "Sufixos fora da lista da constituição (propostos para a emenda 2.1.0, ver C1/M7 da análise): *Entity (entidade JPA), *Command (comando de CLI), *Filter, *Converter, *Codec, *Config (classe de configuração). *Jpa permanece como sigla (JPA) no nome da interface Spring Data.",
+    "Homônimo aceito: data (calendário × dado). \"data\" é palavra do inglês e não é acusada; o marcador {data} do catálogo de mensagens e as chaves \"data\" dos mapas de parâmetros significam a data do calendário e ficam como estão (o marcador de hora foi para {time}). Em composto, prefira date (ex.: lessonDate).",
+    "Palavras do inglês que contêm termo português NÃO entram em words: classe (em classes/JavaClasses) e musical (musicalGoals) casariam com o inglês; o guardião casa por prefixo/radical. Os identificadores que usavam classe (parâmetro de lambda) foram renomeados à mão."
   ]
 }

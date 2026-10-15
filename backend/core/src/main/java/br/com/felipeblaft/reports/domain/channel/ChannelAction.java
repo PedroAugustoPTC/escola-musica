@@ -153,9 +153,9 @@ public class ChannelAction {
      * Reserva (lease) do despacho: empurra a próxima tentativa para o futuro; se o despachante
      * morrer, a ação volta a ser devida quando o lease vence. Só age sobre {@code PENDENTE}.
      */
-    public void reserveUntil(Instant leaseAte) {
+    public void reserveUntil(Instant leaseUntil) {
         if (state == ChannelActionState.PENDING) {
-            nextAttemptAt = leaseAte;
+            nextAttemptAt = leaseUntil;
         }
     }
 

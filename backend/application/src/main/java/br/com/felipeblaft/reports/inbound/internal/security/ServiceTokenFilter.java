@@ -32,7 +32,7 @@ public class ServiceTokenFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(
-            HttpServletRequest request, HttpServletResponse response, FilterChain cadeia)
+            HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
         String received = request.getHeader(HEADER);
         if (received != null && comparator.containsAny(received, configured)) {
@@ -43,6 +43,6 @@ public class ServiceTokenFilter extends OncePerRequestFilter {
                                     null,
                                     List.of(new SimpleGrantedAuthority(AUTHORITY))));
         }
-        cadeia.doFilter(request, response);
+        chain.doFilter(request, response);
     }
 }

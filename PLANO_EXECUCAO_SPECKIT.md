@@ -116,13 +116,13 @@ Todas as features (003 a 007) seguem **o mesmo ciclo**. Cada feature abaixo traz
 ### 3.2 Comandos de teste (contêiner)
 
 ```bash
-sh infra/scripts/local.sh subir            # sobe o ambiente local completo
-sh infra/scripts/local.sh testes backend   # testes do backend (JaCoCo, ArchUnit)
-sh infra/scripts/local.sh testes frontend  # Vitest, lint, typecheck
-sh infra/scripts/local.sh testes e2e       # Playwright + axe (acessibilidade)
+sh infra/scripts/local.sh up               # sobe o ambiente local completo
+sh infra/scripts/local.sh tests backend    # testes do backend (JaCoCo, ArchUnit)
+sh infra/scripts/local.sh tests frontend   # Vitest, lint, typecheck
+sh infra/scripts/local.sh tests e2e        # Playwright + axe (acessibilidade)
 ```
 
-> Após a feature `003` o script passa a ter nome e subcomandos em inglês; este documento deve ser atualizado nessa PR.
+> O script já tem os subcomandos em inglês (feature `003`); este bloco foi atualizado nessa PR. O restante do documento é planejamento histórico e mantém os nomes da época.
 
 ### 3.3 Quality gates em todo PR (constituição)
 

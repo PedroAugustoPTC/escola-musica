@@ -30,7 +30,7 @@ class QueryStudentHistoryUseCaseTest {
     @Test
     void onlyTeachersApprovedFromNewestToOldest() {
         LessonReport milestone = c.approvedLesson(c.matteo, LocalDate.of(2026, 3, 10), "Escala");
-        LessonReport maio = c.approvedLesson(c.matteo, LocalDate.of(2026, 5, 20), "Estudo");
+        LessonReport may = c.approvedLesson(c.matteo, LocalDate.of(2026, 5, 20), "Estudo");
         c.clock.advance(Duration.ofMinutes(5));
         LessonReport mayAfter =
                 c.approvedLesson(c.matteo, LocalDate.of(2026, 5, 20), "Outro estudo");
@@ -47,7 +47,7 @@ class QueryStudentHistoryUseCaseTest {
         assertThat(result.student().name()).isEqualTo("Matteo Mafra");
         assertThat(result.items())
                 .extracting(HistoryItem::reportId)
-                .containsExactly(mayAfter.id(), maio.id(), milestone.id(), semester.id());
+                .containsExactly(mayAfter.id(), may.id(), milestone.id(), semester.id());
         assertThat(result.items().getLast().type()).isEqualTo(ReportType.SEMESTER);
         assertThat(result.items().getLast().period().key()).isEqualTo("2026-1");
     }

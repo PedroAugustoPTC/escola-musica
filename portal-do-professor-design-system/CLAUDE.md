@@ -10,7 +10,7 @@ implantado.
 
 Regras:
 
-- Reproduza o visual no `frontend/` (tokens em `frontend/src/estilos/tokens.css`) e nos PDFs do backend;
+- Reproduza o visual no `frontend/` (tokens em `frontend/src/styles/tokens.css`) e nos PDFs do backend;
   não copie a estrutura interna dos protótipos.
 - Não edite estes arquivos para implementar telas; mudanças de identidade vêm de nova exportação do design.
 - O `README.md` daqui é o aviso padrão do bundle; leia-o ao reimportar o design.

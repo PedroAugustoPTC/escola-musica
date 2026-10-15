@@ -25,7 +25,7 @@ function openReportText(open: OpenReportDto): string {
   return msg('REPORT_ALREADY_OPEN', {
     originChannel: msg(open.originChannel === 'TELEGRAM' ? 'TELEGRAM_ORIGIN_CHANNEL' : 'WEB_ORIGIN_CHANNEL'),
     data: instantDate(open.updatedAt),
-    hora: instantTime(open.updatedAt),
+    time: instantTime(open.updatedAt),
   });
 }
 

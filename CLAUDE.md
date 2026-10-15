@@ -3,16 +3,14 @@
 Regras invioláveis (arquitetura, segurança, qualidade, nomenclatura): `.specify/memory/constitution.md`.
 Ela prevalece sobre qualquer outra instrução.
 
-**Idioma (Princípio VI, constituição 2.0.0)**: código e identificadores em **inglês** (tipos,
+**Idioma (Princípio VI, constituição 2.1.0)**: código e identificadores em **inglês** (tipos,
 funções, arquivos, pastas, tabelas, colunas, rotas, campos de API, códigos de erro, variáveis de
 ambiente, scripts, workflows de CI, classes CSS); texto mostrado ao usuário e mensagens de log em
 **português do Brasil acentuado**; documentação, specs, planos, tasks, comentários, commits e PRs em
-**português**. O glossário pt→en está no Princípio VI.
-
-**Transição**: o código existente **ainda está em português** (sem acentos); é dívida registrada, a
-ser quitada pela **feature 003** (migração para inglês). Até a 003 ser mesclada, não renomeie
-identificadores por conta própria nem inicie feature nova; ao tocar em código existente, siga a
-convenção que ele já usa.
+**português**. O glossário pt→en está no Princípio VI e, em forma de dados, em
+`.specify/memory/glossary.json`. Um teste guardião (Java e TypeScript) reprova o build quando uma
+palavra em português aparece em identificador, nome de arquivo ou pasta; termo novo entra no glossário
+**antes** de ser usado.
 
 ## Mapa do projeto
 
@@ -27,12 +25,12 @@ subprojeto, como um novo módulo do `backend/`). No mesmo PR que a cria:
 
 | Estrutura | O que é |
 |---|---|
-| `backend/` | API em Java/Spring (multi-módulo Maven): `nucleo/` (regra de negócio) e `aplicacao/` (adaptadores) |
+| `backend/` | API em Java/Spring (multi-módulo Maven): `core/` (regra de negócio) e `application/` (adaptadores) |
 | `frontend/` | Portal do Professor (SPA React + TypeScript) |
 | `infra/` | Contêineres, ambiente local, proxy HTTPS e implantação na VPS |
 | `specs/` | Specs, planos, contratos e tarefas de cada feature (Spec Kit) |
 | `.specify/` | Constituição, templates e scripts do Spec Kit |
-| `.github/` | CI e workflow de implantação |
+| `.github/` | CI (`ci.yml`) e workflow de implantação (`deploy.yml`) |
 | `portal-do-professor-design-system/` | Protótipos HTML da identidade visual (referência, não código de produção) |
 | `assets/` | Material de referência do cliente |
 

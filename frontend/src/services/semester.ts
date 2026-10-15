@@ -150,7 +150,7 @@ export function semesterSections(info: Info, content: Content): SemesterSection[
         text('PHRASING_FIELD', m.phrasing),
         text('ARTICULATION_FIELD', m.articulation),
         text('STYLE_FIELD', m.style),
-        text('MUSICAL_COMMENT_FIELD', m.commentMusical),
+        text('MUSICAL_COMMENT_FIELD', m.musicalComment),
       ],
     },
     {
@@ -181,7 +181,7 @@ export function semesterSections(info: Info, content: Content): SemesterSection[
       title: msg('NEXT_SEMESTER_PLAN_SECTION'),
       fields: [
         list('TECHNICAL_GOALS_FIELD', p.technicalGoals),
-        list('MUSICAL_GOALS_FIELD', p.goalsMusicais),
+        list('MUSICAL_GOALS_FIELD', p.musicalGoals),
         list('STUDY_HABITS_FIELD', p.studyHabits),
         list('PROPOSED_REPERTOIRE_FIELD', p.proposedRepertoire),
         list('TECHNICAL_STUDIES_FIELD', p.technicalStudies),

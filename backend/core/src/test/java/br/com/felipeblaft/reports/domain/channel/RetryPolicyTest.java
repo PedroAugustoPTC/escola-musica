@@ -87,23 +87,23 @@ class RetryPolicyTest {
 
     @Test
     void invalidValuesAreRefused() {
-        Duration trinta = Duration.ofSeconds(30);
-        Duration hora = Duration.ofHours(1);
-        assertThatThrownBy(() -> new RetryPolicy(null, hora, hora))
+        Duration thirtySeconds = Duration.ofSeconds(30);
+        Duration oneHour = Duration.ofHours(1);
+        assertThatThrownBy(() -> new RetryPolicy(null, oneHour, oneHour))
                 .isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> new RetryPolicy(Duration.ZERO, hora, hora))
+        assertThatThrownBy(() -> new RetryPolicy(Duration.ZERO, oneHour, oneHour))
                 .isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> new RetryPolicy(Duration.ofSeconds(-1), hora, hora))
+        assertThatThrownBy(() -> new RetryPolicy(Duration.ofSeconds(-1), oneHour, oneHour))
                 .isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> new RetryPolicy(hora, trinta, hora))
+        assertThatThrownBy(() -> new RetryPolicy(oneHour, thirtySeconds, oneHour))
                 .isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> new RetryPolicy(trinta, null, hora))
+        assertThatThrownBy(() -> new RetryPolicy(thirtySeconds, null, oneHour))
                 .isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> new RetryPolicy(trinta, hora, null))
+        assertThatThrownBy(() -> new RetryPolicy(thirtySeconds, oneHour, null))
                 .isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> new RetryPolicy(trinta, hora, Duration.ZERO))
+        assertThatThrownBy(() -> new RetryPolicy(thirtySeconds, oneHour, Duration.ZERO))
                 .isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> new RetryPolicy(trinta, hora, Duration.ofSeconds(-5)))
+        assertThatThrownBy(() -> new RetryPolicy(thirtySeconds, oneHour, Duration.ofSeconds(-5)))
                 .isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> policy.nextAttempt(0, NOW))
                 .isInstanceOf(IllegalArgumentException.class);

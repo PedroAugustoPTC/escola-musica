@@ -158,8 +158,9 @@ Notas da rodada:
 2. A primeira tentativa do frontend falhou por **timeout de 5 s** do Vitest no guardião (a varredura do repositório
    levou 5,4 s no disco montado). O teste ganhou prazo explícito de 120 s. Backend e frontend foram rerodados
    depois; o `e2e` não foi repetido porque o arquivo alterado é um teste do Vitest, fora do e2e.
-3. O backend levou ~30 min por rodada completa em contêiner (~18 min na linha de base): o guardião Java varre o
-   repositório e o IT cria um banco descartável, sobretudo por causa do disco montado no Windows.
+3. O backend levou ~30 min por rodada completa em contêiner (~18 min na linha de base). **Correção (T237, feita na fatia 7)**: a lentidão
+   **não** vem dos guardiões (≈ 45 s somados: `LanguageGuardTest` 28 s e `ArtifactsLanguageGuardIT` 15 s). O módulo `core`, que a fatia não tocou, também foi de
+   2:36 para 4:52 min, então a causa é a máquina e o disco montado no Windows, não o código. Nas fatias seguintes a rodada completa do backend ficou entre 11 e 15 min.
 
 ## Anotações (bug ou código morto: anotado, não corrigido)
 
@@ -173,3 +174,9 @@ Notas da rodada:
   `frontend/node_modules` do host com binários Linux (a pasta é ignorada pelo Git). Quem desenvolve fora de
   contêiner deve rodar `npm ci` no host.
 - `specs/003-migrate-code-to-english/tasks.md.tmp`: resto do `/speckit-tasks`, ignorado pelo Git (`*.tmp`).
+
+## Desvio da prova T021: decisão registrada (T239, na fatia 7)
+
+O desvio (todas as violações introduzidas de uma vez, uma falha por violação, em vez de "uma por vez") foi apresentado ao dono no checkpoint da fatia 1 e ele
+seguiu para a fatia 2 sem pedir a repetição violação a violação; a prova não foi repetida. A volta ao verde foi demonstrada pela rodada completa sobre o commit limpo
+(e, na fatia 7, pelas palavras novas do glossário que o guardião acusou de imediato quando casaram com palavras do inglês).

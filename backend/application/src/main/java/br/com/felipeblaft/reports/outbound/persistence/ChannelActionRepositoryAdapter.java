@@ -84,12 +84,12 @@ class ChannelActionRepositoryAdapter implements ChannelActionRepository {
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public List<ChannelAction> reserveNextDueBatch(
-            Instant now, Duration confirmationMax, Instant leaseAte) {
+            Instant now, Duration confirmationMax, Instant leaseUntil) {
         Optional<String> batch = jpa.nextDueBatch(now, now.minus(confirmationMax));
         if (batch.isEmpty()) {
             return List.of();
         }
-        jpa.reserveBatch(batch.get(), leaseAte);
+        jpa.reserveBatch(batch.get(), leaseUntil);
         return jpa.findByBatchIdOrderBySeq(batch.get()).stream()
                 .filter(e -> ChannelActionState.PENDING.name().equals(e.state))
                 .map(this::read)
@@ -126,8 +126,8 @@ class ChannelActionRepositoryAdapter implements ChannelActionRepository {
 
     @Override
     @Transactional
-    public Purge purge(Instant payloadAte, Instant registrationUntil) {
-        int reset = jpa.clearFinalizedContentUntil(payloadAte);
+    public Purge purge(Instant payloadUntil, Instant registrationUntil) {
+        int reset = jpa.clearFinalizedContentUntil(payloadUntil);
         int removed = jpa.removeFinalizedUntil(registrationUntil);
         return new Purge(reset, removed);
     }

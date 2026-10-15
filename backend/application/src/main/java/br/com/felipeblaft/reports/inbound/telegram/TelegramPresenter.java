@@ -169,7 +169,7 @@ public class TelegramPresenter {
                         "type", label("TYPE_" + openReport.type().name()),
                         "outcome", status,
                         "data", formatting.data(openReport.updatedAt()),
-                        "hora", formatting.hora(openReport.updatedAt())));
+                        "time", formatting.time(openReport.updatedAt())));
     }
 
     public String studentLine(StudentSummary student) {

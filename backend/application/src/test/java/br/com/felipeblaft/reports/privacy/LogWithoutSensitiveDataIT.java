@@ -96,10 +96,10 @@ class LogWithoutSensitiveDataIT extends TelegramConversationBase {
             if (event.getKeyValuePairs() != null) {
                 event.getKeyValuePairs()
                         .forEach(
-                                par ->
-                                        text.append(par.key)
+                                pair ->
+                                        text.append(pair.key)
                                                 .append('=')
-                                                .append(par.value)
+                                                .append(pair.value)
                                                 .append('\n'));
             }
             if (event.getThrowableProxy() != null) {

@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 class TelegramConversationTest {
 
     private static final Instant T0 = Instant.parse("2026-09-21T13:00:00Z");
-    private static final Duration TRINTA = Duration.ofMinutes(30);
+    private static final Duration THIRTY = Duration.ofMinutes(30);
 
     @Test
     void emptyConversationStartsWithoutFlow() {
@@ -67,11 +67,11 @@ class TelegramConversationTest {
                 new PendingAudio("f2", "u2", "audio/ogg", 200, T0.plusSeconds(60)));
         assertThat(conversation.pendingAudio()).map(PendingAudio::fileId).contains("f2");
 
-        assertThat(conversation.discardAudioIfExpired(T0.plus(TRINTA), TRINTA)).isFalse();
-        assertThat(conversation.discardAudioIfExpired(T0.plusSeconds(60).plus(TRINTA), TRINTA))
+        assertThat(conversation.discardAudioIfExpired(T0.plus(THIRTY), THIRTY)).isFalse();
+        assertThat(conversation.discardAudioIfExpired(T0.plusSeconds(60).plus(THIRTY), THIRTY))
                 .isTrue();
         assertThat(conversation.pendingAudio()).isEmpty();
-        assertThat(conversation.discardAudioIfExpired(T0, TRINTA)).isFalse();
+        assertThat(conversation.discardAudioIfExpired(T0, THIRTY)).isFalse();
 
         conversation.receiveAudio(new PendingAudio("f3", null, null, 1, T0));
         conversation.discardAudio();

@@ -122,7 +122,7 @@ class HomeSearchConversationIT extends TelegramConversationBase {
     }
 
     @Test
-    void signOutPeloButton() throws Exception {
+    void signOutByButton() throws Exception {
         sendText(USER_CLARA, "sair");
         sendCallback(USER_CLARA, "v1:sign-out-ok:");
         assertThat(jdbc.queryForObject("select count(*) from telegram_link", Integer.class))

@@ -56,7 +56,7 @@ public class InMemoryChannelActionRepository implements ChannelActionRepository 
 
     @Override
     public List<ChannelAction> reserveNextDueBatch(
-            Instant now, Duration confirmationMax, Instant leaseAte) {
+            Instant now, Duration confirmationMax, Instant leaseUntil) {
         Instant limit = now.minus(confirmationMax);
         Optional<ChannelAction> candidate =
                 data.values().stream()
@@ -73,7 +73,7 @@ public class InMemoryChannelActionRepository implements ChannelActionRepository 
         for (ChannelAction action : ordered(a -> a.batchId().equals(batch))) {
             ChannelAction stored = data.get(action.id());
             if (stored.state() == ChannelActionState.PENDING) {
-                stored.reserveUntil(leaseAte);
+                stored.reserveUntil(leaseUntil);
                 stored.defineVersion(stored.version() + 1);
                 reserved.add(copy(stored));
             }
@@ -108,11 +108,11 @@ public class InMemoryChannelActionRepository implements ChannelActionRepository 
     }
 
     @Override
-    public Purge purge(Instant payloadAte, Instant registrationUntil) {
+    public Purge purge(Instant payloadUntil, Instant registrationUntil) {
         int reset = 0;
         for (ChannelAction action : data.values()) {
             if (action.state().finalized()
-                    && action.finalizedAt().isBefore(payloadAte)
+                    && action.finalizedAt().isBefore(payloadUntil)
                     && (action.payload() != null || action.compensation() != null)) {
                 action.resetPayload();
                 reset++;

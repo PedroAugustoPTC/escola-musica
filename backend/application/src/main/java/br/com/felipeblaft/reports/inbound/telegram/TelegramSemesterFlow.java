@@ -617,10 +617,10 @@ public class TelegramSemesterFlow implements TelegramFlow {
                                 "REPORT_APPROVED",
                                 Map.of(
                                         "data", presenter.formatting().data(approval.approvedAt()),
-                                        "hora",
+                                        "time",
                                                 presenter
                                                         .formatting()
-                                                        .hora(approval.approvedAt()))),
+                                                        .time(approval.approvedAt()))),
                         Keyboard.of(
                                 presenter.button("HISTORY_BUTTON", "history"),
                                 presenter.button("HOME_BUTTON", "home"))));

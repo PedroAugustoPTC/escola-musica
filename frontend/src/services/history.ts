@@ -18,7 +18,7 @@ export function useHistory(studentId: string | undefined) {
 
 /** `APROVADO_EM` com data e hora no fuso da escola (o mesmo texto do bot). */
 export function approvedAtText(item: HistoryItemDto): string {
-  return msg('APPROVED_AT', { data: instantDate(item.approvedAt), hora: instantTime(item.approvedAt) });
+  return msg('APPROVED_AT', { data: instantDate(item.approvedAt), time: instantTime(item.approvedAt) });
 }
 
 /** Selo de data do item: dia e mês da aula, ou o semestre ("1º"/"2º" e "SEM"). */

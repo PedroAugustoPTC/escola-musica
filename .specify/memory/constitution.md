@@ -1,5 +1,36 @@
 <!--
 Sync Impact Report
+- Version change: 2.0.0 → 2.1.0
+- Rationale: MINOR — quitação da dívida do Princípio VI pela feature 003 (migração do código existente para
+  inglês) e expansão material do princípio: (a) a **regra de transição** deixa de valer, porque o código, o banco,
+  os contratos, os scripts, o CI e o frontend já estão em inglês, e o bloqueio "nenhuma feature nova pode ser
+  iniciada" cai; (b) o glossário do domínio ganha um complemento oficial em forma de dados,
+  `.specify/memory/glossary.json`, que alimenta o teste guardião de idioma (Java e TypeScript) e é parte da
+  regra; (c) uma quinta categoria de exceção, "nomes próprios e material de referência", é ratificada; (d) a lista
+  de sufixos padronizados ganha `*Entity`, `*Command`, `*Filter`, `*Converter`, `*Codec` e `*Config`, que a
+  migração encontrou em uso e que o glossário já aceita.
+- Modified principles: VI. Nomenclatura Previsível, Linguagem Ubíqua e Idioma (sufixos; exceções; regra de
+  transição reescrita como registro da quitação; guardião de idioma)
+- Modified sections: nenhuma além do Princípio VI e do cabeçalho de versão
+- Added sections: nenhuma (o "Guardião de idioma" é subparte do Princípio VI)
+- Removed sections: nenhuma; a **regra de transição** deixa de ser norma e fica como registro histórico
+- Princípios I a V e VII a IX: inalterados
+- Histórico: os textos das versões anteriores foram preservados, inclusive o item da 2.0.0 que diz que a
+  feature 003 "ainda NÃO existe spec", que era verdade na época; o número 003 ficou com a migração, e a feature
+  que traz o n8n passou a ser a 004 (documentos da spec 002 corrigidos nessa PR).
+- Templates verificados (`.specify/templates/`): `plan-template.md`, `spec-template.md`, `tasks-template.md`,
+  `checklist-template.md` e `constitution-template.md` — nenhum cita idioma de identificadores, sufixos,
+  Hostinger nem a regra de transição; nenhum requer alteração. `.specify/memory/.constitution-template.json`
+  guarda só o hash do modelo da constituição, que não mudou.
+- Artefatos dependentes atualizados na mesma PR: todos os `CLAUDE.md` (raiz, `.specify`, `backend`,
+  `backend/core`, `backend/application`, `frontend`, `infra`, `.github`, `specs`, `assets`,
+  `portal-do-professor-design-system`), `README.md` da raiz e de `infra/`, `specs/001-*` e `specs/002-*` (nota de
+  histórico no topo) e `PLANO_EXECUCAO_SPECKIT.md` (bloco de comandos da seção 3.2).
+- Aprovação: a emenda exige a aprovação do dono do produto (Governança); ela é pedida na descrição do PR da
+  feature 003 e o merge do PR a registra.
+- Deferred items: nenhum
+
+Histórico — v2.0.0 (2026-10-10)
 - Version change: 1.4.0 → 2.0.0
 - Rationale: MAJOR — redefinição incompatível do Princípio VI: identificadores de código, nomes de
   arquivo e pasta, tabelas e colunas, rotas e campos de API, códigos de erro, chaves de catálogos,
@@ -281,8 +312,23 @@ rigorosos no núcleo são a rede de segurança contra regressões silenciosas.
     (ex.: `StudentRepositoryAdapter`).
   - `*Mapper`: conversão entre objetos de transporte e de domínio.
   - `*Dto`, `*Request`, `*Response`: objetos de transporte na borda.
+  - `*Entity`: entidade de persistência (mapeamento JPA), quando distinta da entidade de domínio.
+  - `*Command`: comando operacional ou de linha de comando (ex.: `SeedCommand`).
+  - `*Filter`: filtro de requisição na borda (ex.: de sessão ou de segurança).
+  - `*Converter`: conversão de tipo de e para o banco ou o transporte.
+  - `*Codec`: codificação e decodificação de um formato persistido ou trafegado.
+  - `*Config`: classe de configuração (beans e propriedades).
 - Exceções permitidas, e somente estas: palavras reservadas da linguagem, APIs de terceiros, nomes
-  exigidos por ferramentas ou frameworks e siglas consagradas (PDF, LLM, HTTP, DTO).
+  exigidos por ferramentas ou frameworks, siglas consagradas (PDF, LLM, HTTP, DTO) e **nomes próprios e
+  material de referência**: o nome da organização no pacote Java (`br.com.felipeblaft`), o prefixo de marca
+  dos arquivos de identidade visual (`fb-`), o domínio público do portal, as pastas de material de referência
+  que não são código (`assets/`, `portal-do-professor-design-system/`, `.claude/`), os nomes das pastas de
+  feature em `specs/` (ex.: `001-fluxo-relatorios`) e os valores já persistidos que não podem mudar sem
+  invalidar dados (os prefixos de domínio do HMAC dos códigos de acesso). Texto mostrado ao usuário e
+  palavras digitadas por ele (ex.: o nome sugerido ao baixar o PDF, a palavra de confirmação do
+  `local.sh clean`) seguem em português, como já diz esta seção.
+- Toda exceção DEVE estar registrada em `.specify/memory/glossary.json`, com o motivo e a categoria; exceção
+  que não casa com nada no código é "morta" e reprova o guardião.
 
 **Glossário do domínio (pt → en)**
 
@@ -303,12 +349,23 @@ Os termos abaixo são os canônicos; o equivalente em inglês é o único nome a
 | Versão | `Version` |
 | Aprovação | `Approval` |
 
-**Regra de transição**
+**Guardião de idioma**
 
-- O código existente ainda está em português e constitui **dívida registrada** em relação a este
-  princípio, a ser quitada pela **feature 003** (migração para inglês).
-- Enquanto a feature 003 não for mesclada, **nenhuma feature nova pode ser iniciada**; a própria
-  003 é a única exceção.
+- Um teste guardião DEVE rodar no CI e reprovar o build quando uma palavra em português aparecer em
+  identificador, nome de arquivo ou de pasta, tabela, coluna, chave de catálogo, variável de ambiente, YAML,
+  script, workflow ou classe CSS. Ele existe em Java (código e artefatos de dados e configuração) e em
+  TypeScript (frontend), consome `.specify/memory/glossary.json` e NÃO examina texto mostrado ao usuário,
+  logs, comentários nem documentação.
+- Termo novo DEVE entrar no `glossary.json`, com um único equivalente em inglês, **antes** de ser usado. Não existe
+  lista de exclusão: o que não pode ser traduzido é uma exceção documentada (acima).
+
+**Regra de transição (quitada)**
+
+- Até a versão 2.0.0, o código existente estava em português e constituía dívida registrada em relação a este
+  princípio, e nenhuma feature nova podia ser iniciada enquanto ela não fosse quitada.
+- A dívida foi **quitada pela feature 003** (`specs/003-migrate-code-to-english/`), em sete fatias, sem mudança
+  de comportamento. A partir da 2.1.0 não há mais regra de transição nem bloqueio de feature nova: todo código
+  novo segue este princípio desde o primeiro commit.
 
 **Justificativa**: nomes previsíveis tornam a arquitetura autoexplicativa e impedem que regra de
 negócio escape para a camada errada. Identificadores em inglês seguem o idioma das linguagens,
@@ -451,4 +508,4 @@ número de versão conforme a política abaixo, e (4) verificar se `spec-templat
 revisão; violações não justificadas bloqueiam o merge. Exceções DEVEM ser registradas na descrição
 do PR e aprovadas por outro revisor.
 
-**Version**: 2.0.0 | **Ratified**: 2026-09-30 | **Last Amended**: 2026-10-10
+**Version**: 2.1.0 | **Ratified**: 2026-09-30 | **Last Amended**: 2026-10-15

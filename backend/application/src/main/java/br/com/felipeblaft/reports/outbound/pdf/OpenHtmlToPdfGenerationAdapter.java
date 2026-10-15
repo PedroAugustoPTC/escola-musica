@@ -156,7 +156,7 @@ public class OpenHtmlToPdfGenerationAdapter implements PdfGenerationPort {
                                 "APPROVED_AT",
                                 Map.of(
                                         "data", formatting.data(model.approval().approvedAt()),
-                                        "hora", formatting.hora(model.approval().approvedAt()))));
+                                        "time", formatting.time(model.approval().approvedAt()))));
         return generate("semester-report", variables);
     }
 
@@ -175,7 +175,7 @@ public class OpenHtmlToPdfGenerationAdapter implements PdfGenerationPort {
                                 Map.of(
                                         "teacher", approval.teacherName(),
                                         "data", formatting.data(approval.approvedAt()),
-                                        "hora", formatting.hora(approval.approvedAt()),
+                                        "time", formatting.time(approval.approvedAt()),
                                         "version", approval.version())));
         variables.put("versionText", "Versão " + version);
     }

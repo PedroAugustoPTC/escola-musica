@@ -1,6 +1,0 @@
-{
-  "version": 1,
-  "description": "Exclusões temporárias do teste guardião de idioma (feature 003, FR-035). Só existe na branch da feature, é regerada por specs/003-migrate-code-to-english/tools/gen-exclusions.mjs, só encolhe a cada fatia e DEVE ser apagada na fatia 7. \"files\": arquivos ainda em português; \"terms\": termos retidos (B1/B2/B3) dentro de arquivos já migrados. \"slice\" é a fatia que quita a entrada.",
-  "files": [],
-  "terms": []
-}

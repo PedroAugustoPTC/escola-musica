@@ -37,7 +37,7 @@ public class SessionCookieFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(
-            HttpServletRequest request, HttpServletResponse response, FilterChain cadeia)
+            HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
         String token = cookie.read(request);
         if (token != null && !token.isBlank()) {
@@ -55,6 +55,6 @@ public class SessionCookieFilter extends OncePerRequestFilter {
         }
         // o contexto é limpo pelo SecurityContextHolderFilter ao fim da requisição; limpar aqui
         // esconderia a autenticação do ExceptionTranslationFilter (401 viraria 403)
-        cadeia.doFilter(request, response);
+        chain.doFilter(request, response);
     }
 }

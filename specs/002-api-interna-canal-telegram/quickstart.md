@@ -1,10 +1,15 @@
 # Quickstart: validar a API interna de canal do Telegram
 
+> **Nota de histórico (feature 003)**: este documento foi escrito antes da migração do código para
+> inglês e cita nomes anteriores a ela (classes, arquivos, tabelas, rotas, variáveis). Ele permanece como
+> histórico, sem reescrita. Para o nome atual de cada termo, consulte o glossário em
+> [`.specify/memory/glossary.json`](../../.specify/memory/glossary.json) e o Princípio VI da constituição.
+
 **Feature**: `002-api-interna-canal-telegram` | **Plano**: [plan.md](./plan.md)
 
 Guia para provar, de ponta a ponta, que a nova porta funciona **sem mudar nada do que o professor vê**.
 Detalhes de rotas, formato e regras estão em [contracts/](./contracts/) e [data-model.md](./data-model.md);
-este guia só os referencia. Como esta feature não inclui workflows do n8n (feature `003`), a prova é
+este guia só os referencia. Como esta feature não inclui workflows do n8n (feature `004`), a prova é
 feita por testes automatizados cujo "executor" simula o n8n.
 
 ## 1. Pré-requisitos
@@ -26,7 +31,7 @@ acrescido dos valores do canal (fixos no código de teste, sem segredo real):
 | `relatorios.canal-telegram.orquestrador-url` | URL do WireMock do orquestrador | despacho |
 | `relatorios.canal-telegram.retentativa-*`, `prazo-horas` | padrões, com `RelogioAjustavel` | retentativa sem dormir |
 
-Para ambientes reais (feature `003`), as variáveis estão em [data-model.md §4](./data-model.md); nenhuma
+Para ambientes reais (feature `004`), as variáveis estão em [data-model.md §4](./data-model.md); nenhuma
 é obrigatória nesta feature (o padrão `DIRETA` mantém o comportamento atual).
 
 ## 3. Rodar a suíte
@@ -69,9 +74,9 @@ Cada cenário aponta o requisito que prova e a classe de teste responsável (a c
 | V19 | Cobertura do núcleo | FR-032, SC-008 | JaCoCo ≥ 90% de linhas e ramos em `nucleo` (inclui `dominio.canal` e `casodeuso.canal`) | build (`verify`) |
 | V20 | Migração V6 sobre um banco já na V5, com linhas antigas em `update_telegram_processado` | R-14 | aplica sem erro; linhas antigas ficam com `total_acoes`/`origem` nulos e um update repetido do webhook antigo continua devolvendo `200` | `MigracaoV6IT` |
 
-## 5. Verificação manual opcional (depois da `003`)
+## 5. Verificação manual opcional (depois da `004`)
 
-Fora do escopo desta feature, mas já descrita para não se perder: com o n8n da `003` apontado para estas
+Fora do escopo desta feature, mas já descrita para não se perder: com o n8n da `004` apontado para estas
 rotas, repetir V1 em um bot **de testes** e conferir (a) que o professor vê as mesmas mensagens, (b) que
 derrubar o contêiner do n8n e enviar uma mensagem gera reentrega ao voltar, e (c) que
 `CANAL_TELEGRAM_ENTREGA=ORQUESTRADOR` é ligado **junto** com a troca do webhook registrado no Telegram.

@@ -16,12 +16,12 @@ public final class GeneratorId {
         long milliseconds = System.currentTimeMillis();
         byte[] random = new byte[10];
         RANDOM.nextBytes(random);
-        long alto =
+        long high =
                 (milliseconds << 16) | 0x7000L | ((random[0] & 0x0FL) << 8) | (random[1] & 0xFFL);
         long low = 0x8000_0000_0000_0000L | ((random[2] & 0x3FL) << 56);
         for (int i = 3; i < 10; i++) {
             low |= (random[i] & 0xFFL) << (8 * (9 - i));
         }
-        return new UUID(alto, low);
+        return new UUID(high, low);
     }
 }

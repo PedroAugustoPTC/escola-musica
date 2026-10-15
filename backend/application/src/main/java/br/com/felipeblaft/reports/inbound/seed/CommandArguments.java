@@ -29,7 +29,7 @@ final class CommandArguments {
                 + " (válido até "
                 + formatting.data(code.validUntil())
                 + " "
-                + formatting.hora(code.validUntil())
+                + formatting.time(code.validUntil())
                 + ")";
     }
 }

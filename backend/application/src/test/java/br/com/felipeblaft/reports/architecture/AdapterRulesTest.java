@@ -42,9 +42,9 @@ class AdapterRulesTest {
                 .implement(
                         com.tngtech.archunit.base.DescribedPredicate.describe(
                                 "porta ou repositório do núcleo",
-                                classe ->
-                                        classe.getPackageName().equals(BASE + ".port")
-                                                && classe.isInterface()))
+                                javaClass ->
+                                        javaClass.getPackageName().equals(BASE + ".port")
+                                                && javaClass.isInterface()))
                 .should()
                 .haveSimpleNameEndingWith("Adapter")
                 .check(application);

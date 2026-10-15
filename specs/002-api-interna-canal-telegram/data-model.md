@@ -1,5 +1,10 @@
 # Data Model: API interna de canal do Telegram
 
+> **Nota de histórico (feature 003)**: este documento foi escrito antes da migração do código para
+> inglês e cita nomes anteriores a ela (classes, arquivos, tabelas, rotas, variáveis). Ele permanece como
+> histórico, sem reescrita. Para o nome atual de cada termo, consulte o glossário em
+> [`.specify/memory/glossary.json`](../../.specify/memory/glossary.json) e o Princípio VI da constituição.
+
 **Feature**: `002-api-interna-canal-telegram` | **Data**: 2026-10-02 | **Plano**: [plan.md](./plan.md) | **Pesquisa**: [research.md](./research.md)
 
 Convenções herdadas de `specs/001-fluxo-relatorios/data-model.md`: nomes em português sem acento

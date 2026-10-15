@@ -1,0 +1,119 @@
+synonym-check: 10655 palavras de domínio comparadas nos mapas (102 traduzidas por termo idiomático diferente do glossário, só informativo); 16 grupos de abreviação/termo aceitos em uso; 0 achados
+  idiomático: verificador (glossário: verifier) — ex.: aceitaDigitoVerificadorZero → acceptsZeroCheckDigit
+  idiomático: aceite (glossário: accepted) — ex.: aceite → accept
+  idiomático: falso (glossário: false) — ex.: ArquivoCanalFalso → FakeChannelFile
+  idiomático: fala (glossário: speaks) — ex.: AUDIO_SEM_FALA → AUDIO_WITHOUT_SPEECH
+  idiomático: curso (glossário: course) — ex.: buscarConsolidacaoEmCurso → searchConsolidationInProgress
+  idiomático: traz (glossário: brings) — ex.: buscaVaziaTrazTodos → emptySearchReturnsAll
+  idiomático: emitido (glossário: emitted) — ex.: CodigoEmitido → IssuedCode
+  idiomático: emitidos (glossário: emitted) — ex.: codigosEmitidos → issuedCodes
+  idiomático: inventar (glossário: invent) — ex.: conteudoNormalizaSemInventar → contentNormalizesWithoutInventing
+  idiomático: retomada (glossário: resumption) — ex.: descarteNaRetomada → discardOnResume
+  idiomático: execucao (glossário: execution) — ex.: EM_EXECUCAO → RUNNING
+  idiomático: entrada (glossário: inbound) — ex.: entrada → input
+  idiomático: entrar (glossário: sign-in) — ex.: entrar → signIn
+  idiomático: tecnica (glossário: technique) — ex.: evolucaoTecnica → technicalProgress
+  idiomático: dentro (glossário: inside) — ex.: exigirDentroDoLimite → requireWithinLimit
+  idiomático: vencidas (glossário: expired) — ex.: expirarEntreguesVencidas → expireOverdueDelivered
+  idiomático: falha (glossário: failure) — ex.: FALHA_ALTERACAO → CHANGE_FAILED
+  idiomático: definitiva (glossário: definitive) — ex.: FALHA_DEFINITIVA → PERMANENTLY_FAILED
+  idiomático: resposta (glossário: response) — ex.: FALHA_RESPOSTA → ANSWER_FAILED
+  idiomático: definitivas (glossário: definitive) — ex.: falhasDefinitivas → permanentFailures
+  idiomático: fonte (glossário: font) — ex.: FonteDocumentos → DocumentSource
+  idiomático: nao (glossário: not) — ex.: FORMATO_NAO_SUPORTADO → UNSUPPORTED_FORMAT
+  idiomático: suportado (glossário: supported) — ex.: FORMATO_NAO_SUPORTADO → UNSUPPORTED_FORMAT
+  idiomático: falsa (glossário: false) — ex.: GeracaoPdfFalsa → FakePdfGeneration
+  idiomático: maximo (glossário: maximum) — ex.: JITTER_MAXIMO → MAX_JITTER
+  idiomático: limite (glossário: limit) — ex.: LIMITE_DE_TAXA → RATE_LIMITED
+  idiomático: demorados (glossário: slow) — ex.: listarDemoradosSemAviso → listDelayedWithoutNotice
+  idiomático: maioridade (glossário: adulthood) — ex.: MAIORIDADE → ADULT_AGE
+  idiomático: mais (glossário: more) — ex.: MAIS_RECENTE_PRIMEIRO → NEWEST_FIRST
+  idiomático: recente (glossário: recent) — ex.: MAIS_RECENTE_PRIMEIRO → NEWEST_FIRST
+  idiomático: antiga (glossário: old) — ex.: maisAntiga → oldest
+  idiomático: menos (glossário: less) — ex.: menosUm → minusOne
+  idiomático: muito (glossário: too) — ex.: muitoDepois → muchLater
+  idiomático: depois (glossário: after) — ex.: muitoDepois → muchLater
+  idiomático: citar (glossário: cite) — ex.: naoCitarFornecedor → doNotMentionVendor
+  idiomático: maiusculas (glossário: uppercase) — ex.: normalizaEspacosEMaiusculas → normalizesSpacesAndCase
+  idiomático: registradora (glossário: registrar) — ex.: NotificacaoRegistradora → RecordingNotification
+  idiomático: nova (glossário: new) — ex.: NOVA_TENTATIVA → RETRY
+  idiomático: tentativa (glossário: attempt) — ex.: NOVA_TENTATIVA → RETRY
+  idiomático: cita (glossário: cites) — ex.: nucleoNaoCitaFornecedores → coreDoesNotMentionVendors
+  idiomático: parece (glossário: seems) — ex.: pareceCodigo → looksLikeCode
+  idiomático: inexistente (glossário: missing) — ex.: PROFESSOR_INEXISTENTE → TEACHER_NOT_FOUND
+  idiomático: entra (glossário: enters) — ex.: professorInativoNaoEntra → inactiveTeacherCannotSignIn
+  idiomático: quantidade (glossário: quantity) — ex.: quantidadeAulas → lessonCount
+  idiomático: recusada (glossário: refused) — ex.: RECUSADA_VERSAO_DESATUALIZADA → REJECTED_STALE_VERSION
+  idiomático: recusa (glossário: refuses) — ex.: recusaForaDoFormato → refusalOutsideFormat
+  idiomático: saida (glossário: outbound) — ex.: saida → output
+  idiomático: gravacao (glossário: recording) — ex.: TENTATIVAS_DE_GRAVACAO → SAVE_ATTEMPTS
+  idiomático: uso (glossário: use) — ex.: ultimoUsoEm → lastUsedAt
+  idiomático: hora (glossário: time) — ex.: umaHoraDepois → oneHourLater
+  idiomático: valida (glossário: validates) — ex.: validaEm → validAt
+  idiomático: massa (glossário: demo-data) — ex.: $saida_massa → $saida_demo_data
+  idiomático: cruzado (glossário: crossed) — ex.: AcessoCruzadoIT → CrossAccessIT
+  idiomático: aplicacao (glossário: application) — ex.: ALTERACAO_EM_APLICACAO → CHANGE_BEING_APPLIED
+  idiomático: novo (glossário: new) — ex.: aprovarDeNovo → approveAgain
+  idiomático: semestre (glossário: semester) — ex.: aulasNo1Semestre → lessonsInSemester1
+  idiomático: otimista (glossário: optimistic) — ex.: bloqueio_otimista → lock_version
+  idiomático: sair (glossário: sign-out) — ex.: BOTAO_CONFIRMAR_SAIR → CONFIRM_SIGN_OUT_BUTTON
+  idiomático: mesmo (glossário: same) — ex.: BOTAO_GERAR_MESMO_ASSIM → GENERATE_ANYWAY_BUTTON
+  idiomático: assim (glossário: thus) — ex.: BOTAO_GERAR_MESMO_ASSIM → GENERATE_ANYWAY_BUTTON
+  idiomático: novamente (glossário: again) — ex.: BOTAO_TENTAR_NOVAMENTE → RETRY_BUTTON
+  idiomático: trocar (glossário: swap) — ex.: BOTAO_TROCAR_ALUNO → SWITCH_STUDENT_BUTTON
+  idiomático: voltar (glossário: return) — ex.: BOTAO_VOLTAR → BACK_BUTTON
+  idiomático: vinculado (glossário: linked) — ex.: callbackNaoVinculado → unlinkedCallback
+  idiomático: chegar (glossário: arrive) — ex.: chegarAConferencia → reachReview
+  idiomático: confal (glossário: confirmstudent) — ex.: confal → confirmedStudent
+  idiomático: algum (glossário: some) — ex.: contemAlgum → containsAny
+  idiomático: seguro (glossário: safe) — ex.: cookie-seguro → cookie-secure
+  idiomático: fora (glossário: outside) — ex.: correcao-fora-do-ar → correction-offline
+  idiomático: corrido (glossário: ran) — ex.: corrido → running
+  idiomático: sentidos (glossário: senses) — ex.: descartarNosDoisSentidos → discardInBothDirections
+  idiomático: emitir (glossário: emit) — ex.: emitir-codigo → issue-code
+  idiomático: envio (glossário: sending) — ex.: EnvioTelegram → TelegramSender
+  idiomático: horario (glossário: time) — ex.: ESCOLA_FUSO_HORARIO → SCHOOL_TIMEZONE
+  idiomático: realizados (glossário: performed) — ex.: estudosRealizados → completedStudies
+  idiomático: faixa (glossário: range) — ex.: faixa → banner
+  idiomático: seguidas (glossário: followed) — ex.: falhasSeguidas → consecutiveFailures
+  idiomático: hitem (glossário: historyitem) — ex.: hitem → historyItem
+  idiomático: linha (glossário: line) — ex.: IDADE_DE_LINHA_PERDIDA → LOST_ROW_AGE
+  idiomático: maxima (glossário: maximum) — ex.: IDADE_MAXIMA → MAX_AGE
+  idiomático: marca (glossário: brand) — ex.: MARCA_EM_ABERTO → OPEN_REPORT_MARK
+  idiomático: nenhum (glossário: none) — ex.: NENHUM_ALUNO_ENCONTRADO → NO_STUDENT_FOUND
+  idiomático: origem (glossário: origin) — ex.: origem_hash → source_hash
+  idiomático: palavras (glossário: words) — ex.: PalavrasChaveTelegram → TelegramKeywords
+  idiomático: chave (glossário: key) — ex.: PalavrasChaveTelegram → TelegramKeywords
+  idiomático: troca (glossário: swap) — ex.: perguntarTrocaDeAluno → askStudentSwitch
+  idiomático: demorado (glossário: slow) — ex.: PROCESSAMENTO_DEMORADO → PROCESSING_DELAYED
+  idiomático: volta (glossário: returns) — ex.: professorIdaEVolta → teacherRoundTrip
+  idiomático: travados (glossário: locked) — ex.: recuperarTravados → recoverStuck
+  idiomático: foco (glossário: focus) — ex.: relatorio_foco_id → focused_report_id
+  idiomático: responda (glossário: answer) — ex.: RESPONDA_SIM → REPLY_YES
+  idiomático: responder (glossário: answer) — ex.: responderComAtraso → replyWithDelay
+  idiomático: barra (glossário: bar) — ex.: semBarra → withoutSlash
+  idiomático: encerramento (glossário: closing) — ex.: sessaoAtualEEncerramento → currentSessionAndEnding
+  idiomático: trocal (glossário: swapstudent) — ex.: trocal → switchStudent
+  idiomático: varredura (glossário: scan) — ex.: VarreduraAcessoTarefa → AccessSweepTask
+  idiomático: suportada (glossário: supported) — ex.: VERSAO_NAO_SUPORTADA → UNSUPPORTED_VERSION
+  idiomático: silencio (glossário: silence) — ex.: voz-silencio → silent-voice
+  idiomático: zerar (glossário: reset) — ex.: zerarConteudoFinalizadoAte → clearFinalizedContentUntil
+  idiomático: situacao (glossário: status) — ex.: situacao → outcome
+  idiomático: selecionado (glossário: selected) — ex.: preSelecionado → preselected
+  idiomático: aceita (glossário: accepts) — ex.: canal-entrega-aceita → channel-delivery-accepted
+  aceito: db|database (db=103, database=62) — db/ é a pasta de migrações do Flyway e o Playwright usa db; database é o nome do domínio (DATABASE_URL, tabelas)
+  aceito: msg|message (msg=153, message=948) — msg() é o auxiliar curto do frontend que busca o texto do catálogo; message é o termo do domínio
+  aceito: config|configuration (config=195, configuration=48) — *Config é sufixo padronizado (emenda 2.1.0); configuration só aparece em nomes de terceiros (Spring)
+  aceito: dir|directory (dir=54, directory=82) — dir é a chave curta do Spring (reports.documents.dir) e do Node; directory é o termo por extenso
+  aceito: src|source (src=646, source=159) — src é atributo HTML/TypeScript (nome de ferramenta); source é o termo de domínio
+  aceito: tmp|temp|temporary (tmp=24, temp=44, temporary=139) — tmp/temp vêm de nomes de ferramenta (java.io.tmpdir, tmpfs, temp-dir da configuração); temporary é o termo de domínio
+  aceito: err|error (err=18, error=1056) — err é o parâmetro curto de captura (catch) e de callbacks; error é o termo de domínio
+  aceito: info|information (info=106, information=106) — info é nível de log e propriedade de ferramenta; information é a seção de informações gerais do relatório
+  aceito: delete|remove (delete=51, remove=53) — delete é a operação de persistência (DELETE) e remove a operação de coleção/DOM; não são o mesmo conceito
+  aceito: img|image (img=18, image=18) — img é a tag HTML; image é o termo de domínio
+  aceito: cb|callback (cb=17, callback=268) — cb é o parâmetro curto de callback de ferramenta de teste
+  aceito: ts|timestamp (ts=59, timestamp=7) — ts é a extensão e o nome curto de tipo TypeScript
+  aceito: param|parameter (param=14, parameter=70) — param é a anotação do Spring e o termo de tipo; parameter é o termo geral
+  aceito: repo|repository (repo=4, repository=869) — repo aparece só em texto de ferramenta (git); repository é o sufixo padronizado
+  aceito: app|application (app=47, application=617) — app é o diretório/arquivo de ferramenta (app/, App.tsx); application é o módulo Maven
+  aceito: term|semester (term=67, semester=1772) — term é o modo `term` das exceções do glossário (mode: term) e palavra genérica; semester é o termo de domínio

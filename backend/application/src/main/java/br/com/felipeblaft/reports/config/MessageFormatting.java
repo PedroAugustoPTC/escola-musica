@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 public class MessageFormatting {
 
     private static final DateTimeFormatter DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    private static final DateTimeFormatter HORA = DateTimeFormatter.ofPattern("HH:mm");
+    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
 
     private final MessageCatalog catalog;
     private final ClockPort clock;
@@ -38,8 +38,8 @@ public class MessageFormatting {
         return instant.atZone(clock.schoolTimezone()).format(DATA);
     }
 
-    public String hora(Instant instant) {
-        return instant.atZone(clock.schoolTimezone()).format(HORA);
+    public String time(Instant instant) {
+        return instant.atZone(clock.schoolTimezone()).format(TIME_FORMAT);
     }
 
     /** "Aula de dd/mm/aaaa" ou "Semestral (dd/mm/aaaa a dd/mm/aaaa)" — iguais nos dois canais. */
@@ -57,7 +57,7 @@ public class MessageFormatting {
 
     /** "Aprovado em dd/mm/aaaa às hh:mm" no fuso da escola. */
     public String approvedAt(Instant instant) {
-        return catalog.text("APPROVED_AT", Map.of("data", data(instant), "hora", hora(instant)));
+        return catalog.text("APPROVED_AT", Map.of("data", data(instant), "time", time(instant)));
     }
 
     public String originChannel(Channel channel) {
@@ -96,7 +96,7 @@ public class MessageFormatting {
                     }
                     if (openReport.get("updatedAt") instanceof Instant updated) {
                         parameters.put("data", data(updated));
-                        parameters.put("hora", hora(updated));
+                        parameters.put("time", time(updated));
                     }
                 }
             }

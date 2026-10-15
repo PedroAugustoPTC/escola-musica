@@ -259,7 +259,7 @@ export function SemesterReviewScreen() {
               type="button"
               role="tab"
               aria-selected={tab === 'text'}
-              className="tabs__aba"
+              className="tabs__tab"
               onClick={() => setTab('text')}
             >
               Texto
@@ -268,7 +268,7 @@ export function SemesterReviewScreen() {
               type="button"
               role="tab"
               aria-selected={tab === 'pdf'}
-              className="tabs__aba"
+              className="tabs__tab"
               onClick={() => setTab('pdf')}
             >
               Ver PDF

@@ -183,3 +183,8 @@ suíte inteira (11 min por execução seria 2 h; a regra que barra é a mesma). 
 
 Não provocável: `coreDoesNotDependOnFrameworks` (o `core` não tem Spring, Jakarta nem Jackson no classpath, então não
 há como compilar a violação; quem barra isso é a regra do enforcer `core-without-dependencies`, que continua ativa).
+
+## Cuidado registrado (T238, na fatia 7)
+
+Em toda prova com branch descartável, apagar `backend/*/target` (ou rodar `mvn clean`) antes das suítes de comparação: resíduos de `target/classes` da branch descartável
+(`V9__proof.sql`, `prova.properties`) reprovaram o guardião do catálogo e o teste da `V6` na primeira rodada da fatia 1. As provas das fatias seguintes seguiram esse cuidado.

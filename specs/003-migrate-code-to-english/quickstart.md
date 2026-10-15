@@ -18,6 +18,10 @@ cp infra/.env.example infra/.env
 git fetch origin && git checkout spec/003-migrate-code-to-english
 ```
 
+- **Não rode `npm ci` montando `frontend/` num contêiner Node sem volume nomeado para `node_modules`**: reinstala o `frontend/node_modules` do host com binários
+  Linux (aconteceu na fatia 1). Use `sh infra/scripts/local.sh tests frontend` (o compose já usa o volume nomeado `node-modules`) ou, para desenvolver fora do
+  contêiner, `npm ci` no host.
+
 - Árvore-base para o verificador (a `main`, sem tocar o seu diretório de trabalho):
 
 ```bash
@@ -26,13 +30,13 @@ rm -rf /tmp/base && mkdir -p /tmp/base && git archive origin/main | tar -x -C /t
 
 ## 1. Em cada fatia: as três suítes (devem passar em TODOS os commits)
 
-Até a fatia 5 o comando é o abaixo; depois da fatia 6 o subcomando passa a `tests` (ver `plan.md`, *Pontos
-de decisão* 2).
+O subcomando é `tests` (a partir da fatia 6; **antes da fatia 6** era `testes`, e na `main` continua sendo, ver
+`plan.md`, *Pontos de decisão* 2).
 
 ```bash
-sh infra/scripts/local.sh testes backend
-sh infra/scripts/local.sh testes frontend
-sh infra/scripts/local.sh testes e2e
+sh infra/scripts/local.sh tests backend
+sh infra/scripts/local.sh tests frontend
+sh infra/scripts/local.sh tests e2e
 ```
 
 **Esperado**: `BUILD SUCCESS` (todos os testes, cobertura do núcleo ≥ 90% por linha e por branch), lint,
@@ -55,7 +59,7 @@ docker run --rm -v "$PWD":/work -v /tmp/base:/base:ro node:24-alpine \
 **Cobertura antes/depois** (linha e branch do `core`; não pode cair):
 
 ```bash
-sh infra/scripts/local.sh testes backend   # gera backend/<core>/target/site/jacoco/
+sh infra/scripts/local.sh tests backend    # gera backend/<core>/target/site/jacoco/
 ```
 
 Compare o resumo do JaCoCo com o da `main` (`/tmp/base`, mesma execução): totais iguais ou maiores.
@@ -78,11 +82,11 @@ e ação da outbox gravados antes continuam legíveis; zero chaves JSON antigas;
 `V8`; proteções (índices únicos e `CHECK`s) continuam ativas. **Esperado**: todos verdes.
 
 **Ensaio manual com dados existentes** (opcional, recomendado antes do merge). Na `main`, com a pilha antiga
-populada (`sh infra/scripts/local.sh subir --massa=true`), salve um dump e pare a pilha:
+populada (na `main` o comando ainda é `sh infra/scripts/local.sh subir --massa=true`), salve um dump e pare a pilha:
 
 ```bash
 docker compose -f infra/compose.yaml -f infra/compose.dev.yaml exec -T postgres   pg_dump -U relatorios -d relatorios > /tmp/antigo.sql
-sh infra/scripts/local.sh parar
+sh infra/scripts/local.sh parar   # na main; na branch da feature é stop
 ```
 
 Na branch da feature (já com a fatia 6, o banco e o usuário são `reports`), suba **só o banco**, restaure o
@@ -114,8 +118,8 @@ git switch -c scratch/guard-proof
 # tabela/coluna no banco (V9), chave em YAML, variável de ambiente, script, workflow.
 # exemplos de nomes proibidos (termos do glossário em português): AlunoService, listarAlunos,
 # tabela_aluno, ALUNO_URL, alunos.sh
-sh infra/scripts/local.sh testes backend
-sh infra/scripts/local.sh testes frontend
+sh infra/scripts/local.sh tests backend
+sh infra/scripts/local.sh tests frontend
 ```
 
 **Esperado**: falha apontando `arquivo:linha`, o termo e o equivalente (`aluno → student`); remover a
@@ -155,7 +159,7 @@ de ação desconhecida (teste de regressão em `testes backend`).
 Com `AI_PROVIDERS=real` e as chaves no `infra/.env`:
 
 ```bash
-sh infra/scripts/local.sh testes ia-real     # depois da fatia 6: tests real-ai
+sh infra/scripts/local.sh tests real-ai       # antes da fatia 6: testes ia-real
 ```
 
 Percorra um fluxo de aula e um semestral. **Registre no PR**: campos preenchidos, perguntas geradas,

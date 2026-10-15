@@ -294,7 +294,7 @@ export function ReviewScreen() {
               id="text-tab"
               aria-selected={tab === 'text'}
               aria-controls="text-panel"
-              className="tabs__aba"
+              className="tabs__tab"
               onClick={() => setTab('text')}
             >
               Texto
@@ -305,7 +305,7 @@ export function ReviewScreen() {
               id="pdf-tab"
               aria-selected={tab === 'pdf'}
               aria-controls="pdf-panel"
-              className="tabs__aba"
+              className="tabs__tab"
               onClick={() => setTab('pdf')}
             >
               Ver PDF

@@ -42,11 +42,11 @@ class ArchitectureRulesTest {
     private static final DescribedPredicate<JavaClass> BEHAVIOR_CLASS =
             DescribedPredicate.describe(
                     "classe de primeiro nível que não é record, enum nem interface",
-                    classe ->
-                            classe.isTopLevelClass()
-                                    && !classe.isRecord()
-                                    && !classe.isEnum()
-                                    && !classe.isInterface());
+                    javaClass ->
+                            javaClass.isTopLevelClass()
+                                    && !javaClass.isRecord()
+                                    && !javaClass.isEnum()
+                                    && !javaClass.isInterface());
 
     @Test
     void domainDoesNotDependOnUseCasesServicesNorPorts() {
@@ -115,9 +115,9 @@ class ArchitectureRulesTest {
                 .and(
                         DescribedPredicate.describe(
                                 "não são tipos de dados (selados ou entradas)",
-                                classe ->
-                                        !classe.reflect().isSealed()
-                                                && !classe.getSimpleName().endsWith("Input")))
+                                javaClass ->
+                                        !javaClass.reflect().isSealed()
+                                                && !javaClass.getSimpleName().endsWith("Input")))
                 .should()
                 .haveSimpleNameEndingWith("Port")
                 .orShould()
@@ -147,16 +147,16 @@ class ArchitectureRulesTest {
     private static ArchCondition<JavaClass> doNotMentionVendor() {
         return new ArchCondition<>("não citar nome de fornecedor no nome da classe nem do pacote") {
             @Override
-            public void check(JavaClass classe, ConditionEvents events) {
-                String name = classe.getFullName().toLowerCase(Locale.ROOT);
+            public void check(JavaClass javaClass, ConditionEvents events) {
+                String name = javaClass.getFullName().toLowerCase(Locale.ROOT);
                 for (String vendor : VENDORS) {
                     if (name.contains(vendor)) {
                         events.add(
                                 SimpleConditionEvent.violated(
-                                        classe, classe.getFullName() + " cita " + vendor));
+                                        javaClass, javaClass.getFullName() + " cita " + vendor));
                     }
                 }
-                classe.getDirectDependenciesFromSelf().stream()
+                javaClass.getDirectDependenciesFromSelf().stream()
                         .map(dependency -> dependency.getTargetClass().getBaseComponentType())
                         .filter(target -> !target.isPrimitive())
                         .map(JavaClass::getFullName)
@@ -166,8 +166,8 @@ class ArchitectureRulesTest {
                                 target ->
                                         events.add(
                                                 SimpleConditionEvent.violated(
-                                                        classe,
-                                                        classe.getFullName()
+                                                        javaClass,
+                                                        javaClass.getFullName()
                                                                 + " depende de "
                                                                 + target)));
             }

@@ -3,6 +3,11 @@
 description: "Lista de tarefas da feature 001-fluxo-relatorios"
 ---
 
+> **Nota de histórico (feature 003)**: este documento foi escrito antes da migração do código para
+> inglês e cita nomes anteriores a ela (classes, arquivos, tabelas, rotas, variáveis). Ele permanece como
+> histórico, sem reescrita. Para o nome atual de cada termo, consulte o glossário em
+> [`.specify/memory/glossary.json`](../../.specify/memory/glossary.json) e o Princípio VI da constituição.
+
 # Tasks: Fluxo de envio e criação de relatórios pedagógicos (Web e Telegram)
 
 **Input**: documentos de design em `specs/001-fluxo-relatorios/`

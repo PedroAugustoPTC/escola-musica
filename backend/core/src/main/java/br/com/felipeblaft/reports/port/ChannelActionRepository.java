@@ -34,13 +34,13 @@ public interface ChannelActionRepository {
 
     /**
      * Reserva o próximo lote devido, sem disputar com outros despachantes: a reserva empurra a
-     * próxima tentativa para {@code leaseAte}, de modo que um despachante que morre deixa o lote
+     * próxima tentativa para {@code leaseUntil}, de modo que um despachante que morre deixa o lote
      * reentregável quando o lease vence. Respeita a ordem por chat: ignora o chat que ainda tem
      * ação anterior de outro lote {@code PENDENTE} ou {@code ENTREGUE} há menos de {@code
      * confirmacaoMax}. Devolve o lote inteiro, na ordem de criação, ou lista vazia.
      */
     List<ChannelAction> reserveNextDueBatch(
-            Instant now, Duration confirmationMax, Instant leaseAte);
+            Instant now, Duration confirmationMax, Instant leaseUntil);
 
     /**
      * Grava a ação só se a versão armazenada ainda for {@code versaoEsperada} (controle otimista);
@@ -55,10 +55,10 @@ public interface ChannelActionRepository {
     int expireOverdueDelivered(Instant now);
 
     /**
-     * Zera o conteúdo das ações finais anteriores a {@code payloadAte} e remove os registros finais
-     * anteriores a {@code registroAte}.
+     * Zera o conteúdo das ações finais anteriores a {@code payloadUntil} e remove os registros
+     * finais anteriores a {@code registroAte}.
      */
-    Purge purge(Instant payloadAte, Instant registrationUntil);
+    Purge purge(Instant payloadUntil, Instant registrationUntil);
 
     /**
      * @param entreguesAte entregues antes deste instante e ainda sem confirmação contam como

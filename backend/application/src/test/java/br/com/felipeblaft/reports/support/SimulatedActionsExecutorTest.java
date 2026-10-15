@@ -15,7 +15,7 @@ import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
 
 /**
- * Especificação executável do workflow do orquestrador (feature 003): faz o que o n8n fará, e só
+ * Especificação executável do workflow do orquestrador (feature 004): faz o que o n8n fará, e só
  * isso. Percorre as ações em ordem <strong>sem parar na primeira falha</strong>, traduz cada uma
  * para a API de bots (aqui, o WireMock) conforme a tabela de contracts/canal-telegram-interno.md §4
  * e informa o resultado por {@code POST /confirmacoes}. Não decide nada: não compensa, não reenvia,

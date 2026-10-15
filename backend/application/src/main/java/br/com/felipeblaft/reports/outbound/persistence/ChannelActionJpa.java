@@ -77,10 +77,10 @@ interface ChannelActionJpa extends JpaRepository<ChannelActionEntity, String> {
     @Modifying
     @Query(
             value =
-                    "update channel_action set next_attempt_at = :leaseAte, version = version + 1"
+                    "update channel_action set next_attempt_at = :leaseUntil, version = version + 1"
                             + " where batch_id = :batchId and state = 'PENDING'",
             nativeQuery = true)
-    int reserveBatch(String batchId, Instant leaseAte);
+    int reserveBatch(String batchId, Instant leaseUntil);
 
     /** Grava o novo estado só se a versão ainda for a esperada (controle otimista). */
     @Modifying

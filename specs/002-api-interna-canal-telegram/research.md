@@ -1,5 +1,10 @@
 # Research: API interna de canal do Telegram para orquestrador externo
 
+> **Nota de histórico (feature 003)**: este documento foi escrito antes da migração do código para
+> inglês e cita nomes anteriores a ela (classes, arquivos, tabelas, rotas, variáveis). Ele permanece como
+> histórico, sem reescrita. Para o nome atual de cada termo, consulte o glossário em
+> [`.specify/memory/glossary.json`](../../.specify/memory/glossary.json) e o Princípio VI da constituição.
+
 **Feature**: `002-api-interna-canal-telegram` | **Data**: 2026-10-02 | **Plano**: [plan.md](./plan.md)
 
 Este documento resolve as incógnitas do "Technical Context" do plano e registra as decisões de
@@ -17,7 +22,7 @@ Justificativa / Alternativas consideradas. A constituição vigente é a v1.4.0.
   O backend continua sendo o único que interpreta a conversa, autoriza e escreve no banco. Permanecem
   válidos de R-04: o `secret_token` validado em tempo constante, a deduplicação por `update_id` e o
   adaptador de entrada que só traduz (Princípio I). O caminho antigo (`/telegram/webhook` + envio
-  direto) **continua funcionando** nesta feature; sua remoção é da feature `003`.
+  direto) **continua funcionando** nesta feature; sua remoção é da feature `004`.
 - **Justificativa**: a constituição v1.4.0 (Princípio II) admitiu o n8n **somente** nesse papel, por
   decisão do dono do produto. A razão original de R-04 era evitar "a API interna paralela à pública
   sem checagem de dono" e "o token de serviço estático" do MVP. Esses riscos são tratados aqui, e não
@@ -237,7 +242,7 @@ Justificativa / Alternativas consideradas. A constituição vigente é a v1.4.0.
   - `SaidaTelegram.Documento` ganha uma `ReferenciaDocumento` (professor, tipo, relatório, versão ou
     oficial). Os apresentadores a preenchem. **O campo `conteudo` permanece** para o envio direto
     antigo (zero mudança em `MensageriaTelegramAdaptador`); o v1 ignora os bytes e o `DOCUMENTO`
-    carrega só o id. A limpeza do campo fica para a feature `003`, quando o envio direto sair.
+    carrega só o id. A limpeza do campo fica para a feature `004`, quando o envio direto sair.
   - Nada em `documentoId` é interpretado como URL ou caminho (FR-023): o valor só é procurado por
     hash. Um `documentoId` fora do formato (43 caracteres Base64url) é recusado antes de ir ao banco.
 - **Justificativa**: token aleatório com hash no banco é revogável, expirável e não deixa identificador
@@ -284,7 +289,7 @@ Justificativa / Alternativas consideradas. A constituição vigente é a v1.4.0.
   (`MessageDigest.isEqual` é tempo constante apenas para entradas de mesmo tamanho).
 - **Alternativas consideradas**: *um único filtro na cadeia existente com ramo por caminho* (mistura
   credenciais e arrisca regressão de CSRF); *Spring Security `BearerTokenAuthenticationFilter`*
-  (o cabeçalho exigido é `X-N8N-Service-Token`, não `Authorization`); *mTLS* (infraestrutura da `003`).
+  (o cabeçalho exigido é `X-N8N-Service-Token`, não `Authorization`); *mTLS* (infraestrutura da `004`).
 
 ## R-10. Escolha do caminho de entrega proativa (exatamente um)
 
@@ -309,7 +314,7 @@ Justificativa / Alternativas consideradas. A constituição vigente é a v1.4.0.
   duas coisas.
 - **Alternativas consideradas**: *um `if` em runtime dentro do adaptador* (as duas implementações
   ficariam vivas e o "exatamente um" só seria convenção); *remover o envio direto agora* (fora do
-  escopo, é a `003`).
+  escopo, é a `004`).
 
 ## R-11. Privacidade: texto de aluno na outbox e nos logs
 
@@ -391,7 +396,7 @@ Justificativa / Alternativas consideradas. A constituição vigente é a v1.4.0.
   - **Privacidade**: `LogSemDadosSensiveisIT` estendido para o fluxo interno e a entrega; teste que
     confirma `payload` nulo após a retenção.
 - **Justificativa**: trocar só o "executor" prova SC-001 sem reescrever nenhuma expectativa e deixa o
-  simulador de n8n do teste como a especificação executável do que o workflow da `003` deve fazer.
+  simulador de n8n do teste como a especificação executável do que o workflow da `004` deve fazer.
 - **Alternativas consideradas**: *duplicar os ITs de conversa para o interno* (divergiriam);
   *Testcontainers com n8n real* (fora do escopo e exigiria Docker em Docker, R-16 da 001).
 

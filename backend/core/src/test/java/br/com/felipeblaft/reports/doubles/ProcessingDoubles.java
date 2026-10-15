@@ -381,7 +381,7 @@ public final class ProcessingDoubles {
                     .findFirst();
         }
 
-        private java.util.stream.Stream<LessonReport> doPar(UUID teacherId, UUID studentId) {
+        private java.util.stream.Stream<LessonReport> forPair(UUID teacherId, UUID studentId) {
             return reports.values().stream()
                     .filter(
                             r ->
@@ -399,7 +399,7 @@ public final class ProcessingDoubles {
                 UUID studentId,
                 java.time.LocalDate start,
                 java.time.LocalDate end) {
-            return doPar(teacherId, studentId)
+            return forPair(teacherId, studentId)
                     .filter(
                             r ->
                                     r.status()
@@ -424,7 +424,7 @@ public final class ProcessingDoubles {
                 java.time.LocalDate start,
                 java.time.LocalDate end) {
             return (int)
-                    doPar(teacherId, studentId)
+                    forPair(teacherId, studentId)
                             .filter(r -> r.status().isOpen())
                             .filter(r -> !data(r).isBefore(start) && !data(r).isAfter(end))
                             .count();

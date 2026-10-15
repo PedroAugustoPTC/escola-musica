@@ -11,7 +11,7 @@ Dois lados falam este contrato:
 
 - **Backend** (esta feature): recebe updates, devolve ações, entrega ações proativas, recebe
   confirmações e serve PDFs. É a única parte que decide o que responder.
-- **Orquestrador (n8n)** (feature `003`): só transporta (Princípio II). Esta seção "Obrigações do
+- **Orquestrador (n8n)** (feature `004`): só transporta (Princípio II). Esta seção "Obrigações do
   orquestrador" é a especificação do que o workflow deve fazer.
 
 ## 1. Autenticação
@@ -25,7 +25,7 @@ Dois lados falam este contrato:
 | Token em rota do portal | `/api/v1/**` continua exigindo sessão; o token de serviço não autentica nada ali (FR-025) |
 | CSRF | desligado **somente** na cadeia `/interno/**` (sem cookie, sem navegador); inalterado no portal (FR-027) |
 | Segredo do webhook | em `/atualizacao`, além do token: `X-Telegram-Bot-Api-Secret-Token`, tempo constante; ausente/errado = `401` sem corpo (FR-006) |
-| Exposição | a área interna não é publicada pelo proxy (o Caddy só encaminha `/api/*`); a decisão de rede é da `003`, mas a API recusa tudo sem token mesmo se alcançada |
+| Exposição | a área interna não é publicada pelo proxy (o Caddy só encaminha `/api/*`); a decisão de rede é da `004`, mas a API recusa tudo sem token mesmo se alcançada |
 
 Rotação do token: (1) pôr o novo em `TELEGRAM_CHANNEL_NEXT_TOKEN`; (2) trocar o valor no n8n;
 (3) promover (`CURRENT ← NEXT`, esvaziar `NEXT`). Nenhuma janela de recusa.
@@ -115,7 +115,7 @@ Content-Type: application/json
 | Vínculo desfeito | ação `PENDING` de professor sem vínculo é `DISCARDED` com registro, sem entrega |
 | Etapa | em `STEP_MESSAGE` com `jobId`, `editMessageId` é preenchido no momento do despacho com o id da mensagem de etapa conhecida do trabalho |
 
-## 4. Obrigações do orquestrador (especificação para a feature `003`)
+## 4. Obrigações do orquestrador (especificação para a feature `004`)
 
 1. **Autenticar-se** com `X-N8N-Service-Token` em toda chamada ao backend e **validar**
    `X-Canal-Entrega-Token` nas entregas recebidas. Segredos só do ambiente/cofre; nenhum segredo nem id
@@ -142,7 +142,7 @@ Content-Type: application/json
    confirmação é a prova de execução).
 10. **Sem persistência de domínio** e sem logs com texto de aluno (Princípio II e IV).
 
-### Tradução ação → API de bots (referência para a `003` e para o executor simulado dos testes)
+### Tradução ação → API de bots (referência para a `004` e para o executor simulado dos testes)
 
 | Ação v1 | Chamada ao Telegram | Observações |
 |---|---|---|
