@@ -254,7 +254,7 @@ n8n no GitHub, "n8n 2.0 breaking changes" e "CLI commands" de docs.n8n.io.
   - `healthcheck` do contêiner = **vivacidade local**:
     `wget -q -O - http://127.0.0.1:5678/webhook/transport-health/live` (responde `200` só se o `transport-health`
     estiver publicado, o que prova que o `publish:workflow` rodou e o n8n subiu), `interval: 10s`, `timeout: 5s`,
-    `retries: 6`, `start_period: 40s`. Sem chamar backend nem API de bots, para que a queda do backend não derrube
+    `retries: 6`, `start_period: 60s` (spike S-6: ≈ 46 s com 4 workflows, F-2). Sem chamar backend nem API de bots, para que a queda do backend não derrube
     a saúde do n8n em cascata.
   - **Saúde profunda** (`/deep`): backend aceita o token e a API de bots aceita o token do bot. Consultada por
     `n8n.sh health --deep` e pelo `verify`, não pelo Docker.
@@ -262,9 +262,10 @@ n8n no GitHub, "n8n 2.0 breaking changes" e "CLI commands" de docs.n8n.io.
     **não** depende do `n8n` (a outbox reentrega). `web` não muda.
   - **Reinício**: `restart: unless-stopped` em `compose.prod.yaml` (como os demais). `stop_grace_period: 30s` e
     `N8N_GRACEFUL_SHUTDOWN_TIMEOUT=25` para não cortar execução em curso numa parada limpa. Uma única réplica.
-  - **Orçamento de 60 s** (FR-003): `entrypoint.sh` (importar 4 + publicar 4) + partida do n8n; S-6 mede em
-    ambiente local; se passar de ~40 s, as opções são remover migrações repetidas (não aplicável) ou reduzir
-    carga de nós (`NODES_INCLUDE`).
+  - **Orçamento de 60 s** (FR-003): `entrypoint.sh` (importar 4 + publicar 4) + partida do n8n. **Medido no S-6**:
+    importação ≈ 6 s, ≈ 5 s por `publish:workflow` e servidor ≈ 20 s ⇒ ≈ 46 s com 4 workflows (a frio, 39 s); passa
+    da meta de 40 s e cabe nos 60 s. A alavanca é publicar só os workflows com gatilho próprio (não o
+    sub-workflow `execute-actions`), a medir na T065; `NODES_INCLUDE` não ajuda (o custo é a CLI, não os nós).
   - `local.sh` passa a esperar também o `n8n` `healthy` em `wait_until_healthy`; `deploy.sh` já espera todos.
 - **Por quê**: SC-006 e FR-006. Docker não reinicia contêiner `unhealthy` por conta própria; o reinício é por
   saída do processo, e o n8n sai se o `entrypoint.sh` falhar (importação inválida derruba a subida em vez de
@@ -340,6 +341,10 @@ n8n no GitHub, "n8n 2.0 breaking changes" e "CLI commands" de docs.n8n.io.
 
 - **Decisão (variáveis do n8n)**: `EXECUTIONS_DATA_SAVE_ON_SUCCESS=none`, `EXECUTIONS_DATA_SAVE_ON_ERROR=none`,
   `EXECUTIONS_DATA_SAVE_ON_PROGRESS=false`, `EXECUTIONS_DATA_SAVE_MANUAL_EXECUTIONS=false`;
+  **poda acelerada (spike S-5/F-1)**: `EXECUTIONS_DATA_HARD_DELETE_BUFFER=0`,
+  `EXECUTIONS_DATA_PRUNE_HARD_DELETE_INTERVAL=1` e `EXECUTIONS_DATA_PRUNE_SOFT_DELETE_INTERVAL=1`, porque `none`
+  **não** impede o instantâneo inicial da execução (cabeçalhos com o segredo do webhook e o `body` do update) nem
+  o binário do PDF de ficarem no SQLite e no `tmpfs` até a poda (padrão: até ≈ 75 min);
   `N8N_DEFAULT_BINARY_DATA_MODE=filesystem` com `/home/node/.n8n/binaryData` em **`tmpfs`** (no 2.x o modo em
   memória foi removido); `N8N_PUBLIC_API_DISABLED=true`; `N8N_DIAGNOSTICS_ENABLED=false`,
   `N8N_VERSION_NOTIFICATIONS_ENABLED=false`, `N8N_TEMPLATES_ENABLED=false`, `N8N_PERSONALIZATION_ENABLED=false`,
@@ -349,11 +354,22 @@ n8n no GitHub, "n8n 2.0 breaking changes" e "CLI commands" de docs.n8n.io.
   dado e não exceção; a classificação decide. Falha de **conexão** (que levanta exceção e cujo texto pode trazer a
   URL com o token do bot) é capturada com `continueOnFail` e vira `TELEGRAM_ERROR` ou `DOCUMENT_UNAVAILABLE`
   sem reproduzir a mensagem; nenhum nó escreve o corpo em log.
+- **Janela residual declarada (medida no spike, F-1)**: com a poda acelerada, o texto do update e o PDF podem
+  existir por **até ≈ 2 min** depois da execução: o texto no SQLite do volume `n8n-data` (disco) e o PDF no
+  `tmpfs`. Nenhum dos três tokens aparece nesse registro; o segredo do webhook do Telegram aparece nos
+  cabeçalhos. Passado esse tempo restam zero linhas e zero arquivos. **Teste:** `N8nPrivacyIT` espera a poda
+  (consulta até ≈ 3 min) e lê o SQLite pelo `node:sqlite` do contêiner (a REST não lista execução apagada).
+- **Endurecimento opcional, não adotado (decisão do dono do produto)**: pôr **todo** `/home/node/.n8n` em
+  `tmpfs`, o que tira o texto do disco. Cabe porque os workflows são reimportados em toda subida e a cifra vem
+  de `N8N_ENCRYPTION_KEY`; o custo é perder, a cada reinício, o dono do editor do ambiente local e refazer a migração
+  do banco em toda partida (a frio, com 4 workflows, a partida mediu 39 s, dentro do orçamento). Mudança de uma
+  linha no compose se for pedida.
 - **Por quê**: Princípio IV e FR-031: o histórico de execuções do n8n guarda por padrão o conteúdo das
-  mensagens; desligá-lo e provar com varredura é a única forma de garantir "sem texto de aluno".
-- **Spikes**: S-5 e S-6 confirmam que a lista de variáveis é a do 2.43, que o binário é apagado ao fim da
-  execução mesmo sem execução salva, e o que `N8N_DISABLE_UI=true` mantém (webhooks sim; REST de teste só com UI
-  ligada).
+  mensagens; desligá-lo, acelerar a poda e provar com varredura é a forma de garantir "sem texto de aluno" para
+  além da janela acima.
+- **Spikes**: S-5 e S-6 confirmaram a lista de variáveis do 2.43, **refutaram** que o binário seja apagado ao
+  fim da execução (F-1) e mostraram o que `N8N_DISABLE_UI=true` mantém (webhooks e `/healthz` sim; `/rest/*` não,
+  só com a UI ligada).
 
 ## R-14. Ordem, concorrência e `max_connections`
 
@@ -435,11 +451,45 @@ n8n no GitHub, "n8n 2.0 breaking changes" e "CLI commands" de docs.n8n.io.
 
 ## Spikes (S0) — fechar antes das tarefas de implementação
 
-| # | Pergunta | Se a resposta for "não" |
-|---|---|---|
-| S-1 | A tag `2.43.6` existe em `docker.n8n.io`? Qual o *digest*, o usuário, o Node e há `wget` busybox? | usar a patch mais próxima publicada; sem `wget`, o `healthcheck` passa a `node -e fetch` (já há Node) |
-| S-2 | `import:workflow --separate` e `publish:workflow --id` funcionam em banco novo, sem dono configurado, antes do `start`? | passar `--userId`/`--projectId`, ou provisionar o dono do editor por variáveis de ambiente; se nenhum servir, publicar pelo REST interno do n8n no `entrypoint` com a UI/REST habilitados só localmente |
-| S-3 | `$env.X` funciona em campos de `HTTP Request` e `If` com `N8N_BLOCK_ENV_ACCESS_IN_NODE=false`? A mensagem de erro do nó nunca mostra o valor? | cair para credenciais *Header Auth* provisionadas por `import:credentials` (R-03, alternativa), refazendo a regra do guardião |
-| S-4 | O `Webhook` com `rawBody` e o `HTTP Request` com corpo cru repassam **bytes idênticos** ao backend? `Respond to Webhook` devolve `503` sem corpo e `200` vazio? Cabeçalhos chegam em minúsculas? | reconstruir o corpo por `JSON.stringify` do objeto original (aceitável porque o backend lê o JSON), mantendo o teste de equivalência semântica |
-| S-5 | `neverError` + resposta completa + `continueOnFail` bastam para nunca haver exceção com URL? `multipart` com o binário do `GET` funciona? O binário some ao fim da execução com `tmpfs`? | encapsular a chamada de documento em sub-workflow próprio; se o binário persistir, limpar no `entrypoint` e na parada |
-| S-6 | Tempo de partida do `entrypoint.sh` ao `healthy` ≤ 40 s? `NODES_EXCLUDE`/`NODES_INCLUDE` não quebram o carregamento? `N8N_DISABLE_UI=true` mantém os webhooks? Há REST utilizável para o teste de privacidade com a UI ligada? | reduzir carga (R-10); abrir mão do `NODES_*` (o guardião é o controle principal); para a varredura de execuções, ler o SQLite pelo `node` da imagem |
+Resultados medidos em 2026-10-15 com a imagem real `docker.n8n.io/n8nio/n8n:2.43.6`, em contêineres
+descartáveis (pasta de rascunho fora do repositório, removidos ao fim). Os achados que **mudam** uma decisão estão
+em "Achados dos spikes" logo abaixo.
+
+| # | Pergunta | Se a resposta for "não" | Resultado |
+|---|---|---|---|
+| S-1 | A tag `2.43.6` existe em `docker.n8n.io`? Qual o *digest*, o usuário, o Node e há `wget` busybox? | usar a patch mais próxima publicada; sem `wget`, o `healthcheck` passa a `node -e fetch` (já há Node) | **Sim.** *Digest* `sha256:dd580fe1ab6e99e85bc66f2acf8bc8c5e9409fbe61b2e2803c5024403ef52833` (linux/amd64); `n8n --version` = `2.43.6`. Usuário `node` (uid 1000, `HOME=/home/node`). Node **v26.7.0**. `wget` do busybox 1.37.0 em `/usr/bin/wget`; `fetch` existe no `node`. O `ENTRYPOINT` da imagem é `tini -- /docker-entrypoint.sh` (ver F-3) |
+| S-2 | `import:workflow --separate` e `publish:workflow --id` funcionam em banco novo, sem dono configurado, antes do `start`? | passar `--userId`/`--projectId`, ou provisionar o dono do editor por variáveis de ambiente; se nenhum servir, publicar pelo REST interno do n8n no `entrypoint` com a UI/REST habilitados só localmente | **Sim, sem plano B.** Em volume vazio e sem dono, `import:workflow --separate --input=<dir>` (≈ 6 s) e `publish:workflow --id=<id>` (≈ 5 s **por chamada**) saem com código 0; o `id` fixo do JSON é preservado (`n8n list:workflow` imprime `id\|nome`); depois do `exec n8n start` os webhooks publicados respondem. `--userId`/`--projectId` não foram necessários |
+| S-3 | `$env.X` funciona em campos de `HTTP Request` e `If` com `N8N_BLOCK_ENV_ACCESS_IN_NODE=false`? A mensagem de erro do nó nunca mostra o valor? | cair para credenciais *Header Auth* provisionadas por `import:credentials` (R-03, alternativa), refazendo a regra do guardião | **Sim.** `{{ $env.X }}` funcionou na URL e em cabeçalho do `HTTP Request` e na comparação do `If` (token de entrega certo ⇒ `200`; errado, vazio ou ausente ⇒ `401`). Com conexão recusada o item de erro (inclusive `stack`) traz `connect ECONNREFUSED 127.0.0.1:1`, **sem** o caminho `/bot<token>/`; o log do contêiner teve zero ocorrências dos valores secretos. Não testado: erro de expressão com variável ausente |
+| S-4 | O `Webhook` com `rawBody` e o `HTTP Request` com corpo cru repassam **bytes idênticos** ao backend? `Respond to Webhook` devolve `503` sem corpo e `200` vazio? Cabeçalhos chegam em minúsculas? | reconstruir o corpo por `JSON.stringify` do objeto original (aceitável porque o backend lê o JSON), mantendo o teste de equivalência semântica | **Sim.** Corpo de 98 bytes (id de chat `-1001234567890123456789`, espaços, quebra de linha, UTF-8 e `1.0`) chegou **idêntico** ao mock (comparação byte a byte) com `Content-Type: application/json`, `X-N8N-Service-Token` e o segredo do Telegram copiado. Cabeçalhos chegam em minúsculas (`x-telegram-bot-api-secret-token`). `Respond to Webhook` com `noData` devolve `200` e `503` com corpo vazio; backend `401` ⇒ n8n `503`. Ressalvas em F-4 |
+| S-5 | `neverError` + resposta completa + `continueOnFail` bastam para nunca haver exceção com URL? `multipart` com o binário do `GET` funciona? O binário some ao fim da execução com `tmpfs`? | encapsular a chamada de documento em sub-workflow próprio; se o binário persistir, limpar no `entrypoint` e na parada | **Parcial.** `neverError` + resposta completa: `400` vira dado (`statusCode` e `body`). Conexão recusada com `onError: continueRegularOutput` vira o item `{error:{message,name,stack}}`, sem token nem URL. `multipart/form-data` com o binário de outro `HTTP Request` funciona (PDF íntegro; `chat_id` negativo grande literal; o nome de arquivo saiu `pdf` porque o mock não enviou `Content-Disposition`: conferir na T044). **O binário NÃO some ao fim da execução**: o PDF ficou no `tmpfs`, por execução, até a poda (F-1) |
+| S-6 | Tempo de partida do `entrypoint.sh` ao `healthy` ≤ 40 s? `NODES_EXCLUDE`/`NODES_INCLUDE` não quebram o carregamento? `N8N_DISABLE_UI=true` mantém os webhooks? Há REST utilizável para o teste de privacidade com a UI ligada? | reduzir carga (R-10); abrir mão do `NODES_*` (o guardião é o controle principal); para a varredura de execuções, ler o SQLite pelo `node` da imagem | **Parcial.** Partida: a frio (banco novo, 4 workflows) **39 s**; a quente com 7 workflows 59 a 68 s (importação 6 s, ≈ 5 s por publicação, servidor ≈ 20 s) ⇒ com 4 workflows ≈ 46 s: a meta de 40 s **não é garantida**, o orçamento de 60 s (FR-003) fecha (F-2). `NODES_EXCLUDE` com 4 nós não quebrou o carregamento. `N8N_DISABLE_UI=true`: webhooks e `/healthz` respondem (`200`), `/` e `/rest/*` dão `404`. Com a UI ligada: `/rest/settings` `200`, `POST /rest/owner/setup` `200` e `/rest/executions` `200`, **mas a listagem não mostra execuções apagadas logicamente**; a varredura de privacidade lê o SQLite pelo `node:sqlite` do contêiner (F-1) |
+
+### Achados dos spikes (mudam decisões)
+
+- **F-1 — O histórico "desligado" ainda grava o instantâneo inicial (muda R-13).** Com
+  `EXECUTIONS_DATA_SAVE_ON_SUCCESS/_ON_ERROR=none`, cada execução cria no SQLite uma linha em `execution_entity`
+  (`status` fica `running`, nunca finaliza) e outra em `execution_data` com o **primeiro item do gatilho**:
+  cabeçalhos (**inclui o segredo do webhook do Telegram**) e o `body` já interpretado do update (**inclui o texto
+  da mensagem**). A linha é apagada logicamente na hora (`deletedAt`) e só sai de vez, com o binário, na poda
+  (`EXECUTIONS_DATA_PRUNE_HARD_DELETE_INTERVAL` = 15 min e `EXECUTIONS_DATA_HARD_DELETE_BUFFER` = 1 h por padrão).
+  O PDF do `HTTP Request` fica em `binaryData/workflows/<id>/executions/<n>/` no `tmpfs` até a mesma poda. Os
+  tokens do bot e de serviço **não** apareceram no `execution_data`. **Medido** com
+  `EXECUTIONS_DATA_HARD_DELETE_BUFFER=0`, `EXECUTIONS_DATA_PRUNE_HARD_DELETE_INTERVAL=1` e
+  `EXECUTIONS_DATA_PRUNE_SOFT_DELETE_INTERVAL=1`: aos 45 s ainda havia linhas e arquivos; aos 90 s, zero linhas e
+  zero arquivos. **Decisão:** adotar as três variáveis (R-13), de modo que nada persista por mais de ≈ 2 min; a
+  janela residual existe e está declarada em R-13 e no `plan.md`.
+- **F-2 — Orçamento de partida (muda R-10).** O custo dominante é a CLI: cada `publish:workflow` inicia o
+  aplicativo inteiro (≈ 5 s). Com 4 workflows a partida fica ≈ 46 s. `start_period` do `healthcheck` sobe de 40 s
+  para **60 s**. Alavanca a medir na T065: não publicar o sub-workflow `execute-actions` (só os três que têm
+  gatilho próprio), se o n8n aceitar chamá-lo despublicado.
+- **F-3 — `ENTRYPOINT` da imagem.** O original é `tini -- /docker-entrypoint.sh`. O `Dockerfile` da T022 deve
+  manter o `tini` como PID 1: `ENTRYPOINT ["tini","--","/opt/entrypoint.sh"]`.
+- **F-4 — Repasse do update: ressalvas.** (a) O `Webhook` só entrega o binário `data` quando o `Content-Type` é
+  JSON (o Telegram sempre envia assim; com `application/x-www-form-urlencoded` o fluxo cai no `503`).
+  (b) Corpo que **não é JSON** é recusado pelo próprio n8n com `422`, antes do workflow: o "corpo ilegível" do
+  cenário N17 e da spec passa a significar JSON bem formado de formato inesperado (decidido pelo backend);
+  corpo não-JSON nunca vem do Telegram.
+- **F-5 — Ruído de log aceito.** A cada partida o n8n registra, em nível `warn`, a lista de avisos de depreciação
+  (`N8N_RUNNERS_MODE` interno, etc.) e `Failed to start Python task runner in internal mode` (a imagem não tem
+  Python; o nó `Code` em JavaScript funciona). Nenhum desses avisos contém segredo; a varredura de privacidade
+  (T068) não deve tratá-los como vazamento.

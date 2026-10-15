@@ -94,7 +94,7 @@ chegar um update ⇒ o n8n devolve `503` e o professor é respondido quando o ba
 ## V9. Privacidade: nada de aluno no n8n [S2]
 
 `N8nPrivacyIT`, dentro de V5. Esperado: zero ocorrência de token, segredo, nome de aluno, texto de relatório ou
-bytes de PDF nos logs do contêiner, na exportação dos workflows e nas execuções (zero execuções salvas)
+bytes de PDF nos logs do contêiner, na exportação dos workflows e nas execuções (zero execuções salvas **depois da poda de ≈ 2 min**, que o teste aguarda; spike F-1)
 (SC-005). Manualmente, em qualquer momento: `sh infra/scripts/n8n.sh logs` não mostra conteúdo de mensagem.
 
 ## V10. O n8n não é público [S1/S2]

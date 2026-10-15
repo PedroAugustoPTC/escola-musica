@@ -38,6 +38,8 @@ do arquivo sem extensão; nenhum `credentials`; um único `Webhook` com `path = 
 | `N8N_PUBLIC_API_DISABLED` | `true` | não | |
 | `EXECUTIONS_DATA_SAVE_ON_SUCCESS` / `_ON_ERROR` | `none` | não | R-13 |
 | `EXECUTIONS_DATA_SAVE_ON_PROGRESS` / `_MANUAL_EXECUTIONS` | `false` | não | R-13 |
+| `EXECUTIONS_DATA_HARD_DELETE_BUFFER` | `0` | não | R-13 (spike S-5/F-1): apaga de vez sem esperar 1 h |
+| `EXECUTIONS_DATA_PRUNE_HARD_DELETE_INTERVAL` / `_SOFT_DELETE_INTERVAL` | `1` / `1` (minutos) | não | R-13: instantâneo e binário somem em ≈ 2 min (padrão: 15 / 60) |
 | `N8N_DEFAULT_BINARY_DATA_MODE` | `filesystem` (em `tmpfs`) | não | R-13 |
 | `N8N_GRACEFUL_SHUTDOWN_TIMEOUT` | `25` | não | R-10 |
 | `N8N_DIAGNOSTICS_ENABLED`, `N8N_VERSION_NOTIFICATIONS_ENABLED`, `N8N_TEMPLATES_ENABLED`, `N8N_PERSONALIZATION_ENABLED`, `N8N_HIRING_BANNER_ENABLED` | `false` | não | sem telemetria nem rede externa |
@@ -72,7 +74,7 @@ canal quando `TELEGRAM_TRANSPORT=N8N`.
 | Caminho / recurso | Tipo | Conteúdo | Retenção |
 |---|---|---|---|
 | `/home/node/.n8n` | volume `n8n-data` | SQLite do n8n (workflows importados, ajustes, usuário do editor local) e arquivo de configuração | sobrevive a reinício; **recriável do zero** (R-04); nada de domínio |
-| `/home/node/.n8n/binaryData` | `tmpfs` | bytes do PDF em trânsito | some ao fim da execução e ao reiniciar |
+| `/home/node/.n8n/binaryData` | `tmpfs` | bytes do PDF em trânsito | some na poda (≈ 2 min depois da execução, spike F-1) e ao reiniciar |
 | `/opt/workflows` | camada da imagem (somente leitura) | os 4 JSON do repositório | trocam a cada nova imagem |
 | `/opt/ops` | camada da imagem | `probe.mjs`, `normalize-workflow.mjs`, `generate-token.mjs` | idem |
 
