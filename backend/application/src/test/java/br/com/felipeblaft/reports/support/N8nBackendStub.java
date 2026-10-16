@@ -81,6 +81,14 @@ public final class N8nBackendStub implements AutoCloseable {
                         .willReturn(aResponse().withStatus(status)));
     }
 
+    /** Resposta de {@code POST /confirmations} (padrão: 200). */
+    public void confirmationsStatus(int status) {
+        server.stubFor(
+                post(urlEqualTo(BASE + "/confirmations"))
+                        .atPriority(1)
+                        .willReturn(aResponse().withStatus(status)));
+    }
+
     public void documentReturns(String documentId, byte[] pdf) {
         server.stubFor(
                 get(urlPathEqualTo(BASE + "/documents/" + documentId))

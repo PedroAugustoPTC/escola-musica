@@ -39,6 +39,18 @@ public final class N8nBotApiStub implements AutoCloseable {
                         .willReturn(json(200, "{\"ok\":true,\"result\":{\"message_id\":4242}}")));
     }
 
+    /** A conexão cai no meio da resposta (o n8n vê um erro de rede, sem corpo). */
+    public void breakConnection(String method) {
+        server.stubFor(
+                any(urlPathMatching("/bot.*/" + method))
+                        .atPriority(1)
+                        .willReturn(
+                                aResponse()
+                                        .withFault(
+                                                com.github.tomakehurst.wiremock.http.Fault
+                                                        .CONNECTION_RESET_BY_PEER)));
+    }
+
     /** Programa o erro do Telegram para um método (por exemplo {@code editMessageText}). */
     public void failMethod(String method, int status, String description) {
         server.stubFor(
@@ -49,9 +61,12 @@ public final class N8nBotApiStub implements AutoCloseable {
                                         status,
                                         "{\"ok\":false,\"error_code\":"
                                                 + status
-                                                + ",\"description\":\""
-                                                + description
-                                                + "\"}")));
+                                                + (description == null
+                                                        ? ""
+                                                        : ",\"description\":\""
+                                                                + description
+                                                                + "\"")
+                                                + "}")));
     }
 
     /** Chamadas na ordem de chegada. */

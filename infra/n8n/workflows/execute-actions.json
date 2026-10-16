@@ -570,11 +570,41 @@
       "parameters": {
         "language": "javaScript",
         "mode": "runOnceForEachItem",
-        "jsCode": "const action = $('Loop').item.json;\nconst response = $input.item.json;\nconst sent = response.error === undefined && Math.floor(response.statusCode / 100) === 2;\nconst reply = response.body && typeof response.body === 'object' ? response.body : {};\nlet messageId = null;\nif (sent) {\n  if (action.type === 'EDIT') {\n    messageId = action.messageId;\n  } else if (action.type === 'STEP_MESSAGE' && action.editMessageId !== undefined && action.editMessageId !== null) {\n    messageId = action.editMessageId;\n  } else if (reply.result && typeof reply.result.message_id === 'number') {\n    messageId = reply.result.message_id;\n  }\n}\nconst result = { actionId: action.actionId, outcome: sent ? 'EXECUTED' : 'FAILED' };\nif (!sent) {\n  result.reasonCode = 'TELEGRAM_ERROR';\n}\nif (messageId !== null) {\n  result.messageId = messageId;\n}\nreturn { json: { version: 'v1', results: [result] } };"
+        "jsCode": "const action = $('Loop').item.json;\nconst response = $input.item.json;\nconst reply = response.body && typeof response.body === 'object' ? response.body : {};\nconst description = typeof reply.description === 'string' ? reply.description.toLowerCase() : '';\nconst status = response.statusCode;\nlet reasonCode = null;\nif (response.error !== undefined) {\n  reasonCode = 'TELEGRAM_ERROR';\n} else if (Math.floor(status / 100) !== 2) {\n  if (description.includes('message is not modified')) {\n    reasonCode = null;\n  } else if (description.includes('message to edit not found') || description.includes(\"message can't be edited\") || description.includes('message_id_invalid')) {\n    reasonCode = 'MESSAGE_NOT_EDITABLE';\n  } else if (status === 403 || description.includes('chat not found')) {\n    reasonCode = 'CHAT_UNAVAILABLE';\n  } else if (status === 429) {\n    reasonCode = 'RATE_LIMITED';\n  } else {\n    reasonCode = 'TELEGRAM_ERROR';\n  }\n}\nconst result = { actionId: action.actionId, outcome: reasonCode === null ? 'EXECUTED' : 'FAILED' };\nif (reasonCode !== null) {\n  result.reasonCode = reasonCode;\n} else if (action.type === 'EDIT') {\n  result.messageId = action.messageId;\n} else if (action.type === 'STEP_MESSAGE' && action.editMessageId !== undefined && action.editMessageId !== null) {\n  result.messageId = action.editMessageId;\n} else if (reply.result && typeof reply.result.message_id === 'number') {\n  result.messageId = reply.result.message_id;\n}\nreturn { json: { version: 'v1', results: [result] } };"
       }
     },
     {
-      "id": "confirm-32",
+      "id": "unsupported-32",
+      "name": "Unsupported",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1680,
+        480
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "mode": "runOnceForEachItem",
+        "jsCode": "const action = $('Loop').item.json;\nreturn { json: { version: 'v1', results: [{ actionId: action.actionId, outcome: 'FAILED', reasonCode: 'ACTION_NOT_SUPPORTED' }] } };"
+      }
+    },
+    {
+      "id": "unavailable-33",
+      "name": "Unavailable",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2160,
+        480
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "mode": "runOnceForEachItem",
+        "jsCode": "const action = $('Loop').item.json;\nreturn { json: { version: 'v1', results: [{ actionId: action.actionId, outcome: 'FAILED', reasonCode: 'DOCUMENT_UNAVAILABLE' }] } };"
+      }
+    },
+    {
+      "id": "confirm-34",
       "name": "Confirm",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -604,20 +634,16 @@
               "followRedirects": false
             }
           },
-          "response": {
-            "response": {
-              "fullResponse": true,
-              "neverError": true,
-              "responseFormat": "autodetect"
-            }
-          },
           "timeout": 10000
         }
       },
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1000
     },
     {
-      "id": "fetch-33",
+      "id": "fetch-35",
       "name": "Fetch",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -656,7 +682,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "haspdf-35",
+      "id": "haspdf-37",
       "name": "HasPdf",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
@@ -673,7 +699,7 @@
           },
           "conditions": [
             {
-              "id": "condition-34",
+              "id": "condition-36",
               "leftValue": "={{ $json.statusCode }}",
               "rightValue": 200,
               "operator": {
@@ -688,7 +714,7 @@
       }
     },
     {
-      "id": "prepare-36",
+      "id": "prepare-38",
       "name": "Prepare",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -703,7 +729,7 @@
       }
     },
     {
-      "id": "senddocument-37",
+      "id": "senddocument-39",
       "name": "SendDocument",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -925,7 +951,29 @@
         ],
         [
           {
-            "node": "Loop",
+            "node": "Unsupported",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unsupported": {
+      "main": [
+        [
+          {
+            "node": "Confirm",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unavailable": {
+      "main": [
+        [
+          {
+            "node": "Confirm",
             "type": "main",
             "index": 0
           }
@@ -998,7 +1046,7 @@
         ],
         [
           {
-            "node": "Loop",
+            "node": "Unavailable",
             "type": "main",
             "index": 0
           }
