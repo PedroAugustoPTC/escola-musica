@@ -196,7 +196,7 @@ case "$command" in
       n8n)
         # utilitários do n8n (node:test na própria imagem) e, depois, a suíte pelo n8n real em contêiner
         $TESTS run --rm --build tests-n8n-ops
-        $TESTS run --rm --build tests-n8n
+        $TESTS run --rm --build --use-aliases tests-n8n
         ;;
       real-ai)
         require_env
@@ -210,7 +210,7 @@ case "$command" in
         $TESTS run --rm tests-frontend
         $TESTS run --rm --build tests-e2e
         $TESTS run --rm --build tests-n8n-ops
-        $TESTS run --rm --build tests-n8n
+        $TESTS run --rm --build --use-aliases tests-n8n
         ;;
       *) echo "Use: backend | frontend | e2e | n8n | real-ai | all" >&2; exit 2 ;;
     esac

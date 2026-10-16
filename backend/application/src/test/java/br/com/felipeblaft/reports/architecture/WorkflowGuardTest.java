@@ -16,7 +16,8 @@ import org.junit.jupiter.api.Test;
 class WorkflowGuardTest {
 
     /** Arquivos que já precisam existir nesta fase; as fases seguintes ampliam a lista. */
-    private static final Set<String> REQUIRED = Set.of("transport-health");
+    private static final Set<String> REQUIRED =
+            Set.of("transport-health", "telegram-inbound", "execute-actions");
 
     @Test
     @DisplayName("os workflows do repositório respeitam as regras de transporte")

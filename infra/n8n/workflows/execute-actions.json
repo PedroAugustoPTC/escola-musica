@@ -1,0 +1,1038 @@
+{
+  "id": "execute-actions",
+  "name": "execute-actions",
+  "nodes": [
+    {
+      "id": "start-1",
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "inputSource": "passthrough"
+      }
+    },
+    {
+      "id": "expand-2",
+      "name": "Expand",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const response = $input.first().json;\nconst actions = response.body && Array.isArray(response.body.actions) ? response.body.actions : [];\nif (actions.length === 0) {\n  return [{ json: { type: 'NONE' } }];\n}\nreturn actions.map((action) => ({ json: action }));"
+      }
+    },
+    {
+      "id": "loop-3",
+      "name": "Loop",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        480,
+        0
+      ],
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      }
+    },
+    {
+      "id": "finish-4",
+      "name": "Finish",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        -160
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "return [{ json: { ok: true } }];"
+      }
+    },
+    {
+      "id": "isnone-6",
+      "name": "IsNone",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        720,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "condition-5",
+              "leftValue": "={{ $json.type }}",
+              "rightValue": "NONE",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "state-7",
+      "name": "State",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        960,
+        0
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.BACKEND_INTERNAL_URL }}/internal/v1/channel/telegram/actions/{{ $('Loop').item.json.actionId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-N8N-Service-Token",
+              "value": "={{ $env.BACKEND_SERVICE_TOKEN }}"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true,
+              "responseFormat": "autodetect"
+            }
+          },
+          "timeout": 10000
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "gate-21",
+      "name": "Gate",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        1200,
+        0
+      ],
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose"
+                },
+                "conditions": [
+                  {
+                    "id": "condition-8",
+                    "leftValue": "={{ $json.statusCode }}",
+                    "rightValue": 200,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  },
+                  {
+                    "id": "condition-9",
+                    "leftValue": "={{ $json.body.state }}",
+                    "rightValue": "PENDING",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "PENDING"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose"
+                },
+                "conditions": [
+                  {
+                    "id": "condition-10",
+                    "leftValue": "={{ $json.statusCode }}",
+                    "rightValue": 200,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  },
+                  {
+                    "id": "condition-11",
+                    "leftValue": "={{ $json.body.state }}",
+                    "rightValue": "DELIVERED",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "DELIVERED"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose"
+                },
+                "conditions": [
+                  {
+                    "id": "condition-12",
+                    "leftValue": "={{ $json.statusCode }}",
+                    "rightValue": 404,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "NOT_FOUND"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose"
+                },
+                "conditions": [
+                  {
+                    "id": "condition-13",
+                    "leftValue": "={{ $json.statusCode }}",
+                    "rightValue": 200,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  },
+                  {
+                    "id": "condition-14",
+                    "leftValue": "={{ $json.body.state }}",
+                    "rightValue": "EXECUTED",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "EXECUTED"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose"
+                },
+                "conditions": [
+                  {
+                    "id": "condition-15",
+                    "leftValue": "={{ $json.statusCode }}",
+                    "rightValue": 200,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  },
+                  {
+                    "id": "condition-16",
+                    "leftValue": "={{ $json.body.state }}",
+                    "rightValue": "FAILED",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "FAILED"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose"
+                },
+                "conditions": [
+                  {
+                    "id": "condition-17",
+                    "leftValue": "={{ $json.statusCode }}",
+                    "rightValue": 200,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  },
+                  {
+                    "id": "condition-18",
+                    "leftValue": "={{ $json.body.state }}",
+                    "rightValue": "PERMANENTLY_FAILED",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "PERMANENTLY_FAILED"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose"
+                },
+                "conditions": [
+                  {
+                    "id": "condition-19",
+                    "leftValue": "={{ $json.statusCode }}",
+                    "rightValue": 200,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  },
+                  {
+                    "id": "condition-20",
+                    "leftValue": "={{ $json.body.state }}",
+                    "rightValue": "DISCARDED",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "DISCARDED"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      }
+    },
+    {
+      "id": "abort-22",
+      "name": "Abort",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        480
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "return [{ json: { ok: false } }];"
+      }
+    },
+    {
+      "id": "kind-28",
+      "name": "Kind",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        1440,
+        0
+      ],
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose"
+                },
+                "conditions": [
+                  {
+                    "id": "condition-23",
+                    "leftValue": "={{ $('Loop').item.json.type }}",
+                    "rightValue": "DOCUMENT",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "DOCUMENT"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose"
+                },
+                "conditions": [
+                  {
+                    "id": "condition-24",
+                    "leftValue": "={{ $('Loop').item.json.type }}",
+                    "rightValue": "MESSAGE",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "MESSAGE"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose"
+                },
+                "conditions": [
+                  {
+                    "id": "condition-25",
+                    "leftValue": "={{ $('Loop').item.json.type }}",
+                    "rightValue": "EDIT",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "EDIT"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose"
+                },
+                "conditions": [
+                  {
+                    "id": "condition-26",
+                    "leftValue": "={{ $('Loop').item.json.type }}",
+                    "rightValue": "CALLBACK_REPLY",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "CALLBACK_REPLY"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose"
+                },
+                "conditions": [
+                  {
+                    "id": "condition-27",
+                    "leftValue": "={{ $('Loop').item.json.type }}",
+                    "rightValue": "STEP_MESSAGE",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "STEP_MESSAGE"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      }
+    },
+    {
+      "id": "build-29",
+      "name": "Build",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1680,
+        -160
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const action = $('Loop').item.json;\nconst rows = action.keyboard && Array.isArray(action.keyboard.rows) ? action.keyboard.rows : [];\nconst inline = rows.map((row) => row.map((button) => ({ text: button.label, callback_data: button.data })));\nif (action.type === 'CALLBACK_REPLY') {\n  return [{ json: { method: 'answerCallbackQuery', body: { callback_query_id: action.callbackId } } }];\n}\nconst base = { chat_id: action.chatId, text: action.text, parse_mode: 'HTML' };\nconst editingStep = action.type === 'STEP_MESSAGE' && action.editMessageId !== undefined && action.editMessageId !== null;\nif (action.type === 'EDIT' || editingStep) {\n  const messageId = action.type === 'EDIT' ? action.messageId : action.editMessageId;\n  return [{ json: { method: 'editMessageText', body: { ...base, message_id: messageId, reply_markup: { inline_keyboard: inline } } } }];\n}\nconst body = { ...base, link_preview_options: { is_disabled: true } };\nif (inline.length > 0) {\n  body.reply_markup = { inline_keyboard: inline };\n}\nreturn [{ json: { method: 'sendMessage', body } }];"
+      }
+    },
+    {
+      "id": "send-30",
+      "name": "Send",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1920,
+        -160
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.TELEGRAM_API_URL }}/bot{{ $env.TELEGRAM_BOT_TOKEN }}/{{ $json.method }}",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.body }}",
+        "options": {
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true,
+              "responseFormat": "autodetect"
+            }
+          },
+          "timeout": 30000
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "result-31",
+      "name": "Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2640,
+        -160
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "mode": "runOnceForEachItem",
+        "jsCode": "const action = $('Loop').item.json;\nconst response = $input.item.json;\nconst sent = response.error === undefined && Math.floor(response.statusCode / 100) === 2;\nconst reply = response.body && typeof response.body === 'object' ? response.body : {};\nlet messageId = null;\nif (sent) {\n  if (action.type === 'EDIT') {\n    messageId = action.messageId;\n  } else if (action.type === 'STEP_MESSAGE' && action.editMessageId !== undefined && action.editMessageId !== null) {\n    messageId = action.editMessageId;\n  } else if (reply.result && typeof reply.result.message_id === 'number') {\n    messageId = reply.result.message_id;\n  }\n}\nconst result = { actionId: action.actionId, outcome: sent ? 'EXECUTED' : 'FAILED' };\nif (!sent) {\n  result.reasonCode = 'TELEGRAM_ERROR';\n}\nif (messageId !== null) {\n  result.messageId = messageId;\n}\nreturn { json: { version: 'v1', results: [result] } };"
+      }
+    },
+    {
+      "id": "confirm-32",
+      "name": "Confirm",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2880,
+        -160
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.BACKEND_INTERNAL_URL }}/internal/v1/channel/telegram/confirmations",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-N8N-Service-Token",
+              "value": "={{ $env.BACKEND_SERVICE_TOKEN }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true,
+              "responseFormat": "autodetect"
+            }
+          },
+          "timeout": 10000
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "fetch-33",
+      "name": "Fetch",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1680,
+        160
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.BACKEND_INTERNAL_URL }}/internal/v1/channel/telegram/documents/{{ $('Loop').item.json.documentId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-N8N-Service-Token",
+              "value": "={{ $env.BACKEND_SERVICE_TOKEN }}"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true,
+              "responseFormat": "file"
+            }
+          },
+          "timeout": 30000
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "haspdf-35",
+      "name": "HasPdf",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1920,
+        160
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "condition-34",
+              "leftValue": "={{ $json.statusCode }}",
+              "rightValue": 200,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "prepare-36",
+      "name": "Prepare",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2160,
+        160
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "mode": "runOnceForEachItem",
+        "jsCode": "const action = $('Loop').item.json;\nconst item = $input.item;\nitem.binary.data.fileName = action.fileName;\nitem.binary.data.mimeType = 'application/pdf';\nreturn item;"
+      }
+    },
+    {
+      "id": "senddocument-37",
+      "name": "SendDocument",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2400,
+        160
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.TELEGRAM_API_URL }}/bot{{ $env.TELEGRAM_BOT_TOKEN }}/sendDocument",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "document",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "chat_id",
+              "value": "={{ $('Loop').item.json.chatId }}"
+            },
+            {
+              "name": "caption",
+              "value": "={{ $('Loop').item.json.caption || '' }}"
+            },
+            {
+              "name": "parse_mode",
+              "value": "HTML"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true,
+              "responseFormat": "autodetect"
+            }
+          },
+          "timeout": 60000
+        }
+      },
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Expand",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Expand": {
+      "main": [
+        [
+          {
+            "node": "Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop": {
+      "main": [
+        [
+          {
+            "node": "Finish",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "IsNone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IsNone": {
+      "main": [
+        [
+          {
+            "node": "Loop",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "State": {
+      "main": [
+        [
+          {
+            "node": "Gate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gate": {
+      "main": [
+        [
+          {
+            "node": "Kind",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Kind",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Abort",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kind": {
+      "main": [
+        [
+          {
+            "node": "Fetch",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build": {
+      "main": [
+        [
+          {
+            "node": "Send",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send": {
+      "main": [
+        [
+          {
+            "node": "Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Result": {
+      "main": [
+        [
+          {
+            "node": "Confirm",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirm": {
+      "main": [
+        [
+          {
+            "node": "Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch": {
+      "main": [
+        [
+          {
+            "node": "HasPdf",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HasPdf": {
+      "main": [
+        [
+          {
+            "node": "Prepare",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare": {
+      "main": [
+        [
+          {
+            "node": "SendDocument",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SendDocument": {
+      "main": [
+        [
+          {
+            "node": "Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "none",
+    "saveExecutionProgress": false,
+    "saveManualExecutions": false
+  }
+}

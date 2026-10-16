@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import br.com.felipeblaft.reports.domain.registry.Student;
 import br.com.felipeblaft.reports.domain.registry.Teacher;
 import br.com.felipeblaft.reports.support.AudioNormalizationTest;
+import br.com.felipeblaft.reports.support.ConversationState;
 import br.com.felipeblaft.reports.support.ScenarioIT;
 import br.com.felipeblaft.reports.support.TelegramConversationBase;
 import java.nio.charset.StandardCharsets;
@@ -42,11 +43,12 @@ class LessonRegistrationConversationIT extends TelegramConversationBase {
     /**
      * V15, FR-028 (US5.1): pela API interna o áudio nunca passa pelo orquestrador: a ação não traz
      * bytes, caminho de arquivo nem endereço de download, e ninguém pede o arquivo à API de bots no
-     * recebimento. Só faz sentido no transporte interno.
+     * recebimento. Só faz sentido pela API interna (transportes internal e n8n).
      */
     @Test
     void audioInInternalTransportCarriesNoBytesPathNorAddress() throws Exception {
-        org.junit.jupiter.api.Assumptions.assumeTrue("internal".equals(TRANSPORT));
+        org.junit.jupiter.api.Assumptions.assumeTrue(
+                "internal".equals(TRANSPORT) || "n8n".equals(TRANSPORT));
         prepareTelegramFile("voice-ok", AudioNormalizationTest.AUDIO_WITH_SPEECH);
         chooseMatteo();
 
@@ -80,6 +82,7 @@ class LessonRegistrationConversationIT extends TelegramConversationBase {
     }
 
     @Test
+    @ConversationState({10})
     void registerLessonAsksForStudentAndThenAudio() throws Exception {
         sendCallback(USER_CLARA, "v1:register:");
         assertThat(lastMessage().get("text").asString()).isEqualTo("Para qual aluno?");
@@ -94,6 +97,7 @@ class LessonRegistrationConversationIT extends TelegramConversationBase {
     }
 
     @Test
+    @ConversationState({7})
     void audioWithSelectedStudentAsksConfirmationWithoutDownloadingAnything() throws Exception {
         chooseMatteo();
 
@@ -146,6 +150,7 @@ class LessonRegistrationConversationIT extends TelegramConversationBase {
     }
 
     @Test
+    @ConversationState({7})
     void newAudioReplacesPreviousAndExpiresIn30Minutes() throws Exception {
         chooseMatteo();
         sendVoice(USER_CLARA, "first", 1000);
@@ -193,6 +198,7 @@ class LessonRegistrationConversationIT extends TelegramConversationBase {
     }
 
     @Test
+    @ConversationState({3, 5})
     void confirmProcessesEditingSameMessageUpToQuestions() throws Exception {
         Path file = prepareTelegramFile("voice-ok", AudioNormalizationTest.AUDIO_WITH_SPEECH);
         chooseMatteo();
@@ -271,6 +277,7 @@ class LessonRegistrationConversationIT extends TelegramConversationBase {
     }
 
     @Test
+    @ConversationState({7})
     void cancelWithoutFocusedReportDiscardsPendingAudio() throws Exception {
         chooseMatteo();
         sendVoice(USER_CLARA, "disposable", 1000);

@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import br.com.felipeblaft.reports.domain.registry.Teacher;
+import br.com.felipeblaft.reports.support.ConversationState;
 import br.com.felipeblaft.reports.support.ScenarioIT;
 import br.com.felipeblaft.reports.support.TelegramConversationBase;
 import java.time.Duration;
@@ -25,6 +26,7 @@ class LinkingConversationIT extends TelegramConversationBase {
     }
 
     @Test
+    @ConversationState({1})
     void unlinkedReceivesCodeRequest() throws Exception {
         sendText(USER_CLARA, "olá, bom dia!");
         sendText(USER_CLARA, "/start");
@@ -36,6 +38,7 @@ class LinkingConversationIT extends TelegramConversationBase {
     }
 
     @Test
+    @ConversationState({1})
     void validCodeLinksAndShowsHome() throws Exception {
         sendText(USER_CLARA, "k7qm-2xpa");
 
@@ -57,6 +60,7 @@ class LinkingConversationIT extends TelegramConversationBase {
     }
 
     @Test
+    @ConversationState({1})
     void wrongExpiredCodeAndLock() throws Exception {
         sendText(USER_CLARA, "ZZZZZZZZ");
         assertThat(lastMessage().get("text").asString()).startsWith("Código inválido.");
@@ -74,6 +78,7 @@ class LinkingConversationIT extends TelegramConversationBase {
     }
 
     @Test
+    @ConversationState({1})
     void linkConflicts() throws Exception {
         scenario.bruno();
         link(USER_CLARA, ScenarioIT.CODE_CLARA);
@@ -84,6 +89,7 @@ class LinkingConversationIT extends TelegramConversationBase {
     }
 
     @Test
+    @ConversationState({1})
     void wrongSecretAndRepeatedUpdate() throws Exception {
         mvc.perform(
                         post("/telegram/webhook")
@@ -105,6 +111,7 @@ class LinkingConversationIT extends TelegramConversationBase {
     }
 
     @Test
+    @ConversationState({1})
     void groupRefusedAndOtherTypesAskForCode() throws Exception {
         sendUpdate(messageJson(nextUpdate(), USER_CLARA, "group", "\"text\": \"K7QM2XPA\""));
         assertThat(lastMessage().get("text").asString())

@@ -71,6 +71,15 @@ public final class N8nTestSupport {
                         .POST(HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8)));
     }
 
+    /** POST com cabeçalhos extras (o segredo do webhook do Telegram, por exemplo). */
+    public static Reply post(
+            String url, java.util.Map<String, String> headers, String contentType, byte[] body) {
+        HttpRequest.Builder request =
+                HttpRequest.newBuilder(URI.create(url)).header("Content-Type", contentType);
+        headers.forEach(request::header);
+        return send(PLAIN, request.POST(HttpRequest.BodyPublishers.ofByteArray(body)));
+    }
+
     /** Aceita o certificado local do Caddy (a CA interna não é conhecida pela JVM). */
     public static Reply insecureGet(String url) {
         return send(insecureClient(), HttpRequest.newBuilder(URI.create(url)).GET());

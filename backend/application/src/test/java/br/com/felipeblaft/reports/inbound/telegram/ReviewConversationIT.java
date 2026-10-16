@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import br.com.felipeblaft.reports.domain.registry.Teacher;
 import br.com.felipeblaft.reports.support.AudioNormalizationTest;
+import br.com.felipeblaft.reports.support.ConversationState;
 import br.com.felipeblaft.reports.support.ScenarioIT;
 import br.com.felipeblaft.reports.support.TelegramConversationBase;
 import java.util.List;
@@ -54,6 +55,7 @@ class ReviewConversationIT extends TelegramConversationBase {
     }
 
     @Test
+    @ConversationState({3})
     void answerByTextGoesStraightToProcessingAndReachesReviewWithPdf() throws Exception {
         sendText(USER_CLARA, "Estudou bem; vai preparar a valsa.");
 
@@ -93,6 +95,7 @@ class ReviewConversationIT extends TelegramConversationBase {
     }
 
     @Test
+    @ConversationState({3})
     void answerByAudioDoesNotAskConfirmation() throws Exception {
         prepareTelegramFile("response", AudioNormalizationTest.AUDIO_WITH_SPEECH);
 
@@ -108,6 +111,7 @@ class ReviewConversationIT extends TelegramConversationBase {
     }
 
     @Test
+    @ConversationState({5})
     void textDuringProcessingReportsStep() throws Exception {
         sendText(USER_CLARA, "Estudou bem.");
         API_BOTS.resetRequests();
@@ -120,6 +124,7 @@ class ReviewConversationIT extends TelegramConversationBase {
     }
 
     @Test
+    @ConversationState({4})
     void changeByTextGeneratesNewVersionWithUnderstoodText() throws Exception {
         reachReview();
 
@@ -146,6 +151,7 @@ class ReviewConversationIT extends TelegramConversationBase {
     }
 
     @Test
+    @ConversationState({4})
     void changeByAudioShowsWhatWasUnderstood() throws Exception {
         reachReview();
         prepareTelegramFile("request", AudioNormalizationTest.AUDIO_WITH_SPEECH);
@@ -185,6 +191,7 @@ class ReviewConversationIT extends TelegramConversationBase {
     }
 
     @Test
+    @ConversationState({2})
     void approveByKeywordAsksConfirmationCitingVersion() throws Exception {
         reachReview();
 
@@ -217,6 +224,7 @@ class ReviewConversationIT extends TelegramConversationBase {
     }
 
     @Test
+    @ConversationState({4})
     void approveByButtonWithOldVersionShowsCurrent() throws Exception {
         reachReview();
         sendText(USER_CLARA, "Nas observações, diga que a aula foi ótima.");
@@ -249,6 +257,7 @@ class ReviewConversationIT extends TelegramConversationBase {
     }
 
     @Test
+    @ConversationState({2})
     void cancelByButtonWithConfirmationClearsFocusAndShowsHome() throws Exception {
         reachReview();
 
@@ -265,6 +274,7 @@ class ReviewConversationIT extends TelegramConversationBase {
     }
 
     @Test
+    @ConversationState({2})
     void otherTextGivesUpConfirmationAndWillBeAChange() throws Exception {
         reachReview();
         sendText(USER_CLARA, "cancelar");
@@ -276,6 +286,7 @@ class ReviewConversationIT extends TelegramConversationBase {
     }
 
     @Test
+    @ConversationState({4})
     void pdfButtonResendsDocument() throws Exception {
         reachReview();
 
@@ -285,6 +296,7 @@ class ReviewConversationIT extends TelegramConversationBase {
     }
 
     @Test
+    @ConversationState({6})
     void processingFailureOffersRetry() throws Exception {
         jdbc.update(
                 "update lesson_report set status = 'PROCESSING_FAILED', processing_step = null, failure_reason = 'TEST'");
@@ -316,6 +328,7 @@ class ReviewConversationIT extends TelegramConversationBase {
     }
 
     @Test
+    @ConversationState({4})
     void continueInChatPutsReportInFocus() throws Exception {
         reachReview();
         sendText(USER_CLARA, "início");

@@ -76,7 +76,7 @@ jobs:
       - name: Utilitários do n8n
         run: docker compose -f infra/compose.test.yaml run --rm --build tests-n8n-ops
       - name: Testes pelo n8n
-        run: docker compose -f infra/compose.test.yaml run --rm --build tests-n8n
+        run: docker compose -f infra/compose.test.yaml run --rm --build --use-aliases tests-n8n
       - name: Logs do n8n
         if: failure()
         run: docker compose -f infra/compose.test.yaml logs --no-color n8n-test | tail -n 200

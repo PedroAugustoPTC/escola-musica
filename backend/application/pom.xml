@@ -197,6 +197,31 @@
                                 <id>internal-transport</id>
                                 <phase>none</phase>
                             </execution>
+                            <!--
+                                A suíte de conversa e de paridade EXISTENTE, sem alterar nenhuma expectativa, com o n8n
+                                real como transporte: o backend sobe na porta fixa 18080 e a API de bots simulada
+                                na 18081, ambas alcançadas pelo contêiner do n8n.
+                            -->
+                            <execution>
+                                <id>n8n-transport</id>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                </goals>
+                                <configuration>
+                                    <includes>
+                                        <include>**/inbound/telegram/*ConversationIT.java</include>
+                                        <include>**/inbound/telegram/OldButtonFormatIT.java</include>
+                                        <include>**/inbound/telegram/ReplyWithinFiveSecondsIT.java</include>
+                                        <include>**/parity/*ParityScriptIT.java</include>
+                                        <include>**/privacy/AudioNonRetentionIT.java</include>
+                                        <include>**/privacy/LogWithoutSensitiveDataIT.java</include>
+                                    </includes>
+                                    <systemPropertyVariables>
+                                        <telegram.transport>n8n</telegram.transport>
+                                    </systemPropertyVariables>
+                                    <reportNameSuffix>n8n</reportNameSuffix>
+                                </configuration>
+                            </execution>
                         </executions>
                     </plugin>
                 </plugins>

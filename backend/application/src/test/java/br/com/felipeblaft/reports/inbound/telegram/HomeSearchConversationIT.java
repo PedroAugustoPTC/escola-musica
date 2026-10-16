@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 
 import br.com.felipeblaft.reports.domain.registry.Teacher;
+import br.com.felipeblaft.reports.support.ConversationState;
 import br.com.felipeblaft.reports.support.ScenarioIT;
 import br.com.felipeblaft.reports.support.TelegramConversationBase;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,6 +60,7 @@ class HomeSearchConversationIT extends TelegramConversationBase {
     }
 
     @Test
+    @ConversationState({10})
     void homeAndMenuShowHomeBlock() throws Exception {
         for (String command : new String[] {"início", "/inicio", "MENU", "/start"}) {
             sendText(USER_CLARA, command);
@@ -68,6 +70,7 @@ class HomeSearchConversationIT extends TelegramConversationBase {
     }
 
     @Test
+    @ConversationState({10})
     void searchWithOneSeveralAndNoMatch() throws Exception {
         sendText(USER_CLARA, "matteo");
         assertThat(lastMessage().get("text").asString())
@@ -91,6 +94,7 @@ class HomeSearchConversationIT extends TelegramConversationBase {
     }
 
     @Test
+    @ConversationState({10})
     void registerLessonAsksForStudent() throws Exception {
         sendText(USER_CLARA, "registrar aula");
         assertThat(lastMessage().get("text").asString()).isEqualTo("Para qual aluno?");
@@ -101,6 +105,7 @@ class HomeSearchConversationIT extends TelegramConversationBase {
     }
 
     @Test
+    @ConversationState({2})
     void signOutAsksConfirmationAndUndoesLink() throws Exception {
         sendText(USER_CLARA, "sair");
         assertThat(lastMessage().get("text").asString()).startsWith("Deseja sair?");

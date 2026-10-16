@@ -4,7 +4,7 @@
 #   docker compose -f infra/compose.test.yaml run --rm tests-e2e
 #   docker compose -f infra/compose.test.yaml run --rm tests-real-ai
 #   docker compose -f infra/compose.test.yaml run --rm tests-n8n-ops
-#   docker compose -f infra/compose.test.yaml run --rm tests-n8n
+#   docker compose -f infra/compose.test.yaml run --rm --use-aliases tests-n8n
 name: reports-tests
 
 x-maven: &maven
@@ -164,8 +164,8 @@ services:
     environment:
       BACKEND_INTERNAL_URL: http://tests-n8n:18080
       TELEGRAM_API_URL: http://tests-n8n:18081
-      TELEGRAM_BOT_TOKEN: test-bot-token
-      BACKEND_SERVICE_TOKEN: test-service-token
+      TELEGRAM_BOT_TOKEN: "123456:TEST"
+      BACKEND_SERVICE_TOKEN: current-service-token-test
       CHANNEL_DELIVERY_TOKEN: test-delivery-token
       N8N_ENCRYPTION_KEY: test-encryption-key-0123456789abcdef
       N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
@@ -238,7 +238,12 @@ services:
         condition: service_healthy
       web-n8n-test:
         condition: service_started
-    command: ["mvn", "-B", "-ntp", "-Pn8n", "verify"]
+    # `compose run` só aplica o alias com --use-aliases: o n8n precisa alcançar o backend e a API de bots simulados
+    # (portas 18080 e 18081 desta JVM) por `tests-n8n`
+    networks:
+      default:
+        aliases: [tests-n8n]
+    command: ["sh", "-c", "mvn -B -ntp -q -pl core -am install -DskipTests && mvn -B -ntp -Pn8n -pl application verify"]
 
 volumes:
   m2:
