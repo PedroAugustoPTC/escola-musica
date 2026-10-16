@@ -35,7 +35,10 @@ services:
       DATABASE_USER: reports
       DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
       TELEGRAM_API_URL: http://telegram-bot-api:8081
-      TELEGRAM_WEBHOOK_URL: http://backend:8080/telegram/webhook
+      # Estado da troca do webhook (feature 004): o padrão é o caminho atual; quem troca é telegram-webhook.sh.
+      TELEGRAM_WEBHOOK_URL: ${TELEGRAM_WEBHOOK_URL:-http://backend:8080/telegram/webhook}
+      # Teto da resposta do n8n à entrega proativa: ele só aceita o lote depois de executá-lo (R-07).
+      TELEGRAM_CHANNEL_RESPONSE_TIMEOUT_MS: 30000
       TELEGRAM_FILES_DIR: /var/lib/telegram-bot-api
       DOCUMENTS_DIR: /data/documents
       AUDIO_TEMP_DIR: /tmp/audios
@@ -84,6 +87,71 @@ services:
       - telegram-bot-api-data:/var/lib/telegram-bot-api
     networks: [internal]
 
+  # Orquestrador do canal Telegram (feature 004): o n8n só TRANSPORTA (recebe o update, repassa ao backend, executa
+  # as ações devolvidas e confirma). Os workflows vêm do repositório (infra/n8n/workflows) e são importados a cada
+  # subida; o editor é desligado em produção. Nunca publica porta: só o Caddy (serviço `web`) é público, e o
+  # webhook é chamado pelo servidor local da API de bots, pela rede interna (R-02). Versão FIXADA em infra/n8n/Dockerfile;
+  # para atualizar, siga a seção "Versão do n8n" de infra/README.md.
+  # Só recebe as variáveis abaixo (nunca o .env inteiro): os segredos chegam por ${...} e não existem no Git.
+  n8n:
+    build:
+      context: ./n8n
+    image: reports-n8n
+    environment:
+      BACKEND_INTERNAL_URL: http://backend:8080
+      TELEGRAM_API_URL: http://telegram-bot-api:8081
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      # usa o token seguinte quando existe (rotação sem janela de recusa), senão o atual
+      BACKEND_SERVICE_TOKEN: ${TELEGRAM_CHANNEL_NEXT_TOKEN:-${TELEGRAM_CHANNEL_CURRENT_TOKEN:-}}
+      CHANNEL_DELIVERY_TOKEN: ${TELEGRAM_CHANNEL_ORCHESTRATOR_TOKEN:-}
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:-}
+      # os workflows leem segredo por $env (nenhum usa credencial do n8n); só o `If`/`HTTP Request` enxergam
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
+      N8N_DISABLE_UI: "true"
+      N8N_PUBLIC_API_DISABLED: "true"
+      # privacidade (R-13): nenhuma execução é guardada; o instantâneo inicial e o binário do PDF somem na poda de ≈ 2 min
+      EXECUTIONS_DATA_SAVE_ON_SUCCESS: none
+      EXECUTIONS_DATA_SAVE_ON_ERROR: none
+      EXECUTIONS_DATA_SAVE_ON_PROGRESS: "false"
+      EXECUTIONS_DATA_SAVE_MANUAL_EXECUTIONS: "false"
+      EXECUTIONS_DATA_HARD_DELETE_BUFFER: "0"
+      EXECUTIONS_DATA_PRUNE_HARD_DELETE_INTERVAL: "1"
+      EXECUTIONS_DATA_PRUNE_SOFT_DELETE_INTERVAL: "1"
+      N8N_DEFAULT_BINARY_DATA_MODE: filesystem
+      N8N_DIAGNOSTICS_ENABLED: "false"
+      N8N_VERSION_NOTIFICATIONS_ENABLED: "false"
+      N8N_TEMPLATES_ENABLED: "false"
+      N8N_PERSONALIZATION_ENABLED: "false"
+      N8N_HIRING_BANNER_ENABLED: "false"
+      N8N_LOG_LEVEL: warn
+      N8N_LOG_OUTPUT: console
+      N8N_GRACEFUL_SHUTDOWN_TIMEOUT: "25"
+      # defesa em profundidade: nós que o transporte nunca usa (o guardião de workflows é o controle principal)
+      NODES_EXCLUDE: '["n8n-nodes-base.executeCommand","n8n-nodes-base.readWriteFile","n8n-nodes-base.ssh","n8n-nodes-base.ftp","n8n-nodes-base.postgres","n8n-nodes-base.mySql","n8n-nodes-base.mongoDb","n8n-nodes-base.redis"]'
+      GENERIC_TIMEZONE: ${SCHOOL_TIMEZONE:-America/Sao_Paulo}
+      TZ: ${SCHOOL_TIMEZONE:-America/Sao_Paulo}
+    volumes:
+      - n8n-data:/home/node/.n8n
+    tmpfs:
+      # bytes do PDF em trânsito: só em memória, nunca em disco
+      - /home/node/.n8n/binaryData:uid=1000,gid=1000,mode=0700,size=128m
+    depends_on:
+      backend:
+        condition: service_healthy
+      telegram-bot-api:
+        condition: service_started
+    networks: [internal]
+    stop_grace_period: 30s
+    expose:
+      - "5678"
+    healthcheck:
+      # vivacidade local: só prova que o n8n subiu e que os workflows foram publicados (não consulta o backend)
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:5678/webhook/transport-health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 60s
+
 networks:
   internal:
 
@@ -91,5 +159,6 @@ volumes:
   pgdata:
   documents:
   telegram-bot-api-data:
+  n8n-data:
   caddy-data:
   caddy-config:

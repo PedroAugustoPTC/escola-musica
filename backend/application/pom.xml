@@ -130,6 +130,8 @@
                 <configuration>
                     <excludes>
                         <exclude>**/realai/**</exclude>
+                        <!-- feature 004: exigem o n8n em contêiner; rodam só no perfil n8n (tests-n8n) -->
+                        <exclude>**/transport/n8n/**</exclude>
                     </excludes>
                     <!-- Usa as classes (e não o jar reempacotado) no classpath dos testes de integração. -->
                     <classesDirectory>${project.build.outputDirectory}</classesDirectory>
@@ -165,6 +167,42 @@
     </build>
 
     <profiles>
+        <!--
+            Feature 004: testes pelo n8n real em contêiner (mvn -Pn8n verify, serviço tests-n8n). Só rodam as
+            classes de transport/n8n; as demais suítes ficam com o tests-backend. As execuções com
+            telegram.transport=n8n (conversa e paridade) e com duplicidade entram junto do modo n8n das bases.
+        -->
+        <profile>
+            <id>n8n</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <skipTests>true</skipTests>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <configuration>
+                            <includes>
+                                <include>**/transport/n8n/*IT.java</include>
+                            </includes>
+                            <excludes combine.self="override"/>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>internal-transport</id>
+                                <phase>none</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
         <!-- Suíte opcional com IA real, fora da cobertura (R-16): mvn -Preal-ai verify -->
         <profile>
             <id>real-ai</id>

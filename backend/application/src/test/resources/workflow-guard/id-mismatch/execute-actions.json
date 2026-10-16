@@ -1,0 +1,9 @@
+{
+  "id": "another-id",
+  "name": "another-id",
+  "nodes": [
+    { "id": "a1", "name": "Hook", "type": "n8n-nodes-base.noOp", "typeVersion": 1, "position": [0, 0], "parameters": {} }
+  ],
+  "connections": {},
+  "settings": { "executionOrder": "v1" }
+}

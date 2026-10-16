@@ -2,9 +2,9 @@
 
 Automação do GitHub, versionada no repositório (Princípio VIII).
 
-- `workflows/ci.yml` — três jobs, todos em contêiner via `infra/compose.test.yaml`: **Backend** (unitários,
+- `workflows/ci.yml` — quatro jobs, todos em contêiner via `infra/compose.test.yaml`: **Backend** (unitários,
   arquitetura, integração, contrato, cobertura; publica o artefato `jacoco-core`), **Frontend** (lint, tipos,
-  Vitest) e **Ponta a ponta + acessibilidade** (Playwright + axe). O job Backend começa por um passo que reprova
+  Vitest) **Ponta a ponta + acessibilidade** (Playwright + axe) e **n8n** (feature 004: utilitários do `infra/n8n/ops` e a suíte `tests-n8n` pelo n8n real em contêiner, depois do Backend e do Frontend). O job Backend começa por um passo que reprova
   o PR se `.specify/memory/glossary-temporary-exclusions.json` existir: o guardião de idioma não aceita lista de
   exclusão (ver `.specify/CLAUDE.md`).
 - `workflows/deploy.yml` — implantação manual na VPS (usa `infra/scripts/deploy.sh`); ambiente `production` e segredos

@@ -1,0 +1,9 @@
+{
+  "id": "execute-actions",
+  "name": "execute-actions",
+  "nodes": [
+    { "id": "a1", "name": "Note", "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [0, 0], "parameters": { "content": "text" } }
+  ],
+  "connections": {},
+  "settings": { "executionOrder": "v1" }
+}

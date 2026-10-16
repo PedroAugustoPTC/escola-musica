@@ -3,6 +3,8 @@
 #   docker compose -f infra/compose.test.yaml run --rm tests-frontend
 #   docker compose -f infra/compose.test.yaml run --rm tests-e2e
 #   docker compose -f infra/compose.test.yaml run --rm tests-real-ai
+#   docker compose -f infra/compose.test.yaml run --rm tests-n8n-ops
+#   docker compose -f infra/compose.test.yaml run --rm tests-n8n
 name: reports-tests
 
 x-maven: &maven
@@ -143,6 +145,100 @@ services:
       web-e2e:
         condition: service_started
     command: ["sh", "-c", "npm ci && npx playwright test"]
+
+  # --- n8n (feature 004) --------------------------------------------------------------------------------
+  # Testes unitários dos utilitários de infra/n8n/ops, dentro da própria imagem fina do n8n.
+  tests-n8n-ops:
+    build:
+      context: ./n8n
+    image: reports-n8n
+    entrypoint: ["node", "--test", "/opt/ops/*.test.mjs"]
+
+  # O n8n real, na imagem fina de produção, com o editor ligado (a REST serve ao teste de privacidade). Backend e API de
+  # bots são simulados pela JVM do teste (portas 18080 e 18081 do tests-n8n). Segredos e chave abaixo são só de teste.
+  n8n-test:
+    build:
+      context: ./n8n
+    image: reports-n8n
+    container_name: reports-n8n-test
+    environment:
+      BACKEND_INTERNAL_URL: http://tests-n8n:18080
+      TELEGRAM_API_URL: http://tests-n8n:18081
+      TELEGRAM_BOT_TOKEN: test-bot-token
+      BACKEND_SERVICE_TOKEN: test-service-token
+      CHANNEL_DELIVERY_TOKEN: test-delivery-token
+      N8N_ENCRYPTION_KEY: test-encryption-key-0123456789abcdef
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
+      N8N_DISABLE_UI: "false"
+      N8N_SECURE_COOKIE: "false"
+      N8N_PUBLIC_API_DISABLED: "true"
+      EXECUTIONS_DATA_SAVE_ON_SUCCESS: none
+      EXECUTIONS_DATA_SAVE_ON_ERROR: none
+      EXECUTIONS_DATA_SAVE_ON_PROGRESS: "false"
+      EXECUTIONS_DATA_SAVE_MANUAL_EXECUTIONS: "false"
+      EXECUTIONS_DATA_HARD_DELETE_BUFFER: "0"
+      EXECUTIONS_DATA_PRUNE_HARD_DELETE_INTERVAL: "1"
+      EXECUTIONS_DATA_PRUNE_SOFT_DELETE_INTERVAL: "1"
+      N8N_DEFAULT_BINARY_DATA_MODE: filesystem
+      N8N_DIAGNOSTICS_ENABLED: "false"
+      N8N_VERSION_NOTIFICATIONS_ENABLED: "false"
+      N8N_TEMPLATES_ENABLED: "false"
+      N8N_PERSONALIZATION_ENABLED: "false"
+      N8N_HIRING_BANNER_ENABLED: "false"
+      N8N_LOG_LEVEL: warn
+      N8N_LOG_OUTPUT: console
+      N8N_GRACEFUL_SHUTDOWN_TIMEOUT: "25"
+      NODES_EXCLUDE: '["n8n-nodes-base.executeCommand","n8n-nodes-base.readWriteFile","n8n-nodes-base.ssh","n8n-nodes-base.ftp","n8n-nodes-base.postgres","n8n-nodes-base.mySql","n8n-nodes-base.mongoDb","n8n-nodes-base.redis"]'
+      GENERIC_TIMEZONE: America/Sao_Paulo
+      TZ: America/Sao_Paulo
+    volumes:
+      # volume anônimo (some no `down -v`): o reinício reaproveita o banco e o n8n precisa descartar a edição manual
+      - /home/node/.n8n
+    tmpfs:
+      - /home/node/.n8n/binaryData:uid=1000,gid=1000,mode=0700,size=128m
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:5678/webhook/transport-health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+  # Entrada pública simulada: o Caddy real com o Caddyfile do repositório e um SPA mínimo (N8nExposureIT).
+  web-n8n-test:
+    image: caddy:2
+    environment:
+      DOMAIN: web-n8n-test
+      LOCAL_CERTIFICATES: local_certs
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+    tmpfs:
+      - /srv
+    command: ["sh", "-c", "echo '<!doctype html><title>spa</title>' > /srv/index.html && exec caddy run --config /etc/caddy/Caddyfile --adapter caddyfile"]
+
+  # Suíte pelo n8n real: contrato dos workflows, conversa e paridade, duplicidade, resiliência e privacidade.
+  # O socket do Docker é montado SÓ aqui (derrubar e subir o n8n no meio da lista de ações).
+  tests-n8n:
+    <<: *maven
+    build:
+      context: ./tests/n8n
+    image: reports-tests-n8n
+    environment:
+      <<: *maven-env
+      N8N_URL: http://n8n-test:5678
+      WEB_URL: https://web-n8n-test
+      N8N_CONTAINER: reports-n8n-test
+    volumes:
+      - ..:/work
+      - m2:/root/.m2
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+      n8n-test:
+        condition: service_healthy
+      web-n8n-test:
+        condition: service_started
+    command: ["mvn", "-B", "-ntp", "-Pn8n", "verify"]
 
 volumes:
   m2:

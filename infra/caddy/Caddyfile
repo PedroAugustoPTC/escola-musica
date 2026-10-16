@@ -1,6 +1,10 @@
 # Ponto de entrada HTTPS único (R-15, Princípio IV). Serve o SPA e faz proxy de /api/* para o backend.
 # DOMAIN=localhost (padrão) usa a CA interna do Caddy; um domínio real obtém certificado automático.
 # LOCAL_CERTIFICATES=local_certs força a CA interna para nomes sem domínio público (pilha de testes).
+#
+# O n8n (transporte do Telegram, feature 004) NÃO é roteado aqui, de propósito (R-02): o webhook é chamado pelo
+# servidor local da API de bots, de dentro da rede interna, então uma rota pública não teria chamador legítimo
+# e só aumentaria a superfície de ataque (Princípio IV). Nenhuma diretiva nova é necessária.
 {
 	email {$ACME_EMAIL:admin@localhost}
 	admin off

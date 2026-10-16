@@ -11,3 +11,8 @@ services:
     restart: unless-stopped
   telegram-bot-api:
     restart: unless-stopped
+  # Editor desligado e nenhuma porta: workflows só mudam por PR e nova imagem (feature 004, FR-002 e FR-008).
+  n8n:
+    restart: unless-stopped
+    environment:
+      N8N_DISABLE_UI: "true"

@@ -1,0 +1,9 @@
+{
+  "id": "other",
+  "name": "other",
+  "nodes": [
+    { "id": "a1", "name": "Hook", "type": "n8n-nodes-base.webhook", "typeVersion": 2, "position": [0, 0], "parameters": { "httpMethod": "GET", "path": "other" } }
+  ],
+  "connections": {},
+  "settings": { "executionOrder": "v1" }
+}

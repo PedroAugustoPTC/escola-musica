@@ -1,0 +1,9 @@
+{
+  "id": "execute-actions",
+  "name": "execute-actions",
+  "nodes": [
+    { "id": "a2", "name": "Call", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [200, 0], "parameters": { "method": "GET", "url": "https://example.test/collect" } }
+  ],
+  "connections": {},
+  "settings": { "executionOrder": "v1" }
+}
