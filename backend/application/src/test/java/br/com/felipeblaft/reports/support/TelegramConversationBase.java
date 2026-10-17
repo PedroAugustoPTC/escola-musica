@@ -74,6 +74,12 @@ public abstract class TelegramConversationBase extends IntegrationBase {
         }
     }
 
+    /**
+     * Modo de duplicidade ({@code -Dtelegram.n8n.duplicates=true}): o Telegram entrega cada update
+     * duas vezes. A transcrição do chat não pode mudar (FR-028a, SC-011).
+     */
+    protected static volatile boolean n8nDuplicates = Boolean.getBoolean("telegram.n8n.duplicates");
+
     private static final java.util.concurrent.atomic.AtomicBoolean N8N_CHECKED =
             new java.util.concurrent.atomic.AtomicBoolean(false);
 
@@ -107,6 +113,11 @@ public abstract class TelegramConversationBase extends IntegrationBase {
 
     @BeforeEach
     void cleanBotApi() {
+        resetBotApi();
+    }
+
+    /** Apaga as chamadas registradas e volta ao padrão: toda chamada responde {@code ok}. */
+    protected void resetBotApi() {
         API_BOTS.resetAll();
         API_BOTS.stubFor(
                 post(anyUrl())
@@ -185,14 +196,17 @@ public abstract class TelegramConversationBase extends IntegrationBase {
         if (N8N_CHECKED.compareAndSet(false, true)) {
             N8nTestSupport.awaitHealthy(java.time.Duration.ofSeconds(180));
         }
-        N8nTestSupport.Reply reply =
-                N8nTestSupport.post(
-                        N8nTestSupport.N8N_URL + "/webhook/telegram-update",
-                        java.util.Map.of("X-Telegram-Bot-Api-Secret-Token", SECRET),
-                        "application/json",
-                        json.getBytes(java.nio.charset.StandardCharsets.UTF_8));
-        if (reply.status() != 200) {
-            throw new AssertionError("o n8n respondeu " + reply.status() + " ao update");
+        int deliveries = n8nDuplicates ? 2 : 1;
+        for (int i = 0; i < deliveries; i++) {
+            N8nTestSupport.Reply reply =
+                    N8nTestSupport.post(
+                            N8nTestSupport.N8N_URL + "/webhook/telegram-update",
+                            java.util.Map.of("X-Telegram-Bot-Api-Secret-Token", SECRET),
+                            "application/json",
+                            json.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            if (reply.status() != 200) {
+                throw new AssertionError("o n8n respondeu " + reply.status() + " ao update");
+            }
         }
     }
 

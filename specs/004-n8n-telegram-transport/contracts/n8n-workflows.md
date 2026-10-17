@@ -114,6 +114,7 @@ tabela de casos alimenta `N8nFailureHandlingIT`, de modo que o simulador de test
 | Rota | Resposta | Quem usa |
 |---|---|---|
 | `GET /webhook/transport-health/live` | `200 {"status":"UP"}` sem chamar ninguém | `healthcheck` do Docker; `n8n.sh health` |
+| `GET /webhook/telegram-inbound/live` e `GET /webhook/channel-delivery/live` | `200 {"status":"UP"}` sem chamar ninguém; provam que os receptores desses workflows estão registrados | `healthcheck` do Docker (`ops/healthcheck.sh` exige os três `live`) |
 | `GET /webhook/transport-health/deep` | `200 {"status":"UP","backend":"ok","botApi":"ok"}` se: `GET …/actions/u0-0` retorna `404` (token de serviço aceito; `401` ⇒ `"backend":"unauthorized"`; falha ⇒ `"backend":"down"`) **e** `getMe` retorna `ok:true` (`"botApi":"ok"`; senão `"botApi":"down"`). Qualquer componente fora ⇒ `503` com o mesmo corpo | `n8n.sh health --deep`; `telegram-webhook.sh verify` e pré-condição do `switch` |
 
 O corpo nunca contém token, URL, nome do bot nem versão.

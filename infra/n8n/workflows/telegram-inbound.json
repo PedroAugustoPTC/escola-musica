@@ -185,6 +185,40 @@
           "responseCode": 503
         }
       }
+    },
+    {
+      "id": "livewebhook-10",
+      "name": "LiveWebhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        640
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "telegram-inbound/live",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "webhookId": "telegram-inbound-live"
+    },
+    {
+      "id": "liverespond-11",
+      "name": "LiveRespond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        640
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"status\":\"UP\"}",
+        "options": {
+          "responseCode": 200
+        }
+      }
     }
   ],
   "connections": {
@@ -251,6 +285,17 @@
         [
           {
             "node": "Fail503",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LiveWebhook": {
+      "main": [
+        [
+          {
+            "node": "LiveRespond",
             "type": "main",
             "index": 0
           }

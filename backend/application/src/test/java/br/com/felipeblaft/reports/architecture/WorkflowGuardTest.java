@@ -17,7 +17,7 @@ class WorkflowGuardTest {
 
     /** Arquivos que já precisam existir nesta fase; as fases seguintes ampliam a lista. */
     private static final Set<String> REQUIRED =
-            Set.of("transport-health", "telegram-inbound", "execute-actions");
+            Set.of("transport-health", "telegram-inbound", "execute-actions", "channel-delivery");
 
     @Test
     @DisplayName("os workflows do repositório respeitam as regras de transporte")

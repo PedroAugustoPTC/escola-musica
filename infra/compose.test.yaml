@@ -166,7 +166,7 @@ services:
       TELEGRAM_API_URL: http://tests-n8n:18081
       TELEGRAM_BOT_TOKEN: "123456:TEST"
       BACKEND_SERVICE_TOKEN: current-service-token-test
-      CHANNEL_DELIVERY_TOKEN: test-delivery-token
+      CHANNEL_DELIVERY_TOKEN: orchestrator-secret
       N8N_ENCRYPTION_KEY: test-encryption-key-0123456789abcdef
       N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
       N8N_DISABLE_UI: "false"
@@ -197,7 +197,7 @@ services:
     tmpfs:
       - /home/node/.n8n/binaryData:uid=1000,gid=1000,mode=0700,size=128m
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:5678/webhook/transport-health/live"]
+      test: ["CMD", "sh", "/opt/ops/healthcheck.sh"]
       interval: 5s
       timeout: 5s
       retries: 30

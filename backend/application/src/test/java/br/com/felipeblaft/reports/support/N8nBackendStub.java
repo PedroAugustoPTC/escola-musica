@@ -74,6 +74,16 @@ public final class N8nBackendStub implements AutoCloseable {
                         .willReturn(stateResponse(actionId, state)));
     }
 
+    /**
+     * A consulta de estado desta ação demora {@code millis} para responder (simula travar no meio).
+     */
+    public void delayState(String actionId, int millis) {
+        server.stubFor(
+                get(urlPathEqualTo(BASE + "/actions/" + actionId))
+                        .atPriority(1)
+                        .willReturn(stateResponse(actionId, "PENDING").withFixedDelay(millis)));
+    }
+
     public void actionStatus(String actionId, int status) {
         server.stubFor(
                 get(urlPathEqualTo(BASE + "/actions/" + actionId))
@@ -108,6 +118,13 @@ public final class N8nBackendStub implements AutoCloseable {
     }
 
     // ---------------------------------------------------------------- o que o n8n enviou
+
+    /** Ids das ações cujo estado o n8n já consultou, na ordem. */
+    public List<String> queriedActionIds() {
+        return stateQueries().stream()
+                .map(request -> request.getUrl().substring(request.getUrl().lastIndexOf('/') + 1))
+                .toList();
+    }
 
     public List<LoggedRequest> updates() {
         return server.findAll(postRequestedFor(urlEqualTo(BASE + "/update")));

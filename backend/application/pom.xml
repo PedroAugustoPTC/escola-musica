@@ -215,11 +215,40 @@
                                         <include>**/parity/*ParityScriptIT.java</include>
                                         <include>**/privacy/AudioNonRetentionIT.java</include>
                                         <include>**/privacy/LogWithoutSensitiveDataIT.java</include>
+                                        <include>**/outbound/telegram/TelegramNotificationOrchestratorIT.java</include>
+                                        <include>**/transport/n8n/conversation/*IT.java</include>
                                     </includes>
                                     <systemPropertyVariables>
                                         <telegram.transport>n8n</telegram.transport>
                                     </systemPropertyVariables>
                                     <reportNameSuffix>n8n</reportNameSuffix>
+                                </configuration>
+                            </execution>
+                            <!--
+                                Os mesmos testes, agora com cada update entregue duas vezes e cada lote proativo
+                                reentregue: nenhuma expectativa muda, logo nenhuma mensagem pode sair a mais (SC-011).
+                            -->
+                            <execution>
+                                <id>n8n-duplicates</id>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                </goals>
+                                <configuration>
+                                    <includes>
+                                        <include>**/inbound/telegram/*ConversationIT.java</include>
+                                        <include>**/inbound/telegram/OldButtonFormatIT.java</include>
+                                        <include>**/inbound/telegram/ReplyWithinFiveSecondsIT.java</include>
+                                        <include>**/parity/*ParityScriptIT.java</include>
+                                        <include>**/privacy/AudioNonRetentionIT.java</include>
+                                        <include>**/privacy/LogWithoutSensitiveDataIT.java</include>
+                                        <include>**/outbound/telegram/TelegramNotificationOrchestratorIT.java</include>
+                                        <include>**/transport/n8n/conversation/*IT.java</include>
+                                    </includes>
+                                    <systemPropertyVariables>
+                                        <telegram.transport>n8n</telegram.transport>
+                                        <telegram.n8n.duplicates>true</telegram.n8n.duplicates>
+                                    </systemPropertyVariables>
+                                    <reportNameSuffix>n8n-duplicates</reportNameSuffix>
                                 </configuration>
                             </execution>
                         </executions>

@@ -206,6 +206,24 @@ public final class N8nTestSupport {
         docker("restart", N8N_CONTAINER);
     }
 
+    /** Derruba o contêiner sem parada limpa (queda), como falta de energia ou {@code kill -9}. */
+    public static void killN8n() {
+        docker("kill", N8N_CONTAINER);
+    }
+
+    public static void startN8n() {
+        docker("start", N8N_CONTAINER);
+    }
+
+    /** O contêiner do n8n está em execução? */
+    public static boolean isRunning() {
+        return "true"
+                .equals(
+                        docker("inspect", "--format", "{{.State.Running}}", N8N_CONTAINER)
+                                .output()
+                                .trim());
+    }
+
     private static void sleep(long millis) {
         try {
             Thread.sleep(millis);

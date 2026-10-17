@@ -250,7 +250,9 @@ n8n no GitHub, "n8n 2.0 breaking changes" e "CLI commands" de docs.n8n.io.
 
 ## R-10. Healthcheck e política de reinício
 
-- **Decisão**:
+- **Decisão** (ajustada na Fase 4: o `healthcheck` exige os **três** receptores registrados, por `ops/healthcheck.sh`,
+  que consulta `transport-health/live`, `telegram-inbound/live` e `channel-delivery/live`; antes, o contêiner podia ficar
+  `healthy` com o webhook do Telegram ainda sem registro e responder `404` a um update logo após o reinício):
   - `healthcheck` do contêiner = **vivacidade local**:
     `wget -q -O - http://127.0.0.1:5678/webhook/transport-health/live` (responde `200` só se o `transport-health`
     estiver publicado, o que prova que o `publish:workflow` rodou e o n8n subiu), `interval: 10s`, `timeout: 5s`,
@@ -264,8 +266,10 @@ n8n no GitHub, "n8n 2.0 breaking changes" e "CLI commands" de docs.n8n.io.
     `N8N_GRACEFUL_SHUTDOWN_TIMEOUT=25` para não cortar execução em curso numa parada limpa. Uma única réplica.
   - **Orçamento de 60 s** (FR-003): `entrypoint.sh` (importar 4 + publicar 4) + partida do n8n. **Medido no S-6**:
     importação ≈ 6 s, ≈ 5 s por `publish:workflow` e servidor ≈ 20 s ⇒ ≈ 46 s com 4 workflows (a frio, 39 s); passa
-    da meta de 40 s e cabe nos 60 s. A alavanca é publicar só os workflows com gatilho próprio (não o
-    sub-workflow `execute-actions`), a medir na T065; `NODES_INCLUDE` não ajuda (o custo é a CLI, não os nós).
+    da meta de 40 s e cabe nos 60 s. **Medido na Fase 4 (T065):** não publicar o sub-workflow `execute-actions` **não funciona** (a chamada do
+    `Execute Workflow` falha com `500`); a alavanca que funciona é rodar as quatro `publish:workflow` **em paralelo**
+    no `entrypoint.sh`: partida a frio 26 s (era 33 a 44 s) e reinício 20 a 21 s (era 28 a 41 s, mais 9 s depois
+    de queda com recuperação de execuções); sem erro de bloqueio no SQLite. `NODES_INCLUDE` não ajuda (o custo é a CLI, não os nós).
   - `local.sh` passa a esperar também o `n8n` `healthy` em `wait_until_healthy`; `deploy.sh` já espera todos.
 - **Por quê**: SC-006 e FR-006. Docker não reinicia contêiner `unhealthy` por conta própria; o reinício é por
   saída do processo, e o n8n sai se o `entrypoint.sh` falhar (importação inválida derruba a subida em vez de

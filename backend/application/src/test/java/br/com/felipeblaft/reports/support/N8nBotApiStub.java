@@ -39,6 +39,34 @@ public final class N8nBotApiStub implements AutoCloseable {
                         .willReturn(json(200, "{\"ok\":true,\"result\":{\"message_id\":4242}}")));
     }
 
+    /**
+     * O método demora {@code millis} para responder quando o corpo contém o trecho (ação "em voo").
+     */
+    public void delayWhenBodyContains(String method, String fragment, int millis) {
+        server.stubFor(
+                any(urlPathMatching("/bot.*/" + method))
+                        .withRequestBody(
+                                com.github.tomakehurst.wiremock.client.WireMock.containing(
+                                        fragment))
+                        .atPriority(1)
+                        .willReturn(
+                                json(200, "{\"ok\":true,\"result\":{\"message_id\":4242}}")
+                                        .withFixedDelay(millis)));
+    }
+
+    /** Textos enviados por {@code sendMessage}, na ordem. */
+    public List<String> sentTexts() {
+        return callsOf("sendMessage").stream()
+                .map(
+                        call ->
+                                tools.jackson.databind.json.JsonMapper.builder()
+                                        .build()
+                                        .readTree(call.getBodyAsString())
+                                        .get("text")
+                                        .asString())
+                .toList();
+    }
+
     /** A conexão cai no meio da resposta (o n8n vê um erro de rede, sem corpo). */
     public void breakConnection(String method) {
         server.stubFor(

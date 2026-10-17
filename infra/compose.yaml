@@ -146,7 +146,7 @@ services:
       - "5678"
     healthcheck:
       # vivacidade local: só prova que o n8n subiu e que os workflows foram publicados (não consulta o backend)
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:5678/webhook/transport-health/live"]
+      test: ["CMD", "sh", "/opt/ops/healthcheck.sh"]
       interval: 10s
       timeout: 5s
       retries: 6

@@ -40,6 +40,11 @@ public abstract class IntegrationBase {
 
     @BeforeEach
     void cleanDatabase() {
+        truncateAll();
+    }
+
+    /** Esvazia todas as tabelas e volta o relógio ao padrão (também usado no meio de um teste). */
+    protected void truncateAll() {
         List<String> tables =
                 jdbc.queryForList(
                         "select tablename from pg_tables where schemaname = 'public'"
