@@ -210,6 +210,15 @@ case "$command" in
         rehearsal_status=0
         $REHEARSAL up -d --build --wait postgres-rehearsal telegram-simulator backend-rehearsal n8n-rehearsal \
           && $REHEARSAL run --rm tests-rehearsal || rehearsal_status=$?
+        if [ "$rehearsal_status" != "0" ]; then
+          # o down apaga os contêineres; no CI essa é a única chance de ver por que o ensaio falhou
+          echo "──── diagnóstico do ensaio (estado e últimas linhas dos logs) ────"
+          $REHEARSAL ps -a 2>&1 | tail -n 20 || true
+          for service in n8n-rehearsal backend-rehearsal; do
+            echo "──── $service ────"
+            $REHEARSAL logs --no-color --tail 80 "$service" 2>&1 | cut -c1-300 || true
+          done
+        fi
         $TESTS down -v >/dev/null 2>&1 || true
         rm -f infra/tests/rehearsal/rehearsal.env infra/tests/rehearsal/rehearsal.env.previous
         exit $rehearsal_status
