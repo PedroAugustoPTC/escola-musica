@@ -34,6 +34,10 @@
 - Q: Como a suíte de paridade pelo n8n comprova que os **10 estados da conversa** e os **5 tipos de ação** estão cobertos? → A: Por uma matriz estado → teste (`data-model.md` §6) e por um meta-teste que reprova o build se algum dos 10 estados da seção 4 de `specs/001-fluxo-relatorios/contracts/telegram-conversa.md` não for exercitado na execução pelo n8n; os 5 tipos de ação já são cobertos pelos cenários de contrato dos workflows.
 - Q: Como a regra "a remoção só depois da prova de paridade" é aplicada, além do processo? → A: A evidência fica em arquivo versionado na `main` (`specs/004-n8n-telegram-transport/evidence/parity.md`), entrando por um PR de documentação **antes** da entrega de remoção, e essa entrega traz um teste que reprova o build se o arquivo faltar ou estiver incompleto (menos de 7 dias, qualquer sinal diferente de zero ou aprovação ausente).
 
+### Session 2026-10-19 (dispensa do gate de paridade)
+
+- Q: O gate de FR-029 pode ser dispensado? → A: Sim, por decisão **explícita e escrita** do mantenedor, registrada em `evidence/parity.md` com `mode: waiver` (quem, quando e por quê), por PR de documentação mesclado na `main` antes da remoção. A dispensa não substitui a prova nem a inventa: os campos numéricos ficam como "não registrado". O `ParityEvidenceGuardTest` aceita `mode: evidence` com a prova completa **ou** `mode: waiver` com `waivedBy`, `waivedAt` e `reason`; arquivo ausente continua reprovando o build. Em 2026-10-19 o mantenedor dispensou o registro numérico, declarando validados o ensaio manual e a observação de 7 dias.
+
 ## Quem usa esta feature
 
 - **Professor**: usuário final. Não deve perceber nenhuma diferença: mesmos textos, botões, etapas, PDFs e avisos de hoje, no mesmo ritmo.

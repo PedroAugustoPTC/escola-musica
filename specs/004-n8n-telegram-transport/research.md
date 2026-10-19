@@ -428,7 +428,7 @@ n8n no GitHub, "n8n 2.0 breaking changes" e "CLI commands" de docs.n8n.io.
 ## R-15. Remoção do caminho antigo (última fase, S5)
 
 - **Pré-condições (gate, FR-029)**: (1) suíte completa verde pelo n8n na `main`; (2) **7 dias corridos** de
-  produção com os 4 sinais em zero e nenhum relato de diferença; (3) aprovação registrada do dono do produto;
+  produção com os 4 sinais em zero e nenhum relato de diferença; (3) aprovação registrada do dono do produto (ou dispensa formal do mantenedor, `mode: waiver`, spec sessão 2026-10-19);
   (4) `evidence/parity.md` já registrada **na `main`** por PR de documentação, conforme data-model.md §5, e verificada pelo `ParityEvidenceGuardTest` que a entrega da S5 traz; (5) rollback do webhook para o backend ainda possível
   até o instante do merge — depois dele, a reversão é reimplantar a versão anterior (spec, Edge Cases).
 - **Inventário a confirmar com `get_impact_radius_tool` e `get_affected_flows_tool` no início de S5** (o grafo atual
