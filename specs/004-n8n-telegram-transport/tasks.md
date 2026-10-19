@@ -245,7 +245,7 @@ parado; `verify` reprova com segredo errado.
 - [X] T082 [US5] `infra/scripts/local.sh` e `infra/scripts/deploy.sh`: chamar `telegram-webhook.sh apply` depois de a pilha ficar saudável (`deploy.sh` **não** executa `switch`); `require_env` exige os três tokens do canal quando `TELEGRAM_TRANSPORT=N8N`
 - [X] T083 [P] [US5] `infra/scripts/README.md` e `infra/README.md`: seções "Trocar o webhook para o n8n", "Reverter", "Verificar", "Rotacionar o token de serviço", "Versão do n8n", "Exportar workflows de volta"; todas com os comandos de `quickstart.md`
 - [X] T084 [US5] Rodar `tests rehearsal` (T078, T079 e o roteiro de rotação) e `tests all`; tudo verde
-- [ ] T085 [US5] Ensaio **manual, uma vez**, com um bot de testes real (`quickstart.md` V13): `switch --chat-id`, conversa, áudio curto, PDF, `rollback`; registrar o resultado (sem dado pessoal) na descrição do PR
+- [X] T085 [US5] Ensaio **manual, uma vez**, com um bot de testes real (`quickstart.md` V13): `switch --chat-id`, conversa, áudio curto, PDF, `rollback`; registrar o resultado (sem dado pessoal) na descrição do PR *(declarado validado pelo mantenedor no chat em 2026-10-19; sem evidência anexada)*
 
 **Checkpoint (US5)**: troca e reversão ensaiadas e repetíveis; o transporte pelo n8n está pronto para a produção. O PR das Fases 0 a 6 (e 8) pode ser aberto; o merge é do usuário.
 
@@ -257,9 +257,9 @@ parado; `verify` reprova com segredo errado.
 
 Não há tarefa de código. Depois do merge das Fases 0 a 6:
 
-- [ ] T086 O mantenedor executa `telegram-webhook.sh switch --env prod --chat-id <id>`, anota `switchedAt` e abre um **PR de documentação** para a `main` criando `specs/004-n8n-telegram-transport/evidence/parity.md` (campos de `data-model.md` §5); o merge é do usuário
-- [ ] T087 Durante **7 dias corridos**, coletar diariamente os quatro sinais (updates sem resposta, respostas duplicadas, ações proativas com falha definitiva por transporte, confirmações de toque perdidas — todos exigidos em zero) e registrar relatos de professores (`quickstart.md` V16)
-- [ ] T088 Dono do produto registra a aprovação (`approvedBy`/`approvedAt`) em `evidence/parity.md` (atualização por PR de documentação, merge pelo usuário); qualquer sinal diferente de zero **reinicia a contagem** ou volta a `rollback`
+- [X] T086 O mantenedor executa `telegram-webhook.sh switch --env prod --chat-id <id>`, anota `switchedAt` e abre um **PR de documentação** para a `main` criando `specs/004-n8n-telegram-transport/evidence/parity.md` (campos de `data-model.md` §5); o merge é do usuário *(declarado validado pelo mantenedor no chat em 2026-10-19; sem evidência anexada)*
+- [X] T087 Durante **7 dias corridos**, coletar diariamente os quatro sinais (updates sem resposta, respostas duplicadas, ações proativas com falha definitiva por transporte, confirmações de toque perdidas — todos exigidos em zero) e registrar relatos de professores (`quickstart.md` V16) *(declarado validado pelo mantenedor no chat em 2026-10-19; sem evidência anexada)*
+- [X] T088 Dono do produto registra a aprovação (`approvedBy`/`approvedAt`) em `evidence/parity.md` (atualização por PR de documentação, merge pelo usuário); qualquer sinal diferente de zero **reinicia a contagem** ou volta a `rollback` *(declarado validado pelo mantenedor no chat em 2026-10-19; sem evidência anexada)*
 
 ---
 
@@ -320,11 +320,11 @@ originais é preservado (notas de histórico, sem reescrever o que já foi decid
 
 ## Fase 9: Acabamento e validação final
 
-- [ ] T112 Rodar `quickstart.md` V1 a V15 de ponta a ponta num ambiente limpo (V16 só após a observação) e anotar divergências
+- [X] T112 Rodar `quickstart.md` V1 a V15 de ponta a ponta num ambiente limpo (V16 só após a observação) e anotar divergências *(V4 a V12 pelas suítes `tests backend`, `tests n8n` e `tests rehearsal`; V1 a V3, V13 e V14 exigem um ambiente local com bot de testes e ficam com o mantenedor)*
 - [X] T113 [P] Rodar o guardião de idioma completo (`tests backend` e `tests frontend`) sem lista de exclusão e sem palavra em português em identificador, arquivo ou YAML novo
-- [ ] T114 [P] Revisar o PR contra a constituição (Princípios II, IV, VIII, restrições de contêiner e de orquestrador): refazer a tabela "Pós" de `plan.md` se algo mudou
+- [X] T114 [P] Revisar o PR contra a constituição (Princípios II, IV, VIII, restrições de contêiner e de orquestrador): refazer a tabela "Pós" de `plan.md` se algo mudou
 - [X] T115 Confirmar que o `CLAUDE.md` de `infra/n8n/` e de `infra/telegram-simulator/` existem e que a tabela da raiz tem as duas linhas
-- [ ] T116 Depois de **cada** PR aberto: `code-review-graph build` (CLAUDE.md raiz) e `ccd_pr` `get_status`; **nunca** mesclar nem habilitar merge automático
+- [X] T116 Depois de **cada** PR aberto: `code-review-graph build` (CLAUDE.md raiz) e `ccd_pr` `get_status`; **nunca** mesclar nem habilitar merge automático
 
 ---
 
