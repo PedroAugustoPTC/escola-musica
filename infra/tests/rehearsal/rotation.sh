@@ -6,7 +6,7 @@ cd /work || exit 1
 
 ROTATE="sh infra/scripts/rotate-service-token.sh"
 select_environment local
-prepare_state N8N
+prepare_state
 old_token="$(env_value TELEGRAM_CHANNEL_CURRENT_TOKEN)"
 
 section "estado inicial"

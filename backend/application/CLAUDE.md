@@ -8,7 +8,7 @@ Pacotes em `src/main/java/br/com/felipeblaft/reports/`:
 | Pacote | Conteúdo |
 |---|---|
 | `inbound/web` | API do Portal (`*Controller`), com sessão e segurança web |
-| `inbound/telegram` | Entrada do canal Telegram |
+| `inbound/telegram` | Conversa do canal Telegram (interpretador e fluxos); a entrada é a rota interna do n8n em `inbound/telegram/channel` |
 | `inbound/internal` | API interna consumida pelo n8n (transporte do Telegram), com segurança própria |
 | `inbound/seed` | Comandos operacionais: `seed` (carga inicial), `issue-code` (reemite o código de acesso) e `demo-data` (massa de demonstração, só local) |
 | `outbound/persistence` | `*RepositoryAdapter` (JPA/Flyway) |
@@ -34,4 +34,9 @@ Regras:
   Nomes de campo, rota, código de erro e chave de documento são contrato: não mude sem mudar o contrato.
 - Testes especiais em `src/test`: `architecture` (ArchUnit e guardião de idioma), `parity` (Web ≡ Telegram), `privacy` e
   `realai` (chamadas reais, fora da cobertura unitária).
+- Telegram: o n8n é o **único** transporte (feature 004). O backend nunca recebe webhook direto do Telegram nem envia
+  mensagem pela API de bots; as notificações proativas viram ações na outbox, entregues ao n8n. O backend só chama a
+  API de bots para baixar o áudio (`getFile`, `TelegramFileAdapter`) e registrar os comandos (`setMyCommands`); o
+  webhook é registrado por `infra/scripts/telegram-webhook.sh apply`. Nos testes, `TelegramConversationBase` usa a
+  API interna com o executor em memória e entrega a outbox na publicação (`ProactiveOutboxDrain`).
 - Segredos e áudio nunca em log nem no código; áudio original não é retido após o processamento.

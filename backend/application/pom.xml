@@ -136,32 +136,6 @@
                     <!-- Usa as classes (e não o jar reempacotado) no classpath dos testes de integração. -->
                     <classesDirectory>${project.build.outputDirectory}</classesDirectory>
                 </configuration>
-                <executions>
-                    <!--
-                        Feature 002 (R-13): os testes de conversa e de paridade rodam duas vezes, sem mudar
-                        nenhuma expectativa: pelo webhook direto (execução padrão) e pela API interna do canal,
-                        com o executor simulado do orquestrador (telegram.transport=internal). Ambas precisam
-                        passar para o build passar.
-                    -->
-                    <execution>
-                        <id>internal-transport</id>
-                        <goals>
-                            <goal>integration-test</goal>
-                        </goals>
-                        <configuration>
-                            <includes>
-                                <include>**/inbound/telegram/*ConversationIT.java</include>
-                                <include>**/parity/*ParityScriptIT.java</include>
-                                <include>**/privacy/AudioNonRetentionIT.java</include>
-                                <include>**/privacy/LogWithoutSensitiveDataIT.java</include>
-                            </includes>
-                            <systemPropertyVariables>
-                                <telegram.transport>internal</telegram.transport>
-                            </systemPropertyVariables>
-                            <reportNameSuffix>internal</reportNameSuffix>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
@@ -193,10 +167,6 @@
                             <excludes combine.self="override"/>
                         </configuration>
                         <executions>
-                            <execution>
-                                <id>internal-transport</id>
-                                <phase>none</phase>
-                            </execution>
                             <!--
                                 A suíte de conversa e de paridade EXISTENTE, sem alterar nenhuma expectativa, com o n8n
                                 real como transporte: o backend sobe na porta fixa 18080 e a API de bots simulada
@@ -278,13 +248,6 @@
                             </includes>
                             <excludes combine.self="override"/>
                         </configuration>
-                        <executions>
-                            <!-- a suíte com IA real não repete os testes de conversa pelo transporte interno -->
-                            <execution>
-                                <id>internal-transport</id>
-                                <phase>none</phase>
-                            </execution>
-                        </executions>
                     </plugin>
                 </plugins>
             </build>

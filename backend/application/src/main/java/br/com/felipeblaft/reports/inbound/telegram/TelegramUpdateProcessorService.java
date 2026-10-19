@@ -12,8 +12,8 @@ import tools.jackson.databind.json.JsonMapper;
 /**
  * Porta de entrada única do Telegram (R-02): lê o update, deduplica por {@code update_id}, chama o
  * <strong>mesmo</strong> interpretador de conversa e produz {@code ERRO_INTERNO} diante de falha
- * inesperada. É usada pelo webhook antigo (que envia as saídas direto à API de bots) e pela rota
- * interna do canal (que as devolve como ações v1). Não tem regra de conversa nem de transporte.
+ * inesperada. É usada pela rota interna do canal, que devolve as saídas como ações v1 ao n8n. Não
+ * tem regra de conversa nem de transporte.
  */
 @Component
 public class TelegramUpdateProcessorService {
@@ -51,12 +51,7 @@ public class TelegramUpdateProcessorService {
         }
     }
 
-    /** Update do webhook antigo: registra só o {@code update_id}. */
-    public TelegramUpdateResult processWebhook(UpdateTelegram update) {
-        return process(update, updateRecords.registerIfNew(update.updateId(), clock.now()));
-    }
-
-    /** Update da rota interna: registra também a origem, para reentregar as ações depois. */
+    /** Registra o update com a origem, para reentregar as ações depois. */
     public TelegramUpdateResult processInternal(UpdateTelegram update) {
         return process(
                 update,

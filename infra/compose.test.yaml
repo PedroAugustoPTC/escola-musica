@@ -225,9 +225,9 @@ services:
       - /srv
     command: ["sh", "-c", "echo '<!doctype html><title>spa</title>' > /srv/index.html && exec caddy run --config /etc/caddy/Caddyfile --adapter caddyfile"]
 
-  # --- Ensaio da troca do webhook e da rotação do token (feature 004, R-12) --------------------------------------
-  # Pilha reduzida com o backend real (IA simulada), o n8n real e o simulador do Telegram. Os valores de estado (webhook,
-  # entrega proativa, tokens) vêm de infra/tests/rehearsal/rehearsal.env, que os scripts de operação reescrevem.
+  # --- Ensaio do registro do webhook e da rotação do token (feature 004, R-12) -----------------------------------
+  # Pilha reduzida com o backend real (IA simulada), o n8n real e o simulador do Telegram. Os valores de estado (tokens e
+  # segredo) vêm de infra/tests/rehearsal/rehearsal.env, que os scripts de operação reescrevem.
   postgres-rehearsal:
     image: postgres:18
     environment:
@@ -271,12 +271,10 @@ services:
       TELEGRAM_API_ID: "1"
       TELEGRAM_API_HASH: rehearsal
       TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET:-rehearsal-webhook-secret}
-      TELEGRAM_WEBHOOK_URL: ${TELEGRAM_WEBHOOK_URL:-http://backend-rehearsal:8080/telegram/webhook}
       TELEGRAM_FILES_DIR: /tmp/telegram-files
-      TELEGRAM_CHANNEL_DELIVERY: ${TELEGRAM_CHANNEL_DELIVERY:-DIRECT}
       TELEGRAM_CHANNEL_CURRENT_TOKEN: ${TELEGRAM_CHANNEL_CURRENT_TOKEN:-rehearsal-current-token}
       TELEGRAM_CHANNEL_NEXT_TOKEN: ${TELEGRAM_CHANNEL_NEXT_TOKEN:-}
-      TELEGRAM_CHANNEL_ORCHESTRATOR_URL: ${TELEGRAM_CHANNEL_ORCHESTRATOR_URL:-}
+      TELEGRAM_CHANNEL_ORCHESTRATOR_URL: http://n8n-rehearsal:5678/webhook/channel-delivery
       TELEGRAM_CHANNEL_ORCHESTRATOR_TOKEN: ${TELEGRAM_CHANNEL_ORCHESTRATOR_TOKEN:-rehearsal-delivery-token}
       TELEGRAM_CHANNEL_RESPONSE_TIMEOUT_MS: "30000"
       CPF_ENCRYPTION_KEY: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
@@ -356,7 +354,6 @@ services:
       BACKEND_SERVICE: backend-rehearsal
       N8N_SERVICE: n8n-rehearsal
       SIMULATOR_URL: http://telegram-simulator:8081
-      TRANSPORT_STATE_FILE: /work/infra/tests/rehearsal/transport-state
     command: ["sh", "/work/infra/tests/rehearsal/run.sh"]
 
   # Suíte pelo n8n real: contrato dos workflows, conversa e paridade, duplicidade, resiliência e privacidade.

@@ -192,19 +192,4 @@ class InternalSecurityIT extends IntegrationBase {
         requires401WithoutBody(get("/internal"));
         requires401WithoutBody(get("/internal/"));
     }
-
-    @Test
-    void oldWebhookStaysOutsideInternalChain() throws Exception {
-        // o webhook segue autenticado só pelo segredo do cabeçalho do Telegram
-        assertThat(status(post("/telegram/webhook").content("{}"))).isEqualTo(401);
-        assertThat(
-                        status(
-                                post("/telegram/webhook")
-                                        .header(
-                                                "X-Telegram-Bot-Api-Secret-Token",
-                                                "secret-webhook-test")
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .content("{}")))
-                .isEqualTo(200);
-    }
 }

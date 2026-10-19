@@ -12,14 +12,13 @@ resultado. Não há regra de negócio no adaptador (Princípio I) e nenhum estad
 
 > **Nota (feature 002, sem reescrever histórico):** o transporte do Telegram agora é feito via n8n
 > (constituição v1.4.0); ver `specs/002-api-interna-canal-telegram/research.md` R-01. A rota
-> `/interno/v1/canal/telegram/**` (contrato da 002) passa a ser o caminho usado pelo n8n; o webhook
-> `/telegram/webhook` descrito abaixo segue disponível.
+> `/interno/v1/canal/telegram/**` (contrato da 002) passa a ser o caminho usado pelo n8n.
 >
-> **Nota (feature 004):** o n8n é o transporte; ele recebe o update em `/webhook/telegram-update`, repassa o corpo e o cabeçalho de segredo ao backend e executa as ações devolvidas. A conversa (estados, mensagens, botões) não muda. Contratos: `specs/002-api-interna-canal-telegram/contracts/` e `specs/004-n8n-telegram-transport/contracts/`.
+> **Nota (feature 004, remoção do caminho antigo):** o n8n é o **único** transporte; ele recebe o update em `/webhook/telegram-update`, repassa o corpo e o cabeçalho de segredo ao backend e executa as ações devolvidas. O webhook `POST /telegram/webhook`, em que o backend recebia o update direto e respondia pela API de bots, foi **removido**; o backend só chama a API de bots para baixar o áudio (`getFile`) e registrar os comandos (`setMyCommands`). A conversa (estados, mensagens, botões) não muda. Contratos: `specs/002-api-interna-canal-telegram/contracts/` e `specs/004-n8n-telegram-transport/contracts/`.
 
 | Item | Contrato |
 |---|---|
-| Entrada | `POST /telegram/webhook` (rede interna), chamado pelo servidor local `telegram-bot-api`. Cabeçalho `X-Telegram-Bot-Api-Secret-Token` obrigatório, comparado em tempo constante; se não bater, 401 sem corpo. |
+| Entrada | `POST /internal/v1/channel/telegram/update` (rede interna), chamado pelo n8n, que recebe o update do servidor local `telegram-bot-api`. Cabeçalho `X-Telegram-Bot-Api-Secret-Token` obrigatório, comparado em tempo constante; se não bater, 401 sem corpo. |
 | Updates aceitos | `message` (chat privado) e `callback_query`. Outros tipos: 200 e ignorados. Grupos: o bot responde que só atende em conversa privada. |
 | Idempotência | `update_id` gravado em `update_telegram_processado`; um update repetido devolve 200 sem reprocessar. |
 | Resposta HTTP | sempre 200 depois de persistir o estado; o trabalho pesado vai para a fila (R-06). |
@@ -188,6 +187,7 @@ foco atual da conversa até o professor tocar no botão.
 ## 7. Testes de contrato do canal
 
 Cada linha da tabela da seção 4 e cada sequência da seção 5 tem um teste de conversa: os updates
-JSON de entrada são enviados ao `POST /telegram/webhook`, e o teste verifica as chamadas feitas ao
+JSON de entrada são enviados pelo transporte do canal (a API interna com o executor em memória no lugar
+do n8n, e o n8n real em `tests n8n`), e o teste verifica as chamadas feitas ao
 WireMock da API de bots (método, `chat_id`, código de mensagem e botões) e o estado persistido
 resultante. O roteiro de paridade (R-16) usa as mesmas entradas que o roteiro da Web.

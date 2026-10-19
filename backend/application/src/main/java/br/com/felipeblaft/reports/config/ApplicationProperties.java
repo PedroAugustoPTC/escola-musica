@@ -52,7 +52,6 @@ public record ApplicationProperties(
             String apiUrl,
             String token,
             String webhookSecret,
-            String webhookUrl,
             Path filesDir,
             int pendingAudioMinutes) {
 
@@ -62,18 +61,11 @@ public record ApplicationProperties(
         }
     }
 
-    /** Quem entrega as mensagens proativas ao Telegram (R-10): exatamente um caminho fica ativo. */
-    public enum ProactiveDelivery {
-        DIRECT,
-        ORCHESTRATOR
-    }
-
     /**
      * API interna do canal Telegram (feature 002): tokens de serviço, entrega ao orquestrador,
      * retentativa e retenção da outbox (data-model.md §4).
      */
     public record TelegramChannel(
-            ProactiveDelivery proactiveDelivery,
             String currentToken,
             String nextToken,
             String orchestratorUrl,
@@ -90,19 +82,13 @@ public record ApplicationProperties(
             int payloadRetentionHours,
             int recordRetentionDays) {
 
-        public TelegramChannel {
-            if (proactiveDelivery == null) {
-                proactiveDelivery = ProactiveDelivery.DIRECT;
-            }
-        }
-
         public boolean configuredOrchestrator() {
             return orchestratorUrl != null && !orchestratorUrl.isBlank();
         }
 
         @Override
         public String toString() {
-            return "TelegramChannel[proactiveDelivery=" + proactiveDelivery + ", ***]";
+            return "TelegramChannel[***]";
         }
     }
 

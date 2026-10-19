@@ -12,7 +12,7 @@ A validação funcional completa está em
 | `compose.yaml` | serviços base: `web` (Caddy + SPA), `backend`, `postgres`, `telegram-bot-api`, `n8n` |
 | `compose.dev.yaml` | local: `web` só em `127.0.0.1:80/443`; monta `infra/seed` em `/seed` |
 | `compose.prod.yaml` | produção: `web` publica 80 e 443; `restart: unless-stopped` |
-| `compose.test.yaml` | testes em contêiner (backend, frontend, ponta a ponta, IA real, n8n e o ensaio da troca do webhook) |
+| `compose.test.yaml` | testes em contêiner (backend, frontend, ponta a ponta, IA real, n8n e o ensaio do webhook) |
 | `caddy/Caddyfile` | HTTPS, cabeçalhos de segurança e proxy de `/api/*` |
 | `.env.example` | modelo das variáveis; copie para `infra/.env` (**nunca versionado**) |
 | `seed/example.json` | carga fictícia; cargas reais ficam fora do Git (`infra/seed/*.json`) |
@@ -22,7 +22,7 @@ A validação funcional completa está em
 | `scripts/deploy.sh` | atualização e subida da pilha de produção na VPS |
 | `n8n/` | n8n, o transporte do Telegram: imagem fina, workflows como código e utilitários — leia [`n8n/CLAUDE.md`](n8n/CLAUDE.md) |
 | `telegram-simulator/` | simulador do Telegram, só para os ensaios (nunca em produção) |
-| `scripts/n8n.sh`, `scripts/telegram-webhook.sh`, `scripts/rotate-service-token.sh` | operação do n8n, troca e reversão do webhook e rotação do token de serviço (seções abaixo) |
+| `scripts/n8n.sh`, `scripts/telegram-webhook.sh`, `scripts/rotate-service-token.sh` | operação do n8n, registro e verificação do webhook e rotação do token de serviço (seções abaixo) |
 
 ## Se você tem um ambiente anterior à feature 003
 
@@ -113,8 +113,9 @@ O primeiro vai em `POSTGRES_PASSWORD`, o segundo em `CPF_ENCRYPTION_KEY` e o ter
 docker compose -f infra/compose.yaml -f infra/compose.dev.yaml up -d --build
 ```
 
-O portal responde em `https://localhost` (CA interna do Caddy). O backend registra o webhook no
-servidor local da API de bots ao iniciar (log `webhook-registered`).
+O portal responde em `https://localhost` (CA interna do Caddy). Com o Telegram habilitado, o `local.sh up`
+registra o webhook do n8n (`telegram-webhook.sh apply`) e o backend registra os comandos do bot ao iniciar (log
+`commands-registered`).
 
 ### Massa de demonstração
 
@@ -150,32 +151,29 @@ abra o PR. `sh infra/scripts/n8n.sh check` mostra se a instância divergiu do re
 desligado e nada se edita à mão. O banco do n8n fica só em memória (`tmpfs`): reiniciar o contêiner o zera, e o
 usuário do editor local é recriado.
 
-### Trocar o webhook para o n8n
+### Registrar o webhook do n8n
 
-O n8n é o transporte do Telegram, mas **a troca em produção é uma ação deliberada do mantenedor**: o `deploy.sh`
-nunca a faz. Antes, ensaie com `sh infra/scripts/local.sh tests rehearsal` (backend real, n8n real e Telegram
-simulado; cada update precisa ter exatamente uma resposta durante a troca, a reversão e a rotação).
+O n8n é o **único** transporte do Telegram: o webhook registrado no bot aponta sempre para ele, e o
+`telegram-webhook.sh` é o único dono desse registro (o backend não registra webhook). O `local.sh up` e o `deploy.sh`
+já rodam `apply`. Para registrar ou conferir à mão, com o ensaio em `sh infra/scripts/local.sh tests rehearsal` (backend
+real, n8n real e Telegram simulado; cada update precisa ter exatamente uma resposta durante o registro e a rotação):
 
 ```bash
 sh infra/scripts/telegram-webhook.sh status --env prod
-sh infra/scripts/telegram-webhook.sh switch --env prod --chat-id <seu-chat-de-teste>
+sh infra/scripts/telegram-webhook.sh apply --env prod --chat-id <seu-chat-de-teste>
 ```
 
-O `switch` confere as pré-condições (n8n saudável, workflows publicados, saúde profunda, segredo do webhook válido,
-tokens preenchidos e diferentes), grava as quatro chaves do estado no `infra/.env`, recria só o `backend`, registra o
-webhook e **verifica** (webhook certo, segredo errado recusado, segredo certo aceito, entrega proativa e, com
-`--chat-id`, a ida e volta real). Se a verificação reprovar, ele **restaura** o estado anterior e sai com `3`. Os
+O `apply` confere as pré-condições (n8n saudável, workflows publicados, saúde profunda, segredo do webhook válido,
+tokens preenchidos e diferentes), registra o webhook e **verifica** (webhook certo, segredo errado recusado, segredo
+certo aceito, saúde profunda, entrega proativa apontando para o n8n e, com `--chat-id`, a ida e volta real). Os
 códigos de motivo (`[N8N_NOT_HEALTHY]`, `[SECRET_MISMATCH]` etc.) estão em
 `specs/004-n8n-telegram-transport/contracts/transport-scripts.md`.
 
 ### Reverter
 
-```bash
-sh infra/scripts/telegram-webhook.sh rollback --env prod
-```
-
-Volta ao caminho antigo com a mesma verificação; é idempotente. Depois da remoção do caminho antigo (a última fase
-da feature), a reversão passa a ser reimplantar a versão anterior.
+Não existe mais reversão por script: o caminho antigo (o backend falando direto com o Telegram) foi removido depois
+da paridade (feature 004, FR-029). Reverter é **reimplantar a versão anterior** da aplicação; nesse caso, registre o
+webhook do backend dessa versão antes de ligar o tráfego.
 
 ### Verificar
 
@@ -254,7 +252,7 @@ docker compose -f infra/compose.test.yaml run --rm --build tests-e2e
 - `tests-n8n`: o n8n real em contêiner (contrato dos workflows, a suíte de conversa e de paridade pelo n8n,
   duplicidade, resiliência, privacidade e latência); `tests-n8n-ops` e `tests-simulator` testam os utilitários.
   Rode com `sh infra/scripts/local.sh tests n8n`.
-- `tests-rehearsal`: o ensaio da troca do webhook, da reversão e da rotação do token, com o Telegram simulado
+- `tests-rehearsal`: o ensaio do registro do webhook e da rotação do token, com o Telegram simulado
   (`sh infra/scripts/local.sh tests rehearsal`).
 - `tests-e2e`: Playwright + axe contra a pilha completa com IA simulada. A semeadura grava dados
   fictícios direto no banco de testes. Relatório em `frontend/playwright-report/`.
@@ -317,10 +315,11 @@ segredos `VPS_HOST`, `VPS_USER`, `VPS_DIRECTORY`, `VPS_SSH_KEY` (chave privada d
   aparecem (ficam na rede interna `internal`).
 - `https://<domínio>` abre o portal com certificado válido e os cabeçalhos de segurança
   (`Strict-Transport-Security`, `Content-Security-Policy`, `X-Content-Type-Options`).
-- Log `webhook-registered` no backend:
+- Log `commands-registered` no backend e webhook do n8n registrado:
 
   ```bash
-  docker compose -f infra/compose.yaml -f infra/compose.prod.yaml logs backend | grep webhook
+  docker compose -f infra/compose.yaml -f infra/compose.prod.yaml logs backend | grep commands-registered
+  sh infra/scripts/telegram-webhook.sh status --env prod
   ```
 
 ### 4.4 Perfil do bot no @BotFather

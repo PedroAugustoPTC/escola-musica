@@ -1,8 +1,6 @@
 package br.com.felipeblaft.reports.inbound.telegram;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import br.com.felipeblaft.reports.domain.registry.Teacher;
 import br.com.felipeblaft.reports.support.ConversationState;
@@ -11,7 +9,6 @@ import br.com.felipeblaft.reports.support.TelegramConversationBase;
 import java.time.Duration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.MediaType;
 
 /** Sequência 5.1 e estado #1 de contracts/telegram-conversa.md. */
 class LinkingConversationIT extends TelegramConversationBase {
@@ -90,16 +87,7 @@ class LinkingConversationIT extends TelegramConversationBase {
 
     @Test
     @ConversationState({1})
-    void wrongSecretAndRepeatedUpdate() throws Exception {
-        mvc.perform(
-                        post("/telegram/webhook")
-                                .header("X-Telegram-Bot-Api-Secret-Token", "wrong")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("{}"))
-                .andExpect(status().isUnauthorized());
-        mvc.perform(post("/telegram/webhook").contentType(MediaType.APPLICATION_JSON).content("{}"))
-                .andExpect(status().isUnauthorized());
-
+    void repeatedUpdateAnswersOnce() throws Exception {
         long update = nextUpdate();
         String json = messageJson(update, USER_CLARA, "\"text\": \"oi\"");
         sendUpdate(json);

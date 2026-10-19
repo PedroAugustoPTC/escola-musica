@@ -4,9 +4,8 @@ import java.time.Instant;
 import java.util.Optional;
 
 /**
- * Idempotência da entrada do Telegram: um {@code update_id} repetido não é reprocessado. Serve ao
- * webhook antigo (que só registra) e à rota interna do canal (que também guarda quantas ações o
- * update produziu, para reentregá-las).
+ * Idempotência da entrada do Telegram: um {@code update_id} repetido não é reprocessado. Serve à
+ * rota interna do canal, que também guarda quantas ações o update produziu, para reentregá-las.
  */
 public interface TelegramUpdateRecords {
 
@@ -18,14 +17,9 @@ public interface TelegramUpdateRecords {
      *
      * @param totalAcoes nulo enquanto o update ainda está sendo processado (ou se a linha se
      *     perdeu)
-     * @param interno {@code false} nas linhas do webhook antigo
+     * @param internal {@code false} nas linhas gravadas antes de o n8n ser o transporte
      */
     record UpdateStatus(Integer totalActions, Instant receivedAt, boolean internal) {}
-
-    /**
-     * Registra o update (webhook antigo); devolve {@code false} se ele já tinha sido processado.
-     */
-    boolean registerIfNew(long updateId, Instant now);
 
     /** Registra o update com a origem informada; devolve {@code false} se ele já existia. */
     boolean registerIfNew(long updateId, Instant now, String origin);

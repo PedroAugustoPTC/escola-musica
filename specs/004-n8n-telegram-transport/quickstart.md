@@ -4,6 +4,10 @@
 [contracts/n8n-workflows.md](./contracts/n8n-workflows.md), [contracts/transport-scripts.md](./contracts/transport-scripts.md),
 [data-model.md](./data-model.md)
 
+> **Depois da Fase 7 (remoção do caminho antigo):** `telegram-webhook.sh` só tem `status`, `verify` e `apply`;
+> `switch` e `rollback` deixaram de existir (reverter é reimplantar a versão anterior). Os passos V11, V13 e V16
+> abaixo descrevem a troca como foi validada; hoje o equivalente é `apply` (registrar o webhook do n8n e verificar).
+
 Guia de **validação e operação**, não de implementação. Os comandos existem depois das fatias indicadas entre
 colchetes. Todos rodam da raiz do repositório, só com Docker (Princípio "Containerização"). Detalhes de
 cada comando estão nos contratos; aqui só se diz o que rodar e o que esperar.
@@ -108,15 +112,16 @@ curl -sk https://localhost/healthz -o /dev/null -w '%{http_code}\n'
 Esperado: respostas do SPA/Caddy (não as do n8n). `N8nExposureIT` automatiza isto na pilha de testes, e
 `ComposeGuardTest` garante que o `n8n` não tem `ports` em produção.
 
-## V11. Ensaio da troca e da reversão (Telegram simulado) [S3]
+## V11. Ensaio do registro do webhook (Telegram simulado) [S3]
 
 ```bash
 sh infra/scripts/local.sh tests rehearsal
 ```
 
-Esperado: `status` → `DIRECT`; `switch` sob tráfego → `N8N`; `rollback` → `DIRECT`; `switch` de novo; cada update
-enviado ao longo do ensaio tem **exatamente uma** resposta na transcrição do simulador; `switch` com o n8n parado
-é recusado (`[N8N_NOT_HEALTHY]`) sem mexer no webhook; `verify` com segredo errado reprova com `3`.
+Esperado: `status` e `verify` aprovam; `apply` sob tráfego, repetido, mantém o webhook do n8n; cada update enviado
+ao longo do ensaio tem **exatamente uma** resposta na transcrição do simulador; `apply` com o n8n parado é recusado
+(`[N8N_NOT_HEALTHY]`) sem mexer no webhook; `setWebhook` que falha reprova com `3`; `verify` com segredo errado
+reprova com `3`.
 
 ## V12. Rotação do token de serviço (Telegram simulado) [S3]
 
@@ -132,16 +137,16 @@ Esperado: `start` ⇒ estado `DUAL` (token novo e atual aceitos, n8n usando o no
 (novo aceito, antigo recusado com `401`). Nenhuma recusa de mensagem durante a troca (sem janela). `abort`
 devolve ao estado anterior.
 
-## V13. Trocar o webhook do bot de testes de verdade [S3, manual, uma vez]
+## V13. Registrar o webhook do bot de testes de verdade [S3, manual, uma vez]
 
 ```bash
 sh infra/scripts/telegram-webhook.sh status
-sh infra/scripts/telegram-webhook.sh switch --chat-id <seu chat id>
+sh infra/scripts/telegram-webhook.sh apply --chat-id <seu chat id>
 ```
 
 Esperado: `✔` em todas as verificações, e no Telegram a resposta do `/ajuda` com o mesmo texto de hoje. Mande
-mensagens, toque nos botões, grave um áudio curto, peça o PDF: o professor não percebe diferença. Para
-voltar: `sh infra/scripts/telegram-webhook.sh rollback`.
+mensagens, toque nos botões, grave um áudio curto, peça o PDF: o professor não percebe diferença.
+(Antes da Fase 7 havia `rollback` para voltar ao caminho antigo; hoje voltar é reimplantar a versão anterior.)
 
 ## V14. Exportar um workflow de volta para o repositório [S1]
 

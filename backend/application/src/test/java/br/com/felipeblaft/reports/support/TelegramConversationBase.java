@@ -5,6 +5,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.anyUrl;
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -23,15 +24,27 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Base dos testes de conversa do Telegram (contracts/telegram-conversa.md §7): envia updates JSON
- * ao webhook com o segredo e verifica as chamadas feitas à API de bots simulada no WireMock.
+ * pelo transporte do canal (a API interna, com o executor em memória no lugar do n8n, ou o n8n
+ * real) e verifica as chamadas feitas à API de bots simulada no WireMock. As mensagens proativas
+ * saem pela outbox e são entregues na hora da publicação por {@link ProactiveOutboxDrain}, como o
+ * despachante e o n8n fariam, para que as asserções vejam o chat como o professor o vê.
  */
 @AutoConfigureMockMvc
+@TestPropertySource(
+        properties = {
+            "test.telegram.drain-proactive=true",
+            "reports.telegram-channel.orchestrator-token=orchestrator-secret",
+            "reports.telegram-channel.dispatch-interval-ms=3600000",
+            "reports.telegram-channel.connection-timeout-ms=500",
+            "reports.telegram-channel.response-timeout-ms=1500"
+        })
 public abstract class TelegramConversationBase extends IntegrationBase {
 
     public static final String SECRET = "secret-webhook-test";
@@ -41,9 +54,20 @@ public abstract class TelegramConversationBase extends IntegrationBase {
     protected static final JsonMapper JSON = JsonMapper.builder().build();
 
     /**
-     * Transporte exercitado: {@code webhook} (padrão), {@code internal} ou {@code n8n} (n8n real).
+     * Transporte exercitado: {@code internal} (padrão: API interna e executor em memória) ou {@code
+     * n8n} (n8n real).
      */
-    public static final String TRANSPORT = System.getProperty("telegram.transport", "webhook");
+    public static final String TRANSPORT = System.getProperty("telegram.transport", "internal");
+
+    /**
+     * Webhook do orquestrador simulado: recebe os lotes proativos do despachante. No modo n8n o
+     * caminho é o do {@code channel-delivery} real.
+     */
+    public static final WireMockServer ORCHESTRATOR =
+            new WireMockServer(wireMockConfig().dynamicPort());
+
+    public static final String PATH =
+            "n8n".equals(TRANSPORT) ? "/webhook/channel-delivery" : "/webhook/secret-in-path-123";
 
     /**
      * No modo n8n a API de bots simulada escuta numa porta fixa, que o contêiner do n8n alcança.
@@ -68,6 +92,7 @@ public abstract class TelegramConversationBase extends IntegrationBase {
                     : null;
 
     static {
+        ORCHESTRATOR.start();
         API_BOTS.start();
         if (BACKEND_PROXY != null) {
             BACKEND_PROXY.start();
@@ -79,6 +104,11 @@ public abstract class TelegramConversationBase extends IntegrationBase {
      * duas vezes. A transcrição do chat não pode mudar (FR-028a, SC-011).
      */
     protected static volatile boolean n8nDuplicates = Boolean.getBoolean("telegram.n8n.duplicates");
+
+    /** Modo de duplicidade ligado? (lido pela entrega proativa de teste). */
+    public static boolean n8nDuplicates() {
+        return n8nDuplicates;
+    }
 
     private static final java.util.concurrent.atomic.AtomicBoolean N8N_CHECKED =
             new java.util.concurrent.atomic.AtomicBoolean(false);
@@ -99,6 +129,13 @@ public abstract class TelegramConversationBase extends IntegrationBase {
         registration.add("reports.telegram.api-url", API_BOTS::baseUrl);
         registration.add("reports.telegram.token", () -> TOKEN);
         registration.add("reports.telegram.webhook-secret", () -> SECRET);
+        registration.add(
+                "reports.telegram-channel.orchestrator-url",
+                () -> "http://localhost:" + ORCHESTRATOR.port() + PATH);
+        if ("n8n".equals(TRANSPORT)) {
+            // o n8n responde depois de executar e confirmar o lote (R-07)
+            registration.add("reports.telegram-channel.response-timeout-ms", () -> "30000");
+        }
     }
 
     @BeforeEach
@@ -114,6 +151,18 @@ public abstract class TelegramConversationBase extends IntegrationBase {
     @BeforeEach
     void cleanBotApi() {
         resetBotApi();
+        resetOrchestrator();
+    }
+
+    /** Orquestrador simulado no padrão: aceita (200) todo lote; no modo n8n, encaminha ao n8n. */
+    protected void resetOrchestrator() {
+        ORCHESTRATOR.resetAll();
+        ORCHESTRATOR.stubFor(
+                post(urlPathEqualTo(PATH))
+                        .willReturn(
+                                "n8n".equals(TRANSPORT)
+                                        ? aResponse().proxiedFrom(N8nTestSupport.N8N_URL)
+                                        : aResponse().withStatus(200)));
     }
 
     /** Apaga as chamadas registradas e volta ao padrão: toda chamada responde {@code ok}. */
@@ -134,27 +183,17 @@ public abstract class TelegramConversationBase extends IntegrationBase {
     }
 
     protected void sendUpdate(String json) throws Exception {
-        if ("internal".equals(TRANSPORT)) {
-            sendThroughInternalChannel(json);
-            return;
-        }
         if ("n8n".equals(TRANSPORT)) {
             sendThroughN8n(json);
             return;
         }
-        mvc.perform(
-                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
-                                        "/telegram/webhook")
-                                .header("X-Telegram-Bot-Api-Secret-Token", SECRET)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(json))
-                .andExpect(status().isOk());
+        sendThroughInternalChannel(json);
     }
 
     /**
-     * Modo {@code interno}: o update vai à API interna do canal (token de serviço e segredo do
+     * Modo {@code internal}: o update vai à API interna do canal (token de serviço e segredo do
      * webhook), a resposta é validada contra o esquema v1 e o executor simulado faz o que o n8n
-     * fará, traduzindo as ações para as mesmas chamadas à API de bots que o envio direto faria.
+     * fará, traduzindo as ações para as chamadas à API de bots.
      */
     private void sendThroughInternalChannel(String json) throws Exception {
         var result =

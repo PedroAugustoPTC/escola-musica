@@ -43,14 +43,9 @@ require_env() {
     [ -n "$(value "$key")" ] || missing="$missing $key"
   done
   if [ "$(value TELEGRAM_ENABLED)" = "true" ]; then
-    for key in TELEGRAM_BOT_TOKEN TELEGRAM_API_ID TELEGRAM_API_HASH TELEGRAM_WEBHOOK_SECRET N8N_ENCRYPTION_KEY; do
+    for key in TELEGRAM_BOT_TOKEN TELEGRAM_API_ID TELEGRAM_API_HASH TELEGRAM_WEBHOOK_SECRET N8N_ENCRYPTION_KEY TELEGRAM_CHANNEL_CURRENT_TOKEN TELEGRAM_CHANNEL_ORCHESTRATOR_TOKEN; do
       [ -n "$(value "$key")" ] || missing="$missing $key"
     done
-    if [ "$(value TELEGRAM_TRANSPORT)" = "N8N" ]; then
-      for key in TELEGRAM_CHANNEL_CURRENT_TOKEN TELEGRAM_CHANNEL_ORCHESTRATOR_TOKEN; do
-        [ -n "$(value "$key")" ] || missing="$missing $key"
-      done
-    fi
   fi
   if [ "$(value AI_PROVIDERS)" = "real" ]; then
     for key in TRANSCRIPTION_API_KEY LLM_API_KEY; do
@@ -133,7 +128,7 @@ case "$command" in
     $LOCAL up -d --build --remove-orphans $(services)
     wait_until_healthy
     if [ "$(value TELEGRAM_ENABLED)" = "true" ]; then
-      # o script de troca é o dono do registro do webhook do estado atual (DIRECT ou N8N)
+      # o script do webhook é o único dono do registro do webhook, que aponta para o n8n
       sh infra/scripts/telegram-webhook.sh apply --env local         || echo "Aviso: o registro/verificação do webhook falhou; veja: sh infra/scripts/telegram-webhook.sh status" >&2
     fi
     if [ "$demo_data" = "true" ]; then
@@ -209,7 +204,7 @@ case "$command" in
         $TESTS run --rm --build --use-aliases tests-n8n
         ;;
       rehearsal)
-        # ensaio da troca do webhook e da rotação do token: backend real, n8n real e simulador do Telegram
+        # ensaio do registro do webhook e da rotação do token: backend real, n8n real e simulador do Telegram
         cp infra/tests/rehearsal/rehearsal.env.template infra/tests/rehearsal/rehearsal.env
         REHEARSAL="$TESTS --env-file infra/tests/rehearsal/rehearsal.env"
         rehearsal_status=0

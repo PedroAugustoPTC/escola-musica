@@ -74,12 +74,9 @@ reports:
     api-url: ${TELEGRAM_API_URL:http://telegram-bot-api:8081}
     token: ${TELEGRAM_BOT_TOKEN:}
     webhook-secret: ${TELEGRAM_WEBHOOK_SECRET:}
-    webhook-url: ${TELEGRAM_WEBHOOK_URL:http://backend:8080/telegram/webhook}
     files-dir: ${TELEGRAM_FILES_DIR:/var/lib/telegram-bot-api}
     pending-audio-minutes: ${PENDING_AUDIO_MINUTES:30}
   telegram-channel:
-    # DIRECT = envio direto à API de bots (padrão); ORCHESTRATOR = outbox entregue ao n8n (feature 004)
-    proactive-delivery: ${TELEGRAM_CHANNEL_DELIVERY:DIRECT}
     current-token: ${TELEGRAM_CHANNEL_CURRENT_TOKEN:}
     next-token: ${TELEGRAM_CHANNEL_NEXT_TOKEN:}
     orchestrator-url: ${TELEGRAM_CHANNEL_ORCHESTRATOR_URL:}

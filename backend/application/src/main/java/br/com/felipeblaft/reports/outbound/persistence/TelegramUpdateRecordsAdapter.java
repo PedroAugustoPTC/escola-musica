@@ -17,12 +17,6 @@ class TelegramUpdateRecordsAdapter implements TelegramUpdateRecords {
 
     @Override
     @Transactional
-    public boolean registerIfNew(long updateId, Instant now) {
-        return jpa.registerIfNew(updateId, now) > 0;
-    }
-
-    @Override
-    @Transactional
     public boolean registerIfNew(long updateId, Instant now, String origin) {
         return jpa.registerIfNewWithOrigin(updateId, now, origin) > 0;
     }

@@ -82,27 +82,16 @@ wait_pending_zero() {
   return 1
 }
 
-# Leva a pilha ao estado inicial pedido (DIRECT ou N8N): reescreve as três chaves do estado e recria o backend, que
-# registra o webhook correspondente no simulador.
+# Leva a pilha ao estado inicial: zera o simulador, limpa o token seguinte, recria o backend e o n8n e registra o webhook
+# do n8n no simulador (o registro é do telegram-webhook.sh; o backend não registra webhook).
 prepare_state() {
-  state="$1"
   control_post /_control/reset '{}' >/dev/null
   write_env_key TELEGRAM_CHANNEL_NEXT_TOKEN ""
-  if [ "$state" = "N8N" ]; then
-    write_env_key TELEGRAM_TRANSPORT N8N
-    write_env_key TELEGRAM_CHANNEL_DELIVERY ORCHESTRATOR
-    write_env_key TELEGRAM_WEBHOOK_URL http://n8n-rehearsal:5678/webhook/telegram-update
-    write_env_key TELEGRAM_CHANNEL_ORCHESTRATOR_URL http://n8n-rehearsal:5678/webhook/channel-delivery
-  else
-    write_env_key TELEGRAM_TRANSPORT DIRECT
-    write_env_key TELEGRAM_CHANNEL_DELIVERY DIRECT
-    write_env_key TELEGRAM_WEBHOOK_URL http://backend-rehearsal:8080/telegram/webhook
-    write_env_key TELEGRAM_CHANNEL_ORCHESTRATOR_URL ""
-  fi
   recreate_service "$BACKEND_SERVICE"
   recreate_service "$N8N_SERVICE"
   wait_healthy "$BACKEND_SERVICE" 240
   wait_healthy "$N8N_SERVICE" 240
+  sh infra/scripts/telegram-webhook.sh apply --env local >/dev/null 2>&1 || true
   waited=0
   while [ "$waited" -lt 60 ] && [ -z "$(webhook_url)" ]; do
     sleep 1

@@ -8,19 +8,14 @@ import br.com.felipeblaft.reports.inbound.telegram.channel.ChannelActionMapper.M
 import br.com.felipeblaft.reports.usecase.channel.SaveChannelActionsUseCase;
 import java.util.List;
 import java.util.UUID;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 /**
- * Caminho do orquestrador: as notificações proativas viram ações v1 gravadas na outbox, de forma
- * idempotente por evento (FR-014), e o despachante as entrega ao n8n com retentativa. Nada é
- * enviado direto à API de bots enquanto este caminho está ativo (FR-019).
+ * Entrega proativa pelo orquestrador: as notificações viram ações v1 gravadas na outbox, de forma
+ * idempotente por evento (FR-014), e o despachante as entrega ao n8n com retentativa. O backend
+ * nunca envia mensagem direto à API de bots (FR-019).
  */
 @Component
-@ConditionalOnProperty(
-        prefix = "reports.telegram-channel",
-        name = "proactive-delivery",
-        havingValue = "ORCHESTRATOR")
 public class TelegramOutboxPublicationAdapter implements TelegramActionPublicationPort {
 
     private final ChannelActionMapper mapper;

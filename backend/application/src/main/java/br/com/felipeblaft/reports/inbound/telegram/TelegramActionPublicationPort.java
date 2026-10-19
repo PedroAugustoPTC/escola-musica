@@ -5,9 +5,8 @@ import java.util.UUID;
 
 /**
  * Saída das notificações proativas ao professor (etapas, resultado, demora e avisos entre canais),
- * isto é, o que não responde a um update. Exatamente uma implementação fica ativa por configuração
- * (R-10, FR-019): o envio direto à API de bots (padrão) ou a outbox entregue ao orquestrador. A
- * entrada define a porta; a saída a implementa.
+ * isto é, o que não responde a um update. A única implementação grava a outbox, que é entregue ao
+ * orquestrador (n8n; FR-019). A entrada define a porta; a saída a implementa.
  */
 public interface TelegramActionPublicationPort {
 

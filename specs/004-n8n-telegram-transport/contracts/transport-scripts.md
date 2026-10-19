@@ -23,19 +23,22 @@ o `.env`**.
 
 ## 1. `telegram-webhook.sh`
 
+> **Depois da remoção do caminho antigo (Fase 7):** o n8n é o único transporte, então o script **não troca nem
+> reverte** mais nada: `switch`, `rollback`, `--yes`, `--dry-run`, o estado `DIRECT`/`N8N` e as quatro chaves de estado
+> deixaram de existir. Ele é o **único dono do registro do webhook** (o backend registra só os comandos do bot).
+> Reverter passa a ser reimplantar a versão anterior da aplicação.
+
 ```text
-sh infra/scripts/telegram-webhook.sh <command> [--env local|prod] [--yes] [--dry-run] [--chat-id <id>]
+sh infra/scripts/telegram-webhook.sh <command> [--env local|prod] [--chat-id <id>]
 ```
 
 | Comando | O que faz | Altera |
 |---|---|---|
-| `status` | mostra o estado do transporte (`DIRECT`/`N8N`/`INCONSISTENT`), o webhook registrado (`url`, `pending_update_count`, `last_error_message` truncado), a saúde do n8n e do backend, e quem entrega as proativas | nada |
-| `switch` | leva o transporte para o n8n (data-model §4.1). Sequência: pré-condições → guarda o estado anterior → ajusta `.env` → recria **somente** o `backend` → `setWebhook` → `verify`. Em reprovação do `verify`, **restaura** e sai `3` | `.env`, contêiner `backend`, webhook |
-| `rollback` | leva o transporte de volta ao caminho antigo; mesma verificação. Existe enquanto o caminho antigo existir (some na fatia S5) | idem |
-| `verify` | verificação pós-troca, somente leitura exceto a sonda; reprova (`3`) se o destino do webhook, a entrega proativa ou a ida e volta divergirem do estado esperado | nada |
-| `apply` | registra o webhook do **estado atual** (`setWebhook` idempotente) e roda o `verify`; usado por `local.sh up` e `deploy.sh` depois de tudo saudável (e, depois da S5, é o único dono do registro) | webhook |
+| `status` | mostra o webhook registrado, a saúde do n8n e se o webhook é o do n8n (`3` se não for) | nada |
+| `verify` | verificação somente leitura exceto a sonda; reprova (`3`) se o destino do webhook, a entrega proativa ou a ida e volta divergirem do esperado | nada |
+| `apply` | pré-condições → `setWebhook` do n8n (idempotente) → `verify`; usado por `local.sh up` e `deploy.sh` depois de tudo saudável | webhook |
 
-### 1.1 Pré-condições do `switch` (códigos de motivo)
+### 1.1 Pré-condições do `apply` (códigos de motivo)
 
 | Verificação | Código | Efeito se falhar |
 |---|---|---|
@@ -45,17 +48,18 @@ sh infra/scripts/telegram-webhook.sh <command> [--env local|prod] [--yes] [--dry
 | `TELEGRAM_WEBHOOK_SECRET` casa `^[A-Za-z0-9_-]{1,256}$` | `INVALID_WEBHOOK_SECRET` | recusa; aviso (sem recusa) se tiver menos de 32 caracteres |
 | `TELEGRAM_CHANNEL_CURRENT_TOKEN` e `TELEGRAM_CHANNEL_ORCHESTRATOR_TOKEN` preenchidos e diferentes entre si | `TOKENS_MISSING` | recusa |
 | `TELEGRAM_ENABLED=true` e `TELEGRAM_BOT_TOKEN` preenchido | `TELEGRAM_DISABLED` | recusa |
-| estado atual é `DIRECT` | — | já está em `N8N`: sai `0` sem alterar (idempotente) |
+
+Com `TELEGRAM_ENABLED` diferente de `true`, o `apply` sai `0` sem fazer nada.
 
 ### 1.2 `verify` (todas as verificações; falha de qualquer uma ⇒ saída `3`)
 
 | # | Verificação | Código de motivo |
 |---|---|---|
-| 1 | `getWebhookInfo`: `url` igual à esperada para o estado (`http://n8n:5678/webhook/telegram-update` ou `http://backend:8080/telegram/webhook`); `allowed_updates` = `message`, `callback_query`; sem `last_error_message` posterior à troca | `WEBHOOK_MISMATCH` |
+| 1 | `getWebhookInfo`: `url` igual a `http://n8n:5678/webhook/telegram-update`; `allowed_updates` = `message`, `callback_query`; sem `last_error_message` recente | `WEBHOOK_MISMATCH` |
 | 2 | **sonda de segredo, negativa**: `POST` ao webhook com segredo diferente responde `>= 400` | `SECRET_NOT_ENFORCED` |
 | 3 | **sonda de segredo, positiva e sem efeito**: `POST` com o segredo do `.env` e um update de tipo não suportado (`update_id` fora da faixa real) responde `2xx` | `SECRET_MISMATCH` |
-| 4 | em `N8N`: `transport-health/deep` = `200`; em `DIRECT`: n/a | `DEEP_HEALTH_FAILED` |
-| 5 | quem entrega as proativas, lido do ambiente do contêiner do `backend` (apenas o nome do modo, nunca valores secretos), bate com o estado (`ORCHESTRATOR`/`DIRECT`) | `DELIVERY_MODE_MISMATCH` |
+| 4 | `transport-health/deep` = `200` | `DEEP_HEALTH_FAILED` |
+| 5 | a URL de entrega proativa, lida do ambiente do contêiner do `backend` (não tem segredo), é a do `channel-delivery` do n8n | `DELIVERY_TARGET_MISMATCH` |
 | 6 | só com `--chat-id` (ou `TELEGRAM_VERIFY_CHAT_ID`): **ida e volta real** — injeta no webhook um update `ajuda` desse chat e confere que o backend o aceitou (`2xx`); a resposta ao chat é a do catálogo do backend, o script não escreve texto | `ROUND_TRIP_FAILED` |
 
 A sonda 3 usa um `update_id` alto e fixo reservado (`2147000000 + n`), de um tipo que o backend ignora
@@ -64,16 +68,7 @@ A sonda 3 usa um `update_id` alto e fixo reservado (`2147000000 + n`), de um tip
 ### 1.3 Como o `setWebhook` é feito
 
 `setWebhook` com `url`, `secret_token` (o do `.env`, já validado), `allowed_updates=["message","callback_query"]` e
-`max_connections=10`, os mesmos parâmetros de `TelegramConfig.register`. Resposta `ok:true` obrigatória. O
-backend, ao ser recriado, registra a **mesma** URL pelo caminho já existente (a variável `TELEGRAM_WEBHOOK_URL`
-agora vem do `.env`), então os dois registros convergem e não brigam.
-
-### 1.4 Garantias de "um caminho por vez"
-
-- as três chaves de estado mudam juntas ou o script restaura todas (data-model §4.1);
-- o `backend` é recriado **uma vez** por troca; durante a recriação, updates pendentes ficam retidos pelo
-  servidor de bots e são reenviados (sem perda); a deduplicação por `update_id` evita reprocessar;
-- o script nunca roda `deleteWebhook` nem polling; `rollback` é o espelho de `switch`.
+`max_connections=10`. Resposta `ok:true` obrigatória. O script nunca roda `deleteWebhook` nem polling.
 
 ## 2. `rotate-service-token.sh`
 
@@ -122,12 +117,13 @@ sh infra/scripts/n8n.sh <command> [--env local|prod] [--deep]
 | `services()` inclui `n8n` quando `TELEGRAM_ENABLED=true`; `wait_until_healthy` espera também `n8n healthy` | `local.sh` |
 | depois de saudável: `telegram-webhook.sh apply` (a partir da S3; antes disso o backend registra sozinho) | `local.sh up`, `deploy.sh` |
 | nova suíte `tests n8n` (e `all` passa a incluí-la); novo `tests rehearsal` | `local.sh` |
-| `require_env` exige `N8N_ENCRYPTION_KEY` com Telegram habilitado, e os tokens do canal quando `TELEGRAM_TRANSPORT=N8N` | `local.sh` |
-| `deploy.sh` não troca o transporte: troca é sempre uma ação deliberada do mantenedor | `deploy.sh` |
+| `require_env` exige `N8N_ENCRYPTION_KEY` e os tokens do canal com Telegram habilitado | `local.sh` |
+| `deploy.sh` roda `telegram-webhook.sh apply` depois de tudo saudável (o n8n é o único transporte) | `deploy.sh` |
 
 ## 5. O que os testes cobrem destes scripts
 
-`tests-rehearsal` (R-12) roda `status`, `switch`, `verify`, `rollback`, `switch` com tráfego contínuo, `switch`
-com o n8n parado (espera `1` e webhook intacto), `verify` com segredo errado (espera `3`), `rotate-service-token.sh
+`tests-rehearsal` (R-12) roda `status`, `verify`, `apply` com tráfego contínuo e repetido (idempotente), `apply`
+com o n8n parado (espera `1` e webhook intacto), `apply` com `setWebhook` falhando (espera `3`), `verify` com
+segredo errado (espera `3`), `rotate-service-token.sh
 start/finish/abort` com tráfego, e `n8n.sh check` (com e sem edição manual na instância). Em todas as fases
 confere: cada update tem **exatamente uma** resposta na transcrição do simulador.
