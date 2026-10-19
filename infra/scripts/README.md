@@ -312,6 +312,10 @@ sh infra/scripts/rotate-service-token.sh start|finish|abort
 há troca nem `rollback` (reverter é reimplantar a versão anterior). O passo a passo do registro e da rotação está em
 [`infra/README.md`](../README.md).
 
+## Repetir só no limite de taxa do registro (CI)
+
+`sh infra/scripts/retry-rate-limit.sh <comando>` repete o comando (até 5 vezes, esperando 30 s a mais a cada tentativa) quando a saída traz `429 Too Many Requests`; qualquer outra falha sai na hora com o mesmo código. É o que o job `n8n` do CI usa nos passos que constroem a imagem do n8n.
+
 ## Testes
 
 ```bash

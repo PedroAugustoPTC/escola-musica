@@ -66,6 +66,8 @@ jobs:
 
   # Feature 004: o n8n real em contêiner (imagem de produção, Telegram e backend simulados): utilitários, contrato dos
   # workflows e, nas fases seguintes, a suíte de conversa e de paridade pelo n8n, duplicidade, resiliência e privacidade.
+  # O docker.n8n.io limita a taxa (429) dos executores do GitHub de vez em quando; os passos abaixo repetem só nesse caso
+  # (infra/scripts/retry-rate-limit.sh). Qualquer outra falha reprova na hora.
   n8n:
     name: n8n (transporte do Telegram em contêiner)
     runs-on: ubuntu-latest
@@ -75,12 +77,12 @@ jobs:
       - uses: actions/checkout@v5
       - name: Utilitários do n8n e do simulador
         run: |
-          docker compose -f infra/compose.test.yaml run --rm --build tests-n8n-ops
-          docker compose -f infra/compose.test.yaml run --rm --build tests-simulator
+          sh infra/scripts/retry-rate-limit.sh docker compose -f infra/compose.test.yaml run --rm --build tests-n8n-ops
+          sh infra/scripts/retry-rate-limit.sh docker compose -f infra/compose.test.yaml run --rm --build tests-simulator
       - name: Testes pelo n8n
-        run: docker compose -f infra/compose.test.yaml run --rm --build --use-aliases tests-n8n
+        run: sh infra/scripts/retry-rate-limit.sh docker compose -f infra/compose.test.yaml run --rm --build --use-aliases tests-n8n
       - name: Ensaio da troca do webhook e da rotação do token
-        run: sh infra/scripts/local.sh tests rehearsal
+        run: sh infra/scripts/retry-rate-limit.sh sh infra/scripts/local.sh tests rehearsal
       - name: Logs do n8n
         if: failure()
         run: docker compose -f infra/compose.test.yaml logs --no-color n8n-test | tail -n 200
