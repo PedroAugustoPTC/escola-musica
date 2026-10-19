@@ -89,8 +89,8 @@ prepare_state() {
   write_env_key TELEGRAM_CHANNEL_NEXT_TOKEN ""
   recreate_service "$BACKEND_SERVICE"
   recreate_service "$N8N_SERVICE"
-  wait_healthy "$BACKEND_SERVICE" 240
-  wait_healthy "$N8N_SERVICE" 240
+  wait_healthy "$BACKEND_SERVICE" 300
+  wait_healthy "$N8N_SERVICE" 300
   sh infra/scripts/telegram-webhook.sh apply --env local >/dev/null 2>&1 || true
   waited=0
   while [ "$waited" -lt 60 ] && [ -z "$(webhook_url)" ]; do
