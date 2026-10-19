@@ -51,9 +51,9 @@ Telegram próprio em Node, sem dependências (`infra/telegram-simulator/`, só p
 
 **Storage**: o n8n usa SQLite em volume `n8n-data` **somente** para configuração própria (chave de cifra gerada
 a partir de `N8N_ENCRYPTION_KEY`, ajustes e, no ambiente local, o usuário do editor). Nenhum dado de domínio
-é guardado de propósito; o instantâneo inicial de cada execução (texto do update) e o PDF em trânsito só são
-removidos pela poda do n8n, acelerada para **≈ 2 min** (spike S-5/F-1, R-13: janela residual declarada, pendente
-de aceite do dono do produto). Binários em trânsito ficam em `tmpfs`.
+é guardado de propósito; o instantâneo inicial de cada execução (texto do update e das ações) e o PDF em trânsito
+existem só em **memória**: o SQLite do n8n e `binaryData` ficam em `tmpfs` e a poda os apaga em ≈ 2 min (spike
+S-5/F-1 e a medição da Fase 5 em R-13: apagar linhas não zera o arquivo, por isso o banco não pode ir para disco).
 
 **Testing**: `tests-backend` (guardiões estáticos, sem n8n) e um novo `tests-n8n` em `infra/compose.test.yaml`
 (contrato dos workflows, conversa e paridade pelo n8n, duplicidade, resiliência), mais `tests-rehearsal` (troca,

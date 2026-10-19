@@ -44,21 +44,31 @@
       }
     },
     {
-      "id": "finish-4",
+      "id": "finish-5",
       "name": "Finish",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
       "position": [
         720,
         -160
       ],
       "parameters": {
-        "language": "javaScript",
-        "jsCode": "return [{ json: { ok: true } }];"
+        "assignments": {
+          "assignments": [
+            {
+              "id": "assign-4",
+              "name": "ok",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
       }
     },
     {
-      "id": "isnone-6",
+      "id": "isnone-7",
       "name": "IsNone",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
@@ -75,7 +85,7 @@
           },
           "conditions": [
             {
-              "id": "condition-5",
+              "id": "condition-6",
               "leftValue": "={{ $json.type }}",
               "rightValue": "NONE",
               "operator": {
@@ -90,7 +100,7 @@
       }
     },
     {
-      "id": "state-7",
+      "id": "state-8",
       "name": "State",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -129,7 +139,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "gate-21",
+      "id": "gate-22",
       "name": "Gate",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3,
@@ -149,7 +159,7 @@
                 },
                 "conditions": [
                   {
-                    "id": "condition-8",
+                    "id": "condition-9",
                     "leftValue": "={{ $json.statusCode }}",
                     "rightValue": 200,
                     "operator": {
@@ -158,7 +168,7 @@
                     }
                   },
                   {
-                    "id": "condition-9",
+                    "id": "condition-10",
                     "leftValue": "={{ $json.body.state }}",
                     "rightValue": "PENDING",
                     "operator": {
@@ -181,7 +191,7 @@
                 },
                 "conditions": [
                   {
-                    "id": "condition-10",
+                    "id": "condition-11",
                     "leftValue": "={{ $json.statusCode }}",
                     "rightValue": 200,
                     "operator": {
@@ -190,7 +200,7 @@
                     }
                   },
                   {
-                    "id": "condition-11",
+                    "id": "condition-12",
                     "leftValue": "={{ $json.body.state }}",
                     "rightValue": "DELIVERED",
                     "operator": {
@@ -213,7 +223,7 @@
                 },
                 "conditions": [
                   {
-                    "id": "condition-12",
+                    "id": "condition-13",
                     "leftValue": "={{ $json.statusCode }}",
                     "rightValue": 404,
                     "operator": {
@@ -236,7 +246,7 @@
                 },
                 "conditions": [
                   {
-                    "id": "condition-13",
+                    "id": "condition-14",
                     "leftValue": "={{ $json.statusCode }}",
                     "rightValue": 200,
                     "operator": {
@@ -245,7 +255,7 @@
                     }
                   },
                   {
-                    "id": "condition-14",
+                    "id": "condition-15",
                     "leftValue": "={{ $json.body.state }}",
                     "rightValue": "EXECUTED",
                     "operator": {
@@ -268,7 +278,7 @@
                 },
                 "conditions": [
                   {
-                    "id": "condition-15",
+                    "id": "condition-16",
                     "leftValue": "={{ $json.statusCode }}",
                     "rightValue": 200,
                     "operator": {
@@ -277,7 +287,7 @@
                     }
                   },
                   {
-                    "id": "condition-16",
+                    "id": "condition-17",
                     "leftValue": "={{ $json.body.state }}",
                     "rightValue": "FAILED",
                     "operator": {
@@ -300,7 +310,7 @@
                 },
                 "conditions": [
                   {
-                    "id": "condition-17",
+                    "id": "condition-18",
                     "leftValue": "={{ $json.statusCode }}",
                     "rightValue": 200,
                     "operator": {
@@ -309,7 +319,7 @@
                     }
                   },
                   {
-                    "id": "condition-18",
+                    "id": "condition-19",
                     "leftValue": "={{ $json.body.state }}",
                     "rightValue": "PERMANENTLY_FAILED",
                     "operator": {
@@ -332,7 +342,7 @@
                 },
                 "conditions": [
                   {
-                    "id": "condition-19",
+                    "id": "condition-20",
                     "leftValue": "={{ $json.statusCode }}",
                     "rightValue": 200,
                     "operator": {
@@ -341,7 +351,7 @@
                     }
                   },
                   {
-                    "id": "condition-20",
+                    "id": "condition-21",
                     "leftValue": "={{ $json.body.state }}",
                     "rightValue": "DISCARDED",
                     "operator": {
@@ -363,21 +373,31 @@
       }
     },
     {
-      "id": "abort-22",
+      "id": "abort-24",
       "name": "Abort",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
       "position": [
         1440,
         480
       ],
       "parameters": {
-        "language": "javaScript",
-        "jsCode": "return [{ json: { ok: false } }];"
+        "assignments": {
+          "assignments": [
+            {
+              "id": "assign-23",
+              "name": "ok",
+              "value": false,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
       }
     },
     {
-      "id": "kind-28",
+      "id": "kind-30",
       "name": "Kind",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3,
@@ -397,7 +417,7 @@
                 },
                 "conditions": [
                   {
-                    "id": "condition-23",
+                    "id": "condition-25",
                     "leftValue": "={{ $('Loop').item.json.type }}",
                     "rightValue": "DOCUMENT",
                     "operator": {
@@ -420,7 +440,7 @@
                 },
                 "conditions": [
                   {
-                    "id": "condition-24",
+                    "id": "condition-26",
                     "leftValue": "={{ $('Loop').item.json.type }}",
                     "rightValue": "MESSAGE",
                     "operator": {
@@ -443,7 +463,7 @@
                 },
                 "conditions": [
                   {
-                    "id": "condition-25",
+                    "id": "condition-27",
                     "leftValue": "={{ $('Loop').item.json.type }}",
                     "rightValue": "EDIT",
                     "operator": {
@@ -466,7 +486,7 @@
                 },
                 "conditions": [
                   {
-                    "id": "condition-26",
+                    "id": "condition-28",
                     "leftValue": "={{ $('Loop').item.json.type }}",
                     "rightValue": "CALLBACK_REPLY",
                     "operator": {
@@ -489,7 +509,7 @@
                 },
                 "conditions": [
                   {
-                    "id": "condition-27",
+                    "id": "condition-29",
                     "leftValue": "={{ $('Loop').item.json.type }}",
                     "rightValue": "STEP_MESSAGE",
                     "operator": {
@@ -511,7 +531,7 @@
       }
     },
     {
-      "id": "build-29",
+      "id": "build-31",
       "name": "Build",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -525,7 +545,7 @@
       }
     },
     {
-      "id": "send-30",
+      "id": "send-32",
       "name": "Send",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -559,52 +579,79 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "result-31",
+      "id": "result-34",
       "name": "Result",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
       "position": [
         2640,
         -160
       ],
       "parameters": {
-        "language": "javaScript",
-        "mode": "runOnceForEachItem",
-        "jsCode": "const action = $('Loop').item.json;\nconst response = $input.item.json;\nconst reply = response.body && typeof response.body === 'object' ? response.body : {};\nconst description = typeof reply.description === 'string' ? reply.description.toLowerCase() : '';\nconst status = response.statusCode;\nlet reasonCode = null;\nif (response.error !== undefined) {\n  reasonCode = 'TELEGRAM_ERROR';\n} else if (Math.floor(status / 100) !== 2) {\n  if (description.includes('message is not modified')) {\n    reasonCode = null;\n  } else if (description.includes('message to edit not found') || description.includes(\"message can't be edited\") || description.includes('message_id_invalid')) {\n    reasonCode = 'MESSAGE_NOT_EDITABLE';\n  } else if (status === 403 || description.includes('chat not found')) {\n    reasonCode = 'CHAT_UNAVAILABLE';\n  } else if (status === 429) {\n    reasonCode = 'RATE_LIMITED';\n  } else {\n    reasonCode = 'TELEGRAM_ERROR';\n  }\n}\nconst result = { actionId: action.actionId, outcome: reasonCode === null ? 'EXECUTED' : 'FAILED' };\nif (reasonCode !== null) {\n  result.reasonCode = reasonCode;\n} else if (action.type === 'EDIT') {\n  result.messageId = action.messageId;\n} else if (action.type === 'STEP_MESSAGE' && action.editMessageId !== undefined && action.editMessageId !== null) {\n  result.messageId = action.editMessageId;\n} else if (reply.result && typeof reply.result.message_id === 'number') {\n  result.messageId = reply.result.message_id;\n}\nreturn { json: { version: 'v1', results: [result] } };"
+        "assignments": {
+          "assignments": [
+            {
+              "id": "assign-33",
+              "name": "reasonCode",
+              "value": "={{ $json.error !== undefined ? 'TELEGRAM_ERROR' : Math.floor($json.statusCode / 100) === 2 ? '' : (d => d.includes('message is not modified') ? '' : (d.includes('message to edit not found') || d.includes(\"message can't be edited\") || d.includes('message_id_invalid')) ? 'MESSAGE_NOT_EDITABLE' : ($json.statusCode === 403 || d.includes('chat not found')) ? 'CHAT_UNAVAILABLE' : $json.statusCode === 429 ? 'RATE_LIMITED' : 'TELEGRAM_ERROR')(String(($json.body && $json.body.description) || '').toLowerCase()) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
       }
     },
     {
-      "id": "unsupported-32",
+      "id": "unsupported-36",
       "name": "Unsupported",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
       "position": [
         1680,
         480
       ],
       "parameters": {
-        "language": "javaScript",
-        "mode": "runOnceForEachItem",
-        "jsCode": "const action = $('Loop').item.json;\nreturn { json: { version: 'v1', results: [{ actionId: action.actionId, outcome: 'FAILED', reasonCode: 'ACTION_NOT_SUPPORTED' }] } };"
+        "assignments": {
+          "assignments": [
+            {
+              "id": "assign-35",
+              "name": "reasonCode",
+              "value": "ACTION_NOT_SUPPORTED",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
       }
     },
     {
-      "id": "unavailable-33",
+      "id": "unavailable-38",
       "name": "Unavailable",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
       "position": [
         2160,
         480
       ],
       "parameters": {
-        "language": "javaScript",
-        "mode": "runOnceForEachItem",
-        "jsCode": "const action = $('Loop').item.json;\nreturn { json: { version: 'v1', results: [{ actionId: action.actionId, outcome: 'FAILED', reasonCode: 'DOCUMENT_UNAVAILABLE' }] } };"
+        "assignments": {
+          "assignments": [
+            {
+              "id": "assign-37",
+              "name": "reasonCode",
+              "value": "DOCUMENT_UNAVAILABLE",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
       }
     },
     {
-      "id": "confirm-34",
+      "id": "confirm-39",
       "name": "Confirm",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -627,7 +674,7 @@
         "sendBody": true,
         "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ $json }}",
+        "jsonBody": "={{ (action => ({ version: 'v1', results: [Object.assign({ actionId: action.actionId, outcome: $json.reasonCode === '' ? 'EXECUTED' : 'FAILED' }, $json.reasonCode !== '' ? { reasonCode: $json.reasonCode } : {}, $json.reasonCode === '' && action.type === 'EDIT' ? { messageId: action.messageId } : {}, $json.reasonCode === '' && action.type === 'STEP_MESSAGE' && action.editMessageId !== undefined && action.editMessageId !== null ? { messageId: action.editMessageId } : {}, $json.reasonCode === '' && action.type !== 'EDIT' && !(action.type === 'STEP_MESSAGE' && action.editMessageId !== undefined && action.editMessageId !== null) && $json.body && $json.body.result && typeof $json.body.result.message_id === 'number' ? { messageId: $json.body.result.message_id } : {})] }))($('Loop').item.json) }}",
         "options": {
           "redirect": {
             "redirect": {
@@ -643,7 +690,7 @@
       "waitBetweenTries": 1000
     },
     {
-      "id": "fetch-35",
+      "id": "fetch-40",
       "name": "Fetch",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -682,7 +729,7 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "haspdf-37",
+      "id": "haspdf-42",
       "name": "HasPdf",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
@@ -699,7 +746,7 @@
           },
           "conditions": [
             {
-              "id": "condition-36",
+              "id": "condition-41",
               "leftValue": "={{ $json.statusCode }}",
               "rightValue": 200,
               "operator": {
@@ -714,7 +761,7 @@
       }
     },
     {
-      "id": "prepare-38",
+      "id": "prepare-43",
       "name": "Prepare",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -729,7 +776,7 @@
       }
     },
     {
-      "id": "senddocument-39",
+      "id": "senddocument-44",
       "name": "SendDocument",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,

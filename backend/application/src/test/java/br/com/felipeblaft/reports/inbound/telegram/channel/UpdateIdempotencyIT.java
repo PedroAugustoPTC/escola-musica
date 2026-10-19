@@ -216,14 +216,19 @@ class UpdateIdempotencyIT extends TelegramConversationBase {
     }
 
     @Test
-    void recentRowInProcessingReturnsEmptyListWithoutInventingError() throws Exception {
+    void recentRowStillInProcessingAsksTheTransportToRetryWithoutInventingError() throws Exception {
         long update = nextUpdate();
         jdbc.update(
                 "insert into processed_telegram_update (update_id, received_at, origin) values (?, ?, 'INTERNAL')",
                 update,
                 Timestamp.from(AdjustableClock.DEFAULT.minus(Duration.ofSeconds(2))));
-        JsonNode response = update(messageJson(update, USER_CLARA, "\"text\": \"oi\""));
-        assertThat(response.get("actions")).isEmpty();
+        mvc.perform(
+                        post(BASE + "/update")
+                                .header("X-N8N-Service-Token", TOKEN_SERVICE)
+                                .header("X-Telegram-Bot-Api-Secret-Token", SECRET)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(messageJson(update, USER_CLARA, "\"text\": \"oi\"")))
+                .andExpect(status().isServiceUnavailable());
         assertThat(jdbc.queryForObject("select count(*) from channel_action", Integer.class))
                 .isZero();
     }

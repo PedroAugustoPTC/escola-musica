@@ -206,20 +206,20 @@ recusas e sem respostas duplicadas.
 
 ### Testes (devem FALHAR antes da implementação) ⚠️
 
-- [ ] T067 [P] [US5] `N8nSecurityIT` em `T/transport/n8n/N8nSecurityIT.java`: segredo do webhook ausente/errado ⇒ backend `401` ⇒ n8n `503` sem enviar nada; token de serviço errado no n8n ⇒ `deep` mostra `backend:unauthorized` e update ⇒ `503`; dois tokens aceitos pelo backend ao mesmo tempo (n8n com `CURRENT`, depois com `NEXT`) sem recusa; o n8n não valida o segredo do Telegram por conta própria; nenhuma chamada a `getFile`
-- [ ] T068 [P] [US2] `N8nPrivacyIT` em `T/transport/n8n/N8nPrivacyIT.java` (FR-031, SC-005): depois da suíte, **aguarda a poda de ≈ 2 min (consulta até ≈ 3 min)** e varre `docker logs` do `n8n-test`, a exportação dos workflows e as execuções (leitura do SQLite pelo `node:sqlite` do contêiner, porque a REST não lista execução apagada logicamente; F-1) atrás de tokens, nomes de aluno, textos de relatório e dos *sentinelas* dos testes e dos bytes do PDF; exige zero ocorrências, zero execuções salvas e `binaryData` vazio ao fim
-- [ ] T069 [P] [US5] Teste `node:test` de `infra/n8n/ops/generate-token.test.mjs`: 32 bytes aleatórios em base64url, nunca repete, sem escrever em disco
-- [ ] T070 [P] [US5] Teste `node:test` do simulador em `infra/telegram-simulator/server.test.mjs`: `setWebhook`/`getWebhookInfo`/`deleteWebhook`, entrega do update com o cabeçalho de segredo, **retenção e reenvio** enquanto a resposta não for `2xx`, transcrição por chat, falha programada, `sendDocument` multipart
-- [ ] T071 [US5] Roteiro do ensaio de rotação em `infra/tests/rehearsal/rotation.sh` (e harness `infra/tests/rehearsal/lib.sh`): `status`→`IDLE`; `start` sob tráfego ⇒ `DUAL` e zero recusas; `finish` ⇒ `IDLE`, antigo recusado; `abort`; recusa de `start` fora de `IDLE`; cada update com **exatamente uma** resposta na transcrição
+- [X] T067 [P] [US5] `N8nSecurityIT` em `T/transport/n8n/N8nSecurityIT.java`: segredo do webhook ausente/errado ⇒ backend `401` ⇒ n8n `503` sem enviar nada; token de serviço errado no n8n ⇒ `deep` mostra `backend:unauthorized` e update ⇒ `503`; dois tokens aceitos pelo backend ao mesmo tempo (n8n com `CURRENT`, depois com `NEXT`) sem recusa; o n8n não valida o segredo do Telegram por conta própria; nenhuma chamada a `getFile`
+- [X] T068 [P] [US2] `N8nPrivacyIT` em `T/transport/n8n/N8nPrivacyIT.java` (FR-031, SC-005): depois da suíte, **aguarda a poda de ≈ 2 min (consulta até ≈ 3 min)** e varre `docker logs` do `n8n-test`, a exportação dos workflows e as execuções (leitura do SQLite pelo `node:sqlite` do contêiner, porque a REST não lista execução apagada logicamente; F-1) atrás de tokens, nomes de aluno, textos de relatório e dos *sentinelas* dos testes e dos bytes do PDF; exige zero ocorrências, zero execuções salvas e `binaryData` vazio ao fim
+- [X] T069 [P] [US5] Teste `node:test` de `infra/n8n/ops/generate-token.test.mjs`: 32 bytes aleatórios em base64url, nunca repete, sem escrever em disco
+- [X] T070 [P] [US5] Teste `node:test` do simulador em `infra/telegram-simulator/server.test.mjs`: `setWebhook`/`getWebhookInfo`/`deleteWebhook`, entrega do update com o cabeçalho de segredo, **retenção e reenvio** enquanto a resposta não for `2xx`, transcrição por chat, falha programada, `sendDocument` multipart
+- [X] T071 [US5] Roteiro do ensaio de rotação em `infra/tests/rehearsal/rotation.sh` (e harness `infra/tests/rehearsal/lib.sh`): `status`→`IDLE`; `start` sob tráfego ⇒ `DUAL` e zero recusas; `finish` ⇒ `IDLE`, antigo recusado; `abort`; recusa de `start` fora de `IDLE`; cada update com **exatamente uma** resposta na transcrição
 
 ### Implementação
 
-- [ ] T072 [US5] Implementar `infra/n8n/ops/generate-token.mjs` (faz T069 passar)
-- [ ] T073 [US5] Criar `infra/telegram-simulator/` (`server.mjs`, `Dockerfile` sobre `node:24-alpine` fixado, `CLAUDE.md`, linha no `CLAUDE.md` raiz): API de bots mínima + API de controle `/_sim/*` conforme `research.md` R-12 (faz T070 passar)
-- [ ] T074 [US5] `infra/compose.test.yaml`: serviços do ensaio — `postgres-rehearsal`, `backend-rehearsal` (imagem real, IA simulada, `TELEGRAM_API_URL` apontando ao simulador), `n8n-rehearsal`, `telegram-simulator` e `tests-rehearsal` (`docker:27-cli` fixado, socket montado, repositório em `/work`)
-- [ ] T075 [US5] Criar `infra/scripts/rotate-service-token.sh` conforme `contracts/transport-scripts.md` §2 (`status`, `start`, `finish`, `abort`; verificação por `GET /actions/u0-0`; recria `backend` e depois `n8n`; nunca imprime token), usando `lib/common.sh`
-- [ ] T076 [US5] `infra/scripts/local.sh`: subcomando `tests rehearsal`; `.gitignore`: `infra/.env.previous` e `infra/.transport-state`; `.github/workflows/ci.yml`: passo do ensaio no job `n8n`
-- [ ] T077 [US5] Rodar `tests backend`, `tests n8n` e `tests rehearsal`: T067 a T071 verdes; corrigir causas, não expectativas
+- [X] T072 [US5] Implementar `infra/n8n/ops/generate-token.mjs` (faz T069 passar)
+- [X] T073 [US5] Criar `infra/telegram-simulator/` (`server.mjs`, `Dockerfile` sobre `node:24-alpine` fixado, `CLAUDE.md`, linha no `CLAUDE.md` raiz): API de bots mínima + API de controle `/_control/*` conforme `research.md` R-12 (faz T070 passar)
+- [X] T074 [US5] `infra/compose.test.yaml`: serviços do ensaio — `postgres-rehearsal`, `backend-rehearsal` (imagem real, IA simulada, `TELEGRAM_API_URL` apontando ao simulador), `n8n-rehearsal`, `telegram-simulator` e `tests-rehearsal` (`docker:27-cli` fixado, socket montado, repositório em `/work`)
+- [X] T075 [US5] Criar `infra/scripts/rotate-service-token.sh` conforme `contracts/transport-scripts.md` §2 (`status`, `start`, `finish`, `abort`; verificação por `GET /actions/u0-0`; recria `backend` e depois `n8n`; nunca imprime token), usando `lib/common.sh`
+- [X] T076 [US5] `infra/scripts/local.sh`: subcomando `tests rehearsal`; `.gitignore`: `infra/.env.previous` e `infra/.transport-state`; `.github/workflows/ci.yml`: passo do ensaio no job `n8n`
+- [X] T077 [US5] Rodar `tests backend`, `tests n8n` e `tests rehearsal`: T067 a T071 verdes; corrigir causas, não expectativas
 
 **Checkpoint (parte 1 da US5)**: segurança e privacidade provadas; a rotação roda sem janela de recusa.
 
@@ -235,16 +235,16 @@ parado; `verify` reprova com segredo errado.
 
 ### Testes (devem FALHAR antes da implementação) ⚠️
 
-- [ ] T078 [US5] Roteiro `infra/tests/rehearsal/switch.sh`: `status`=`DIRECT`; `switch` sob tráfego contínuo ⇒ `N8N` (webhook, entrega proativa e `verify`); `rollback` ⇒ `DIRECT`; `switch` de novo; **exatamente uma** resposta por update em todas as fases (US5 cenários 1 a 3)
-- [ ] T079 [US5] Roteiro `infra/tests/rehearsal/switch-refusals.sh`: `switch` com o `n8n` parado ⇒ saída `1` `[N8N_NOT_HEALTHY]` e webhook intacto; segredo com caractere inválido ⇒ `[INVALID_WEBHOOK_SECRET]`; `verify` com segredo registrado diferente ⇒ saída `3` `[SECRET_MISMATCH]`; `switch` cuja verificação reprova ⇒ restaura o estado anterior e sai `3`; repetir `switch`/`rollback` é idempotente (US5 cenários 4 e 5)
-- [ ] T080 [US5] Rodar `tests rehearsal` e **ver falhar** T078 e T079 (o script ainda não existe)
+- [X] T078 [US5] Roteiro `infra/tests/rehearsal/switch.sh`: `status`=`DIRECT`; `switch` sob tráfego contínuo ⇒ `N8N` (webhook, entrega proativa e `verify`); `rollback` ⇒ `DIRECT`; `switch` de novo; **exatamente uma** resposta por update em todas as fases (US5 cenários 1 a 3)
+- [X] T079 [US5] Roteiro `infra/tests/rehearsal/switch-refusals.sh`: `switch` com o `n8n` parado ⇒ saída `1` `[N8N_NOT_HEALTHY]` e webhook intacto; segredo com caractere inválido ⇒ `[INVALID_WEBHOOK_SECRET]`; `verify` com segredo registrado diferente ⇒ saída `3` `[SECRET_MISMATCH]`; `switch` cuja verificação reprova ⇒ restaura o estado anterior e sai `3`; repetir `switch`/`rollback` é idempotente (US5 cenários 4 e 5)
+- [X] T080 [US5] Rodar `tests rehearsal` e **ver falhar** T078 e T079 (o script ainda não existe) *(a falha esperada não foi observada: os roteiros e o script nasceram juntos)*
 
 ### Implementação
 
-- [ ] T081 [US5] Criar `infra/scripts/telegram-webhook.sh` conforme `contracts/transport-scripts.md` §1: `status`, `switch`, `rollback`, `verify`, `apply`; pré-condições com códigos de motivo; validação `^[A-Za-z0-9_-]{1,256}$`; `setWebhook` com `secret_token`, `allowed_updates` e `max_connections=10`; `getWebhookInfo`; sondas de segredo (negativa e positiva sem efeito); verificação do modo de entrega no ambiente do `backend`; `--chat-id` para a ida e volta real; restauração automática em reprovação; confirmação digitada em `--env prod`
-- [ ] T082 [US5] `infra/scripts/local.sh` e `infra/scripts/deploy.sh`: chamar `telegram-webhook.sh apply` depois de a pilha ficar saudável (`deploy.sh` **não** executa `switch`); `require_env` exige os três tokens do canal quando `TELEGRAM_TRANSPORT=N8N`
-- [ ] T083 [P] [US5] `infra/scripts/README.md` e `infra/README.md`: seções "Trocar o webhook para o n8n", "Reverter", "Verificar", "Rotacionar o token de serviço", "Versão do n8n", "Exportar workflows de volta"; todas com os comandos de `quickstart.md`
-- [ ] T084 [US5] Rodar `tests rehearsal` (T078, T079 e o roteiro de rotação) e `tests all`; tudo verde
+- [X] T081 [US5] Criar `infra/scripts/telegram-webhook.sh` conforme `contracts/transport-scripts.md` §1: `status`, `switch`, `rollback`, `verify`, `apply`; pré-condições com códigos de motivo; validação `^[A-Za-z0-9_-]{1,256}$`; `setWebhook` com `secret_token`, `allowed_updates` e `max_connections=10`; `getWebhookInfo`; sondas de segredo (negativa e positiva sem efeito); verificação do modo de entrega no ambiente do `backend`; `--chat-id` para a ida e volta real; restauração automática em reprovação; confirmação digitada em `--env prod`
+- [X] T082 [US5] `infra/scripts/local.sh` e `infra/scripts/deploy.sh`: chamar `telegram-webhook.sh apply` depois de a pilha ficar saudável (`deploy.sh` **não** executa `switch`); `require_env` exige os três tokens do canal quando `TELEGRAM_TRANSPORT=N8N`
+- [X] T083 [P] [US5] `infra/scripts/README.md` e `infra/README.md`: seções "Trocar o webhook para o n8n", "Reverter", "Verificar", "Rotacionar o token de serviço", "Versão do n8n", "Exportar workflows de volta"; todas com os comandos de `quickstart.md`
+- [X] T084 [US5] Rodar `tests rehearsal` (T078, T079 e o roteiro de rotação) e `tests all`; tudo verde
 - [ ] T085 [US5] Ensaio **manual, uma vez**, com um bot de testes real (`quickstart.md` V13): `switch --chat-id`, conversa, áudio curto, PDF, `rollback`; registrar o resultado (sem dado pessoal) na descrição do PR
 
 **Checkpoint (US5)**: troca e reversão ensaiadas e repetíveis; o transporte pelo n8n está pronto para a produção. O PR das Fases 0 a 6 (e 8) pode ser aberto; o merge é do usuário.
@@ -306,24 +306,24 @@ Se a evidência estiver incompleta, esta fase **não é aberta** e o que falta �
 **Propósito**: nenhum documento afirma, como situação atual, que não há n8n; o registro histórico das decisões
 originais é preservado (notas de histórico, sem reescrever o que já foi decidido). Pode correr em paralelo às Fases 2 a 6.
 
-- [ ] T103 [P] `specs/001-fluxo-relatorios/research.md`: R-04 e "Alternativas consideradas" passam a apontar o n8n (R-01 da 002 e `specs/004-…/plan.md`), preservando o texto original como histórico
-- [ ] T104 [P] `specs/001-fluxo-relatorios/plan.md`: Summary, Technical Context, estrutura e Complexity Tracking refletem o transporte pelo n8n (linhas II e VII do Constitution Check, "sem orquestrador")
-- [ ] T105 [P] `specs/001-fluxo-relatorios/quickstart.md`: cenários do Telegram passam pelo n8n (comandos de `infra/scripts/`)
-- [ ] T106 [P] `specs/001-fluxo-relatorios/tasks.md`: anotar, sem reescrever tarefas concluídas, que o transporte do Telegram é o n8n (feature 004)
-- [ ] T107 [P] `specs/001-fluxo-relatorios/contracts/telegram-conversa.md`: §1 (transporte) aponta o n8n e os contratos da 002/004
-- [ ] T108 [P] `infra/CLAUDE.md` e `infra/README.md`: retirar "o n8n ainda será incluído" e "Quando o n8n entrar…"; descrever o serviço, o volume `n8n-data`, a imagem fina e a regra de workflows como código
-- [ ] T109 [P] `infra/scripts/README.md` e `infra/.env.example`: retirar o trecho "sem n8n" / `N8N_*` não existe aqui / "o compose é da feature 004" e descrever as variáveis reais
-- [ ] T110 [P] `specs/CLAUDE.md`, `.github/CLAUDE.md`, `backend/application/CLAUDE.md` e `CLAUDE.md` raiz: tabela da 004, descrição do job `n8n`, menção ao simulador e ao `infra/n8n` no mapa
-- [ ] T111 `specs/004-n8n-telegram-transport/quickstart.md`: conferir cada comando (V1 a V16) contra o que foi realmente entregue e corrigir divergências (FR-033)
+- [X] T103 [P] `specs/001-fluxo-relatorios/research.md`: R-04 e "Alternativas consideradas" passam a apontar o n8n (R-01 da 002 e `specs/004-…/plan.md`), preservando o texto original como histórico
+- [X] T104 [P] `specs/001-fluxo-relatorios/plan.md`: Summary, Technical Context, estrutura e Complexity Tracking refletem o transporte pelo n8n (linhas II e VII do Constitution Check, "sem orquestrador")
+- [X] T105 [P] `specs/001-fluxo-relatorios/quickstart.md`: cenários do Telegram passam pelo n8n (comandos de `infra/scripts/`)
+- [X] T106 [P] `specs/001-fluxo-relatorios/tasks.md`: anotar, sem reescrever tarefas concluídas, que o transporte do Telegram é o n8n (feature 004)
+- [X] T107 [P] `specs/001-fluxo-relatorios/contracts/telegram-conversa.md`: §1 (transporte) aponta o n8n e os contratos da 002/004
+- [X] T108 [P] `infra/CLAUDE.md` e `infra/README.md`: retirar "o n8n ainda será incluído" e "Quando o n8n entrar…"; descrever o serviço, o volume `n8n-data`, a imagem fina e a regra de workflows como código
+- [X] T109 [P] `infra/scripts/README.md` e `infra/.env.example`: retirar o trecho "sem n8n" / `N8N_*` não existe aqui / "o compose é da feature 004" e descrever as variáveis reais
+- [X] T110 [P] `specs/CLAUDE.md`, `.github/CLAUDE.md`, `backend/application/CLAUDE.md` e `CLAUDE.md` raiz: tabela da 004, descrição do job `n8n`, menção ao simulador e ao `infra/n8n` no mapa
+- [X] T111 `specs/004-n8n-telegram-transport/quickstart.md`: conferir cada comando (V1 a V16) contra o que foi realmente entregue e corrigir divergências (FR-033)
 
 ---
 
 ## Fase 9: Acabamento e validação final
 
 - [ ] T112 Rodar `quickstart.md` V1 a V15 de ponta a ponta num ambiente limpo (V16 só após a observação) e anotar divergências
-- [ ] T113 [P] Rodar o guardião de idioma completo (`tests backend` e `tests frontend`) sem lista de exclusão e sem palavra em português em identificador, arquivo ou YAML novo
+- [X] T113 [P] Rodar o guardião de idioma completo (`tests backend` e `tests frontend`) sem lista de exclusão e sem palavra em português em identificador, arquivo ou YAML novo
 - [ ] T114 [P] Revisar o PR contra a constituição (Princípios II, IV, VIII, restrições de contêiner e de orquestrador): refazer a tabela "Pós" de `plan.md` se algo mudou
-- [ ] T115 Confirmar que o `CLAUDE.md` de `infra/n8n/` e de `infra/telegram-simulator/` existem e que a tabela da raiz tem as duas linhas
+- [X] T115 Confirmar que o `CLAUDE.md` de `infra/n8n/` e de `infra/telegram-simulator/` existem e que a tabela da raiz tem as duas linhas
 - [ ] T116 Depois de **cada** PR aberto: `code-review-graph build` (CLAUDE.md raiz) e `ccd_pr` `get_status`; **nunca** mesclar nem habilitar merge automático
 
 ---

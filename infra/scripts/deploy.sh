@@ -31,6 +31,10 @@ while [ "$attempts" -lt 30 ]; do
     sleep 10
   else
     $COMPOSE ps
+    if [ "$(sed -n 's/^TELEGRAM_ENABLED=//p' infra/.env | tail -n 1)" = "true" ]; then
+      # o script de troca é o dono do registro do webhook do estado atual; a implantação NÃO troca o transporte
+      sh infra/scripts/telegram-webhook.sh apply --env prod         || { echo "A implantação subiu, mas o registro/verificação do webhook falhou; veja: sh infra/scripts/telegram-webhook.sh status --env prod" >&2; exit 1; }
+    fi
     echo "Implantação concluída."
     exit 0
   fi

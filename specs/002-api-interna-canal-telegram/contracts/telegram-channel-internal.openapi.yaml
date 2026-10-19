@@ -40,6 +40,10 @@ paths:
                 $ref: "./actions-v1.schema.json#/$defs/UpdateResponse"
         "401":
           $ref: "#/components/responses/NotAuthenticated"
+        "503":
+          description: >-
+            update repetido cujo primeiro processamento ainda não foi concluído (recente, menos de 30 s); o transporte
+            deve tentar de novo. Passados 30 s sem conclusão, a resposta traz a ação `INTERNAL_ERROR`
 
   /internal/v1/channel/telegram/confirmations:
     post:

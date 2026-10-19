@@ -32,12 +32,8 @@ while [ "$#" -gt 0 ]; do
   shift
 done
 
-# N8N_COMPOSE e N8N_SERVICE existem para os testes apontarem para a pilha de teste; o uso normal não os define.
-if [ -n "${N8N_COMPOSE:-}" ]; then
-  COMPOSE="$N8N_COMPOSE"
-else
-  select_environment "$environment" || exit 2
-fi
+# TRANSPORT_COMPOSE e N8N_SERVICE existem para os ensaios apontarem para a pilha de teste.
+select_environment "$environment" || exit 2
 SERVICE="${N8N_SERVICE:-n8n}"
 
 in_n8n() {

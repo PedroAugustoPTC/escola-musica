@@ -39,7 +39,8 @@ done
 extra="$(node --no-warnings -e '
 const { DatabaseSync } = require("node:sqlite");
 const keep = new Set(process.argv.slice(1));
-const db = new DatabaseSync(process.env.HOME + "/.n8n/database.sqlite", { readOnly: true });
+const file = process.env.DB_SQLITE_DATABASE || process.env.HOME + "/.n8n/database.sqlite";
+const db = new DatabaseSync(file);
 for (const row of db.prepare("select id from workflow_entity").all()) {
   if (!keep.has(row.id)) console.log(row.id);
 }
@@ -50,4 +51,4 @@ for id in $extra; do
 done
 
 echo "n8n: iniciando o servidor."
-exec n8n start
+exec node /opt/ops/gate.mjs

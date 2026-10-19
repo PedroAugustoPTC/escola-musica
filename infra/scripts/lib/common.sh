@@ -7,10 +7,16 @@
 # Git Bash (Windows) converte caminhos como "/opt/..." antes de passar ao Docker.
 export MSYS_NO_PATHCONV=1
 
-ENV_FILE="infra/.env"
+# Os ensaios (tests rehearsal) apontam estas duas variáveis para a pilha de teste; o uso normal não as define.
+ENV_FILE="${TRANSPORT_ENV_FILE:-infra/.env}"
 
 # Escolhe as camadas do compose: local (compose.yaml + compose.dev.yaml) ou prod (compose.yaml + compose.prod.yaml).
+# TRANSPORT_COMPOSE (só nos ensaios) substitui o comando inteiro.
 select_environment() {
+  if [ -n "${TRANSPORT_COMPOSE:-}" ]; then
+    COMPOSE="$TRANSPORT_COMPOSE"
+    return 0
+  fi
   case "$1" in
     local) COMPOSE="docker compose -f infra/compose.yaml -f infra/compose.dev.yaml" ;;
     prod) COMPOSE="docker compose -f infra/compose.yaml -f infra/compose.prod.yaml" ;;
@@ -70,4 +76,30 @@ confirm_typed() {
   printf '%s Digite "%s" para confirmar: ' "$prompt" "$word"
   read -r answer
   [ "$answer" = "$word" ]
+}
+
+# Espera o serviço ficar saudável (padrão: 180 s). Devolve 1 se não ficar.
+wait_healthy() {
+  service="$1"
+  limit="${2:-180}"
+  waited=0
+  while [ "$waited" -lt "$limit" ]; do
+    if $COMPOSE ps --format '{{.Service}} {{.Health}}' 2>/dev/null | grep -q "^$service healthy"; then
+      return 0
+    fi
+    sleep 2
+    waited=$((waited + 2))
+  done
+  return 1
+}
+
+# Recria só o serviço indicado (mesma imagem), sem tocar nas dependências.
+recreate_service() {
+  $COMPOSE up -d --no-deps --force-recreate "$1" >/dev/null 2>&1
+}
+
+# Status HTTP de `GET .../actions/u0-0` com o token informado, chamado de DENTRO do contêiner do n8n:
+# 404 = token aceito (a ação não existe), 401 = recusado. O token vai pelo ambiente, nunca pela linha de comando.
+token_status() {
+  TOKEN_UNDER_TEST="$1" $COMPOSE exec -T -e TOKEN_UNDER_TEST "${N8N_SERVICE:-n8n}"     node /opt/ops/probe.mjs GET '{BACKEND_INTERNAL_URL}/internal/v1/channel/telegram/actions/u0-0'     --header-env X-N8N-Service-Token=TOKEN_UNDER_TEST 2>/dev/null | sed -n '1s/^HTTP //p'
 }

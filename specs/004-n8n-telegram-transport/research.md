@@ -262,8 +262,7 @@ n8n no GitHub, "n8n 2.0 breaking changes" e "CLI commands" de docs.n8n.io.
     `n8n.sh health --deep` e pelo `verify`, não pelo Docker.
   - `depends_on`: `n8n` espera `backend` `service_healthy` e `telegram-bot-api` `service_started`; o `backend`
     **não** depende do `n8n` (a outbox reentrega). `web` não muda.
-  - **Reinício**: `restart: unless-stopped` em `compose.prod.yaml` (como os demais). `stop_grace_period: 30s` e
-    `N8N_GRACEFUL_SHUTDOWN_TIMEOUT=25` para não cortar execução em curso numa parada limpa. Uma única réplica.
+  - **Reinício**: `restart: unless-stopped` em `compose.prod.yaml` (como os demais). `stop_grace_period: 30s` e `N8N_GRACEFUL_SHUTDOWN_TIMEOUT=5`: a porta de entrada drena as requisições em curso antes de parar o n8n (R-13a). Uma única réplica.
   - **Orçamento de 60 s** (FR-003): `entrypoint.sh` (importar 4 + publicar 4) + partida do n8n. **Medido no S-6**:
     importação ≈ 6 s, ≈ 5 s por `publish:workflow` e servidor ≈ 20 s ⇒ ≈ 46 s com 4 workflows (a frio, 39 s); passa
     da meta de 40 s e cabe nos 60 s. **Medido na Fase 4 (T065):** não publicar o sub-workflow `execute-actions` **não funciona** (a chamada do
@@ -326,7 +325,7 @@ n8n no GitHub, "n8n 2.0 breaking changes" e "CLI commands" de docs.n8n.io.
   mínimo da API de bots **e** do comportamento de entrega do Telegram: `setWebhook` (guarda `url`,
   `secret_token`, `allowed_updates`), `getWebhookInfo` (inclui `pending_update_count` e `last_error_message`),
   `deleteWebhook`, `getMe`, `setMyCommands`, `sendMessage`, `editMessageText`, `sendDocument`,
-  `answerCallbackQuery`, e uma API de controle `/_sim/…`: injetar update de um chat, ler a transcrição por chat,
+  `answerCallbackQuery`, e uma API de controle `/_control/…`: injetar update de um chat, ler a transcrição por chat,
   falhar a próxima chamada, travar a entrega. Entrega o update ao webhook registrado com o cabeçalho de segredo
   e **retém e reenvia** enquanto a resposta não for `2xx` (a semântica do Telegram que a spec cita).
 - **Ensaio** (`infra/tests/rehearsal.sh`, em `tests-rehearsal` com `docker:27-cli` e o socket): sobe a pilha,
@@ -363,8 +362,17 @@ n8n no GitHub, "n8n 2.0 breaking changes" e "CLI commands" de docs.n8n.io.
   `tmpfs`. Nenhum dos três tokens aparece nesse registro; o segredo do webhook do Telegram aparece nos
   cabeçalhos. Passado esse tempo restam zero linhas e zero arquivos. **Teste:** `N8nPrivacyIT` espera a poda
   (consulta até ≈ 3 min) e lê o SQLite pelo `node:sqlite` do contêiner (a REST não lista execução apagada).
-- **Endurecimento opcional, não adotado (decisão do dono do produto)**: pôr **todo** `/home/node/.n8n` em
-  `tmpfs`, o que tira o texto do disco. Cabe porque os workflows são reimportados em toda subida e a cifra vem
+- **ATUALIZAÇÃO (Fase 5, medição): o endurecimento abaixo foi ADOTADO.** A medição mostrou que a poda apaga as
+  *linhas*, mas o texto do update, o texto das ações do backend e o segredo do webhook **continuam no arquivo do
+  SQLite e no `-wal`** (páginas livres não são zeradas): a "janela de ≈ 2 min" valia só para as linhas, não para o
+  disco. Por isso o banco do n8n (`DB_SQLITE_DATABASE=/var/lib/n8n-db/database.sqlite`) fica num `tmpfs`; o volume
+  `n8n-data` guarda só a configuração (sem texto de aluno, sem token, conferido por varredura). Custo: o
+  banco é refeito a cada reinício (os workflows já são reimportados em toda subida) e o dono do editor local é recriado.
+- **Resíduo aceito**: o arquivo `config` do volume `n8n-data` guarda a chave de cifra do próprio n8n (o valor de
+  `N8N_ENCRYPTION_KEY`), gravada pelo n8n por conta própria. Ela não protege nada de domínio (não há credencial nem
+  dado no n8n) e é o único segredo que o volume contém; nenhum token do bot, de serviço ou de entrega, nem o segredo do
+  webhook, vai para o disco (varredura do `N8nPrivacyIT`).
+- **Endurecimento (adotado na Fase 5)**: pôr o banco em `tmpfs`, o que tira o texto do disco. Cabe porque os workflows são reimportados em toda subida e a cifra vem
   de `N8N_ENCRYPTION_KEY`; o custo é perder, a cada reinício, o dono do editor do ambiente local e refazer a migração
   do banco em toda partida (a frio, com 4 workflows, a partida mediu 39 s, dentro do orçamento). Mudança de uma
   linha no compose se for pedida.
@@ -374,6 +382,39 @@ n8n no GitHub, "n8n 2.0 breaking changes" e "CLI commands" de docs.n8n.io.
 - **Spikes**: S-5 e S-6 confirmaram a lista de variáveis do 2.43, **refutaram** que o binário seja apagado ao
   fim da execução (F-1) e mostraram o que `N8N_DISABLE_UI=true` mantém (webhooks e `/healthz` sim; `/rest/*` não,
   só com a UI ligada).
+
+## R-13a. Janelas em que o n8n responde 200 sem repassar o update
+
+- **Achado (ensaio de reinício sob tráfego, 2 a 17 updates sem resposta em ≈ 600 a 1250)**: o Telegram só reenvia o
+  update que não recebeu 2xx; qualquer 200 dado pelo n8n sem ter repassado o update ao backend é perda definitiva.
+  Duas janelas produziam esse 200:
+  1. **Partida**: logo depois de escutar a 5678 (e antes de registrar os webhooks), o n8n responde
+     `200 "n8n is starting up. Please wait"` a qualquer requisição, inclusive POST em `/webhook/*` (≈ 20 ms; medido com um
+     laço de POST a cada 5 ms durante a partida). O `Webhook` não chegou a rodar e o backend não tem registro do update.
+  2. **Parada limpa**: o executor de `Code` encerra antes do servidor; as execuções ficam penduradas até o limite de
+     encerramento e as requisições aceitas nesse intervalo recebem 200 ao fim, também sem registro no backend.
+- **Decisão**: (a) `ops/gate.mjs` é o processo principal do contêiner: sobe o n8n em `127.0.0.1:5680` e só abre a 5678
+  (repasse de bytes TCP, sem ler o conteúdo) depois que os três `*/live` respondem `{"status":"UP"}`; antes disso a
+  conexão é recusada e o Telegram reenvia. (b) a mesma porta, na parada (SIGTERM), deixa de aceitar (conexão recusada ou 503), espera as
+  requisições em curso terminarem (até 20 s, com o n8n ainda inteiro) e só então manda o n8n parar
+  (`stop_grace_period: 30s`, `N8N_GRACEFUL_SHUTDOWN_TIMEOUT=5`). Parar com SIGKILL foi tentado e descartado: derruba
+  execuções entre o envio da mensagem e a confirmação ao backend e duplica a resposta (2 em 923 no ensaio de rotação).
+- **Alternativas descartadas**: confiar na parada limpa (o executor de `Code` cai primeiro, a janela continua); um proxy
+  (Caddy/nginx) na frente (mais um serviço só para isso); resposta 503 nos primeiros ms (não configurável no n8n).
+- **Validação**: três reinícios do n8n sob tráfego contínuo (≈ 500 a 600 updates cada) com exatamente uma resposta por
+  update; `ops/gate.test.mjs`; `rotation.sh` e `switch.sh` do ensaio.
+
+## R-13b. Update repetido ainda sem conclusão: 503 em vez de 200 vazio (muda a 002)
+
+- **Achado (ensaio de rotação, que reinicia o backend sob tráfego; 1 update sem resposta em 288)**: o backend gravou a linha
+  do update, morreu antes de concluir e o Telegram reenviou em menos de 30 s. A resposta era `200` com lista vazia
+  ("o primeiro processamento ainda está em curso"); o n8n a executou (nada) e respondeu 200, e o Telegram deu o update por
+  entregue. O update some, sem aviso ao professor.
+- **Decisão**: o backend responde `503` nesse caso (o n8n já traduz qualquer status diferente de 200 em 503 ao Telegram, que
+  reenvia). Passados 30 s sem conclusão, vale o `INTERNAL_ERROR` estável que a 002 já definia. Mudam o
+  `TelegramChannelController`, o teste `UpdateIdempotencyIT` e a nota do contrato da 002 (`canal-telegram-interno.md` e o
+  `openapi`). Nenhuma lógica nova no n8n.
+- **Validação**: `UpdateIdempotencyIT` e o roteiro de rotação do ensaio (zero updates sem resposta).
 
 ## R-14. Ordem, concorrência e `max_connections`
 

@@ -73,7 +73,8 @@ canal quando `TELEGRAM_TRANSPORT=N8N`.
 
 | Caminho / recurso | Tipo | Conteúdo | Retenção |
 |---|---|---|---|
-| `/home/node/.n8n` | volume `n8n-data` | SQLite do n8n (workflows importados, ajustes, usuário do editor local) e arquivo de configuração | sobrevive a reinício; **recriável do zero** (R-04); nada de domínio |
+| `/home/node/.n8n` | volume `n8n-data` | arquivo de configuração e registro de eventos (sem dado de aluno, sem token) | sobrevive a reinício; **recriável do zero** (R-04); nada de domínio |
+| `/var/lib/n8n-db` | `tmpfs` | o SQLite do n8n (`DB_SQLITE_DATABASE`): workflows importados, execuções em andamento e o dono do editor local | só em memória; some ao parar o contêiner; refeito pela importação a cada subida (R-13, F-1) |
 | `/home/node/.n8n/binaryData` | `tmpfs` | bytes do PDF em trânsito | some na poda (≈ 2 min depois da execução, spike F-1) e ao reiniciar |
 | `/opt/workflows` | camada da imagem (somente leitura) | os 4 JSON do repositório | trocam a cada nova imagem |
 | `/opt/ops` | camada da imagem | `probe.mjs`, `normalize-workflow.mjs`, `generate-token.mjs` | idem |

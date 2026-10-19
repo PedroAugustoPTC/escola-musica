@@ -94,7 +94,8 @@ class N8nIdempotencyIT extends OrchestratorDeliveryBase {
             boolean json =
                     request.getHeader("Content-Type") != null
                             && request.getHeader("Content-Type").startsWith("application/json");
-            // o id do toque e os UUIDs dos relatórios mudam entre as rodadas; o resto da transcrição não
+            // o id do toque e os UUIDs dos relatórios mudam entre as rodadas; o resto da
+            // transcrição não
             String body =
                     json
                             ? request.getBodyAsString()

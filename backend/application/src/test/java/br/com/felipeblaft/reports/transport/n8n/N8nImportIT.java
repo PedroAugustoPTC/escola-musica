@@ -36,7 +36,7 @@ class N8nImportIT {
 
     private static final String PUBLISHED_IDS_SCRIPT =
             "const { DatabaseSync } = require('node:sqlite');"
-                    + "const db = new DatabaseSync(process.env.HOME + '/.n8n/database.sqlite', { readOnly: true });"
+                    + "const db = new DatabaseSync(process.env.DB_SQLITE_DATABASE);"
                     + "console.log(db.prepare('select id from workflow_entity where activeVersionId is not null order by id')"
                     + ".all().map((row) => row.id).join(','));";
 

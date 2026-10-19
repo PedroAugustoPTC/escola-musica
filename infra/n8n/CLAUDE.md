@@ -8,9 +8,9 @@ workflows versionados como código.
 | Caminho | O que é |
 |---|---|
 | `Dockerfile` | `FROM docker.n8n.io/n8nio/n8n:<versão exata>` + `workflows/`, `ops/` e `entrypoint.sh`. Versão **fixada**; nunca `latest`, `stable` nem `next` |
-| `entrypoint.sh` | importa e publica os workflows do repositório, despublica o que só existe na instância, inicia o servidor |
+| `entrypoint.sh` | importa e publica os workflows do repositório, despublica o que só existe na instância e entrega a `ops/gate.mjs` |
 | `workflows/*.json` | os workflows (inventário fechado: `telegram-inbound`, `channel-delivery`, `execute-actions`, `transport-health`) |
-| `ops/` | utilitários sem dependências, executados **dentro** da imagem: `probe.mjs` (HTTP), `normalize-workflow.mjs` (exportação e comparação), `check-workflows.sh`, e os `*.test.mjs` |
+| `ops/` | utilitários sem dependências, executados **dentro** da imagem: `gate.mjs` (porta de entrada: abre a 5678 só com os receptores registrados), `probe.mjs` (HTTP), `normalize-workflow.mjs` (exportação e comparação), `check-workflows.sh`, e os `*.test.mjs` |
 
 ## Regras
 
@@ -26,9 +26,15 @@ workflows versionados como código.
 - Os guardiões `WorkflowGuardTest`, `WorkflowSecretScanTest` e `ComposeGuardTest` (em `tests-backend`) reprovam o build
   se alguma regra for quebrada; leia a mensagem (arquivo, nó e caminho JSON; nunca o valor).
 - Um único receptor de updates do Telegram em todo o conjunto: o `Webhook` `telegram-update` do `telegram-inbound`.
+- **Porta de entrada (`ops/gate.mjs`)**: o n8n escuta em `127.0.0.1:5680` e a 5678 só abre depois que os três `*/live` respondem
+  `{"status":"UP"}`. Sem isso, nos primeiros ms o n8n responde `200 "n8n is starting up"` a qualquer POST e o Telegram dá o
+  update por entregue (perda). Na parada (SIGTERM) a porta deixa de aceitar, espera as requisições em curso (até 20 s) e só então manda o n8n parar: na parada
+  limpa do próprio n8n o executor de `Code` encerra primeiro e os updates aceitos nesse intervalo recebem 200 sem terem sido
+  repassados (`research.md` R-13a).
 - O n8n **nunca** é publicado: sem `ports` (só o editor em `127.0.0.1:5678` no ambiente local) e sem rota no Caddy.
-- Privacidade: nenhuma execução é guardada; o instantâneo inicial e o PDF em trânsito somem na poda de ≈ 2 min
-  (`research.md` R-13, F-1). Nunca ponha dado de aluno em log, nó `Set` ou nome de nó.
+- Privacidade: nenhuma execução é guardada; o instantâneo inicial e o PDF em trânsito existem só em memória: o SQLite
+  do n8n (`DB_SQLITE_DATABASE`) e `binaryData` ficam em `tmpfs` e a poda os apaga em ≈ 2 min (`research.md` R-13, F-1).
+  Consequência: reiniciar o contêiner zera o banco, e **o usuário do editor local é recriado a cada reinício**. Nunca ponha dado de aluno em log, nó `Set` ou nome de nó.
 
 ## Mudar um workflow (editar e exportar de volta)
 

@@ -12,7 +12,7 @@
 #   sh infra/scripts/local.sh database        # abre o psql no banco local (como administrador)
 #   sh infra/scripts/local.sh database-port   # publica o banco em 127.0.0.1 para DBeaver/pgAdmin
 #   sh infra/scripts/local.sh database-close  # volta a deixar o banco só na rede interna
-#   sh infra/scripts/local.sh tests [suite]   # backend | frontend | e2e | n8n | real-ai | all (padrão: all)
+#   sh infra/scripts/local.sh tests [suite]   # backend | frontend | e2e | n8n | rehearsal | real-ai | all (padrão: all)
 #   sh infra/scripts/local.sh stop            # para a pilha local (mantém os dados)
 #   sh infra/scripts/local.sh clean           # para e APAGA os dados locais (banco, PDFs, certificados)
 #
@@ -46,6 +46,11 @@ require_env() {
     for key in TELEGRAM_BOT_TOKEN TELEGRAM_API_ID TELEGRAM_API_HASH TELEGRAM_WEBHOOK_SECRET N8N_ENCRYPTION_KEY; do
       [ -n "$(value "$key")" ] || missing="$missing $key"
     done
+    if [ "$(value TELEGRAM_TRANSPORT)" = "N8N" ]; then
+      for key in TELEGRAM_CHANNEL_CURRENT_TOKEN TELEGRAM_CHANNEL_ORCHESTRATOR_TOKEN; do
+        [ -n "$(value "$key")" ] || missing="$missing $key"
+      done
+    fi
   fi
   if [ "$(value AI_PROVIDERS)" = "real" ]; then
     for key in TRANSCRIPTION_API_KEY LLM_API_KEY; do
@@ -127,6 +132,10 @@ case "$command" in
     # shellcheck disable=SC2046
     $LOCAL up -d --build --remove-orphans $(services)
     wait_until_healthy
+    if [ "$(value TELEGRAM_ENABLED)" = "true" ]; then
+      # o script de troca é o dono do registro do webhook do estado atual (DIRECT ou N8N)
+      sh infra/scripts/telegram-webhook.sh apply --env local         || echo "Aviso: o registro/verificação do webhook falhou; veja: sh infra/scripts/telegram-webhook.sh status" >&2
+    fi
     if [ "$demo_data" = "true" ]; then
       echo "Gerando a massa de demonstração (cadastros, aulas, semestrais e PDFs)..."
       if demo_data_output="$($LOCAL run --rm backend demo-data --file /seed/demo.json 2>&1)"; then
@@ -194,9 +203,21 @@ case "$command" in
       frontend) $TESTS run --rm tests-frontend ;;
       e2e) $TESTS run --rm --build tests-e2e ;;
       n8n)
-        # utilitários do n8n (node:test na própria imagem) e, depois, a suíte pelo n8n real em contêiner
+        # utilitários do n8n e do simulador (node:test nas próprias imagens) e, depois, a suíte pelo n8n real em contêiner
         $TESTS run --rm --build tests-n8n-ops
+        $TESTS run --rm --build tests-simulator
         $TESTS run --rm --build --use-aliases tests-n8n
+        ;;
+      rehearsal)
+        # ensaio da troca do webhook e da rotação do token: backend real, n8n real e simulador do Telegram
+        cp infra/tests/rehearsal/rehearsal.env.template infra/tests/rehearsal/rehearsal.env
+        REHEARSAL="$TESTS --env-file infra/tests/rehearsal/rehearsal.env"
+        rehearsal_status=0
+        $REHEARSAL up -d --build --wait postgres-rehearsal telegram-simulator backend-rehearsal n8n-rehearsal \
+          && $REHEARSAL run --rm tests-rehearsal || rehearsal_status=$?
+        $TESTS down -v >/dev/null 2>&1 || true
+        rm -f infra/tests/rehearsal/rehearsal.env infra/tests/rehearsal/rehearsal.env.previous
+        exit $rehearsal_status
         ;;
       real-ai)
         require_env
@@ -210,9 +231,11 @@ case "$command" in
         $TESTS run --rm tests-frontend
         $TESTS run --rm --build tests-e2e
         $TESTS run --rm --build tests-n8n-ops
+        $TESTS run --rm --build tests-simulator
         $TESTS run --rm --build --use-aliases tests-n8n
+        sh "$0" tests rehearsal
         ;;
-      *) echo "Use: backend | frontend | e2e | n8n | real-ai | all" >&2; exit 2 ;;
+      *) echo "Use: backend | frontend | e2e | n8n | rehearsal | real-ai | all" >&2; exit 2 ;;
     esac
     $TESTS down -v >/dev/null 2>&1 || true
     ;;

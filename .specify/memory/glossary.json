@@ -1853,14 +1853,19 @@
       "id": "typed-confirmation-word",
       "scope": "string de comando: palavra que o operador digita para confirmar a limpeza dos dados locais",
       "terms": [
-        "apagar"
+        "apagar",
+        "trocar",
+        "reverter",
+        "rotacionar"
       ],
-      "reason": "O local.sh clean pede ao operador que digite a palavra mostrada na pergunta (em português) antes de apagar o banco, os PDFs e os certificados locais. A palavra é a que a pessoa digita, texto do usuário; traduzi-la mudaria a interação do script, o que a feature 003 proíbe.",
+      "reason": "O local.sh clean pede ao operador que digite a palavra mostrada na pergunta (em português) antes de apagar o banco, os PDFs e os certificados locais. A palavra é a que a pessoa digita (apagar, trocar, reverter e rotacionar, nos scripts de operação do n8n e do webhook), texto do usuário; traduzi-la mudaria a interação do script, o que a feature 003 proíbe.",
       "constitutionCategory": "texto do usuário (explicitamente em português no Princípio VI)",
       "mode": "term",
       "paths": [
         "infra/scripts/local.sh",
-        "infra/scripts/n8n.sh"
+        "infra/scripts/n8n.sh",
+        "infra/scripts/telegram-webhook.sh",
+        "infra/scripts/rotate-service-token.sh"
       ],
       "appliesTo": [
         "artifacts"

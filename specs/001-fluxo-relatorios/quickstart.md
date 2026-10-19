@@ -15,6 +15,8 @@ referencia.
 
 - Docker Engine 27+ com Docker Compose v2. É a **única** dependência da máquina (constituição,
   "Containerização e implantação").
+> **Nota (feature 004):** o canal Telegram passa pelo n8n, que sobe junto com a pilha (`sh infra/scripts/local.sh up`). Para ligá-lo como transporte: `sh infra/scripts/telegram-webhook.sh switch`; para voltar: `rollback`; para conferir: `status` e `verify`. Ensaio sem bot real: `sh infra/scripts/local.sh tests rehearsal`. Passo a passo em `specs/004-n8n-telegram-transport/quickstart.md`.
+
 - Para o canal Telegram: um bot **de testes** criado no @BotFather (token), `api_id` e `api_hash`
   obtidos em my.telegram.org (exigidos pelo servidor local da API de bots, R-05) e uma conta de
   Telegram de teste.

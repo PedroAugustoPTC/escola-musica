@@ -66,6 +66,52 @@ public final class N8nBackendStub implements AutoCloseable {
                         .willReturn(aResponse().withStatus(status)));
     }
 
+    /**
+     * Faz o papel da autorização do backend: só atende {@code POST /update} com o segredo do
+     * webhook e o token de serviço informados; qualquer outra combinação recebe {@code 401}.
+     */
+    public void requireCredentials(
+            String webhookSecret, String serviceToken, String updateResponseJson) {
+        server.stubFor(
+                post(urlEqualTo(BASE + "/update"))
+                        .atPriority(1)
+                        .willReturn(aResponse().withStatus(401)));
+        server.stubFor(
+                post(urlEqualTo(BASE + "/update"))
+                        .withHeader(
+                                "X-Telegram-Bot-Api-Secret-Token",
+                                com.github.tomakehurst.wiremock.client.WireMock.equalTo(
+                                        webhookSecret))
+                        .withHeader(
+                                "X-N8N-Service-Token",
+                                com.github.tomakehurst.wiremock.client.WireMock.equalTo(
+                                        serviceToken))
+                        .atPriority(0)
+                        .willReturn(json(200, updateResponseJson)));
+    }
+
+    /**
+     * O backend só reconhece este token de serviço (qualquer outro recebe 401), em todas as rotas.
+     */
+    public void requireServiceToken(String serviceToken) {
+        server.stubFor(
+                get(urlPathMatching(BASE + "/actions/.*"))
+                        .atPriority(2)
+                        .willReturn(aResponse().withStatus(401)));
+        server.stubFor(
+                get(urlPathMatching(BASE + "/actions/.*"))
+                        .withHeader(
+                                "X-N8N-Service-Token",
+                                com.github.tomakehurst.wiremock.client.WireMock.equalTo(
+                                        serviceToken))
+                        .atPriority(1)
+                        .willReturn(aResponse().withStatus(404)));
+        server.stubFor(
+                post(urlEqualTo(BASE + "/update"))
+                        .atPriority(0)
+                        .willReturn(aResponse().withStatus(401)));
+    }
+
     /** Estado devolvido por {@code GET /actions/{id}}. */
     public void actionState(String actionId, String state) {
         server.stubFor(

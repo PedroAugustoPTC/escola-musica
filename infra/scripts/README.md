@@ -13,6 +13,7 @@ Para a implantação na VPS, use `deploy.sh` e o roteiro de [`infra/README.md`](
 | `backend` (Spring Boot) | API, processamento dos áudios, PDFs e bot | não exposto (só pela rede interna) |
 | `postgres` (PostgreSQL 18) | banco `reports` | não exposto; veja [Acessar o banco](#acessar-o-banco-como-administrador) |
 | `telegram-bot-api` | servidor local da API de bots | não exposto; só sobe com `TELEGRAM_ENABLED=true` |
+| `n8n` | transporte do canal Telegram: recebe o update, repassa ao backend e executa as ações; os workflows vêm do repositório | não exposto; o editor abre em `http://127.0.0.1:5678` (só local); veja `infra/n8n/CLAUDE.md` |
 
 Os dados (banco, PDFs gerados, certificados do Caddy) ficam em volumes do Docker e sobrevivem a
 `stop` e a reinícios do computador. Só `clean` os apaga.
@@ -282,6 +283,7 @@ TELEGRAM_BOT_TOKEN=...        # @BotFather
 TELEGRAM_API_ID=...           # https://my.telegram.org → API development tools
 TELEGRAM_API_HASH=...
 TELEGRAM_WEBHOOK_SECRET=...  # openssl rand -hex 32
+N8N_ENCRYPTION_KEY=...        # openssl rand -hex 32 (o n8n sobe junto com o bot)
 ```
 
 Se o bot já foi usado na API da nuvem (por exemplo, no MVP com n8n), faça uma vez o `logOut` e não
@@ -293,6 +295,21 @@ curl -s "https://api.telegram.org/bot<TOKEN>/logOut"
 
 Depois de editar o `infra/.env`, rode `up` de novo. O comando avisa se faltar alguma credencial.
 No Telegram, envie o código de acesso ao bot para vincular a conta.
+
+## Operar o n8n e o transporte
+
+```bash
+sh infra/scripts/n8n.sh health [--deep]       # saúde do n8n (e, com --deep, do backend e da API de bots)
+sh infra/scripts/n8n.sh check                 # a instância diverge dos workflows do repositório?
+sh infra/scripts/n8n.sh export                # exporta da instância, normaliza e grava em infra/n8n/workflows/
+sh infra/scripts/telegram-webhook.sh status   # estado do transporte (DIRECT ou N8N) e webhook registrado
+sh infra/scripts/telegram-webhook.sh switch   # liga o n8n como transporte (com verificação e reversão automática)
+sh infra/scripts/telegram-webhook.sh rollback # volta ao caminho antigo
+sh infra/scripts/rotate-service-token.sh start|finish|abort
+```
+
+`local.sh up` já registra o webhook do estado atual (`telegram-webhook.sh apply`). O passo a passo da troca em
+produção, da reversão e da rotação está em [`infra/README.md`](../README.md).
 
 ## Testes
 
@@ -306,7 +323,9 @@ sh infra/scripts/local.sh tests
 | `frontend` | ESLint, TypeScript e Vitest |
 | `e2e` | Playwright + axe contra uma pilha própria de testes (IA simulada); relatório em `frontend/playwright-report/` |
 | `real-ai` | gravações de `assets/` com a IA real (usa as chaves do `infra/.env`); gera `backend/application/target/real-ai/report.md` |
-| `all` | `backend`, `frontend` e `e2e` |
+| `n8n` | o n8n real em contêiner: utilitários, contrato dos workflows e a suíte de conversa e de paridade pelo n8n (com duplicidade, queda, privacidade e latência) |
+| `rehearsal` | ensaio da troca do webhook, da reversão e da rotação do token de serviço, com o Telegram simulado |
+| `all` | `backend`, `frontend`, `e2e`, `n8n` e `rehearsal` |
 
 Os testes usam bancos e contêineres próprios (`infra/compose.test.yaml`): não tocam nos dados da
 pilha local.

@@ -73,10 +73,14 @@ jobs:
     needs: [backend, frontend]
     steps:
       - uses: actions/checkout@v5
-      - name: Utilitários do n8n
-        run: docker compose -f infra/compose.test.yaml run --rm --build tests-n8n-ops
+      - name: Utilitários do n8n e do simulador
+        run: |
+          docker compose -f infra/compose.test.yaml run --rm --build tests-n8n-ops
+          docker compose -f infra/compose.test.yaml run --rm --build tests-simulator
       - name: Testes pelo n8n
         run: docker compose -f infra/compose.test.yaml run --rm --build --use-aliases tests-n8n
+      - name: Ensaio da troca do webhook e da rotação do token
+        run: sh infra/scripts/local.sh tests rehearsal
       - name: Logs do n8n
         if: failure()
         run: docker compose -f infra/compose.test.yaml logs --no-color n8n-test | tail -n 200

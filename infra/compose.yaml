@@ -118,6 +118,9 @@ services:
       EXECUTIONS_DATA_PRUNE_HARD_DELETE_INTERVAL: "1"
       EXECUTIONS_DATA_PRUNE_SOFT_DELETE_INTERVAL: "1"
       N8N_DEFAULT_BINARY_DATA_MODE: filesystem
+      # o banco do n8n fica só em memória (tmpfs): apagar a linha não apaga o conteúdo do arquivo do SQLite, então o texto
+      # do update e das ações nunca pode chegar ao disco (R-13, achado F-1)
+      DB_SQLITE_DATABASE: /var/lib/n8n-db/database.sqlite
       N8N_DIAGNOSTICS_ENABLED: "false"
       N8N_VERSION_NOTIFICATIONS_ENABLED: "false"
       N8N_TEMPLATES_ENABLED: "false"
@@ -125,7 +128,7 @@ services:
       N8N_HIRING_BANNER_ENABLED: "false"
       N8N_LOG_LEVEL: warn
       N8N_LOG_OUTPUT: console
-      N8N_GRACEFUL_SHUTDOWN_TIMEOUT: "25"
+      N8N_GRACEFUL_SHUTDOWN_TIMEOUT: "5"
       # defesa em profundidade: nós que o transporte nunca usa (o guardião de workflows é o controle principal)
       NODES_EXCLUDE: '["n8n-nodes-base.executeCommand","n8n-nodes-base.readWriteFile","n8n-nodes-base.ssh","n8n-nodes-base.ftp","n8n-nodes-base.postgres","n8n-nodes-base.mySql","n8n-nodes-base.mongoDb","n8n-nodes-base.redis"]'
       GENERIC_TIMEZONE: ${SCHOOL_TIMEZONE:-America/Sao_Paulo}
@@ -133,14 +136,17 @@ services:
     volumes:
       - n8n-data:/home/node/.n8n
     tmpfs:
-      # bytes do PDF em trânsito: só em memória, nunca em disco
+      # bytes do PDF em trânsito e o banco do n8n: só em memória, nunca em disco
       - /home/node/.n8n/binaryData:uid=1000,gid=1000,mode=0700,size=128m
+      - /var/lib/n8n-db:uid=1000,gid=1000,mode=0700,size=256m
     depends_on:
       backend:
         condition: service_healthy
       telegram-bot-api:
         condition: service_started
     networks: [internal]
+    # A porta de entrada (ops/gate.mjs) para de aceitar na parada e espera as requisições em curso (até 20 s) antes de
+    # mandar o n8n parar; o n8n tem então 5 s. Ver research.md R-13a.
     stop_grace_period: 30s
     expose:
       - "5678"

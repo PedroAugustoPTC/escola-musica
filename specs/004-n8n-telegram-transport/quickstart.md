@@ -72,7 +72,7 @@ cobrindo os cenários N1 a N16 de `contracts/n8n-workflows.md`.
 `-Dtelegram.transport=n8n`, duplicidade, resiliência, privacidade, latência). Para só ver a conversa:
 
 ```bash
-docker compose -f infra/compose.test.yaml run --rm tests-n8n \
+docker compose -f infra/compose.test.yaml run --rm --use-aliases tests-n8n \
   sh -c "mvn -B -ntp -Pn8n verify -Dtelegram.transport=n8n -Dit.test='*ConversationIT,*ParityScriptIT'"
 ```
 
