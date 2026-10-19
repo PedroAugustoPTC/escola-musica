@@ -450,6 +450,22 @@ n8n no GitHub, "n8n 2.0 breaking changes" e "CLI commands" de docs.n8n.io.
     `TELEGRAM_TRANSPORT` e `TELEGRAM_CHANNEL_DELIVERY` saem do `.env.example`, `local.sh`/`deploy.sh` chamam
     `apply` depois de saudáveis (agora o script é o **único** dono do registro do webhook), `.env.example`
     perde chaves órfãs; `README`s e `CLAUDE.md` deixam de falar de dois caminhos.
+- **Inventário realizado na Fase 7 (T091)** — grafo só indexa YAML/SQL, então o levantamento foi por `Grep`:
+  - **Removidos**: `TelegramWebhookController` (e a exceção/CSRF de `/telegram/webhook` em `SecurityConfig`),
+    `TelegramSender`, `TelegramDirectPublicationAdapter`, `processWebhook` e `registerIfNew(updateId, now)`
+    (porta, adaptador e JPA), `setWebhook` e `webhookUrl`, `ProactiveDelivery` e `proactiveDelivery`, a verificação
+    "exatamente um caminho ativo", o envio direto de `TelegramMessagingAdapter` (`sendMessage`, `editMessageText`,
+    `sendDocument`, `answerCallbackQuery`, etapa) e a dependência dele da fila, `TELEGRAM_WEBHOOK_URL` e
+    `TELEGRAM_CHANNEL_DELIVERY` do `application.yaml`, e `TELEGRAM_TRANSPORT` dos scripts.
+  - **Mantidos por terem uso**: `TelegramOutput` e `TelegramUpdateResult.outputs()` (o interpretador e o
+    `ChannelActionMapper` os usam), `TelegramActionPublicationPort` (porta com uma só implementação, a outbox),
+    `TelegramOutboxPublicationAdapter` (sem `@ConditionalOnProperty`), `N8nOrchestratorAdapter`,
+    `TelegramMessagingAdapter` reduzido a `call` (`getFile`, `setMyCommands`), `TelegramFileAdapter`,
+    `JobQueuePort.registerStepMessage` (a confirmação do n8n a usa) e a coluna `origin` da tabela de updates (as
+    migrações `V1` a `V8` são imutáveis; as linhas anteriores ao n8n têm origem nula).
+  - **Mudança de configuração**: com o Telegram habilitado, `TELEGRAM_CHANNEL_ORCHESTRATOR_URL` passou a ser
+    obrigatório (o `TelegramChannelConfig` derruba a subida sem ele); o compose o fixa em
+    `http://n8n:5678/webhook/channel-delivery`.
 - **Guardião de órfãos**: um teste varre `application.yaml`, `.env.example` e `compose*.yaml` atrás de chaves que
   nenhuma classe lê (e classes sem uso) para fechar SC-010.
 - **Consequência aceita**: depois do merge, desfazer exige reimplantar a versão anterior (registrado na spec).

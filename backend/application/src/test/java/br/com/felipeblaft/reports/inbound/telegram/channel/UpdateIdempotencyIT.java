@@ -234,15 +234,14 @@ class UpdateIdempotencyIT extends TelegramConversationBase {
     }
 
     @Test
-    void repeatedOldWebhookUpdateOnInternalRouteReturnsEmpty() throws Exception {
+    void updateRecordedBeforeTheOrchestratorOnInternalRouteReturnsEmpty() throws Exception {
         long update = nextUpdate();
         String json = messageJson(update, USER_CLARA, "\"text\": \"oi\"");
-        mvc.perform(
-                        post("/telegram/webhook")
-                                .header("X-Telegram-Bot-Api-Secret-Token", SECRET)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(json))
-                .andExpect(status().isOk());
+        // linha gravada quando o backend ainda recebia o webhook direto: sem origem interna
+        jdbc.update(
+                "insert into processed_telegram_update (update_id, received_at) values (?, ?)",
+                update,
+                Timestamp.from(AdjustableClock.DEFAULT.minus(Duration.ofSeconds(2))));
 
         JsonNode response = update(json);
 

@@ -4,16 +4,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import br.com.felipeblaft.reports.config.ApplicationProperties.ProactiveDelivery;
 import br.com.felipeblaft.reports.config.ApplicationProperties.TelegramChannel;
 import org.junit.jupiter.api.Test;
 
-/** R-10, R-09, Princípio IV: configuração inconsistente derruba a subida, sem vazar segredo. */
+/** R-09, Princípio IV: configuração inconsistente derruba a subida, sem vazar segredo. */
 class TelegramChannelConfigTest {
 
-    private static TelegramChannel channel(ProactiveDelivery delivery, String url, int lease) {
+    private static TelegramChannel channel(String url, int lease) {
         return new TelegramChannel(
-                delivery,
                 "current",
                 "next",
                 url,
@@ -33,81 +31,41 @@ class TelegramChannelConfigTest {
 
     @Test
     void defaultConfigIsValid() {
-        assertThatCode(
-                        () ->
-                                TelegramChannelConfig.validate(
-                                        channel(ProactiveDelivery.DIRECT, "", 60), 1))
+        assertThatCode(() -> TelegramChannelConfig.validate(channel("", 60), false))
                 .doesNotThrowAnyException();
     }
 
     @Test
-    void orchestratorWithoutUrlDoesNotStart() {
-        assertThatThrownBy(
-                        () ->
-                                TelegramChannelConfig.validate(
-                                        channel(ProactiveDelivery.ORCHESTRATOR, "", 60), 1))
+    void enabledTelegramWithoutOrchestratorUrlDoesNotStart() {
+        assertThatThrownBy(() -> TelegramChannelConfig.validate(channel("", 60), true))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("TELEGRAM_CHANNEL_ORCHESTRATOR_URL");
-        assertThatThrownBy(
-                        () ->
-                                TelegramChannelConfig.validate(
-                                        channel(ProactiveDelivery.ORCHESTRATOR, "  ", 60), 1))
+        assertThatThrownBy(() -> TelegramChannelConfig.validate(channel("  ", 60), true))
                 .isInstanceOf(IllegalStateException.class);
         assertThatCode(
                         () ->
                                 TelegramChannelConfig.validate(
-                                        channel(
-                                                ProactiveDelivery.ORCHESTRATOR,
-                                                "http://n8n:5678/webhook/abc",
-                                                60),
-                                        1))
+                                        channel("http://n8n:5678/webhook/abc", 60), true))
                 .doesNotThrowAnyException();
     }
 
     @Test
-    void directModeAcceptsEmptyUrl() {
-        assertThat(channel(ProactiveDelivery.DIRECT, null, 60).configuredOrchestrator()).isFalse();
-        assertThatCode(
-                        () ->
-                                TelegramChannelConfig.validate(
-                                        channel(ProactiveDelivery.DIRECT, null, 60), 1))
+    void disabledTelegramAcceptsEmptyUrl() {
+        assertThat(channel(null, 60).configuredOrchestrator()).isFalse();
+        assertThatCode(() -> TelegramChannelConfig.validate(channel(null, 60), false))
                 .doesNotThrowAnyException();
     }
 
     @Test
     void leaseMustExceedConnectionPlusReply() {
         // 3000 + 10000 ms = 13 s
-        assertThatThrownBy(
-                        () ->
-                                TelegramChannelConfig.validate(
-                                        channel(ProactiveDelivery.DIRECT, "", 13), 1))
+        assertThatThrownBy(() -> TelegramChannelConfig.validate(channel("", 13), false))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("lease-seconds");
-        assertThatThrownBy(
-                        () ->
-                                TelegramChannelConfig.validate(
-                                        channel(ProactiveDelivery.DIRECT, "", 5), 1))
+        assertThatThrownBy(() -> TelegramChannelConfig.validate(channel("", 5), false))
                 .isInstanceOf(IllegalStateException.class);
-        assertThatCode(
-                        () ->
-                                TelegramChannelConfig.validate(
-                                        channel(ProactiveDelivery.DIRECT, "", 14), 1))
+        assertThatCode(() -> TelegramChannelConfig.validate(channel("", 14), false))
                 .doesNotThrowAnyException();
-    }
-
-    @Test
-    void exactlyOneProactivePathMustBeActive() {
-        assertThatThrownBy(
-                        () ->
-                                TelegramChannelConfig.validate(
-                                        channel(ProactiveDelivery.DIRECT, "", 60), 0))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("exatamente um");
-        assertThatThrownBy(
-                        () ->
-                                TelegramChannelConfig.validate(
-                                        channel(ProactiveDelivery.DIRECT, "", 60), 2))
-                .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
@@ -142,10 +100,7 @@ class TelegramChannelConfigTest {
     @Test
     void publicUrlWithoutHttpsDoesNotStartAndWithoutLeakingSecretPath() {
         String url = "http://n8n.example.com.br/webhook/secret-in-path-123";
-        assertThatThrownBy(
-                        () ->
-                                TelegramChannelConfig.validate(
-                                        channel(ProactiveDelivery.ORCHESTRATOR, url, 60), 1))
+        assertThatThrownBy(() -> TelegramChannelConfig.validate(channel(url, 60), true))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("https")
                 .satisfies(
@@ -156,14 +111,7 @@ class TelegramChannelConfigTest {
 
     @Test
     void toStringMasksTokensAndUrl() {
-        String text = channel(ProactiveDelivery.ORCHESTRATOR, "https://x/secret", 60).toString();
-        assertThat(text)
-                .doesNotContain("current", "next", "orchestrator-token", "secret")
-                .contains("ORCHESTRATOR");
-    }
-
-    @Test
-    void nullProactiveDeliveryBecomesDirect() {
-        assertThat(channel(null, "", 60).proactiveDelivery()).isEqualTo(ProactiveDelivery.DIRECT);
+        String text = channel("https://x/secret", 60).toString();
+        assertThat(text).doesNotContain("current", "next", "orchestrator-token", "secret");
     }
 }

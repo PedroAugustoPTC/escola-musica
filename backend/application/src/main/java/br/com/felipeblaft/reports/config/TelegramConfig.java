@@ -13,8 +13,9 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 
 /**
- * Registra o webhook no servidor local da API de bots ao iniciar (com {@code secret_token}) e os
- * comandos do bot. Se o servidor ainda não estiver pronto, tenta de novo a cada minuto.
+ * Registra os comandos do bot no servidor local da API de bots ao iniciar. O webhook não é
+ * registrado aqui: quem o registra é {@code infra/scripts/telegram-webhook.sh apply}, apontando
+ * para o n8n. Se o servidor ainda não estiver pronto, tenta de novo a cada minuto.
  */
 @Configuration(proxyBeanMethods = false)
 @Profile("!seed")
@@ -56,30 +57,23 @@ public class TelegramConfig {
         boolean ok =
                 messaging
                         .call(
-                                "setWebhook",
+                                "setMyCommands",
                                 Map.of(
-                                        "url", telegram.webhookUrl(),
-                                        "secret_token", telegram.webhookSecret(),
-                                        "allowed_updates", List.of("message", "callback_query"),
-                                        "max_connections", 10))
+                                        "commands",
+                                        List.of(
+                                                command("inicio", "HOME_BUTTON"),
+                                                command("registrar", "REGISTER_LESSON_BUTTON"),
+                                                command("semestral", "SEMESTER_REPORT_BUTTON"),
+                                                command("historico", "HISTORY_BUTTON"),
+                                                Map.of("command", "ajuda", "description", "Ajuda"),
+                                                Map.of("command", "sair", "description", "Sair"))))
                         .isPresent();
         if (!ok) {
-            LOG.warn("webhook-not-registered; nova tentativa em 1 minuto");
+            LOG.warn("commands-not-registered; nova tentativa em 1 minuto");
             return;
         }
-        messaging.call(
-                "setMyCommands",
-                Map.of(
-                        "commands",
-                        List.of(
-                                command("inicio", "HOME_BUTTON"),
-                                command("registrar", "REGISTER_LESSON_BUTTON"),
-                                command("semestral", "SEMESTER_REPORT_BUTTON"),
-                                command("historico", "HISTORY_BUTTON"),
-                                Map.of("command", "ajuda", "description", "Ajuda"),
-                                Map.of("command", "sair", "description", "Sair"))));
         registered.set(true);
-        LOG.info("webhook-registered");
+        LOG.info("commands-registered");
     }
 
     private Map<String, String> command(String name, String label) {

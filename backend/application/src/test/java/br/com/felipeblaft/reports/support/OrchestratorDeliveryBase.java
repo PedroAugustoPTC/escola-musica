@@ -4,7 +4,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 
 import br.com.felipeblaft.reports.domain.common.Channel;
 import br.com.felipeblaft.reports.domain.registry.Student;
@@ -16,7 +15,6 @@ import br.com.felipeblaft.reports.port.TeacherNotificationPort;
 import br.com.felipeblaft.reports.port.TemporaryFile;
 import br.com.felipeblaft.reports.usecase.channel.DeliverPendingActionsUseCase;
 import br.com.felipeblaft.reports.usecase.lesson.RegisterLessonByAudioUseCase;
-import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.nio.file.Files;
@@ -25,16 +23,15 @@ import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
 import tools.jackson.databind.JsonNode;
 
 /**
- * Base dos testes com a entrega proativa ligada ao orquestrador ({@code ORQUESTRADOR}): um WireMock
- * faz o papel do webhook do n8n e o executor simulado faz o papel dos seus workflows. O despachante
- * agendado fica desligado (intervalo de 1 h): o teste chama os ciclos, com o tempo do relógio
- * ajustável. Todas as subclasses compartilham o mesmo contexto Spring.
+ * Base dos testes que controlam a entrega proativa pelo orquestrador: o WireMock da base faz o
+ * papel do webhook do n8n e o executor simulado faz o papel dos seus workflows. Diferente da base
+ * de conversa, a entrega não acontece na publicação ({@code test.telegram.drain-proactive=false}):
+ * o teste chama os ciclos ({@link #drain(int)}), com o tempo do relógio ajustável. Todas as
+ * subclasses compartilham o mesmo contexto Spring.
  *
  * <p>Modo {@code n8n} (feature 004, {@code telegram.transport=n8n}): os testes que programam a
  * resposta do orquestrador ({@link #accept()}, {@link #answer(int)}, {@link #replyWithDelay(int,
@@ -44,37 +41,10 @@ import tools.jackson.databind.JsonNode;
  * -Dtelegram.n8n.duplicates=true} cada lote entregue é reentregue ao n8n, que não pode repetir
  * nada.
  */
-@TestPropertySource(
-        properties = {
-            "reports.telegram-channel.proactive-delivery=ORCHESTRATOR",
-            "reports.telegram-channel.orchestrator-token=orchestrator-secret",
-            "reports.telegram-channel.dispatch-interval-ms=3600000",
-            "reports.telegram-channel.connection-timeout-ms=500",
-            "reports.telegram-channel.response-timeout-ms=1500"
-        })
+@TestPropertySource(properties = "test.telegram.drain-proactive=false")
 public abstract class OrchestratorDeliveryBase extends TelegramConversationBase {
 
-    public static final WireMockServer ORCHESTRATOR =
-            new WireMockServer(wireMockConfig().dynamicPort());
     private static final boolean N8N = "n8n".equals(TRANSPORT);
-
-    public static final String PATH =
-            N8N ? "/webhook/channel-delivery" : "/webhook/secret-in-path-123";
-
-    static {
-        ORCHESTRATOR.start();
-    }
-
-    @DynamicPropertySource
-    static void orchestrator(DynamicPropertyRegistry registration) {
-        registration.add(
-                "reports.telegram-channel.orchestrator-url",
-                () -> "http://localhost:" + ORCHESTRATOR.port() + PATH);
-        if (N8N) {
-            // o n8n responde depois de executar e confirmar o lote (R-07)
-            registration.add("reports.telegram-channel.response-timeout-ms", () -> "30000");
-        }
-    }
 
     @Autowired protected DeliverPendingActionsUseCase deliver;
     @Autowired protected ChannelActionsDeliveryTask task;
@@ -99,6 +69,16 @@ public abstract class OrchestratorDeliveryBase extends TelegramConversationBase 
         clara = scenario.clara();
         matteo = scenario.student(clara, "Matteo Ferreira", "Piano");
         helena = scenario.student(clara, "Helena Prado", "Violino");
+    }
+
+    /**
+     * O vínculo responde ao update pela API interna e deixa as ações da resposta na outbox; estes
+     * testes só querem as ações proativas que eles mesmos provocam.
+     */
+    @Override
+    protected void link(long user, String code) throws Exception {
+        super.link(user, code);
+        jdbc.update("delete from channel_action");
     }
 
     /**

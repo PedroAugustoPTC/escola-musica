@@ -35,8 +35,9 @@ services:
       DATABASE_USER: reports
       DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
       TELEGRAM_API_URL: http://telegram-bot-api:8081
-      # Estado da troca do webhook (feature 004): o padrão é o caminho atual; quem troca é telegram-webhook.sh.
-      TELEGRAM_WEBHOOK_URL: ${TELEGRAM_WEBHOOK_URL:-http://backend:8080/telegram/webhook}
+      # O n8n é o único transporte do Telegram (feature 004): as mensagens proativas vão da outbox ao webhook dele.
+      # O webhook do Telegram é registrado por telegram-webhook.sh (apply), apontando para o n8n.
+      TELEGRAM_CHANNEL_ORCHESTRATOR_URL: http://n8n:5678/webhook/channel-delivery
       # Teto da resposta do n8n à entrega proativa: ele só aceita o lote depois de executá-lo (R-07).
       TELEGRAM_CHANNEL_RESPONSE_TIMEOUT_MS: 30000
       TELEGRAM_FILES_DIR: /var/lib/telegram-bot-api

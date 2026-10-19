@@ -66,8 +66,7 @@ public class SecurityConfig {
         http.csrf(
                         csrf ->
                                 csrf.csrfTokenRepository(csrfRepository)
-                                        .csrfTokenRequestHandler(csrfHandler)
-                                        .ignoringRequestMatchers("/telegram/webhook"))
+                                        .csrfTokenRequestHandler(csrfHandler))
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
@@ -83,7 +82,7 @@ public class SecurityConfig {
                         rules ->
                                 rules.requestMatchers(HttpMethod.POST, "/api/v1/session")
                                         .permitAll()
-                                        .requestMatchers("/telegram/webhook", "/error")
+                                        .requestMatchers("/error")
                                         .permitAll()
                                         .requestMatchers(
                                                 "/actuator/health",

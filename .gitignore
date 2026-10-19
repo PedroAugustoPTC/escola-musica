@@ -35,9 +35,7 @@ frontend/tsconfig.tsbuildinfo
 # Added by code-review-graph
 .code-review-graph/
 
-# Estado dos scripts de transporte (feature 004): cópia do .env anterior e estado da troca do webhook
+# Estado dos scripts de transporte (feature 004): cópia do .env anterior (rotação do token)
 infra/.env.previous
-infra/.transport-state
 infra/tests/rehearsal/rehearsal.env
 infra/tests/rehearsal/rehearsal.env.previous
-infra/tests/rehearsal/transport-state

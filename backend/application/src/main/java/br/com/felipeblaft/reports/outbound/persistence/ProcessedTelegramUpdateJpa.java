@@ -7,16 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 
 interface ProcessedTelegramUpdateJpa extends JpaRepository<ProcessedTelegramUpdateEntity, Long> {
 
-    /** Insere o {@code update_id}; devolve 0 se ele já foi processado. */
-    @Modifying
-    @Query(
-            value =
-                    "insert into processed_telegram_update (update_id, received_at) values (:updateId, :now)"
-                            + " on conflict (update_id) do nothing",
-            nativeQuery = true)
-    int registerIfNew(long updateId, Instant now);
-
-    /** Como {@link #registerIfNew}, gravando a origem (rota interna do canal). */
+    /** Insere o {@code update_id} com a origem; devolve 0 se ele já foi processado. */
     @Modifying
     @Query(
             value =

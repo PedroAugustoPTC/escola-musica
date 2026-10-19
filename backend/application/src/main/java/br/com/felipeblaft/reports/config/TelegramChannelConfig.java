@@ -1,42 +1,34 @@
 package br.com.felipeblaft.reports.config;
 
-import br.com.felipeblaft.reports.inbound.telegram.TelegramActionPublicationPort;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
-import java.util.List;
 import org.springframework.context.annotation.Configuration;
 
 /**
  * Validação, na subida, da configuração do canal Telegram interno: configuração inconsistente
- * derruba a aplicação em vez de perder mensagens em silêncio. As mensagens de erro nunca repetem a
- * URL do orquestrador (pode conter segredo no caminho) nem token algum.
+ * derruba a aplicação em vez de perder mensagens em silêncio. Com o Telegram ligado, o orquestrador
+ * (n8n) é o único transporte, então o endereço dele é obrigatório. As mensagens de erro nunca
+ * repetem a URL do orquestrador (pode conter segredo no caminho) nem token algum.
  */
 @Configuration(proxyBeanMethods = false)
 public class TelegramChannelConfig {
 
-    public TelegramChannelConfig(
-            ApplicationProperties properties, List<TelegramActionPublicationPort> publications) {
-        validate(properties.telegramChannel(), publications.size());
+    public TelegramChannelConfig(ApplicationProperties properties) {
+        validate(properties.telegramChannel(), properties.telegram().enabled());
     }
 
-    static void validate(ApplicationProperties.TelegramChannel channel, int activePublications) {
-        if (activePublications != 1) {
-            throw new IllegalStateException(
-                    "exatamente um caminho de entrega proativa deve estar ativo (DIRECT ou"
-                            + " ORCHESTRATOR), mas há "
-                            + activePublications);
-        }
+    static void validate(ApplicationProperties.TelegramChannel channel, boolean telegramEnabled) {
         long windowHttpMs = (long) channel.connectionTimeoutMs() + channel.responseTimeoutMs();
         if (channel.leaseSeconds() * 1000L <= windowHttpMs) {
             throw new IllegalStateException(
                     "reports.telegram-channel.lease-seconds deve ser maior que"
                             + " connection-timeout-ms + response-timeout-ms");
         }
-        if (channel.proactiveDelivery() == ApplicationProperties.ProactiveDelivery.ORCHESTRATOR
-                && !channel.configuredOrchestrator()) {
+        if (telegramEnabled && !channel.configuredOrchestrator()) {
             throw new IllegalStateException(
-                    "TELEGRAM_CHANNEL_DELIVERY=ORCHESTRATOR exige TELEGRAM_CHANNEL_ORCHESTRATOR_URL");
+                    "TELEGRAM_ENABLED=true exige TELEGRAM_CHANNEL_ORCHESTRATOR_URL: o n8n é o único"
+                            + " transporte do Telegram");
         }
         if (channel.configuredOrchestrator() && !allowedDestination(channel.orchestratorUrl())) {
             throw new IllegalStateException(

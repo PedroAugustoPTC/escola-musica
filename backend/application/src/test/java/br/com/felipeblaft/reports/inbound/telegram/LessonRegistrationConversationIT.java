@@ -43,12 +43,10 @@ class LessonRegistrationConversationIT extends TelegramConversationBase {
     /**
      * V15, FR-028 (US5.1): pela API interna o áudio nunca passa pelo orquestrador: a ação não traz
      * bytes, caminho de arquivo nem endereço de download, e ninguém pede o arquivo à API de bots no
-     * recebimento. Só faz sentido pela API interna (transportes internal e n8n).
+     * recebimento.
      */
     @Test
     void audioInInternalTransportCarriesNoBytesPathNorAddress() throws Exception {
-        org.junit.jupiter.api.Assumptions.assumeTrue(
-                "internal".equals(TRANSPORT) || "n8n".equals(TRANSPORT));
         prepareTelegramFile("voice-ok", AudioNormalizationTest.AUDIO_WITH_SPEECH);
         chooseMatteo();
 

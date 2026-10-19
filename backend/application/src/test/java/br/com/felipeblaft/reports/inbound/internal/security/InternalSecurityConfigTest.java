@@ -2,7 +2,6 @@ package br.com.felipeblaft.reports.inbound.internal.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import br.com.felipeblaft.reports.config.ApplicationProperties.ProactiveDelivery;
 import br.com.felipeblaft.reports.config.ApplicationProperties.TelegramChannel;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -34,22 +33,7 @@ class InternalSecurityConfigTest {
 
     private static TelegramChannel channel(String current, String next) {
         return new TelegramChannel(
-                ProactiveDelivery.DIRECT,
-                current,
-                next,
-                "",
-                "",
-                3000,
-                10000,
-                30,
-                900,
-                24,
-                60,
-                60,
-                2000,
-                20,
-                24,
-                7);
+                current, next, "", "", 3000, 10000, 30, 900, 24, 60, 60, 2000, 20, 24, 7);
     }
 
     @Test

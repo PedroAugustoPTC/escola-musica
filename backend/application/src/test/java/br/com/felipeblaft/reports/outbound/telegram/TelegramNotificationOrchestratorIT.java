@@ -19,10 +19,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import tools.jackson.databind.JsonNode;
 
 /**
- * V13, US3.1, US3.2, V12: com {@code entrega-proativa=ORQUESTRADOR} os avisos e resultados do
- * processamento saem pela outbox, com as mesmas mensagens e a mesma ordem do envio direto, o
- * relatório em foco quando pedido no Telegram e sem nenhuma chamada direta do backend à API de
- * bots. Os casos do modo {@code DIRETA} estão em {@link TelegramNotificationAdapterIT}, intactos.
+ * V13, US3.1, US3.2, V12: os avisos e resultados do processamento saem pela outbox, com as mesmas
+ * mensagens e a mesma ordem de sempre, o relatório em foco quando pedido no Telegram e sem nenhuma
+ * chamada direta do backend à API de bots. O texto dos avisos em cada canal está em {@link
+ * TelegramNotificationAdapterIT}.
  */
 class TelegramNotificationOrchestratorIT extends OrchestratorDeliveryBase {
 

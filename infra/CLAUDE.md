@@ -10,6 +10,8 @@ máquina só precisa de Docker Engine 27+ com Compose v2 (constituição, "Conta
 - `n8n/`: imagem fina do n8n, workflows (`workflows/*.json`), utilitários (`ops/`) e `entrypoint.sh`. Leia `n8n/CLAUDE.md` antes de mexer.
 - `tests/n8n/`: `Dockerfile` do `tests-n8n` (Maven + `docker` CLI; o socket do Docker só é montado em `compose.test.yaml`).
 - `caddy/Caddyfile`: HTTPS, cabeçalhos de segurança e proxy de `/api/*`. Só a entrada HTTPS é pública.
+- `scripts/telegram-webhook.sh` (`status`, `verify`, `apply`) é o único dono do registro do webhook, que aponta para o n8n (o
+  único transporte do Telegram; não há `switch` nem `rollback`: reverter é reimplantar a versão anterior).
 - `scripts/local.sh` sobe e opera o ambiente local (`up`, `seed`, `code`, `database`, `database-port`,
   `database-close`, `status`, `logs`, `tests`, `stop`, `clean`; `up --demo-data=true|false`);
   `scripts/deploy.sh` atualiza a pilha na VPS. Passo a passo em `README.md` e `scripts/README.md`.
