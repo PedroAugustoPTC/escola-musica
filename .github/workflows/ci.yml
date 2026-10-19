@@ -66,8 +66,9 @@ jobs:
 
   # Feature 004: o n8n real em contêiner (imagem de produção, Telegram e backend simulados): utilitários, contrato dos
   # workflows e, nas fases seguintes, a suíte de conversa e de paridade pelo n8n, duplicidade, resiliência e privacidade.
-  # O docker.n8n.io limita a taxa (429) dos executores do GitHub de vez em quando; os passos abaixo repetem só nesse caso
-  # (infra/scripts/retry-rate-limit.sh). Qualquer outra falha reprova na hora.
+  # O docker.n8n.io limita a taxa (429) dos executores do GitHub. A imagem base vem do cache ou, sem ele, POR DIGEST do
+  # docker.n8n.io, do ghcr.io ou do Docker Hub (infra/scripts/ci-n8n-image.sh); com ela no Docker local o build não consulta
+  # o registro. Os passos de build ainda repetem se o 429 vier (infra/scripts/retry-rate-limit.sh).
   n8n:
     name: n8n (transporte do Telegram em contêiner)
     runs-on: ubuntu-latest
@@ -75,6 +76,13 @@ jobs:
     needs: [backend, frontend]
     steps:
       - uses: actions/checkout@v5
+      - name: Cache da imagem base do n8n
+        uses: actions/cache@v4
+        with:
+          path: /tmp/n8n-image.tar
+          key: n8n-image-${{ hashFiles('infra/n8n/Dockerfile') }}
+      - name: Imagem base do n8n (cache, ou por digest com origens alternativas)
+        run: sh infra/scripts/ci-n8n-image.sh /tmp/n8n-image.tar
       - name: Utilitários do n8n e do simulador
         run: |
           sh infra/scripts/retry-rate-limit.sh docker compose -f infra/compose.test.yaml run --rm --build tests-n8n-ops

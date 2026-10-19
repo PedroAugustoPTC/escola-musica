@@ -316,6 +316,10 @@ há troca nem `rollback` (reverter é reimplantar a versão anterior). O passo a
 
 `sh infra/scripts/retry-rate-limit.sh <comando>` repete o comando (até 5 vezes, esperando 30 s a mais a cada tentativa) quando a saída traz `429 Too Many Requests`; qualquer outra falha sai na hora com o mesmo código. É o que o job `n8n` do CI usa nos passos que constroem a imagem do n8n.
 
+## Imagem base do n8n no CI
+
+`sh infra/scripts/ci-n8n-image.sh [cache.tar]` deixa a imagem base do n8n (tag e digest fixados em `infra/n8n/Dockerfile`) no Docker local antes do build: carrega do cache ou baixa por digest do `docker.n8n.io`, do `ghcr.io` e do Docker Hub, nessa ordem. É o que o job `n8n` do CI usa para não depender de um registro só.
+
 ## Testes
 
 ```bash
