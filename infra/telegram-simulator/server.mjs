@@ -68,7 +68,9 @@ export function createSimulator({ botToken = '', retryMs = 1000, deliveryTimeout
       remember(item, error?.name === 'TimeoutError' ? 'timeout' : 'conexão');
     }
     state.lastErrorDate = Math.floor(Date.now() / 1000);
-    item.nextAt = Date.now() + retryMs;
+    // como o Telegram, o intervalo entre tentativas do mesmo update cresce (até 10x o inicial)
+    item.failures = (item.failures ?? 0) + 1;
+    item.nextAt = Date.now() + Math.min(retryMs * 2 ** (item.failures - 1), retryMs * 10);
     item.inflight = false;
   }
 
@@ -77,9 +79,15 @@ export function createSimulator({ botToken = '', retryMs = 1000, deliveryTimeout
       return;
     }
     const now = Date.now();
+    // como o Telegram, nunca mais que max_connections entregas em voo ao mesmo tempo
+    let inflight = state.queue.filter((item) => item.inflight).length;
     for (const item of state.queue) {
+      if (inflight >= state.webhook.max) {
+        break;
+      }
       if (!item.inflight && item.nextAt <= now) {
         deliver(item);
+        inflight += 1;
       }
     }
   }
