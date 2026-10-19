@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import br.com.felipeblaft.reports.domain.registry.Student;
 import br.com.felipeblaft.reports.domain.registry.Teacher;
+import br.com.felipeblaft.reports.support.ConversationState;
 import br.com.felipeblaft.reports.support.ScenarioIT;
 import br.com.felipeblaft.reports.support.TelegramConversationBase;
 import java.time.LocalDate;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import tools.jackson.databind.JsonNode;
 
 /** Histórico pelo bot (sequência 5.5, estado #9). */
+@ConversationState({9})
 class HistoryConversationIT extends TelegramConversationBase {
 
     private Teacher clara;

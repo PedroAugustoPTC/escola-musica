@@ -9,10 +9,10 @@ A validação funcional completa está em
 
 | Arquivo | Papel |
 |---|---|
-| `compose.yaml` | serviços base: `web` (Caddy + SPA), `backend`, `postgres`, `telegram-bot-api` |
+| `compose.yaml` | serviços base: `web` (Caddy + SPA), `backend`, `postgres`, `telegram-bot-api`, `n8n` |
 | `compose.dev.yaml` | local: `web` só em `127.0.0.1:80/443`; monta `infra/seed` em `/seed` |
 | `compose.prod.yaml` | produção: `web` publica 80 e 443; `restart: unless-stopped` |
-| `compose.test.yaml` | testes em contêiner (backend, frontend, ponta a ponta, IA real) |
+| `compose.test.yaml` | testes em contêiner (backend, frontend, ponta a ponta, IA real, n8n e o ensaio da troca do webhook) |
 | `caddy/Caddyfile` | HTTPS, cabeçalhos de segurança e proxy de `/api/*` |
 | `.env.example` | modelo das variáveis; copie para `infra/.env` (**nunca versionado**) |
 | `seed/example.json` | carga fictícia; cargas reais ficam fora do Git (`infra/seed/*.json`) |
@@ -20,6 +20,9 @@ A validação funcional completa está em
 | `scripts/local.sh` | ambiente local: up, seed, code, database, status, logs, tests, stop, clean — passo a passo em [`scripts/README.md`](scripts/README.md) |
 | `compose.database.yaml` | só local: publica o banco em `127.0.0.1` para ferramentas gráficas (`local.sh database-port`) |
 | `scripts/deploy.sh` | atualização e subida da pilha de produção na VPS |
+| `n8n/` | n8n, o transporte do Telegram: imagem fina, workflows como código e utilitários — leia [`n8n/CLAUDE.md`](n8n/CLAUDE.md) |
+| `telegram-simulator/` | simulador do Telegram, só para os ensaios (nunca em produção) |
+| `scripts/n8n.sh`, `scripts/telegram-webhook.sh`, `scripts/rotate-service-token.sh` | operação do n8n, troca e reversão do webhook e rotação do token de serviço (seções abaixo) |
 
 ## Se você tem um ambiente anterior à feature 003
 
@@ -131,6 +134,71 @@ comportamento. Para atualizar: troque a tag em `infra/compose.yaml`, suba em amb
 bot de teste e envie o MP4 de 31 MB pelo Telegram (checklist `validacao-quickstart.md`, V5) antes de
 implantar.
 
+### Versão do n8n
+
+O n8n usa a imagem `docker.n8n.io/n8nio/n8n:2.43.6`, fixada **só** em `infra/n8n/Dockerfile` (com o *digest* em
+comentário). Nunca use `latest`, `stable` nem `next`. Para atualizar: leia as notas de versão do n8n, troque a tag no
+`Dockerfile`, suba no ambiente local, rode `sh infra/scripts/local.sh tests n8n` e `tests rehearsal` e só então
+abra o PR. A imagem já traz os workflows do repositório; nada é baixado em tempo de execução.
+
+### Exportar workflows de volta
+
+Os workflows são código (`infra/n8n/workflows/*.json`) e o repositório sempre prevalece: a cada subida o n8n os
+importa de novo. Para mudar um: `local.sh up` (o editor abre em `http://127.0.0.1:5678`), edite no navegador,
+`sh infra/scripts/n8n.sh export` (normaliza e recusa credencial, token ou URL com senha), `git diff`, `tests n8n` e
+abra o PR. `sh infra/scripts/n8n.sh check` mostra se a instância divergiu do repositório. Em produção o editor é
+desligado e nada se edita à mão. O banco do n8n fica só em memória (`tmpfs`): reiniciar o contêiner o zera, e o
+usuário do editor local é recriado.
+
+### Trocar o webhook para o n8n
+
+O n8n é o transporte do Telegram, mas **a troca em produção é uma ação deliberada do mantenedor**: o `deploy.sh`
+nunca a faz. Antes, ensaie com `sh infra/scripts/local.sh tests rehearsal` (backend real, n8n real e Telegram
+simulado; cada update precisa ter exatamente uma resposta durante a troca, a reversão e a rotação).
+
+```bash
+sh infra/scripts/telegram-webhook.sh status --env prod
+sh infra/scripts/telegram-webhook.sh switch --env prod --chat-id <seu-chat-de-teste>
+```
+
+O `switch` confere as pré-condições (n8n saudável, workflows publicados, saúde profunda, segredo do webhook válido,
+tokens preenchidos e diferentes), grava as quatro chaves do estado no `infra/.env`, recria só o `backend`, registra o
+webhook e **verifica** (webhook certo, segredo errado recusado, segredo certo aceito, entrega proativa e, com
+`--chat-id`, a ida e volta real). Se a verificação reprovar, ele **restaura** o estado anterior e sai com `3`. Os
+códigos de motivo (`[N8N_NOT_HEALTHY]`, `[SECRET_MISMATCH]` etc.) estão em
+`specs/004-n8n-telegram-transport/contracts/transport-scripts.md`.
+
+### Reverter
+
+```bash
+sh infra/scripts/telegram-webhook.sh rollback --env prod
+```
+
+Volta ao caminho antigo com a mesma verificação; é idempotente. Depois da remoção do caminho antigo (a última fase
+da feature), a reversão passa a ser reimplantar a versão anterior.
+
+### Verificar
+
+```bash
+sh infra/scripts/telegram-webhook.sh verify --env prod   # somente leitura, exceto as sondas
+sh infra/scripts/n8n.sh health --deep --env prod         # backend e API de bots, vistos pelo n8n
+```
+
+### Rotacionar o token de serviço
+
+O token que o n8n envia ao backend (`TELEGRAM_CHANNEL_CURRENT_TOKEN`) troca-se **sem janela de recusa**, usando os
+dois tokens simultâneos do backend:
+
+```bash
+sh infra/scripts/rotate-service-token.sh start --env prod    # gera o novo; o backend aceita os dois; o n8n envia o novo
+sh infra/scripts/rotate-service-token.sh finish --env prod   # o novo vira o atual; o antigo passa a ser recusado
+# ou: sh infra/scripts/rotate-service-token.sh abort --env prod
+```
+
+O `infra/.env.previous` guarda a cópia anterior do `.env` (contém segredos; ignorado pelo Git). O token de entrega
+(`TELEGRAM_CHANNEL_ORCHESTRATOR_TOKEN`, do backend ao n8n) é outro segredo: sua troca é um reinício coordenado dos
+dois contêineres.
+
 ### Bot de testes já usado na nuvem
 
 O servidor local da API de bots só assume um bot que não esteja logado na API da nuvem. Faça
@@ -183,6 +251,11 @@ docker compose -f infra/compose.test.yaml run --rm --build tests-e2e
 - `tests-backend`: unitários, ArchUnit, integração com PostgreSQL, contrato OpenAPI, conversa do
   Telegram e paridade; o JaCoCo exige ≥ 90% de linhas e branches no `core`.
 - `tests-frontend`: ESLint, TypeScript e Vitest.
+- `tests-n8n`: o n8n real em contêiner (contrato dos workflows, a suíte de conversa e de paridade pelo n8n,
+  duplicidade, resiliência, privacidade e latência); `tests-n8n-ops` e `tests-simulator` testam os utilitários.
+  Rode com `sh infra/scripts/local.sh tests n8n`.
+- `tests-rehearsal`: o ensaio da troca do webhook, da reversão e da rotação do token, com o Telegram simulado
+  (`sh infra/scripts/local.sh tests rehearsal`).
 - `tests-e2e`: Playwright + axe contra a pilha completa com IA simulada. A semeadura grava dados
   fictícios direto no banco de testes. Relatório em `frontend/playwright-report/`.
 - `tests-real-ai` (opcional, fora da cobertura): precisa de `TRANSCRIPTION_API_KEY` e `LLM_API_KEY` no

@@ -35,6 +35,14 @@ import tools.jackson.databind.JsonNode;
  * faz o papel do webhook do n8n e o executor simulado faz o papel dos seus workflows. O despachante
  * agendado fica desligado (intervalo de 1 h): o teste chama os ciclos, com o tempo do relógio
  * ajustável. Todas as subclasses compartilham o mesmo contexto Spring.
+ *
+ * <p>Modo {@code n8n} (feature 004, {@code telegram.transport=n8n}): os testes que programam a
+ * resposta do orquestrador ({@link #accept()}, {@link #answer(int)}, {@link #replyWithDelay(int,
+ * int)}) testam o backend e continuam com o WireMock. Já {@link #drain(int)} faz o que o n8n faria
+ * <em>de verdade</em>: o WireMock vira proxy do {@code channel-delivery} real, que executa e
+ * confirma antes de responder, e o executor em memória não é usado. Com {@code
+ * -Dtelegram.n8n.duplicates=true} cada lote entregue é reentregue ao n8n, que não pode repetir
+ * nada.
  */
 @TestPropertySource(
         properties = {
@@ -48,7 +56,10 @@ public abstract class OrchestratorDeliveryBase extends TelegramConversationBase 
 
     public static final WireMockServer ORCHESTRATOR =
             new WireMockServer(wireMockConfig().dynamicPort());
-    public static final String PATH = "/webhook/secret-in-path-123";
+    private static final boolean N8N = "n8n".equals(TRANSPORT);
+
+    public static final String PATH =
+            N8N ? "/webhook/channel-delivery" : "/webhook/secret-in-path-123";
 
     static {
         ORCHESTRATOR.start();
@@ -59,6 +70,10 @@ public abstract class OrchestratorDeliveryBase extends TelegramConversationBase 
         registration.add(
                 "reports.telegram-channel.orchestrator-url",
                 () -> "http://localhost:" + ORCHESTRATOR.port() + PATH);
+        if (N8N) {
+            // o n8n responde depois de executar e confirmar o lote (R-07)
+            registration.add("reports.telegram-channel.response-timeout-ms", () -> "30000");
+        }
     }
 
     @Autowired protected DeliverPendingActionsUseCase deliver;
@@ -73,7 +88,7 @@ public abstract class OrchestratorDeliveryBase extends TelegramConversationBase 
     protected Student matteo;
     protected Student helena;
 
-    /** Quantas entregas já foram passadas ao executor por {@link #drain(int)}. */
+    /** Quantas entregas já foram tratadas por {@link #drain(int)}. */
     private int handledDeliveries;
 
     @BeforeEach
@@ -86,11 +101,28 @@ public abstract class OrchestratorDeliveryBase extends TelegramConversationBase 
         helena = scenario.student(clara, "Helena Prado", "Violino");
     }
 
+    /**
+     * Volta ao estado inicial no meio de um teste (banco, API de bots e orquestrador simulados).
+     */
+    protected void resetScenario() {
+        truncateAll();
+        resetBotApi();
+        prepareOrchestrator();
+    }
+
     // ---- orquestrador simulado
 
     protected void accept() {
         ORCHESTRATOR.resetMappings();
         ORCHESTRATOR.stubFor(post(urlPathEqualTo(PATH)).willReturn(aResponse().withStatus(200)));
+    }
+
+    /** Modo n8n: o WireMock passa a encaminhar as entregas ao {@code channel-delivery} real. */
+    private void routeDeliveriesToN8n() {
+        ORCHESTRATOR.resetMappings();
+        ORCHESTRATOR.stubFor(
+                post(urlPathEqualTo(PATH))
+                        .willReturn(aResponse().proxiedFrom(N8nTestSupport.N8N_URL)));
     }
 
     protected void answer(int status) {
@@ -120,6 +152,19 @@ public abstract class OrchestratorDeliveryBase extends TelegramConversationBase 
      * e confirma. Repete até não haver mais nada devido (ou {@code ciclos} vezes).
      */
     protected void drain(int cycles) throws Exception {
+        if (N8N) {
+            routeDeliveriesToN8n();
+        }
+        try {
+            drainCycles(cycles);
+        } finally {
+            if (N8N) {
+                accept();
+            }
+        }
+    }
+
+    private void drainCycles(int cycles) throws Exception {
         for (int i = 0; i < cycles; i++) {
             task.dispatch();
             List<LoggedRequest> all = deliveries();
@@ -127,9 +172,32 @@ public abstract class OrchestratorDeliveryBase extends TelegramConversationBase 
                 return;
             }
             for (int k = handledDeliveries; k < all.size(); k++) {
-                orchestratorExecutor().run(body(all.get(k)).get("actions"));
+                if (N8N) {
+                    // o n8n real já executou e confirmou antes de responder; a duplicidade o
+                    // reentrega
+                    if (n8nDuplicates) {
+                        redeliver(all.get(k));
+                    }
+                } else {
+                    orchestratorExecutor().run(body(all.get(k)).get("actions"));
+                }
             }
             handledDeliveries = all.size();
+        }
+    }
+
+    /** Entrega de novo ao n8n o mesmo lote, com os mesmos cabeçalhos (modo de duplicidade). */
+    private void redeliver(LoggedRequest delivery) {
+        String token = delivery.getHeader("X-Channel-Delivery-Token");
+        String key = delivery.getHeader("Idempotency-Key");
+        N8nTestSupport.Reply reply =
+                N8nTestSupport.post(
+                        N8nTestSupport.N8N_URL + "/webhook/channel-delivery",
+                        java.util.Map.of("X-Channel-Delivery-Token", token, "Idempotency-Key", key),
+                        "application/json",
+                        delivery.getBody());
+        if (reply.status() != 200) {
+            throw new AssertionError("a reentrega do lote foi recusada com " + reply.status());
         }
     }
 

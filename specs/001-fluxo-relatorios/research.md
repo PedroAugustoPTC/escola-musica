@@ -70,6 +70,8 @@ e exige que as escolhas sejam registradas e justificadas aqui.
 > **Nota (feature 002, sem reescrever histórico):** o transporte do Telegram agora é feito via n8n
 > (constituição v1.4.0); ver `specs/002-api-interna-canal-telegram/research.md` R-01. O texto abaixo
 > registra a decisão original da 001.
+>
+> **Nota (feature 004, sem reescrever histórico):** o n8n é o transporte do canal Telegram (features 002 e 004): workflows como código em `infra/n8n/`, troca controlada e reversível do webhook por `infra/scripts/telegram-webhook.sh`. O adaptador de entrada direto descrito aqui continua funcionando até a prova de paridade da 004 e só então é removido. Veja `specs/004-n8n-telegram-transport/plan.md`.
 
 - **Decisão**: o backend recebe os updates do Telegram por webhook, num adaptador de entrada
   (`adaptadores.entrada.telegram`) que apenas traduz cada update para os mesmos casos de uso da Web.

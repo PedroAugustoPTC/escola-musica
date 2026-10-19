@@ -7,6 +7,7 @@ import br.com.felipeblaft.reports.domain.registry.Student;
 import br.com.felipeblaft.reports.domain.registry.Teacher;
 import br.com.felipeblaft.reports.port.TemporaryFile;
 import br.com.felipeblaft.reports.support.AudioNormalizationTest;
+import br.com.felipeblaft.reports.support.ConversationState;
 import br.com.felipeblaft.reports.support.ScenarioIT;
 import br.com.felipeblaft.reports.support.TelegramConversationBase;
 import br.com.felipeblaft.reports.usecase.lesson.AnswerQuestionsUseCase;
@@ -73,6 +74,7 @@ class ResumptionConversationIT extends TelegramConversationBase {
     }
 
     @Test
+    @ConversationState({4})
     void continueRepresentsReviewInCurrentVersion() throws Exception {
         UUID id = reportInReviewThroughWeb();
         change.changeByText(clara.id(), id, "Diga que a aula foi ótima.", 1, Channel.WEB);
@@ -96,6 +98,7 @@ class ResumptionConversationIT extends TelegramConversationBase {
     }
 
     @Test
+    @ConversationState({3})
     void continueWithPendingQuestionsShowsQuestions() throws Exception {
         register.run(clara.id(), matteo.id(), webAudio(), Channel.WEB);
         scenario.processQueue();
@@ -109,6 +112,7 @@ class ResumptionConversationIT extends TelegramConversationBase {
     }
 
     @Test
+    @ConversationState({5})
     void registrationStillInTranscriptionReportsStep() throws Exception {
         register.run(clara.id(), matteo.id(), webAudio(), Channel.WEB);
         sendText(USER_CLARA, "registrar aula");
@@ -123,6 +127,7 @@ class ResumptionConversationIT extends TelegramConversationBase {
     }
 
     @Test
+    @ConversationState({2})
     void discardAsksConfirmationCancelsAndAsksForNewAudio() throws Exception {
         reportInReviewThroughWeb();
         sendText(USER_CLARA, "registrar aula");
@@ -145,6 +150,7 @@ class ResumptionConversationIT extends TelegramConversationBase {
     }
 
     @Test
+    @ConversationState({7})
     void discardWithValidPendingAudioReusesAudio() throws Exception {
         register.run(clara.id(), matteo.id(), webAudio(), Channel.WEB);
         scenario.processQueue();

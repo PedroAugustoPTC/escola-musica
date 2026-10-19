@@ -1,0 +1,12 @@
+{
+  "id": "transport-health",
+  "name": "transport-health",
+  "nodes": [
+    { "id": "a1", "name": "Webhook", "type": "n8n-nodes-base.webhook", "typeVersion": 2, "position": [0, 0], "parameters": { "httpMethod": "POST", "path": "transport-health/live", "responseMode": "responseNode" } },
+    { "id": "a2", "name": "Call", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [200, 0], "parameters": { "method": "GET", "url": "={{ $env.BACKEND_INTERNAL_URL }}/internal/v1/channel/telegram/actions/u0-0", "sendHeaders": true, "headerParameters": { "parameters": [ { "name": "X-N8N-Service-Token", "value": "={{ $env.BACKEND_SERVICE_TOKEN }}" } ] } } },
+    { "id": "a3", "name": "Check", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [400, 0], "parameters": { "conditions": { "conditions": [ { "leftValue": "={{ $json.statusCode }}", "rightValue": 404, "operator": { "type": "number", "operation": "equals" } } ] } } },
+    { "id": "a4", "name": "Shape", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [600, 0], "parameters": { "language": "javaScript", "jsCode": "const item = $input.first().json; return [{ json: { ok: item.statusCode === 404 } }];" } }
+  ],
+  "connections": {},
+  "settings": { "executionOrder": "v1" }
+}

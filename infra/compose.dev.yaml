@@ -1,4 +1,6 @@
 # Ambiente local: só o `web` publica portas, e apenas em loopback (Princípio IV).
+# O editor do n8n é a exceção controlada: ligado e publicado SÓ em 127.0.0.1, para exportar workflows de volta
+# ao repositório (procedimento em infra/n8n/CLAUDE.md). Em produção ele fica desligado.
 services:
   web:
     ports:
@@ -7,3 +9,9 @@ services:
   backend:
     volumes:
       - ./seed:/seed:ro
+  n8n:
+    environment:
+      N8N_DISABLE_UI: "false"
+      N8N_SECURE_COOKIE: "false"
+    ports:
+      - "127.0.0.1:5678:5678"

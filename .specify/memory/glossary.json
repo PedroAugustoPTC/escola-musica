@@ -1853,13 +1853,19 @@
       "id": "typed-confirmation-word",
       "scope": "string de comando: palavra que o operador digita para confirmar a limpeza dos dados locais",
       "terms": [
-        "apagar"
+        "apagar",
+        "trocar",
+        "reverter",
+        "rotacionar"
       ],
-      "reason": "O local.sh clean pede ao operador que digite a palavra mostrada na pergunta (em português) antes de apagar o banco, os PDFs e os certificados locais. A palavra é a que a pessoa digita, texto do usuário; traduzi-la mudaria a interação do script, o que a feature 003 proíbe.",
+      "reason": "O local.sh clean pede ao operador que digite a palavra mostrada na pergunta (em português) antes de apagar o banco, os PDFs e os certificados locais. A palavra é a que a pessoa digita (apagar, trocar, reverter e rotacionar, nos scripts de operação do n8n e do webhook), texto do usuário; traduzi-la mudaria a interação do script, o que a feature 003 proíbe.",
       "constitutionCategory": "texto do usuário (explicitamente em português no Princípio VI)",
       "mode": "term",
       "paths": [
-        "infra/scripts/local.sh"
+        "infra/scripts/local.sh",
+        "infra/scripts/n8n.sh",
+        "infra/scripts/telegram-webhook.sh",
+        "infra/scripts/rotate-service-token.sh"
       ],
       "appliesTo": [
         "artifacts"
@@ -1867,17 +1873,19 @@
     },
     {
       "id": "spec-folder-references",
-      "scope": "string de comando: caminho da pasta da feature 001 em specs/ citado pelos scripts, pelo Dockerfile do frontend e pelo compose de testes",
+      "scope": "string de comando: caminho das pastas das features 001 e 002 em specs/ citado pelos scripts, pelo Dockerfile do frontend, pelo compose de testes e pelo contrato OpenAPI da feature 004",
       "terms": [
-        "001-fluxo-relatorios"
+        "001-fluxo-relatorios",
+        "002-api-interna-canal-telegram"
       ],
-      "reason": "A pasta specs/001-fluxo-relatorios mantém o nome em português (specs/ é documentação, fora do escopo de renomeação); o contrato OpenAPI do Portal continua nela, e o script generate:api, o Dockerfile do frontend e a variável CONTRACT_API do compose de testes só montam o caminho até ele.",
+      "reason": "A pasta specs/001-fluxo-relatorios mantém o nome em português (specs/ é documentação, fora do escopo de renomeação); o contrato OpenAPI do Portal continua nela, e o script generate:api, o Dockerfile do frontend e a variável CONTRACT_API do compose de testes só montam o caminho até ele. A pasta specs/002-api-interna-canal-telegram também mantém o nome: o OpenAPI do n8n (feature 004) referencia o esquema v1 dela por `$ref`.",
       "constitutionCategory": "nomes próprios e material de referência (Princípio VI, emenda 2.1.0)",
       "mode": "term",
       "paths": [
         "frontend/package.json",
         "frontend/Dockerfile",
-        "infra/compose.test.yaml"
+        "infra/compose.test.yaml",
+        "specs/004-n8n-telegram-transport/contracts/n8n-endpoints.openapi.yaml"
       ],
       "appliesTo": [
         "artifacts"

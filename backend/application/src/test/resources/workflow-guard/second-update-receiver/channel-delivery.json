@@ -1,0 +1,9 @@
+{
+  "id": "channel-delivery",
+  "name": "channel-delivery",
+  "nodes": [
+    { "id": "a1", "name": "Webhook", "type": "n8n-nodes-base.webhook", "typeVersion": 2, "position": [0, 0], "parameters": { "httpMethod": "POST", "path": "telegram-update", "responseMode": "responseNode" } }
+  ],
+  "connections": {},
+  "settings": { "executionOrder": "v1" }
+}

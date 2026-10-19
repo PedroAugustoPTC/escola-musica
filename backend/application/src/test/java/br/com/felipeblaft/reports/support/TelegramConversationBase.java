@@ -40,20 +40,51 @@ public abstract class TelegramConversationBase extends IntegrationBase {
     protected static final long USER_BRUNO = 7002L;
     protected static final JsonMapper JSON = JsonMapper.builder().build();
 
+    /**
+     * Transporte exercitado: {@code webhook} (padrão), {@code internal} ou {@code n8n} (n8n real).
+     */
+    public static final String TRANSPORT = System.getProperty("telegram.transport", "webhook");
+
+    /**
+     * No modo n8n a API de bots simulada escuta numa porta fixa, que o contêiner do n8n alcança.
+     */
     protected static final WireMockServer API_BOTS =
-            new WireMockServer(wireMockConfig().dynamicPort());
+            new WireMockServer(
+                    "n8n".equals(TRANSPORT)
+                            ? wireMockConfig().port(N8nTestSupport.BOT_API_STUB_PORT)
+                            : wireMockConfig().dynamicPort());
+
+    /**
+     * Modo n8n: o contêiner do n8n chama o backend em {@code tests-n8n:18080}, porta fixa. Cada
+     * contexto Spring do teste sobe em porta própria, então esta porta fixa é um proxy que
+     * encaminha ao contexto do teste em execução (ver {@link #routeN8nToThisContext()}).
+     */
+    private static final WireMockServer BACKEND_PROXY =
+            "n8n".equals(TRANSPORT)
+                    ? new WireMockServer(
+                            wireMockConfig()
+                                    .port(N8nTestSupport.BACKEND_STUB_PORT)
+                                    .disableRequestJournal())
+                    : null;
 
     static {
         API_BOTS.start();
+        if (BACKEND_PROXY != null) {
+            BACKEND_PROXY.start();
+        }
     }
+
+    /**
+     * Modo de duplicidade ({@code -Dtelegram.n8n.duplicates=true}): o Telegram entrega cada update
+     * duas vezes. A transcrição do chat não pode mudar (FR-028a, SC-011).
+     */
+    protected static volatile boolean n8nDuplicates = Boolean.getBoolean("telegram.n8n.duplicates");
+
+    private static final java.util.concurrent.atomic.AtomicBoolean N8N_CHECKED =
+            new java.util.concurrent.atomic.AtomicBoolean(false);
 
     private static final AtomicLong UPDATES = new AtomicLong(1000);
     private static final AtomicLong MESSAGES = new AtomicLong(1);
-
-    /**
-     * Transporte exercitado pelos testes de conversa: {@code webhook} (padrão) ou {@code interno}.
-     */
-    public static final String TRANSPORT = System.getProperty("telegram.transport", "webhook");
 
     public static final String TOKEN_SERVICE = "current-service-token-test";
 
@@ -71,7 +102,22 @@ public abstract class TelegramConversationBase extends IntegrationBase {
     }
 
     @BeforeEach
+    void routeN8nToThisContext() {
+        if (BACKEND_PROXY != null) {
+            BACKEND_PROXY.resetMappings();
+            BACKEND_PROXY.stubFor(
+                    com.github.tomakehurst.wiremock.client.WireMock.any(anyUrl())
+                            .willReturn(aResponse().proxiedFrom("http://localhost:" + serverPort)));
+        }
+    }
+
+    @BeforeEach
     void cleanBotApi() {
+        resetBotApi();
+    }
+
+    /** Apaga as chamadas registradas e volta ao padrão: toda chamada responde {@code ok}. */
+    protected void resetBotApi() {
         API_BOTS.resetAll();
         API_BOTS.stubFor(
                 post(anyUrl())
@@ -90,6 +136,10 @@ public abstract class TelegramConversationBase extends IntegrationBase {
     protected void sendUpdate(String json) throws Exception {
         if ("internal".equals(TRANSPORT)) {
             sendThroughInternalChannel(json);
+            return;
+        }
+        if ("n8n".equals(TRANSPORT)) {
+            sendThroughN8n(json);
             return;
         }
         mvc.perform(
@@ -120,6 +170,53 @@ public abstract class TelegramConversationBase extends IntegrationBase {
         String body = result.getResponse().getContentAsString();
         ActionsSchemaV1.require("UpdateResponse", body);
         orchestratorExecutor().run(JSON.readTree(body).get("actions"));
+    }
+
+    /**
+     * Modo {@code n8n}: o update vai ao webhook do n8n real, em contêiner, como o servidor local da
+     * API de bots o entregaria. O n8n só responde depois de executar todas as ações, então as
+     * asserções dos testes (chamadas à API de bots simulada) não mudam.
+     */
+    private void sendThroughN8n(String json) {
+        if (!isJson(json)) {
+            // corpo que não é JSON o próprio n8n recusa com 422, antes do workflow; o Telegram
+            // nunca o envia (F-4)
+            N8nTestSupport.Reply refused =
+                    N8nTestSupport.post(
+                            N8nTestSupport.N8N_URL + "/webhook/telegram-update",
+                            java.util.Map.of("X-Telegram-Bot-Api-Secret-Token", SECRET),
+                            "application/json",
+                            json.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            if (refused.status() != 422) {
+                throw new AssertionError(
+                        "o n8n respondeu " + refused.status() + " a um corpo que não é JSON");
+            }
+            return;
+        }
+        if (N8N_CHECKED.compareAndSet(false, true)) {
+            N8nTestSupport.awaitHealthy(java.time.Duration.ofSeconds(180));
+        }
+        int deliveries = n8nDuplicates ? 2 : 1;
+        for (int i = 0; i < deliveries; i++) {
+            N8nTestSupport.Reply reply =
+                    N8nTestSupport.post(
+                            N8nTestSupport.N8N_URL + "/webhook/telegram-update",
+                            java.util.Map.of("X-Telegram-Bot-Api-Secret-Token", SECRET),
+                            "application/json",
+                            json.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            if (reply.status() != 200) {
+                throw new AssertionError("o n8n respondeu " + reply.status() + " ao update");
+            }
+        }
+    }
+
+    private static boolean isJson(String text) {
+        try {
+            JSON.readTree(text);
+            return true;
+        } catch (RuntimeException invalid) {
+            return false;
+        }
     }
 
     /** O "n8n" dos testes, ligado ao MockMvc e à API de bots simulada. */

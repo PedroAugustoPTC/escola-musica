@@ -14,6 +14,8 @@ resultado. Não há regra de negócio no adaptador (Princípio I) e nenhum estad
 > (constituição v1.4.0); ver `specs/002-api-interna-canal-telegram/research.md` R-01. A rota
 > `/interno/v1/canal/telegram/**` (contrato da 002) passa a ser o caminho usado pelo n8n; o webhook
 > `/telegram/webhook` descrito abaixo segue disponível.
+>
+> **Nota (feature 004):** o n8n é o transporte; ele recebe o update em `/webhook/telegram-update`, repassa o corpo e o cabeçalho de segredo ao backend e executa as ações devolvidas. A conversa (estados, mensagens, botões) não muda. Contratos: `specs/002-api-interna-canal-telegram/contracts/` e `specs/004-n8n-telegram-transport/contracts/`.
 
 | Item | Contrato |
 |---|---|

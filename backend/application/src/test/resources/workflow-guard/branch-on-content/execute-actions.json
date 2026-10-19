@@ -1,0 +1,9 @@
+{
+  "id": "execute-actions",
+  "name": "execute-actions",
+  "nodes": [
+    { "id": "a1", "name": "Check", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [0, 0], "parameters": { "conditions": { "conditions": [ { "leftValue": "={{ $json.body.message.text }}", "rightValue": "x", "operator": { "type": "string", "operation": "equals" } } ] } } }
+  ],
+  "connections": {},
+  "settings": { "executionOrder": "v1" }
+}

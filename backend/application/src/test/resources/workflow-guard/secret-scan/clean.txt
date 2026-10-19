@@ -1,0 +1,4 @@
+# nada secreto: digest, ids e caminhos comuns
+FROM docker.n8n.io/n8nio/n8n:2.43.6 # sha256:@DIGEST@
+url=http://backend:8080/internal/v1/channel/telegram/update
+path=/home/node/.n8n/binaryData/workflows

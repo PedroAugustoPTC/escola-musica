@@ -130,6 +130,8 @@
                 <configuration>
                     <excludes>
                         <exclude>**/realai/**</exclude>
+                        <!-- feature 004: exigem o n8n em contêiner; rodam só no perfil n8n (tests-n8n) -->
+                        <exclude>**/transport/n8n/**</exclude>
                     </excludes>
                     <!-- Usa as classes (e não o jar reempacotado) no classpath dos testes de integração. -->
                     <classesDirectory>${project.build.outputDirectory}</classesDirectory>
@@ -165,6 +167,96 @@
     </build>
 
     <profiles>
+        <!--
+            Feature 004: testes pelo n8n real em contêiner (mvn -Pn8n verify, serviço tests-n8n). Só rodam as
+            classes de transport/n8n; as demais suítes ficam com o tests-backend. As execuções com
+            telegram.transport=n8n (conversa e paridade) e com duplicidade entram junto do modo n8n das bases.
+        -->
+        <profile>
+            <id>n8n</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <skipTests>true</skipTests>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <configuration>
+                            <includes>
+                                <include>**/transport/n8n/*IT.java</include>
+                            </includes>
+                            <excludes combine.self="override"/>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>internal-transport</id>
+                                <phase>none</phase>
+                            </execution>
+                            <!--
+                                A suíte de conversa e de paridade EXISTENTE, sem alterar nenhuma expectativa, com o n8n
+                                real como transporte: o backend sobe na porta fixa 18080 e a API de bots simulada
+                                na 18081, ambas alcançadas pelo contêiner do n8n.
+                            -->
+                            <execution>
+                                <id>n8n-transport</id>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                </goals>
+                                <configuration>
+                                    <includes>
+                                        <include>**/inbound/telegram/*ConversationIT.java</include>
+                                        <include>**/inbound/telegram/OldButtonFormatIT.java</include>
+                                        <include>**/inbound/telegram/ReplyWithinFiveSecondsIT.java</include>
+                                        <include>**/parity/*ParityScriptIT.java</include>
+                                        <include>**/privacy/AudioNonRetentionIT.java</include>
+                                        <include>**/privacy/LogWithoutSensitiveDataIT.java</include>
+                                        <include>**/outbound/telegram/TelegramNotificationOrchestratorIT.java</include>
+                                        <include>**/transport/n8n/conversation/*IT.java</include>
+                                    </includes>
+                                    <systemPropertyVariables>
+                                        <telegram.transport>n8n</telegram.transport>
+                                    </systemPropertyVariables>
+                                    <reportNameSuffix>n8n</reportNameSuffix>
+                                </configuration>
+                            </execution>
+                            <!--
+                                Os mesmos testes, agora com cada update entregue duas vezes e cada lote proativo
+                                reentregue: nenhuma expectativa muda, logo nenhuma mensagem pode sair a mais (SC-011).
+                            -->
+                            <execution>
+                                <id>n8n-duplicates</id>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                </goals>
+                                <configuration>
+                                    <includes>
+                                        <include>**/inbound/telegram/*ConversationIT.java</include>
+                                        <include>**/inbound/telegram/OldButtonFormatIT.java</include>
+                                        <include>**/inbound/telegram/ReplyWithinFiveSecondsIT.java</include>
+                                        <include>**/parity/*ParityScriptIT.java</include>
+                                        <include>**/privacy/AudioNonRetentionIT.java</include>
+                                        <include>**/privacy/LogWithoutSensitiveDataIT.java</include>
+                                        <include>**/outbound/telegram/TelegramNotificationOrchestratorIT.java</include>
+                                        <include>**/transport/n8n/conversation/*IT.java</include>
+                                    </includes>
+                                    <systemPropertyVariables>
+                                        <telegram.transport>n8n</telegram.transport>
+                                        <telegram.n8n.duplicates>true</telegram.n8n.duplicates>
+                                    </systemPropertyVariables>
+                                    <reportNameSuffix>n8n-duplicates</reportNameSuffix>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
         <!-- Suíte opcional com IA real, fora da cobertura (R-16): mvn -Preal-ai verify -->
         <profile>
             <id>real-ai</id>

@@ -14,6 +14,8 @@
 > **Nota (feature 002, sem reescrever histórico):** o transporte do Telegram agora é feito via n8n
 > (constituição v1.4.0); ver `specs/002-api-interna-canal-telegram/research.md` R-01. O resumo abaixo
 > registra o plano original da 001.
+>
+> **Nota (feature 004):** o n8n é o transporte do canal Telegram (features 002 e 004): workflows como código em `infra/n8n/`, troca controlada e reversível do webhook por `infra/scripts/telegram-webhook.sh`. O adaptador de entrada direto descrito aqui continua funcionando até a prova de paridade da 004 e só então é removido. Na tabela do Constitution Check, as linhas II e VII ("sem orquestrador") valem para a 001; o n8n só transporta e nunca decide nem escreve no banco (ver `specs/004-n8n-telegram-transport/plan.md`).
 
 O professor registra uma aula por áudio (gravação no navegador, arquivo, mensagem de voz ou vídeo
 de até 50 MB) pela **Web ou pelo Telegram, com paridade funcional**. O sistema transcreve, estrutura
@@ -203,6 +205,8 @@ processo (Princípio I) e nenhum outro componente escreve no banco (Princípio I
 > **Nota (feature 002):** o transporte do Telegram agora é feito via n8n; ver
 > `specs/002-api-interna-canal-telegram/research.md` R-01. O adaptador de entrada continua dentro de
 > `aplicacao`; o n8n só transporta.
+>
+> **Nota (feature 004):** a estrutura passa a incluir `infra/n8n/` (imagem fina, workflows como código e utilitários) e `infra/telegram-simulator/` (só para os ensaios); ver `specs/004-n8n-telegram-transport/plan.md`.
 
 ## Fases seguintes
 

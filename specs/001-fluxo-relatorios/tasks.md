@@ -8,6 +8,8 @@ description: "Lista de tarefas da feature 001-fluxo-relatorios"
 > histórico, sem reescrita. Para o nome atual de cada termo, consulte o glossário em
 > [`.specify/memory/glossary.json`](../../.specify/memory/glossary.json) e o Princípio VI da constituição.
 
+> **Nota de histórico (feature 004)**: o transporte do Telegram passou a ser o n8n (features 002 e 004). As tarefas concluídas abaixo descrevem o adaptador direto e permanecem como histórico, sem reescrita; o que mudou está em `specs/004-n8n-telegram-transport/tasks.md`.
+
 # Tasks: Fluxo de envio e criação de relatórios pedagógicos (Web e Telegram)
 
 **Input**: documentos de design em `specs/001-fluxo-relatorios/`

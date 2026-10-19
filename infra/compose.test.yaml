@@ -3,6 +3,8 @@
 #   docker compose -f infra/compose.test.yaml run --rm tests-frontend
 #   docker compose -f infra/compose.test.yaml run --rm tests-e2e
 #   docker compose -f infra/compose.test.yaml run --rm tests-real-ai
+#   docker compose -f infra/compose.test.yaml run --rm tests-n8n-ops
+#   docker compose -f infra/compose.test.yaml run --rm --use-aliases tests-n8n
 name: reports-tests
 
 x-maven: &maven
@@ -143,6 +145,249 @@ services:
       web-e2e:
         condition: service_started
     command: ["sh", "-c", "npm ci && npx playwright test"]
+
+  # --- n8n (feature 004) --------------------------------------------------------------------------------
+  # Testes unitários dos utilitários de infra/n8n/ops, dentro da própria imagem fina do n8n.
+  tests-n8n-ops:
+    build:
+      context: ./n8n
+    image: reports-n8n
+    entrypoint: ["node", "--test", "/opt/ops/*.test.mjs"]
+
+  # Testes unitários do simulador do Telegram dos ensaios.
+  tests-simulator:
+    build:
+      context: ./telegram-simulator
+    image: reports-telegram-simulator
+    entrypoint: ["node", "--test", "/app/server.test.mjs"]
+
+  # O n8n real, na imagem fina de produção, com o editor ligado (a REST serve ao teste de privacidade). Backend e API de
+  # bots são simulados pela JVM do teste (portas 18080 e 18081 do tests-n8n). Segredos e chave abaixo são só de teste.
+  n8n-test:
+    build:
+      context: ./n8n
+    image: reports-n8n
+    container_name: reports-n8n-test
+    environment:
+      BACKEND_INTERNAL_URL: http://tests-n8n:18080
+      TELEGRAM_API_URL: http://tests-n8n:18081
+      TELEGRAM_BOT_TOKEN: "123456:TEST"
+      BACKEND_SERVICE_TOKEN: current-service-token-test
+      CHANNEL_DELIVERY_TOKEN: orchestrator-secret
+      N8N_ENCRYPTION_KEY: test-encryption-key-0123456789abcdef
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
+      N8N_DISABLE_UI: "false"
+      N8N_SECURE_COOKIE: "false"
+      N8N_PUBLIC_API_DISABLED: "true"
+      EXECUTIONS_DATA_SAVE_ON_SUCCESS: none
+      EXECUTIONS_DATA_SAVE_ON_ERROR: none
+      EXECUTIONS_DATA_SAVE_ON_PROGRESS: "false"
+      EXECUTIONS_DATA_SAVE_MANUAL_EXECUTIONS: "false"
+      EXECUTIONS_DATA_HARD_DELETE_BUFFER: "0"
+      EXECUTIONS_DATA_PRUNE_HARD_DELETE_INTERVAL: "1"
+      EXECUTIONS_DATA_PRUNE_SOFT_DELETE_INTERVAL: "1"
+      N8N_DEFAULT_BINARY_DATA_MODE: filesystem
+      DB_SQLITE_DATABASE: /var/lib/n8n-db/database.sqlite
+      N8N_DIAGNOSTICS_ENABLED: "false"
+      N8N_VERSION_NOTIFICATIONS_ENABLED: "false"
+      N8N_TEMPLATES_ENABLED: "false"
+      N8N_PERSONALIZATION_ENABLED: "false"
+      N8N_HIRING_BANNER_ENABLED: "false"
+      N8N_LOG_LEVEL: warn
+      N8N_LOG_OUTPUT: console
+      N8N_GRACEFUL_SHUTDOWN_TIMEOUT: "5"
+      NODES_EXCLUDE: '["n8n-nodes-base.executeCommand","n8n-nodes-base.readWriteFile","n8n-nodes-base.ssh","n8n-nodes-base.ftp","n8n-nodes-base.postgres","n8n-nodes-base.mySql","n8n-nodes-base.mongoDb","n8n-nodes-base.redis"]'
+      GENERIC_TIMEZONE: America/Sao_Paulo
+      TZ: America/Sao_Paulo
+    volumes:
+      # volume anônimo (some no `down -v`): o reinício reaproveita o banco e o n8n precisa descartar a edição manual
+      - /home/node/.n8n
+    stop_grace_period: 30s # a porta de entrada espera as requisições em curso: ver o serviço n8n em compose.yaml
+    tmpfs:
+      - /home/node/.n8n/binaryData:uid=1000,gid=1000,mode=0700,size=128m
+      - /var/lib/n8n-db:uid=1000,gid=1000,mode=0700,size=256m
+    healthcheck:
+      test: ["CMD", "sh", "/opt/ops/healthcheck.sh"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+  # Entrada pública simulada: o Caddy real com o Caddyfile do repositório e um SPA mínimo (N8nExposureIT).
+  web-n8n-test:
+    image: caddy:2
+    environment:
+      DOMAIN: web-n8n-test
+      LOCAL_CERTIFICATES: local_certs
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+    tmpfs:
+      - /srv
+    command: ["sh", "-c", "echo '<!doctype html><title>spa</title>' > /srv/index.html && exec caddy run --config /etc/caddy/Caddyfile --adapter caddyfile"]
+
+  # --- Ensaio da troca do webhook e da rotação do token (feature 004, R-12) --------------------------------------
+  # Pilha reduzida com o backend real (IA simulada), o n8n real e o simulador do Telegram. Os valores de estado (webhook,
+  # entrega proativa, tokens) vêm de infra/tests/rehearsal/rehearsal.env, que os scripts de operação reescrevem.
+  postgres-rehearsal:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: reports
+      POSTGRES_USER: reports
+      POSTGRES_PASSWORD: rehearsal
+    tmpfs:
+      - /var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U reports -d reports"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  telegram-simulator:
+    build:
+      context: ./telegram-simulator
+    image: reports-telegram-simulator
+    environment:
+      SIMULATOR_BOT_TOKEN: "123456:REHEARSAL"
+      SIMULATOR_RETRY_MS: "500"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8081/_control/status"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  backend-rehearsal:
+    build:
+      context: ../backend
+      dockerfile: application/Dockerfile
+    image: reports-backend
+    environment:
+      DATABASE_URL: jdbc:postgresql://postgres-rehearsal:5432/reports
+      DATABASE_USER: reports
+      DATABASE_PASSWORD: rehearsal
+      AI_PROVIDERS: simulated
+      TELEGRAM_ENABLED: "true"
+      TELEGRAM_BOT_TOKEN: "123456:REHEARSAL"
+      TELEGRAM_API_URL: http://telegram-simulator:8081
+      TELEGRAM_API_ID: "1"
+      TELEGRAM_API_HASH: rehearsal
+      TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET:-rehearsal-webhook-secret}
+      TELEGRAM_WEBHOOK_URL: ${TELEGRAM_WEBHOOK_URL:-http://backend-rehearsal:8080/telegram/webhook}
+      TELEGRAM_FILES_DIR: /tmp/telegram-files
+      TELEGRAM_CHANNEL_DELIVERY: ${TELEGRAM_CHANNEL_DELIVERY:-DIRECT}
+      TELEGRAM_CHANNEL_CURRENT_TOKEN: ${TELEGRAM_CHANNEL_CURRENT_TOKEN:-rehearsal-current-token}
+      TELEGRAM_CHANNEL_NEXT_TOKEN: ${TELEGRAM_CHANNEL_NEXT_TOKEN:-}
+      TELEGRAM_CHANNEL_ORCHESTRATOR_URL: ${TELEGRAM_CHANNEL_ORCHESTRATOR_URL:-}
+      TELEGRAM_CHANNEL_ORCHESTRATOR_TOKEN: ${TELEGRAM_CHANNEL_ORCHESTRATOR_TOKEN:-rehearsal-delivery-token}
+      TELEGRAM_CHANNEL_RESPONSE_TIMEOUT_MS: "30000"
+      CPF_ENCRYPTION_KEY: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+      HMAC_SECRET: hmac-secret-for-rehearsal-with-more-than-32-bytes
+      SESSION_COOKIE_SECURE: "true"
+      DOCUMENTS_DIR: /data/documents
+      AUDIO_TEMP_DIR: /tmp/audios
+    tmpfs:
+      - /tmp/audios:mode=1777
+      - /tmp/telegram-files:mode=1777
+    depends_on:
+      postgres-rehearsal:
+        condition: service_healthy
+      telegram-simulator:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8080 && printf 'GET /actuator/health HTTP/1.0\r\n\r\n' >&3 && grep -q UP <&3"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+
+  n8n-rehearsal:
+    build:
+      context: ./n8n
+    image: reports-n8n
+    environment:
+      BACKEND_INTERNAL_URL: http://backend-rehearsal:8080
+      TELEGRAM_API_URL: http://telegram-simulator:8081
+      TELEGRAM_BOT_TOKEN: "123456:REHEARSAL"
+      BACKEND_SERVICE_TOKEN: ${TELEGRAM_CHANNEL_NEXT_TOKEN:-${TELEGRAM_CHANNEL_CURRENT_TOKEN:-rehearsal-current-token}}
+      CHANNEL_DELIVERY_TOKEN: ${TELEGRAM_CHANNEL_ORCHESTRATOR_TOKEN:-rehearsal-delivery-token}
+      N8N_ENCRYPTION_KEY: rehearsal-encryption-key-0123456789abcdef
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
+      N8N_DISABLE_UI: "true"
+      N8N_PUBLIC_API_DISABLED: "true"
+      EXECUTIONS_DATA_SAVE_ON_SUCCESS: none
+      EXECUTIONS_DATA_SAVE_ON_ERROR: none
+      EXECUTIONS_DATA_SAVE_ON_PROGRESS: "false"
+      EXECUTIONS_DATA_SAVE_MANUAL_EXECUTIONS: "false"
+      EXECUTIONS_DATA_HARD_DELETE_BUFFER: "0"
+      EXECUTIONS_DATA_PRUNE_HARD_DELETE_INTERVAL: "1"
+      EXECUTIONS_DATA_PRUNE_SOFT_DELETE_INTERVAL: "1"
+      N8N_DEFAULT_BINARY_DATA_MODE: filesystem
+      DB_SQLITE_DATABASE: /var/lib/n8n-db/database.sqlite
+      N8N_DIAGNOSTICS_ENABLED: "false"
+      N8N_VERSION_NOTIFICATIONS_ENABLED: "false"
+      N8N_LOG_LEVEL: warn
+      N8N_GRACEFUL_SHUTDOWN_TIMEOUT: "5"
+      GENERIC_TIMEZONE: America/Sao_Paulo
+      TZ: America/Sao_Paulo
+    stop_grace_period: 30s # a porta de entrada espera as requisições em curso: ver o serviço n8n em compose.yaml
+    tmpfs:
+      - /home/node/.n8n/binaryData:uid=1000,gid=1000,mode=0700,size=128m
+      - /var/lib/n8n-db:uid=1000,gid=1000,mode=0700,size=256m
+    depends_on:
+      backend-rehearsal:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "sh", "/opt/ops/healthcheck.sh"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+  # Os scripts de operação (telegram-webhook.sh, rotate-service-token.sh) rodam AQUI, falando com o Docker do host pelo
+  # socket (montado só neste arquivo) e conduzindo a pilha acima; o tráfego é injetado no simulador.
+  tests-rehearsal:
+    image: docker:27-cli
+    working_dir: /work
+    volumes:
+      - ..:/work
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      TRANSPORT_COMPOSE: docker compose -f /work/infra/compose.test.yaml --env-file /work/infra/tests/rehearsal/rehearsal.env -p reports-tests
+      TRANSPORT_ENV_FILE: /work/infra/tests/rehearsal/rehearsal.env
+      BACKEND_SERVICE: backend-rehearsal
+      N8N_SERVICE: n8n-rehearsal
+      SIMULATOR_URL: http://telegram-simulator:8081
+      TRANSPORT_STATE_FILE: /work/infra/tests/rehearsal/transport-state
+    command: ["sh", "/work/infra/tests/rehearsal/run.sh"]
+
+  # Suíte pelo n8n real: contrato dos workflows, conversa e paridade, duplicidade, resiliência e privacidade.
+  # O socket do Docker é montado SÓ aqui (derrubar e subir o n8n no meio da lista de ações).
+  tests-n8n:
+    <<: *maven
+    build:
+      context: ./tests/n8n
+    image: reports-tests-n8n
+    environment:
+      <<: *maven-env
+      N8N_URL: http://n8n-test:5678
+      WEB_URL: https://web-n8n-test
+      N8N_CONTAINER: reports-n8n-test
+    volumes:
+      - ..:/work
+      - m2:/root/.m2
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+      n8n-test:
+        condition: service_healthy
+      web-n8n-test:
+        condition: service_started
+    # `compose run` só aplica o alias com --use-aliases: o n8n precisa alcançar o backend e a API de bots simulados
+    # (portas 18080 e 18081 desta JVM) por `tests-n8n`
+    networks:
+      default:
+        aliases: [tests-n8n]
+    command: ["sh", "-c", "mvn -B -ntp -q -pl core -am install -DskipTests && mvn -B -ntp -Pn8n -pl application verify"]
 
 volumes:
   m2:

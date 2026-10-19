@@ -55,6 +55,9 @@ está gravado quando a resposta sai, e o envio é do orquestrador.
   (FR-008).
 - **Update repetido** (mesmo `update_id`): o estado não é reprocessado; a resposta traz só as ações
   **ainda não confirmadas**, com os mesmos `actionId`; lista vazia se todas foram confirmadas (FR-007).
+  Se o primeiro processamento ainda não foi concluído (linha recente, menos de 30 s), a resposta é `503` e o transporte
+  tenta de novo: uma lista vazia aqui faria o Telegram dar o update por entregue caso o primeiro processamento tivesse
+  morrido com o backend (feature 004, ensaio de rotação). Passados 30 s sem conclusão, vale o `INTERNAL_ERROR` estável.
 - Latência alvo: 95% em até 2 s (SC-003).
 
 ### 2.2 `POST /confirmations`

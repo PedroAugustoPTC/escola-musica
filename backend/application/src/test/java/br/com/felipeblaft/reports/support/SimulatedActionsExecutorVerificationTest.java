@@ -126,29 +126,15 @@ class SimulatedActionsExecutorVerificationTest {
                         new Result("u1-1", "EXECUTED", null, 77L));
     }
 
-    @Test
-    void classifiesTelegramErrorsAccordingToContractTable() {
-        assertThat(
-                        SimulatedActionsExecutorTest.classify(
-                                400, "Bad Request: message is not modified"))
-                .isNull();
-        assertThat(
-                        SimulatedActionsExecutorTest.classify(
-                                400, "Bad Request: message to edit not found"))
-                .isEqualTo("MESSAGE_NOT_EDITABLE");
-        assertThat(
-                        SimulatedActionsExecutorTest.classify(
-                                400, "Bad Request: message can't be edited"))
-                .isEqualTo("MESSAGE_NOT_EDITABLE");
-        assertThat(SimulatedActionsExecutorTest.classify(403, "Forbidden"))
-                .isEqualTo("CHAT_UNAVAILABLE");
-        assertThat(SimulatedActionsExecutorTest.classify(400, "Bad Request: chat not found"))
-                .isEqualTo("CHAT_UNAVAILABLE");
-        assertThat(SimulatedActionsExecutorTest.classify(429, "Too Many Requests"))
-                .isEqualTo("RATE_LIMITED");
-        assertThat(SimulatedActionsExecutorTest.classify(500, null)).isEqualTo("TELEGRAM_ERROR");
-        assertThat(SimulatedActionsExecutorTest.classify(400, "algo inesperado"))
-                .isEqualTo("TELEGRAM_ERROR");
+    static java.util.stream.Stream<ClassificationCases.Case> classificationCases() {
+        return ClassificationCases.all().stream();
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.MethodSource("classificationCases")
+    void classifiesTelegramErrorsAccordingToContractTable(ClassificationCases.Case scenario) {
+        assertThat(SimulatedActionsExecutorTest.classify(scenario.status(), scenario.description()))
+                .isEqualTo(scenario.reasonCode());
     }
 
     @Test

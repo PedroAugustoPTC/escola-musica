@@ -129,7 +129,7 @@ public class TelegramChannelController {
         if (!result.repeated()) {
             return ResponseEntity.ok(registerActions(update, result.outputs(), false));
         }
-        return ResponseEntity.ok(redeliver(update));
+        return redeliver(update);
     }
 
     /** Mapeia, grava na outbox e marca o update como concluído, tudo na mesma transação. */
@@ -164,14 +164,17 @@ public class TelegramChannelController {
 
     /**
      * Update repetido (FR-007): só as ações ainda não confirmadas, com os mesmos ids. Se o primeiro
-     * processamento ainda está em curso, espera um pouco; se a linha ficou sem conclusão por muito
-     * tempo, o processamento se perdeu e o professor recebe {@code ERRO_INTERNO}.
+     * processamento ainda está em curso, espera um pouco; se a linha ainda não foi concluída e é
+     * recente, responde {@code 503} (o transporte tenta de novo; devolver lista vazia faria o
+     * Telegram dar o update por entregue se o primeiro processamento tivesse morrido com o
+     * backend); se a linha ficou sem conclusão por muito tempo, o processamento se perdeu e o
+     * professor recebe {@code ERRO_INTERNO}.
      */
-    private UpdateResponse redeliver(UpdateTelegram update) {
+    private ResponseEntity<UpdateResponse> redeliver(UpdateTelegram update) {
         long id = update.updateId();
         Optional<UpdateStatus> status = updateRecords.status(id);
         if (status.isEmpty() || !status.get().internal()) {
-            return UpdateResponse.of(id, List.of());
+            return ResponseEntity.ok(UpdateResponse.of(id, List.of()));
         }
         UpdateStatus current = status.get();
         long limit = System.nanoTime() + PROCESSING_WAIT.toNanos();
@@ -189,15 +192,20 @@ public class TelegramChannelController {
             boolean lost =
                     Duration.between(current.receivedAt(), clock.now()).compareTo(LOST_ROW_AGE) > 0;
             return lost
-                    ? registerActions(update, processor.errorReply(update), true)
-                    : UpdateResponse.of(id, List.of());
+                    ? ResponseEntity.ok(registerActions(update, processor.errorReply(update), true))
+                    : ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
         }
         List<ChannelAction> pending = getUnconfirmed.run(id);
-        return UpdateResponse.of(
-                id,
-                pending.stream()
-                        .map(a -> (JsonNode) ChannelActionMapper.withActionId(a.id(), a.payload()))
-                        .toList());
+        return ResponseEntity.ok(
+                UpdateResponse.of(
+                        id,
+                        pending.stream()
+                                .map(
+                                        a ->
+                                                (JsonNode)
+                                                        ChannelActionMapper.withActionId(
+                                                                a.id(), a.payload()))
+                                .toList()));
     }
 
     private static boolean sleep() {

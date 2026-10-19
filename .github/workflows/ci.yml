@@ -63,3 +63,27 @@ jobs:
       - name: Derrubar serviços
         if: always()
         run: docker compose -f infra/compose.test.yaml down -v
+
+  # Feature 004: o n8n real em contêiner (imagem de produção, Telegram e backend simulados): utilitários, contrato dos
+  # workflows e, nas fases seguintes, a suíte de conversa e de paridade pelo n8n, duplicidade, resiliência e privacidade.
+  n8n:
+    name: n8n (transporte do Telegram em contêiner)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    needs: [backend, frontend]
+    steps:
+      - uses: actions/checkout@v5
+      - name: Utilitários do n8n e do simulador
+        run: |
+          docker compose -f infra/compose.test.yaml run --rm --build tests-n8n-ops
+          docker compose -f infra/compose.test.yaml run --rm --build tests-simulator
+      - name: Testes pelo n8n
+        run: docker compose -f infra/compose.test.yaml run --rm --build --use-aliases tests-n8n
+      - name: Ensaio da troca do webhook e da rotação do token
+        run: sh infra/scripts/local.sh tests rehearsal
+      - name: Logs do n8n
+        if: failure()
+        run: docker compose -f infra/compose.test.yaml logs --no-color n8n-test | tail -n 200
+      - name: Derrubar serviços
+        if: always()
+        run: docker compose -f infra/compose.test.yaml down -v
