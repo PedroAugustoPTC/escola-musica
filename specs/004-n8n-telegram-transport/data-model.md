@@ -146,6 +146,12 @@ violar as colunas "exigido" abaixo (`ParityEvidenceGuardTest`). **Não** é enti
 | `teacherReports` | relatos de diferença visível registrados pelo dono do produto; exigido `nenhum` |
 | `approvedBy` / `approvedAt` | dono do produto e data da aprovação registrada |
 
+**Dispensa formal (2026-10-19)**: o arquivo pode, em vez da prova, registrar `mode = waiver` com `waivedBy`,
+`waivedAt` e `reason` (decisão explícita e escrita do mantenedor, por PR de documentação mesclado na `main`). Os
+campos numéricos ficam `não registrado`; nada é estimado. Com `mode = evidence`, as colunas "exigido" acima
+valem integralmente. O `ParityEvidenceGuardTest` reprova o arquivo ausente, `mode = evidence` incompleto e
+`mode = waiver` sem os três campos.
+
 Fonte dos quatro sinais: logs técnicos do backend e do n8n (só identificadores: `updateId`, `actionId`,
 `batchId`, estado e código), consultas à tabela `channel_action` e à métrica de ações `PERMANENTLY_FAILED` já
 existente na 002. A coleta passo a passo está em `quickstart.md` V16. Nenhum dado de aluno entra na evidência.

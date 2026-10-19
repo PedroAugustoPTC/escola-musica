@@ -169,7 +169,7 @@ mais "o n8n ainda será incluído" nem "o compose é da feature 004" (FR-032, SC
    - toques sem `CALLBACK_REPLY` executado.
 3. Registre relatos de professores. Preencha `specs/004-n8n-telegram-transport/evidence/parity.md` (campos em
    data-model §5) por **PR de documentação para a `main`** e peça a aprovação ao dono do produto (também por PR).
-4. Só com tudo zerado e aprovado: crie a branch da S5 a partir da `main` atualizada (já com a evidência), numa sessão nova, remova o caminho antigo
+4. Só com tudo zerado e aprovado (ou com a dispensa formal registrada em `evidence/parity.md`, `mode: waiver`): crie a branch da S5 a partir da `main` atualizada (já com a evidência), numa sessão nova, remova o caminho antigo
    (R-15), rode `sh infra/scripts/local.sh tests all` e abra o PR com a evidência anexada. Se qualquer item falhar:
    **a S5 não é aberta**; `rollback` segue disponível.
 
