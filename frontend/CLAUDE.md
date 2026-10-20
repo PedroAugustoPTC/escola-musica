@@ -1,7 +1,8 @@
 # frontend/
 
 **Portal do Professor**: SPA em React 19 + TypeScript + Vite, com TanStack Query e React Router.
-É um dos dois canais de entrada (o outro é o Telegram) e deve ter **paridade funcional** com ele.
+É um dos dois canais de entrada do professor (o outro é o Telegram) e deve ter **paridade funcional** com ele.
+A área do **administrador** existe **somente na Web** (constituição 2.2.0, Princípio I): não tem equivalente no Telegram.
 
 | Pasta              | Conteúdo                                                        |
 | ------------------ | --------------------------------------------------------------- |
