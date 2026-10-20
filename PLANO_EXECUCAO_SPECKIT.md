@@ -47,7 +47,7 @@
 
 | # | Lacuna | Origem |
 |---|---|---|
-| A | **Área da secretaria**: login do administrador, cadastro/edição/inativação de professores e alunos, associações, emissão e reemissão de código, histórico de qualquer aluno, gestão de administradores | Handoff 2.4, 5.1, 12.2, 17.1, 17.2; spec 001 (Assumptions) |
+| A | **Área de administração**: login do administrador, cadastro/edição/inativação de professores e alunos (o professor, só dos seus), associações, emissão e reemissão de código, histórico de qualquer aluno, gestão de administradores | Handoff 2.4, 5.1, 12.2, 17.1, 17.2; spec 001 (Assumptions) |
 | B | **Orquestrador n8n** como transporte do Telegram (workflows, contêiner, troca do webhook, remoção do adaptador antigo) | Spec 002 (fora de escopo); constituição v1.4.0 |
 | C | **Privacidade, retenção e operação**: retenção/exclusão, consentimento do responsável, auditoria, observabilidade e custos, backup automatizado | Handoff 13.3, 17.3, 19 (item 009) |
 
@@ -59,7 +59,7 @@
 | **VPS genérica**, sem assumir Hostinger | Exige emenda da constituição ("Containerização e implantação") e limpeza de `infra/`, `.github/` e docs |
 | **Sem evoluções de produto por enquanto** | Nenhuma feature de evolução entra neste plano |
 
-> A constituição também manda (Princípio I e "Restrições Adicionais") que **a administração exista nos dois canais**, Web e Telegram. O handoff dizia "somente Web". Vale a constituição, então a secretaria nasce com paridade.
+> A constituição também manda (Princípio I e "Restrições Adicionais") que **a administração exista nos dois canais**, Web e Telegram. O handoff dizia "somente Web". Vale a constituição, então a administração nasce com paridade.
 
 ---
 
@@ -70,9 +70,9 @@
 | **Fase 0** | Preparação, auditoria de `001`/`002`, decisões de produto | Garante base confiável e decisões fechadas antes de especificar |
 | **Fase 1** | Emenda da constituição **v2.0.0** (idioma + VPS genérica) e `CLAUDE.md` | Todo código novo precisa nascer sob a regra nova |
 | **Feature 003** | **Migração do código para inglês** (refatoração, comportamento idêntico) | Antes de qualquer feature nova, para não escrever mais código em português |
-| **Feature 004** | Orquestrador **n8n** (transporte do Telegram) | Exigido pela constituição; a secretaria já nasce sobre o transporte final |
-| **Feature 005** | **Secretaria — acesso e cadastros** (Web + Telegram) | Maior lacuna funcional |
-| **Feature 006** | **Secretaria — visão da escola** (histórico de qualquer aluno) | Depende dos cadastros da 005 |
+| **Feature 004** | Orquestrador **n8n** (transporte do Telegram) | Exigido pela constituição; a administração já nasce sobre o transporte final |
+| **Feature 005** | **Administração — acesso e cadastros** (Web + Telegram) | Maior lacuna funcional |
+| **Feature 006** | **Administração — visão da escola** (histórico de qualquer aluno) | Depende dos cadastros da 005 |
 | **Feature 007** | **Privacidade, retenção e operação (LGPD)** | Antes de operar com dados reais de menores |
 | **Fase final** | Implantação em VPS genérica e aceite global | Fecha o ciclo |
 
@@ -169,16 +169,16 @@ Estas decisões são suas (ou do cliente). A coluna "Recomendação" é um ponto
 
 | # | Decisão | Alimenta | Recomendação | Decisão do dono |
 |---|---|---|---|---|
-| D1 | **Semestral com vários professores.** A spec 001 consolida só as aulas do próprio professor e permite um semestral aprovado por (aluno, professor, período). A secretaria vê todos. | 006 | Manter por professor; a secretaria só **lê** os semestrais de todos os professores. Sem consolidação entre professores agora. | ☐ |
-| D2 | **Como o administrador se autentica no Telegram.** O handoff (RN-11) diz que o `telegramUserId` não autentica ação administrativa, mas a constituição exige administração nos dois canais. | 005 | Vinculação do administrador por **código de uso único** emitido por outro administrador (ou pelo comando de bootstrap), com as mesmas regras de bloqueio por tentativas, e **confirmação explícita** nas ações destrutivas (inativar, reemitir código). | ☐ |
+| D1 | **Semestral com vários professores.** A spec 001 consolida só as aulas do próprio professor e permite um semestral aprovado por (aluno, professor, período). O administrador vê todos. | 006 | Manter por professor; o administrador só **lê** os semestrais de todos os professores. Sem consolidação entre professores agora. | ☐ |
+| D2 | **Como o administrador (e o professor, nas ações de cadastro) se autentica no Telegram.** O handoff (RN-11) diz que o `telegramUserId` não autentica ação administrativa, mas a constituição exige administração nos dois canais. | 005 | Vinculação do administrador por **código de uso único** emitido por outro administrador (ou pelo comando de bootstrap), com as mesmas regras de bloqueio por tentativas, e **confirmação explícita** nas ações destrutivas (inativar, reemitir código). Para o professor, o vínculo que ele já tem basta para cadastrar e manter **os seus** alunos, com **confirmação explícita** dos dados antes de gravar e nada além do seu escopo. | ☐ |
 | D3 | **Revogação de acessos ao reemitir código ou inativar professor.** | 005 | Reemitir código **encerra** sessões Web e (opcional) o vínculo do Telegram; inativar professor encerra tudo. | ☐ |
 | D4 | **Inativar professor/aluno com relatório em aberto.** | 005 | Bloquear com aviso listando os relatórios em aberto; permitir só após cancelar ou concluir. | ☐ |
 | D5 | **Retirar a associação professor–aluno com relatório em aberto.** | 005 | Relatório em aberto fica visível ao professor até ser concluído ou cancelado; aprovados permanecem no histórico. | ☐ |
 | D6 | **Retenção de dados** (transcrição, PDFs de versões antigas, relatórios cancelados). | 007 | *Proposta para validar:* apagar a transcrição N dias após a aprovação; manter só o PDF da versão aprovada; anonimizar cancelados após N dias; N configurável. | ☐ |
-| D7 | **Eliminação a pedido (direito do titular).** | 007 | Fluxo conduzido pela secretaria, com anonimização do aluno e dos relatórios, registro do pedido e do atendimento. | ☐ |
+| D7 | **Eliminação a pedido (direito do titular).** | 007 | Fluxo conduzido pelo administrador, com anonimização do aluno e dos relatórios, registro do pedido e do atendimento. | ☐ |
 | D8 | **Consentimento do responsável (menores).** | 007 | Registrar no cadastro quem consentiu, quando e a versão do termo; sem consentimento registrado, o aluno não pode ter relatório de IA. | ☐ |
 | D9 | **O que a auditoria registra.** | 005, 006, 007 | Quem, quando, o quê, sobre qual registro: logins (sucesso/falha), cadastros e alterações, emissão de código, aprovação, download de PDF, exclusões. **Nunca** o conteúdo do relatório. | ☐ |
-| D10 | **O administrador pode alterar ou aprovar relatório de professor?** | 006 | **Não.** Só o professor aprova (Princípio III). A secretaria apenas consulta e baixa. | ☐ |
+| D10 | **O administrador pode alterar ou aprovar relatório de professor?** | 006 | **Não.** Só o professor aprova (Princípio III). O administrador apenas consulta e baixa. | ☐ |
 | D11 | **Quem é o responsável pela LGPD na escola** (contato e papel). | 007 | Definir uma pessoa; aparece nos termos e nos fluxos de eliminação. | ☐ |
 
 ---
@@ -323,7 +323,7 @@ git checkout main && git pull --ff-only origin main
 
 Contexto: o sistema foi construído com identificadores em português. A constituição 2.0.0 passou a exigir código em inglês, mantendo em português apenas os textos mostrados ao usuário (telas, bot, PDFs) e os logs; documentação, specs, comentários e commits seguem em português.
 
-Valor: eliminar a dívida de nomenclatura registrada na regra de transição da constituição, para que toda feature futura (n8n, secretaria, privacidade) nasça no idioma correto, e deixar o código legível por qualquer desenvolvedor.
+Valor: eliminar a dívida de nomenclatura registrada na regra de transição da constituição, para que toda feature futura (n8n, administração, privacidade) nasça no idioma correto, e deixar o código legível por qualquer desenvolvedor.
 
 Escopo (tudo que é código): pacotes, módulos, classes, interfaces, métodos, variáveis, constantes, arquivos e pastas; tabelas, colunas, índices, constraints e valores de enumeração do banco; rotas e campos das APIs e dos contratos (OpenAPI e JSON Schema); códigos de erro; ações e dados dos botões do Telegram; chaves dos catálogos de mensagens; variáveis de ambiente; classes CSS; componentes, páginas e rotas do frontend; nomes de scripts e de workflows de CI; testes.
 
@@ -458,29 +458,47 @@ Fora de escopo: qualquer regra de negócio ou autorização no n8n; novas funcio
 
 ---
 
-## 8. Feature 005 — Secretaria: acesso e cadastros (Web + Telegram)
+## 8. Feature 005 — Administração: acesso e cadastros (Web + Telegram)
 
 ### 8.1 Objetivo e escopo
 
-Dar à escola autonomia: a secretaria passa a cadastrar e manter professores, alunos e associações **sem depender do comando de carga**, nos **dois canais**.
+Dar à escola autonomia: o **administrador do sistema** passa a cadastrar e manter professores, alunos e associações, e o **professor** passa a cadastrar e manter os **seus próprios alunos**, **sem depender do comando de carga**, nos **dois canais**. **Aluno e responsável não têm nenhuma função administrativa** (nem acesso de qualquer tipo ao sistema).
+
+> **Perspectiva de acesso (muda o handoff 2.4):** só **dois papéis** fazem administração: **Administrador** e **Professor**. O handoff concentrava todo o cadastro no "Administrador / Secretaria"; aqui o administrador cuida da escola inteira e o professor cuida apenas do que é seu. **Aluno e responsável nunca são atores**: não há conta, login, vínculo de Telegram, tela, rota nem comando para eles; o responsável existe só como **dado do cadastro** do aluno menor. Os papéis seguem separados (RN-14): a credencial de professor nunca autentica rota administrativa e a de administrador nunca autentica rota do professor.
+
+**Quem faz o quê**
+
+| Operação | Administrador | Professor |
+|---|---|---|
+| Entrar | E-mail e senha, sessão fixa de 2 h | Código de acesso (já entregue na spec 001) |
+| Administradores: criar, inativar | Sim | Não |
+| Professores: cadastrar, listar, editar, inativar/reativar | Sim, qualquer um | Não |
+| Código de acesso: emitir, reemitir; desvincular Telegram | Sim, de qualquer professor | Não |
+| Alunos: cadastrar | Sim, com 0..N professores associados | Sim; o aluno já nasce associado a ele |
+| Alunos: listar/buscar, editar, inativar/reativar | Qualquer aluno | Somente os seus (associados a ele) |
+| Associações professor–aluno | Incluir e retirar, em qualquer aluno | Não (só a associação automática ao cadastrar) |
+| CPF | Informa; nunca é exibido de volta | Informa; nunca é exibido de volta |
 
 | Dentro | Fora (feature 006 ou 007) |
 |---|---|
 | Login do administrador (sessão fixa de 2 h, bloqueio por tentativas) | Histórico de qualquer aluno (006) |
-| Gestão de administradores (criar, inativar; nunca ficar sem nenhum ativo) | Auditoria completa e retenção (007) |
-| Professores: cadastrar, listar, editar, inativar/reativar | |
-| Alunos: cadastrar, listar, editar, inativar/reativar; CPF cifrado e **validado**; data **real**; responsável obrigatório se menor; instrumento opcional | |
-| Associações professor–aluno editáveis a qualquer momento | |
+| Gestão de administradores (criar, inativar; nunca ficar sem nenhum ativo) | Auditoria completa, retenção e consentimento do responsável (007) |
+| Professores, pelo administrador: cadastrar, listar, editar, inativar/reativar | Qualquer conta, login, tela, rota, comando ou aviso para aluno ou responsável |
+| Alunos, pelo administrador (qualquer aluno): cadastrar, listar, editar, inativar/reativar; CPF cifrado e **validado**; data **real**; responsável obrigatório se menor; instrumento opcional | Professor administrar outros professores, administradores, códigos de acesso ou associações |
+| Alunos, pelo professor (somente os seus): cadastrar (já associado a ele), listar, editar, inativar/reativar, com as mesmas validações | Administrador aprovar ou alterar relatório (Princípio III) |
+| Escopo do professor imposto no núcleo: nunca vê nem altera aluno que não seja seu | |
+| Associações professor–aluno editáveis a qualquer momento, pelo administrador | |
 | Código de acesso: emitir, reemitir (validade de 7 dias), com revogação de acessos conforme D3 | |
 | Desvincular o Telegram de um professor | |
-| Paridade Web + Telegram para tudo acima | |
-| Registro mínimo de autoria (quem criou/alterou) para a 007 usar | |
+| Paridade Web + Telegram para tudo acima, para o papel que executa cada operação | |
+| Registro mínimo de autoria (quem criou/alterou, com o papel) para a 007 usar | |
+| Ajustar os textos e o link da spec 001 que mandam o professor "falar com a secretaria" | |
 
-**Referências do handoff:** 2.4, 4.2 (Administrador), 5.1 (RN-01 a RN-04), 5.2 (RN-05, RN-06, RN-11), 5.3 (RN-12, RN-14), 7.1, 12.2, 17.1 (itens 4 a 8), 17.2 (itens 13, 16). **Spec 001:** FR-011, Assumptions (secretaria). **Constituição:** Princípios I, III, IV, IX. **Decisões:** D2, D3, D4, D5 e D9 da seção 4.2.
+**Referências do handoff:** 2.4, 4.2 (Administrador), 5.1 (RN-01 a RN-04), 5.2 (RN-05, RN-06, RN-11), 5.3 (RN-12, RN-14), 7.1, 12.2, 17.1 (itens 4 a 8), 17.2 (itens 13, 16). **Spec 001:** FR-011, Assumptions (secretaria). **Constituição:** Princípios I, III, IV, IX. **Decisões:** D2, D3, D4, D5 e D9 da seção 4.2. Nesta feature, D2 passa a cobrir também o **professor no Telegram** (o handoff, RN-11, diz que o `telegramUserId` não autoriza ação administrativa): fechar no `clarify` e, se aprovado, refletir na tabela 4.2.
 
 **Dependência:** features 003 e 004 mescladas; decisões D2 a D5 preenchidas.
 
-> **Risco:** é a maior feature funcional. Se o `plan` indicar mais de ~12 dias de trabalho, divida em duas branches/PRs por prioridade de user story (P1: acesso + professores + alunos; P2: associações, administradores, desvincular Telegram), mantendo a paridade dentro de cada fatia.
+> **Risco:** é a maior feature funcional. Se o `plan` indicar mais de ~12 dias de trabalho, divida em duas branches/PRs por prioridade de user story (P1: acesso do administrador + professores + alunos, pelo administrador e pelo professor; P2: associações, administradores, código e desvincular Telegram), mantendo a paridade dentro de cada fatia.
 
 ### 8.2 Prompts
 
@@ -488,76 +506,79 @@ Dar à escola autonomia: a secretaria passa a cadastrar e manter professores, al
 
 **`/speckit-specify`**
 ```text
-/speckit-specify Área da secretaria para cadastros e acesso, disponível na Web e no Telegram com paridade (constituição, Princípio I e restrições de produto), de modo que a escola deixe de depender do procedimento operacional de carga inicial.
+/speckit-specify Área de administração para cadastros e acesso, disponível na Web e no Telegram com paridade (constituição, Princípio I e restrições de produto), de modo que a escola deixe de depender do procedimento operacional de carga inicial. Somente dois papéis têm função administrativa: o Administrador do sistema e o Professor (este apenas sobre os seus próprios alunos). Aluno e responsável não têm nenhuma função administrativa nem qualquer acesso ao sistema.
 
-Contexto: hoje professores, alunos e associações entram no sistema por um comando de carga; não existe tela nem fluxo para a secretaria. O professor já acessa por código de acesso (Web e Telegram) e só enxerga seus alunos. Esta feature cria o ator Administrador (secretaria) e as operações de cadastro. Referências: HANDOFF seções 2.4, 5.1, 5.2, 7.1, 12.2 e 17; spec 001 (FR-004 a FR-011 e Assumptions); a feature fica sobre o transporte do Telegram da feature 004.
+Contexto: hoje professores, alunos e associações entram no sistema por um comando de carga; não existe tela nem fluxo de cadastro. O professor já acessa por código de acesso (Web e Telegram) e só enxerga seus alunos. Esta feature cria o ator Administrador e as operações de cadastro, e dá ao Professor o cadastro dos seus próprios alunos (o handoff atribuía todo o cadastro à secretaria). Referências: HANDOFF seções 2.4, 5.1, 5.2, 7.1, 12.2 e 17; spec 001 (FR-004 a FR-011 e Assumptions); a feature fica sobre o transporte do Telegram da feature 004.
 
-Atores: Administrador (secretaria), Professor (afetado pelas ações), Aluno/responsável (sujeito dos dados, sem acesso ao sistema).
+Atores: Administrador (opera a escola inteira); Professor (administra somente os alunos associados a ele); Aluno e responsável NÃO são atores: são sujeitos dos dados, sem conta, login, vínculo de Telegram, tela, rota nem comando. O responsável existe apenas como dado do cadastro do aluno menor. O conjunto de papéis autenticáveis é fechado em dois: Administrador e Professor.
 
 Histórias, por prioridade:
 P1 — Acesso do administrador: entra com e-mail e senha; sessão com validade fixa de 2 horas, sem renovação; após 5 tentativas incorretas consecutivas da mesma origem, bloqueio de 15 minutos (inclusive com a senha correta), com tempo restante informado, mesmas regras de zeragem das demais autenticações; nunca é possível sair do sistema sem pelo menos um administrador ativo; credencial do professor nunca autentica rota administrativa e vice-versa (RN-14). No Telegram, o administrador é identificado por vínculo próprio e as ações destrutivas exigem confirmação explícita (modelo de autenticação conforme a decisão D2).
-P1 — Professores: cadastrar (nome, e-mail único; nasce ativo e com código de acesso de 8 caracteres válido por 7 dias exibido uma única vez para repasse), listar (com indicação de Telegram vinculado e situação), editar, inativar e reativar. E-mail duplicado é recusado com mensagem clara.
-P1 — Alunos: cadastrar (nome, data de nascimento real, CPF, nome do responsável obrigatório se menor de 18 anos na data do cadastro, instrumento opcional, professores associados — zero ou mais), listar com busca, editar, inativar e reativar. O CPF é validado (dígitos verificadores), armazenado cifrado, usado para detectar duplicidade sem ser exibido e nunca é devolvido por nenhuma API nem aparece em log. Data inexistente (ex.: 31/02) é recusada.
-P2 — Associações: incluir e retirar professores de um aluno a qualquer momento, com o efeito sobre relatórios em aberto definido pelas decisões D4/D5.
-P2 — Código de acesso: reemitir para qualquer professor (substitui o anterior, validade de 7 dias, exibição única) e, conforme D3, encerrar as sessões Web existentes e opcionalmente o vínculo do Telegram. Desvincular o Telegram de um professor.
+P1 — Professores (administrador): cadastrar (nome, e-mail único; nasce ativo e com código de acesso de 8 caracteres válido por 7 dias exibido uma única vez para repasse), listar (com indicação de Telegram vinculado e situação), editar, inativar e reativar. E-mail duplicado é recusado com mensagem clara. O professor não gerencia professores.
+P1 — Alunos (administrador): cadastrar (nome, data de nascimento real, CPF, nome do responsável obrigatório se menor de 18 anos na data do cadastro, instrumento opcional, professores associados — zero ou mais), listar com busca, editar, inativar e reativar, em qualquer aluno. O CPF é validado (dígitos verificadores), armazenado cifrado, usado para detectar duplicidade sem ser exibido e nunca é devolvido por nenhuma API nem aparece em log. Data inexistente (ex.: 31/02) é recusada.
+P1 — Alunos (professor): cadastra aluno com os mesmos campos e validações; o aluno já nasce associado a ele; lista e busca somente os seus; edita e inativa/reativa somente os seus. Nunca vê nem altera aluno de outro professor, e nenhuma resposta revela a existência ou os dados de aluno que não seja seu. Se o CPF informado já pertencer a um aluno que não é dele, o cadastro é recusado com mensagem neutra orientando procurar o administrador, sem revelar nome nem professor. Se o aluno tem mais de um professor, o professor edita os dados cadastrais, mas só o inativa quando for o único professor associado; do contrário, a inativação é do administrador (confirmar no clarify). O professor não altera associações nem cadastra aluno para outro professor.
+P2 — Associações (administrador): incluir e retirar professores de um aluno a qualquer momento, com o efeito sobre relatórios em aberto definido pelas decisões D4/D5.
+P2 — Código de acesso (administrador): reemitir para qualquer professor (substitui o anterior, validade de 7 dias, exibição única) e, conforme D3, encerrar as sessões Web existentes e opcionalmente o vínculo do Telegram. Desvincular o Telegram de um professor.
 P2 — Administradores: criar e inativar outros administradores; ninguém inativa a si mesmo se for o último.
 P3 — Primeiro administrador: procedimento operacional seguro de bootstrap (sem senha padrão versionada).
 
-Paridade: cada operação acima existe na Web e no Telegram, com as mesmas regras de autorização, validação, mensagens (adaptadas ao meio) e resultado. Entrega em um canal só exige justificativa no plano.
+O que muda no que já existe: os textos e o link da spec 001 que mandam o professor "falar com a secretaria" ou entrar na "área da secretaria" passam a refletir os papéis novos (professor sem alunos pode cadastrar o primeiro; código vencido ou conta já vinculada orientam procurar o administrador; o link da tela de entrada passa a falar em administrador). A carga inicial deixa de ter regra própria e passa a usar as mesmas operações.
 
-Regras de privacidade e segurança: CPF e dados de menores nunca em logs; ações administrativas registram autoria (quem, quando) para a futura trilha de auditoria (feature 007); mensagens de erro sem detalhes internos; senha com hash forte; toda rota administrativa nega por padrão.
+Paridade: cada operação acima existe na Web e no Telegram, para o papel que a executa, com as mesmas regras de autorização, validação, mensagens (adaptadas ao meio) e resultado. No Telegram, o professor usa o vínculo que já possui, restrito aos seus alunos, e confirma explicitamente os dados antes de gravar (modelo conforme a decisão D2, estendida ao professor). Entrega em um canal só exige justificativa no plano.
 
-Fora de escopo: histórico de qualquer aluno e visão da escola (feature 006); retenção, exclusão a pedido, consentimento e auditoria completa (feature 007); edição/aprovação de relatórios de professor pela secretaria (Princípio III: só o professor aprova); evoluções de produto.
+Regras de privacidade e segurança: CPF e dados de menores nunca em logs; ações registram autoria, com o papel (administrador ou professor), para a futura trilha de auditoria (feature 007); o escopo do professor é imposto no núcleo, nunca só na interface; mensagens de erro sem detalhes internos; senha com hash forte; toda rota negada por padrão.
 
-Critérios mensuráveis: secretária cadastra professor e aluno e entrega o código em até 3 minutos, em cada canal; 100% das operações disponíveis nos dois canais; zero CPF em logs e respostas; zero acesso administrativo com credencial de professor.
+Fora de escopo: histórico de qualquer aluno e visão da escola (feature 006); retenção, exclusão a pedido, consentimento do responsável e auditoria completa (feature 007); qualquer conta, login, tela, rota, comando ou aviso para aluno ou responsável; professor gerenciar professores, administradores, códigos de acesso ou associações; edição/aprovação de relatório de professor pelo administrador (Princípio III: só o professor aprova); evoluções de produto.
+
+Critérios mensuráveis: o administrador cadastra professor e aluno e entrega o código em até 3 minutos, em cada canal; o professor cadastra um aluno seu em até 3 minutos, em cada canal; 100% das operações disponíveis nos dois canais, para o papel que as executa; zero CPF em logs e respostas; zero acesso administrativo com credencial de professor; zero acesso do professor a aluno que não seja seu; zero papel, credencial ou rota para aluno ou responsável.
 ```
 
 **`/speckit-clarify`**
 ```text
-/speckit-clarify Priorize as decisões abertas de produto: D2 (como o administrador se autentica e confirma ações no Telegram, dado que o identificador do Telegram sozinho não é autenticação administrativa), D3 (o que a reemissão de código e a inativação revogam), D4 (inativar professor ou aluno com relatório em aberto), D5 (retirar associação com relatório em aberto), D9 (que eventos de autoria são gravados agora). Verifique também: se o bloqueio por tentativas do administrador compartilha o serviço das demais autenticações; se a reativação restaura vínculo e código; e a política para o último administrador.
+/speckit-clarify Priorize as decisões abertas de produto: D2 (como o administrador se autentica e confirma ações no Telegram, dado que o identificador do Telegram sozinho não é autenticação administrativa, e se o vínculo que o professor já tem basta, com confirmação, para cadastrar os próprios alunos), D3 (o que a reemissão de código e a inativação revogam), D4 (inativar professor ou aluno com relatório em aberto, inclusive quando quem inativa é o professor), D5 (retirar associação com relatório em aberto), D9 (que eventos de autoria são gravados agora, com o papel do autor). Verifique também: o que o professor pode fazer com aluno compartilhado com outro professor (editar, inativar); como recusar CPF que já pertence a aluno de outro professor sem vazar dado; se o bloqueio por tentativas do administrador compartilha o serviço das demais autenticações; se a reativação restaura vínculo e código; a política para o último administrador; e a confirmação de que aluno e responsável não terão nenhum acesso, nem de leitura, nesta feature.
 ```
 
 **`/speckit-checklist`** *(recomendado nesta feature, por tocar autenticação)*
 ```text
-/speckit-checklist Gere o checklist de qualidade dos requisitos de segurança e privacidade: autenticação e sessão do administrador, separação de papéis, bloqueio por tentativas, tratamento do CPF, menores de idade, mensagens de erro, autoria das ações e paridade entre canais.
+/speckit-checklist Gere o checklist de qualidade dos requisitos de segurança e privacidade: autenticação e sessão do administrador, separação entre os dois papéis, isolamento do professor aos seus alunos, ausência de qualquer papel ou acesso para aluno e responsável, bloqueio por tentativas, tratamento do CPF, menores de idade, mensagens de erro (sem vazar existência de aluno de outro professor), autoria das ações e paridade entre canais.
 ```
 
 **`/speckit-plan`**
 ```text
-/speckit-plan Planeje reaproveitando o que existe: serviço de tentativas de acesso e bloqueio (usado por Web e Telegram), cifragem e hash do CPF, geração e renovação de código de acesso, casos de uso de carga inicial (a carga deve passar a usar os mesmos casos de uso novos, sem duplicar regra), vínculo do Telegram e fila de ações do canal. Núcleo com casos de uso por operação; adaptadores Web e Telegram sem regra de negócio; ambos chamando os mesmos casos de uso. Definir: modelo de sessão do administrador (validade fixa de 2 h), modelo de vínculo e confirmação no Telegram conforme D2, revogação de sessão (token com versão de credencial ou sessão revogável), colunas de autoria, validação de CPF e de data no núcleo, contrato OpenAPI da área administrativa (nova seção ou arquivo), telas do portal seguindo portal-do-professor-design-system e a identidade do Instituto (mobile-first, WCAG AA, modo claro e escuro) e fluxo do bot. Faça o Constitution Check de I, II, III, IV, VI (código em inglês; textos e logs em português) e IX. Registre em research.md as alternativas descartadas (por exemplo, administração só na Web) e justifique qualquer desvio de paridade.
+/speckit-plan Planeje reaproveitando o que existe: serviço de tentativas de acesso e bloqueio (usado por Web e Telegram), cifragem e hash do CPF, geração e renovação de código de acesso, casos de uso de carga inicial (a carga deve passar a usar os mesmos casos de uso novos, sem duplicar regra), vínculo do Telegram e fila de ações do canal. Núcleo com um caso de uso por operação, que recebe o ator (papel e identidade) e aplica o escopo: administrador, escola inteira; professor, somente os alunos associados a ele. Os adaptadores Web e Telegram não têm regra de negócio e chamam os mesmos casos de uso; rotas administrativas e rotas do professor ficam separadas e cada uma aceita só a sua credencial. O modelo de autorização tem exatamente dois papéis (Administrador e Professor), sem papel para aluno ou responsável. Definir: modelo de sessão do administrador (validade fixa de 2 h), modelo de vínculo e confirmação no Telegram conforme D2 (administrador e professor), revogação de sessão (token com versão de credencial ou sessão revogável), colunas de autoria com o papel do autor, validação de CPF e de data no núcleo, tratamento de CPF duplicado sem vazar dado de outro professor, contrato OpenAPI da área administrativa e do cadastro de alunos pelo professor (nova seção ou arquivo), telas do portal (área administrativa e "Meus alunos" do professor) seguindo portal-do-professor-design-system e a identidade do Instituto (mobile-first, WCAG AA, modo claro e escuro) e fluxo do bot. Faça o Constitution Check de I, II, III, IV, VI (código em inglês; textos e logs em português) e IX. Registre em research.md as alternativas descartadas (por exemplo, administração só na Web; professor sem cadastro próprio de alunos) e justifique qualquer desvio de paridade.
 ```
 
 **`/speckit-tasks`**
 ```text
-/speckit-tasks Organize por user story (P1 acesso do administrador; P1 professores; P1 alunos; P2 associações; P2 código e Telegram; P2 administradores; P3 bootstrap), cada uma entregando Web e Telegram juntos e testável de forma independente. Testes de contrato, de paridade entre canais, de segurança (credencial cruzada, bloqueio, CPF fora de logs e respostas) e de acessibilidade antes da implementação. Inclua tasks de atualização dos CLAUDE.md, do .env.example e do README de infra, e de migração da carga inicial para os casos de uso novos.
+/speckit-tasks Organize por user story (P1 acesso do administrador; P1 professores; P1 alunos pelo administrador; P1 alunos pelo professor; P2 associações; P2 código e Telegram; P2 administradores; P3 bootstrap), cada uma entregando Web e Telegram juntos e testável de forma independente. Testes de contrato, de paridade entre canais, de segurança (credencial cruzada, bloqueio, CPF fora de logs e respostas), de isolamento (professor não encontra nem altera aluno de outro professor; CPF duplicado de outro professor recusado sem vazar dado), de que não existe papel, credencial nem rota para aluno ou responsável, e de acessibilidade antes da implementação. Inclua tasks de atualização dos CLAUDE.md, do .env.example e do README de infra, de migração da carga inicial para os casos de uso novos e de ajuste dos textos e do link da spec 001 que citam a secretaria.
 ```
 
 **`/speckit-analyze`**
 ```text
-/speckit-analyze Foque em: paridade (toda operação existe nos dois canais); separação de papéis; CPF e menores nunca em log nem resposta; ações destrutivas com confirmação; decisões D2 a D5 refletidas nos requisitos e nas tasks; ausência de regra de negócio em adaptadores; consistência dos nomes com o glossário em inglês.
+/speckit-analyze Foque em: paridade (toda operação existe nos dois canais, para o papel que a executa); separação entre administrador e professor; escopo do professor imposto no núcleo; nenhum papel, credencial, rota ou aviso para aluno ou responsável; CPF e menores nunca em log nem resposta; ações destrutivas com confirmação; decisões D2 a D5 refletidas nos requisitos e nas tasks; ausência de regra de negócio em adaptadores; consistência dos nomes com o glossário em inglês.
 ```
 
 **`/speckit-implement`**
 ```text
-/speckit-implement Execute uma user story por vez, Web e Telegram juntos, parando a cada checkpoint. Escreva os testes primeiro e mantenha cobertura mínima de 90% no núcleo. Código, nomes de tabela, rotas e variáveis em inglês; textos ao usuário e logs em português com acentuação correta. Não coloque senha, CPF ou código de acesso em log. Rode a suíte nos contêineres (backend, frontend, e2e com axe) a cada checkpoint.
+/speckit-implement Execute uma user story por vez, Web e Telegram juntos, parando a cada checkpoint. Escreva os testes primeiro e mantenha cobertura mínima de 90% no núcleo. Código, nomes de tabela, rotas e variáveis em inglês; textos ao usuário e logs em português com acentuação correta. O escopo do professor é decidido no núcleo, não na interface. Não coloque senha, CPF ou código de acesso em log. Rode a suíte nos contêineres (backend, frontend, e2e com axe) a cada checkpoint.
 ```
 
 **`/speckit-converge`**
 ```text
-/speckit-converge Confira requisito por requisito e a paridade Web x Telegram, a revogação de acessos (D3), o tratamento dos casos D4/D5, a validação de CPF e de data, o bloqueio por tentativas e que a carga inicial usa os mesmos casos de uso. Acrescente ao tasks.md o que faltar.
+/speckit-converge Confira requisito por requisito e a paridade Web x Telegram, a separação entre os dois papéis, o isolamento do professor aos seus alunos, a ausência de qualquer papel ou acesso para aluno e responsável, a revogação de acessos (D3), o tratamento dos casos D4/D5, a validação de CPF e de data, o bloqueio por tentativas e que a carga inicial usa os mesmos casos de uso. Acrescente ao tasks.md o que faltar.
 ```
 
 **Fechamento:** `/code-review` + `/security-review` (autenticação e dado de menor), commit, PR (sem merge), `code-review-graph build`.
 
-**Pronto quando:** a secretaria opera todo o cadastro pelos dois canais; suíte verde com cobertura ≥ 90%; revisão de segurança sem achado crítico; carga inicial convertida; PR mesclado.
+**Pronto quando:** o administrador opera todo o cadastro e o professor cuida dos seus alunos, pelos dois canais; nenhum acesso existe para aluno ou responsável; suíte verde com cobertura ≥ 90%; revisão de segurança sem achado crítico; carga inicial convertida; PR mesclado.
 
 ---
 
-## 9. Feature 006 — Secretaria: visão da escola
+## 9. Feature 006 — Administração: visão da escola
 
 ### 9.1 Objetivo e escopo
 
-A secretaria **consulta** o que a escola produziu, sem interferir no ciclo do relatório.
+O administrador **consulta** o que a escola produziu, sem interferir no ciclo do relatório.
 
 | Dentro | Fora |
 |---|---|
@@ -576,22 +597,22 @@ A secretaria **consulta** o que a escola produziu, sem interferir no ciclo do re
 
 **`/speckit-specify`**
 ```text
-/speckit-specify Visão da escola para a secretaria: consultar o histórico de relatórios aprovados de qualquer aluno, de todos os professores, e abrir ou baixar os PDFs, na Web e no Telegram com paridade.
+/speckit-specify Visão da escola para o administrador: consultar o histórico de relatórios aprovados de qualquer aluno, de todos os professores, e abrir ou baixar os PDFs, na Web e no Telegram com paridade.
 
-Contexto: o professor já consulta o histórico dos seus alunos, com os relatórios de sua autoria (spec 001, FR-047). A secretaria (feature 005) ainda não consegue ver nada do que foi produzido. Referências: HANDOFF 5.7 (RN-33 e RN-34), 7.9 e 12.2; spec 001 FR-047 e FR-048.
+Contexto: o professor já consulta o histórico dos seus alunos, com os relatórios de sua autoria (spec 001, FR-047). O administrador (feature 005) ainda não consegue ver nada do que foi produzido. Referências: HANDOFF 5.7 (RN-33 e RN-34), 7.9 e 12.2; spec 001 FR-047 e FR-048.
 
-Regras: a secretaria vê o histórico de qualquer aluno cadastrado, com os relatórios de aula e semestrais APROVADOS de todos os professores, em ordem cronológica (aula pela data da aula; semestral pelo início do período), com professor autor, data e hora da aprovação e versão aprovada; pode filtrar por aluno, professor, tipo e período; abre e baixa PDFs. Relatórios em rascunho, aguardando respostas, em conferência, com falha ou cancelados NÃO aparecem. A secretaria é somente leitura: não aprova, não altera, não cancela e não gera relatório (Princípio III). O download de PDF exige administrador autenticado e autorizado para aquele relatório (FR-048 estendido ao papel administrativo), nunca apenas o conhecimento do endereço. Cada consulta e cada download ficam registrados com autoria para a trilha da feature 007, sem conteúdo do relatório. Os semestrais continuam por professor (decisão D1): a secretaria lê todos, sem consolidação entre professores.
+Regras: o administrador vê o histórico de qualquer aluno cadastrado, com os relatórios de aula e semestrais APROVADOS de todos os professores, em ordem cronológica (aula pela data da aula; semestral pelo início do período), com professor autor, data e hora da aprovação e versão aprovada; pode filtrar por aluno, professor, tipo e período; abre e baixa PDFs. Relatórios em rascunho, aguardando respostas, em conferência, com falha ou cancelados NÃO aparecem. O administrador é somente leitura: não aprova, não altera, não cancela e não gera relatório (Princípio III). O download de PDF exige administrador autenticado e autorizado para aquele relatório (FR-048 estendido ao papel administrativo), nunca apenas o conhecimento do endereço. Cada consulta e cada download ficam registrados com autoria para a trilha da feature 007, sem conteúdo do relatório. Os semestrais continuam por professor (decisão D1): o administrador lê todos, sem consolidação entre professores.
 
 Privacidade: o histórico contém dados de menores; nunca registrar conteúdo em log; mensagens de erro sem detalhe interno.
 
 Fora de escopo: qualquer escrita sobre relatórios; métricas e painel analítico; exportação em lote; envio às famílias.
 
-Critérios: a secretaria encontra o histórico de um aluno em até 3 interações, em cada canal; 100% dos relatórios listados são aprovados; zero download de PDF sem autorização; paridade total entre canais.
+Critérios: o administrador encontra o histórico de um aluno em até 3 interações, em cada canal; 100% dos relatórios listados são aprovados; zero download de PDF sem autorização; paridade total entre canais.
 ```
 
 **`/speckit-clarify`**
 ```text
-/speckit-clarify Priorize: D1 (confirmar semestral por professor e leitura de todos pela secretaria), D10 (secretaria estritamente somente leitura), D9 (o que a consulta e o download registram), formato do histórico no Telegram para listas longas (paginação), e se alunos inativos continuam consultáveis.
+/speckit-clarify Priorize: D1 (confirmar semestral por professor e leitura de todos pelo administrador), D10 (administrador estritamente somente leitura), D9 (o que a consulta e o download registram), formato do histórico no Telegram para listas longas (paginação), e se alunos inativos continuam consultáveis.
 ```
 
 **`/speckit-plan`**
@@ -606,7 +627,7 @@ Critérios: a secretaria encontra o histórico de um aluno em até 3 interaçõe
 
 **`/speckit-analyze`**
 ```text
-/speckit-analyze Foque em: a secretaria não tem nenhuma operação de escrita sobre relatórios; só aprovados aparecem; autorização de PDF cobre o papel administrativo; paridade; ausência de conteúdo de relatório em logs e registros de autoria.
+/speckit-analyze Foque em: o administrador não tem nenhuma operação de escrita sobre relatórios; só aprovados aparecem; autorização de PDF cobre o papel administrativo; paridade; ausência de conteúdo de relatório em logs e registros de autoria.
 ```
 
 **`/speckit-implement`**
@@ -621,7 +642,7 @@ Critérios: a secretaria encontra o histórico de um aluno em até 3 interaçõe
 
 **Fechamento:** `/code-review` + `/security-review`, commit, PR (sem merge), `code-review-graph build`.
 
-**Pronto quando:** a secretaria consulta qualquer aluno nos dois canais, sem poder alterar nada; testes de acesso cruzado verdes; PR mesclado.
+**Pronto quando:** o administrador consulta qualquer aluno nos dois canais, sem poder alterar nada; testes de acesso cruzado verdes; PR mesclado.
 
 ---
 
@@ -658,14 +679,14 @@ Contexto: o sistema já cifra o CPF, não retém áudio e restringe cada profess
 
 Entregas:
 1. Retenção: política configurável que remove ou anonimiza transcrições, PDFs de versões antigas e relatórios cancelados após prazos definidos pelo dono do produto (D6), com execução automática, registro do que foi tratado (sem conteúdo) e proteção contra apagar relatório aprovado vigente.
-2. Eliminação a pedido: fluxo conduzido pela secretaria, nos dois canais, que registra o pedido, anonimiza o aluno e seus relatórios conforme D7 e registra o atendimento.
+2. Eliminação a pedido: fluxo conduzido pelo administrador, nos dois canais, que registra o pedido, anonimiza o aluno e seus relatórios conforme D7 e registra o atendimento.
 3. Consentimento: registro, por aluno menor, de quem consentiu, quando e qual versão do termo (D8); regra de bloqueio quando ausente.
-4. Auditoria: trilha imutável de eventos (login e falha de login, cadastro e alteração, emissão de código, aprovação, cancelamento, consulta e download de PDF, eliminação), com ator, momento, tipo e identificador do registro, nunca o conteúdo; consultável pela secretaria; com prazo de guarda próprio.
+4. Auditoria: trilha imutável de eventos (login e falha de login, cadastro e alteração, emissão de código, aprovação, cancelamento, consulta e download de PDF, eliminação), com ator, momento, tipo e identificador do registro, nunca o conteúdo; consultável pelo administrador; com prazo de guarda próprio.
 5. Observabilidade: logs estruturados em português sem áudio, transcrição, CPF nem dados pessoais além do necessário; métricas de tempo e custo estimado por áudio, aula, aluno, relatório semestral e mês, por canal e por provedor (confirmar o que o FR-056 já cobre e completar o resto); alertas para falha de provedor de IA, fila de entrega do canal acumulada e erro de armazenamento.
 6. Backup e restauração: rotina automática do banco e do armazenamento de PDFs, cifrada, enviada para fora da VPS, com retenção configurável e teste de restauração documentado e automatizado; as chaves de cifragem do CPF e do HMAC guardadas junto, fora do repositório.
 7. Inventário de tratamento: documento versionado dizendo quais dados vão para quais provedores de IA, por que, onde ficam e sob quais termos.
 
-Paridade: as ações da secretaria (eliminação, consulta de auditoria) existem na Web e no Telegram.
+Paridade: as ações do administrador (eliminação, consulta de auditoria) existem na Web e no Telegram.
 
 Fora de escopo: parecer jurídico; mudança de provedor de IA; evoluções de produto; anonimização de logs antigos fora da política definida.
 
@@ -689,7 +710,7 @@ Critérios mensuráveis: zero dado de aluno em logs, métricas e trilha (verific
 
 **`/speckit-analyze`**
 ```text
-/speckit-analyze Foque em: nenhum requisito apaga relatório aprovado vigente por engano; a trilha não guarda conteúdo; backup e chaves ficam fora do repositório; todo prazo é configurável e tem valor padrão registrado; paridade das ações da secretaria; coerência com as decisões D6 a D11.
+/speckit-analyze Foque em: nenhum requisito apaga relatório aprovado vigente por engano; a trilha não guarda conteúdo; backup e chaves ficam fora do repositório; todo prazo é configurável e tem valor padrão registrado; paridade das ações do administrador; coerência com as decisões D6 a D11.
 ```
 
 **`/speckit-implement`**
@@ -720,23 +741,23 @@ Critérios mensuráveis: zero dado de aluno em logs, métricas e trilha (verific
 - [ ] Deploy pelo workflow manual com ambiente protegido por aprovação, usando SSH com chave dedicada guardada como segredo do repositório.
 - [ ] Backup automatizado em destino **fora da VPS**, cifrado, com restauração testada e as chaves guardadas à parte.
 - [ ] Webhook do Telegram apontando para o n8n e perfil do bot configurado (monograma FB).
-- [ ] Verificações pós-implantação: health check, login do professor e da secretaria, um áudio de ponta a ponta com as gravações fictícias do cliente, PDF abrindo com autenticação, restauração de backup.
+- [ ] Verificações pós-implantação: health check, login do professor e do administrador, um áudio de ponta a ponta com as gravações fictícias do cliente, PDF abrindo com autenticação, restauração de backup.
 - [ ] Plano de reversão: comando para voltar à imagem anterior e para restaurar o último backup.
 
 ### 11.2 Aceite global (Apêndice A do handoff, atualizado)
 
 | # | Critério | Feature |
 |---|---|---|
-| 1 | Secretaria cadastra professor, recebe código de 8 caracteres válido por 7 dias; e-mail duplicado recusado | 005 |
-| 2 | Secretaria reemite código; lista mostra se há Telegram vinculado | 005 |
-| 3 | Secretaria cadastra aluno com CPF único, cifrado e nunca exibido; menor exige responsável; associa 0..N professores | 005 |
+| 1 | Administrador cadastra professor, recebe código de 8 caracteres válido por 7 dias; e-mail duplicado recusado | 005 |
+| 2 | Administrador reemite código; lista mostra se há Telegram vinculado | 005 |
+| 3 | Administrador cadastra aluno com CPF único, cifrado e nunca exibido; menor exige responsável; associa 0..N professores; o professor cadastra aluno seu e não acessa aluno de outro; aluno e responsável não têm acesso | 005 |
 | 4 | Professor vincula o Telegram e entra na Web com o mesmo código; sessão e bloqueio por tentativas conforme regras | 001 |
 | 5 | Professor só vê alunos associados (403) e relatórios próprios (404) | 001 |
 | 6 | Registro de aula por voz no Telegram e por gravação/upload na Web; áudio inválido não cria registro; áudio não é armazenado | 001 |
 | 7 | IA estrutura, pergunta antes do PDF se faltar informação, versão e PDF por alteração, aprovação com versão vigente e irreversível | 001 |
 | 8 | Relatório iniciado em um canal é retomado ou descartado no outro | 001 |
 | 9 | Semestral: menu de semestres, contagem de aprovados, bloqueio sem dados, 10 seções, PDF, alteração, aprovação | 001 |
-| 10 | Histórico do professor só com aprovados; secretaria vê qualquer aluno, somente leitura | 001, 006 |
+| 10 | Histórico do professor só com aprovados; administrador vê qualquer aluno, somente leitura | 001, 006 |
 | 11 | Bot funciona de ponta a ponta pelo n8n; mesma experiência de antes | 004 |
 | 12 | Administração disponível na Web e no Telegram | 005, 006 |
 | 13 | Retenção, eliminação a pedido, consentimento, auditoria e backup restaurável | 007 |
@@ -751,8 +772,8 @@ Critérios mensuráveis: zero dado de aluno em logs, métricas e trilha (verific
 | Fase 1 | `docs/constitution-v2.0.0` | — | — | — | — | — | — | — | ☐ | ☐ | ☐ |
 | 003 Inglês | `003-migracao-para-ingles` | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
 | 004 n8n | `004-orquestrador-n8n` | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| 005 Secretaria cadastros | `005-secretaria-cadastros` | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
-| 006 Secretaria visão | `006-secretaria-visao-escola` | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| 005 Administração cadastros | `005-admin-registrations` | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
+| 006 Administração visão | `006-admin-school-overview` | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
 | 007 LGPD e operação | `007-privacidade-operacao` | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ |
 | Implantação | — | — | — | — | — | — | — | — | — | — | ☐ |
 
@@ -767,7 +788,7 @@ Critérios mensuráveis: zero dado de aluno em logs, métricas e trilha (verific
 | Handoff | Assunto | Onde foi/será entregue |
 |---|---|---|
 | 001 | Fundação, identidade e acesso | Spec 001 (professor) + **005** (administrador) |
-| 002 | Cadastros da secretaria | **005** |
+| 002 | Cadastros da administração | **005** |
 | 003 | Núcleo do relatório de aula (IA) | Spec 001 |
 | 004 | Portal web do professor | Spec 001 |
 | 005 | Canal Telegram (registro de aula) | Specs 001 e 002 + **004** (n8n) |
@@ -783,7 +804,7 @@ Critérios mensuráveis: zero dado de aluno em logs, métricas e trilha (verific
 |---|---|
 | A migração para inglês (003) é grande e transversal | Fatias que compilam e passam a cada passo; renomeação por ferramenta; teste guardião; nenhuma mudança de comportamento |
 | Expectativa de texto de teste quebra durante a migração | Parar e relatar; não ajustar teste de texto |
-| A secretaria (005) é grande | Dividir por prioridade de user story em PRs separados, mantendo paridade em cada um |
+| A administração (005) é grande | Dividir por prioridade de user story em PRs separados, mantendo paridade em cada um |
 | Administração no Telegram sem autenticação forte | Decisão D2 antes do `plan`; confirmação explícita em ações destrutivas; `/security-review` obrigatório |
 | Prazos de retenção sem validação jurídica | Validar com o cliente antes do `plan` da 007 |
 | Specs antigas citando nomes em português | Nota de histórico no topo; não reescrever |
