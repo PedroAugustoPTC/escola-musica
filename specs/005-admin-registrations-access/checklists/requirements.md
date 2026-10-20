@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [x] No [NEEDS CLARIFICATION] markers remain — as decisões abertas (D2 a D5 e o aluno compartilhado) foram preenchidas com a proposta do plano e listadas em "Assumptions → Decisões adotadas por padrão, a confirmar no `/speckit-clarify`"
+- [x] No [NEEDS CLARIFICATION] markers remain — as decisões abertas (D2 a D5 e o aluno compartilhado) foram fechadas no clarify ou preenchidas com a proposta do plano, e listadas em "Assumptions"
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -31,5 +31,5 @@
 
 ## Notes
 
-- Pontos que o `/speckit-clarify` deve fechar (também em "Assumptions"): (1) como o administrador obtém o código de vínculo do Telegram quando é o único (lacuna da proposta D2); (2) o que a reativação restaura (D3); (3) saída quando um relatório em aberto não pode ser concluído pelo professor, pois o administrador não pode cancelá-lo (D4); (4) a exceção de acesso do professor a relatório em aberto após a retirada da associação (D5); (5) o que o professor pode editar em aluno compartilhado (FR-026); (6) uma conta do Telegram, um vínculo.
+- Revalidado após o `/speckit-clarify` de 2026-10-20 (5 perguntas: administrador só na Web, tratamento da constituição por emenda 2.2.0, inativação sem bloqueio, retirada de associação sem exceção de acesso, eventos de autoria): todos os itens seguem aprovados. A feature só segue para o `plan` com o PR [escola-musica#28](https://github.com/PedroAugustoPTC/escola-musica/pull/28) (constituição 2.2.0) mesclado.
 - A Story 8 (bootstrap) é P3 por valor, mas é pré-requisito técnico da Story 1.

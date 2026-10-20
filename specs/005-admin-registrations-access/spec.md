@@ -10,7 +10,7 @@
 
 **Materiais de referência**:
 
-- Constituição v2.1.0: Princípio I (paridade entre Web e Telegram; mesmos casos de uso; **a decisão "administrador só na Web" diverge dele e das "Decisões de produto vinculantes"** — ver Assumptions), II (o backend decide autorização e validação; o n8n só transporta), III (só o professor aprova relatório), IV (CPF cifrado; logs sem dado sensível; o professor acessa somente os próprios alunos, verificado no backend), VI (código em inglês; textos e logs em português) e IX (identidade visual, WCAG 2.1 AA, mobile-first).
+- Constituição v2.2.0 (emenda em [escola-musica#28](https://github.com/PedroAugustoPTC/escola-musica/pull/28), que esta spec exige mesclada): Princípio I (paridade entre Web e Telegram **para o Professor**; funções do Administrador somente Web; mesmos casos de uso), II (o backend decide autorização e validação; o n8n só transporta), III (só o professor aprova relatório), IV (CPF cifrado; logs sem dado sensível; o professor acessa somente os próprios alunos, verificado no backend), VI (código em inglês; textos e logs em português) e IX (identidade visual, WCAG 2.1 AA, mobile-first).
 - `specs/001-fluxo-relatorios/spec.md`: FR-004 a FR-011 (acesso do professor, código de acesso, bloqueio por tentativas, escopo por aluno, carga inicial) e a seção Assumptions (funções da "secretaria" adiadas para esta feature). A spec 001 é **histórico** e não é reescrita; esta spec registra o que ela substitui (FR-042 a FR-044).
 - `specs/004-n8n-telegram-transport/`: o transporte do Telegram sobre o qual esta feature opera. Nenhuma regra da 004 muda aqui.
 - `HANDOFF_MVP_Relatorios_Escola_Musica.md`, seções 2.4, 4.2, 5.1 (RN-01 a RN-04), 5.2 (RN-05, RN-06, RN-11), 5.3 (RN-12, RN-14), 7.1, 12.2 e 17; e `PLANO_EXECUCAO_SPECKIT.md`, seções 4.2 (decisões D2 a D5 e D9) e 8.
@@ -21,7 +21,11 @@
 
 ### Session 2026-10-20
 
-- Q: Como o administrador prova quem é ao vincular a sua conta do Telegram (D2)? → A: **Não vincula.** O administrador opera **somente pela Web**; o Telegram é somente do professor. Não existe vínculo de Telegram, código de vínculo, comando nem menu administrativo para o administrador. O professor continua com o vínculo que já tem e confirma os dados antes de gravar. Efeito: toda operação administrativa é só Web; a paridade entre Web e Telegram vale para as operações do professor. **Isso diverge do Princípio I e das "Decisões de produto vinculantes" da constituição v2.1.0** (administração nos dois canais); o tratamento da divergência está em Assumptions.
+- Q: Como o administrador prova quem é ao vincular a sua conta do Telegram (D2)? → A: **Não vincula.** O administrador opera **somente pela Web**; o Telegram é somente do professor. Não existe vínculo de Telegram, código de vínculo, comando nem menu administrativo para o administrador. O professor continua com o vínculo que já tem e confirma os dados antes de gravar. Efeito: toda operação administrativa é só Web; a paridade entre Web e Telegram vale para as operações do professor. Isso divergia do Princípio I e das "Decisões de produto vinculantes" da constituição v2.1.0 (administração nos dois canais).
+- Q: Como tratar a divergência com a constituição? → A: **Emendar a constituição** (decisão do dono do produto): v2.2.0, PR [escola-musica#28](https://github.com/PedroAugustoPTC/escola-musica/pull/28), diz que as funções do Administrador são somente Web e que o Professor tem paridade nos dois canais. A feature 005 só segue para o `plan` com esse PR mesclado; a spec já escreve conforme a v2.2.0.
+- Q: A inativação de professor ou aluno com relatório em aberto deve ser bloqueada (D4)? → A: **Não, nunca.** Inativar professor corta o acesso na hora e congela os relatórios em aberto (voltam se ele for reativado); inativar aluno o tira das novas aulas, e o professor ainda conclui ou cancela o relatório em aberto. O administrador não toca em relatório (Princípio III).
+- Q: Retirada a associação, o professor continua acessando o relatório em aberto para concluí-lo (D5)? → A: **Não.** O acesso ao aluno e aos relatórios dele termina na hora, sem exceção ao escopo do professor; os relatórios em aberto ficam congelados e voltam se ele for associado de novo; a tela avisa quantos ficarão congelados, sem bloquear.
+- Q: Que eventos de autoria esta feature grava agora (D9)? → A: Toda gravação, toda recusa de CPF de aluno alheio e toda autenticação com sucesso ou falha, do administrador (Web) e do professor (código na Web, vínculo do Telegram), com quem, papel, canal, momento, operação, alvo e resultado, sem CPF nem conteúdo de relatório. Leituras de dados de aluno ficam para a feature 007.
 
 ## Quem usa esta feature
 
@@ -68,8 +72,8 @@ O administrador cadastra um professor informando nome e e-mail. O professor nasc
 2. **Given** o código exibido, **When** o professor o informa na Web ou o envia ao bot, **Then** acessa normalmente, como definido na spec 001 (FR-004 a FR-008).
 3. **Given** um e-mail já usado por outro professor (inclusive inativo; sem diferenciar maiúsculas de minúsculas), **When** o administrador tenta cadastrar ou editar para esse e-mail, **Then** a operação é recusada com mensagem clara e nada é gravado.
 4. **Given** professores cadastrados, **When** o administrador abre a lista, **Then** vê, para cada um, nome, e-mail, situação (ativo ou inativo) e se há Telegram vinculado; nunca vê o código de acesso.
-5. **Given** um professor ativo sem relatórios em aberto, **When** o administrador o inativa, **Then** o professor perde na hora todo acesso (sessões Web e vínculo do Telegram encerrados, código invalidado) e passa a constar como inativo; ao reativar, volta a ser ativo com um código novo, exibido uma única vez.
-6. **Given** um professor com relatórios em aberto, **When** o administrador tenta inativá-lo, **Then** a inativação é bloqueada, com aviso que lista quais relatórios estão em aberto (aluno, etapa) e orienta o professor a concluí-los ou cancelá-los; nada muda.
+5. **Given** um professor ativo, **When** o administrador o inativa, **Then** o professor perde na hora todo acesso (sessões Web e vínculo do Telegram encerrados, código invalidado) e passa a constar como inativo; ao reativar, volta a ser ativo com um código novo, exibido uma única vez.
+6. **Given** um professor com relatórios em aberto, **When** o administrador o inativa, **Then** a inativação vale na hora e **não é bloqueada**; os relatórios em aberto ficam preservados e congelados, sem que o administrador os conclua, aprove, altere ou cancele; se o professor for reativado, volta a vê-los e a concluí-los.
 7. **Given** uma credencial de professor, **When** tenta listar, cadastrar, editar, inativar ou reativar professores, **Then** é negada.
 
 ---
@@ -90,8 +94,8 @@ O administrador cadastra alunos informando nome, data de nascimento, CPF, nome d
 4. **Given** um CPF que já pertence a um aluno (ativo ou inativo), **When** o administrador tenta cadastrar outro aluno com ele, **Then** é recusado com mensagem clara que indica o aluno já cadastrado pelo nome, sem exibir o CPF.
 5. **Given** vários alunos, **When** o administrador busca por parte do nome ou pelo instrumento, **Then** a lista traz os que casam (sem diferenciar maiúsculas, minúsculas e acentos), de todos os professores, com situação e professores associados.
 6. **Given** um aluno cadastrado, **When** o administrador edita nome, data, responsável, instrumento ou CPF (deixar o CPF em branco mantém o atual), **Then** as mesmas validações valem e o aluno é atualizado.
-7. **Given** um aluno sem relatórios em aberto, **When** o administrador o inativa, **Then** ele deixa de ser oferecido para novos relatórios e de aparecer nas listas padrão dos professores; nada é apagado; reativar o devolve às listas.
-8. **Given** um aluno com relatório em aberto, **When** o administrador tenta inativá-lo, **Then** é bloqueado, com aviso que lista os relatórios em aberto e quem os conduz.
+7. **Given** um aluno ativo, **When** o administrador o inativa, **Then** ele deixa de ser oferecido para novos relatórios e de aparecer nas listas padrão dos professores; nada é apagado; reativar o devolve às listas.
+8. **Given** um aluno com relatório em aberto, **When** o administrador o inativa, **Then** a inativação vale e **não é bloqueada**; o professor ainda vê esse relatório e pode concluí-lo ou cancelá-lo, mas não inicia novo relatório para o aluno.
 
 ---
 
@@ -110,7 +114,7 @@ O professor, na Web ou no Telegram, cadastra um aluno com os mesmos campos e as 
 3. **Given** um aluno de outro professor, **When** o professor tenta abri-lo, editá-lo, inativá-lo ou reativá-lo (por identificador manipulado na Web ou por nome no Telegram), **Then** a resposta é indistinguível da de um aluno que não existe, e nada é alterado.
 4. **Given** um CPF que já pertence a um aluno que não é do professor, **When** ele tenta cadastrar, **Then** o cadastro é recusado com mensagem neutra que orienta procurar o administrador, sem nome do aluno, nem de professor, nem qualquer outro dado.
 5. **Given** um aluno associado a mais de um professor, **When** um deles edita os dados cadastrais, **Then** a edição vale; **And** quando tenta inativá-lo, a ação é negada com orientação de procurar o administrador, porque só o professor **único** associado pode inativar.
-6. **Given** um aluno cujo único professor é o próprio ator, **When** ele o inativa (sem relatórios em aberto), **Then** o aluno fica inativo; e, ao reativá-lo, volta a ficar ativo.
+6. **Given** um aluno cujo único professor é o próprio ator, **When** ele o inativa, **Then** o aluno fica inativo; e, ao reativá-lo, volta a ficar ativo.
 7. **Given** um professor sem nenhum aluno, **When** ele entra por qualquer canal, **Then** vê a orientação de cadastrar o primeiro aluno (e não de "falar com a secretaria").
 8. **Given** o professor no Telegram, **When** ele conclui o preenchimento dos dados de um aluno, **Then** o bot mostra o resumo (sem o CPF) e só grava depois da confirmação explícita; cancelar, ou deixar a confirmação vencer, não grava nada e descarta os dados informados.
 9. **Given** qualquer tentativa do professor de incluir ou retirar professores de um aluno, cadastrar aluno para outro professor, ou usar operações de professor, administrador, código ou associação, **Then** é negada.
@@ -119,7 +123,7 @@ O professor, na Web ou no Telegram, cadastra um aluno com os mesmos campos e as 
 
 ### User Story 5 - Associações professor–aluno, pelo administrador (Priority: P2)
 
-O administrador inclui e retira professores de um aluno a qualquer momento. Retirar um professor que tem relatório em aberto daquele aluno não apaga nada: o relatório fica acessível ao professor, somente para concluir ou cancelar, até acabar; os já aprovados permanecem preservados.
+O administrador inclui e retira professores de um aluno a qualquer momento. Retirar um professor corta na hora o acesso dele ao aluno, sem exceção: se ele tem relatório em aberto daquele aluno, a tela avisa antes de confirmar quantos ficarão congelados, mas não bloqueia; nada é apagado, os relatórios em aberto ficam preservados e voltam ao professor se ele for associado de novo, e os já aprovados permanecem preservados.
 
 **Why this priority**: o cadastro funciona só com associação definida na criação; ajustar depois é necessário na prática, mas pode vir logo após os P1.
 
@@ -129,7 +133,7 @@ O administrador inclui e retira professores de um aluno a qualquer momento. Reti
 
 1. **Given** um aluno e um professor ativo ainda não associado, **When** o administrador os associa, **Then** o professor passa a ver o aluno e a poder registrar aulas para ele, na Web e no Telegram.
 2. **Given** um aluno associado a um professor sem relatório em aberto dele, **When** o administrador retira a associação, **Then** o aluno some das listas do professor e qualquer acesso dele àquele aluno passa a ser negado como inexistente.
-3. **Given** um professor com relatório em aberto de um aluno, **When** o administrador retira a associação, **Then** o relatório continua visível ao professor e ele só pode concluí-lo ou cancelá-lo; **And** ele não consegue iniciar novo relatório para o aluno; **And** terminado o relatório em aberto, o acesso ao aluno deixa de existir.
+3. **Given** um professor com relatório em aberto de um aluno, **When** o administrador vai retirar a associação, **Then** a tela avisa quantos relatórios em aberto ficarão congelados e pede confirmação, sem bloquear; **And** depois da retirada o professor não vê o aluno nem o relatório; **And** se o professor for associado de novo ao aluno, retoma o relatório de onde parou.
 4. **Given** um aluno cuja última associação foi retirada, **When** o administrador consulta, **Then** o aluno continua existindo com zero professores, visível só ao administrador.
 5. **Given** um professor inativo, **When** o administrador tenta associá-lo a um aluno, **Then** é recusado.
 
@@ -197,7 +201,7 @@ O mantenedor executa um procedimento operacional que cria o primeiro administrad
 - **CPF digitado no Telegram**: o CPF trafega na conversa do chat. O sistema o guarda só cifrado e só enquanto o cadastro está em andamento; é descartado ao confirmar, cancelar ou vencer o prazo (30 minutos por padrão, configurável), e nunca aparece em mensagem do bot, resumo, log ou registro de operação.
 - **Cadastro do professor interrompido no meio (Telegram)**: o professor pode cancelar a qualquer momento; mensagens de outro assunto não gravam nada; o estado em andamento sobrevive ao reinício do transporte (Princípio II).
 - **Dois cadastros simultâneos com o mesmo CPF ou o mesmo e-mail**: apenas um vale; o outro recebe a recusa de duplicidade. Dois professores cadastrando o mesmo aluno ao mesmo tempo: um é aceito, o outro recebe a recusa neutra.
-- **Professor inativado durante uma conversa no Telegram ou sessão Web**: a próxima ação é negada; nada é gravado; a mensagem orienta procurar o administrador.
+- **Professor inativado durante uma conversa no Telegram ou sessão Web**: a próxima ação é negada; nada é gravado; a mensagem orienta procurar o administrador. Um relatório dele em processamento pode terminar no servidor, mas nada é enviado ao chat e o resultado só aparece se ele for reativado.
 - **Código de acesso vencido ou substituído**: o acesso com ele é recusado com mensagem própria, orientando procurar o administrador; vale também para conta já vinculada a outro professor.
 - **Reemitir código de professor com relatório em andamento no Telegram**: o relatório continua salvo; o professor retoma depois de voltar a acessar.
 - **Data de nascimento limítrofe**: o aluno que faz 18 anos exatamente na data do cadastro é adulto (responsável opcional); a idade é calculada pela data no fuso da escola, não pela do servidor.
@@ -231,7 +235,7 @@ O mantenedor executa um procedimento operacional que cria o primeiro administrad
 - **FR-012**: O administrador DEVE poder listar professores (com busca por nome ou e-mail), vendo nome, e-mail, situação (ativo/inativo) e se há Telegram vinculado. A lista NUNCA DEVE mostrar código de acesso.
 - **FR-013**: O administrador DEVE poder editar nome e e-mail do professor, com a mesma regra de unicidade.
 - **FR-014**: O administrador DEVE poder inativar e reativar professor. Inativar DEVE encerrar na hora as sessões Web, o vínculo do Telegram e o código de acesso do professor, e recusar novos acessos com mensagem que orienta procurar o administrador. Reativar DEVE devolver o professor à situação ativa **com um código de acesso novo**, mostrado uma única vez; as associações com alunos são preservadas.
-- **FR-015**: Inativar professor com **relatório em aberto** (em processamento, com falha no processamento, aguardando respostas ou aguardando conferência) DEVE ser **bloqueado**, com aviso que lista os relatórios em aberto (aluno e etapa) e orienta o professor a concluí-los ou cancelá-los. O administrador NÃO DEVE concluir, aprovar, alterar nem cancelar relatório de professor (Princípio III).
+- **FR-015**: Inativar professor NÃO DEVE ser bloqueado por **relatório em aberto** (em processamento, com falha no processamento, aguardando respostas ou aguardando conferência): cortar o acesso nunca depende de relatório pendente. Os relatórios em aberto DEVEM ficar preservados e congelados, sem mudança de estado ou de versão causada pela inativação; um processamento já em curso PODE terminar no servidor, mas o resultado só fica disponível se o professor for reativado, e nenhum aviso é enviado ao chat de quem foi desvinculado. O administrador NÃO DEVE concluir, aprovar, alterar nem cancelar relatório de professor (Princípio III). Ao reativar, o professor volta a ver e a conduzir esses relatórios.
 - **FR-016**: O professor NÃO DEVE poder listar, cadastrar, editar, inativar ou reativar professores, nem administradores, códigos de acesso ou associações.
 
 **Alunos (regras comuns ao administrador e ao professor)**
@@ -241,7 +245,7 @@ O mantenedor executa um procedimento operacional que cria o primeiro administrad
 - **FR-019**: O CPF DEVE ser único entre todos os alunos, ativos e inativos. A duplicidade DEVE ser detectada sem exibir nem devolver o CPF. Para o administrador, a recusa DEVE indicar o aluno já cadastrado pelo nome. Para o professor, vale FR-024.
 - **FR-020**: O CPF DEVE ser armazenado cifrado e NUNCA DEVE ser devolvido por API, tela, mensagem do bot, resumo de confirmação, mensagem de erro ou registro de operação. Na edição, o campo CPF DEVE vir em branco (em branco mantém o atual); informar um valor substitui o CPF, com as mesmas validações.
 - **FR-021**: A lista de alunos DEVE ter busca por parte do nome ou instrumento (sem diferenciar maiúsculas, minúsculas e acentos), filtro por situação e paginação, e DEVE mostrar nome, data de nascimento ou idade, instrumento, situação e (para o administrador) os professores associados. Busca por CPF NÃO DEVE existir.
-- **FR-022**: Inativar aluno com **relatório em aberto** DEVE ser bloqueado, com aviso listando os relatórios em aberto e quem os conduz. Aluno inativo DEVE deixar de ser oferecido para novos relatórios e de constar das listas padrão dos professores, sem que nada seja apagado; reativar o devolve.
+- **FR-022**: Inativar aluno NÃO DEVE ser bloqueado por relatório em aberto. Aluno inativo DEVE deixar de ser oferecido para novos relatórios e de constar das listas padrão dos professores, sem que nada seja apagado; reativar o devolve. O professor continua associado ao aluno inativo, e por isso os relatórios já em aberto continuam acessíveis a ele, para concluir ou cancelar, pelas regras normais de acesso (sem exceção); ele só não inicia relatório novo.
 - **FR-023**: O cadastro, a edição e as associações iniciais de um aluno DEVEM valer por inteiro ou não valer: falha no meio NÃO DEVE deixar cadastro parcial.
 
 **Alunos (professor, somente os seus)**
@@ -254,7 +258,7 @@ O mantenedor executa um procedimento operacional que cria o primeiro administrad
 **Associações (administrador)**
 
 - **FR-028**: O administrador DEVE poder incluir e retirar professores de um aluno a qualquer momento. Só professor ativo PODE ser associado. O aluno PODE ficar com zero professores; nesse caso só o administrador o enxerga.
-- **FR-029**: Retirar a associação com **relatório em aberto** daquele professor com o aluno NÃO DEVE apagar nem alterar o relatório. O relatório DEVE permanecer acessível ao professor **somente para ser concluído ou cancelado**, sem permitir novo relatório para o aluno, e o acesso do professor ao aluno DEVE terminar quando o relatório sair de aberto. Relatórios já aprovados DEVEM ser preservados sem alteração.
+- **FR-029**: Retirar a associação NÃO DEVE ser bloqueada por relatório em aberto e NÃO DEVE apagar nem alterar nenhum relatório. O acesso do professor ao aluno e aos relatórios dele DEVE terminar na hora, sem exceção ao escopo do professor (Princípio IV). Os relatórios em aberto DEVEM ficar congelados e preservados, e voltar ao professor se ele for associado de novo ao aluno; os já aprovados DEVEM ser preservados sem alteração. Antes de confirmar, a tela DEVE avisar quantos relatórios em aberto daquele professor com o aluno ficarão congelados.
 
 **Código de acesso e vínculo do Telegram (administrador)**
 
@@ -272,7 +276,7 @@ O mantenedor executa um procedimento operacional que cria o primeiro administrad
 
 **Canais e paridade**
 
-- **FR-035**: As operações do **professor** (cadastrar, listar, buscar, editar, inativar e reativar os próprios alunos) DEVEM existir na Web e no Telegram, executando os **mesmos casos de uso**, com as mesmas regras de autorização, validação e resultado; só a forma de interação e o texto se adaptam ao meio (formulário e tabela na Web; conversa guiada, botões e listas paginadas no Telegram). As operações do **administrador** (acesso, professores, alunos, associações, código de acesso, desvinculação do Telegram de professor e administradores) DEVEM existir **somente na Web**, por decisão do dono do produto; é um desvio deliberado do Princípio I, tratado em Assumptions e justificado no plano.
+- **FR-035**: As operações do **professor** (cadastrar, listar, buscar, editar, inativar e reativar os próprios alunos) DEVEM existir na Web e no Telegram, executando os **mesmos casos de uso**, com as mesmas regras de autorização, validação e resultado; só a forma de interação e o texto se adaptam ao meio (formulário e tabela na Web; conversa guiada, botões e listas paginadas no Telegram). As operações do **administrador** (acesso, professores, alunos, associações, código de acesso, desvinculação do Telegram de professor e administradores) DEVEM existir **somente na Web**, por decisão do dono do produto; é regra do Princípio I da constituição v2.2.0, não um desvio, e o plano só precisa citá-la no Constitution Check.
 - **FR-036**: Cada cadastro de aluno em andamento no Telegram DEVE ter o estado persistido no backend (Princípio II), poder ser cancelado a qualquer momento por palavra-chave ou botão, e ser descartado ao confirmar, cancelar ou vencer o prazo de inatividade (30 minutos por padrão, configurável). Um cadastro iniciado no Telegram NÃO precisa ser continuado na Web.
 - **FR-037**: O bot DEVE oferecer ao professor apenas as opções de aluno (e as de relatório que já tem); NÃO DEVE existir no bot nenhum menu, botão ou comando administrativo. Ao professor vinculado, ou a qualquer conta, um pedido de operação administrativa DEVE receber negativa neutra, sem revelar que a operação existe na Web.
 
@@ -280,7 +284,7 @@ O mantenedor executa um procedimento operacional que cria o primeiro administrad
 
 - **FR-038**: O escopo do professor aos seus alunos DEVE ser imposto no núcleo, em todo caso de uso que lê ou altera dados de aluno, independentemente de interface, canal ou transporte (Princípios II e IV).
 - **FR-039**: CPF, nome, data de nascimento e responsável de aluno NUNCA DEVEM aparecer em registros de operação (logs), em mensagens de erro ou em dados de monitoramento; o registro de operação DEVE usar identificadores e códigos de erro. Todas as mensagens de erro ao usuário DEVEM ser em português, sem detalhes internos.
-- **FR-040**: Cada operação de gravação desta feature, cada tentativa de CPF recusada por pertencer a aluno de outro professor e cada autenticação de administrador (sucesso ou falha) DEVEM deixar um **registro de autoria**: quem (identificador e papel), canal, momento, operação, tipo e identificador do registro afetado e resultado, sem CPF nem conteúdo de relatório, para a trilha da feature 007. Esta feature não oferece tela de consulta dessa trilha.
+- **FR-040**: Cada operação de gravação desta feature, cada tentativa de CPF recusada por pertencer a aluno de outro professor e cada autenticação (administrador na Web; professor por código na Web ou por vínculo do Telegram), com sucesso ou falha, DEVEM deixar um **registro de autoria**: quem (identificador e papel), canal, momento, operação, tipo e identificador do registro afetado e resultado, sem CPF nem conteúdo de relatório, para a trilha da feature 007. Consultas (leituras) de dados de aluno NÃO geram registro nesta feature; isso, a retenção e a tela de consulta da trilha são da feature 007.
 - **FR-041**: Duplicidade de e-mail ou de CPF DEVE ser garantida também sob concorrência (duas operações simultâneas): no máximo uma é aceita.
 
 **Mudanças no que já existe**
@@ -307,7 +311,7 @@ O mantenedor executa um procedimento operacional que cria o primeiro administrad
 - **Tentativa de Acesso**: contagem de falhas e bloqueio de 15 minutos por origem (Web, para o administrador) ou por conta (Telegram, para o professor); mesmo serviço e mesmas regras, contagens separadas por papel.
 - **Cadastro em Andamento (Telegram)**: estado temporário e persistido de um cadastro de aluno conduzido pelo professor no bot; contém o CPF apenas cifrado; descartado ao concluir, cancelar ou vencer.
 - **Registro de Autoria**: quem (id e papel), canal, quando, operação, alvo, resultado; sem CPF; alimenta a feature 007.
-- **Relatório em Aberto**: relatório de aula ou semestral em processamento, com falha no processamento, aguardando respostas ou aguardando conferência; aparece nesta feature só como condição que bloqueia inativações e que mantém o acesso do professor depois de retirada a associação.
+- **Relatório em Aberto**: relatório de aula ou semestral em processamento, com falha no processamento, aguardando respostas ou aguardando conferência; aparece nesta feature só como estado que fica **congelado e preservado** quando o professor é inativado ou desassociado do aluno (volta se ele for reativado ou associado de novo), e que o professor ainda conduz quando só o aluno é inativado. Nunca bloqueia uma inativação nem uma retirada de associação.
 
 ## Success Criteria *(mandatory)*
 
@@ -325,20 +329,24 @@ O mantenedor executa um procedimento operacional que cria o primeiro administrad
 - **SC-010**: Em 100% das reemissões de código, inativações e desvinculações testadas, o acesso anterior deixa de funcionar imediatamente (sessões Web e/ou vínculo, conforme FR-014, FR-030 e FR-031).
 - **SC-011**: Depois da entrega, a escola faz o cadastro de professores, alunos e associações sem usar o procedimento de carga inicial (carga convertida para as mesmas operações, sem regra própria).
 - **SC-012**: Todas as telas novas da Web passam em auditoria WCAG 2.1 AA, nos modos claro e escuro, em 390 px e 1440 px de largura.
+- **SC-013**: Em 100% dos casos testados, inativar professor ou aluno e retirar uma associação são concluídos mesmo com relatório em aberto, sem nenhum relatório criado, alterado, aprovado ou cancelado por essas operações.
+- **SC-014**: Em 100% das operações de gravação, recusas de CPF alheio e autenticações testadas, existe um registro de autoria com papel e canal corretos e sem CPF.
 
 ## Assumptions
 
-### Decisões adotadas por padrão, a confirmar no `/speckit-clarify`
+### Decisões fechadas no `/speckit-clarify` e decisões adotadas por padrão
 
-Estas decisões estavam abertas no plano (D2 a D5 e itens do pedido) e foram preenchidas com a proposta do plano para a spec poder avançar. Qualquer mudança no `clarify` altera os requisitos indicados.
+D2, D4, D5 e D9 foram fechadas por pergunta ao dono do produto em 2026-10-20 (ver Clarifications). As demais seguem a proposta do plano ou a regra do próprio pedido e não foram perguntadas; a mudança de qualquer uma altera os requisitos indicados.
 
-- **D2 — FECHADA em 2026-10-20 (FR-008, FR-009)**: o administrador opera só pela Web; o Telegram é só do professor, que usa o vínculo que já tem e confirma os dados antes de gravar. Não há autenticação de administrador no Telegram. Esta decisão **diverge do Princípio I e das "Decisões de produto vinculantes" da constituição v2.1.0**, que exigem administração nos dois canais; a divergência precisa de tratamento formal antes do `plan` (ver abaixo).
-- **D3 — Revogação (FR-014, FR-030, FR-031)**: reemitir código encerra as sessões Web e, opcionalmente, o vínculo do Telegram; inativar professor ou administrador encerra tudo. Reativar professor não restaura sessões nem vínculo e emite código novo; reativar administrador exige nova definição de senha. O `clarify` deve confirmar se a reativação restaura algo.
-- **D4 — Inativar com relatório em aberto (FR-015, FR-022)**: a inativação é **bloqueada**, com aviso listando os relatórios, até serem concluídos ou cancelados pelo professor. Como o administrador não pode cancelar relatório de professor (Princípio III), cabe ao professor concluí-los; se o professor não puder (por exemplo, saiu da escola), o `clarify` deve decidir se existe uma saída. Vale também quando é o professor quem inativa o seu aluno.
-- **D5 — Retirar associação com relatório em aberto (FR-029)**: o relatório continua acessível ao professor, somente para concluir ou cancelar, até acabar; os aprovados permanecem preservados. Isso é uma **exceção controlada** à regra "o professor só acessa alunos associados" (spec 001, FR-009), limitada a esses relatórios.
-- **Professor com aluno compartilhado (FR-026)**: edita os dados cadastrais, mas só inativa/reativa quando for o único professor associado. O `clarify` deve confirmar (já sinalizado no pedido), inclusive se a edição de CPF e de data também fica livre ao professor nesse caso.
+- **D2 — FECHADA em 2026-10-20 (FR-008, FR-009)**: o administrador opera só pela Web; o Telegram é só do professor, que usa o vínculo que já tem e confirma os dados antes de gravar. Não há autenticação de administrador no Telegram. Esta decisão divergia da constituição v2.1.0 (administração nos dois canais) e foi tratada por **emenda**, v2.2.0 ([escola-musica#28](https://github.com/PedroAugustoPTC/escola-musica/pull/28)); o PR precisa estar mesclado antes do `plan`, e o Constitution Check do plano usa a v2.2.0.
+- **D3 — Revogação, adotada por padrão (FR-014, FR-030, FR-031)**: reemitir código encerra as sessões Web e, opcionalmente, o vínculo do Telegram; inativar professor ou administrador encerra todas as sessões Web (e, do professor, o vínculo do Telegram e o código). Reativar professor não restaura sessões nem vínculo e emite código novo; reativar administrador exige nova definição de senha; as associações e os relatórios congelados voltam.
+- **D4 — FECHADA em 2026-10-20 (FR-015, FR-022)**: inativar professor ou aluno **nunca é bloqueado** por relatório em aberto. Inativar professor congela e preserva os relatórios; inativar aluno só o tira das novas aulas, e o professor ainda conclui ou cancela o relatório em aberto. Motivo: cortar o acesso de quem saiu da escola não pode depender de relatório pendente, e o administrador não toca em relatório (Princípio III).
+- **D5 — FECHADA em 2026-10-20 (FR-029)**: retirar a associação corta o acesso na hora, sem exceção ao escopo do professor (Princípio IV); os relatórios em aberto ficam congelados e preservados, voltam se o professor for associado de novo, e os aprovados são preservados. A tela avisa, sem bloquear. Fica diferente da proposta do plano ("relatório visível até ser concluído"), para coincidir com a D4.
+- **Professor com aluno compartilhado, regra do pedido (FR-026)**: edita os dados cadastrais (inclusive CPF e data, com as mesmas validações), mas só inativa/reativa quando for o único professor associado. A edição por um professor vale para todos os professores associados.
 - **Conta do Telegram (FR-008)**: uma conta do Telegram tem no máximo um vínculo, sempre de professor.
 - **Prazo de inatividade de cadastro em andamento no Telegram**: 30 minutos, configurável, igual ao do áudio aguardando confirmação (spec 001).
+- **D9 — FECHADA em 2026-10-20 (FR-040)**: ver Clarifications. A trilha completa, a retenção e a consulta são da feature 007.
+- **Bloqueio por tentativas do administrador (FR-006) e último administrador (FR-007), verificados no `clarify`**: o administrador reaproveita o mesmo serviço de tentativas de acesso das demais autenticações, com contagem separada por papel; e nenhuma operação deixa a escola sem administrador ativo, inclusive de si mesmo e sob concorrência. Ambos já estavam no pedido e não exigiram pergunta.
 
 ### Demais premissas
 
