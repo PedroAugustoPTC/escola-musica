@@ -17,3 +17,5 @@ Regras:
 - O CI deve rodar os mesmos comandos de contêiner do ambiente local; ao mudar um, mude o outro.
 - Nomes de workflow, job, passo (`id`), artefato e segredo em inglês (Princípio VI); o texto do `name:` mostrado às
   pessoas segue em português.
+
+- O job `n8n` não depende de um registro só: `infra/scripts/ci-n8n-image.sh` carrega a imagem base do cache ou a baixa por digest (docker.n8n.io, ghcr.io, Docker Hub), e `infra/scripts/retry-rate-limit.sh` repete um passo apenas quando o registro responde `429 Too Many Requests`; qualquer outra falha reprova na hora.

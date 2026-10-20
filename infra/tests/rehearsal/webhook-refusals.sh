@@ -17,7 +17,7 @@ check "apply sai com 1" 1 "$CODE"
 check_contains "o motivo é N8N_NOT_HEALTHY" "N8N_NOT_HEALTHY" "$OUT"
 check "o webhook registrado não mudou" "$before" "$(webhook_url)"
 $COMPOSE up -d --no-deps "$N8N_SERVICE" >/dev/null 2>&1
-wait_healthy "$N8N_SERVICE" 240
+wait_healthy "$N8N_SERVICE" 300
 
 section "segredo do webhook com caractere inválido"
 valid_secret="$(env_value TELEGRAM_WEBHOOK_SECRET)"

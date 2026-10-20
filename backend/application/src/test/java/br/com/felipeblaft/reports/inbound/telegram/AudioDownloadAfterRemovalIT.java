@@ -38,6 +38,10 @@ class AudioDownloadAfterRemovalIT extends TelegramConversationBase {
     void audioIsDownloadedByBackendFromLocalBotsServerAndDiscardedAfterProcessing()
             throws Exception {
         Path file = prepareTelegramFile("voice-ok", AudioNormalizationTest.AUDIO_WITH_SPEECH);
+        // o diretório temporário é compartilhado com os outros testes (uploads da Web ainda na fila
+        // deixam arquivos lá);
+        // o que este fluxo precisa provar é que ELE não deixa nada para trás
+        List<Path> alreadyThere = temporaryFiles();
         sendVoice(USER_CLARA, "voice-ok", 1000);
         // receber o áudio não baixa nada: só guarda a referência até a confirmação
         API_BOTS.verify(exactly(0), postRequestedFor(urlPathMatching(".*/getFile")));
@@ -47,7 +51,9 @@ class AudioDownloadAfterRemovalIT extends TelegramConversationBase {
 
         API_BOTS.verify(exactly(1), postRequestedFor(urlPathMatching(".*/getFile")));
         assertThat(file).as("original no volume do bot é removido").doesNotExist();
-        assertThat(temporaryFiles()).as("nada fica no diretório temporário").isEmpty();
+        assertThat(temporaryFiles())
+                .as("o fluxo do Telegram não deixa nada no diretório temporário")
+                .isSubsetOf(alreadyThere);
         assertThat(jdbc.queryForObject("select count(*) from lesson_report", Integer.class))
                 .isEqualTo(1);
     }

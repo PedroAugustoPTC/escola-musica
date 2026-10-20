@@ -17,7 +17,7 @@ const INNER_PORT = Number(process.env.GATE_INNER_PORT ?? 5680);
 const READY_PATHS = (process.env.GATE_READY_PATHS ?? 'transport-health/live,telegram-inbound/live,channel-delivery/live').split(',');
 const COMMAND = (process.env.GATE_N8N_COMMAND ?? 'n8n start').split(' ');
 const DRAIN_LIMIT_MS = Number(process.env.GATE_DRAIN_LIMIT_MS ?? 20000);
-const POLL_MS = 100;
+const POLL_MS = 500;
 
 export function isLiveBody(status, body) {
   if (status !== 200) {

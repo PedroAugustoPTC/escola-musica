@@ -173,3 +173,32 @@ test('pausar a entrega retém os updates até soltar', async () => {
   await until(() => target.received.length === 1);
   target.close();
 });
+
+test('respeita max_connections: nunca mais entregas em voo do que o limite do webhook', async () => {
+  let open = 0;
+  let peak = 0;
+  const held = [];
+  const server = createServer((request, response) => {
+    open += 1;
+    peak = Math.max(peak, open);
+    held.push(response);
+    request.resume();
+    response.on('close', () => (open -= 1));
+  });
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  try {
+    await bot('setWebhook', { url: `http://127.0.0.1:${server.address().port}/hook`, secret_token: 's', max_connections: 2 });
+    for (let chatId = 1; chatId <= 6; chatId++) {
+      await control('/updates', 'POST', { chatId, text: 'oi' });
+    }
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    assert.equal(peak, 2);
+    for (const response of held) {
+      response.writeHead(200).end();
+    }
+  } finally {
+    await bot('deleteWebhook');
+    server.close();
+    await control('/reset', 'POST', {});
+  }
+});

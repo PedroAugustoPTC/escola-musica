@@ -47,6 +47,8 @@ select_environment "$environment" || exit 2
 BACKEND_SERVICE="${BACKEND_SERVICE:-backend}"
 N8N_SERVICE="${N8N_SERVICE:-n8n}"
 export N8N_SERVICE
+# teto da espera por saúde depois de recriar um serviço: em produção leva cerca de 1 min; os executores do CI são bem mais lentos
+health_limit="${HEALTH_WAIT_SECONDS:-300}"
 require_env_file || exit 1
 
 rotation_state() {
@@ -115,10 +117,10 @@ case "$command" in
     write_env_key TELEGRAM_CHANNEL_NEXT_TOKEN "$new_token"
     step_ok "token novo gravado (cópia anterior em infra/.env.previous; contém segredos)"
     recreate_service "$BACKEND_SERVICE"
-    wait_healthy "$BACKEND_SERVICE" 180 || { step_fail BACKEND_NOT_HEALTHY "o backend não voltou saudável; o estado ficou DUAL (seguro): use abort"; exit 3; }
+    wait_healthy "$BACKEND_SERVICE" "$health_limit" || { step_fail BACKEND_NOT_HEALTHY "o backend não voltou saudável; o estado ficou DUAL (seguro): use abort"; exit 3; }
     step_ok "backend recriado: aceita o token atual e o novo"
     recreate_service "$N8N_SERVICE"
-    wait_healthy "$N8N_SERVICE" 180 || { step_fail N8N_NOT_HEALTHY "o n8n não voltou saudável; o estado ficou DUAL (seguro): use abort"; exit 3; }
+    wait_healthy "$N8N_SERVICE" "$health_limit" || { step_fail N8N_NOT_HEALTHY "o n8n não voltou saudável; o estado ficou DUAL (seguro): use abort"; exit 3; }
     step_ok "n8n recriado: passa a enviar o token novo"
     failed=0
     expect_status NEW_TOKEN_REJECTED 404 "$new_token" "o backend aceita o token novo" || failed=1
@@ -145,7 +147,7 @@ case "$command" in
     write_env_key TELEGRAM_CHANNEL_NEXT_TOKEN ""
     step_ok "o token novo virou o atual"
     recreate_service "$BACKEND_SERVICE"
-    wait_healthy "$BACKEND_SERVICE" 180 || { step_fail BACKEND_NOT_HEALTHY "o backend não voltou saudável"; exit 3; }
+    wait_healthy "$BACKEND_SERVICE" "$health_limit" || { step_fail BACKEND_NOT_HEALTHY "o backend não voltou saudável"; exit 3; }
     step_ok "backend recriado: aceita só o token novo (o n8n já envia esse valor e não precisa reiniciar)"
     failed=0
     expect_status NEW_TOKEN_REJECTED 404 "$new_token" "o backend aceita o token novo" || failed=1
@@ -171,9 +173,9 @@ case "$command" in
     # primeiro o n8n volta a enviar o token atual (o backend ainda aceita os dois); só então o backend deixa de aceitar o
     # descartado. Na ordem inversa o n8n enviaria, por alguns segundos, um token que o backend já recusa.
     recreate_service "$N8N_SERVICE"
-    wait_healthy "$N8N_SERVICE" 180 || { step_fail N8N_NOT_HEALTHY "o n8n não voltou saudável"; exit 3; }
+    wait_healthy "$N8N_SERVICE" "$health_limit" || { step_fail N8N_NOT_HEALTHY "o n8n não voltou saudável"; exit 3; }
     recreate_service "$BACKEND_SERVICE"
-    wait_healthy "$BACKEND_SERVICE" 180 || { step_fail BACKEND_NOT_HEALTHY "o backend não voltou saudável"; exit 3; }
+    wait_healthy "$BACKEND_SERVICE" "$health_limit" || { step_fail BACKEND_NOT_HEALTHY "o backend não voltou saudável"; exit 3; }
     step_ok "n8n e backend recriados: voltam ao token atual"
     failed=0
     expect_status CURRENT_TOKEN_REJECTED 404 "$(env_value TELEGRAM_CHANNEL_CURRENT_TOKEN)" "o backend aceita o token atual" || failed=1

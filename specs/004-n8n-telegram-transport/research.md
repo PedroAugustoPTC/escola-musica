@@ -250,6 +250,10 @@ n8n no GitHub, "n8n 2.0 breaking changes" e "CLI commands" de docs.n8n.io.
 
 ## R-10. Healthcheck e política de reinício
 
+- **Ajuste final (R-13a, ensaio com CPU limitada)**: o `healthcheck` passou a consultar só o `/healthz` do n8n **pela porta de
+  entrada** (`ops/gate.mjs`), que só abre a 5678 depois que os três receptores estão registrados; sondar os `*/live` (execuções de
+  workflow) competia por CPU com o tráfego e, num n8n saturado após o reinício, a sonda estourava o tempo e o contêiner nunca ficava
+  saudável.
 - **Decisão** (ajustada na Fase 4: o `healthcheck` exige os **três** receptores registrados, por `ops/healthcheck.sh`,
   que consulta `transport-health/live`, `telegram-inbound/live` e `channel-delivery/live`; antes, o contêiner podia ficar
   `healthy` com o webhook do Telegram ainda sem registro e responder `404` a um update logo após o reinício):
