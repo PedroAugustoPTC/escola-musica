@@ -101,6 +101,9 @@ próximo login bem-sucedido quando os parâmetros mudam). Política (`PasswordPo
 (sem diferenciar maiúsculas). E-mail desconhecido, conta inativa ou ainda não ativada executam
 `verifyDummy` com um hash fixo do mesmo custo, para que tempo e contagem não revelem a existência da conta (FR-006).
 
+**Decisão do dono do produto (2026-10-20)**: usar Argon2id com `org.bouncycastle:bcprov-jdk18on` de versão fixada; a
+contingência PBKDF2 não será usada.
+
 **Justificativa**: FR-004 pede hash adaptativo, custo configurável e sal único; senha de até 128 caracteres elimina o
 bcrypt (limite de 72 bytes truncaria em silêncio). O bloqueio por origem é checado **antes** do hash, então um atacante
 não consegue usar o custo do Argon2 como amplificador de negação de serviço além dos 5 erros por origem.
@@ -302,7 +305,12 @@ cabeçalhos, uma consulta em ambos, sem trabalho extra no ramo "existe"). Em `/m
 `callback_data` nunca leva id de aluno (leva a posição na lista persistida) e o texto de "não encontrado" é o mesmo.
 A associação de leitura/edição vale por **toda** operação do professor sobre aluno (listar, abrir, editar, inativar,
 buscar, cadastrar com CPF alheio), inclusive no núcleo das operações existentes da 001, que já usam
-`AuthorizationService`/`ReportAccessService`.
+`AuthorizationService`/`ReportAccessService`. **Decisão do dono do produto (2026-10-20)**: o `403 STUDENT_NOT_ASSIGNED`
+da 001 também deixa de existir: `AuthorizationService.requireAssignment` passa a lançar `RESOURCE_NOT_FOUND`, o código sai
+do `ErrorCode`, do catálogo, do contrato da 001 e dos testes, e o texto "Este aluno não está associado a você" desaparece
+(ele confirmava a existência do aluno). Vale para a Web e para o Telegram (FR-050). Antes de remover o código, conferir se
+alguma coluna persistida (`lesson_report.failure_reason`, `ai_call.error_code`, `channel_action.reason_code`) pode guardá-lo;
+se puder, a linha é migrada para `RESOURCE_NOT_FOUND` na migração `V14` (decisão do `COORD`, sem criar migração nova).
 
 **Justificativa**: FR-025 e SC-006 definem "indistinguível" por status, corpo, cabeçalhos e ordem de grandeza do tempo.
 

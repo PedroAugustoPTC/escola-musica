@@ -46,7 +46,7 @@ conta: o responsável é `guardian_*` dentro de `student`.
 | `registry/Student` (alterado) | `guardianPhone`, `guardianEmail`; `inactivate(now)`, `reactivate(now)`, `applyEdit(StudentData, cpfProtection?, now)`; mantém `toString` sem dado pessoal |
 | `registry/Teacher` (alterado) | `inactivate(now)` (invalida o código), `reactivate(now)`, `rename/changeEmail`; `normalizeEmail` mantido |
 | `telegram/StudentRegistrationDraft` | cadastro em andamento (seção 3.5) |
-| `common/ErrorCode` (alterado) | acréscimos e remoção de `EXPIRED_CODE` (seção 9) |
+| `common/ErrorCode` (alterado) | acréscimos e remoção de `EXPIRED_CODE` e `STUDENT_NOT_ASSIGNED` (seção 9) |
 
 Serviços do núcleo (`service/…`): `ActorAuthorizationService` (consulta a matriz, nega com `RESOURCE_NOT_FOUND` quando o
 papel não tem a operação e `PASSWORD_CHANGE_REQUIRED` para ator restrito), `StudentAccessService` (monta `StudentScope`,
@@ -251,7 +251,7 @@ Acrescentar: `INVALID_CREDENTIALS`, `INVALID_ACTIVATION`, `ACCESS_ENDED`, `PASSW
 `LAST_ADMINISTRATOR`, `VALIDATION_FAILED`, `INVALID_NAME`, `INVALID_PHONE`, `INVALID_INSTRUMENT`, `INVALID_TEXT`,
 `DUPLICATE_EMAIL`, `DUPLICATE_CPF`, `CPF_UNAVAILABLE`, `STUDENT_ALREADY_YOURS`, `SHARED_STUDENT_ACTION_DENIED`,
 `OPERATION_TEMPORARILY_BLOCKED`, `TEACHER_INACTIVE`, `STUDENT_INACTIVE`, `CONFIRMATION_EXPIRED`,
-`CONFIRMATION_ALREADY_DONE`, `CALLBACK_EXPIRED`, `OPERATION_NOT_SAVED`. **Remover** `EXPIRED_CODE`. Mantêm-se os códigos de campo
+`CONFIRMATION_ALREADY_DONE`, `CALLBACK_EXPIRED`, `OPERATION_NOT_SAVED`. **Remover** `EXPIRED_CODE` e `STUDENT_NOT_ASSIGNED` (aluno não associado passa a `RESOURCE_NOT_FOUND`, FR-050). Mantêm-se os códigos de campo
 da carga (`INVALID_EMAIL`, `NAME_REQUIRED`, `INVALID_CPF`, `INVALID_BIRTH_DATE`, `GUARDIAN_REQUIRED`, `TEACHER_NOT_FOUND`,
 `DUPLICATE_*_IN_FILE`). Textos e HTTP: `contracts/messages.md`.
 
@@ -271,6 +271,12 @@ da carga (`INVALID_EMAIL`, `NAME_REQUIRED`, `INVALID_CPF`, `INVALID_BIRTH_DATE`,
 | congelado | frozen |
 | rascunho | draft (já existe) |
 | responsavel | guardian (já existe) |
+| inativar | inactivate (se ainda não existir) |
+| reativar | reactivate (se ainda não existir) |
+| escopo | scope |
+| permissao | permission |
+| matriz | matrix |
+| inicializacao | startup |
 
 Cada termo entra com um único equivalente; o que já existe não é duplicado. Antes de usar qualquer outra palavra
 portuguesa nova em identificador, o fluxo roda `GUARD_REPORT=1` (ver `.specify/CLAUDE.md`).

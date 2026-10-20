@@ -40,7 +40,7 @@ Novo fluxo `STUDENT_REGISTRY` (cabe nos 20 caracteres da coluna `flow`). Etapas 
 | `REGISTRY_EDIT_FIELD` | escolha do campo a editar (botões) |
 | `REGISTRY_CONFIRM` | "sim"/botão Confirmar, ou Cancelar |
 
-Os valores já aceitos ficam no **cadastro em andamento** (`student_registration_draft`, `data-model.md` §6), preso ao
+Os valores já aceitos ficam no **cadastro em andamento** (`student_registration_draft`, `data-model.md` §3.5), preso ao
 vínculo por `ON DELETE CASCADE`: **desaparece na hora em que o vínculo termina, por qualquer causa** (FR-036). O CPF
 fica só cifrado. Prazo de inatividade: 30 minutos (`reports.telegram.student-draft-minutes`); vencido, o
 rascunho é descartado no próximo update e por uma varredura, e o bot avisa.

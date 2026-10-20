@@ -8,17 +8,17 @@
     "ALLOW": "permitido, sem restrição de escopo",
     "ALLOW_OWN_STUDENTS": "permitido somente sobre alunos associados ao próprio professor; aluno alheio equivale a inexistente",
     "ALLOW_SOLE_ACTIVE_TEACHER": "como ALLOW_OWN_STUDENTS, e só quando o ator é o único professor ativo associado (FR-026)",
-    "PUBLIC": "sem credencial; só as telas e os comandos de entrada",
+    "PUBLIC": "sem credencial; só as telas e os comandos de entrada; o cookie do outro papel, se vier junto, é ignorado (FR-003: as sessões coexistem)",
     "DENY": "negado: rota inexistente na Web (404) e negativa neutra no Telegram"
   },
   "operations": [
-    { "operation": "ADMIN_SIGN_IN", "administratorWeb": "PUBLIC", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["POST /admin/session"], "system": [] },
-    { "operation": "ADMIN_ACTIVATE", "administratorWeb": "PUBLIC", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["POST /admin/activation"], "system": [] },
+    { "operation": "ADMIN_SIGN_IN", "administratorWeb": "PUBLIC", "teacherWeb": "PUBLIC", "teacherTelegram": "DENY", "webRoutes": ["POST /admin/session"], "system": [] },
+    { "operation": "ADMIN_ACTIVATE", "administratorWeb": "PUBLIC", "teacherWeb": "PUBLIC", "teacherTelegram": "DENY", "webRoutes": ["POST /admin/activation"], "system": [] },
     { "operation": "ADMIN_GET_SESSION", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/session"], "system": [] },
     { "operation": "ADMIN_SIGN_OUT", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["DELETE /admin/session"], "system": [] },
     { "operation": "ADMIN_CHANGE_PASSWORD", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["PUT /admin/password"], "system": [] },
 
-    { "operation": "TEACHER_SIGN_IN", "administratorWeb": "DENY", "teacherWeb": "PUBLIC", "teacherTelegram": "PUBLIC", "webRoutes": ["POST /session"], "system": [], "note": "rota da 001; o Telegram vincula pelo mesmo código (LinkTelegramUseCase)" },
+    { "operation": "TEACHER_SIGN_IN", "administratorWeb": "PUBLIC", "teacherWeb": "PUBLIC", "teacherTelegram": "PUBLIC", "webRoutes": ["POST /session"], "system": [], "note": "rota da 001; o Telegram vincula pelo mesmo código (LinkTelegramUseCase)" },
 
     { "operation": "TEACHER_LIST", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/teachers"], "system": [] },
     { "operation": "TEACHER_GET", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/teachers/{teacherId}"], "system": [] },
@@ -46,6 +46,6 @@
     { "operation": "STUDENT_INACTIVATE", "administratorWeb": "ALLOW", "teacherWeb": "ALLOW_SOLE_ACTIVE_TEACHER", "teacherTelegram": "ALLOW_SOLE_ACTIVE_TEACHER", "webRoutes": ["POST /admin/students/{studentId}/inactivation", "POST /my-students/{studentId}/inactivation"], "system": [] },
     { "operation": "STUDENT_REACTIVATE", "administratorWeb": "ALLOW", "teacherWeb": "ALLOW_SOLE_ACTIVE_TEACHER", "teacherTelegram": "ALLOW_SOLE_ACTIVE_TEACHER", "webRoutes": ["POST /admin/students/{studentId}/reactivation", "POST /my-students/{studentId}/reactivation"], "system": [] },
 
-    { "operation": "LESSON_AND_SEMESTER_REPORTS", "administratorWeb": "DENY", "teacherWeb": "ALLOW_OWN_STUDENTS", "teacherTelegram": "ALLOW_OWN_STUDENTS", "webRoutes": ["/lesson-reports/**", "/semester-reports/**", "/jobs/**", "/history/**"], "system": [], "note": "operações da 001; o administrador nunca toca em relatório (Princípio III)" }
+    { "operation": "LESSON_AND_SEMESTER_REPORTS", "administratorWeb": "DENY", "teacherWeb": "ALLOW_OWN_STUDENTS", "teacherTelegram": "ALLOW_OWN_STUDENTS", "webRoutes": ["/home", "/students", "/students/{studentId}", "/students/{studentId}/**", "/lesson-reports/**", "/semester-reports/**", "/jobs/**"], "system": [], "note": "operações da 001; o administrador nunca toca em relatório (Princípio III); aluno ou relatório alheio responde 404 RESOURCE_NOT_FOUND, igual ao inexistente (FR-050)" }
   ]
 }

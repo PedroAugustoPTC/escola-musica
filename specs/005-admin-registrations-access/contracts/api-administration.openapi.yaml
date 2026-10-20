@@ -428,7 +428,7 @@ paths:
         "403": { $ref: "#/components/responses/PasswordChangeRequired" }
         "404": { $ref: "#/components/responses/NotFound" }
         "409":
-          description: "`DUPLICATE_CPF` (`details.studentName` identifica o aluno existente; nunca o CPF) ou `TEACHER_INACTIVE`"
+          description: "`DUPLICATE_CPF` (`details.name` identifica o aluno existente; nunca o CPF) ou `TEACHER_INACTIVE`"
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
 
   /admin/students/{studentId}:

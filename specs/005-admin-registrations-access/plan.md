@@ -46,8 +46,8 @@ exatamente **dois papéis**; aluno e responsável não têm conta, rota, comando
 | Fila de ações do canal | `ChannelAction`, outbox, idempotência por `update_id`, compensação | reaproveitada; acréscimo compatível `DELETE_MESSAGE` (+ compensação `MESSAGE_NOT_DELETABLE`) |
 | Sessão e cookie do professor | `WebSession`, `SessionCookie`, `SessionCookieFilter`, `SecurityConfig` | padrão copiado para o administrador em cadeia, tabela e cookie próprios; o do professor ganha só a revogação com motivo |
 | Resolução da origem | `RequestOriginResolver` + Caddy (`header_up X-Forwarded-For`) | mesmo resolvedor para o administrador, com teste de cabeçalho forjado |
-| Erros, catálogo e HTTP | `ErrorCode`, `MessageCatalog`, `ErrorHandlerController` | estendidos (fundação), `EXPIRED_CODE` removido |
-| Autorização por associação | `AuthorizationService`, `ReportAccessService` | inalterados; `StudentAccessService` aplica o escopo nas novas operações |
+| Erros, catálogo e HTTP | `ErrorCode`, `MessageCatalog`, `ErrorHandlerController` | estendidos (fundação), `EXPIRED_CODE` e `STUDENT_NOT_ASSIGNED` removidos |
+| Autorização por associação | `AuthorizationService`, `ReportAccessService` | `AuthorizationService.requireAssignment` passa a lançar `RESOURCE_NOT_FOUND` (FR-050); `StudentAccessService` aplica o escopo nas novas operações |
 
 ## Technical Context
 
@@ -199,7 +199,7 @@ frontend/src/
 
 infra/             .env.example C · scripts/local.sh C · seed/example.json, demo.json C · README.md C ·
                    n8n/workflows/execute-actions.json C · telegram-simulator/ (deleteMessage) C · tests/n8n C
-specs/             001 (nota em POST /session) C · 002 (actions-v1: DeleteMessageAction) C · CLAUDE.md (linha da 005) C
+specs/             001 (nota em POST /session) C · 002 (actions-v1: DeleteMessageAction) C · 004 (n8n-workflows.md: deleteMessage) C · CLAUDE.md (linha da 005) C
 .specify/memory/   glossary.json C
 ```
 
@@ -246,7 +246,7 @@ real acontece em S5.
 
 Entrega um build **verde** com tudo o que é compartilhado e o esqueleto das assinaturas:
 
-- **F1** `glossary.json` com os termos de `data-model.md` §10; `ErrorCode` (+ remoção de `EXPIRED_CODE`), status HTTP em
+- **F1** `glossary.json` com os termos de `data-model.md` §10; `ErrorCode` (+ remoção de `EXPIRED_CODE` e `STUDENT_NOT_ASSIGNED`, com `AuthorizationService` passando a lançar `RESOURCE_NOT_FOUND`), status HTTP em
   `ErrorHandlerController`, textos de `contracts/messages.md` em `messages_pt_BR.properties` (o teste do catálogo passa);
   remoção das ocorrências de "secretaria" nos textos do professor.
 - **F2** `ApplicationProperties`/`application.yaml`/`.env.example`/passagem de variáveis no compose (nomes em R-04, R-06, R-16,

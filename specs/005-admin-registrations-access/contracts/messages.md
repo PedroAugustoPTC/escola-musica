@@ -23,6 +23,8 @@ português acentuado. Esta tabela é a fonte do que a fundação (fase F) grava 
 | regras de negócio | `LAST_ADMINISTRATOR`, `TEACHER_INACTIVE`, `STUDENT_INACTIVE`, `SHARED_STUDENT_ACTION_DENIED`, `PASSWORD_CHANGE_NOT_REQUIRED` | 409, 409, 409, 403, 409 |
 
 Mudanças em códigos existentes: `EXPIRED_CODE` **deixa de existir** (código vencido passa a `INVALID_CODE`, FR-042);
+`STUDENT_NOT_ASSIGNED` (403) **deixa de existir** (aluno não associado passa a `RESOURCE_NOT_FOUND`, 404, a mesma resposta de
+aluno inexistente, FR-025 e FR-050; no Telegram, o texto de "não encontramos");
 `DUPLICATE_EMAIL_IN_FILE`, `DUPLICATE_CPF_IN_FILE` e os códigos de campo da carga seguem na carga inicial.
 
 ## 2. Textos novos (erros)
@@ -78,7 +80,7 @@ TEACHER_ALREADY_LINKED=Seu cadastro já está vinculado a outra conta do Telegra
 NO_STUDENTS=Você ainda não tem alunos. Cadastre o primeiro em “Meus alunos”.
 ```
 
-`EXPIRED_CODE` é removido do catálogo. O teste do catálogo passa a reprovar a palavra "secretaria" em qualquer texto.
+`EXPIRED_CODE` e `STUDENT_NOT_ASSIGNED` são removidos do catálogo. O teste do catálogo passa a reprovar a palavra "secretaria" em qualquer texto.
 
 ## 4. Textos do bot (fluxo "Meus alunos")
 

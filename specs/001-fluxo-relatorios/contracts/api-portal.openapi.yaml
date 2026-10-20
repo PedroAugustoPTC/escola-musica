@@ -16,8 +16,8 @@ info:
       FR-008).
     - Erros seguem o schema `Error`; os códigos e textos estão em `contracts/mensagens.md`. Nenhum erro
       expõe detalhe interno (FR-054).
-    - Aluno não associado → 403 `STUDENT_NOT_ASSIGNED`. Relatório de outro professor → 404
-      `RESOURCE_NOT_FOUND`.
+    - Aluno não associado e relatório de outro professor → 404 `RESOURCE_NOT_FOUND`, a mesma resposta de
+      um recurso inexistente (feature 005, FR-025 e FR-050; o 403 `STUDENT_NOT_ASSIGNED` deixou de existir).
     - O canal Telegram usa os mesmos casos de uso por outro adaptador; ver
       `contracts/telegram-conversa.md`.
 servers:
@@ -111,7 +111,6 @@ paths:
         "200":
           description: OK
           content: { application/json: { schema: { $ref: "#/components/schemas/StudentSummaryDto" } } }
-        "403": { $ref: "#/components/responses/StudentNotAssigned" }
         "404": { $ref: "#/components/responses/NotFound" }
 
   /students/{studentId}/open-report:
@@ -124,7 +123,7 @@ paths:
           description: Existe relatório em aberto.
           content: { application/json: { schema: { $ref: "#/components/schemas/OpenReportDto" } } }
         "204": { description: Nenhum relatório em aberto. }
-        "403": { $ref: "#/components/responses/StudentNotAssigned" }
+        "404": { $ref: "#/components/responses/NotFound" }
 
   /students/{studentId}/lesson-reports:
     parameters: [{ $ref: "#/components/parameters/StudentId" }]
@@ -147,7 +146,7 @@ paths:
         "202":
           description: Áudio aceito; acompanhar por `/jobs/{jobId}`.
           content: { application/json: { schema: { $ref: "#/components/schemas/JobRefDto" } } }
-        "403": { $ref: "#/components/responses/StudentNotAssigned" }
+        "404": { $ref: "#/components/responses/NotFound" }
         "409":
           description: "`REPORT_ALREADY_OPEN` (details traz o relatório em aberto)"
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
@@ -318,7 +317,7 @@ paths:
               schema:
                 type: array
                 items: { $ref: "#/components/schemas/SemesterDto" }
-        "403": { $ref: "#/components/responses/StudentNotAssigned" }
+        "404": { $ref: "#/components/responses/NotFound" }
 
   /students/{studentId}/semesters/{periodKey}/preview:
     parameters:
@@ -332,7 +331,7 @@ paths:
           description: OK
           content: { application/json: { schema: { $ref: "#/components/schemas/SemesterPreviewDto" } } }
         "400": { $ref: "#/components/responses/InvalidData" }
-        "403": { $ref: "#/components/responses/StudentNotAssigned" }
+        "404": { $ref: "#/components/responses/NotFound" }
 
   /students/{studentId}/semester-reports:
     parameters: [{ $ref: "#/components/parameters/StudentId" }]
@@ -354,7 +353,7 @@ paths:
           description: Consolidação iniciada.
           content: { application/json: { schema: { $ref: "#/components/schemas/JobRefDto" } } }
         "400": { $ref: "#/components/responses/InvalidData" }
-        "403": { $ref: "#/components/responses/StudentNotAssigned" }
+        "404": { $ref: "#/components/responses/NotFound" }
         "409":
           description: "`NO_APPROVED_LESSONS_IN_PERIOD`, `OPEN_REPORTS_EXIST` (details.count), `SEMESTER_REPORT_ALREADY_APPROVED` ou `REPORT_ALREADY_OPEN` (details do semestral em aberto)"
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
@@ -448,7 +447,7 @@ paths:
         "200":
           description: OK
           content: { application/json: { schema: { $ref: "#/components/schemas/HistoryDto" } } }
-        "403": { $ref: "#/components/responses/StudentNotAssigned" }
+        "404": { $ref: "#/components/responses/NotFound" }
 
 components:
   securitySchemes:
@@ -486,11 +485,8 @@ components:
     NotAuthenticated:
       description: "`SESSION_EXPIRED` ou `NOT_AUTHENTICATED`; o portal leva à tela Entrar"
       content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
-    StudentNotAssigned:
-      description: "`STUDENT_NOT_ASSIGNED`; nenhum dado do aluno é revelado"
-      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
     NotFound:
-      description: "`RESOURCE_NOT_FOUND` (inclui relatório de outro professor)"
+      description: "`RESOURCE_NOT_FOUND` (inclui aluno não associado ao professor e relatório de outro professor; a resposta é a mesma de um recurso que não existe, feature 005, FR-025 e FR-050)"
       content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
     Conflict:
       description: "`ACTION_NOT_ALLOWED_AT_STEP`, `REPORT_ALREADY_APPROVED`, `REPORT_CANCELLED`, `PROCESSING_IN_PROGRESS`"

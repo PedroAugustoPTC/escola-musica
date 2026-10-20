@@ -41,8 +41,7 @@
 | `NO_STUDENTS` | — | Você ainda não tem alunos associados. Fale com a secretaria da escola. |
 | `NO_STUDENT_FOUND` | — | Nenhum aluno encontrado para "{search}". |
 | `SEVERAL_STUDENTS_FOUND` | — | Encontrei mais de um aluno. Qual deles? |
-| `STUDENT_NOT_ASSIGNED` | 403 | Este aluno não está associado a você. |
-| `RESOURCE_NOT_FOUND` | 404 | Não encontramos o que você procurou. |
+| `RESOURCE_NOT_FOUND` | 404 | Não encontramos o que você procurou. (também para aluno não associado ao professor; o código `STUDENT_NOT_ASSIGNED` foi removido na feature 005, FR-050) |
 | `CHOOSE_STUDENT` | — | Para qual aluno? |
 | `SWITCH_STUDENT_DURING_REVIEW` | — | Você quer trocar para {student}? O relatório de {currentStudent} continua em aberto. |
 
