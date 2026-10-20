@@ -13,6 +13,7 @@ Schema, mensagens) e `checklists/`.
 | `002-api-interna-canal-telegram` | API interna que o n8n usa como transporte do Telegram |
 | `003-migrate-code-to-english` | Migração do código existente de português para inglês (refatoração, comportamento idêntico) |
 | `004-n8n-telegram-transport` | n8n como único transporte do canal Telegram (workflows como código, registro do webhook e remoção do caminho antigo, feita após a paridade) |
+| `005-admin-registrations-access` | Administração: acesso do administrador e cadastros de professores, alunos, associações e administradores (o professor cadastra os próprios alunos), Web e Telegram |
 
 Regras:
 
