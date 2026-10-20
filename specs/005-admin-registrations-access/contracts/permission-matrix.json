@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "source": "spec.md, seção Matriz de permissões (FR-048). Fonte normativa do teste de acesso cruzado (SC-005, SC-006, SC-007). A classe PermissionMatrix do núcleo deve ser idêntica a este arquivo; um teste de contrato reprova a divergência.",
+  "roles": ["ADMINISTRATOR", "TEACHER"],
+  "channels": ["WEB", "TELEGRAM"],
+  "systemOrigins": ["SYSTEM_STARTUP", "INITIAL_LOAD"],
+  "values": {
+    "ALLOW": "permitido, sem restrição de escopo",
+    "ALLOW_OWN_STUDENTS": "permitido somente sobre alunos associados ao próprio professor; aluno alheio equivale a inexistente",
+    "ALLOW_SOLE_ACTIVE_TEACHER": "como ALLOW_OWN_STUDENTS, e só quando o ator é o único professor ativo associado (FR-026)",
+    "PUBLIC": "sem credencial; só as telas e os comandos de entrada",
+    "DENY": "negado: rota inexistente na Web (404) e negativa neutra no Telegram"
+  },
+  "operations": [
+    { "operation": "ADMIN_SIGN_IN", "administratorWeb": "PUBLIC", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["POST /admin/session"], "system": [] },
+    { "operation": "ADMIN_ACTIVATE", "administratorWeb": "PUBLIC", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["POST /admin/activation"], "system": [] },
+    { "operation": "ADMIN_GET_SESSION", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/session"], "system": [] },
+    { "operation": "ADMIN_SIGN_OUT", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["DELETE /admin/session"], "system": [] },
+    { "operation": "ADMIN_CHANGE_PASSWORD", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["PUT /admin/password"], "system": [] },
+
+    { "operation": "TEACHER_SIGN_IN", "administratorWeb": "DENY", "teacherWeb": "PUBLIC", "teacherTelegram": "PUBLIC", "webRoutes": ["POST /session"], "system": [], "note": "rota da 001; o Telegram vincula pelo mesmo código (LinkTelegramUseCase)" },
+
+    { "operation": "TEACHER_LIST", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/teachers"], "system": [] },
+    { "operation": "TEACHER_GET", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/teachers/{teacherId}"], "system": [] },
+    { "operation": "TEACHER_REGISTER", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["POST /admin/teachers"], "system": ["INITIAL_LOAD"] },
+    { "operation": "TEACHER_UPDATE", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["PATCH /admin/teachers/{teacherId}"], "system": ["INITIAL_LOAD"] },
+    { "operation": "TEACHER_INACTIVATE", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["POST /admin/teachers/{teacherId}/inactivation"], "system": ["INITIAL_LOAD"] },
+    { "operation": "TEACHER_REACTIVATE", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["POST /admin/teachers/{teacherId}/reactivation"], "system": ["INITIAL_LOAD"] },
+    { "operation": "TEACHER_REISSUE_ACCESS_CODE", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["POST /admin/teachers/{teacherId}/access-code"], "system": ["INITIAL_LOAD"] },
+    { "operation": "TEACHER_UNLINK_TELEGRAM", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["DELETE /admin/teachers/{teacherId}/telegram-link"], "system": [] },
+
+    { "operation": "ADMINISTRATOR_LIST", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/administrators"], "system": [] },
+    { "operation": "ADMINISTRATOR_CREATE", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["POST /admin/administrators"], "system": [] },
+    { "operation": "ADMINISTRATOR_INACTIVATE", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["POST /admin/administrators/{administratorId}/inactivation"], "system": [] },
+    { "operation": "ADMINISTRATOR_REACTIVATE", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["POST /admin/administrators/{administratorId}/reactivation"], "system": [] },
+    { "operation": "FIRST_ADMINISTRATOR_BOOTSTRAP", "administratorWeb": "DENY", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": [], "system": ["SYSTEM_STARTUP"] },
+
+    { "operation": "ASSIGNMENT_ASSIGN", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["PUT /admin/students/{studentId}/teachers/{teacherId}"], "system": ["INITIAL_LOAD"] },
+    { "operation": "ASSIGNMENT_REMOVE", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["DELETE /admin/students/{studentId}/teachers/{teacherId}"], "system": [] },
+    { "operation": "ASSIGNMENT_PREVIEW_REMOVAL", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/students/{studentId}/teachers/{teacherId}/removal-preview"], "system": [] },
+
+    { "operation": "STUDENT_LIST", "administratorWeb": "ALLOW", "teacherWeb": "ALLOW_OWN_STUDENTS", "teacherTelegram": "ALLOW_OWN_STUDENTS", "webRoutes": ["GET /admin/students", "GET /my-students"], "system": [] },
+    { "operation": "STUDENT_GET", "administratorWeb": "ALLOW", "teacherWeb": "ALLOW_OWN_STUDENTS", "teacherTelegram": "ALLOW_OWN_STUDENTS", "webRoutes": ["GET /admin/students/{studentId}", "GET /my-students/{studentId}"], "system": [] },
+    { "operation": "STUDENT_REGISTER", "administratorWeb": "ALLOW", "teacherWeb": "ALLOW_OWN_STUDENTS", "teacherTelegram": "ALLOW_OWN_STUDENTS", "webRoutes": ["POST /admin/students", "POST /my-students"], "system": ["INITIAL_LOAD"] },
+    { "operation": "STUDENT_UPDATE", "administratorWeb": "ALLOW", "teacherWeb": "ALLOW_OWN_STUDENTS", "teacherTelegram": "ALLOW_OWN_STUDENTS", "webRoutes": ["PATCH /admin/students/{studentId}", "PATCH /my-students/{studentId}"], "system": ["INITIAL_LOAD"] },
+    { "operation": "STUDENT_INACTIVATE", "administratorWeb": "ALLOW", "teacherWeb": "ALLOW_SOLE_ACTIVE_TEACHER", "teacherTelegram": "ALLOW_SOLE_ACTIVE_TEACHER", "webRoutes": ["POST /admin/students/{studentId}/inactivation", "POST /my-students/{studentId}/inactivation"], "system": [] },
+    { "operation": "STUDENT_REACTIVATE", "administratorWeb": "ALLOW", "teacherWeb": "ALLOW_SOLE_ACTIVE_TEACHER", "teacherTelegram": "ALLOW_SOLE_ACTIVE_TEACHER", "webRoutes": ["POST /admin/students/{studentId}/reactivation", "POST /my-students/{studentId}/reactivation"], "system": [] },
+
+    { "operation": "LESSON_AND_SEMESTER_REPORTS", "administratorWeb": "DENY", "teacherWeb": "ALLOW_OWN_STUDENTS", "teacherTelegram": "ALLOW_OWN_STUDENTS", "webRoutes": ["/lesson-reports/**", "/semester-reports/**", "/jobs/**", "/history/**"], "system": [], "note": "operações da 001; o administrador nunca toca em relatório (Princípio III)" }
+  ]
+}
