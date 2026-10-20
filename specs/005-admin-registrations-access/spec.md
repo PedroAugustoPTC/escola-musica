@@ -1,4 +1,4 @@
-# Feature Specification: Administração — acesso e cadastros (Web e Telegram)
+# Feature Specification: Administração — acesso e cadastros (administrador na Web; professor na Web e no Telegram)
 
 **Feature Branch**: `spec/005-admin-registrations-access`
 
@@ -6,25 +6,27 @@
 
 **Status**: Draft
 
-**Input**: User description: "Área de administração para cadastros e acesso, disponível na Web e no Telegram com paridade (constituição, Princípio I e restrições de produto), de modo que a escola deixe de depender do procedimento operacional de carga inicial. Somente dois papéis têm função administrativa: o Administrador do sistema e o Professor (este apenas sobre os seus próprios alunos). Aluno e responsável não têm nenhuma função administrativa nem qualquer acesso ao sistema." (descrição completa preservada no pedido de `/speckit-specify` e em `PLANO_EXECUCAO_SPECKIT.md`, seção 8; resumida nas seções abaixo)
+**Input**: User description: "Área de administração para cadastros e acesso, disponível na Web e no Telegram com paridade (constituição, Princípio I e restrições de produto), de modo que a escola deixe de depender do procedimento operacional de carga inicial. Somente dois papéis têm função administrativa: o Administrador do sistema e o Professor (este apenas sobre os seus próprios alunos). Aluno e responsável não têm nenhuma função administrativa nem qualquer acesso ao sistema." (descrição completa preservada no pedido de `/speckit-specify` e em `PLANO_EXECUCAO_SPECKIT.md`, seção 8; resumida nas seções abaixo). **Ajuste de 2026-10-20 (Clarifications):** o pedido original previa o administrador também no Telegram; por decisão do dono do produto, o administrador opera **somente pela Web** e o Telegram é **somente do professor**.
 
 **Materiais de referência**:
 
-- Constituição v2.1.0: Princípio I (paridade entre Web e Telegram; mesmos casos de uso), II (o backend decide autorização e validação; o n8n só transporta), III (só o professor aprova relatório), IV (CPF cifrado; logs sem dado sensível; o professor acessa somente os próprios alunos, verificado no backend), VI (código em inglês; textos e logs em português) e IX (identidade visual, WCAG 2.1 AA, mobile-first).
+- Constituição v2.1.0: Princípio I (paridade entre Web e Telegram; mesmos casos de uso; **a decisão "administrador só na Web" diverge dele e das "Decisões de produto vinculantes"** — ver Assumptions), II (o backend decide autorização e validação; o n8n só transporta), III (só o professor aprova relatório), IV (CPF cifrado; logs sem dado sensível; o professor acessa somente os próprios alunos, verificado no backend), VI (código em inglês; textos e logs em português) e IX (identidade visual, WCAG 2.1 AA, mobile-first).
 - `specs/001-fluxo-relatorios/spec.md`: FR-004 a FR-011 (acesso do professor, código de acesso, bloqueio por tentativas, escopo por aluno, carga inicial) e a seção Assumptions (funções da "secretaria" adiadas para esta feature). A spec 001 é **histórico** e não é reescrita; esta spec registra o que ela substitui (FR-042 a FR-044).
 - `specs/004-n8n-telegram-transport/`: o transporte do Telegram sobre o qual esta feature opera. Nenhuma regra da 004 muda aqui.
 - `HANDOFF_MVP_Relatorios_Escola_Musica.md`, seções 2.4, 4.2, 5.1 (RN-01 a RN-04), 5.2 (RN-05, RN-06, RN-11), 5.3 (RN-12, RN-14), 7.1, 12.2 e 17; e `PLANO_EXECUCAO_SPECKIT.md`, seções 4.2 (decisões D2 a D5 e D9) e 8.
 
-**Escopo desta feature**: o ator **Administrador** e as operações de cadastro e de acesso — professores, alunos, associações professor–aluno, código de acesso, vínculo do Telegram e administradores — mais o cadastro dos **próprios alunos** pelo **Professor**, tudo nos dois canais (Web e Telegram), com o procedimento seguro para criar o primeiro administrador. **Fora de escopo**: histórico de qualquer aluno e visão da escola (feature 006); retenção, exclusão a pedido, consentimento do responsável e trilha de auditoria completa (feature 007); qualquer conta, login, tela, rota, comando ou aviso para aluno ou responsável; professor gerenciar professores, administradores, códigos de acesso ou associações; edição ou aprovação de relatório de professor pelo administrador (Princípio III: só o professor aprova); evoluções de produto.
+**Escopo desta feature**: o ator **Administrador** e as operações de cadastro e de acesso — professores, alunos, associações professor–aluno, código de acesso, desvinculação do Telegram de professor e administradores — todas **somente pela Web**, pelo administrador — mais o cadastro dos **próprios alunos** pelo **Professor**, na Web e no Telegram (com paridade entre os dois), e o procedimento seguro para criar o primeiro administrador. **Fora de escopo**: histórico de qualquer aluno e visão da escola (feature 006); retenção, exclusão a pedido, consentimento do responsável e trilha de auditoria completa (feature 007); qualquer conta, login, tela, rota, comando ou aviso para aluno ou responsável; professor gerenciar professores, administradores, códigos de acesso ou associações; edição ou aprovação de relatório de professor pelo administrador (Princípio III: só o professor aprova); evoluções de produto.
 
 ## Clarifications
 
-*(Vazio. Esta spec é a versão inicial; as decisões ainda abertas estão em "Assumptions → Decisões adotadas por padrão, a confirmar no `/speckit-clarify`".)*
+### Session 2026-10-20
+
+- Q: Como o administrador prova quem é ao vincular a sua conta do Telegram (D2)? → A: **Não vincula.** O administrador opera **somente pela Web**; o Telegram é somente do professor. Não existe vínculo de Telegram, código de vínculo, comando nem menu administrativo para o administrador. O professor continua com o vínculo que já tem e confirma os dados antes de gravar. Efeito: toda operação administrativa é só Web; a paridade entre Web e Telegram vale para as operações do professor. **Isso diverge do Princípio I e das "Decisões de produto vinculantes" da constituição v2.1.0** (administração nos dois canais); o tratamento da divergência está em Assumptions.
 
 ## Quem usa esta feature
 
-- **Administrador**: pessoa da escola (direção ou secretaria) que opera a escola inteira: cadastra e mantém professores, alunos, associações e outros administradores, emite códigos de acesso e desvincula o Telegram de professores.
-- **Professor**: já entra por código de acesso, na Web e no Telegram. Passa a cadastrar e manter **somente os alunos associados a ele**; nada além disso.
+- **Administrador**: pessoa da escola (direção ou secretaria) que opera a escola inteira **somente pela Web**: cadastra e mantém professores, alunos, associações e outros administradores, emite códigos de acesso e desvincula o Telegram de professores. Não usa o Telegram para nada disto.
+- **Professor**: já entra por código de acesso, na Web e no Telegram (o Telegram é só dele). Passa a cadastrar e manter **somente os alunos associados a ele**, nos dois canais; nada além disso.
 - **Aluno e responsável: não são atores.** São sujeitos dos dados. Não têm conta, login, vínculo de Telegram, tela, rota, comando nem aviso, nem de leitura. O responsável existe apenas como **nome no cadastro do aluno menor de idade**.
 - **Mantenedor da plataforma**: executa o procedimento operacional que cria o primeiro administrador e que recupera o acesso se nenhum administrador conseguir entrar.
 
@@ -32,13 +34,13 @@ O conjunto de papéis que se autenticam é **fechado em dois**: Administrador e 
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Acesso do administrador, na Web e no Telegram (Priority: P1)
+### User Story 1 - Acesso do administrador, somente pela Web (Priority: P1)
 
-O administrador entra no portal com e-mail e senha e chega a uma área administrativa separada da área do professor. A sessão dura 2 horas fixas, sem renovação por uso. Errar a senha 5 vezes seguidas, da mesma origem, bloqueia novas tentativas por 15 minutos, inclusive com a senha correta, e a tela informa o tempo restante. No Telegram, o administrador se identifica por um vínculo próprio, obtido com um código de uso único (não basta o identificador do Telegram), e toda gravação, em especial as destrutivas, pede confirmação explícita antes de valer. Em nenhum canal uma credencial de professor abre uma operação administrativa, nem a de administrador abre uma operação do professor.
+O administrador entra no portal com e-mail e senha e chega a uma área administrativa separada da área do professor. A sessão dura 2 horas fixas, sem renovação por uso. Errar a senha 5 vezes seguidas, da mesma origem, bloqueia novas tentativas por 15 minutos, inclusive com a senha correta, e a tela informa o tempo restante. As ações destrutivas pedem confirmação explícita antes de valer. O administrador **não tem acesso pelo Telegram**: o bot não o reconhece como administrador nem oferece operação administrativa. Uma credencial de professor nunca abre uma operação administrativa, nem a de administrador abre uma operação do professor.
 
-**Why this priority**: sem o ator Administrador nada mais desta feature existe, e o acesso é a parte que protege a escola inteira: um administrador comprometido enxerga todos os alunos.
+**Why this priority**: sem o ator Administrador nada mais desta feature existe, e o acesso é a parte que protege a escola inteira: um administrador comprometido enxerga todos os alunos. Manter o acesso só na Web, onde há senha e sessão curta, também reduz a superfície de ataque.
 
-**Independent Test**: com um administrador existente (criado pelo procedimento da Story 8), entrar na Web com a senha certa e com a errada, esgotar as tentativas, esperar a sessão vencer, vincular o Telegram com o código de uso único e tentar uma operação administrativa com uma credencial de professor e uma do professor com a de administrador, nos dois canais.
+**Independent Test**: com um administrador existente (criado pelo procedimento da Story 8), entrar na Web com a senha certa e com a errada, esgotar as tentativas, esperar a sessão vencer, tentar uma operação administrativa com uma credencial de professor e uma do professor com a de administrador, e conferir que nenhuma conta do Telegram consegue executar operação administrativa.
 
 **Acceptance Scenarios**:
 
@@ -46,10 +48,9 @@ O administrador entra no portal com e-mail e senha e chega a uma área administr
 2. **Given** a sessão expirada ou encerrada ("Sair"), **When** o administrador tenta qualquer operação administrativa, **Then** é levado à tela de entrada e nada é executado; "Sair" encerra a sessão no servidor.
 3. **Given** e-mail inexistente, senha errada ou conta inativa, **When** a entrada é tentada, **Then** a mensagem é a mesma nos três casos e não revela qual deles ocorreu.
 4. **Given** 5 tentativas incorretas consecutivas da mesma origem, **When** a sexta tentativa chega, mesmo com a senha correta, **Then** é recusada, com o tempo restante do bloqueio; ao fim dos 15 minutos a contagem recomeça do zero, e um acesso bem-sucedido também zera a contagem.
-5. **Given** uma credencial de professor (sessão Web ou vínculo do Telegram), **When** ela é usada em qualquer rota ou comando administrativo, **Then** a operação é negada e nada é revelado; e uma credencial de administrador usada em rota ou comando do professor também é negada.
-6. **Given** um administrador autenticado na Web, **When** ele pede o código de vínculo do Telegram e o envia ao bot, **Then** aquela conta do Telegram passa a operar como administrador; **And** uma conta do Telegram sem vínculo, ou vinculada a professor, que tente um comando administrativo recebe uma negativa neutra.
-7. **Given** o administrador no Telegram, **When** ele inicia uma gravação (por exemplo, inativar um professor), **Then** o bot mostra um resumo do que será feito e só executa depois da confirmação explícita; cancelar ou deixar vencer não grava nada.
-8. **Given** um administrador que erra o código de vínculo do Telegram 5 vezes seguidas na mesma conta, **When** tenta de novo, **Then** vale o mesmo bloqueio de 15 minutos, com a mesma contagem, zeragem e mensagem das demais autenticações.
+5. **Given** uma credencial de professor (sessão Web ou vínculo do Telegram), **When** ela é usada em qualquer rota ou comando administrativo, **Then** a operação é negada e nada é revelado; e uma credencial de administrador usada em rota do professor também é negada.
+6. **Given** qualquer conta do Telegram (vinculada a professor ou não), **When** ela envia um comando ou texto que tente uma operação administrativa, **Then** recebe uma negativa neutra, sem revelar que a operação existe na Web; o bot nunca oferece menu administrativo.
+7. **Given** o administrador na Web, **When** ele inicia uma ação destrutiva (por exemplo, inativar um professor), **Then** a tela pede confirmação explícita nomeando a ação e o alvo; cancelar ou fechar o diálogo não grava nada.
 
 ---
 
@@ -59,7 +60,7 @@ O administrador cadastra um professor informando nome e e-mail. O professor nasc
 
 **Why this priority**: é a primeira operação que a escola faz sem a carga inicial, e sem professor cadastrado não há aluno para associar nem relatório para produzir.
 
-**Independent Test**: em cada canal, cadastrar um professor, anotar o código exibido, usar o código para entrar como professor, listar, editar, tentar cadastrar o mesmo e-mail, inativar (conferindo que o acesso do professor cai) e reativar.
+**Independent Test**: na Web, cadastrar um professor, anotar o código exibido, usar o código para entrar como professor (na Web e no Telegram), listar, editar, tentar cadastrar o mesmo e-mail, inativar (conferindo que o acesso do professor cai nos dois canais) e reativar.
 
 **Acceptance Scenarios**:
 
@@ -79,7 +80,7 @@ O administrador cadastra alunos informando nome, data de nascimento, CPF, nome d
 
 **Why this priority**: o aluno é a unidade em torno da qual todo relatório existe; sem cadastro de aluno a escola continua dependente da carga.
 
-**Independent Test**: em cada canal, cadastrar um aluno adulto e um menor (com e sem responsável), tentar CPF inválido, CPF repetido e 31/02, associar professores, buscar, editar, inativar e reativar, e conferir que o CPF não aparece em nenhuma resposta, tela, mensagem do bot ou registro de operação.
+**Independent Test**: na Web, cadastrar um aluno adulto e um menor (com e sem responsável), tentar CPF inválido, CPF repetido e 31/02, associar professores, buscar, editar, inativar e reativar, e conferir que o CPF não aparece em nenhuma resposta, tela ou registro de operação.
 
 **Acceptance Scenarios**:
 
@@ -122,7 +123,7 @@ O administrador inclui e retira professores de um aluno a qualquer momento. Reti
 
 **Why this priority**: o cadastro funciona só com associação definida na criação; ajustar depois é necessário na prática, mas pode vir logo após os P1.
 
-**Independent Test**: associar e desassociar professores de um aluno com e sem relatório em aberto; conferir o que cada professor passa a ver; repetir nos dois canais.
+**Independent Test**: associar e desassociar professores de um aluno com e sem relatório em aberto; conferir, na Web e no Telegram, o que cada professor passa a ver.
 
 **Acceptance Scenarios**:
 
@@ -134,13 +135,13 @@ O administrador inclui e retira professores de um aluno a qualquer momento. Reti
 
 ---
 
-### User Story 6 - Código de acesso e vínculo do Telegram, pelo administrador (Priority: P2)
+### User Story 6 - Código de acesso e vínculo do Telegram do professor, pelo administrador (Priority: P2)
 
 O administrador reemite o código de acesso de qualquer professor (o anterior deixa de valer, o novo vale 7 dias e aparece uma única vez), o que encerra as sessões Web daquele professor e, se o administrador quiser, também o vínculo do Telegram. O administrador também pode desvincular o Telegram de um professor.
 
 **Why this priority**: cobre o dia em que o professor perde o acesso ou troca de celular; sem isso a escola voltaria ao procedimento operacional.
 
-**Independent Test**: reemitir o código de um professor com sessão Web e Telegram ativos, com e sem a opção de encerrar o Telegram; usar o código antigo e o novo; desvincular o Telegram e conferir que o professor precisa enviar o código de novo; nos dois canais.
+**Independent Test**: reemitir o código de um professor com sessão Web e Telegram ativos, com e sem a opção de encerrar o Telegram; usar o código antigo e o novo; desvincular o Telegram e conferir que o professor precisa enviar o código de novo. As operações são feitas pelo administrador na Web; os efeitos são conferidos na Web e no Telegram do professor.
 
 **Acceptance Scenarios**:
 
@@ -149,7 +150,7 @@ O administrador reemite o código de acesso de qualquer professor (o anterior de
 3. **Given** um professor com Telegram vinculado, **When** o administrador o desvincula, **Then** aquela conta deixa de ser aceita como o professor, ações pendentes de envio ao chat são descartadas e o professor precisa enviar um código válido para vincular de novo.
 4. **Given** um professor inativo, **When** o administrador tenta reemitir o código, **Then** é recusado orientando reativar antes.
 5. **Given** uma credencial de professor, **When** tenta reemitir código ou desvincular Telegram (de si ou de outro), **Then** é negada.
-6. **Given** o administrador no Telegram, **When** reemite um código ou desvincula, **Then** o bot pede confirmação explícita nomeando a ação e o professor antes de executar.
+6. **Given** o administrador na Web, **When** reemite um código ou desvincula, **Then** a tela pede confirmação explícita nomeando a ação e o professor antes de executar; na reemissão, a confirmação oferece a opção de encerrar também o vínculo do Telegram.
 
 ---
 
@@ -159,12 +160,12 @@ O administrador cria outros administradores (nome e e-mail) e inativa administra
 
 **Why this priority**: a escola precisa de mais de uma pessoa com a chave e de poder desligar quem sai; mas isso vem depois do que o dia a dia exige.
 
-**Independent Test**: criar um administrador, ativá-lo, inativar o primeiro, tentar inativar o último, e tentar duas inativações simultâneas que deixariam zero ativos; nos dois canais.
+**Independent Test**: criar um administrador, ativá-lo, inativar o primeiro, tentar inativar o último, e tentar duas inativações simultâneas que deixariam zero ativos; tudo na Web.
 
 **Acceptance Scenarios**:
 
 1. **Given** nome e e-mail inéditos entre administradores, **When** o administrador cria outro, **Then** o novo nasce ativo e recebe um código de ativação de uso único, exibido uma única vez, com o qual define a própria senha na Web; antes disso, ele não consegue entrar.
-2. **Given** dois ou mais administradores ativos, **When** um inativa outro (ou a si mesmo), **Then** o inativado perde na hora sessões e vínculo do Telegram.
+2. **Given** dois ou mais administradores ativos, **When** um inativa outro (ou a si mesmo), **Then** o inativado perde na hora todas as sessões Web.
 3. **Given** um único administrador ativo, **When** ele (ou qualquer um) tenta inativá-lo, **Then** é recusado com mensagem clara.
 4. **Given** dois administradores ativos que tentam, ao mesmo tempo, inativar um ao outro, **When** as duas operações são processadas, **Then** no máximo uma vale e sobra pelo menos um administrador ativo.
 5. **Given** um administrador inativo, **When** outro o reativa, **Then** ele volta a ser ativo e precisa definir a senha de novo por um código de ativação novo.
@@ -192,7 +193,7 @@ O mantenedor executa um procedimento operacional que cria o primeiro administrad
 ### Edge Cases
 
 - **Aluno e responsável tentam algo**: não existe como tentar: não há papel, credencial, rota, comando ou tela. Qualquer requisição que diga ser deles é tratada como não autenticada e negada. Uma mensagem ao bot de uma conta sem vínculo recebe a orientação de entrada já existente, sem menção a "aluno" ou "responsável" como usuários.
-- **Mesma pessoa é professor e administrador**: são duas contas com credenciais separadas (RN-14). Uma conta do Telegram tem no máximo um vínculo por vez, de professor ou de administrador. Trocar de papel exige desvincular e vincular de novo.
+- **Mesma pessoa é professor e administrador**: são duas contas com credenciais separadas (RN-14). O Telegram só vincula a conta de **professor**: a conta de administrador não se vincula ao Telegram, e a mesma pessoa usa o Telegram apenas como professor.
 - **CPF digitado no Telegram**: o CPF trafega na conversa do chat. O sistema o guarda só cifrado e só enquanto o cadastro está em andamento; é descartado ao confirmar, cancelar ou vencer o prazo (30 minutos por padrão, configurável), e nunca aparece em mensagem do bot, resumo, log ou registro de operação.
 - **Cadastro do professor interrompido no meio (Telegram)**: o professor pode cancelar a qualquer momento; mensagens de outro assunto não gravam nada; o estado em andamento sobrevive ao reinício do transporte (Princípio II).
 - **Dois cadastros simultâneos com o mesmo CPF ou o mesmo e-mail**: apenas um vale; o outro recebe a recusa de duplicidade. Dois professores cadastrando o mesmo aluno ao mesmo tempo: um é aceito, o outro recebe a recusa neutra.
@@ -202,7 +203,7 @@ O mantenedor executa um procedimento operacional que cria o primeiro administrad
 - **Data de nascimento limítrofe**: o aluno que faz 18 anos exatamente na data do cadastro é adulto (responsável opcional); a idade é calculada pela data no fuso da escola, não pela do servidor.
 - **Edição que torna o aluno menor**: se, ao editar, a data de nascimento passar a indicar menos de 18 anos na data da edição, o responsável passa a ser obrigatório.
 - **Tentar sondar CPFs (professor)**: cada recusa por CPF de aluno que não é do professor deixa registro de autoria. A resposta, por necessidade, indica que o CPF não pode ser usado; o risco residual é aceito e documentado (Assumptions).
-- **Lista longa no Telegram**: listas de professores, alunos e administradores são paginadas por botões, com o mesmo conteúdo e a mesma ordem da Web.
+- **Lista longa de alunos no Telegram**: a lista de alunos do professor é paginada por botões, com o mesmo conteúdo e a mesma ordem da Web.
 - **Falha no meio de uma operação com várias partes** (cadastrar aluno e associar professores): ou tudo vale, ou nada é gravado; o usuário é informado e pode repetir.
 - **Código de acesso perdido antes de repassar**: não há como recuperá-lo (só existe de forma irreversível); o administrador reemite.
 - **Sessão do administrador vence no meio de um formulário**: nada é gravado; ele volta à tela de entrada e os dados digitados não são mantidos.
@@ -218,15 +219,15 @@ O mantenedor executa um procedimento operacional que cria o primeiro administrad
 - **FR-003**: Credencial de professor NUNCA DEVE autenticar operação administrativa, e credencial de administrador NUNCA DEVE autenticar operação do professor (RN-14), em nenhum dos canais. As áreas administrativa e do professor DEVEM ser separadas.
 - **FR-004**: O administrador DEVE entrar na Web com e-mail e senha. A senha DEVE ser armazenada somente com hash forte, e o sistema NÃO DEVE conter senha ou credencial padrão. A recusa de entrada DEVE ter a mesma mensagem para e-mail inexistente, senha errada e conta inativa.
 - **FR-005**: A sessão Web do administrador DEVE expirar 2 horas após o login, sem renovação por uso (validade configurável, padrão 2 horas). "Sair" DEVE encerrar a sessão no servidor. Sessão expirada DEVE levar à tela de entrada sem executar a operação pedida.
-- **FR-006**: Após 5 tentativas incorretas consecutivas da mesma origem (Web) ou da mesma conta (Telegram), o sistema DEVE recusar novas tentativas por 15 minutos, inclusive com credencial correta, informando o tempo restante. Acesso bem-sucedido e fim do bloqueio DEVEM zerar a contagem. Limite e duração DEVEM ser os mesmos das demais autenticações (spec 001, FR-007), configuráveis e iguais nos dois canais.
+- **FR-006**: Após 5 tentativas incorretas consecutivas da mesma origem, o sistema DEVE recusar novas tentativas de entrada do administrador por 15 minutos, inclusive com a senha correta, informando o tempo restante. Acesso bem-sucedido e fim do bloqueio DEVEM zerar a contagem. Limite, duração e regras de zeragem DEVEM ser os mesmos das demais autenticações (spec 001, FR-007), configuráveis, reaproveitando o mesmo serviço de tentativas de acesso; a contagem do administrador é separada da do professor.
 - **FR-007**: O sistema NÃO DEVE permitir que nenhuma operação, inclusive concorrente, deixe a escola sem pelo menos um administrador ativo.
-- **FR-008**: No Telegram, o administrador DEVE ser identificado por um **vínculo próprio**, obtido com um código de uso único e de curta validade; o identificador da conta do Telegram sozinho NUNCA DEVE autorizar ação administrativa (RN-11, Princípio II). O vínculo vale até o administrador encerrá-lo (“sair”), ser desvinculado ou inativado. Uma conta do Telegram DEVE ter no máximo um vínculo (de professor ou de administrador).
-- **FR-009**: No Telegram, toda **gravação** de qualquer dos dois papéis (cadastrar, editar, inativar, reativar, associar, reemitir, desvincular) DEVE ser precedida de um resumo do que será feito e de confirmação explícita; as destrutivas e de acesso (inativar, retirar associação, reemitir código, desvincular, inativar administrador) DEVEM nomear a ação e o alvo na confirmação. Sem confirmação, nada é gravado. Na Web, as destrutivas DEVEM pedir confirmação explícita antes de executar.
+- **FR-008**: O administrador DEVE operar **somente pela Web**. NÃO DEVE existir vínculo de Telegram para administrador, código de vínculo, menu, comando ou botão administrativo no bot; o identificador de uma conta do Telegram NUNCA DEVE autorizar operação administrativa (RN-11, Princípio II). Qualquer tentativa de operação administrativa pelo Telegram, por conta vinculada ou não, DEVE receber negativa neutra. Uma conta do Telegram DEVE continuar com no máximo um vínculo, sempre de professor.
+- **FR-009**: Na Web, as ações destrutivas e de acesso do administrador (inativar, retirar associação, reemitir código, desvincular Telegram, inativar administrador) DEVEM pedir confirmação explícita que nomeie a ação e o alvo antes de executar; sem confirmação, nada é gravado. No Telegram, toda **gravação** do professor (cadastrar, editar, inativar, reativar aluno) DEVE ser precedida de um resumo dos dados (sem o CPF) e de confirmação explícita; sem confirmação, nada é gravado.
 
 **Professores (administrador)**
 
 - **FR-010**: O administrador DEVE poder cadastrar professor com nome e e-mail. O e-mail DEVE ser único entre professores (sem diferenciar maiúsculas, minúsculas e espaços nas pontas), inclusive entre inativos; duplicidade DEVE ser recusada com mensagem clara. O professor DEVE nascer ativo e com código de acesso de 8 caracteres (letras maiúsculas e dígitos, sem caracteres ambíguos), válido por 7 dias.
-- **FR-011**: O código de acesso DEVE ser mostrado **uma única vez** ao administrador, no canal em que a operação foi feita, com aviso de que não poderá ser exibido de novo; o sistema DEVE guardá-lo somente de forma não reversível. Código perdido só se resolve reemitindo (FR-030).
+- **FR-011**: O código de acesso DEVE ser mostrado **uma única vez** ao administrador, na tela da Web onde a operação foi feita, com aviso de que não poderá ser exibido de novo; o sistema DEVE guardá-lo somente de forma não reversível. Código perdido só se resolve reemitindo (FR-030).
 - **FR-012**: O administrador DEVE poder listar professores (com busca por nome ou e-mail), vendo nome, e-mail, situação (ativo/inativo) e se há Telegram vinculado. A lista NUNCA DEVE mostrar código de acesso.
 - **FR-013**: O administrador DEVE poder editar nome e e-mail do professor, com a mesma regra de unicidade.
 - **FR-014**: O administrador DEVE poder inativar e reativar professor. Inativar DEVE encerrar na hora as sessões Web, o vínculo do Telegram e o código de acesso do professor, e recusar novos acessos com mensagem que orienta procurar o administrador. Reativar DEVE devolver o professor à situação ativa **com um código de acesso novo**, mostrado uma única vez; as associações com alunos são preservadas.
@@ -262,18 +263,18 @@ O mantenedor executa um procedimento operacional que cria o primeiro administrad
 
 **Administradores**
 
-- **FR-032**: O administrador DEVE poder listar administradores (nome, e-mail, situação, se há Telegram vinculado) e criar outro com nome e e-mail únicos entre administradores. O novo administrador DEVE definir a **própria senha** por um código de ativação de uso único, exibido uma única vez a quem o criou, que vence em 7 dias; ninguém DEVE conhecer ou definir a senha de outro. Sem definir a senha, o administrador novo NÃO DEVE conseguir entrar. A senha DEVE ter no mínimo 12 caracteres.
-- **FR-033**: O administrador DEVE poder inativar e reativar administradores. Inativar DEVE encerrar na hora sessões Web e vínculo do Telegram do inativado; reativar DEVE exigir nova definição de senha por novo código de ativação. A regra de FR-007 vale para qualquer inativação, inclusive de si mesmo, inclusive sob concorrência.
+- **FR-032**: O administrador DEVE poder listar administradores (nome, e-mail, situação) e criar outro com nome e e-mail únicos entre administradores. O novo administrador DEVE definir a **própria senha** por um código de ativação de uso único, exibido uma única vez a quem o criou, que vence em 7 dias; ninguém DEVE conhecer ou definir a senha de outro. Sem definir a senha, o administrador novo NÃO DEVE conseguir entrar. A senha DEVE ter no mínimo 12 caracteres.
+- **FR-033**: O administrador DEVE poder inativar e reativar administradores. Inativar DEVE encerrar na hora todas as sessões Web do inativado; reativar DEVE exigir nova definição de senha por novo código de ativação. A regra de FR-007 vale para qualquer inativação, inclusive de si mesmo, inclusive sob concorrência.
 
 **Primeiro administrador**
 
 - **FR-034**: DEVE existir um procedimento operacional que cria o primeiro administrador (nome e e-mail) e entrega um código de ativação de uso único, exibido apenas a quem executa e uma única vez. O mesmo procedimento, executado para o e-mail de um administrador existente, DEVE emitir novo código de ativação (recuperação de acesso), sem criar administrador duplicado. Nenhuma senha, código ou segredo do procedimento DEVE estar em arquivo versionado ou em registro de operação.
 
-**Paridade entre canais**
+**Canais e paridade**
 
-- **FR-035**: Cada operação desta feature DEVE existir na Web e no Telegram para o papel que a executa (administrador: acesso, professores, alunos, associações, código e Telegram, administradores; professor: cadastro e manutenção dos próprios alunos), executando os **mesmos casos de uso**, com as mesmas regras de autorização, validação e resultado. Só a forma de interação e o texto se adaptam ao meio (formulário e tabela na Web; conversa guiada, botões e listas paginadas no Telegram). Exceção a esta regra exige justificativa no plano.
-- **FR-036**: Cada cadastro em andamento no Telegram DEVE ter o estado persistido no backend (Princípio II), poder ser cancelado a qualquer momento por palavra-chave ou botão, e ser descartado ao confirmar, cancelar ou vencer o prazo de inatividade (30 minutos por padrão, configurável). Um cadastro iniciado no Telegram NÃO precisa ser continuado na Web.
-- **FR-037**: O menu e os comandos administrativos do bot DEVEM ser oferecidos somente a contas vinculadas como administrador; a quem não é, qualquer comando administrativo DEVE receber uma negativa neutra, sem revelar que o comando existe para outro papel. O professor DEVE ver no bot apenas as opções de aluno (e as de relatório que já tem).
+- **FR-035**: As operações do **professor** (cadastrar, listar, buscar, editar, inativar e reativar os próprios alunos) DEVEM existir na Web e no Telegram, executando os **mesmos casos de uso**, com as mesmas regras de autorização, validação e resultado; só a forma de interação e o texto se adaptam ao meio (formulário e tabela na Web; conversa guiada, botões e listas paginadas no Telegram). As operações do **administrador** (acesso, professores, alunos, associações, código de acesso, desvinculação do Telegram de professor e administradores) DEVEM existir **somente na Web**, por decisão do dono do produto; é um desvio deliberado do Princípio I, tratado em Assumptions e justificado no plano.
+- **FR-036**: Cada cadastro de aluno em andamento no Telegram DEVE ter o estado persistido no backend (Princípio II), poder ser cancelado a qualquer momento por palavra-chave ou botão, e ser descartado ao confirmar, cancelar ou vencer o prazo de inatividade (30 minutos por padrão, configurável). Um cadastro iniciado no Telegram NÃO precisa ser continuado na Web.
+- **FR-037**: O bot DEVE oferecer ao professor apenas as opções de aluno (e as de relatório que já tem); NÃO DEVE existir no bot nenhum menu, botão ou comando administrativo. Ao professor vinculado, ou a qualquer conta, um pedido de operação administrativa DEVE receber negativa neutra, sem revelar que a operação existe na Web.
 
 **Privacidade, segurança e autoria**
 
@@ -294,18 +295,17 @@ O mantenedor executa um procedimento operacional que cria o primeiro administrad
 
 ### Key Entities *(include if feature involves data)*
 
-- **Administrador**: pessoa da escola com função administrativa total. Nome, e-mail (único entre administradores), situação (ativo/inativo), senha (somente em forma não reversível), código de ativação pendente, no máximo um vínculo do Telegram.
+- **Administrador**: pessoa da escola com função administrativa total. Nome, e-mail (único entre administradores), situação (ativo/inativo), senha (somente em forma não reversível), código de ativação pendente. **Sem vínculo de Telegram**: acesso só pela Web.
 - **Professor**: já existe (spec 001). Passa a ter cadastro, edição, inativação e reativação pelo administrador, e a cadastrar alunos. Nome, e-mail (único entre professores), situação, código de acesso com validade, no máximo um vínculo do Telegram.
 - **Aluno**: já existe. Nome, data de nascimento, CPF (cifrado, nunca devolvido; usado só para impedir duplicidade), nome do responsável (obrigatório se menor de 18 anos), instrumento (opcional), situação (ativo/inativo). Pode ter zero ou vários professores. **Não é ator.**
 - **Responsável**: **não é entidade com conta**; é o nome guardado no cadastro do aluno menor de idade.
 - **Associação Professor–Aluno**: já existe; passa a ser mantida pelo administrador (e criada, para o próprio professor, no cadastro do aluno pelo professor). Base de todo o controle de acesso aos alunos.
 - **Código de Acesso (professor)**: já existe; 8 caracteres, validade de 7 dias, exibição única, substituído a cada reemissão.
 - **Código de Ativação (administrador)**: código de uso único, validade de 7 dias, exibido uma única vez, usado para definir a própria senha.
-- **Código de Vínculo do Telegram (administrador)**: código de uso único e curta validade, obtido por administrador autenticado, usado para vincular a conta do Telegram.
 - **Sessão do Administrador (Web)**: acesso ativo com validade fixa de 2 horas, sem renovação, revogável.
-- **Vínculo Telegram**: já existe para o professor; passa a existir também para o administrador, com papel explícito. Uma conta do Telegram, um vínculo.
-- **Tentativa de Acesso**: contagem de falhas e bloqueio de 15 minutos por origem (Web) ou conta (Telegram); reaproveita a regra das demais autenticações.
-- **Cadastro em Andamento (Telegram)**: estado temporário e persistido de um cadastro conduzido no bot; contém o CPF apenas cifrado; descartado ao concluir, cancelar ou vencer.
+- **Vínculo Telegram**: já existe, **somente para o professor**; o administrador pode desvinculá-lo pela Web. Uma conta do Telegram, um vínculo.
+- **Tentativa de Acesso**: contagem de falhas e bloqueio de 15 minutos por origem (Web, para o administrador) ou por conta (Telegram, para o professor); mesmo serviço e mesmas regras, contagens separadas por papel.
+- **Cadastro em Andamento (Telegram)**: estado temporário e persistido de um cadastro de aluno conduzido pelo professor no bot; contém o CPF apenas cifrado; descartado ao concluir, cancelar ou vencer.
 - **Registro de Autoria**: quem (id e papel), canal, quando, operação, alvo, resultado; sem CPF; alimenta a feature 007.
 - **Relatório em Aberto**: relatório de aula ou semestral em processamento, com falha no processamento, aguardando respostas ou aguardando conferência; aparece nesta feature só como condição que bloqueia inativações e que mantém o acesso do professor depois de retirada a associação.
 
@@ -313,11 +313,11 @@ O mantenedor executa um procedimento operacional que cria o primeiro administrad
 
 ### Measurable Outcomes
 
-- **SC-001**: O administrador cadastra um professor e um aluno e entrega o código de acesso ao professor em até 3 minutos, em cada canal (Web e Telegram).
-- **SC-002**: O professor cadastra um aluno seu em até 3 minutos, em cada canal.
-- **SC-003**: 100% das operações desta feature estão disponíveis na Web e no Telegram para o papel que as executa, e o mesmo roteiro de teste produz os mesmos resultados de negócio nos dois canais.
+- **SC-001**: O administrador cadastra um professor e um aluno e entrega o código de acesso ao professor em até 3 minutos, na Web.
+- **SC-002**: O professor cadastra um aluno seu em até 3 minutos, em cada canal (Web e Telegram).
+- **SC-003**: 100% das operações do administrador estão disponíveis na Web, e 100% das operações do professor estão disponíveis na Web e no Telegram, com o mesmo roteiro de teste produzindo os mesmos resultados de negócio nos dois canais; zero operação administrativa alcançável pelo Telegram.
 - **SC-004**: Zero ocorrência de CPF em logs, em respostas de API, em telas, em mensagens do bot e em registros de autoria, verificado por varredura automatizada em todo o conjunto de testes.
-- **SC-005**: Zero acesso a operação administrativa com credencial de professor, e zero acesso a operação do professor com credencial de administrador, verificado em teste de acesso cruzado em todas as rotas e comandos, nos dois canais.
+- **SC-005**: Zero acesso a operação administrativa com credencial de professor, e zero acesso a operação do professor com credencial de administrador, verificado em teste de acesso cruzado em todas as rotas e comandos.
 - **SC-006**: Zero acesso do professor a aluno que não seja seu: em teste de acesso cruzado, 100% das tentativas de ler, editar, inativar, buscar ou cadastrar sobre aluno alheio são negadas ou tratadas como inexistente, e as respostas são indistinguíveis das de aluno inexistente.
 - **SC-007**: Zero papel, credencial, conta, rota, comando, tela ou aviso para aluno ou responsável, verificado por teste que enumera todos os papéis e todas as rotas e comandos.
 - **SC-008**: Após 5 tentativas incorretas consecutivas, 100% das tentativas seguintes são recusadas por 15 minutos, mesmo com a credencial correta; a sessão do administrador deixa de valer 2 horas após o login em 100% dos casos testados.
@@ -332,12 +332,12 @@ O mantenedor executa um procedimento operacional que cria o primeiro administrad
 
 Estas decisões estavam abertas no plano (D2 a D5 e itens do pedido) e foram preenchidas com a proposta do plano para a spec poder avançar. Qualquer mudança no `clarify` altera os requisitos indicados.
 
-- **D2 — Autenticação do administrador e do professor no Telegram (FR-008, FR-009)**: o administrador vincula o Telegram com um **código de uso único**, de curta validade, e as gravações exigem confirmação explícita; para o professor basta o vínculo que ele já tem, com confirmação dos dados antes de gravar. **Lacuna a fechar:** o plano diz que o código é emitido "por outro administrador (ou pelo comando de bootstrap)", o que deixaria um administrador **único** sem como vincular o Telegram. Esta spec adota, por padrão, que o **próprio administrador autenticado na Web** pode pedir o seu código de vínculo; o `clarify` deve confirmar ou trocar por emissão por outro administrador.
+- **D2 — FECHADA em 2026-10-20 (FR-008, FR-009)**: o administrador opera só pela Web; o Telegram é só do professor, que usa o vínculo que já tem e confirma os dados antes de gravar. Não há autenticação de administrador no Telegram. Esta decisão **diverge do Princípio I e das "Decisões de produto vinculantes" da constituição v2.1.0**, que exigem administração nos dois canais; a divergência precisa de tratamento formal antes do `plan` (ver abaixo).
 - **D3 — Revogação (FR-014, FR-030, FR-031)**: reemitir código encerra as sessões Web e, opcionalmente, o vínculo do Telegram; inativar professor ou administrador encerra tudo. Reativar professor não restaura sessões nem vínculo e emite código novo; reativar administrador exige nova definição de senha. O `clarify` deve confirmar se a reativação restaura algo.
 - **D4 — Inativar com relatório em aberto (FR-015, FR-022)**: a inativação é **bloqueada**, com aviso listando os relatórios, até serem concluídos ou cancelados pelo professor. Como o administrador não pode cancelar relatório de professor (Princípio III), cabe ao professor concluí-los; se o professor não puder (por exemplo, saiu da escola), o `clarify` deve decidir se existe uma saída. Vale também quando é o professor quem inativa o seu aluno.
 - **D5 — Retirar associação com relatório em aberto (FR-029)**: o relatório continua acessível ao professor, somente para concluir ou cancelar, até acabar; os aprovados permanecem preservados. Isso é uma **exceção controlada** à regra "o professor só acessa alunos associados" (spec 001, FR-009), limitada a esses relatórios.
 - **Professor com aluno compartilhado (FR-026)**: edita os dados cadastrais, mas só inativa/reativa quando for o único professor associado. O `clarify` deve confirmar (já sinalizado no pedido), inclusive se a edição de CPF e de data também fica livre ao professor nesse caso.
-- **Conta do Telegram (FR-008, edge case)**: uma conta do Telegram tem no máximo um vínculo (professor **ou** administrador). Quem exerce os dois papéis alterna desvinculando.
+- **Conta do Telegram (FR-008)**: uma conta do Telegram tem no máximo um vínculo, sempre de professor.
 - **Prazo de inatividade de cadastro em andamento no Telegram**: 30 minutos, configurável, igual ao do áudio aguardando confirmação (spec 001).
 
 ### Demais premissas
