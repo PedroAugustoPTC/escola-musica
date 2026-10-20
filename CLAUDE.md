@@ -33,10 +33,13 @@ subprojeto, como um novo módulo do `backend/`). No mesmo PR que a cria:
 | `specs/` | Specs, planos, contratos e tarefas de cada feature (Spec Kit) |
 | `.specify/` | Constituição, templates e scripts do Spec Kit |
 | `.github/` | CI (`ci.yml`) e workflow de implantação (`deploy.yml`) |
+| `.claude/` | Skills (Spec Kit, grafo e do projeto) e agentes revisores do Claude Code, versionados e revisados por PR |
 | `portal-do-professor-design-system/` | Protótipos HTML da identidade visual (referência, não código de produção) |
 | `assets/` | Material de referência do cliente |
 
-`.claude/` guarda as skills do Spec Kit e os hooks do grafo; não edite à mão.
+`.claude/` guarda as skills do Spec Kit, os hooks do grafo, as skills do projeto e os agentes revisores. As
+skills `speckit-*`, as do grafo e o `settings.json` são gerados por ferramenta: não edite à mão. As skills e os
+agentes do projeto (ver `.claude/CLAUDE.md`) são editados por PR, como qualquer outro código.
 
 ## Fluxo de trabalho com Git
 
