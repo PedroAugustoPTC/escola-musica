@@ -142,9 +142,13 @@ sem ganho.
 **Decisão**: escopo `TEACHER_CPF_PROBE`, chave = id do professor (hash), política **5 recusas em 15 minutos → bloqueio de
 15 minutos**, todos configuráveis (`reports.access.cpf-probe.max-refusals`, `window-minutes`, `lock-minutes`). Só as
 operações que informam CPF (`STUDENT_REGISTER` e `STUDENT_UPDATE` com CPF novo) verificam o bloqueio **antes** de qualquer
-consulta de duplicidade e respondem `OPERATION_TEMPORARILY_BLOCKED` (tempo restante, sem motivo). Só recusa por CPF de
-**aluno alheio** conta; "já está entre os seus", CPF inválido e CPF livre não contam. O sucesso não zera a janela (uma
-sondagem esperta alterna acertos e erros).
+consulta de duplicidade e respondem `OPERATION_TEMPORARILY_BLOCKED` (tempo restante, sem motivo). Conta recusa por CPF de
+**aluno alheio**; "já está entre os seus" e CPF inválido não contam. O sucesso não zera a janela (uma
+sondagem esperta alterna acertos e erros). **Segundo escopo, `TEACHER_CPF_LOOKUP`** (decisão do dono do produto,
+2026-10-20): toda verificação de duplicidade disparada por CPF digitado pelo professor, livre ou ocupado, conta uma
+consulta; 30 consultas em 60 minutos bloqueiam as operações com CPF por 60 minutos
+(`reports.access.cpf-lookup.max-lookups`, `window-minutes`, `lock-minutes`). A nova verificação da confirmação do
+Telegram não conta. Sem esse teto, o limite de recusas limitaria só os positivos e não os CPFs testados.
 
 **Justificativa**: FR-024 quantifica o limite; manter a janela deslizante (e não "consecutivas") evita que um acerto
 intercalado reinicie a contagem.
@@ -156,7 +160,7 @@ ganho); bloqueio por origem (o professor pode estar no Telegram, sem IP útil).
 
 **Decisão**: o professor continua com `AccessCode` (8 caracteres) e o `AccessCodeIssuanceService` **é reaproveitado**
 (unicidade por tentativa de regeração, HMAC). Novo `ActivationCode` do administrador: 12 caracteres do **mesmo alfabeto
-sem ambíguos** (32 símbolos → 60 bits), HMAC-SHA-256 com o `HMAC_SECRET` e prefixo de contexto `activation:` (prefixo novo,
+sem ambíguos** (32 símbolos → 60 bits), HMAC-SHA-256 com chave derivada (HKDF-SHA256, rótulo `activation`) do `AUTH_HMAC_SECRET`, segredo distinto do `HMAC_SECRET` do CPF, e prefixo de contexto `activation:` (prefixo novo,
 em inglês; o prefixo `codigo:` do código de acesso é valor já persistido e fica como está), guardado em
 `administrator.activation_code_hash` (**no máximo um pendente** por administrador por construção da coluna) com
 `activation_code_expires_at` (7 dias). A ativação é feita com **e-mail + código**: carrega-se a conta pelo e-mail e compara-se o
@@ -184,6 +188,7 @@ de autoria:
 | desvincular Telegram | encerra o vínculo |
 | inativar administrador | `active=false`, apaga `password_hash` e código de ativação pendente; revoga todas as sessões (`ACCOUNT_INACTIVATED`) |
 | reativar administrador | `active=true`, **sem** senha, com código de ativação novo (exige definir senha de novo) |
+| trocar a senha provisória | grava o hash novo e `password_provisional=false`; **revoga todas as outras sessões** do administrador (`PASSWORD_CHANGED`) e troca o identificador da sessão atual |
 
 "Encerrar o vínculo" é o novo `TelegramLinkTerminationService`, chamado por **todo** caminho (inativar, desvincular,
 reemitir com opção, e o "sair" do professor): apaga `telegram_link` (e, por `ON DELETE CASCADE`, o cadastro em andamento
@@ -269,7 +274,12 @@ chaves (procedimento no quickstart); (b) o comando `rotate-cpf-key` (`contracts/
 memória, em lotes e em transação, sem nunca emitir o CPF; (c) a varredura automática de CPF em canário (SC-004, R-25);
 (d) o CPF **nunca** em URL, parâmetro, cache, histórico, relatório de erro, cabeçalho ou corpo de requisição
 registrado (FR-039): `spring.mvc.log-request-details=false`, nenhum filtro de log de corpo, `Cache-Control: no-store`,
-campo sem autopreenchimento, e o Caddy não registra corpo.
+campo sem autopreenchimento, e o Caddy não registra corpo. **Chaves por finalidade** (decisão do dono do produto,
+2026-10-20): o `origin_hash` e o código de ativação, que nascem nesta feature, usam subchaves HKDF-SHA256 (rótulos
+`origin` e `activation`) de um segredo novo, `AUTH_HMAC_SECRET`, distinto do `HMAC_SECRET`; assim, rotacionar a chave do
+CPF não invalida os códigos de ativação e vazar o `HMAC_SECRET` não permite reverter endereços de origem. O `cpf_hash` e
+o código de acesso do professor já estão persistidos com o `HMAC_SECRET` e ficam como estão; separá-los exigiria
+recalcular tudo pelo `rotate-cpf-key` e fica como evolução futura.
 
 **Justificativa**: o sistema já protege o CPF como a spec exige; o risco aberto era operacional (rotação) e de
 vazamento lateral (log, cache), cobertos por procedimento e teste.
@@ -299,7 +309,7 @@ de terceiro).
 **Decisão**: o professor nunca consulta "aluno por id" e depois verifica: ele usa `findVisible(actor, studentId)`, uma
 única consulta indexada `student JOIN assignment WHERE student.id=? AND assignment.teacher_id=?`. Aluno alheio, sem
 professor ou inexistente produzem o **mesmo** vazio e o mesmo caminho de código (`RESOURCE_NOT_FOUND`, mesmo corpo, mesmos
-cabeçalhos, uma consulta em ambos, sem trabalho extra no ramo "existe"). Em `/my-students` não há 403
+cabeçalhos, uma consulta em ambos, sem trabalho extra no ramo "existe"; o registro de autoria `AUTHORIZATION_DENIED` é gravado do mesmo jeito, com o mesmo trabalho, para aluno alheio e para inexistente, sem distinguir os dois). Em `/my-students` não há 403
 `STUDENT_NOT_ASSIGNED`. Um teste mede ~200 chamadas de cada caso e exige a mesma ordem de grandeza (razão das medianas
 < 2 e nenhuma diferença estatística grosseira), além de comparar corpo e cabeçalhos byte a byte (SC-006). No Telegram, o
 `callback_data` nunca leva id de aluno (leva a posição na lista persistida) e o texto de "não encontrado" é o mesmo.
@@ -333,7 +343,7 @@ ordem fixa por `id` evita deadlock.
 `reports.administrator.bootstrap.{name,email,password}` (variáveis `ADMIN_BOOTSTRAP_NAME`, `ADMIN_BOOTSTRAP_EMAIL`,
 `ADMIN_BOOTSTRAP_PASSWORD`) e chama `BootstrapFirstAdministratorUseCase` com `Actor.system(SYSTEM_STARTUP)`. O caso de
 uso insere de forma atômica **somente se `count(administrator) = 0`** (`insert … where not exists`), com senha provisória
-(`password_provisional = true`) e autoria "sistema/inicialização do sistema". Quatro situações (tabela em
+(`password_provisional = true`, vencendo em `reports.administrator.provisional-password-days`, padrão 7 dias, coluna `password_provisional_expires_at`) e autoria "sistema/inicialização do sistema". Quatro situações (tabela em
 `contracts/initial-load.md` §4): cria; ignora se já existe algum administrador; sobe com aviso em português se faltam
 variáveis; **recusa subir** se a senha violar o FR-004 ou o e-mail for inválido, citando só o nome da variável. A senha nunca
 vai a log ou a autoria. Os valores do `.env.example` ficam vazios; `local.sh` preenche, só no ambiente local, valores

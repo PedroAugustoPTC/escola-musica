@@ -34,7 +34,7 @@ conta: o responsável é `guardian_*` dentro de `student`.
 | `access/AdministratorSession` | sessão fixa de 2 h, revogável (seção 3.2) |
 | `access/ActivationCode` | 12 caracteres do alfabeto sem ambíguos; `looksLikeCode` e normalização (sem espaço/hífen, maiúsculas) |
 | `access/PasswordPolicy` | 12–128 pontos de código (NFC), recusa igual ao e-mail/nome (sem diferenciar caixa) |
-| `access/AttemptScope`, `access/AttemptPolicy` | `TEACHER_CODE`, `ADMIN_SIGN_IN`, `ADMIN_ACTIVATION`, `TEACHER_CPF_PROBE`; `(maxAttempts, lockDuration, window?)` |
+| `access/AttemptScope`, `access/AttemptPolicy` | `TEACHER_CODE`, `ADMIN_SIGN_IN`, `ADMIN_ACTIVATION`, `TEACHER_CPF_PROBE`, `TEACHER_CPF_LOOKUP`; `(maxAttempts, lockDuration, window?)` |
 | `access/AccessAttempt` (alterado) | ganha `scope`, `windowStartedAt`; falha em bloqueio ativo não conta nem prorroga; sucesso não zera bloqueio ativo |
 | `access/WebSession` (alterado) | ganha `revokedAt`, `revocationReason` (`ACCOUNT_INACTIVATED`, `CODE_REISSUED`) |
 | `access/AuthorshipRecord`, `AuthorshipResult` | registro de autoria (seção 3.4); `SUCCESS`, `FAILURE`, `DENIED`, `BLOCKED` |
@@ -69,6 +69,7 @@ administrador), `ActivationCodeIssuanceService` (espelha o de acesso), e a exten
 | `active` | `boolean NOT NULL` | |
 | `password_hash` | `varchar(255)` | Argon2id codificado (parâmetros dentro); nulo até a ativação e após inativar |
 | `password_provisional` | `boolean NOT NULL` | verdadeiro só para o primeiro administrador até a troca |
+| `password_provisional_expires_at` | `timestamptz` | criação + `reports.administrator.provisional-password-days` (7); só com `password_provisional`; vencida, a senha não autentica |
 | `activation_code_hash` | `varchar(64)` | HMAC; no máximo **um** pendente por administrador (é uma coluna); índice único parcial onde não nulo |
 | `activation_code_expires_at` | `timestamptz` | criação + 7 dias |
 | `activated_at` | `timestamptz` | preenchido quando a senha é definida pelo código |
@@ -86,7 +87,7 @@ Estados derivados (lista): `PENDING` (ativo, sem `password_hash` e com código p
 | `token_hash` | `varchar(64) NOT NULL` **único** | SHA-256 do token de 256 bits |
 | `created_at` | `timestamptz NOT NULL` | |
 | `expires_at` | `timestamptz NOT NULL` | `created_at` + `reports.administrator.session-hours` (2 h); **nunca atualizado** |
-| `revoked_at`, `revocation_reason` | `timestamptz`, `varchar(24)` | `ACCOUNT_INACTIVATED`; "Sair" apaga a linha |
+| `revoked_at`, `revocation_reason` | `timestamptz`, `varchar(24)` | `ACCOUNT_INACTIVATED`, `PASSWORD_CHANGED`; "Sair" apaga a linha |
 
 Índices: `(administrator_id)`, `(expires_at)` (varredura diária de vencidas, a `AccessSweepTask` existente passa a cobrir
 as duas tabelas). **Validação por requisição**: `sessão válida ⇔ now < expires_at ∧ revoked_at IS NULL ∧ administrator.active`.
@@ -148,7 +149,7 @@ dados passam a ser exigidos). `UNIQUE(cpf_hash)` já existe e passa a ser a gara
 
 Acrescenta `scope varchar(24) NOT NULL` (preenchida com `TEACHER_CODE` nas linhas existentes) e `window_started_at timestamptz`;
 troca a unicidade `(channel, source_hash)` por `(scope, channel, source_hash)`. Para `ADMIN_*` o `channel` é `WEB`; para
-`TEACHER_CPF_PROBE` a chave é o hash do id do professor (canal do ator).
+`TEACHER_CPF_PROBE` e `TEACHER_CPF_LOOKUP` a chave é o hash do id do professor (canal do ator).
 
 ### 3.8 `channel_action` (alterada em `V13__channel_action_delete_message.sql`)
 
@@ -217,7 +218,7 @@ Novas: `AdministratorRepository` (`searchById`, `searchByEmail` — a ativação
 `AdministratorSessionRepository` (`searchByTokenHash` já com a conta, `save`, `remove`, `revokeAllOf`, `removeExpired`),
 `PasswordHashPort`, `AuthorshipRecorderPort` (`record`, `recordIndependent`), `StudentRegistrationDraftRepository`,
 `ActivationCodeGeneratorPort`. Alteradas: `AccessAttemptRepository` (`registerFailure(scope, …, policy)`, `confirmSuccess`, `search`),
-`DataProtectionPort` (`hashActivationCode`, `originHash(scope, key)`), `StudentRepository` (`findVisible(scope, id)`,
+`DataProtectionPort` (`hashActivationCode`, `originHash(scope, key)`; os dois usam subchaves do `AUTH_HMAC_SECRET`, distinto do `HMAC_SECRET` do CPF), `StudentRepository` (`findVisible(scope, id)`,
 `list(scope, status)`, `insertIfAbsent`, `searchByCpfHash`), `TeacherRepository` (`list`, `insertIfAbsent`), `AssignmentRepository`
 (`delete`, `listTeachersOfStudent`, `countActiveTeachers`, `countOpenReports…` via `OpenReportsQueryPort`), `WebSessionRepository`
 (`revokeAllOf(teacherId, reason, now)`), `TelegramLinkRepository` (cascata do rascunho), `ChannelActionRepository`

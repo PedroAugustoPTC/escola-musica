@@ -84,6 +84,6 @@ passo a passo fica em `quickstart.md`.
 3. nunca registra, imprime ou grava o CPF em claro; só contagens;
 4. cada chave é opcional e independente. Trocar **só a chave de cifra** reescreve `cpf_encrypted` e não tem efeito
    colateral. Trocar o **segredo do resumo** (`HMAC_SECRET`) também recalcula `cpf_hash`, mas esse segredo protege ainda
-   os códigos de acesso, os códigos de ativação e as origens de tentativas: os códigos vigentes deixam de valer (o
-   administrador reemite os de acesso e de ativação) e as contagens de tentativas zeram. O comando imprime esse aviso
+   os códigos de acesso do professor: os vigentes deixam de valer (o administrador os reemite). Os códigos de ativação e
+   as origens de tentativas usam o `AUTH_HMAC_SECRET` e não são afetados. O comando imprime esse aviso
    e exige a confirmação `--confirm-invalidate-codes` quando o segredo do resumo muda.

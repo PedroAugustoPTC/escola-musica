@@ -120,7 +120,7 @@ paths:
       description: |
         Única operação, além de `GET`/`DELETE /admin/session`, permitida enquanto
         `mustChangePassword` é verdadeiro; as demais rotas respondem 403 `PASSWORD_CHANGE_REQUIRED`.
-        A nova senha segue o FR-004 e difere da provisória. O servidor troca o identificador da
+        A nova senha segue o FR-004 e difere da provisória. O servidor encerra todas as outras sessões do administrador (`PASSWORD_CHANGED`) e troca o identificador da
         sessão (cookie novo, validade de 2 h a partir da troca) e a provisória deixa de valer.
       security: [{ adminSession: [] }]
       requestBody:
@@ -717,7 +717,7 @@ components:
       name: search
       in: query
       required: false
-      description: Parte do nome (e do e-mail, em professores) ou do instrumento; sem diferenciar maiúsculas, minúsculas e acentos. Busca por CPF não existe.
+      description: "Parte do nome (e do e-mail, em professores) ou do instrumento; sem diferenciar maiúsculas, minúsculas e acentos. Busca por CPF não existe; termo com forma de CPF (11 dígitos, com ou sem pontos e traço) é recusado com `VALIDATION_FAILED` no campo `search`, sem repetir o termo."
       schema: { type: string, maxLength: 100 }
     ActiveFilter:
       name: active

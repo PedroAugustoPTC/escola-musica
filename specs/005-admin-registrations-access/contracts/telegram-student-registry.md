@@ -59,9 +59,9 @@ rascunho é descartado no próximo update e por uma varredura, e o bot avisa.
    (`guardianRequired`) e o bot pergunta nome, telefone e e-mail do responsável; senão pula para o instrumento.
 4. **Duplicidade de CPF** é decidida no momento do CPF (e de novo na confirmação, sob a mesma transação): CPF de
    aluno que não é do professor → `CPF_UNAVAILABLE` (neutra, sem nome, sem professor), registro de autoria e conta
-   do limite de sondagem (FR-024); CPF de aluno do próprio professor → `STUDENT_ALREADY_YOURS`. O rascunho é mantido
+   do limite de sondagem (FR-024); cada CPF digitado conta ainda uma consulta no teto `TEACHER_CPF_LOOKUP` (FR-024); CPF de aluno do próprio professor → `STUDENT_ALREADY_YOURS`. O rascunho é mantido
    para o professor corrigir o CPF ou cancelar.
-5. `REGISTRY_CONFIRM`: resumo **sem CPF** (nome, data, instrumento, responsável) + botões **Confirmar** / **Cancelar**
+5. `REGISTRY_CONFIRM`: resumo **sem CPF** (nome, data, instrumento, nome do responsável, sem telefone nem e-mail) + botões **Confirmar** / **Cancelar**
    (`v1:reg-confirm:<token>` e `v1:reg-cancel:`). O `<token>` é um valor aleatório de 8 caracteres gerado a cada vez
    que o resumo é mostrado e guardado no rascunho.
 6. Confirmar → `ConfirmStudentRegistrationUseCase(actor, linkId, token)`: numa única transação, confere o dono (o
@@ -74,8 +74,8 @@ rascunho é descartado no próximo update e por uma varredura, e o bot avisa.
 
 - `MY_STUDENTS` → `ListStudentsUseCase` (o mesmo caso de uso da Web, com o ator professor), página de 6 itens, ordem alfabética, botões
   `‹ Anterior` / `Próxima ›` (`v1:reg-page:<n>`), filtro `Ativos` / `Inativos` (`v1:reg-filter:<ACTIVE|INACTIVE>`).
-  Texto digitado em `REGISTRY_LIST` é busca por nome ou instrumento (mesma normalização da Web).
-- Toque num aluno → `GetStudentUseCase`; o cartão mostra nome, idade, instrumento, situação e responsável
+  Texto digitado em `REGISTRY_LIST` é busca por nome ou instrumento (mesma normalização da Web). Texto com forma de CPF (11 dígitos, com ou sem pontos e traço) nunca vira busca: é recusado com `VALIDATION_FAILED` sem repeti-lo, não é guardado em `data["options"]` e a mensagem é apagada (§4).
+- Toque num aluno → `GetStudentUseCase`; o cartão mostra nome, idade, instrumento, situação e nome do responsável (sem telefone nem e-mail)
   (nunca o CPF). Aluno de outro professor, ou identificador adulterado no `callback_data`, é tratado como inexistente:
   mesma resposta de "Não encontramos o que você procurou" (FR-025).
 - Lista vazia e sem alunos: "Você ainda não tem alunos. Que tal cadastrar o primeiro?" com o botão
@@ -103,7 +103,7 @@ bloqueada por relatório em aberto (FR-022).
 
 ## 4. Apagar a mensagem com o CPF (FR-036)
 
-Ao receber o texto da etapa `REGISTRY_ASK_CPF` (e do novo CPF, na edição) o backend devolve, **antes** da próxima
+Ao receber o texto da etapa `REGISTRY_ASK_CPF` (e do novo CPF, na edição) ou de qualquer texto com forma de CPF em outra etapa, como a busca de `REGISTRY_LIST`, o backend devolve, **antes** da próxima
 pergunta, uma ação `DELETE_MESSAGE` para a mensagem do professor. É uma ação nova v1, só de transporte:
 
 ```json
