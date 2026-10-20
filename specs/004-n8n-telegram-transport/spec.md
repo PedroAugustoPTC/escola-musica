@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-15
 
-**Status**: Draft
+**Status**: Concluída (2026-10-20): Fases 0 a 8 entregues e CI da `main` verde; a observação de 7 dias e o ensaio manual com bot real foram dispensados pelo mantenedor (`evidence/parity.md`, `mode: waiver`)
 
 **Input**: User description: "Colocar o n8n como único transporte do canal Telegram, sem mudar nada do que o professor vê hoje. Esta é a feature que a spec 002 deixou como 'fora de escopo'." (descrição completa preservada no pedido de `/speckit-specify`; resumida nas seções abaixo)
 
