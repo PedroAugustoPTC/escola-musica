@@ -101,12 +101,20 @@ prepare_state() {
 
 # Tráfego contínuo de professores NÃO vinculados: cada update vem de um chat novo e recebe uma resposta previsível
 # (pedido do código de acesso), então "exatamente uma resposta por update" se confere sem massa de dados.
+# Com contrapressão: não injeta enquanto houver mais de TRAFFIC_MAX_PENDING updates pendentes. Cada update custa ≈ 0,3 s de
+# CPU no n8n; num executor lento, injetar a 3 updates/s passa da capacidade, a fila só cresce e o ensaio passaria a medir a
+# velocidade da máquina, não a correção (uma resposta por update). As verificações continuam as mesmas.
+TRAFFIC_MAX_PENDING="${TRAFFIC_MAX_PENDING:-30}"
 traffic_start() {
   : > "$TRAFFIC_LOG"
   : > "$TRAFFIC_FLAG"
   (
     n=0
     while [ -f "$TRAFFIC_FLAG" ]; do
+      if [ "$(pending_updates)" -gt "$TRAFFIC_MAX_PENDING" ] 2>/dev/null; then
+        sleep 0.5
+        continue
+      fi
       n=$((n + 1))
       chat=$((900000 + n))
       if control_post /_control/updates "{\"chatId\":$chat,\"text\":\"oi\"}" >/dev/null 2>&1; then
