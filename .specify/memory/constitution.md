@@ -1,5 +1,34 @@
 <!--
 Sync Impact Report
+- Version change: 2.1.0 → 2.2.0
+- Rationale: MINOR — exceção deliberada e delimitada à paridade do Princípio I, por decisão do dono do
+  produto (2026-10-20): as funções do **Administrador** (acesso e cadastro de professores, alunos, associações,
+  administradores e códigos de acesso, e as futuras consultas de administração) existem **somente na Web**; o
+  Telegram é canal do **Professor**, nunca do Administrador. A paridade entre Web e Telegram continua valendo,
+  integral, para tudo o que o Professor faz. Nenhum princípio é removido; a regra de dependência, a separação de
+  responsabilidades (Princípio II) e a autorização no backend não mudam. Motivo de produto: o administrador
+  autentica com senha e sessão curta na Web; vincular uma conta de mensageria a um papel que enxerga a escola
+  inteira ampliaria a superfície de ataque sem ganho para o uso real (a secretaria trabalha no computador).
+- Modified principles: I. Domínio Independente de Canal e de Fornecedor (nova regra de exceção; regra de paridade
+  e justificativa ajustadas)
+- Modified sections: Restrições Adicionais ("Decisões de produto vinculantes": administração deixa de ser
+  "nos dois canais"; passa a ser do Administrador só Web e do Professor nos dois); Fluxo de Desenvolvimento e
+  Quality Gates (item de revisão de paridade ressalva a exceção)
+- Added sections: nenhuma
+- Removed sections: nenhuma
+- Princípios II a IX: inalterados
+- Templates verificados (`.specify/templates/`): `plan-template.md` (Constitution Check lê esta constituição em
+  tempo de execução), `spec-template.md`, `tasks-template.md`, `checklist-template.md` e
+  `constitution-template.md` — nenhum cita paridade nem administração; nenhum requer alteração.
+- Artefatos dependentes (fora do escopo desta emenda, atualizados nas suas próprias branches):
+  `specs/005-admin-registrations-access/spec.md` (já reflete a decisão), `PLANO_EXECUCAO_SPECKIT.md` (seções 4,
+  8, 9 e 10: administrador sem Telegram; features 006 e 007 só Web para o administrador), `frontend/CLAUDE.md` e
+  `CLAUDE.md` da raiz (nesta mesma PR, para a referência de versão e a nota de paridade).
+- Aprovação: pedida e dada pelo dono do produto no `/speckit-clarify` da feature 005 (2026-10-20); o merge do PR a
+  registra.
+- Deferred items: nenhum
+
+Histórico — v2.1.0 (2026-10-15)
 - Version change: 2.0.0 → 2.1.0
 - Rationale: MINOR — quitação da dívida do Princípio VI pela feature 003 (migração do código existente para
   inglês) e expansão material do princípio: (a) a **regra de transição** deixa de valer, porque o código, o banco,
@@ -192,9 +221,15 @@ Histórico — v1.0.0 (2026-09-30)
 - Canais (Telegram, Web e futuros, como WhatsApp) DEVEM ser adaptadores de entrada que apenas
   traduzem requisições para os mesmos casos de uso. Adaptadores de entrada NÃO DEVEM conter regra
   de negócio.
-- Web e Telegram DEVEM ser canais de entrada equivalentes (paridade funcional): toda
-  funcionalidade disponível em um deles DEVE estar disponível no outro, executando os mesmos casos
-  de uso com as mesmas regras de autorização, validação e versionamento.
+- Web e Telegram DEVEM ser canais de entrada equivalentes (paridade funcional) para o **Professor**:
+  toda funcionalidade do Professor disponível em um deles DEVE estar disponível no outro, executando
+  os mesmos casos de uso com as mesmas regras de autorização, validação e versionamento.
+- **Exceção, por decisão do dono do produto**: as funções do **Administrador** (acesso, cadastro e
+  manutenção de professores, alunos, associações, administradores e códigos de acesso, e as consultas
+  administrativas) existem **somente na Web**. O Telegram é canal do Professor e NÃO DEVE vincular,
+  autenticar nem oferecer menu, comando ou botão ao Administrador; ações administrativas pedidas por
+  ele devem receber negativa neutra. Os casos de uso continuam independentes de canal (esta regra
+  limita quais adaptadores de entrada os expõem). Estender o Telegram ao Administrador exige emenda.
 - Um canal PODE adaptar a forma de interação ao seu meio (ex.: gravação no navegador ↔ mensagem
   de voz; formulário ↔ conversa guiada ou botões; download de PDF ↔ documento enviado no chat),
   mas NÃO DEVE restringir, ampliar ou alterar o resultado de negócio obtido no outro canal.
@@ -210,7 +245,8 @@ Histórico — v1.0.0 (2026-09-30)
 **Justificativa**: o mesmo ciclo de vida de relatório precisa funcionar em qualquer canal e
 sobreviver à troca de stack e de fornecedores de IA, que são as partes mais voláteis do produto.
 Com a paridade entre Web e Telegram, o professor escolhe o canal mais conveniente no momento sem
-perder nenhuma funcionalidade.
+perder nenhuma funcionalidade. A administração, feita por poucas pessoas no computador e com poder
+sobre a escola inteira, fica na Web, onde há senha, sessão curta e confirmação em tela.
 
 ### II. Fonte Única da Verdade
 
@@ -425,8 +461,11 @@ recorrente.
 - **Decisões de produto vinculantes** (seção 0 do handoff):
   - O design visual é totalmente novo; a UI visual do MVP NÃO DEVE ser reaproveitada, somente o
     comportamento funcional.
-  - Web e Telegram são canais de entrada equivalentes (Princípio I): registro de aula,
-    relatório semestral, histórico e administração DEVEM estar disponíveis nos dois canais.
+  - Web e Telegram são canais de entrada equivalentes para o Professor (Princípio I): registro de
+    aula, relatório semestral, histórico e o cadastro e a manutenção dos próprios alunos DEVEM
+    estar disponíveis nos dois canais.
+  - A administração do sistema pelo Administrador é **somente Web**; o Administrador não tem vínculo
+    nem acesso pelo Telegram (Princípio I).
   - Os dois canais DEVEM aceitar áudio: no Telegram, por mensagem de voz ou envio de arquivo; na
     Web, por gravação no navegador ou envio de arquivo.
   - Os dois canais DEVEM compartilhar a mesma identidade de professor e o mesmo ciclo de vida de
@@ -471,8 +510,9 @@ recorrente.
 - Todo Pull Request DEVE:
   - respeitar as camadas e a regra de dependência (Princípio I) e a nomenclatura (Princípio VI);
   - manter a paridade funcional entre Web e Telegram quando adicionar ou alterar funcionalidade
-    em um dos canais (Princípio I); entregar em um canal só é desvio que DEVE ser justificado no
-    plano e registrar a entrega pendente no outro canal;
+    do Professor em um dos canais (Princípio I); entregar em um canal só é desvio que DEVE ser
+    justificado no plano e registrar a entrega pendente no outro canal. Funções do Administrador
+    são somente Web por regra do Princípio I e não são desvio;
   - incluir os testes das mudanças e manter a cobertura mínima (Princípio V), com o CI como fonte
     de verdade;
   - ser revisado quanto a segurança e privacidade quando tocar dados de aluno, áudio, autenticação
@@ -508,4 +548,4 @@ número de versão conforme a política abaixo, e (4) verificar se `spec-templat
 revisão; violações não justificadas bloqueiam o merge. Exceções DEVEM ser registradas na descrição
 do PR e aprovadas por outro revisor.
 
-**Version**: 2.1.0 | **Ratified**: 2026-09-30 | **Last Amended**: 2026-10-15
+**Version**: 2.2.0 | **Ratified**: 2026-09-30 | **Last Amended**: 2026-10-20
