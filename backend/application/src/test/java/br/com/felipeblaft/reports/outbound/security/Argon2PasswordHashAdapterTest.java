@@ -57,7 +57,8 @@ class Argon2PasswordHashAdapterTest {
         String hash = adapter.hash(new Secret(base + "b"));
 
         assertThat(adapter.matches(new Secret(base + "b"), hash)).isTrue();
-        // os 128 caracteres contam inteiros: trocar só o último muda o resultado (sem truncar em 72)
+        // os 128 caracteres contam inteiros: trocar só o último muda o resultado (sem truncar em
+        // 72)
         assertThat(adapter.matches(new Secret(base + "c"), hash)).isFalse();
         assertThat(adapter.matches(new Secret(base), hash)).isFalse();
     }
@@ -81,7 +82,10 @@ class Argon2PasswordHashAdapterTest {
         assertThat(adapter.matches(password, "")).isFalse();
         assertThat(adapter.matches(password, "not-a-hash")).isFalse();
         assertThat(adapter.matches(password, "$argon2id$v=19$m=19456,t=2,p=1$bad$bad")).isFalse();
-        assertThat(adapter.matches(password, "$2a$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ01234"))
+        assertThat(
+                        adapter.matches(
+                                password,
+                                "$2a$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ01234"))
                 .isFalse();
     }
 
@@ -98,7 +102,8 @@ class Argon2PasswordHashAdapterTest {
     void needsRehashOnlyWhenTheStoredCostIsBelowTheCurrentOne() {
         Secret password = new Secret("long-test-password-1");
         String current = adapter.hash(password);
-        String lowerMemory = Argon2PasswordHashAdapter.withParameters(8192, ITERATIONS).hash(password);
+        String lowerMemory =
+                Argon2PasswordHashAdapter.withParameters(8192, ITERATIONS).hash(password);
         String lowerIterations = Argon2PasswordHashAdapter.withParameters(MEMORY, 1).hash(password);
         String stronger = Argon2PasswordHashAdapter.withParameters(32768, 3).hash(password);
 
@@ -115,7 +120,9 @@ class Argon2PasswordHashAdapterTest {
         assertThat(adapter.needsRehash("not-a-hash")).isTrue();
         assertThat(adapter.needsRehash("$argon2i$v=19$m=19456,t=2,p=1$c2FsdHNhbHRzYWx0$aGFzaA"))
                 .isTrue();
-        assertThat(adapter.needsRehash("$2a$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ01234"))
+        assertThat(
+                        adapter.needsRehash(
+                                "$2a$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ01234"))
                 .isTrue();
     }
 

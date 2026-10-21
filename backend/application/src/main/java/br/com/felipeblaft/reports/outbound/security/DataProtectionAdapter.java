@@ -6,7 +6,6 @@ import br.com.felipeblaft.reports.domain.access.ActivationCode;
 import br.com.felipeblaft.reports.domain.access.AttemptScope;
 import br.com.felipeblaft.reports.domain.common.Channel;
 import br.com.felipeblaft.reports.domain.registry.Cpf;
-import br.com.felipeblaft.reports.outbound.PendingImplementation;
 import br.com.felipeblaft.reports.port.DataProtectionPort;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -35,6 +34,8 @@ public class DataProtectionAdapter implements DataProtectionPort {
 
     private final SecretKeySpec keyCpf;
     private final SecretKeySpec keyHmac;
+    private final SecretKeySpec keyOrigin;
+    private final SecretKeySpec keyActivation;
     private final SecureRandom random = new SecureRandom();
 
     public DataProtectionAdapter(ApplicationProperties properties) {
@@ -42,6 +43,9 @@ public class DataProtectionAdapter implements DataProtectionPort {
         byte[] secret = hmacSecret(properties.security().hmacSecret());
         this.keyCpf = new SecretKeySpec(key, "AES");
         this.keyHmac = new SecretKeySpec(secret, "HmacSHA256");
+        byte[] authSecret = authHmacSecret(properties.security().authHmacSecret(), secret);
+        this.keyOrigin = new SecretKeySpec(subKey(authSecret, "origin"), "HmacSHA256");
+        this.keyActivation = new SecretKeySpec(subKey(authSecret, "activation"), "HmacSHA256");
     }
 
     private static byte[] decodeKey(String base64) {
@@ -60,6 +64,43 @@ public class DataProtectionAdapter implements DataProtectionPort {
             throw new IllegalStateException("HMAC_SECRET deve ter pelo menos 32 bytes");
         }
         return secret.getBytes(StandardCharsets.UTF_8);
+    }
+
+    /**
+     * O {@code AUTH_HMAC_SECRET} separa as chaves da origem e da ativação da chave do CPF: ausente,
+     * com menos de 32 bytes ou igual ao {@code HMAC_SECRET} impede a subida. A mensagem nunca traz
+     * o valor.
+     */
+    private static byte[] authHmacSecret(String authSecret, byte[] cpfSecret) {
+        if (authSecret == null || authSecret.isBlank()) {
+            throw new IllegalStateException("AUTH_HMAC_SECRET não configurado");
+        }
+        byte[] bytes = authSecret.getBytes(StandardCharsets.UTF_8);
+        if (bytes.length < 32) {
+            throw new IllegalStateException("AUTH_HMAC_SECRET deve ter pelo menos 32 bytes");
+        }
+        if (MessageDigest.isEqual(bytes, cpfSecret)) {
+            throw new IllegalStateException("AUTH_HMAC_SECRET deve ser diferente do HMAC_SECRET");
+        }
+        return bytes;
+    }
+
+    /**
+     * HKDF-SHA-256 (RFC 5869) sem sal e com uma só saída de 32 bytes: a subchave de cada finalidade
+     * (rótulo {@code origin} ou {@code activation}).
+     */
+    private static byte[] subKey(byte[] secret, String label) {
+        try {
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(new SecretKeySpec(new byte[32], "HmacSHA256"));
+            byte[] pseudoRandomKey = mac.doFinal(secret);
+            mac.init(new SecretKeySpec(pseudoRandomKey, "HmacSHA256"));
+            mac.update(label.getBytes(StandardCharsets.UTF_8));
+            mac.update((byte) 1);
+            return mac.doFinal();
+        } catch (GeneralSecurityException error) {
+            throw new IllegalStateException(error);
+        }
     }
 
     @Override
@@ -106,14 +147,18 @@ public class DataProtectionAdapter implements DataProtectionPort {
         return hmac("origem:" + channel.name() + ":" + origin);
     }
 
+    /**
+     * Subchave {@code activation} do {@code AUTH_HMAC_SECRET}; o valor em claro nunca é guardado.
+     */
     @Override
     public String hashActivationCode(ActivationCode code) {
-        throw PendingImplementation.of("W-E");
+        return hmac(keyActivation, "activation:" + code.value());
     }
 
+    /** Subchave {@code origin} do {@code AUTH_HMAC_SECRET}; o endereço de rede nunca é guardado. */
     @Override
     public String originHash(AttemptScope scope, String key) {
-        throw PendingImplementation.of("W-E");
+        return hmac(keyOrigin, "origin:" + scope.name() + ":" + key);
     }
 
     @Override
@@ -134,9 +179,13 @@ public class DataProtectionAdapter implements DataProtectionPort {
     }
 
     private String hmac(String value) {
+        return hmac(keyHmac, value);
+    }
+
+    private static String hmac(SecretKeySpec key, String value) {
         try {
             Mac mac = Mac.getInstance("HmacSHA256");
-            mac.init(keyHmac);
+            mac.init(key);
             return HexFormat.of().formatHex(mac.doFinal(value.getBytes(StandardCharsets.UTF_8)));
         } catch (GeneralSecurityException error) {
             throw new IllegalStateException(error);

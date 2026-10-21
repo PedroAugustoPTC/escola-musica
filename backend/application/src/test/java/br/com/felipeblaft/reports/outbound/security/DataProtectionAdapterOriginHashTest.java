@@ -19,9 +19,9 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Feature 005, R-09 e R-12: o hash da origem por escopo e o hash do código de ativação usam
- * subchaves HKDF-SHA-256 (rótulos {@code origin} e {@code activation}) do {@code
- * AUTH_HMAC_SECRET}, nunca o {@code HMAC_SECRET} do CPF; o endereço de rede nunca é guardado; o
- * segredo ausente, curto ou igual ao do CPF impede a subida.
+ * subchaves HKDF-SHA-256 (rótulos {@code origin} e {@code activation}) do {@code AUTH_HMAC_SECRET},
+ * nunca o {@code HMAC_SECRET} do CPF; o endereço de rede nunca é guardado; o segredo ausente, curto
+ * ou igual ao do CPF impede a subida.
  */
 class DataProtectionAdapterOriginHashTest {
 
@@ -141,8 +141,7 @@ class DataProtectionAdapterOriginHashTest {
 
     @Test
     void activationHashUsesTheActivationSubKeyAndContextPrefix() throws Exception {
-        String expected =
-                hmacHex(subKey(AUTH_SECRET, "activation"), "activation:K7QM2XPA9B3D");
+        String expected = hmacHex(subKey(AUTH_SECRET, "activation"), "activation:K7QM2XPA9B3D");
 
         assertThat(adapter.hashActivationCode(activation("K7QM2XPA9B3D")))
                 .isEqualTo(expected)

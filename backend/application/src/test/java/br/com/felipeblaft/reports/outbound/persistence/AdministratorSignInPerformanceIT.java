@@ -39,7 +39,8 @@ class AdministratorSignInPerformanceIT extends IntegrationBase {
     @Test
     void p95OfFiftySequentialSignInsIsAtMost500Milliseconds() {
         Instant now = clock.now();
-        AdministratorFixture fixture = AdministratorFixture.insertActive(administrators, hasher, now);
+        AdministratorFixture fixture =
+                AdministratorFixture.insertActive(administrators, hasher, now);
         // o hash padrão precisa estar com os parâmetros padrão (memória 19 MiB, 2 iterações)
         assertThat(administrators.searchByEmail(fixture.email()).orElseThrow().passwordHash())
                 .contains("m=19456,t=2,p=1");
@@ -63,7 +64,9 @@ class AdministratorSignInPerformanceIT extends IntegrationBase {
 
     private void signInOnce(AdministratorFixture fixture, Instant now) {
         Administrator account = administrators.searchByEmail(fixture.email()).orElseThrow();
-        boolean matches = hasher.matches(new Secret(AdministratorFixture.DEFAULT_PASSWORD), account.passwordHash());
+        boolean matches =
+                hasher.matches(
+                        new Secret(AdministratorFixture.DEFAULT_PASSWORD), account.passwordHash());
         assertThat(matches).isTrue();
         String token = protection.generateSessionToken();
         sessions.save(

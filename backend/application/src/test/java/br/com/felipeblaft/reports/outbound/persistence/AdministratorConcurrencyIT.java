@@ -79,7 +79,14 @@ class AdministratorConcurrencyIT extends IntegrationBase {
                                 () -> inactivateKeepingOne(second)));
 
         assertThat(results.stream().filter(Boolean::booleanValue)).hasSize(1);
-        assertThat(administrators.list(null, true, br.com.felipeblaft.reports.domain.common.PageRequest.first()).total())
+        assertThat(
+                        administrators
+                                .list(
+                                        null,
+                                        true,
+                                        br.com.felipeblaft.reports.domain.common.PageRequest
+                                                .first())
+                                .total())
                 .isEqualTo(1);
     }
 
@@ -87,7 +94,8 @@ class AdministratorConcurrencyIT extends IntegrationBase {
     void manySimultaneousInactivationsNeverEmptyTheSet() throws Exception {
         List<Administrator> all = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
-            Administrator admin = AdministratorTestData.active("Admin " + i, "a" + i + "@example.test");
+            Administrator admin =
+                    AdministratorTestData.active("Admin " + i, "a" + i + "@example.test");
             administrators.insertIfAbsent(admin);
             all.add(admin);
         }
@@ -99,7 +107,9 @@ class AdministratorConcurrencyIT extends IntegrationBase {
         List<Boolean> results = ConcurrentRunner.runTogether(tasks);
 
         assertThat(results.stream().filter(Boolean::booleanValue)).hasSize(3);
-        assertThat(jdbc.queryForObject("select count(*) from administrator where active", Integer.class))
+        assertThat(
+                        jdbc.queryForObject(
+                                "select count(*) from administrator where active", Integer.class))
                 .isEqualTo(1);
     }
 

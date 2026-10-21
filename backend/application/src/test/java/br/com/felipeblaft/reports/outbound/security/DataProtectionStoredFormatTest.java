@@ -30,7 +30,9 @@ class DataProtectionStoredFormatTest {
                             null,
                             null,
                             new ApplicationProperties.Security(
-                                    CPF_KEY, HMAC_SECRET, "auth-secret-for-tests-with-over-32-bytes"),
+                                    CPF_KEY,
+                                    HMAC_SECRET,
+                                    "auth-secret-for-tests-with-over-32-bytes"),
                             null,
                             null,
                             null,

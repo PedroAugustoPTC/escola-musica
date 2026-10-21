@@ -51,7 +51,17 @@ final class AdministratorTestData {
 
     static Administrator inactive(String name, String email) {
         return new Administrator(
-                GeneratorId.create(), name, email, false, null, false, null, null, null, NOW, NOW,
+                GeneratorId.create(),
+                name,
+                email,
+                false,
+                null,
+                false,
+                null,
+                null,
+                null,
+                NOW,
+                NOW,
                 NOW);
     }
 

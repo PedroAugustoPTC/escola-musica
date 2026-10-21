@@ -83,7 +83,8 @@ class WebSessionRepositoryRevocationIT extends IntegrationBase {
         insertSession(bruno, 4, now.plus(12, ChronoUnit.HOURS));
         Instant at = now.plusSeconds(60);
 
-        int revoked = sessions.revokeAllOf(clara.id(), SessionRevocationReason.ACCOUNT_INACTIVATED, at);
+        int revoked =
+                sessions.revokeAllOf(clara.id(), SessionRevocationReason.ACCOUNT_INACTIVATED, at);
 
         assertThat(revoked).isEqualTo(2);
         assertThat(reasonOf(1)).isEqualTo("ACCOUNT_INACTIVATED");
@@ -104,7 +105,9 @@ class WebSessionRepositoryRevocationIT extends IntegrationBase {
 
         int again =
                 sessions.revokeAllOf(
-                        clara.id(), SessionRevocationReason.ACCOUNT_INACTIVATED, now.plusSeconds(2));
+                        clara.id(),
+                        SessionRevocationReason.ACCOUNT_INACTIVATED,
+                        now.plusSeconds(2));
 
         assertThat(again).isZero();
         assertThat(reasonOf(1)).isEqualTo("CODE_REISSUED");

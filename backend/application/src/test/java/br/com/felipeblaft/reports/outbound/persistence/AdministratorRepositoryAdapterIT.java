@@ -21,8 +21,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 /**
  * Administradores no PostgreSQL real (feature 005, migração V9): ida e volta, e-mail minúsculo e
- * único, inserção sem abortar a transação, primeiro administrador atômico, lista com busca,
- * índice único parcial do código de ativação pendente e remoção em cascata das sessões.
+ * único, inserção sem abortar a transação, primeiro administrador atômico, lista com busca, índice
+ * único parcial do código de ativação pendente e remoção em cascata das sessões.
  */
 class AdministratorRepositoryAdapterIT extends IntegrationBase {
 
@@ -194,8 +194,7 @@ class AdministratorRepositoryAdapterIT extends IntegrationBase {
         assertThat(read.passwordHash()).startsWith("$argon2id$");
         assertThat(read.activationCodeHash()).isNull();
         assertThat(read.activationCodeExpiresAt()).isNull();
-        assertThat(read.activatedAt())
-                .isEqualTo(AdministratorTestData.micros(NOW.plusSeconds(60)));
+        assertThat(read.activatedAt()).isEqualTo(AdministratorTestData.micros(NOW.plusSeconds(60)));
         assertThat(administrators.count()).isEqualTo(1);
     }
 
@@ -203,7 +202,8 @@ class AdministratorRepositoryAdapterIT extends IntegrationBase {
     void listIsAlphabeticalAndSearchesByNameOrEmailWithoutAccentsOrCase() {
         administrators.insertIfAbsent(
                 AdministratorTestData.active("Zélia Prado", "zelia@example.test"));
-        administrators.insertIfAbsent(AdministratorTestData.active("Ana Souza", "ana@example.test"));
+        administrators.insertIfAbsent(
+                AdministratorTestData.active("Ana Souza", "ana@example.test"));
         administrators.insertIfAbsent(
                 AdministratorTestData.active("Álvaro Lima", "alvaro.lima@escola.example"));
         administrators.insertIfAbsent(

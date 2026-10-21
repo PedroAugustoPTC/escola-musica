@@ -20,8 +20,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 /**
  * Sessões do administrador no PostgreSQL real (feature 005, V9): a consulta por token já traz a
- * conta (validação por requisição, sem cache), a revogação marca e não remove, "Sair" apaga só
- * uma sessão e a varredura apaga as vencidas.
+ * conta (validação por requisição, sem cache), a revogação marca e não remove, "Sair" apaga só uma
+ * sessão e a varredura apaga as vencidas.
  */
 class AdministratorSessionRepositoryAdapterIT extends IntegrationBase {
 
@@ -43,7 +43,8 @@ class AdministratorSessionRepositoryAdapterIT extends IntegrationBase {
 
     private AdministratorSession save(Administrator owner, int n, Instant expiresAt) {
         AdministratorSession session =
-                AdministratorTestData.session(owner.id(), AdministratorTestData.tokenHash(n), expiresAt);
+                AdministratorTestData.session(
+                        owner.id(), AdministratorTestData.tokenHash(n), expiresAt);
         sessions.save(session);
         return session;
     }
@@ -167,7 +168,8 @@ class AdministratorSessionRepositoryAdapterIT extends IntegrationBase {
         Instant revokedAt = NOW.plusSeconds(10);
 
         int revoked =
-                sessions.revokeAllOf(marina.id(), SessionRevocationReason.ACCOUNT_INACTIVATED, revokedAt);
+                sessions.revokeAllOf(
+                        marina.id(), SessionRevocationReason.ACCOUNT_INACTIVATED, revokedAt);
 
         assertThat(revoked).isEqualTo(2);
         for (int n : new int[] {1, 2}) {
@@ -198,11 +200,14 @@ class AdministratorSessionRepositoryAdapterIT extends IntegrationBase {
     @Test
     void revokeAllOfIsIdempotentAndKeepsTheFirstReason() {
         save(marina, 1, NOW.plus(TWO_HOURS));
-        sessions.revokeAllOf(marina.id(), SessionRevocationReason.PASSWORD_CHANGED, NOW.plusSeconds(1));
+        sessions.revokeAllOf(
+                marina.id(), SessionRevocationReason.PASSWORD_CHANGED, NOW.plusSeconds(1));
 
         int second =
                 sessions.revokeAllOf(
-                        marina.id(), SessionRevocationReason.ACCOUNT_INACTIVATED, NOW.plusSeconds(2));
+                        marina.id(),
+                        SessionRevocationReason.ACCOUNT_INACTIVATED,
+                        NOW.plusSeconds(2));
 
         assertThat(second).isZero();
         assertThat(
