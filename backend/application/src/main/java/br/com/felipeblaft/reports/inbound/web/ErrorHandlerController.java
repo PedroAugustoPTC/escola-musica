@@ -6,6 +6,7 @@ import br.com.felipeblaft.reports.domain.common.DomainException;
 import br.com.felipeblaft.reports.domain.common.ErrorCode;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +28,8 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
- * Traduz códigos do núcleo para HTTP (contracts/mensagens.md) com o texto do catálogo. Exceções
- * inesperadas viram {@code ERRO_INTERNO}, sem detalhe interno (FR-054).
+ * Traduz códigos do núcleo para HTTP (contracts/messages.md) com o texto do catálogo. Exceções
+ * inesperadas viram {@code INTERNAL_ERROR}, sem detalhe interno (FR-054).
  */
 @RestControllerAdvice
 public class ErrorHandlerController {
@@ -42,13 +43,11 @@ public class ErrorHandlerController {
             STATUS.put(code, HttpStatus.BAD_REQUEST);
         }
         STATUS.put(ErrorCode.INVALID_CODE, HttpStatus.UNAUTHORIZED);
-        STATUS.put(ErrorCode.EXPIRED_CODE, HttpStatus.UNAUTHORIZED);
         STATUS.put(ErrorCode.SESSION_EXPIRED, HttpStatus.UNAUTHORIZED);
         STATUS.put(ErrorCode.NOT_AUTHENTICATED, HttpStatus.UNAUTHORIZED);
         STATUS.put(ErrorCode.TEMPORARILY_BLOCKED, HttpStatus.TOO_MANY_REQUESTS);
         STATUS.put(ErrorCode.TELEGRAM_ALREADY_LINKED, HttpStatus.CONFLICT);
         STATUS.put(ErrorCode.TEACHER_ALREADY_LINKED, HttpStatus.CONFLICT);
-        STATUS.put(ErrorCode.STUDENT_NOT_ASSIGNED, HttpStatus.FORBIDDEN);
         STATUS.put(ErrorCode.RESOURCE_NOT_FOUND, HttpStatus.NOT_FOUND);
         STATUS.put(ErrorCode.TEACHER_NOT_FOUND, HttpStatus.NOT_FOUND);
         STATUS.put(ErrorCode.PROCESSING_IN_PROGRESS, HttpStatus.CONFLICT);
@@ -65,6 +64,45 @@ public class ErrorHandlerController {
         STATUS.put(ErrorCode.SEMESTER_REPORT_ALREADY_APPROVED, HttpStatus.CONFLICT);
         STATUS.put(ErrorCode.INTERNAL_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
         STATUS.put(ErrorCode.SERVICE_UNAVAILABLE, HttpStatus.SERVICE_UNAVAILABLE);
+        putFeature005Codes();
+    }
+
+    /**
+     * Códigos da feature 005 (contracts/messages.md, seção 1). Os de validação ficam no padrão 400.
+     * Os da confirmação do Telegram não circulam pela Web; ficam em 409 por serem conflito de
+     * estado.
+     */
+    private static void putFeature005Codes() {
+        for (ErrorCode code :
+                List.of(
+                        ErrorCode.ACCESS_ENDED,
+                        ErrorCode.INVALID_CREDENTIALS,
+                        ErrorCode.INVALID_ACTIVATION)) {
+            STATUS.put(code, HttpStatus.UNAUTHORIZED);
+        }
+        for (ErrorCode code :
+                List.of(
+                        ErrorCode.PASSWORD_CHANGE_REQUIRED,
+                        ErrorCode.SHARED_STUDENT_ACTION_DENIED)) {
+            STATUS.put(code, HttpStatus.FORBIDDEN);
+        }
+        for (ErrorCode code :
+                List.of(
+                        ErrorCode.DUPLICATE_EMAIL,
+                        ErrorCode.DUPLICATE_CPF,
+                        ErrorCode.CPF_UNAVAILABLE,
+                        ErrorCode.STUDENT_ALREADY_YOURS,
+                        ErrorCode.LAST_ADMINISTRATOR,
+                        ErrorCode.TEACHER_INACTIVE,
+                        ErrorCode.STUDENT_INACTIVE,
+                        ErrorCode.PASSWORD_CHANGE_NOT_REQUIRED,
+                        ErrorCode.CONFIRMATION_EXPIRED,
+                        ErrorCode.CONFIRMATION_ALREADY_DONE,
+                        ErrorCode.CALLBACK_EXPIRED)) {
+            STATUS.put(code, HttpStatus.CONFLICT);
+        }
+        STATUS.put(ErrorCode.OPERATION_TEMPORARILY_BLOCKED, HttpStatus.TOO_MANY_REQUESTS);
+        STATUS.put(ErrorCode.OPERATION_NOT_SAVED, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     private final MessageCatalog catalog;
@@ -144,7 +182,8 @@ public class ErrorHandlerController {
                 new HashMap<>(parameters.errorParameters(code, details));
         Integer retryAfter = null;
         ResponseEntity.BodyBuilder body = ResponseEntity.status(status);
-        if (code == ErrorCode.TEMPORARILY_BLOCKED
+        if ((code == ErrorCode.TEMPORARILY_BLOCKED
+                        || code == ErrorCode.OPERATION_TEMPORARILY_BLOCKED)
                 && details.get("remainingSeconds") instanceof Number seconds) {
             retryAfter = seconds.intValue();
             body.header(HttpHeaders.RETRY_AFTER, String.valueOf(retryAfter));

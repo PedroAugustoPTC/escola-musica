@@ -12,6 +12,7 @@ export default tseslint.config(
       'playwright-report',
       'test-results',
       'src/services/api-types.ts',
+      'src/services/administration-api-types.ts',
     ],
   },
   {

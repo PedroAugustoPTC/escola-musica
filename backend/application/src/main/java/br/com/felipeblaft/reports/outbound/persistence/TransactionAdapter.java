@@ -1,5 +1,6 @@
 package br.com.felipeblaft.reports.outbound.persistence;
 
+import br.com.felipeblaft.reports.outbound.PendingImplementation;
 import br.com.felipeblaft.reports.port.TransactionPort;
 import java.util.function.Supplier;
 import org.springframework.stereotype.Component;
@@ -19,5 +20,10 @@ class TransactionAdapter implements TransactionPort {
     @Override
     public <T> T run(Supplier<T> excerpt) {
         return model.execute(status -> excerpt.get());
+    }
+
+    @Override
+    public <T> T runAndRollBack(Supplier<T> excerpt) {
+        throw PendingImplementation.of("W-G");
     }
 }

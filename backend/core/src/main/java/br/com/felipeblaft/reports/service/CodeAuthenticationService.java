@@ -15,7 +15,8 @@ import java.util.Optional;
 /**
  * Validação do código de acesso, a mesma nos dois canais (FR-004, FR-007): bloqueio verificado
  * antes do código; código inexistente, fora do formato ou de professor inativo conta como tentativa
- * incorreta; código vencido é recusado com mensagem própria. O código nunca é consumido.
+ * incorreta; código vencido é recusado com a mesma mensagem do inválido (FR-042). O código nunca é
+ * consumido.
  */
 public class CodeAuthenticationService {
 
@@ -48,7 +49,8 @@ public class CodeAuthenticationService {
             throw new DomainException(ErrorCode.INVALID_CODE);
         }
         if (!teacher.get().validCodeAt(now)) {
-            throw new DomainException(ErrorCode.EXPIRED_CODE);
+            // vencido não se distingue de inválido (FR-042); o tratamento completo é do fluxo W-B
+            throw new DomainException(ErrorCode.INVALID_CODE);
         }
         attempts.registerSuccess(channel, origin);
         return teacher.get();

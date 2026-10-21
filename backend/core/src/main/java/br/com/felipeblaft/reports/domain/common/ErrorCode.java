@@ -7,15 +7,13 @@ package br.com.felipeblaft.reports.domain.common;
 public enum ErrorCode {
     // Acesso
     INVALID_CODE,
-    EXPIRED_CODE,
     TEMPORARILY_BLOCKED,
     TELEGRAM_ALREADY_LINKED,
     TEACHER_ALREADY_LINKED,
     SESSION_EXPIRED,
     NOT_AUTHENTICATED,
 
-    // Autorização
-    STUDENT_NOT_ASSIGNED,
+    // Autorização (aluno não associado equivale a aluno inexistente, FR-050)
     RESOURCE_NOT_FOUND,
 
     // Registro de aula e processamento
@@ -49,6 +47,40 @@ public enum ErrorCode {
     INVALID_BIRTH_DATE,
     GUARDIAN_REQUIRED,
     TEACHER_NOT_FOUND,
+
+    // Acesso do administrador (feature 005)
+    INVALID_CREDENTIALS,
+    INVALID_ACTIVATION,
+    ACCESS_ENDED,
+    PASSWORD_CHANGE_REQUIRED,
+    PASSWORD_CHANGE_NOT_REQUIRED,
+    PASSWORD_LENGTH,
+    PASSWORD_EQUALS_IDENTITY,
+    PASSWORD_SAME_AS_PROVISIONAL,
+    LAST_ADMINISTRATOR,
+
+    // Validação de cadastro (campo + motivo)
+    VALIDATION_FAILED,
+    INVALID_NAME,
+    INVALID_PHONE,
+    INVALID_INSTRUMENT,
+    INVALID_TEXT,
+
+    // Duplicidade, escopo e situação
+    DUPLICATE_EMAIL,
+    DUPLICATE_CPF,
+    CPF_UNAVAILABLE,
+    STUDENT_ALREADY_YOURS,
+    SHARED_STUDENT_ACTION_DENIED,
+    TEACHER_INACTIVE,
+    STUDENT_INACTIVE,
+
+    // Bloqueio da sondagem de CPF, confirmação do Telegram e falha parcial
+    OPERATION_TEMPORARILY_BLOCKED,
+    CONFIRMATION_EXPIRED,
+    CONFIRMATION_ALREADY_DONE,
+    CALLBACK_EXPIRED,
+    OPERATION_NOT_SAVED,
 
     // Genéricos
     INVALID_DATA,

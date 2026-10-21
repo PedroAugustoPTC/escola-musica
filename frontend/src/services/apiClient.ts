@@ -7,6 +7,12 @@ export type ContractError = Schemas['Error'];
 
 export const BASE_API = '/api/v1';
 export const SESSION_EXPIRED_EVENT = 'reports:session-expired';
+/** Sessão do administrador expirada (401 em `/admin/**`); independente da sessão do professor. */
+export const ADMIN_SESSION_EXPIRED_EVENT = 'reports:admin-session-expired';
+/** Senha provisória do administrador: o servidor exige a troca (403 `PASSWORD_CHANGE_REQUIRED`). */
+export const ADMIN_PASSWORD_CHANGE_REQUIRED_EVENT = 'reports:admin-password-change-required';
+const CODE_PASSWORD_CHANGE_REQUIRED = 'PASSWORD_CHANGE_REQUIRED';
+const BLOCKED_CODES = new Set(['OPERATION_TEMPORARILY_BLOCKED', 'TEMPORARILY_BLOCKED']);
 const COOKIE_CSRF = 'XSRF-TOKEN';
 const HEADER_CSRF = 'X-CSRF-TOKEN';
 
@@ -20,15 +26,36 @@ export class ApiError extends Error {
   readonly details: Record<string, unknown>;
   readonly retryAfterSeconds?: number;
 
-  constructor(status: number, body: Partial<ContractError> | null) {
+  constructor(status: number, body: Partial<ContractError> | null, retryAfterHeader?: string | null) {
     const code = body?.code ?? (status === 0 ? 'NO_CONNECTION' : 'INTERNAL_ERROR');
     super(body?.message ?? msg(code));
     this.name = 'ApiError';
     this.status = status;
     this.code = code;
     this.details = (body?.details as Record<string, unknown> | undefined) ?? {};
-    this.retryAfterSeconds = body?.retryAfterSeconds;
+    this.retryAfterSeconds = body?.retryAfterSeconds ?? parseSeconds(retryAfterHeader);
   }
+}
+
+function parseSeconds(value: string | null | undefined): number | undefined {
+  if (!value) return undefined;
+  const seconds = Number(value);
+  return Number.isFinite(seconds) && seconds >= 0 ? Math.ceil(seconds) : undefined;
+}
+
+/**
+ * Tempo restante (em segundos) de um bloqueio temporário (`TEMPORARILY_BLOCKED` ou
+ * `OPERATION_TEMPORARILY_BLOCKED`), vindo do corpo ou do cabeçalho `Retry-After`.
+ * Devolve `null` quando o erro não é de bloqueio.
+ */
+export function blockedRemainingSeconds(error: unknown): number | null {
+  if (!(error instanceof ApiError) || !BLOCKED_CODES.has(error.code)) return null;
+  return error.retryAfterSeconds ?? 0;
+}
+
+/** Caminho (relativo a `BASE_API`) da área administrativa: `/admin` ou `/admin/...`. */
+function isAdminPath(path: string): boolean {
+  return /^\/admin(?:[/?#]|$)/.test(path);
 }
 
 function readCookie(name: string): string | null {
@@ -57,10 +84,10 @@ async function ensureCsrf(): Promise<string | null> {
 }
 
 export interface RequestOptions {
-  method?: 'GET' | 'POST' | 'DELETE';
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   body?: unknown;
   form?: FormData;
-  /** Não dispara o evento global de sessão expirada (usado na própria tela de entrada). */
+  /** Não dispara o evento de sessão expirada (usado na própria tela de entrada, do professor ou do administrador). */
   ignore401?: boolean;
   signal?: AbortSignal;
 }
@@ -85,6 +112,7 @@ async function run(path: string, options: RequestOptions): Promise<Response> {
       method,
       headers,
       body,
+      // o cookie `admin_session` (Path=/api/v1/admin) e o `session` seguem só para a própria origem
       credentials: 'same-origin',
       signal: options.signal,
     });
@@ -99,9 +127,14 @@ async function run(path: string, options: RequestOptions): Promise<Response> {
     } catch {
       errorBody = null;
     }
-    const error = new ApiError(response.status, errorBody);
+    const error = new ApiError(response.status, errorBody, response.headers.get('Retry-After'));
+    const admin = isAdminPath(path);
     if (response.status === 401 && !options.ignore401) {
-      window.dispatchEvent(new CustomEvent(SESSION_EXPIRED_EVENT, { detail: error.code }));
+      const event = admin ? ADMIN_SESSION_EXPIRED_EVENT : SESSION_EXPIRED_EVENT;
+      window.dispatchEvent(new CustomEvent(event, { detail: error.code }));
+    }
+    if (admin && response.status === 403 && error.code === CODE_PASSWORD_CHANGE_REQUIRED) {
+      window.dispatchEvent(new CustomEvent(ADMIN_PASSWORD_CHANGE_REQUIRED_EVENT, { detail: error.code }));
     }
     throw error;
   }
@@ -130,6 +163,8 @@ export async function requestBlob(path: string, signal?: AbortSignal): Promise<B
 export const api = {
   get: <T>(path: string, signal?: AbortSignal) => request<T>(path, { signal }),
   post: <T>(path: string, body?: unknown) => request<T>(path, { method: 'POST', body }),
+  put: <T>(path: string, body?: unknown) => request<T>(path, { method: 'PUT', body }),
+  patch: <T>(path: string, body?: unknown) => request<T>(path, { method: 'PATCH', body }),
   postForm: <T>(path: string, form: FormData) => request<T>(path, { method: 'POST', form }),
   delete: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
 };

@@ -117,7 +117,7 @@ class HomeUseCasesTest {
         assertThatThrownBy(() -> summary.run(clara.id(), helena.id()))
                 .isInstanceOf(DomainException.class)
                 .extracting(e -> ((DomainException) e).code())
-                .isEqualTo(ErrorCode.STUDENT_NOT_ASSIGNED);
+                .isEqualTo(ErrorCode.RESOURCE_NOT_FOUND);
     }
 
     @Test

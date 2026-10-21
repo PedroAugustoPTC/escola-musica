@@ -8,12 +8,15 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 
-/** Professor (data-model.md §1). O código de acesso é guardado só como hash. */
+/**
+ * Professor (data-model.md §1). O código de acesso é guardado só como hash. O {@code toString} não
+ * revela dado pessoal.
+ */
 public class Teacher {
 
     private final UUID id;
     private String name;
-    private final String email;
+    private String email;
     private boolean active;
     private String accessCodeHash;
     private Instant accessCodeExpiresAt;
@@ -112,6 +115,46 @@ public class Teacher {
         return true;
     }
 
+    /**
+     * Inativa o professor e invalida o código de acesso (hash, validade e renovação nulos). Devolve
+     * {@code true} se mudou.
+     */
+    public boolean inactivate(Instant now) {
+        if (!active) {
+            return false;
+        }
+        active = false;
+        accessCodeHash = null;
+        accessCodeExpiresAt = null;
+        accessCodeRenewedAt = null;
+        updatedAt = Objects.requireNonNull(now);
+        return true;
+    }
+
+    /**
+     * Reativa o professor sem código: o caso de uso emite um código novo; sessões e vínculo não
+     * voltam. Devolve {@code true} se mudou.
+     */
+    public boolean reactivate(Instant now) {
+        if (active) {
+            return false;
+        }
+        active = true;
+        updatedAt = Objects.requireNonNull(now);
+        return true;
+    }
+
+    public void rename(String newName, Instant now) {
+        name = Objects.requireNonNull(newName);
+        updatedAt = Objects.requireNonNull(now);
+    }
+
+    /** Troca o e-mail, normalizado (sem espaços nas pontas, em minúsculas). */
+    public void changeEmail(String newEmail, Instant now) {
+        email = Objects.requireNonNull(normalizeEmail(newEmail));
+        updatedAt = Objects.requireNonNull(now);
+    }
+
     /** Primeiro nome, usado na saudação ("Olá, Clara"). */
     public String firstName() {
         return name.strip().split("\\s+")[0];
@@ -151,5 +194,10 @@ public class Teacher {
 
     public Instant updatedAt() {
         return updatedAt;
+    }
+
+    @Override
+    public String toString() {
+        return "Teacher[id=" + id + "]";
     }
 }

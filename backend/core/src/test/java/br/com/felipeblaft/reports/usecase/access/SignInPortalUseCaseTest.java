@@ -71,7 +71,7 @@ class SignInPortalUseCaseTest {
     @Test
     void codeExpiredAfterSevenDaysWithoutUse() {
         c.clock.advance(Duration.ofDays(7));
-        failWith(() -> useCase.run("K7QM2XPA", "ip"), ErrorCode.EXPIRED_CODE);
+        failWith(() -> useCase.run("K7QM2XPA", "ip"), ErrorCode.INVALID_CODE);
         assertThat(c.attemptsRepository.all()).isEmpty();
     }
 

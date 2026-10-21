@@ -5,6 +5,7 @@ import br.com.felipeblaft.reports.domain.channel.ChannelActionOrigin;
 import br.com.felipeblaft.reports.domain.channel.ChannelActionState;
 import br.com.felipeblaft.reports.domain.channel.ChannelActionType;
 import br.com.felipeblaft.reports.domain.common.Channel;
+import br.com.felipeblaft.reports.outbound.PendingImplementation;
 import br.com.felipeblaft.reports.port.ChannelActionRepository;
 import jakarta.persistence.EntityManager;
 import java.time.Duration;
@@ -139,6 +140,11 @@ class ChannelActionRepositoryAdapter implements ChannelActionRepository {
                 jpa.countPendings(),
                 jpa.oldestPendingCreated().orElse(null),
                 jpa.countDeliveredSince(deliveredUntil));
+    }
+
+    @Override
+    public int discardPendingByChat(long chatId, Instant now) {
+        throw PendingImplementation.of("W-B");
     }
 
     private ChannelAction read(ChannelActionEntity e) {

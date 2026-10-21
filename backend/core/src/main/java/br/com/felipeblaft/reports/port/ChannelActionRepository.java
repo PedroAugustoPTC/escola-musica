@@ -49,6 +49,12 @@ public interface ChannelActionRepository {
     boolean updateIfVersion(ChannelAction action, int expectedVersion);
 
     /**
+     * Descarta as ações {@code PENDING} do chat (fim do vínculo); as já entregues ou finalizadas
+     * não mudam. Devolve quantas foram descartadas.
+     */
+    int discardPendingByChat(long chatId, Instant now);
+
+    /**
      * Encerra, com o código {@code SEM_CONFIRMACAO}, as ações {@code ENTREGUE} que o orquestrador
      * nunca confirmou e cujo prazo já venceu (FR-029); devolve quantas foram encerradas.
      */

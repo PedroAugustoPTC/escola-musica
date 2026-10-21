@@ -2,8 +2,11 @@ package br.com.felipeblaft.reports.outbound.security;
 
 import br.com.felipeblaft.reports.config.ApplicationProperties;
 import br.com.felipeblaft.reports.domain.access.AccessCode;
+import br.com.felipeblaft.reports.domain.access.ActivationCode;
+import br.com.felipeblaft.reports.domain.access.AttemptScope;
 import br.com.felipeblaft.reports.domain.common.Channel;
 import br.com.felipeblaft.reports.domain.registry.Cpf;
+import br.com.felipeblaft.reports.outbound.PendingImplementation;
 import br.com.felipeblaft.reports.port.DataProtectionPort;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -101,6 +104,16 @@ public class DataProtectionAdapter implements DataProtectionPort {
     @Override
     public String originHash(Channel channel, String origin) {
         return hmac("origem:" + channel.name() + ":" + origin);
+    }
+
+    @Override
+    public String hashActivationCode(ActivationCode code) {
+        throw PendingImplementation.of("W-E");
+    }
+
+    @Override
+    public String originHash(AttemptScope scope, String key) {
+        throw PendingImplementation.of("W-E");
     }
 
     @Override

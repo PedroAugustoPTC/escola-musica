@@ -93,7 +93,7 @@ class SeedCommandIT extends IntegrationBase {
         assertThat(code).isEqualTo(1);
         assertThat(text())
                 .contains("Carga recusada: nada foi gravado.")
-                .contains("students[1].cpf: INVALID_CPF — CPF inválido.")
+                .contains("students[1].cpf: INVALID_CPF — O CPF informado não é válido.")
                 .doesNotContain("111.111");
         assertThat(count("teacher")).isZero();
         assertThat(count("student")).isZero();

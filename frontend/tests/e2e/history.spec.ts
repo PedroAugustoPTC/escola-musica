@@ -42,12 +42,12 @@ test('lista o aprovado e abre o PDF oficial numa nova aba', async ({ page }) => 
 
 test('aluno e relatório de outro professor não são revelados', async ({ page }) => {
   await page.goto(`/students/${data.students.helena}/history`);
-  await expect(page.getByText('Este aluno não está associado a você.')).toBeVisible();
+  await expect(page.getByText('Não encontramos o que você procurou.')).toBeVisible();
   await expect(page.getByText('Helena Prado')).toHaveCount(0);
 
   const history = await page.request.get(`/api/v1/students/${data.students.helena}/history`);
-  expect(history.status()).toBe(403);
-  expect((await history.json()).code).toBe('STUDENT_NOT_ASSIGNED');
+  expect(history.status()).toBe(404);
+  expect((await history.json()).code).toBe('RESOURCE_NOT_FOUND');
   const pdf = await page.request.get(`/api/v1/lesson-reports/${randomUUID()}/official-pdf`);
   expect(pdf.status()).toBe(404);
 });

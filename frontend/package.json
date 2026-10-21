@@ -7,7 +7,8 @@
   "scripts": {
     "generate:messages": "node scripts/generate-messages.mjs",
     "generate:api": "openapi-typescript ../specs/001-fluxo-relatorios/contracts/api-portal.openapi.yaml -o src/services/api-types.ts",
-    "generate": "npm run generate:messages && npm run generate:api",
+    "generate:administration-api": "openapi-typescript ../specs/005-admin-registrations-access/contracts/api-administration.openapi.yaml -o src/services/administration-api-types.ts",
+    "generate": "npm run generate:messages && npm run generate:api && npm run generate:administration-api",
     "predev": "npm run generate",
     "dev": "vite",
     "prebuild": "npm run generate",

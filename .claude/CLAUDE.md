@@ -29,7 +29,7 @@ Configuração do Claude Code para o repositório: skills, agentes e hooks. Tudo
 | qualquer mudança, por último | `constitution-auditor` |
 | CI ou ensaio vermelho | `ci-failure-triage` |
 
-Depois do relatório, o usuário chama `/open-pr`. Essa skill só roda por pedido explícito.
+Depois do relatório, o usuário chama `/open-pr`.
 
 ## Regras
 

@@ -17,6 +17,7 @@ reports:
   security:
     cpf-encryption-key: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
     hmac-secret: test-hmac-secret-with-more-than-32-bytes
+    auth-hmac-secret: test-auth-hmac-secret-with-more-than-32-bytes
   documents:
     dir: ${java.io.tmpdir}/reports-test/documents
   telegram:

@@ -1,6 +1,8 @@
 package br.com.felipeblaft.reports.port;
 
 import br.com.felipeblaft.reports.domain.registry.Student;
+import br.com.felipeblaft.reports.domain.registry.StudentScope;
+import br.com.felipeblaft.reports.domain.registry.StudentStatusFilter;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -13,6 +15,21 @@ public interface StudentRepository {
 
     /** Alunos associados ao professor, em ordem alfabética de nome. */
     List<Student> listByTeacher(UUID teacherId);
+
+    /**
+     * Aluno visível no escopo, numa única consulta: para o professor, só se estiver associado a
+     * ele. Aluno alheio, sem professor ou inexistente produzem o mesmo vazio (R-14).
+     */
+    Optional<Student> findVisible(StudentScope scope, UUID id);
+
+    /** Alunos do escopo na situação pedida, em ordem alfabética de nome. */
+    List<Student> list(StudentScope scope, StudentStatusFilter status);
+
+    /**
+     * Insere somente se o CPF (resumo) ainda não existe, sem abortar a transação (FR-041); devolve
+     * {@code false} em caso de duplicidade.
+     */
+    boolean insertIfAbsent(Student student);
 
     void save(Student student);
 }

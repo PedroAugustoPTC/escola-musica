@@ -247,6 +247,11 @@ public final class ProcessingDoubles {
             transactions++;
             return excerpt.get();
         }
+
+        @Override
+        public <T> T runAndRollBack(Supplier<T> excerpt) {
+            throw new UnsupportedOperationException("F-TEST completa o dublê (T020)");
+        }
     }
 
     public static class InMemoryJobQueue implements JobQueuePort {

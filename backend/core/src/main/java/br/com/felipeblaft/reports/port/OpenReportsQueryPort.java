@@ -7,7 +7,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-/** Consultas de leitura sobre relatórios em aberto e aulas (FR-012, FR-034, FR-035). */
+/**
+ * Consultas de leitura sobre relatórios em aberto e aulas (FR-012, FR-034, FR-035). Só entram
+ * relatórios de professor ativo e de aluno ainda associado a ele: os demais ficam congelados, sem
+ * alteração, e voltam quando a associação ou o professor voltam (R-23).
+ */
 public interface OpenReportsQueryPort {
 
     /** Relatórios em aberto do professor, do mais recente ao mais antigo. */
@@ -18,4 +22,10 @@ public interface OpenReportsQueryPort {
 
     /** Data da última aula de cada aluno do professor. */
     Map<UUID, LocalDate> lastLessonByStudent(UUID teacherId);
+
+    /**
+     * Quantos relatórios em aberto do professor existem para o aluno (prévia da retirada de
+     * associação: eles ficam congelados, nunca alterados, R-23).
+     */
+    int countOpenReports(UUID teacherId, UUID studentId);
 }

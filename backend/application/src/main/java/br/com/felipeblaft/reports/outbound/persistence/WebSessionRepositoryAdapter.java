@@ -1,6 +1,8 @@
 package br.com.felipeblaft.reports.outbound.persistence;
 
+import br.com.felipeblaft.reports.domain.access.SessionRevocationReason;
 import br.com.felipeblaft.reports.domain.access.WebSession;
+import br.com.felipeblaft.reports.outbound.PendingImplementation;
 import br.com.felipeblaft.reports.port.WebSessionRepository;
 import java.time.Instant;
 import java.util.Optional;
@@ -46,6 +48,11 @@ class WebSessionRepositoryAdapter implements WebSessionRepository {
     @Override
     public void remove(UUID id) {
         jpa.deleteById(id);
+    }
+
+    @Override
+    public int revokeAllOf(UUID teacherId, SessionRevocationReason reason, Instant now) {
+        throw PendingImplementation.of("W-E");
     }
 
     @Override

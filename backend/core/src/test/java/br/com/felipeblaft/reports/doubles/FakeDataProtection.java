@@ -29,7 +29,7 @@ public class FakeDataProtection implements DataProtectionPort {
 
     @Override
     public String originHash(Channel channel, String origin) {
-        return "origin:" + channel + ":" + origin;
+        return hex("origin:" + channel + ":" + origin);
     }
 
     @Override
@@ -41,5 +41,30 @@ public class FakeDataProtection implements DataProtectionPort {
     @Override
     public String sessionTokenHash(String token) {
         return "hash:" + token;
+    }
+
+    @Override
+    public String hashActivationCode(br.com.felipeblaft.reports.domain.access.ActivationCode code) {
+        return "activation:" + code.value();
+    }
+
+    @Override
+    public String originHash(
+            br.com.felipeblaft.reports.domain.access.AttemptScope scope, String key) {
+        return hex("origin:" + scope + ":" + key);
+    }
+
+    /** Resumo determinístico de 64 hexadecimais, o mesmo formato do adaptador real. */
+    private static String hex(String value) {
+        try {
+            return java.util.HexFormat.of()
+                    .formatHex(
+                            java.security.MessageDigest.getInstance("SHA-256")
+                                    .digest(
+                                            value.getBytes(
+                                                    java.nio.charset.StandardCharsets.UTF_8)));
+        } catch (java.security.NoSuchAlgorithmException error) {
+            throw new IllegalStateException(error);
+        }
     }
 }

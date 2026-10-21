@@ -1,15 +1,25 @@
 package br.com.felipeblaft.reports.doubles;
 
 import br.com.felipeblaft.reports.domain.registry.Student;
+import br.com.felipeblaft.reports.domain.registry.StudentScope;
+import br.com.felipeblaft.reports.domain.registry.StudentSearch;
+import br.com.felipeblaft.reports.domain.registry.StudentStatusFilter;
 import br.com.felipeblaft.reports.port.StudentRepository;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Alunos em memória. O escopo do professor vem das associações do dublê de associações: aluno
+ * alheio, sem professor ou inexistente produzem o mesmo vazio (R-14), e a unicidade do CPF vale
+ * pelo resumo.
+ */
 public class InMemoryStudentRepository implements StudentRepository {
 
     private final Map<UUID, Student> data = new LinkedHashMap<>();
@@ -33,9 +43,46 @@ public class InMemoryStudentRepository implements StudentRepository {
     public List<Student> listByTeacher(UUID teacherId) {
         return assignments.studentsOf(teacherId).stream()
                 .map(data::get)
-                .filter(java.util.Objects::nonNull)
+                .filter(Objects::nonNull)
                 .sorted(Comparator.comparing(Student::name))
                 .toList();
+    }
+
+    @Override
+    public Optional<Student> findVisible(StudentScope scope, UUID id) {
+        Optional<Student> student = Optional.ofNullable(data.get(id));
+        if (student.isEmpty() || scope.unrestricted()) {
+            return student;
+        }
+        return assignments.exists(scope.teacherId(), id) ? student : Optional.empty();
+    }
+
+    @Override
+    public List<Student> list(StudentScope scope, StudentStatusFilter status) {
+        Collection<Student> universe =
+                scope.unrestricted()
+                        ? data.values()
+                        : assignments.studentsOf(scope.teacherId()).stream()
+                                .map(data::get)
+                                .filter(Objects::nonNull)
+                                .toList();
+        return universe.stream()
+                .filter(student -> status.matches(student.active()))
+                .sorted(
+                        Comparator.comparing(
+                                        (Student student) ->
+                                                StudentSearch.normalize(student.name()))
+                                .thenComparing(Student::name))
+                .toList();
+    }
+
+    @Override
+    public boolean insertIfAbsent(Student student) {
+        if (searchByCpfHash(student.cpfHash()).isPresent()) {
+            return false;
+        }
+        data.put(student.id(), student);
+        return true;
     }
 
     @Override

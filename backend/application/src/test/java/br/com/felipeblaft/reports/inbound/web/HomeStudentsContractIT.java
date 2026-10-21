@@ -71,10 +71,10 @@ class HomeStudentsContractIT extends ContractApiBase {
                 .andExpect(jsonPath("$.name").value("Matteo Mafra"))
                 .andExpect(jsonPath("$.hasOpenReport").value(false));
         mvc.perform(get("/api/v1/students/{id}", helena.id()).cookie(session))
-                .andExpect(status().isForbidden())
+                .andExpect(status().isNotFound())
                 .andExpect(followsContract())
-                .andExpect(jsonPath("$.code").value("STUDENT_NOT_ASSIGNED"))
-                .andExpect(jsonPath("$.message").value("Este aluno não está associado a você."));
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"))
+                .andExpect(jsonPath("$.message").value("Não encontramos o que você procurou."));
         mvc.perform(get("/api/v1/students/{id}", "not-a-uuid").cookie(session))
                 .andExpect(status().isBadRequest());
     }

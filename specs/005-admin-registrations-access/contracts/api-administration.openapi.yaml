@@ -1,0 +1,994 @@
+openapi: 3.1.0
+info:
+  title: API de administração e de "Meus alunos" — Relatórios Pedagógicos por Voz
+  version: 1.0.0
+  description: |
+    Contrato da feature 005-admin-registrations-access, no mesmo estilo do contrato da 001
+    (`specs/001-fluxo-relatorios/contracts/api-portal.openapi.yaml`, que **não muda** além da nota
+    sobre `POST /session` em `contracts/initial-load.md`). Dois grupos de rotas, **separados e cada um
+    aceitando só a sua credencial** (FR-003):
+
+    - `/admin/**`: área administrativa, **somente Web**. Credencial: cookie `admin_session`
+      (HttpOnly, Secure, SameSite=Strict, `Path=/api/v1/admin`, sessão fixa de 2 h, sem renovação).
+    - `/my-students/**`: cadastro dos próprios alunos pelo professor. Credencial: cookie `session`
+      da 001 (sessão deslizante de 12 h). O Telegram executa os mesmos casos de uso por outro
+      adaptador (`contracts/telegram-student-registry.md`); não há rota HTTP para o bot.
+
+    Regras comuns:
+
+    - Nenhuma resposta, em nenhuma rota, contém CPF (nem em formato mascarado). O CPF só trafega
+      na **entrada** (`cpf`), nunca em URL, parâmetro de consulta ou cabeçalho (FR-039).
+    - Requisições que gravam exigem `X-CSRF-TOKEN` igual ao cookie `XSRF-TOKEN` (FR-046).
+    - Todas as respostas levam `Cache-Control: no-store`. Códigos de acesso e de ativação só aparecem
+      na resposta da operação que os gerou (FR-011).
+    - Credencial do outro papel, ou rota inexistente, recebem **a mesma** resposta 404
+      `RESOURCE_NOT_FOUND`; sem credencial, 401 `NOT_AUTHENTICATED` (FR-003).
+    - Aluno de outro professor é idêntico a aluno inexistente: 404 `RESOURCE_NOT_FOUND`, mesmo corpo
+      e mesmos cabeçalhos (FR-025). Em `/my-students` não existe 403 `STUDENT_NOT_ASSIGNED`.
+    - Erros seguem o schema `Error` (o mesmo da 001) e as classes do FR-049; textos em
+      `contracts/messages.md`. Violações de campo vêm em `details.fields`.
+    - A matriz de permissões normativa é `contracts/permission-matrix.json`.
+servers:
+  - url: /api/v1
+tags:
+  - name: AdminAccess
+  - name: AdminTeachers
+  - name: AdminAdministrators
+  - name: AdminStudents
+  - name: AdminAssignments
+  - name: MyStudents
+
+paths:
+  /admin/session:
+    post:
+      tags: [AdminAccess]
+      operationId: signInAdministrator
+      summary: Entrar na área administrativa com e-mail e senha (FR-004, FR-006)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdministratorSignInRequest" }
+      responses:
+        "200":
+          description: Sessão criada (identificador novo a cada login); cookie `admin_session` definido.
+          headers:
+            Set-Cookie: { schema: { type: string } }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdministratorSession" }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
+        "401":
+          description: "`INVALID_CREDENTIALS` — mesma resposta para e-mail inexistente, senha errada, conta inativa e conta ainda não ativada"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "429": { $ref: "#/components/responses/Blocked" }
+    get:
+      tags: [AdminAccess]
+      operationId: getAdministratorSession
+      summary: Sessão atual do administrador
+      security: [{ adminSession: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdministratorSession" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      tags: [AdminAccess]
+      operationId: signOutAdministrator
+      summary: Sair (encerra somente esta sessão, no servidor) (FR-005, FR-046)
+      security: [{ adminSession: [] }]
+      responses:
+        "204":
+          description: Sessão encerrada; cookie removido.
+          headers:
+            Set-Cookie: { schema: { type: string } }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /admin/activation:
+    post:
+      tags: [AdminAccess]
+      operationId: activateAdministrator
+      summary: Definir a senha com o código de ativação (FR-032, Story 7)
+      description: |
+        Sem credencial. O código de ativação é informado junto com o e-mail; as tentativas erradas
+        usam o bloqueio por origem (5 em 15 min, contagem própria). A resposta de código inexistente,
+        vencido, já usado ou de e-mail desconhecido é a mesma (`INVALID_ACTIVATION`). Não abre sessão.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ActivationRequest" }
+      responses:
+        "204": { description: Senha definida; o administrador já pode entrar. }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
+        "401":
+          description: "`INVALID_ACTIVATION`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "429": { $ref: "#/components/responses/Blocked" }
+
+  /admin/password:
+    put:
+      tags: [AdminAccess]
+      operationId: changeProvisionalPassword
+      summary: Trocar a senha provisória do primeiro administrador (FR-034a)
+      description: |
+        Única operação, além de `GET`/`DELETE /admin/session`, permitida enquanto
+        `mustChangePassword` é verdadeiro; as demais rotas respondem 403 `PASSWORD_CHANGE_REQUIRED`.
+        A nova senha segue o FR-004 e difere da provisória. O servidor encerra todas as outras sessões do administrador (`PASSWORD_CHANGED`) e troca o identificador da
+        sessão (cookie novo, validade de 2 h a partir da troca) e a provisória deixa de valer.
+      security: [{ adminSession: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ChangePasswordRequest" }
+      responses:
+        "200":
+          description: Senha trocada; novo cookie `admin_session`.
+          headers:
+            Set-Cookie: { schema: { type: string } }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdministratorSession" }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: "`PASSWORD_CHANGE_NOT_REQUIRED` (a conta não está com senha provisória)"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /admin/teachers:
+    get:
+      tags: [AdminTeachers]
+      operationId: listTeachers
+      summary: Listar professores (FR-012)
+      security: [{ adminSession: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/Search" }
+        - { $ref: "#/components/parameters/ActiveFilter" }
+        - { $ref: "#/components/parameters/Page" }
+        - { $ref: "#/components/parameters/Size" }
+      responses:
+        "200":
+          description: OK (nunca traz código de acesso)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TeacherPage" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "403": { $ref: "#/components/responses/PasswordChangeRequired" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    post:
+      tags: [AdminTeachers]
+      operationId: registerTeacher
+      summary: Cadastrar professor (FR-010)
+      security: [{ adminSession: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TeacherInput" }
+      responses:
+        "201":
+          description: Professor ativo, com o código de acesso exibido **uma única vez**.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TeacherWithCode" }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "403": { $ref: "#/components/responses/PasswordChangeRequired" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Duplicate" }
+
+  /admin/teachers/{teacherId}:
+    parameters:
+      - { $ref: "#/components/parameters/TeacherId" }
+    get:
+      tags: [AdminTeachers]
+      operationId: getTeacher
+      summary: Abrir um professor
+      security: [{ adminSession: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Teacher" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "403": { $ref: "#/components/responses/PasswordChangeRequired" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    patch:
+      tags: [AdminTeachers]
+      operationId: updateTeacher
+      summary: Editar nome e e-mail do professor (FR-013)
+      security: [{ adminSession: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TeacherInput" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Teacher" }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "403": { $ref: "#/components/responses/PasswordChangeRequired" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Duplicate" }
+
+  /admin/teachers/{teacherId}/inactivation:
+    parameters:
+      - { $ref: "#/components/parameters/TeacherId" }
+    post:
+      tags: [AdminTeachers]
+      operationId: inactivateTeacher
+      summary: Inativar professor (FR-014, FR-015)
+      description: |
+        Vale na hora e **nunca** é bloqueada por relatório em aberto. Encerra as sessões Web, o
+        vínculo do Telegram (descartando cadastro em andamento e ações pendentes) e o código de acesso.
+      security: [{ adminSession: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Teacher" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "403": { $ref: "#/components/responses/PasswordChangeRequired" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /admin/teachers/{teacherId}/reactivation:
+    parameters:
+      - { $ref: "#/components/parameters/TeacherId" }
+    post:
+      tags: [AdminTeachers]
+      operationId: reactivateTeacher
+      summary: Reativar professor com código de acesso novo (FR-014)
+      security: [{ adminSession: [] }]
+      responses:
+        "200":
+          description: Professor ativo, com o código exibido uma única vez.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TeacherWithCode" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "403": { $ref: "#/components/responses/PasswordChangeRequired" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /admin/teachers/{teacherId}/access-code:
+    parameters:
+      - { $ref: "#/components/parameters/TeacherId" }
+    post:
+      tags: [AdminTeachers]
+      operationId: reissueAccessCode
+      summary: Reemitir o código de acesso (FR-030)
+      description: |
+        O código anterior deixa de valer na hora e as sessões Web do professor são encerradas.
+        O vínculo do Telegram só é encerrado com `endTelegramLink = true`.
+      security: [{ adminSession: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReissueAccessCodeRequest" }
+      responses:
+        "200":
+          description: Código novo, exibido uma única vez.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TeacherWithCode" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "403": { $ref: "#/components/responses/PasswordChangeRequired" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: "`TEACHER_INACTIVE` (reative antes)"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /admin/teachers/{teacherId}/telegram-link:
+    parameters:
+      - { $ref: "#/components/parameters/TeacherId" }
+    delete:
+      tags: [AdminTeachers]
+      operationId: unlinkTeacherTelegram
+      summary: Desvincular o Telegram do professor (FR-031)
+      security: [{ adminSession: [] }]
+      responses:
+        "204": { description: Vínculo encerrado, ações pendentes e cadastro em andamento descartados. }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "403": { $ref: "#/components/responses/PasswordChangeRequired" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /admin/administrators:
+    get:
+      tags: [AdminAdministrators]
+      operationId: listAdministrators
+      summary: Listar administradores (FR-032)
+      security: [{ adminSession: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/ActiveFilter" }
+        - { $ref: "#/components/parameters/Page" }
+        - { $ref: "#/components/parameters/Size" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdministratorPage" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "403": { $ref: "#/components/responses/PasswordChangeRequired" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    post:
+      tags: [AdminAdministrators]
+      operationId: createAdministrator
+      summary: Criar administrador (código de ativação de uso único) (FR-032)
+      security: [{ adminSession: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdministratorInput" }
+      responses:
+        "201":
+          description: Administrador ativo com ativação pendente; código exibido uma única vez.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdministratorWithActivationCode" }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "403": { $ref: "#/components/responses/PasswordChangeRequired" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Duplicate" }
+
+  /admin/administrators/{administratorId}/inactivation:
+    parameters:
+      - { $ref: "#/components/parameters/AdministratorId" }
+    post:
+      tags: [AdminAdministrators]
+      operationId: inactivateAdministrator
+      summary: Inativar administrador (FR-007, FR-033)
+      description: Encerra as sessões do inativado. Recusa (409 `LAST_ADMINISTRATOR`) se deixaria a escola sem administrador ativo, inclusive sob concorrência.
+      security: [{ adminSession: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Administrator" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "403": { $ref: "#/components/responses/PasswordChangeRequired" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: "`LAST_ADMINISTRATOR`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /admin/administrators/{administratorId}/reactivation:
+    parameters:
+      - { $ref: "#/components/parameters/AdministratorId" }
+    post:
+      tags: [AdminAdministrators]
+      operationId: reactivateAdministrator
+      summary: Reativar administrador com novo código de ativação (FR-033)
+      security: [{ adminSession: [] }]
+      responses:
+        "200":
+          description: Ativo, com ativação pendente; código exibido uma única vez.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdministratorWithActivationCode" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "403": { $ref: "#/components/responses/PasswordChangeRequired" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /admin/students:
+    get:
+      tags: [AdminStudents]
+      operationId: listStudentsAsAdministrator
+      summary: Listar e buscar alunos de toda a escola (FR-021)
+      security: [{ adminSession: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/Search" }
+        - { $ref: "#/components/parameters/StudentStatus" }
+        - { $ref: "#/components/parameters/Page" }
+        - { $ref: "#/components/parameters/Size" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StudentPage" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "403": { $ref: "#/components/responses/PasswordChangeRequired" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    post:
+      tags: [AdminStudents]
+      operationId: registerStudentAsAdministrator
+      summary: Cadastrar aluno, com os professores escolhidos (FR-017 a FR-020, FR-023)
+      security: [{ adminSession: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdministratorStudentInput" }
+      responses:
+        "201":
+          description: Aluno criado e associado (tudo ou nada).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Student" }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "403": { $ref: "#/components/responses/PasswordChangeRequired" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: "`DUPLICATE_CPF` (`details.name` identifica o aluno existente; nunca o CPF) ou `TEACHER_INACTIVE`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /admin/students/{studentId}:
+    parameters:
+      - { $ref: "#/components/parameters/StudentId" }
+    get:
+      tags: [AdminStudents]
+      operationId: getStudentAsAdministrator
+      summary: Abrir um aluno qualquer
+      security: [{ adminSession: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Student" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "403": { $ref: "#/components/responses/PasswordChangeRequired" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    patch:
+      tags: [AdminStudents]
+      operationId: updateStudentAsAdministrator
+      summary: Editar aluno (CPF em branco mantém o atual) (FR-020)
+      security: [{ adminSession: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/StudentUpdate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Student" }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "403": { $ref: "#/components/responses/PasswordChangeRequired" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Duplicate" }
+
+  /admin/students/{studentId}/inactivation:
+    parameters:
+      - { $ref: "#/components/parameters/StudentId" }
+    post:
+      tags: [AdminStudents]
+      operationId: inactivateStudentAsAdministrator
+      summary: Inativar aluno (FR-022); nunca bloqueada por relatório em aberto
+      security: [{ adminSession: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Student" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "403": { $ref: "#/components/responses/PasswordChangeRequired" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /admin/students/{studentId}/reactivation:
+    parameters:
+      - { $ref: "#/components/parameters/StudentId" }
+    post:
+      tags: [AdminStudents]
+      operationId: reactivateStudentAsAdministrator
+      summary: Reativar aluno
+      security: [{ adminSession: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Student" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "403": { $ref: "#/components/responses/PasswordChangeRequired" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /admin/students/{studentId}/teachers/{teacherId}:
+    parameters:
+      - { $ref: "#/components/parameters/StudentId" }
+      - { $ref: "#/components/parameters/TeacherId" }
+    put:
+      tags: [AdminAssignments]
+      operationId: assignTeacherToStudent
+      summary: Associar professor ativo ao aluno (FR-028); idempotente
+      security: [{ adminSession: [] }]
+      responses:
+        "204": { description: Associado. }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "403": { $ref: "#/components/responses/PasswordChangeRequired" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: "`TEACHER_INACTIVE`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    delete:
+      tags: [AdminAssignments]
+      operationId: removeTeacherFromStudent
+      summary: Retirar a associação (FR-029); nunca bloqueada; acesso do professor cai na hora
+      security: [{ adminSession: [] }]
+      responses:
+        "204": { description: Retirada; nenhum relatório é alterado. }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "403": { $ref: "#/components/responses/PasswordChangeRequired" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /admin/students/{studentId}/teachers/{teacherId}/removal-preview:
+    parameters:
+      - { $ref: "#/components/parameters/StudentId" }
+      - { $ref: "#/components/parameters/TeacherId" }
+    get:
+      tags: [AdminAssignments]
+      operationId: previewAssignmentRemoval
+      summary: Quantos relatórios em aberto ficariam congelados (FR-029)
+      security: [{ adminSession: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RemovalPreview" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "403": { $ref: "#/components/responses/PasswordChangeRequired" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /my-students:
+    get:
+      tags: [MyStudents]
+      operationId: listMyStudents
+      summary: Listar e buscar os alunos associados ao professor (FR-025)
+      security: [{ session: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/Search" }
+        - { $ref: "#/components/parameters/StudentStatus" }
+        - { $ref: "#/components/parameters/Page" }
+        - { $ref: "#/components/parameters/Size" }
+      responses:
+        "200":
+          description: Somente alunos do professor da sessão.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StudentPage" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    post:
+      tags: [MyStudents]
+      operationId: registerMyStudent
+      summary: Cadastrar aluno já associado ao professor (FR-024)
+      security: [{ session: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/StudentInput" }
+      responses:
+        "201":
+          description: Aluno criado e associado só ao professor da sessão.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Student" }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: |
+            `CPF_UNAVAILABLE` (CPF de aluno que não é do professor: mensagem neutra, sem nome nem
+            professor) ou `STUDENT_ALREADY_YOURS` (CPF de aluno do próprio professor).
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "429":
+          description: "`OPERATION_TEMPORARILY_BLOCKED` — limite contra sondagem de CPF (FR-024); só as operações com CPF"
+          headers:
+            Retry-After: { schema: { type: integer } }
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /my-students/{studentId}:
+    parameters:
+      - { $ref: "#/components/parameters/StudentId" }
+    get:
+      tags: [MyStudents]
+      operationId: getMyStudent
+      summary: Abrir um aluno do professor
+      security: [{ session: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Student" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    patch:
+      tags: [MyStudents]
+      operationId: updateMyStudent
+      summary: Editar aluno do professor (FR-025, FR-026)
+      security: [{ session: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/StudentUpdate" }
+      responses:
+        "200":
+          description: A edição vale para todos os professores associados.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Student" }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: "`CPF_UNAVAILABLE` ou `STUDENT_ALREADY_YOURS` (CPF novo pertence a outro aluno)"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "429":
+          description: "`OPERATION_TEMPORARILY_BLOCKED`"
+          headers:
+            Retry-After: { schema: { type: integer } }
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /my-students/{studentId}/inactivation:
+    parameters:
+      - { $ref: "#/components/parameters/StudentId" }
+    post:
+      tags: [MyStudents]
+      operationId: inactivateMyStudent
+      summary: Inativar aluno (só se o professor for o único professor ativo associado) (FR-026)
+      security: [{ session: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Student" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "403":
+          description: "`SHARED_STUDENT_ACTION_DENIED` — aluno com mais de um professor ativo; orienta procurar o administrador"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /my-students/{studentId}/reactivation:
+    parameters:
+      - { $ref: "#/components/parameters/StudentId" }
+    post:
+      tags: [MyStudents]
+      operationId: reactivateMyStudent
+      summary: Reativar aluno (mesma regra da inativação)
+      security: [{ session: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Student" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "403":
+          description: "`SHARED_STUDENT_ACTION_DENIED`"
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+components:
+  securitySchemes:
+    adminSession:
+      type: apiKey
+      in: cookie
+      name: admin_session
+    session:
+      type: apiKey
+      in: cookie
+      name: session
+
+  parameters:
+    TeacherId:
+      name: teacherId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    AdministratorId:
+      name: administratorId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    StudentId:
+      name: studentId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    Search:
+      name: search
+      in: query
+      required: false
+      description: "Parte do nome (e do e-mail, em professores) ou do instrumento; sem diferenciar maiúsculas, minúsculas e acentos. Busca por CPF não existe; termo com forma de CPF (11 dígitos, com ou sem pontos e traço) é recusado com `VALIDATION_FAILED` no campo `search`, sem repetir o termo."
+      schema: { type: string, maxLength: 100 }
+    ActiveFilter:
+      name: active
+      in: query
+      required: false
+      schema: { type: boolean }
+    StudentStatus:
+      name: status
+      in: query
+      required: false
+      description: Padrão `ACTIVE`.
+      schema: { type: string, enum: [ACTIVE, INACTIVE, ALL], default: ACTIVE }
+    Page:
+      name: page
+      in: query
+      required: false
+      schema: { type: integer, minimum: 0, default: 0 }
+    Size:
+      name: size
+      in: query
+      required: false
+      schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+
+  responses:
+    ValidationFailed:
+      description: "`VALIDATION_FAILED` com `details.fields[]` (campo + código); nunca repete CPF, senha ou código"
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    NotAuthenticated:
+      description: "`NOT_AUTHENTICATED`, `SESSION_EXPIRED` ou `ACCESS_ENDED`; o portal leva à tela de entrada do papel"
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    PasswordChangeRequired:
+      description: "`PASSWORD_CHANGE_REQUIRED` — senha provisória; só `PUT /admin/password` e a sessão são permitidos"
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    NotFound:
+      description: "`RESOURCE_NOT_FOUND` — inexistente, de outro professor ou rota de outro papel: corpo e cabeçalhos idênticos"
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    Duplicate:
+      description: "`DUPLICATE_EMAIL` ou `DUPLICATE_CPF`; para o administrador `details.name` identifica o registro existente"
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    Blocked:
+      description: "`TEMPORARILY_BLOCKED` (`retryAfterSeconds`)"
+      headers:
+        Retry-After: { schema: { type: integer } }
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  schemas:
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string }
+        message: { type: string, description: Texto em português do catálogo. }
+        retryAfterSeconds: { type: integer }
+        reference: { type: string, description: "Código de referência da falha interna (FR-049.h)." }
+        details:
+          type: object
+          additionalProperties: true
+          properties:
+            fields:
+              type: array
+              items:
+                type: object
+                required: [field, code]
+                properties:
+                  field: { type: string, example: birthDate }
+                  code: { type: string, example: INVALID_BIRTH_DATE }
+            name: { type: string, description: Nome do registro existente (só para o administrador). }
+            frozenReports: { type: integer }
+
+    AdministratorSignInRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, maxLength: 254 }
+        password: { type: string, maxLength: 128, writeOnly: true }
+
+    ActivationRequest:
+      type: object
+      required: [email, activationCode, newPassword]
+      properties:
+        email: { type: string, maxLength: 254 }
+        activationCode: { type: string, maxLength: 20, writeOnly: true, example: "K7QM2XPA9TBD" }
+        newPassword: { type: string, minLength: 12, maxLength: 128, writeOnly: true }
+
+    ChangePasswordRequest:
+      type: object
+      required: [newPassword]
+      properties:
+        newPassword: { type: string, minLength: 12, maxLength: 128, writeOnly: true }
+
+    AdministratorSession:
+      type: object
+      required: [administrator, expiresAt, mustChangePassword]
+      properties:
+        administrator: { $ref: "#/components/schemas/AdministratorSummary" }
+        expiresAt: { type: string, format: date-time, description: "Fixa: login + 2 h; não é renovada." }
+        mustChangePassword: { type: boolean }
+
+    AdministratorSummary:
+      type: object
+      required: [id, name]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+
+    TeacherInput:
+      type: object
+      required: [name, email]
+      properties:
+        name: { type: string, minLength: 2, maxLength: 120 }
+        email: { type: string, maxLength: 254 }
+
+    Teacher:
+      type: object
+      required: [id, name, email, active, telegramLinked]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        email: { type: string }
+        active: { type: boolean }
+        telegramLinked: { type: boolean }
+
+    TeacherWithCode:
+      type: object
+      required: [teacher, accessCode, validUntil]
+      properties:
+        teacher: { $ref: "#/components/schemas/Teacher" }
+        accessCode: { type: string, description: "8 caracteres; exibido uma única vez; nunca em listas." }
+        validUntil: { type: string, format: date-time }
+
+    TeacherPage:
+      type: object
+      required: [items, page, size, total]
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/Teacher" } }
+        page: { type: integer }
+        size: { type: integer }
+        total: { type: integer }
+
+    ReissueAccessCodeRequest:
+      type: object
+      required: [endTelegramLink]
+      properties:
+        endTelegramLink: { type: boolean }
+
+    AdministratorInput:
+      type: object
+      required: [name, email]
+      properties:
+        name: { type: string, minLength: 2, maxLength: 120 }
+        email: { type: string, maxLength: 254 }
+
+    Administrator:
+      type: object
+      required: [id, name, email, active, activationState]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        email: { type: string }
+        active: { type: boolean }
+        activationState:
+          type: string
+          enum: [PENDING, ACTIVATED]
+        activatedAt: { type: string, format: date-time }
+
+    AdministratorWithActivationCode:
+      type: object
+      required: [administrator, activationCode, validUntil]
+      properties:
+        administrator: { $ref: "#/components/schemas/Administrator" }
+        activationCode: { type: string, description: "12 caracteres; exibido uma única vez." }
+        validUntil: { type: string, format: date-time }
+
+    AdministratorPage:
+      type: object
+      required: [items, page, size, total]
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/Administrator" } }
+        page: { type: integer }
+        size: { type: integer }
+        total: { type: integer }
+
+    StudentInput:
+      type: object
+      required: [name, birthDate, cpf]
+      description: Entrada compartilhada pelo administrador e pelo professor (as mesmas validações, no núcleo).
+      properties:
+        name: { type: string, minLength: 2, maxLength: 120 }
+        birthDate: { type: string, format: date }
+        cpf: { type: string, maxLength: 14, writeOnly: true, description: "Só na entrada; aceita pontos e traço." }
+        guardian: { $ref: "#/components/schemas/GuardianInput" }
+        instrument: { type: string, maxLength: 60 }
+
+    AdministratorStudentInput:
+      allOf:
+        - { $ref: "#/components/schemas/StudentInput" }
+        - type: object
+          properties:
+            teacherIds:
+              type: array
+              description: Zero ou mais professores ativos.
+              items: { type: string, format: uuid }
+
+    StudentUpdate:
+      type: object
+      description: |
+        Campos ausentes não mudam. `cpf` em branco ou ausente mantém o atual. `guardian`, quando enviado,
+        substitui os três campos juntos. Menor de 18 anos na data da edição exige os três do responsável.
+      properties:
+        name: { type: string, minLength: 2, maxLength: 120 }
+        birthDate: { type: string, format: date }
+        cpf: { type: string, maxLength: 14, writeOnly: true }
+        guardian: { $ref: "#/components/schemas/GuardianInput" }
+        instrument: { type: string, maxLength: 60 }
+
+    GuardianInput:
+      type: object
+      required: [name, phone, email]
+      properties:
+        name: { type: string, minLength: 2, maxLength: 120 }
+        phone: { type: string, maxLength: 20, description: "Brasileiro com DDD, 10 ou 11 dígitos; aceita máscara." }
+        email: { type: string, maxLength: 254 }
+
+    Guardian:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string }
+        phone: { type: string, description: "Somente dígitos." }
+        email: { type: string }
+
+    Student:
+      type: object
+      description: Nunca contém CPF, cifrado ou não.
+      required: [id, name, birthDate, active]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        birthDate: { type: string, format: date }
+        age: { type: integer, description: "No fuso da escola." }
+        instrument: { type: string }
+        active: { type: boolean }
+        guardian: { $ref: "#/components/schemas/Guardian" }
+        teachers:
+          type: array
+          description: Preenchido só nas rotas `/admin/**`; `/my-students` não devolve outros professores.
+          items:
+            type: object
+            required: [id, name, active]
+            properties:
+              id: { type: string, format: uuid }
+              name: { type: string }
+              active: { type: boolean }
+        canInactivate:
+          type: boolean
+          description: Só em `/my-students`; falso quando há mais de um professor ativo (FR-026).
+
+    StudentPage:
+      type: object
+      required: [items, page, size, total]
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/Student" } }
+        page: { type: integer }
+        size: { type: integer }
+        total: { type: integer }
+
+    RemovalPreview:
+      type: object
+      required: [frozenReports]
+      properties:
+        frozenReports:
+          type: integer
+          minimum: 0
+          description: Relatórios em aberto do professor com o aluno que ficariam congelados.

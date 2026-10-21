@@ -67,7 +67,7 @@ describe('TelaPainel (02)', () => {
     renderRoutes(routes, '/');
     expect(await screen.findByText('Nenhum aluno por aqui')).toBeInTheDocument();
     expect(
-      screen.getByText('Você ainda não tem alunos associados. Fale com a secretaria da escola.'),
+      screen.getByText('Você ainda não tem alunos. Cadastre o primeiro em “Meus alunos”.'),
     ).toBeInTheDocument();
   });
 

@@ -14,6 +14,8 @@ import { QuestionsScreen } from '../pages/QuestionsScreen';
 import { ProcessingScreen } from '../pages/ProcessingScreen';
 import { OpenReportScreen } from '../pages/OpenReportScreen';
 import { SemesterScreen } from '../pages/SemesterScreen';
+import { adminRoutes } from './adminRoutes';
+import { myStudentsRoutes } from './myStudentsRoutes';
 
 /** Página provisória para as rotas ainda não implementadas. */
 function PlaceholderPage({ title }: { title: string }) {
@@ -45,5 +47,7 @@ export const routes: RouteObject[] = [
   { path: '/semester-reports/:reportId', element: protectedRoute(<SemesterReviewScreen />) },
   { path: '/semester-reports/:reportId/approved', element: protectedRoute(<ApprovedScreen semester />) },
   { path: '/students/:studentId/history', element: protectedRoute(<HistoryScreen />) },
+  ...myStudentsRoutes,
+  ...adminRoutes,
   { path: '*', element: protectedRoute(<PlaceholderPage title="Página não encontrada" />) },
 ];

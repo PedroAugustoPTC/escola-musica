@@ -22,7 +22,9 @@ public class Student {
     private final String cpfHash;
     private String guardianName;
     private String instrument;
-    private final boolean active;
+    private String guardianPhone;
+    private String guardianEmail;
+    private boolean active;
     private final Instant createdAt;
     private Instant updatedAt;
 
@@ -37,12 +39,42 @@ public class Student {
             boolean active,
             Instant createdAt,
             Instant updatedAt) {
+        this(
+                id,
+                name,
+                birthDate,
+                encryptedCpf,
+                cpfHash,
+                guardianName,
+                null,
+                null,
+                instrument,
+                active,
+                createdAt,
+                updatedAt);
+    }
+
+    public Student(
+            UUID id,
+            String name,
+            LocalDate birthDate,
+            byte[] encryptedCpf,
+            String cpfHash,
+            String guardianName,
+            String guardianPhone,
+            String guardianEmail,
+            String instrument,
+            boolean active,
+            Instant createdAt,
+            Instant updatedAt) {
         this.id = Objects.requireNonNull(id);
         this.name = Objects.requireNonNull(name);
         this.birthDate = Objects.requireNonNull(birthDate);
         this.encryptedCpf = Objects.requireNonNull(encryptedCpf).clone();
         this.cpfHash = Objects.requireNonNull(cpfHash);
         this.guardianName = guardianName;
+        this.guardianPhone = guardianPhone;
+        this.guardianEmail = guardianEmail;
         this.instrument = instrument;
         this.active = active;
         this.createdAt = Objects.requireNonNull(createdAt);
@@ -64,6 +96,32 @@ public class Student {
                 encryptedCpf,
                 cpfHash,
                 guardianName,
+                instrument,
+                true,
+                now,
+                now);
+    }
+
+    /** Cadastro com os três dados do responsável (nome, telefone e e-mail). */
+    public static Student create(
+            String name,
+            LocalDate birthDate,
+            byte[] encryptedCpf,
+            String cpfHash,
+            String guardianName,
+            String guardianPhone,
+            String guardianEmail,
+            String instrument,
+            Instant now) {
+        return new Student(
+                GeneratorId.create(),
+                name,
+                birthDate,
+                encryptedCpf,
+                cpfHash,
+                guardianName,
+                guardianPhone,
+                guardianEmail,
                 instrument,
                 true,
                 now,
@@ -105,6 +163,26 @@ public class Student {
         return true;
     }
 
+    /** Inativa o aluno; devolve {@code true} se mudou. Nada é apagado (FR-026). */
+    public boolean inactivate(Instant now) {
+        if (!active) {
+            return false;
+        }
+        active = false;
+        updatedAt = Objects.requireNonNull(now);
+        return true;
+    }
+
+    /** Reativa o aluno; devolve {@code true} se mudou. */
+    public boolean reactivate(Instant now) {
+        if (active) {
+            return false;
+        }
+        active = true;
+        updatedAt = Objects.requireNonNull(now);
+        return true;
+    }
+
     public UUID id() {
         return id;
     }
@@ -127,6 +205,14 @@ public class Student {
 
     public String guardianName() {
         return guardianName;
+    }
+
+    public String guardianPhone() {
+        return guardianPhone;
+    }
+
+    public String guardianEmail() {
+        return guardianEmail;
     }
 
     public String instrument() {

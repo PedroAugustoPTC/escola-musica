@@ -5,5 +5,6 @@ playwright-report
 test-results
 package-lock.json
 src/services/api-types.ts
+src/services/administration-api-types.ts
 src/messages/messages.json
 src/styles/fonts

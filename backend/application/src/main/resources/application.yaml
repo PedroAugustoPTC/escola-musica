@@ -62,11 +62,24 @@ reports:
   access:
     max-attempts: ${ACCESS_MAX_ATTEMPTS:5}
     lock-minutes: ${ACCESS_LOCK_MINUTES:15}
+    # Sondagem de CPF pelo professor (feature 005, FR-024): recusas por CPF de aluno alheio.
+    cpf-probe:
+      max-refusals: ${ACCESS_CPF_PROBE_MAX_REFUSALS:5}
+      window-minutes: ${ACCESS_CPF_PROBE_WINDOW_MINUTES:15}
+      lock-minutes: ${ACCESS_CPF_PROBE_LOCK_MINUTES:15}
+    # Teto de consultas de CPF digitado pelo professor, livre ou ocupado.
+    cpf-lookup:
+      max-lookups: ${ACCESS_CPF_LOOKUP_MAX:30}
+      window-minutes: ${ACCESS_CPF_LOOKUP_WINDOW_MINUTES:60}
+      lock-minutes: ${ACCESS_CPF_LOOKUP_LOCK_MINUTES:60}
   code:
     validity-days: ${CODE_VALIDITY_DAYS:7}
   security:
     cpf-encryption-key: ${CPF_ENCRYPTION_KEY:}
     hmac-secret: ${HMAC_SECRET:}
+    # Segredo das chaves derivadas do código de ativação e da origem das tentativas (feature 005, R-09);
+    # distinto do HMAC_SECRET do CPF. Sem valor padrão.
+    auth-hmac-secret: ${AUTH_HMAC_SECRET:}
   documents:
     dir: ${DOCUMENTS_DIR:/data/documents}
   telegram:
@@ -76,6 +89,8 @@ reports:
     webhook-secret: ${TELEGRAM_WEBHOOK_SECRET:}
     files-dir: ${TELEGRAM_FILES_DIR:/var/lib/telegram-bot-api}
     pending-audio-minutes: ${PENDING_AUDIO_MINUTES:30}
+    # Inatividade que descarta o cadastro de aluno em andamento no Telegram (feature 005).
+    student-draft-minutes: ${TELEGRAM_STUDENT_DRAFT_MINUTES:30}
   telegram-channel:
     current-token: ${TELEGRAM_CHANNEL_CURRENT_TOKEN:}
     next-token: ${TELEGRAM_CHANNEL_NEXT_TOKEN:}
@@ -108,6 +123,18 @@ reports:
   jobs:
     workers: ${JOBS_WORKERS:2}
     interval-ms: ${JOBS_INTERVAL_MS:500}
+  # Acesso do administrador (feature 005): sessão fixa, senha provisória, Argon2id e primeiro administrador.
+  administrator:
+    session-hours: ${ADMIN_SESSION_HOURS:2}
+    provisional-password-days: ${ADMIN_PROVISIONAL_PASSWORD_DAYS:7}
+    password:
+      memory-kib: ${ADMIN_PASSWORD_ARGON2_MEMORY_KIB:19456}
+      iterations: ${ADMIN_PASSWORD_ARGON2_ITERATIONS:2}
+    # Sem valor padrão (nenhuma credencial no repositório): só cria o primeiro administrador se ainda não houver nenhum.
+    bootstrap:
+      name: ${ADMIN_BOOTSTRAP_NAME:}
+      email: ${ADMIN_BOOTSTRAP_EMAIL:}
+      password: ${ADMIN_BOOTSTRAP_PASSWORD:}
 
 ---
 spring:

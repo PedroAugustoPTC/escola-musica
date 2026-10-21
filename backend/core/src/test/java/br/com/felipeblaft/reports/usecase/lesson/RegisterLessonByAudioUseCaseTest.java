@@ -57,7 +57,7 @@ class RegisterLessonByAudioUseCaseTest {
         assertThatThrownBy(() -> c.register.run(c.clara.id(), c.helena.id(), file, Channel.WEB))
                 .isInstanceOf(DomainException.class)
                 .extracting(e -> ((DomainException) e).code())
-                .isEqualTo(ErrorCode.STUDENT_NOT_ASSIGNED);
+                .isEqualTo(ErrorCode.RESOURCE_NOT_FOUND);
         assertThat(c.normalization.deleted).contains(file.path());
         assertThat(c.queue.jobs).isEmpty();
     }

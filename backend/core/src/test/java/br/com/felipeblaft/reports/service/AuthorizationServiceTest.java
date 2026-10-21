@@ -28,7 +28,7 @@ class AuthorizationServiceTest {
         assignments.assign(bruno, matteo);
         assertThatThrownBy(() -> service.requireAssignment(clara, matteo))
                 .isInstanceOf(DomainException.class)
-                .hasMessage(ErrorCode.STUDENT_NOT_ASSIGNED.name());
+                .hasMessage(ErrorCode.RESOURCE_NOT_FOUND.name());
     }
 
     @Test
