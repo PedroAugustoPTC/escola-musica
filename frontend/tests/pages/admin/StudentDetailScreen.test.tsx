@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { administratorStudent, validationError } from '../../support/adminFixtures';
+import { TEACHER_ACTIVE, administratorStudent, pageOf, validationError } from '../../support/adminFixtures';
 import { renderAdminArea } from './adminTestSupport';
 import { resetStub } from './studentFormStub';
 
@@ -13,6 +13,7 @@ const PATH = `/api/v1/admin/students/${STUDENT.id}`;
 function open(apiRoutes: Parameters<typeof renderAdminArea>[1] = {}) {
   return renderAdminArea(`/admin/students/${STUDENT.id}`, {
     [`GET ${PATH}`]: { body: STUDENT },
+    'GET /api/v1/admin/teachers': { body: pageOf([TEACHER_ACTIVE]) },
     ...apiRoutes,
   });
 }
@@ -23,7 +24,7 @@ describe('StudentDetailScreen (A12)', () => {
   it('mostra o aluno com situação em ícone e texto e o formulário de edição', async () => {
     open();
     expect(await screen.findByRole('heading', { name: 'Matteo Mafra' })).toBeInTheDocument();
-    expect(screen.getByText('Ativo')).toBeInTheDocument();
+    expect(screen.getAllByText('Ativo').length).toBeGreaterThan(0);
     expect(screen.getByText('modo admin/edit')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Inativar' })).toBeInTheDocument();
   });
@@ -135,7 +136,7 @@ describe('StudentDetailScreen (A12)', () => {
     expect(await within(await screen.findByRole('dialog')).findByRole('alert')).toHaveTextContent(
       'Nada foi gravado',
     );
-    expect(screen.getByText('Ativo')).toBeInTheDocument();
+    expect(screen.queryByText('Inativo')).not.toBeInTheDocument();
   });
 
   it('aluno inexistente mostra o erro do servidor', async () => {

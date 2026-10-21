@@ -7,6 +7,7 @@ import { Icon } from '../../components/Icon';
 import { LoadingState } from '../../components/LoadingState';
 import { FormErrorSummary, StatusBadge } from '../../components/admin/ui';
 import { apiErrorText, fieldErrorsOf } from '../../components/admin/fieldErrors';
+import { StudentAssociationsSection } from './StudentAssociationsSection';
 import { StudentForm } from '../../components/student/StudentForm';
 import { msg } from '../../messages/messages';
 import {
@@ -107,6 +108,8 @@ export function StudentDetailScreen() {
           onCancel={() => navigate('/admin/students')}
         />
       </section>
+
+      <StudentAssociationsSection student={data} />
 
       <section className="admin-section" aria-labelledby="student-status">
         <h2 id="student-status" className="card-title">
