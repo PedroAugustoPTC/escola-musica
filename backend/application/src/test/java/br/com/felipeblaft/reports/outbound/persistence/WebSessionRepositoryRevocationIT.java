@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import br.com.felipeblaft.reports.domain.access.SessionRevocationReason;
+import br.com.felipeblaft.reports.domain.access.WebSession;
 import br.com.felipeblaft.reports.domain.registry.Teacher;
 import br.com.felipeblaft.reports.port.TeacherRepository;
 import br.com.felipeblaft.reports.port.WebSessionRepository;
@@ -63,6 +64,51 @@ class WebSessionRepositoryRevocationIT extends IntegrationBase {
                         java.sql.Timestamp.class,
                         String.format("%064x", n));
         return stamp == null ? null : stamp.toInstant();
+    }
+
+    @Test
+    void revokedSessionIsReadBackWithDateAndReasonAndStaysInvalid() {
+        insertSession(clara, 1, now.plus(12, ChronoUnit.HOURS));
+        Instant at = now.plusSeconds(60);
+        sessions.revokeAllOf(clara.id(), SessionRevocationReason.CODE_REISSUED, at);
+
+        WebSession read = sessions.searchByTokenHash(String.format("%064x", 1)).orElseThrow();
+
+        assertThat(read.revokedAt()).isEqualTo(at);
+        assertThat(read.revocationReason()).isEqualTo(SessionRevocationReason.CODE_REISSUED);
+        assertThat(read.validAt(now.plusSeconds(61))).isFalse();
+    }
+
+    @Test
+    void sessionWithoutRevocationIsReadAsValid() {
+        insertSession(clara, 1, now.plus(12, ChronoUnit.HOURS));
+
+        WebSession read = sessions.searchByTokenHash(String.format("%064x", 1)).orElseThrow();
+
+        assertThat(read.revokedAt()).isNull();
+        assertThat(read.revocationReason()).isNull();
+        assertThat(read.validAt(now)).isTrue();
+    }
+
+    @Test
+    void savingARevokedSessionStoresTheRevocation() {
+        WebSession session =
+                new WebSession(
+                        UUID.randomUUID(),
+                        clara.id(),
+                        String.format("%064x", 7),
+                        now,
+                        now,
+                        now.plus(12, ChronoUnit.HOURS),
+                        now.plusSeconds(5),
+                        SessionRevocationReason.ACCOUNT_INACTIVATED);
+
+        sessions.save(session);
+
+        assertThat(reasonOf(7)).isEqualTo("ACCOUNT_INACTIVATED");
+        assertThat(revokedAtOf(7)).isEqualTo(now.plusSeconds(5));
+        assertThat(sessions.searchByTokenHash(String.format("%064x", 7)).orElseThrow().revoked())
+                .isTrue();
     }
 
     @Test

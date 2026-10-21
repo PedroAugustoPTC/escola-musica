@@ -29,7 +29,9 @@ class WebSessionRepositoryAdapter implements WebSessionRepository {
                                         e.getTokenHash(),
                                         e.getCreatedAt(),
                                         e.getLastUsedAt(),
-                                        e.getExpiresAt()));
+                                        e.getExpiresAt(),
+                                        e.getRevokedAt(),
+                                        e.getRevocationReason()));
     }
 
     @Override
@@ -41,7 +43,9 @@ class WebSessionRepositoryAdapter implements WebSessionRepository {
                         s.tokenHash(),
                         s.createdAt(),
                         s.lastUsedAt(),
-                        s.expiresAt()));
+                        s.expiresAt(),
+                        s.revokedAt(),
+                        s.revocationReason()));
     }
 
     @Override

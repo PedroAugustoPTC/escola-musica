@@ -20,7 +20,9 @@ class ActivationCodeGeneratorAdapter implements ActivationCodeGeneratorPort {
     public ActivationCode generate() {
         StringBuilder code = new StringBuilder(SIZE);
         for (int i = 0; i < SIZE; i++) {
-            code.append(ActivationCode.ALPHABET.charAt(random.nextInt(ActivationCode.ALPHABET.length())));
+            code.append(
+                    ActivationCode.ALPHABET.charAt(
+                            random.nextInt(ActivationCode.ALPHABET.length())));
         }
         return ActivationCode.retry(code.toString())
                 .orElseThrow(

@@ -46,6 +46,8 @@ import tools.jackson.databind.json.JsonMapper;
 @SpringBootTest(
         properties = {
             "spring.flyway.target=8",
+            // as tabelas da feature 005 (V9 em diante) ainda não existem neste esquema
+            "spring.jpa.hibernate.ddl-auto=none",
             "spring.flyway.schemas=" + MigrationV8ReadableDataIT.SCHEMA,
             "spring.flyway.default-schema=" + MigrationV8ReadableDataIT.SCHEMA,
         })
