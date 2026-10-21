@@ -1,7 +1,10 @@
 package br.com.felipeblaft.reports.outbound.persistence;
 
+import br.com.felipeblaft.reports.domain.access.SessionRevocationReason;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.Instant;
@@ -28,21 +31,33 @@ public class WebSessionEntity {
     @Column(name = "expires_at", nullable = false)
     private Instant expiresAt;
 
+    @Column(name = "revoked_at")
+    private Instant revokedAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "revocation_reason")
+    private SessionRevocationReason revocationReason;
+
     protected WebSessionEntity() {}
 
+    @SuppressWarnings("java:S107")
     WebSessionEntity(
             UUID id,
             UUID teacherId,
             String tokenHash,
             Instant createdAt,
             Instant lastUsedAt,
-            Instant expiresAt) {
+            Instant expiresAt,
+            Instant revokedAt,
+            SessionRevocationReason revocationReason) {
         this.id = id;
         this.teacherId = teacherId;
         this.tokenHash = tokenHash;
         this.createdAt = createdAt;
         this.lastUsedAt = lastUsedAt;
         this.expiresAt = expiresAt;
+        this.revokedAt = revokedAt;
+        this.revocationReason = revocationReason;
     }
 
     UUID getId() {
@@ -67,5 +82,13 @@ public class WebSessionEntity {
 
     Instant getExpiresAt() {
         return expiresAt;
+    }
+
+    Instant getRevokedAt() {
+        return revokedAt;
+    }
+
+    SessionRevocationReason getRevocationReason() {
+        return revocationReason;
     }
 }
