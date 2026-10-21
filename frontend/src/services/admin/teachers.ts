@@ -114,3 +114,12 @@ export function useUnlinkTeacherTelegram(teacherId: string) {
     },
   });
 }
+
+/** Professores ativos para a multisseleção do cadastro de aluno (até 100, o máximo da página). */
+export function useActiveTeacherOptions() {
+  return useQuery<TeacherPage>({
+    queryKey: [...TEACHERS, 'options'],
+    queryFn: ({ signal }) =>
+      api.get<TeacherPage>(`/admin/teachers${queryString({ active: true, size: 100 })}`, signal),
+  });
+}
