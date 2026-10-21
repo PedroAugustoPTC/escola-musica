@@ -1,16 +1,20 @@
 package br.com.felipeblaft.reports.outbound.security;
 
+import br.com.felipeblaft.reports.config.ApplicationProperties;
 import br.com.felipeblaft.reports.domain.common.Secret;
 import br.com.felipeblaft.reports.outbound.PendingImplementation;
 import br.com.felipeblaft.reports.port.PasswordHashPort;
 import org.springframework.stereotype.Component;
 
-/**
- * Hash de senha com Argon2id. Stub da Fundação (feature 005): o algoritmo, os parâmetros das
- * propriedades e o hash de isca chegam com o fluxo W-E.
- */
+/** Esqueleto temporário da fase vermelha (testes primeiro). */
 @Component
 class Argon2PasswordHashAdapter implements PasswordHashPort {
+
+    Argon2PasswordHashAdapter(ApplicationProperties properties) {}
+
+    static Argon2PasswordHashAdapter withParameters(int memoryKib, int iterations) {
+        throw PendingImplementation.of("W-E");
+    }
 
     @Override
     public String hash(Secret password) {
