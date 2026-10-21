@@ -58,7 +58,7 @@ describe('TelaEntrar (01)', () => {
         body: {
           code: 'INVALID_CODE',
           message:
-            'Código inválido. Confira o código e tente de novo, ou peça um novo à secretaria da escola.',
+            'Código inválido ou vencido. Procure o administrador.',
         },
       },
     });
@@ -67,7 +67,7 @@ describe('TelaEntrar (01)', () => {
     await user.type(screen.getByLabelText('Código de acesso'), 'ZZZZZZZZ');
     await user.click(screen.getByRole('button', { name: 'Entrar' }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Código inválido.');
+    expect(await screen.findByRole('alert')).toHaveTextContent('Código inválido ou vencido. Procure o administrador.');
     expect(screen.getByLabelText('Código de acesso')).toHaveAttribute('aria-invalid', 'true');
   });
 

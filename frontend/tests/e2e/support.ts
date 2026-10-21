@@ -1,4 +1,5 @@
 import { createCipheriv, createHmac, randomBytes, randomUUID } from 'node:crypto';
+import AxeBuilder from '@axe-core/playwright';
 import { expect, type Page } from '@playwright/test';
 import pg from 'pg';
 
@@ -75,6 +76,8 @@ export async function seed(): Promise<Seeding> {
       return id;
     };
 
+    // CPFs sintéticos: dígitos verificadores válidos, mas de exemplo público de geradores de teste
+    // (e o CPF canário da feature 005, 11144477735); nenhum pertence a uma pessoa real.
     const clara = await teacher('Clara Souza', 'clara@example.test', CODE_CLARA);
     const bruno = await teacher('Bruno Lima', 'bruno@example.test', CODE_BRUNO);
     return {
@@ -83,8 +86,8 @@ export async function seed(): Promise<Seeding> {
       students: {
         matteo: await student(clara, 'Matteo Mafra', '52998224725', 'Piano'),
         olavo: await student(clara, 'Olavo Torrente', '12345678909', 'Violão'),
-        miguel: await student(clara, 'Miguel de Castro Torrente', '70451283635', 'Violino'),
-        helena: await student(bruno, 'Helena Prado', '31826459782', 'Flauta'),
+        miguel: await student(clara, 'Miguel de Castro Torrente', '11144477735', 'Violino'),
+        helena: await student(bruno, 'Helena Prado', '39053344705', 'Flauta'),
       },
     };
   });
@@ -118,6 +121,123 @@ export async function signin(page: Page, code = CODE_CLARA): Promise<void> {
   await page.getByLabel('Código de acesso').fill(code);
   await page.getByRole('button', { name: 'Entrar' }).click();
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Olá');
+}
+
+/** Entra como professor pela tela 01 (código de acesso); o padrão é a Clara semeada. */
+export async function signInAsTeacher(page: Page, code = CODE_CLARA): Promise<void> {
+  await signin(page, code);
+}
+
+export interface AdministratorCredentials {
+  email: string;
+  password: string;
+}
+
+/**
+ * Credenciais do administrador da pilha de testes, lidas do ambiente (`E2E_ADMIN_EMAIL` e
+ * `E2E_ADMIN_PASSWORD`): a senha nunca fica no código nem em log.
+ */
+export function administratorCredentialsFromEnvironment(): AdministratorCredentials {
+  const password = process.env.E2E_ADMIN_PASSWORD;
+  if (!password) throw new Error('Defina E2E_ADMIN_PASSWORD para entrar como administrador nos testes e2e.');
+  return { email: process.env.E2E_ADMIN_EMAIL ?? 'admin@example.test', password };
+}
+
+/** Tela A01: entra como administrador (e-mail e senha) e espera a área administrativa abrir. */
+export async function signInAsAdministrator(
+  page: Page,
+  credentials: AdministratorCredentials = administratorCredentialsFromEnvironment(),
+): Promise<void> {
+  await page.goto('/admin/sign-in');
+  await page.getByLabel('E-mail').fill(credentials.email);
+  await page.getByLabel('Senha', { exact: true }).fill(credentials.password);
+  await page.getByRole('button', { name: 'Entrar' }).click();
+  await expect(page).toHaveURL(/\/admin(\/change-password)?$/);
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+}
+
+export type ColorTheme = 'light' | 'dark';
+
+export interface AccessibilityCheckOptions {
+  themes?: readonly ColorTheme[];
+  /** Larguras da janela, em pixels. */
+  viewports?: readonly number[];
+}
+
+const AXE_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
+const SERIOUS_IMPACTS = new Set(['serious', 'critical']);
+
+/**
+ * SC-012: axe sem violação séria ou crítica na página atual, em cada tema e largura dados
+ * (padrão: claro e escuro, 390 px e 1440 px), e sem rolagem horizontal. Só informa a regra e o
+ * seletor das violações (nunca o HTML nem o texto da página), para não vazar dado nos relatórios.
+ * Devolve a janela e o tema ao que eram.
+ */
+export async function expectNoSeriousViolations(
+  page: Page,
+  options: AccessibilityCheckOptions = {},
+): Promise<void> {
+  const themes = options.themes ?? (['light', 'dark'] as const);
+  const viewports = options.viewports ?? ([390, 1440] as const);
+  const original = page.viewportSize();
+  try {
+    for (const width of viewports) {
+      for (const theme of themes) {
+        const label = `${width}px, tema ${theme}`;
+        await page.setViewportSize({ width, height: original?.height ?? 900 });
+        await page.emulateMedia({ colorScheme: theme });
+        await page.waitForLoadState('domcontentloaded');
+        const result = await new AxeBuilder({ page }).withTags(AXE_TAGS).exclude('iframe').analyze();
+        const serious = result.violations
+          .filter((v) => SERIOUS_IMPACTS.has(v.impact ?? ''))
+          .map((v) => `${v.id} (${v.nodes.map((n) => n.target).join(' | ')})`);
+        expect(serious, label).toEqual([]);
+        const overflow = await page.evaluate(
+          () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        );
+        expect(overflow, `${label}: rolagem horizontal`).toBeLessThanOrEqual(0);
+      }
+    }
+  } finally {
+    await page.emulateMedia({ colorScheme: null });
+    if (original) await page.setViewportSize(original);
+  }
+}
+
+/** Formas em que um valor sensível poderia aparecer: cru, codificado e, se for CPF, só dígitos ou mascarado. */
+function sensitiveVariants(value: string): string[] {
+  const variants = new Set([value, encodeURIComponent(value)]);
+  const digits = value.replace(/\D/g, '');
+  if (digits.length >= 6) variants.add(digits);
+  if (digits.length === 11) {
+    variants.add(`${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`);
+  }
+  return [...variants];
+}
+
+/**
+ * Confere que a URL atual e o armazenamento do navegador (`localStorage`, `sessionStorage` e cookies)
+ * não contêm o valor dado (por exemplo, o CPF digitado). A falha diz só onde achou, nunca o valor.
+ */
+export async function expectValueAbsentFromUrlAndStorage(page: Page, value: string): Promise<void> {
+  const variants = sensitiveVariants(value);
+  const contains = (text: string) => variants.some((variant) => text.includes(variant));
+
+  expect(contains(page.url()), 'a URL contém o valor sensível').toBe(false);
+
+  const stored = await page.evaluate(() => {
+    const dump = (storage: Storage) =>
+      Object.keys(storage).map((key) => `${key}=${storage.getItem(key) ?? ''}`);
+    return { local: dump(window.localStorage), session: dump(window.sessionStorage) };
+  });
+  expect(stored.local.some(contains), 'o localStorage contém o valor sensível').toBe(false);
+  expect(stored.session.some(contains), 'o sessionStorage contém o valor sensível').toBe(false);
+
+  const cookies = await page.context().cookies();
+  expect(
+    cookies.some((cookie) => contains(`${cookie.name}=${cookie.value}`)),
+    'um cookie contém o valor sensível',
+  ).toBe(false);
 }
 
 /** Tela 05: anexa o áudio de teste e envia. */

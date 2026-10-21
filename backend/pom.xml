@@ -37,6 +37,9 @@
         <wiremock.version>3.13.2</wiremock.version>
         <swagger-request-validator.version>3.0.0</swagger-request-validator.version>
         <pdfbox.version>3.0.8</pdfbox.version>
+        <!-- Argon2id da senha do administrador (feature 005, R-04): o Argon2PasswordEncoder do Spring Security
+             Crypto exige o BouncyCastle. Versão fixada aqui; atualizar só por PR. -->
+        <bcprov.version>1.85.2</bcprov.version>
         <jacoco.version>0.8.15</jacoco.version>
         <spotless.version>3.10.3</spotless.version>
         <google-java-format.version>1.36.1</google-java-format.version>
@@ -53,6 +56,11 @@
                 <groupId>com.tngtech.archunit</groupId>
                 <artifactId>archunit-junit5</artifactId>
                 <version>${archunit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>${bcprov.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -11,7 +11,7 @@ import java.util.UUID;
 
 /**
  * Resumo de um aluno associado. Aluno de outro professor (ou inexistente) é {@code
- * ALUNO_NAO_ASSOCIADO}, sem revelar nenhum dado (FR-009).
+ * RESOURCE_NOT_FOUND}, sem revelar nenhum dado (FR-009).
  */
 public class GetStudentSummaryUseCase {
 
@@ -32,7 +32,7 @@ public class GetStudentSummaryUseCase {
         authorization.requireAssignment(teacherId, studentId);
         Student student =
                 students.searchById(studentId)
-                        .orElseThrow(() -> new DomainException(ErrorCode.STUDENT_NOT_ASSIGNED));
+                        .orElseThrow(() -> new DomainException(ErrorCode.RESOURCE_NOT_FOUND));
         return new StudentSummary(
                 student.id(),
                 student.name(),

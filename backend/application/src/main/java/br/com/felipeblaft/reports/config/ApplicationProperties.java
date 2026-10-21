@@ -5,9 +5,7 @@ import java.nio.file.Path;
 import java.time.ZoneId;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-/**
- * Propriedades da aplicação (prefixo {@code relatorios}), lidas do ambiente via application.yaml.
- */
+/** Propriedades da aplicação (prefixo {@code reports}), lidas do ambiente via application.yaml. */
 @ConfigurationProperties(prefix = "reports")
 public record ApplicationProperties(
         School school,
@@ -20,7 +18,8 @@ public record ApplicationProperties(
         Telegram telegram,
         TelegramChannel telegramChannel,
         Providers providers,
-        Jobs jobs) {
+        Jobs jobs,
+        Administrator administrator) {
 
     public record School(ZoneId timezone) {}
 
@@ -33,11 +32,20 @@ public record ApplicationProperties(
 
     public record Session(int hours, boolean cookieSecure) {}
 
-    public record Access(int maxAttempts, int lockMinutes) {}
+    /**
+     * Bloqueio por tentativas. {@code cpfProbe} limita as recusas por CPF de aluno alheio e {@code
+     * cpfLookup} limita as consultas de CPF digitado pelo professor (feature 005, FR-024).
+     */
+    public record Access(
+            int maxAttempts, int lockMinutes, CpfProbe cpfProbe, CpfLookup cpfLookup) {}
+
+    public record CpfProbe(int maxRefusals, int windowMinutes, int lockMinutes) {}
+
+    public record CpfLookup(int maxLookups, int windowMinutes, int lockMinutes) {}
 
     public record Code(int validityDays) {}
 
-    public record Security(String cpfEncryptionKey, String hmacSecret) {
+    public record Security(String cpfEncryptionKey, String hmacSecret, String authHmacSecret) {
 
         @Override
         public String toString() {
@@ -53,7 +61,8 @@ public record ApplicationProperties(
             String token,
             String webhookSecret,
             Path filesDir,
-            int pendingAudioMinutes) {
+            int pendingAudioMinutes,
+            int studentDraftMinutes) {
 
         @Override
         public String toString() {
@@ -121,4 +130,26 @@ public record ApplicationProperties(
     }
 
     public record Jobs(int workers, long intervalMs) {}
+
+    /**
+     * Acesso do administrador (feature 005): sessão fixa, senha provisória, custo do Argon2id e
+     * primeiro administrador lido do ambiente (R-04, R-16).
+     */
+    public record Administrator(
+            int sessionHours,
+            int provisionalPasswordDays,
+            PasswordHashing password,
+            Bootstrap bootstrap) {}
+
+    /** Parâmetros do Argon2id; paralelismo, sal e tamanho da saída são fixos no adaptador. */
+    public record PasswordHashing(int memoryKib, int iterations) {}
+
+    /** Primeiro administrador; sem valor padrão. A senha nunca vai a log. */
+    public record Bootstrap(String name, String email, String password) {
+
+        @Override
+        public String toString() {
+            return "Bootstrap[***]";
+        }
+    }
 }

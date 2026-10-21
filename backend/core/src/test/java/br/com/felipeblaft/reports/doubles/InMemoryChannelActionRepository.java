@@ -208,4 +208,17 @@ public class InMemoryChannelActionRepository implements ChannelActionRepository 
                 a.reasonCode(),
                 a.version());
     }
+
+    @Override
+    public int discardPendingByChat(long chatId, Instant now) {
+        int discarded = 0;
+        for (ChannelAction action : data.values()) {
+            if (action.chatId() == chatId && action.state() == ChannelActionState.PENDING) {
+                action.discard(now);
+                action.defineVersion(action.version() + 1);
+                discarded++;
+            }
+        }
+        return discarded;
+    }
 }

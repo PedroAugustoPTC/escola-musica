@@ -127,7 +127,7 @@ class AccessContractIT extends ContractApiBase {
         clock.advance(Duration.ofDays(7));
         retry(ScenarioIT.CODE_CLARA, "200.1.1.3")
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value("EXPIRED_CODE"));
+                .andExpect(jsonPath("$.code").value("INVALID_CODE"));
         mvc.perform(
                         post("/api/v1/session")
                                 .with(csrf().asHeader())

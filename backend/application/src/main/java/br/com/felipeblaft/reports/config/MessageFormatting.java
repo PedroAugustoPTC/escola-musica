@@ -74,7 +74,7 @@ public class MessageFormatting {
     public Map<String, Object> errorParameters(ErrorCode code, Map<String, Object> details) {
         Map<String, Object> parameters = new HashMap<>(details);
         switch (code) {
-            case TEMPORARILY_BLOCKED -> {
+            case TEMPORARILY_BLOCKED, OPERATION_TEMPORARILY_BLOCKED -> {
                 long seconds =
                         details.get("remainingSeconds") instanceof Number n ? n.longValue() : 0L;
                 parameters.put("minutes", Math.max(1, (seconds + 59) / 60));

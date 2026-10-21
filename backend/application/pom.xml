@@ -57,6 +57,11 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
+            <!-- Argon2id (Argon2PasswordEncoder do Spring Security Crypto); versão gerenciada no pom agregador. -->
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>

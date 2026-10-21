@@ -1,6 +1,7 @@
 package br.com.felipeblaft.reports.service;
 
 import br.com.felipeblaft.reports.domain.access.AccessAttempt;
+import br.com.felipeblaft.reports.domain.access.AttemptScope;
 import br.com.felipeblaft.reports.domain.common.BusinessParameters;
 import br.com.felipeblaft.reports.domain.common.Channel;
 import br.com.felipeblaft.reports.domain.common.DomainException;
@@ -41,7 +42,8 @@ public class AccessAttemptsControlService {
      */
     public void verifyLock(Channel channel, String origin) {
         Instant now = clock.now();
-        Optional<AccessAttempt> registration = attempts.search(channel, hash(channel, origin));
+        Optional<AccessAttempt> registration =
+                attempts.search(AttemptScope.TEACHER_CODE, channel, hash(channel, origin));
         if (registration.isEmpty()) {
             return;
         }
@@ -62,7 +64,7 @@ public class AccessAttemptsControlService {
         Instant now = clock.now();
         String hash = hash(channel, origin);
         AccessAttempt attempt =
-                attempts.search(channel, hash)
+                attempts.search(AttemptScope.TEACHER_CODE, channel, hash)
                         .orElseGet(() -> AccessAttempt.create(channel, hash, now));
         attempt.registerFailure(now, parameters.maxAccessAttempts(), parameters.lockDuration());
         attempts.save(attempt);
@@ -70,7 +72,7 @@ public class AccessAttemptsControlService {
 
     public void registerSuccess(Channel channel, String origin) {
         Instant now = clock.now();
-        attempts.search(channel, hash(channel, origin))
+        attempts.search(AttemptScope.TEACHER_CODE, channel, hash(channel, origin))
                 .filter(t -> t.failedAttempts() > 0 || t.blockedUntil() != null)
                 .ifPresent(
                         attempt -> {

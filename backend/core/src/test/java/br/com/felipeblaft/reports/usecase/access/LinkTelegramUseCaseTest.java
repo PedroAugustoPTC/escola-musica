@@ -62,7 +62,7 @@ class LinkTelegramUseCaseTest {
         }
         failWith(() -> linkUseCase.run(111L, 1L, "K7QM2XPA"), ErrorCode.TEMPORARILY_BLOCKED);
         c.clock.advance(Duration.ofDays(8));
-        failWith(() -> linkUseCase.run(111L, 1L, "K7QM2XPA"), ErrorCode.EXPIRED_CODE);
+        failWith(() -> linkUseCase.run(111L, 1L, "K7QM2XPA"), ErrorCode.INVALID_CODE);
     }
 
     @Test

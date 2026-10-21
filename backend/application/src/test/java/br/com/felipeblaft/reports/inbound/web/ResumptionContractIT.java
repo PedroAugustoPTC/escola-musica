@@ -58,9 +58,9 @@ class ResumptionContractIT extends ContractApiBase {
                 .andExpect(status().isNoContent())
                 .andExpect(followsContract());
         mvc.perform(get("/api/v1/students/{id}/open-report", helena.id()).cookie(session))
-                .andExpect(status().isForbidden())
+                .andExpect(status().isNotFound())
                 .andExpect(followsContract())
-                .andExpect(jsonPath("$.code").value("STUDENT_NOT_ASSIGNED"));
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
     }
 
     @Test

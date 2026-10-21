@@ -41,4 +41,12 @@ public class FakeOpenReportsQuery implements OpenReportsQueryPort {
     public Map<UUID, LocalDate> lastLessonByStudent(UUID teacherId) {
         return Map.copyOf(lastLessons.getOrDefault(teacherId, Map.of()));
     }
+
+    @Override
+    public int countOpenReports(UUID teacherId, UUID studentId) {
+        return (int)
+                listByTeacher(teacherId).stream()
+                        .filter(report -> report.studentId().equals(studentId))
+                        .count();
+    }
 }

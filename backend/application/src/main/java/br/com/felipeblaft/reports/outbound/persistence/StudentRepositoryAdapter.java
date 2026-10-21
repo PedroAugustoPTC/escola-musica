@@ -1,6 +1,9 @@
 package br.com.felipeblaft.reports.outbound.persistence;
 
 import br.com.felipeblaft.reports.domain.registry.Student;
+import br.com.felipeblaft.reports.domain.registry.StudentScope;
+import br.com.felipeblaft.reports.domain.registry.StudentStatusFilter;
+import br.com.felipeblaft.reports.outbound.PendingImplementation;
 import br.com.felipeblaft.reports.port.StudentRepository;
 import java.util.List;
 import java.util.Optional;
@@ -34,5 +37,20 @@ class StudentRepositoryAdapter implements StudentRepository {
     @Override
     public void save(Student student) {
         jpa.save(RegistryMapper.toEntity(student));
+    }
+
+    @Override
+    public Optional<Student> findVisible(StudentScope scope, UUID id) {
+        throw PendingImplementation.of("W-G");
+    }
+
+    @Override
+    public List<Student> list(StudentScope scope, StudentStatusFilter status) {
+        throw PendingImplementation.of("W-G");
+    }
+
+    @Override
+    public boolean insertIfAbsent(Student student) {
+        throw PendingImplementation.of("W-G");
     }
 }

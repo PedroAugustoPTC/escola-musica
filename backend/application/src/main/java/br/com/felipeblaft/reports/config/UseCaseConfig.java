@@ -89,7 +89,9 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * Instancia os casos de uso e serviços do núcleo como beans. O núcleo não tem anotações de
- * framework; toda a montagem fica aqui.
+ * framework; toda a montagem fica aqui. Os da feature 005 ficam em {@link
+ * AdministrationUseCaseConfig}, {@link TeacherManagementUseCaseConfig} e {@link
+ * StudentRegistryUseCaseConfig}, sem repetir bean deste arquivo.
  */
 @Configuration(proxyBeanMethods = false)
 public class UseCaseConfig {

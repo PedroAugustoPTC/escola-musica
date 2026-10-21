@@ -30,8 +30,8 @@ import tools.jackson.databind.JsonNode;
 
 /**
  * SC-008: com a sessão e o vínculo de Clara, todo endpoint e toda ação do bot sobre o aluno e os
- * relatórios de Bruno são recusados (403 ou 404 na Web, "Nenhum aluno encontrado…" ou ação expirada
- * no bot), sem revelar nenhum dado de Bruno nem de Helena.
+ * relatórios de Bruno são recusados (404 na Web, igual ao aluno inexistente, "Nenhum aluno
+ * encontrado…" ou ação expirada no bot), sem revelar nenhum dado de Bruno nem de Helena.
  */
 class CrossAccessIT extends TelegramConversationBase {
 
@@ -111,29 +111,29 @@ class CrossAccessIT extends TelegramConversationBase {
         UUID student = helena.id();
         List<Call> calls =
                 List.of(
-                        new Call("student", get("/api/v1/students/{id}", student), 403),
+                        new Call("student", get("/api/v1/students/{id}", student), 404),
                         new Call(
                                 "em aberto",
                                 get("/api/v1/students/{id}/open-report", student),
-                                403),
+                                404),
                         new Call(
                                 "registrar aula",
                                 multipart("/api/v1/students/{id}/lesson-reports", student)
                                         .file(audio()),
-                                403),
-                        new Call("semesters", get("/api/v1/students/{id}/semesters", student), 403),
+                                404),
+                        new Call("semesters", get("/api/v1/students/{id}/semesters", student), 404),
                         new Call(
                                 "prévia",
                                 get("/api/v1/students/{id}/semesters/2026-1/preview", student),
-                                403),
+                                404),
                         new Call(
                                 "gerar semestral",
                                 json(
                                         "/api/v1/students/{id}/semester-reports",
                                         "{\"periodKey\":\"2026-1\"}",
                                         student),
-                                403),
-                        new Call("histórico", get("/api/v1/students/{id}/history", student), 403),
+                                404),
+                        new Call("histórico", get("/api/v1/students/{id}/history", student), 404),
                         new Call("job", get("/api/v1/jobs/{id}", job), 404),
                         new Call("descartar trabalho", post("/api/v1/jobs/{id}/discard", job), 404),
                         new Call(

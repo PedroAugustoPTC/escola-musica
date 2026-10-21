@@ -105,7 +105,7 @@ class GetChannelDocumentUseCaseTest {
         for (ErrorCode code :
                 List.of(
                         ErrorCode.RESOURCE_NOT_FOUND,
-                        ErrorCode.STUDENT_NOT_ASSIGNED,
+                        ErrorCode.RESOURCE_NOT_FOUND,
                         ErrorCode.INVALID_DATA)) {
             failure = new DomainException(code);
             assertThat(get.run(token)).as(code.name()).isEmpty();

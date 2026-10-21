@@ -104,9 +104,9 @@ class LessonReportContractIT extends ContractApiBase {
                                 multipart("/api/v1/students/{id}/lesson-reports", helena.id())
                                         .file(audio()),
                                 session))
-                .andExpect(status().isForbidden())
+                .andExpect(status().isNotFound())
                 .andExpect(replyFollowsContract())
-                .andExpect(jsonPath("$.code").value("STUDENT_NOT_ASSIGNED"));
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
         mvc.perform(
                         authenticated(
                                 multipart("/api/v1/students/{id}/lesson-reports", matteo.id())

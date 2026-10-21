@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createMemoryRouter, RouterProvider, type RouteObject } from 'react-router';
 import { vi } from 'vitest';
 import { ThemeProvider } from '../src/app/ThemeProvider';
+import { ADMIN_SESSION } from './support/adminFixtures';
 
 export interface SimulatedResponse {
   status?: number;
@@ -73,6 +74,38 @@ export function renderRoutes(routes: RouteObject[], initialPath: string) {
     </QueryClientProvider>,
   );
   return { ...result, router, client };
+}
+
+/**
+ * Renderiza as rotas como administrador: simula a API com a sessão do administrador (`GET /admin/session`)
+ * e deixa `apiRoutes` acrescentar ou substituir respostas. Devolve também o `fetch` simulado e as chamadas.
+ */
+export function renderAsAdministrator(
+  routes: RouteObject[],
+  initialPath: string,
+  apiRoutes: Record<string, SimulatedResponse | SimulatedRoute> = {},
+) {
+  const api = mockApi({
+    'GET /api/v1/admin/session': { body: ADMIN_SESSION },
+    ...apiRoutes,
+  });
+  return { ...renderRoutes(routes, initialPath), ...api };
+}
+
+/**
+ * Renderiza as rotas como professor: simula a API com a sessão do professor (`GET /session`)
+ * e deixa `apiRoutes` acrescentar ou substituir respostas. Devolve também o `fetch` simulado e as chamadas.
+ */
+export function renderAsTeacher(
+  routes: RouteObject[],
+  initialPath: string,
+  apiRoutes: Record<string, SimulatedResponse | SimulatedRoute> = {},
+) {
+  const api = mockApi({
+    'GET /api/v1/session': { body: LIGHT_SESSION },
+    ...apiRoutes,
+  });
+  return { ...renderRoutes(routes, initialPath), ...api };
 }
 
 /** Renderiza um componente isolado com os provedores. */

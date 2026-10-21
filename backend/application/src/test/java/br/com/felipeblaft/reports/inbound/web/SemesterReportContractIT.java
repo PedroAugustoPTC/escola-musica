@@ -86,7 +86,7 @@ class SemesterReportContractIT extends ContractApiBase {
                 .andExpect(jsonPath("$.openLessonReports").value(0))
                 .andExpect(jsonPath("$.approvedSemesterReportId").isEmpty());
         mvc.perform(get("/api/v1/students/{id}/semesters", helena.id()).cookie(session))
-                .andExpect(status().isForbidden())
+                .andExpect(status().isNotFound())
                 .andExpect(followsContract());
         mvc.perform(
                         get("/api/v1/students/{id}/semesters/2026-9/preview", matteo.id())

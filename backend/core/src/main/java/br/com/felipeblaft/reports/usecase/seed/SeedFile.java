@@ -12,7 +12,20 @@ public record SeedFile(List<SeedTeacher> teachers, List<SeedStudent> students) {
         students = students == null ? List.of() : List.copyOf(students);
     }
 
-    public record SeedTeacher(String email, String name, Boolean active) {}
+    /** Só as contagens: o arquivo carrega CPF, nomes e e-mails. */
+    @Override
+    public String toString() {
+        return "SeedFile[teachers=" + teachers.size() + ", students=" + students.size() + "]";
+    }
+
+    public record SeedTeacher(String email, String name, Boolean active) {
+
+        /** Sem e-mail nem nome. */
+        @Override
+        public String toString() {
+            return "SeedTeacher[active=" + active + "]";
+        }
+    }
 
     /** Datas chegam como texto (AAAA-MM-DD) para que a validação aconteça no núcleo. */
     public record SeedStudent(
@@ -28,6 +41,12 @@ public record SeedFile(List<SeedTeacher> teachers, List<SeedStudent> students) {
                     teachers == null
                             ? List.of()
                             : Collections.unmodifiableList(new ArrayList<>(teachers));
+        }
+
+        /** Sem CPF, nome, data de nascimento, responsável, instrumento nem e-mails. */
+        @Override
+        public String toString() {
+            return "SeedStudent[teachers=" + teachers.size() + "]";
         }
     }
 }

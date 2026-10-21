@@ -29,7 +29,7 @@ class LinkingConversationIT extends TelegramConversationBase {
         sendText(USER_CLARA, "/start");
         assertThat(sentTexts())
                 .containsOnly(
-                        "Olá! Para usar o bot, envie o código de acesso que você recebeu da secretaria da escola.");
+                        "Olá! Para usar o bot, envie o código de acesso que você recebeu do administrador da escola.");
         assertThat(jdbc.queryForObject("select count(*) from access_attempt", Integer.class))
                 .isZero();
     }
@@ -60,7 +60,7 @@ class LinkingConversationIT extends TelegramConversationBase {
     @ConversationState({1})
     void wrongExpiredCodeAndLock() throws Exception {
         sendText(USER_CLARA, "ZZZZZZZZ");
-        assertThat(lastMessage().get("text").asString()).startsWith("Código inválido.");
+        assertThat(lastMessage().get("text").asString()).startsWith("Código inválido ou vencido.");
         for (int i = 0; i < 4; i++) {
             sendText(USER_CLARA, "ZZZZ-ZZZZ");
         }
@@ -71,7 +71,7 @@ class LinkingConversationIT extends TelegramConversationBase {
         clock.advance(Duration.ofDays(7));
         sendText(USER_CLARA, ScenarioIT.CODE_CLARA);
         assertThat(lastMessage().get("text").asString())
-                .startsWith("Este código venceu após 7 dias sem uso.");
+                .isEqualTo("Código inválido ou vencido. Procure o administrador.");
     }
 
     @Test
@@ -82,7 +82,7 @@ class LinkingConversationIT extends TelegramConversationBase {
         sendText(USER_BRUNO, ScenarioIT.CODE_CLARA);
         assertThat(lastMessage().get("text").asString())
                 .isEqualTo(
-                        "Seu cadastro já está vinculado a outra conta do Telegram. Procure a secretaria da escola.");
+                        "Seu cadastro já está vinculado a outra conta do Telegram. Procure o administrador.");
     }
 
     @Test

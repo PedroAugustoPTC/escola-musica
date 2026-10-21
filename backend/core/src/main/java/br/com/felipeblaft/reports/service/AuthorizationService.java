@@ -20,7 +20,7 @@ public class AuthorizationService {
 
     public void requireAssignment(UUID teacherId, UUID studentId) {
         if (!assignments.exists(teacherId, studentId)) {
-            throw new DomainException(ErrorCode.STUDENT_NOT_ASSIGNED);
+            throw new DomainException(ErrorCode.RESOURCE_NOT_FOUND);
         }
     }
 

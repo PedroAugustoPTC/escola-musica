@@ -59,7 +59,13 @@ paths:
               schema: { $ref: "#/components/schemas/SessionDto" }
         "400": { $ref: "#/components/responses/InvalidData" }
         "401":
-          description: "`INVALID_CODE` ou `EXPIRED_CODE`"
+          description: |
+            `INVALID_CODE`, com mensagem única: código inexistente, errado ou vencido não se distinguem.
+
+            > **Nota (feature 005)**: `EXPIRED_CODE` deixou de existir (código vencido passa a `INVALID_CODE`,
+            > FR-042). O professor com acesso encerrado por inativação recebe `ACCESS_ENDED` nas requisições
+            > autenticadas seguintes; reemissão ou vencimento da sessão dão `SESSION_EXPIRED`. Ver
+            > [`specs/005-admin-registrations-access/contracts/messages.md`](../../005-admin-registrations-access/contracts/messages.md).
           content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
         "429": { $ref: "#/components/responses/Blocked" }
     get:

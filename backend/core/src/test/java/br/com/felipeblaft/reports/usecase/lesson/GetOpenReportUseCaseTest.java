@@ -47,6 +47,6 @@ class GetOpenReportUseCaseTest {
         assertThatThrownBy(() -> c.getOpen.run(c.clara.id(), c.helena.id()))
                 .isInstanceOfSatisfying(
                         DomainException.class,
-                        e -> assertThat(e.code()).isEqualTo(ErrorCode.STUDENT_NOT_ASSIGNED));
+                        e -> assertThat(e.code()).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND));
     }
 }

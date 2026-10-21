@@ -1,0 +1,37 @@
+package br.com.felipeblaft.reports.domain.access;
+
+/**
+ * Operações da matriz de permissões (data-model.md §8). Há um caso de uso por operação; o conjunto
+ * é idêntico ao de {@code contracts/permission-matrix.json}.
+ */
+public enum Operation {
+    ADMIN_SIGN_IN,
+    ADMIN_ACTIVATE,
+    ADMIN_GET_SESSION,
+    ADMIN_SIGN_OUT,
+    ADMIN_CHANGE_PASSWORD,
+    TEACHER_SIGN_IN,
+    TEACHER_LIST,
+    TEACHER_GET,
+    TEACHER_REGISTER,
+    TEACHER_UPDATE,
+    TEACHER_INACTIVATE,
+    TEACHER_REACTIVATE,
+    TEACHER_REISSUE_ACCESS_CODE,
+    TEACHER_UNLINK_TELEGRAM,
+    ADMINISTRATOR_LIST,
+    ADMINISTRATOR_CREATE,
+    ADMINISTRATOR_INACTIVATE,
+    ADMINISTRATOR_REACTIVATE,
+    FIRST_ADMINISTRATOR_BOOTSTRAP,
+    ASSIGNMENT_ASSIGN,
+    ASSIGNMENT_REMOVE,
+    ASSIGNMENT_PREVIEW_REMOVAL,
+    STUDENT_LIST,
+    STUDENT_GET,
+    STUDENT_REGISTER,
+    STUDENT_UPDATE,
+    STUDENT_INACTIVATE,
+    STUDENT_REACTIVATE,
+    LESSON_AND_SEMESTER_REPORTS
+}

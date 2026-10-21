@@ -66,9 +66,7 @@ class SemesterUseCasesTest {
         assertThat(semesters.getFirst().inProgress()).isTrue();
         assertThat(semesters.getFirst().preSelected()).isTrue();
         assertThat(semesters.get(1).preSelected()).isFalse();
-        code(
-                () -> c.listSemesters.run(c.clara.id(), c.helena.id()),
-                ErrorCode.STUDENT_NOT_ASSIGNED);
+        code(() -> c.listSemesters.run(c.clara.id(), c.helena.id()), ErrorCode.RESOURCE_NOT_FOUND);
     }
 
     @Test

@@ -7,6 +7,7 @@ import br.com.felipeblaft.reports.domain.job.ProcessingJob;
 import br.com.felipeblaft.reports.domain.report.OpenReport;
 import br.com.felipeblaft.reports.domain.report.ReportStatus;
 import br.com.felipeblaft.reports.domain.semester.SemesterReport;
+import br.com.felipeblaft.reports.outbound.PendingImplementation;
 import br.com.felipeblaft.reports.outbound.persistence.ReportEntities.LessonReportEntity;
 import br.com.felipeblaft.reports.port.OpenReportsQueryPort;
 import java.sql.Date;
@@ -126,6 +127,11 @@ public class OpenReportsQueryAdapter implements OpenReportsQueryPort {
                 },
                 teacherId);
         return lasts;
+    }
+
+    @Override
+    public int countOpenReports(UUID teacherId, UUID studentId) {
+        throw PendingImplementation.of("W-C2");
     }
 
     private String name(Map<UUID, String> cache, UUID studentId) {

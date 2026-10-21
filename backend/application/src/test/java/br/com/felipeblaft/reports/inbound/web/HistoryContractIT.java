@@ -47,7 +47,7 @@ class HistoryContractIT extends ContractApiBase {
                 .andExpect(jsonPath("$.student.name").value("Matteo Ferreira"))
                 .andExpect(jsonPath("$.items", hasSize(0)));
         mvc.perform(get("/api/v1/students/{id}/history", helena.id()).cookie(session))
-                .andExpect(status().isForbidden())
+                .andExpect(status().isNotFound())
                 .andExpect(followsContract());
     }
 

@@ -10,6 +10,12 @@ public interface TransactionPort {
 
     <T> T run(Supplier<T> excerpt);
 
+    /**
+     * Executa o trecho e desfaz a transação ao final, devolvendo o resultado (carga inicial com
+     * {@code --simulate}): nada do que o trecho gravou permanece.
+     */
+    <T> T runAndRollBack(Supplier<T> excerpt);
+
     default void run(Runnable excerpt) {
         run(
                 () -> {
