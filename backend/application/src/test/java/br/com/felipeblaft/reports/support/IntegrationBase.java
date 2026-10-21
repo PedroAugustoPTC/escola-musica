@@ -48,11 +48,18 @@ public abstract class IntegrationBase {
         List<String> tables =
                 jdbc.queryForList(
                         "select tablename from pg_tables where schemaname = 'public'"
-                                + " and tablename <> 'flyway_schema_history'",
+                                + " and tablename not in ('flyway_schema_history',"
+                                + " 'authorship_record')",
                         String.class);
         if (!tables.isEmpty()) {
             jdbc.execute("truncate table " + String.join(", ", tables) + " cascade");
         }
+        // o registro de autoria é somente de acréscimo (gatilhos, V10): só o teste, dono da
+        // tabela, suspende os gatilhos na mesma transação para limpá-la
+        jdbc.execute(
+                "alter table authorship_record disable trigger user;"
+                        + " truncate table authorship_record;"
+                        + " alter table authorship_record enable trigger user");
         clock.define(AdjustableClock.DEFAULT);
     }
 }
