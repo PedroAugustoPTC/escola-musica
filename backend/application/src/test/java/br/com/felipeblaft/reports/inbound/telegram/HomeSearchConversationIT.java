@@ -37,7 +37,7 @@ class HomeSearchConversationIT extends TelegramConversationBase {
         String text = messageJson(nextUpdate(), USER_CLARA, "\"text\": \"oi\"");
         sendUpdate(text);
         assertThat(sentTexts())
-                .containsExactly("Ocorreu um erro inesperado. Tente novamente mais tarde.");
+                .containsExactly("Algo deu errado. Informe o código de referência  ao suporte.");
         sendUpdate(text);
         assertThat(sentTexts()).hasSize(1);
 
@@ -53,7 +53,7 @@ class HomeSearchConversationIT extends TelegramConversationBase {
         assertThat(calls("answerCallbackQuery")).hasSize(1);
         assertThat(sentTexts()).hasSize(2);
         assertThat(lastMessage().get("text").asString())
-                .isEqualTo("Ocorreu um erro inesperado. Tente novamente mais tarde.");
+                .isEqualTo("Algo deu errado. Informe o código de referência  ao suporte.");
         sendUpdate(touch);
         assertThat(calls("answerCallbackQuery")).hasSize(1);
         assertThat(sentTexts()).hasSize(2);

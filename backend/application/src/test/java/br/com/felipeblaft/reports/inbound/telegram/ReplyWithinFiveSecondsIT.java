@@ -100,7 +100,7 @@ class ReplyWithinFiveSecondsIT extends OrchestratorDeliveryBase {
 
         assertThat(spent).isLessThanOrEqualTo(LIMIT);
         assertThat(sentTexts())
-                .containsExactly("Ocorreu um erro inesperado. Tente novamente mais tarde.");
+                .containsExactly("Algo deu errado. Informe o código de referência  ao suporte.");
     }
 
     @Test

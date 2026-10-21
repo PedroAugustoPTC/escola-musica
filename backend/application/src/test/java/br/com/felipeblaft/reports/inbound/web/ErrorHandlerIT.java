@@ -83,8 +83,13 @@ class ErrorHandlerIT extends ContractApiBase {
         String body = result.getResponse().getContentAsString();
         JsonNode json = JSON_READER.readTree(body);
         assertThat(json.path("code").asString()).isEqualTo("INTERNAL_ERROR");
+        String reference = json.path("reference").asString();
+        assertThat(reference).matches("[A-Z0-9]{8}");
         assertThat(json.path("message").asString())
-                .isEqualTo("Ocorreu um erro inesperado. Tente novamente mais tarde.");
+                .isEqualTo(
+                        "Algo deu errado. Informe o código de referência "
+                                + reference
+                                + " ao suporte.");
         assertThat(body)
                 .doesNotContain(
                         "IllegalStateException",

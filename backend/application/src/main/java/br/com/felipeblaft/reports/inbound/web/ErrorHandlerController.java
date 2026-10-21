@@ -4,10 +4,13 @@ import br.com.felipeblaft.reports.config.MessageCatalog;
 import br.com.felipeblaft.reports.config.MessageFormatting;
 import br.com.felipeblaft.reports.domain.common.DomainException;
 import br.com.felipeblaft.reports.domain.common.ErrorCode;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -35,6 +38,7 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 public class ErrorHandlerController {
 
     private static final Logger LOG = LoggerFactory.getLogger(ErrorHandlerController.class);
+    private static final String ADMINISTRATIVE_PREFIX = "/api/v1/admin/";
 
     private static final Map<ErrorCode, HttpStatus> STATUS = new EnumMap<>(ErrorCode.class);
 
@@ -118,8 +122,20 @@ public class ErrorHandlerController {
     }
 
     @ExceptionHandler(DomainException.class)
-    public ResponseEntity<ErrorResponse> domain(DomainException error) {
+    public ResponseEntity<ErrorResponse> domain(DomainException error, HttpServletRequest request) {
+        if ((error.code() == ErrorCode.DUPLICATE_CPF || error.code() == ErrorCode.DUPLICATE_EMAIL)
+                && !isAdministrativeRoute(request)) {
+            // o nome do registro existente só sai ao administrador (R-13): fora da área
+            // administrativa a recusa é a neutra, sem nome e sem detalhe
+            return response(ErrorCode.CPF_UNAVAILABLE, Map.of());
+        }
         return response(error.code(), error.details());
+    }
+
+    private static boolean isAdministrativeRoute(HttpServletRequest request) {
+        return request != null
+                && request.getRequestURI() != null
+                && request.getRequestURI().startsWith(ADMINISTRATIVE_PREFIX);
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
@@ -156,8 +172,22 @@ public class ErrorHandlerController {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> unexpected(Exception error) {
         // sem a mensagem nem a causa: podem trazer SQL, caminhos ou dados de aluno (FR-054, FR-055)
-        LOG.error("unexpected-error type={} local={}", error.getClass().getName(), localOf(error));
-        return response(ErrorCode.INTERNAL_ERROR, Map.of());
+        String reference = newReference();
+        LOG.error(
+                "unexpected-error reference={} type={} local={}",
+                reference,
+                error.getClass().getName(),
+                localOf(error));
+        return response(ErrorCode.INTERNAL_ERROR, Map.of(), reference);
+    }
+
+    /** Código curto que o usuário informa ao suporte e que o log registra junto da falha. */
+    private static String newReference() {
+        return UUID.randomUUID()
+                .toString()
+                .replace("-", "")
+                .substring(0, 8)
+                .toUpperCase(Locale.ROOT);
     }
 
     /**
@@ -177,9 +207,17 @@ public class ErrorHandlerController {
     }
 
     ResponseEntity<ErrorResponse> response(ErrorCode code, Map<String, Object> details) {
+        return response(code, details, null);
+    }
+
+    private ResponseEntity<ErrorResponse> response(
+            ErrorCode code, Map<String, Object> details, String reference) {
         HttpStatus status = statusOf(code);
         Map<String, Object> textParameters =
                 new HashMap<>(parameters.errorParameters(code, details));
+        if (reference != null) {
+            textParameters.put("reference", reference);
+        }
         Integer retryAfter = null;
         ResponseEntity.BodyBuilder body = ResponseEntity.status(status);
         if ((code == ErrorCode.TEMPORARILY_BLOCKED
@@ -191,6 +229,10 @@ public class ErrorHandlerController {
         String message = catalog.text(code, textParameters);
         return body.body(
                 new ErrorResponse(
-                        code.name(), message, retryAfter, details.isEmpty() ? null : details));
+                        code.name(),
+                        message,
+                        retryAfter,
+                        details.isEmpty() ? null : details,
+                        reference));
     }
 }

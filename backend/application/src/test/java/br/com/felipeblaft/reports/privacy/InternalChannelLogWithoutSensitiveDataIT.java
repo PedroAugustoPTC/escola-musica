@@ -125,7 +125,7 @@ class InternalChannelLogWithoutSensitiveDataIT extends OrchestratorDeliveryBase 
 
         String response = result.getResponse().getContentAsString();
         assertThat(result.getResponse().getStatus()).isEqualTo(200);
-        assertThat(response).contains("Ocorreu um erro inesperado");
+        assertThat(response).contains("Algo deu errado");
         String logs = logText();
         assertThat(logs)
                 .contains("telegram-interpretation-error updateId=" + update)
