@@ -1,0 +1,156 @@
+package br.com.felipeblaft.reports.usecase.administrator;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import br.com.felipeblaft.reports.domain.access.Administrator;
+import br.com.felipeblaft.reports.domain.access.PermissionMatrix;
+import br.com.felipeblaft.reports.domain.access.SessionRevocationReason;
+import br.com.felipeblaft.reports.domain.common.BusinessParameters;
+import br.com.felipeblaft.reports.domain.common.DomainException;
+import br.com.felipeblaft.reports.domain.common.ErrorCode;
+import br.com.felipeblaft.reports.domain.common.Secret;
+import br.com.felipeblaft.reports.doubles.FakeAuthorshipRecorder;
+import br.com.felipeblaft.reports.doubles.FakeDataProtection;
+import br.com.felipeblaft.reports.doubles.FakePasswordHash;
+import br.com.felipeblaft.reports.doubles.FixedActivationCodeGenerator;
+import br.com.felipeblaft.reports.doubles.FixedClock;
+import br.com.felipeblaft.reports.doubles.InMemoryAccessAttemptRepository;
+import br.com.felipeblaft.reports.doubles.InMemoryAdministratorRepository;
+import br.com.felipeblaft.reports.doubles.InMemoryAdministratorSessionRepository;
+import br.com.felipeblaft.reports.port.AdministratorSessionRepository;
+import br.com.felipeblaft.reports.port.ClockPort;
+import br.com.felipeblaft.reports.service.AccessAttemptsControlService;
+import br.com.felipeblaft.reports.service.ActivationCodeIssuanceService;
+import br.com.felipeblaft.reports.service.ActorAuthorizationService;
+import br.com.felipeblaft.reports.service.AuthorshipService;
+import br.com.felipeblaft.reports.service.SessionRevocationService;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.UUID;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
+
+/**
+ * Monta os dublês e os serviços compartilhados pelos testes dos casos de uso do administrador. A
+ * revogação usa um dublê do {@link SessionRevocationService} (o real é do fluxo W-B): faz o que a
+ * regra pede, marcar as sessões do administrador pelo repositório.
+ */
+final class AdministratorScenario {
+
+    static final String PASSWORD = "correct horse battery";
+    static final String ORIGIN = "10.0.0.1";
+    static final String CORRELATION = "req-test1";
+    static final Duration SESSION_DURATION = Duration.ofHours(2);
+    static final Duration PROVISIONAL_VALIDITY = Duration.ofDays(7);
+
+    final FixedClock clock = new FixedClock();
+    final BusinessParameters parameters = BusinessParameters.defaults();
+    final FakeDataProtection protection = new FakeDataProtection();
+    final FakePasswordHash hasher = new FakePasswordHash();
+    final InMemoryAdministratorRepository administrators = new InMemoryAdministratorRepository();
+    final InMemoryAdministratorSessionRepository sessions =
+            new InMemoryAdministratorSessionRepository(administrators);
+    final InMemoryAccessAttemptRepository attemptsRepository =
+            new InMemoryAccessAttemptRepository();
+    final AccessAttemptsControlService attempts =
+            new AccessAttemptsControlService(attemptsRepository, protection, clock, parameters);
+    final FakeAuthorshipRecorder recorder = new FakeAuthorshipRecorder();
+    final AuthorshipService authorship = new AuthorshipService(recorder, clock);
+    final ActorAuthorizationService authorization =
+            new ActorAuthorizationService(PermissionMatrix.standard());
+    final FixedActivationCodeGenerator generator = new FixedActivationCodeGenerator();
+    final ActivationCodeIssuanceService issuance =
+            new ActivationCodeIssuanceService(generator, protection);
+    final SessionRevocationService revocation = new AdministratorRevocation(sessions, clock);
+
+    /** Administrador ativado, com a senha {@link #PASSWORD} e definitiva. */
+    Administrator activated(String name, String email) {
+        return activated(name, email, PASSWORD);
+    }
+
+    Administrator activated(String name, String email, String password) {
+        Instant now = clock.now();
+        Administrator pending =
+                Administrator.pending(name, email, "unused-code-hash", now.plusSeconds(1), now);
+        Administrator administrator = pending.activate(hasher.hash(new Secret(password)), now);
+        administrators.save(administrator);
+        return administrator;
+    }
+
+    /** Administrador ativo, ainda sem senha, com o código de ativação informado. */
+    Administrator pending(String name, String email, String code) {
+        Instant now = clock.now();
+        ActivationCodeIssuanceService.Issued issued = issueCode(code);
+        Administrator administrator =
+                Administrator.pending(name, email, issued.hash(), issued.expiresAt(), now);
+        administrators.save(administrator);
+        return administrator;
+    }
+
+    /** Primeiro administrador, com senha provisória. */
+    Administrator provisional(String name, String email, String password) {
+        Administrator administrator =
+                Administrator.first(
+                        name,
+                        email,
+                        hasher.hash(new Secret(password)),
+                        PROVISIONAL_VALIDITY,
+                        clock.now());
+        administrators.save(administrator);
+        return administrator;
+    }
+
+    private ActivationCodeIssuanceService.Issued issueCode(String code) {
+        generator.schedule(code);
+        return issuance.issue(clock.now());
+    }
+
+    SignInAdministratorUseCase signIn() {
+        return new SignInAdministratorUseCase(
+                administrators,
+                sessions,
+                hasher,
+                protection,
+                attempts,
+                authorship,
+                clock,
+                SESSION_DURATION);
+    }
+
+    AdministratorSessionResult signInAs(Administrator administrator, String password) {
+        return signIn().run(
+                        new SignInAdministratorUseCase.Command(
+                                administrator.email(), new Secret(password), ORIGIN, CORRELATION));
+    }
+
+    static void failWith(ThrowingCallable action, ErrorCode code) {
+        assertThatThrownBy(action)
+                .isInstanceOf(DomainException.class)
+                .extracting(error -> ((DomainException) error).code())
+                .isEqualTo(code);
+    }
+
+    static void assertNoSecretIn(String text, String... secrets) {
+        for (String secret : secrets) {
+            assertThat(text).doesNotContain(secret);
+        }
+    }
+
+    /** Dublê da revogação do administrador: marca as sessões pelo repositório, no relógio dado. */
+    static final class AdministratorRevocation extends SessionRevocationService {
+
+        private final AdministratorSessionRepository sessions;
+        private final ClockPort clock;
+
+        AdministratorRevocation(AdministratorSessionRepository sessions, ClockPort clock) {
+            super(null, sessions, clock);
+            this.sessions = sessions;
+            this.clock = clock;
+        }
+
+        @Override
+        public int revokeAdministrator(UUID administratorId, SessionRevocationReason reason) {
+            return sessions.revokeAllOf(administratorId, reason, clock.now());
+        }
+    }
+}
