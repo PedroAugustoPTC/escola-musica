@@ -3,18 +3,20 @@ package br.com.felipeblaft.reports.usecase.access;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import br.com.felipeblaft.reports.domain.access.SessionRevocationReason;
+import br.com.felipeblaft.reports.domain.access.WebSession;
 import br.com.felipeblaft.reports.domain.common.DomainException;
 import br.com.felipeblaft.reports.domain.common.ErrorCode;
 import br.com.felipeblaft.reports.domain.registry.Teacher;
-import br.com.felipeblaft.reports.doubles.AccessScenario;
+import br.com.felipeblaft.reports.usecase.teacher.TeacherScenario;
 import java.time.Duration;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
 
-/** ValidarSessaoWebCasoDeUso e EncerrarSessaoWebCasoDeUso. */
+/** ValidateSessionWebUseCase e EndWebSessionUseCase. */
 class WebSessionUseCasesTest {
 
-    private final AccessScenario c = new AccessScenario();
+    private final TeacherScenario c = new TeacherScenario();
     private final SignInPortalUseCase signIn =
             new SignInPortalUseCase(
                     c.authentication,
@@ -22,6 +24,7 @@ class WebSessionUseCasesTest {
                     c.sessions,
                     c.links,
                     c.protection,
+                    c.authorship,
                     c.clock,
                     c.parameters);
     private final ValidateSessionWebUseCase validate =
@@ -78,11 +81,58 @@ class WebSessionUseCasesTest {
     }
 
     @Test
-    void deactivatedTeacherLosesSession() {
+    void sessionRevokedByInactivationEndsWithAccessEndedAndIsKept() {
+        String token = signIn.run("K7QM2XPA", "ip").token();
+        WebSession session = c.sessions.all().getFirst();
+        session.revoke(SessionRevocationReason.ACCOUNT_INACTIVATED, c.clock.now());
+        clara.inactivate(c.clock.now());
+
+        failWith(() -> validate.run(token), ErrorCode.ACCESS_ENDED);
+        failWith(() -> validate.run(token), ErrorCode.ACCESS_ENDED);
+
+        assertThat(c.sessions.all()).hasSize(1);
+    }
+
+    @Test
+    void sessionRevokedByReissueIsSessionExpired() {
+        String token = signIn.run("K7QM2XPA", "ip").token();
+        c.sessions.all().getFirst().revoke(SessionRevocationReason.CODE_REISSUED, c.clock.now());
+
+        failWith(() -> validate.run(token), ErrorCode.SESSION_EXPIRED);
+        failWith(() -> validate.run(token), ErrorCode.SESSION_EXPIRED);
+    }
+
+    @Test
+    void revokedAndAlsoTimedOutSessionStillAnswersByTheRevocationReason() {
+        String token = signIn.run("K7QM2XPA", "ip").token();
+        c.sessions
+                .all()
+                .getFirst()
+                .revoke(SessionRevocationReason.ACCOUNT_INACTIVATED, c.clock.now());
+        c.clock.advance(Duration.ofHours(13));
+
+        failWith(() -> validate.run(token), ErrorCode.ACCESS_ENDED);
+    }
+
+    @Test
+    void inactiveTeacherWithAnUnmarkedSessionSeesAccessEnded() {
         String token = signIn.run("K7QM2XPA", "ip").token();
         clara.updateRegistry(clara.name(), false, c.clock.now());
-        failWith(() -> validate.run(token), ErrorCode.SESSION_EXPIRED);
-        assertThat(c.sessions.all()).isEmpty();
+
+        failWith(() -> validate.run(token), ErrorCode.ACCESS_ENDED);
+        assertThat(c.sessions.all()).hasSize(1);
+    }
+
+    @Test
+    void teacherReactivatedLaterStillHasToSignInAgain() {
+        String token = signIn.run("K7QM2XPA", "ip").token();
+        c.sessions
+                .all()
+                .getFirst()
+                .revoke(SessionRevocationReason.ACCOUNT_INACTIVATED, c.clock.now());
+
+        failWith(() -> validate.run(token), ErrorCode.ACCESS_ENDED);
+        assertThat(signIn.run("K7QM2XPA", "ip").teacher().id()).isEqualTo(clara.id());
     }
 
     @Test
