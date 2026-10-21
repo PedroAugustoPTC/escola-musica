@@ -13,7 +13,9 @@ import { msg } from '../../messages/messages';
 import {
   useInactivateTeacher,
   useReactivateTeacher,
+  useReissueAccessCode,
   useTeacher,
+  useUnlinkTeacherTelegram,
   useUpdateTeacher,
   type TeacherWithCode,
 } from '../../services/admin/teachers';
@@ -25,6 +27,12 @@ export function TeacherDetailScreen() {
   const update = useUpdateTeacher(teacherId);
   const inactivate = useInactivateTeacher(teacherId);
   const reactivate = useReactivateTeacher(teacherId);
+  const reissue = useReissueAccessCode(teacherId);
+  const unlink = useUnlinkTeacherTelegram(teacherId);
+  const [confirmReissue, setConfirmReissue] = useState(false);
+  const [confirmUnlink, setConfirmUnlink] = useState(false);
+  const [endTelegramLink, setEndTelegramLink] = useState(false);
+  const [notice, setNotice] = useState('');
   const [saved, setSaved] = useState(false);
   const [confirmInactivate, setConfirmInactivate] = useState(false);
   const [issued, setIssued] = useState<TeacherWithCode | null>(null);
@@ -106,9 +114,26 @@ export function TeacherDetailScreen() {
         </h2>
         <div className="admin-actions">
           {data.active ? (
-            <Button variant="danger" icon="person_off" onClick={() => setConfirmInactivate(true)}>
-              Inativar
-            </Button>
+            <>
+              <Button
+                variant="secondary"
+                icon="key"
+                onClick={() => {
+                  setEndTelegramLink(false);
+                  setConfirmReissue(true);
+                }}
+              >
+                Reemitir código
+              </Button>
+              {data.telegramLinked ? (
+                <Button variant="secondary" icon="link_off" onClick={() => setConfirmUnlink(true)}>
+                  Desvincular Telegram
+                </Button>
+              ) : null}
+              <Button variant="danger" icon="person_off" onClick={() => setConfirmInactivate(true)}>
+                Inativar
+              </Button>
+            </>
           ) : (
             <Button
               icon="person_check"
@@ -125,6 +150,14 @@ export function TeacherDetailScreen() {
               Reativar
             </Button>
           )}
+        </div>
+        {!data.active ? (
+          <p className="support-text">
+            Este professor está inativo. Reative-o para emitir um código de acesso novo.
+          </p>
+        ) : null}
+        <div role="status" className="support-text">
+          {notice}
         </div>
         {reactivate.isError ? (
           <div role="alert" className="alert alert--error">
@@ -147,6 +180,72 @@ export function TeacherDetailScreen() {
         onClose={() => {
           inactivate.reset();
           setConfirmInactivate(false);
+        }}
+      />
+      <ConfirmationDialog
+        open={confirmReissue}
+        title="Reemitir código de acesso"
+        text={
+          <>
+            {msg('ADMIN_CONFIRM_REISSUE_CODE', { name: data.name })}
+            {data.telegramLinked ? (
+              <span className="checkbox-field">
+                <input
+                  id="end-telegram-link"
+                  type="checkbox"
+                  checked={endTelegramLink}
+                  onChange={(event) => setEndTelegramLink(event.target.checked)}
+                />
+                <label htmlFor="end-telegram-link">{msg('ADMIN_END_TELEGRAM_OPTION')}</label>
+              </span>
+            ) : null}
+          </>
+        }
+        icon="key"
+        confirmLabel="Reemitir"
+        loading={reissue.isPending}
+        error={reissue.isError ? apiErrorText(reissue.error) : undefined}
+        onConfirm={() =>
+          reissue.mutate(
+            { endTelegramLink: data.telegramLinked && endTelegramLink },
+            {
+              onSuccess: (result) => {
+                setConfirmReissue(false);
+                setIssued(result);
+                setNotice('');
+                reissue.reset();
+              },
+            },
+          )
+        }
+        onClose={() => {
+          reissue.reset();
+          setConfirmReissue(false);
+        }}
+      />
+
+      <ConfirmationDialog
+        open={confirmUnlink}
+        title="Desvincular Telegram"
+        text={msg('ADMIN_CONFIRM_UNLINK_TELEGRAM', { name: data.name })}
+        icon="link_off"
+        danger
+        confirmLabel="Desvincular"
+        loading={unlink.isPending}
+        error={unlink.isError ? apiErrorText(unlink.error) : undefined}
+        onConfirm={() =>
+          unlink.mutate(undefined, {
+            onSuccess: () => {
+              setConfirmUnlink(false);
+              setNotice('Vínculo do Telegram encerrado.');
+              // o botão some: o foco vai para o título
+              window.setTimeout(() => heading.current?.focus(), 0);
+            },
+          })
+        }
+        onClose={() => {
+          unlink.reset();
+          setConfirmUnlink(false);
         }}
       />
     </div>
