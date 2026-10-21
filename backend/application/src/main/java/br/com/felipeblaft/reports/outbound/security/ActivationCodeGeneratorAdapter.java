@@ -1,6 +1,5 @@
 package br.com.felipeblaft.reports.outbound.security;
 
-import br.com.felipeblaft.reports.domain.access.AccessCode;
 import br.com.felipeblaft.reports.domain.access.ActivationCode;
 import br.com.felipeblaft.reports.port.ActivationCodeGeneratorPort;
 import java.security.SecureRandom;
@@ -13,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 class ActivationCodeGeneratorAdapter implements ActivationCodeGeneratorPort {
 
-    private static final int SIZE = 12;
+    private static final int SIZE = ActivationCode.SIZE;
 
     private final SecureRandom random = new SecureRandom();
 
@@ -21,7 +20,7 @@ class ActivationCodeGeneratorAdapter implements ActivationCodeGeneratorPort {
     public ActivationCode generate() {
         StringBuilder code = new StringBuilder(SIZE);
         for (int i = 0; i < SIZE; i++) {
-            code.append(AccessCode.ALPHABET.charAt(random.nextInt(AccessCode.ALPHABET.length())));
+            code.append(ActivationCode.ALPHABET.charAt(random.nextInt(ActivationCode.ALPHABET.length())));
         }
         return ActivationCode.retry(code.toString())
                 .orElseThrow(
