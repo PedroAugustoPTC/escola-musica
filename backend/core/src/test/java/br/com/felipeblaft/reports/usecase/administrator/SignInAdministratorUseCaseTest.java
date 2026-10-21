@@ -57,6 +57,15 @@ class SignInAdministratorUseCaseTest {
     }
 
     @Test
+    void aMissingOriginIsTreatedAsAnEmptyOne() {
+        AdministratorSessionResult result = useCase.run(command("ana@school.test", PASSWORD, null));
+
+        assertThat(result.administratorId()).isEqualTo(ana.id());
+        assertThat(c.recorder.inTransaction().getFirst().originHash())
+                .isEqualTo(c.protection.originHash(AttemptScope.ADMIN_SIGN_IN, ""));
+    }
+
+    @Test
     void theEmailIsNormalizedLikeInTheRegistration() {
         AdministratorSessionResult result = useCase.run(command("  ANA@School.TEST ", PASSWORD));
 

@@ -1,5 +1,6 @@
 package br.com.felipeblaft.reports.usecase.administrator;
 
+import br.com.felipeblaft.reports.domain.access.Administrator;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -21,6 +22,18 @@ public record AdministratorView(
     public enum ActivationState {
         PENDING,
         ACTIVATED
+    }
+
+    /** Projeta a conta sem hash nem código; sem senha a conta está pendente e sem data. */
+    public static AdministratorView of(Administrator administrator) {
+        boolean activated = administrator.activated();
+        return new AdministratorView(
+                administrator.id(),
+                administrator.name(),
+                administrator.email(),
+                administrator.active(),
+                activated ? ActivationState.ACTIVATED : ActivationState.PENDING,
+                activated ? administrator.activatedAt() : null);
     }
 
     @Override

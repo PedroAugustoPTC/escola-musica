@@ -3,6 +3,7 @@ package br.com.felipeblaft.reports.usecase.administrator;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import br.com.felipeblaft.reports.domain.access.Actor;
 import br.com.felipeblaft.reports.domain.access.Administrator;
 import br.com.felipeblaft.reports.domain.access.PermissionMatrix;
 import br.com.felipeblaft.reports.domain.access.SessionRevocationReason;
@@ -130,10 +131,18 @@ final class AdministratorScenario {
                 .isEqualTo(code);
     }
 
-    static void assertNoSecretIn(String text, String... secrets) {
-        for (String secret : secrets) {
-            assertThat(text).doesNotContain(secret);
-        }
+    /** Executa a ação e devolve a recusa de domínio que ela lançou. */
+    static DomainException refusalOf(ThrowingCallable action) {
+        Throwable thrown = org.assertj.core.api.Assertions.catchThrowable(action);
+        assertThat(thrown).isInstanceOf(DomainException.class);
+        return (DomainException) thrown;
+    }
+
+    /** Cria um administrador pelo caso de uso e devolve o resultado, com o código em claro. */
+    AdministratorWithCode created(Actor actor, String name, String email) {
+        return new CreateAdministratorUseCase(
+                        authorization, administrators, issuance, authorship, clock)
+                .run(actor, new CreateAdministratorUseCase.Command(name, email, CORRELATION));
     }
 
     /** Dublê da revogação do administrador: marca as sessões pelo repositório, no relógio dado. */

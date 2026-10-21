@@ -108,6 +108,15 @@ class SignOutAdministratorUseCaseTest {
     }
 
     @Test
+    void aBlankTokenIsNotAuthenticated() {
+        failWith(
+                () ->
+                        useCase.run(
+                                ActorFixtures.administratorWeb(ana.id()), command(new Secret(" "))),
+                ErrorCode.NOT_AUTHENTICATED);
+    }
+
+    @Test
     void afterSigningOutTheTokenNoLongerValidates() {
         AdministratorSessionResult opened = c.signInAs(ana, PASSWORD);
         ValidateAdministratorSessionUseCase validate =

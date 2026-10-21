@@ -85,6 +85,28 @@ class GetAdministratorSessionUseCaseTest {
     }
 
     @Test
+    void aBlankTokenIsNotAuthenticated() {
+        failWith(
+                () ->
+                        useCase.run(
+                                ActorFixtures.administratorWeb(ana.id()), command(new Secret(" "))),
+                ErrorCode.NOT_AUTHENTICATED);
+    }
+
+    @Test
+    void anInactiveAccountEndsTheAccess() {
+        AdministratorSessionResult opened = c.signInAs(ana, PASSWORD);
+        c.administrators.save(ana.inactivate(c.clock.now()));
+
+        failWith(
+                () ->
+                        useCase.run(
+                                ActorFixtures.administratorWeb(ana.id()),
+                                command(opened.sessionToken())),
+                ErrorCode.ACCESS_ENDED);
+    }
+
+    @Test
     void readingDoesNotWriteAuthorshipNorChangeTheSession() {
         AdministratorSessionResult opened = c.signInAs(ana, PASSWORD);
         int records = c.recorder.records().size();

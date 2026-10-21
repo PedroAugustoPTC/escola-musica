@@ -247,6 +247,64 @@ class AdministratorTest {
     }
 
     @Test
+    void anIncompleteStateNeverAuthenticatesNorMatchesACode() {
+        Administrator provisionalWithoutExpiry =
+                new Administrator(
+                        java.util.UUID.randomUUID(),
+                        "Ana",
+                        "ana@school.test",
+                        true,
+                        "hash",
+                        true,
+                        null,
+                        null,
+                        null,
+                        NOW,
+                        NOW,
+                        NOW);
+        Administrator pendingWithoutCode =
+                new Administrator(
+                        java.util.UUID.randomUUID(),
+                        "Bia",
+                        "bia@school.test",
+                        true,
+                        null,
+                        false,
+                        null,
+                        null,
+                        null,
+                        null,
+                        NOW,
+                        NOW);
+        Administrator codeWithoutExpiry =
+                new Administrator(
+                        java.util.UUID.randomUUID(),
+                        "Caio",
+                        "caio@school.test",
+                        true,
+                        null,
+                        false,
+                        null,
+                        "code-hash",
+                        null,
+                        null,
+                        NOW,
+                        NOW);
+
+        assertThat(provisionalWithoutExpiry.canSignInAt(NOW)).isFalse();
+        assertThat(pendingWithoutCode.activationCodeMatches("code-hash", NOW)).isFalse();
+        assertThat(codeWithoutExpiry.activationCodeMatches("code-hash", NOW)).isFalse();
+    }
+
+    @Test
+    void anInactiveAccountCannotChangeAProvisionalPassword() {
+        Administrator inactive = first().inactivate(LATER);
+
+        assertThatThrownBy(() -> inactive.changePassword("new-hash", LATER))
+                .isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
     void requiresTheMandatoryFields() {
         assertThatThrownBy(
                         () ->

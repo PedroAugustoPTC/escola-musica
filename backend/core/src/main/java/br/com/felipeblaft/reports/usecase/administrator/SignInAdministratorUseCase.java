@@ -127,17 +127,15 @@ public class SignInAdministratorUseCase {
         try {
             attempts.verifyLock(AttemptScope.ADMIN_SIGN_IN, Channel.WEB, origin);
         } catch (DomainException blocked) {
-            if (blocked.code() == ErrorCode.TEMPORARILY_BLOCKED) {
-                authorship.recordAuthentication(
-                        ActionOrigin.WEB,
-                        null,
-                        null,
-                        OPERATION,
-                        AuthorshipResult.BLOCKED,
-                        ErrorCode.TEMPORARILY_BLOCKED.name(),
-                        originHash,
-                        command.correlationId());
-            }
+            authorship.recordAuthentication(
+                    ActionOrigin.WEB,
+                    null,
+                    null,
+                    OPERATION,
+                    AuthorshipResult.BLOCKED,
+                    ErrorCode.TEMPORARILY_BLOCKED.name(),
+                    originHash,
+                    command.correlationId());
             throw blocked;
         }
     }
