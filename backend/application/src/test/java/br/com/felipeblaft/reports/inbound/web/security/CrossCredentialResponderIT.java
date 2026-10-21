@@ -73,7 +73,8 @@ class CrossCredentialResponderIT extends AdminWebBase {
     }
 
     @Test
-    void teacherCookieOnAdministrativeRoutesIsIndistinguishableFromAMissingRoute() throws Exception {
+    void teacherCookieOnAdministrativeRoutesIsIndistinguishableFromAMissingRoute()
+            throws Exception {
         MvcResult missingGet = run(get("/api/v1/__nope__").cookie(teacherCookie));
         MvcResult missingPost =
                 run(post("/api/v1/__nope__").cookie(teacherCookie).with(csrf().asHeader()));
@@ -83,14 +84,17 @@ class CrossCredentialResponderIT extends AdminWebBase {
         assertSameAsNonexistent(run(get(BASE + "/teachers").cookie(teacherCookie)), missingGet);
         assertSameAsNonexistent(run(get(BASE + "/session").cookie(teacherCookie)), missingGet);
         assertSameAsNonexistent(
-                run(get(BASE + "/students/00000000-0000-4000-8000-000000000001").cookie(teacherCookie)),
+                run(
+                        get(BASE + "/students/00000000-0000-4000-8000-000000000001")
+                                .cookie(teacherCookie)),
                 missingGet);
         assertSameAsNonexistent(
-                run(post(BASE + "/teachers")
-                        .cookie(teacherCookie)
-                        .with(csrf().asHeader())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}")),
+                run(
+                        post(BASE + "/teachers")
+                                .cookie(teacherCookie)
+                                .with(csrf().asHeader())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{}")),
                 missingPost);
         assertSameAsNonexistent(
                 run(delete(BASE + "/session").cookie(teacherCookie).with(csrf().asHeader())),
@@ -106,7 +110,8 @@ class CrossCredentialResponderIT extends AdminWebBase {
     void administratorCookieOnTeacherRoutesIsIndistinguishableFromAMissingRoute() throws Exception {
         MvcResult missingGet = run(get("/api/v1/__nope__").cookie(teacherCookie));
 
-        assertSameAsNonexistent(run(get("/api/v1/home").cookie(adminCookie(ADMIN_TOKEN))), missingGet);
+        assertSameAsNonexistent(
+                run(get("/api/v1/home").cookie(adminCookie(ADMIN_TOKEN))), missingGet);
         assertSameAsNonexistent(
                 run(get("/api/v1/session").cookie(adminCookie(ADMIN_TOKEN))), missingGet);
         assertSameAsNonexistent(
@@ -133,7 +138,8 @@ class CrossCredentialResponderIT extends AdminWebBase {
 
     @Test
     void staleCookiesOfTheOtherRoleDoNotTurnIntoNotFound() throws Exception {
-        // cookie do professor que já não vale: a rota administrativa pede a entrada do administrador
+        // cookie do professor que já não vale: a rota administrativa pede a entrada do
+        // administrador
         mvc.perform(get(BASE + "/session").cookie(new Cookie("session", "token-que-nao-existe")))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("NOT_AUTHENTICATED"));

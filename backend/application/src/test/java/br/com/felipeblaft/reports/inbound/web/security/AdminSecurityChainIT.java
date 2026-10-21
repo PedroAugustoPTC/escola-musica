@@ -58,14 +58,16 @@ class AdminSecurityChainIT extends AdminWebBase {
                                                 if (method != PathItem.HttpMethod.GET) {
                                                     routes.add(
                                                             new Route(
-                                                                    HttpMethod.valueOf(method.name()),
+                                                                    HttpMethod.valueOf(
+                                                                            method.name()),
                                                                     BASE
                                                                             + path.replaceAll(
-                                                                                    "\\{[^}]+}",
-                                                                                    UUID.randomUUID()
-                                                                                            .toString())
+                                                                                            "\\{[^}]+}",
+                                                                                            UUID.randomUUID()
+                                                                                                    .toString())
                                                                                     .substring(
-                                                                                            "/admin".length())));
+                                                                                            "/admin"
+                                                                                                    .length())));
                                                 }
                                             });
                         });
@@ -114,7 +116,10 @@ class AdminSecurityChainIT extends AdminWebBase {
                     .isEqualTo(403);
 
             MvcResult withToken =
-                    mvc.perform(route.builder().cookie(adminCookie(ADMIN_TOKEN)).with(csrf().asHeader()))
+                    mvc.perform(
+                                    route.builder()
+                                            .cookie(adminCookie(ADMIN_TOKEN))
+                                            .with(csrf().asHeader()))
                             .andReturn();
             assertThat(withToken.getResponse().getStatus())
                     .as("%s %s com token", route.method(), route.uri())
@@ -182,14 +187,16 @@ class AdminSecurityChainIT extends AdminWebBase {
         authenticate("token-b", false);
 
         for (String token : List.of("token-a", "token-b", ADMIN_TOKEN)) {
-            MvcResult result = mvc.perform(get(BASE + "/teachers").cookie(adminCookie(token))).andReturn();
+            MvcResult result =
+                    mvc.perform(get(BASE + "/teachers").cookie(adminCookie(token))).andReturn();
             assertThat(result.getResponse().getStatus()).as(token).isNotIn(401, 403);
         }
         // a sessão encerrada de uma não afeta a outra
         revoke("token-a", ErrorCode.SESSION_EXPIRED);
         mvc.perform(get(BASE + "/teachers").cookie(adminCookie("token-a")))
                 .andExpect(status().isUnauthorized());
-        MvcResult other = mvc.perform(get(BASE + "/teachers").cookie(adminCookie("token-b"))).andReturn();
+        MvcResult other =
+                mvc.perform(get(BASE + "/teachers").cookie(adminCookie("token-b"))).andReturn();
         assertThat(other.getResponse().getStatus()).isNotIn(401, 403);
     }
 
@@ -223,7 +230,8 @@ class AdminSecurityChainIT extends AdminWebBase {
         MvcResult inactive = signInFrom("200.1.1.3", null);
 
         for (MvcResult other : List.of(wrongPassword, inactive)) {
-            assertThat(other.getResponse().getStatus()).isEqualTo(unknown.getResponse().getStatus());
+            assertThat(other.getResponse().getStatus())
+                    .isEqualTo(unknown.getResponse().getStatus());
             assertThat(other.getResponse().getContentAsByteArray())
                     .isEqualTo(unknown.getResponse().getContentAsByteArray());
             assertThat(other.getResponse().getHeaderNames())

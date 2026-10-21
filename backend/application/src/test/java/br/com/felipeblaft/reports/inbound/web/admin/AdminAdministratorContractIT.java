@@ -117,7 +117,8 @@ class AdminAdministratorContractIT extends AdminWebBase {
                             .andReturn();
             assertThat(log.text()).doesNotContain(ACTIVATION_CODE);
             assertThat(result.getResponse().getHeaderNames())
-                    .noneMatch(name -> result.getResponse().getHeader(name).contains(ACTIVATION_CODE));
+                    .noneMatch(
+                            name -> result.getResponse().getHeader(name).contains(ACTIVATION_CODE));
         }
 
         ArgumentCaptor<CreateAdministratorUseCase.Command> command =
@@ -130,7 +131,9 @@ class AdminAdministratorContractIT extends AdminWebBase {
     @Test
     void duplicateEmailNamesTheExistingAccount() throws Exception {
         given(createAdministrator.run(any(), any()))
-                .willThrow(new DomainException(ErrorCode.DUPLICATE_EMAIL, Map.of("name", "Maria Diretora")));
+                .willThrow(
+                        new DomainException(
+                                ErrorCode.DUPLICATE_EMAIL, Map.of("name", "Maria Diretora")));
 
         mvc.perform(
                         asAdmin(post(BASE + "/administrators"))

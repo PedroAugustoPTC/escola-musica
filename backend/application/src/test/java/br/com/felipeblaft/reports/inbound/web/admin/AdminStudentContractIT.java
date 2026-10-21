@@ -175,7 +175,12 @@ class AdminStudentContractIT extends AdminWebBase {
                                 ErrorCode.VALIDATION_FAILED,
                                 Map.of(
                                         "fields",
-                                        List.of(Map.of("field", "search", "code", "INVALID_TEXT")))));
+                                        List.of(
+                                                Map.of(
+                                                        "field",
+                                                        "search",
+                                                        "code",
+                                                        "INVALID_TEXT")))));
 
         MvcResult result =
                 mvc.perform(
@@ -304,8 +309,16 @@ class AdminStudentContractIT extends AdminWebBase {
                                 Map.of(
                                         "fields",
                                         List.of(
-                                                Map.of("field", "birthDate", "code", "INVALID_BIRTH_DATE"),
-                                                Map.of("field", "guardian", "code", "GUARDIAN_REQUIRED")))));
+                                                Map.of(
+                                                        "field",
+                                                        "birthDate",
+                                                        "code",
+                                                        "INVALID_BIRTH_DATE"),
+                                                Map.of(
+                                                        "field",
+                                                        "guardian",
+                                                        "code",
+                                                        "GUARDIAN_REQUIRED")))));
 
         MvcResult result =
                 mvc.perform(
@@ -409,8 +422,9 @@ class AdminStudentContractIT extends AdminWebBase {
             ResponseSweeper.searching(CanaryCpf.sweepValues())
                     .allowing(ResponseSweeper.Place.BODY)
                     .assertClean(result);
-            assertThat(ResponseSweeper.searching(CanaryCpf.sweepValues()).sweepText(
-                            ResponseSweeper.Place.LOG, log.text()))
+            assertThat(
+                            ResponseSweeper.searching(CanaryCpf.sweepValues())
+                                    .sweepText(ResponseSweeper.Place.LOG, log.text()))
                     .isEmpty();
         }
     }

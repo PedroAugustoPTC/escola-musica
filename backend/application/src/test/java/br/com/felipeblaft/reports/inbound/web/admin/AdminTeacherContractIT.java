@@ -117,7 +117,8 @@ class AdminTeacherContractIT extends AdminWebBase {
         mvc.perform(
                         asAdmin(post(BASE + "/teachers"))
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"name\":\"Clara Souza\",\"email\":\"clara@example.test\"}"))
+                                .content(
+                                        "{\"name\":\"Clara Souza\",\"email\":\"clara@example.test\"}"))
                 .andExpect(status().isCreated())
                 .andExpect(followsContract())
                 .andExpect(jsonPath("$.teacher.id").value(TEACHER.toString()))
@@ -164,7 +165,11 @@ class AdminTeacherContractIT extends AdminWebBase {
                                         "fields",
                                         List.of(
                                                 Map.of("field", "name", "code", "INVALID_NAME"),
-                                                Map.of("field", "email", "code", "INVALID_EMAIL")))));
+                                                Map.of(
+                                                        "field",
+                                                        "email",
+                                                        "code",
+                                                        "INVALID_EMAIL")))));
 
         mvc.perform(
                         asAdmin(post(BASE + "/teachers"))
@@ -269,7 +274,8 @@ class AdminTeacherContractIT extends AdminWebBase {
         mvc.perform(
                         asAdmin(post(BASE + "/teachers"))
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"name\":\"Clara Souza\",\"email\":\"clara@example.test\"}"))
+                                .content(
+                                        "{\"name\":\"Clara Souza\",\"email\":\"clara@example.test\"}"))
                 .andExpect(jsonPath("$.validUntil").value("2026-11-01T12:00:00Z"));
     }
 }

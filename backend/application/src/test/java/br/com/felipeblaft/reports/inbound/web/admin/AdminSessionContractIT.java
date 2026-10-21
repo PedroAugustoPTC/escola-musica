@@ -34,9 +34,9 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
- * Contrato de {@code POST/GET/DELETE /admin/session} (FR-004, FR-005, FR-006, FR-046) contra
- * {@code api-administration.openapi.yaml}: status, corpo, {@code details.fields}, cabeçalhos,
- * cookie e erros. Os casos de uso são dublês: a regra de negócio não é exercida aqui.
+ * Contrato de {@code POST/GET/DELETE /admin/session} (FR-004, FR-005, FR-006, FR-046) contra {@code
+ * api-administration.openapi.yaml}: status, corpo, {@code details.fields}, cabeçalhos, cookie e
+ * erros. Os casos de uso são dublês: a regra de negócio não é exercida aqui.
  */
 class AdminSessionContractIT extends AdminWebBase {
 
@@ -47,7 +47,11 @@ class AdminSessionContractIT extends AdminWebBase {
 
     private AdministratorSessionResult opened(String token, boolean mustChange) {
         return new AdministratorSessionResult(
-                administratorId, "Administrador de Teste", new Secret(token), sessionExpiry, mustChange);
+                administratorId,
+                "Administrador de Teste",
+                new Secret(token),
+                sessionExpiry,
+                mustChange);
     }
 
     private ResultActions signInRequest(String remote, String forwarded) throws Exception {
@@ -129,8 +133,10 @@ class AdminSessionContractIT extends AdminWebBase {
                 .willReturn(opened("id-a", false))
                 .willReturn(opened("id-b", false));
 
-        String first = signInRequest("200.1.1.1", null).andReturn().getResponse().getHeader("Set-Cookie");
-        String second = signInRequest("200.1.1.1", null).andReturn().getResponse().getHeader("Set-Cookie");
+        String first =
+                signInRequest("200.1.1.1", null).andReturn().getResponse().getHeader("Set-Cookie");
+        String second =
+                signInRequest("200.1.1.1", null).andReturn().getResponse().getHeader("Set-Cookie");
 
         assertThat(first).contains("admin_session=id-a");
         assertThat(second).contains("admin_session=id-b");
@@ -191,7 +197,12 @@ class AdminSessionContractIT extends AdminWebBase {
                                 ErrorCode.VALIDATION_FAILED,
                                 Map.of(
                                         "fields",
-                                        List.of(Map.of("field", "email", "code", "INVALID_EMAIL")))));
+                                        List.of(
+                                                Map.of(
+                                                        "field",
+                                                        "email",
+                                                        "code",
+                                                        "INVALID_EMAIL")))));
 
         signInRequest("200.1.1.1", null)
                 .andExpect(status().isBadRequest())
@@ -199,7 +210,8 @@ class AdminSessionContractIT extends AdminWebBase {
                 .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
                 .andExpect(jsonPath("$.details.fields[0].field").value("email"))
                 .andExpect(jsonPath("$.details.fields[0].code").value("INVALID_EMAIL"))
-                .andExpect(content().string(not(containsString("administrator.test@example.test"))));
+                .andExpect(
+                        content().string(not(containsString("administrator.test@example.test"))));
     }
 
     @Test
@@ -292,14 +304,16 @@ class AdminSessionContractIT extends AdminWebBase {
                 .andExpect(jsonPath("$.code").value("OPERATION_NOT_SAVED"))
                 .andExpect(
                         jsonPath("$.message")
-                                .value("Não foi possível concluir. Nada foi gravado; tente de novo."))
+                                .value(
+                                        "Não foi possível concluir. Nada foi gravado; tente de novo."))
                 .andExpect(jsonPath("$.reference").doesNotExist());
     }
 
     @Test
     void noResponsePropertyIsCalledCpf() throws Exception {
         given(signIn.run(any())).willReturn(opened("t", false));
-        String body = signInRequest("200.1.1.1", null).andReturn().getResponse().getContentAsString();
+        String body =
+                signInRequest("200.1.1.1", null).andReturn().getResponse().getContentAsString();
         assertThat(body.toLowerCase()).doesNotContain("cpf");
     }
 

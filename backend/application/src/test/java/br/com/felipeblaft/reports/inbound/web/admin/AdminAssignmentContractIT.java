@@ -55,18 +55,24 @@ class AdminAssignmentContractIT extends AdminWebBase {
 
     @Test
     void assigningAnInactiveTeacherIs409() throws Exception {
-        doThrow(new DomainException(ErrorCode.TEACHER_INACTIVE)).when(assignTeacher).run(any(), any());
+        doThrow(new DomainException(ErrorCode.TEACHER_INACTIVE))
+                .when(assignTeacher)
+                .run(any(), any());
 
         mvc.perform(asAdmin(put(URI)))
                 .andExpect(status().isConflict())
                 .andExpect(followsContract())
                 .andExpect(jsonPath("$.code").value("TEACHER_INACTIVE"))
-                .andExpect(jsonPath("$.message").value("Este professor está inativo. Reative-o antes."));
+                .andExpect(
+                        jsonPath("$.message")
+                                .value("Este professor está inativo. Reative-o antes."));
     }
 
     @Test
     void unknownStudentOrTeacherIs404() throws Exception {
-        doThrow(new DomainException(ErrorCode.RESOURCE_NOT_FOUND)).when(assignTeacher).run(any(), any());
+        doThrow(new DomainException(ErrorCode.RESOURCE_NOT_FOUND))
+                .when(assignTeacher)
+                .run(any(), any());
 
         mvc.perform(asAdmin(put(URI)))
                 .andExpect(status().isNotFound())
@@ -76,7 +82,9 @@ class AdminAssignmentContractIT extends AdminWebBase {
 
     @Test
     void removeReturns204() throws Exception {
-        mvc.perform(asAdmin(delete(URI))).andExpect(status().isNoContent()).andExpect(followsContract());
+        mvc.perform(asAdmin(delete(URI)))
+                .andExpect(status().isNoContent())
+                .andExpect(followsContract());
 
         ArgumentCaptor<RemoveTeacherFromStudentUseCase.Command> command =
                 ArgumentCaptor.forClass(RemoveTeacherFromStudentUseCase.Command.class);
@@ -87,7 +95,8 @@ class AdminAssignmentContractIT extends AdminWebBase {
 
     @Test
     void removalPreviewReturnsTheFrozenReportCount() throws Exception {
-        given(previewRemoval.run(any(), any())).willReturn(new PreviewAssignmentRemovalUseCase.Result(3));
+        given(previewRemoval.run(any(), any()))
+                .willReturn(new PreviewAssignmentRemovalUseCase.Result(3));
 
         mvc.perform(get(URI + "/removal-preview").cookie(adminCookie(ADMIN_TOKEN)))
                 .andExpect(status().isOk())

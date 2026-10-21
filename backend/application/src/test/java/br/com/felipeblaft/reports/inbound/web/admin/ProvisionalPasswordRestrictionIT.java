@@ -12,7 +12,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import br.com.felipeblaft.reports.domain.access.Actor;
-import br.com.felipeblaft.reports.domain.common.DomainException;
 import br.com.felipeblaft.reports.domain.common.ErrorCode;
 import br.com.felipeblaft.reports.domain.common.Secret;
 import br.com.felipeblaft.reports.usecase.administrator.AdministratorSessionResult;
@@ -62,10 +61,12 @@ class ProvisionalPasswordRestrictionIT extends AdminWebBase {
                                                             "/api/v1"
                                                                     + path.replaceAll(
                                                                             "\\{[^}]+}",
-                                                                            UUID.randomUUID().toString());
+                                                                            UUID.randomUUID()
+                                                                                    .toString());
                                                     routes.add(
                                                             new Route(
-                                                                    HttpMethod.valueOf(method.name()),
+                                                                    HttpMethod.valueOf(
+                                                                            method.name()),
                                                                     uri,
                                                                     key));
                                                 }));
@@ -128,7 +129,11 @@ class ProvisionalPasswordRestrictionIT extends AdminWebBase {
         given(changePassword.run(any(), any()))
                 .willReturn(
                         new AdministratorSessionResult(
-                                administratorId, "Administrador", new Secret("novo"), sessionExpiry, false));
+                                administratorId,
+                                "Administrador",
+                                new Secret("novo"),
+                                sessionExpiry,
+                                false));
 
         mvc.perform(get(BASE + "/session").cookie(adminCookie(PROVISIONAL)))
                 .andExpect(status().isOk())

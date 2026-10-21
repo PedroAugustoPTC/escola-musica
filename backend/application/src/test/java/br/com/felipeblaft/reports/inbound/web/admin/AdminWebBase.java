@@ -1,7 +1,6 @@
 package br.com.felipeblaft.reports.inbound.web.admin;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willReturn;
 import static org.mockito.BDDMockito.willThrow;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -35,8 +34,8 @@ import br.com.felipeblaft.reports.usecase.teacher.GetTeacherUseCase;
 import br.com.felipeblaft.reports.usecase.teacher.InactivateTeacherUseCase;
 import br.com.felipeblaft.reports.usecase.teacher.ListTeachersUseCase;
 import br.com.felipeblaft.reports.usecase.teacher.ReactivateTeacherUseCase;
-import br.com.felipeblaft.reports.usecase.teacher.ReissueAccessCodeUseCase;
 import br.com.felipeblaft.reports.usecase.teacher.RegisterTeacherUseCase;
+import br.com.felipeblaft.reports.usecase.teacher.ReissueAccessCodeUseCase;
 import br.com.felipeblaft.reports.usecase.teacher.UnlinkTeacherTelegramUseCase;
 import br.com.felipeblaft.reports.usecase.teacher.UpdateTeacherUseCase;
 import com.atlassian.oai.validator.OpenApiInteractionValidator;
