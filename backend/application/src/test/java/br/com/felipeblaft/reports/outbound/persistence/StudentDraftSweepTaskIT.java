@@ -97,7 +97,9 @@ class StudentDraftSweepTaskIT extends RegistryPersistenceBase {
     @Test
     void scanIsScheduledFrequentlyEnoughForThirtyMinuteDrafts() throws Exception {
         Scheduled scheduled =
-                StudentDraftSweepTask.class.getDeclaredMethod("scan").getAnnotation(Scheduled.class);
+                StudentDraftSweepTask.class
+                        .getDeclaredMethod("scan")
+                        .getAnnotation(Scheduled.class);
 
         assertThat(scheduled).isNotNull();
         assertThat(scheduled.fixedDelay()).isPositive().isLessThanOrEqualTo(10 * 60_000L);

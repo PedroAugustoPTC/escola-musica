@@ -17,8 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * Relatórios em aberto de professor inativo ficam congelados (R-23, T083). Verificação 3 do plano:
  * antes da feature 005 {@code listTeacherOpenReports} filtrava só por professor e situação do
- * relatório, sem olhar a situação do professor nem a associação; estes testes cobrem o filtro
- * novo. O filtro por associação está em {@link OpenReportsQueryAssociationIT}.
+ * relatório, sem olhar a situação do professor nem a associação; estes testes cobrem o filtro novo.
+ * O filtro por associação está em {@link OpenReportsQueryAssociationIT}.
  */
 class OpenReportsQueryAdapterIT extends RegistryPersistenceBase {
 
@@ -32,7 +32,9 @@ class OpenReportsQueryAdapterIT extends RegistryPersistenceBase {
 
         List<OpenReport> list = query.listByTeacher(clara.id());
 
-        assertThat(list).singleElement().satisfies(r -> assertThat(r.reportId()).isEqualTo(report.id()));
+        assertThat(list)
+                .singleElement()
+                .satisfies(r -> assertThat(r.reportId()).isEqualTo(report.id()));
         assertThat(query.searchByStudent(clara.id(), matteo.id())).isPresent();
     }
 

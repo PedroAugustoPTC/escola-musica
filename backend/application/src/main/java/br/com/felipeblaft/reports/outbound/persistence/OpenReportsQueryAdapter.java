@@ -156,7 +156,8 @@ public class OpenReportsQueryAdapter implements OpenReportsQueryPort {
 
     @Override
     public int countOpenReports(UUID teacherId, UUID studentId) {
-        // inclui os relatórios congelados: é a prévia do que fica preservado ao retirar a associação
+        // inclui os relatórios congelados: é a prévia do que fica preservado ao retirar a
+        // associação
         Integer total =
                 jdbc.queryForObject(
                         "select"

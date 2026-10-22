@@ -41,7 +41,9 @@ interface StudentJpa extends JpaRepository<StudentEntity, UUID> {
             """)
     List<StudentEntity> listByTeacherAndState(UUID teacherId, Collection<Boolean> states);
 
-    /** Insere sem abortar a transação quando o resumo do CPF já existe; devolve as linhas inseridas. */
+    /**
+     * Insere sem abortar a transação quando o resumo do CPF já existe; devolve as linhas inseridas.
+     */
     @Modifying
     @Query(
             value =

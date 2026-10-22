@@ -84,7 +84,8 @@ class StudentRegistrationDraftRepositoryAdapterIT extends RegistryPersistenceBas
     }
 
     private int count() {
-        return jdbc.queryForObject("select count(*) from student_registration_draft", Integer.class);
+        return jdbc.queryForObject(
+                "select count(*) from student_registration_draft", Integer.class);
     }
 
     @Test
@@ -265,7 +266,8 @@ class StudentRegistrationDraftRepositoryAdapterIT extends RegistryPersistenceBas
         linkOfClara();
         drafts.save(createDraft(link.id(), now().plus(Duration.ofMinutes(30))));
 
-        // causa externa ao repositório (limpeza operacional, remoção do professor): o banco cascateia
+        // causa externa ao repositório (limpeza operacional, remoção do professor): o banco
+        // cascateia
         jdbc.update("delete from telegram_link where id = ?", link.id());
 
         assertThat(count()).isZero();

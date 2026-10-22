@@ -162,7 +162,8 @@ class StudentRepositoryAdapterIT extends RegistryPersistenceBase {
                             // a transação segue utilizável depois da duplicidade
                             students.insertIfAbsent(
                                     minorWithGuardian("Outro", Cpf.of(validCpf(904))));
-                            return jdbc.queryForObject("select count(*) from student", Integer.class);
+                            return jdbc.queryForObject(
+                                    "select count(*) from student", Integer.class);
                         });
 
         assertThat(total).isEqualTo(2);
@@ -228,7 +229,8 @@ class StudentRepositoryAdapterIT extends RegistryPersistenceBase {
         assertThat(students.findVisible(StudentScope.ofTeacher(clara.id()), ofClara.id()))
                 .map(Student::id)
                 .contains(ofClara.id());
-        assertThat(students.findVisible(StudentScope.ofTeacher(clara.id()), ofBruno.id())).isEmpty();
+        assertThat(students.findVisible(StudentScope.ofTeacher(clara.id()), ofBruno.id()))
+                .isEmpty();
         assertThat(students.findVisible(StudentScope.ofTeacher(clara.id()), withoutTeacher.id()))
                 .isEmpty();
     }
@@ -294,11 +296,23 @@ class StudentRepositoryAdapterIT extends RegistryPersistenceBase {
         Student foreign = studentOf(bruno, "Aluno do Bruno");
         Student withoutTeacher = student("Aluno sem professor");
 
-        assertThat(names(students.list(StudentScope.ofTeacher(clara.id()), StudentStatusFilter.ACTIVE)))
+        assertThat(
+                        names(
+                                students.list(
+                                        StudentScope.ofTeacher(clara.id()),
+                                        StudentStatusFilter.ACTIVE)))
                 .containsExactlyInAnyOrder("Zélia Prado", "Álvaro Dias", "carlos Eduardo");
-        assertThat(names(students.list(StudentScope.ofTeacher(clara.id()), StudentStatusFilter.INACTIVE)))
+        assertThat(
+                        names(
+                                students.list(
+                                        StudentScope.ofTeacher(clara.id()),
+                                        StudentStatusFilter.INACTIVE)))
                 .containsExactly("Beatriz Inativa");
-        assertThat(names(students.list(StudentScope.ofTeacher(clara.id()), StudentStatusFilter.ALL)))
+        assertThat(
+                        names(
+                                students.list(
+                                        StudentScope.ofTeacher(clara.id()),
+                                        StudentStatusFilter.ALL)))
                 .hasSize(4)
                 .doesNotContain(foreign.name(), withoutTeacher.name());
         assertThat(students.list(StudentScope.all(), StudentStatusFilter.ALL))
@@ -314,7 +328,10 @@ class StudentRepositoryAdapterIT extends RegistryPersistenceBase {
                 .extracting(Student::id)
                 .containsExactly(inactive.id());
         assertThat(
-                        names(students.list(StudentScope.ofTeacher(bruno.id()), StudentStatusFilter.ALL)))
+                        names(
+                                students.list(
+                                        StudentScope.ofTeacher(bruno.id()),
+                                        StudentStatusFilter.ALL)))
                 .containsExactly("Aluno do Bruno");
     }
 
@@ -325,7 +342,11 @@ class StudentRepositoryAdapterIT extends RegistryPersistenceBase {
         studentOf(clara, "Ana");
         studentOf(clara, "Carla");
 
-        assertThat(names(students.list(StudentScope.ofTeacher(clara.id()), StudentStatusFilter.ALL)))
+        assertThat(
+                        names(
+                                students.list(
+                                        StudentScope.ofTeacher(clara.id()),
+                                        StudentStatusFilter.ALL)))
                 .containsExactly("Ana", "bruno", "Carla");
     }
 
@@ -335,9 +356,11 @@ class StudentRepositoryAdapterIT extends RegistryPersistenceBase {
         studentOf(clara, "Álvaro Dias");
         studentOf(clara, "Zélia Prado");
         studentOf(clara, "João Pereira");
-        List<Student> all = students.list(StudentScope.ofTeacher(clara.id()), StudentStatusFilter.ACTIVE);
+        List<Student> all =
+                students.list(StudentScope.ofTeacher(clara.id()), StudentStatusFilter.ACTIVE);
 
-        // a busca é em memória (R-22), com a normalização do núcleo; o banco entrega os nomes intactos
+        // a busca é em memória (R-22), com a normalização do núcleo; o banco entrega os nomes
+        // intactos
         assertThat(matching(all, "alvaro")).containsExactly("Álvaro Dias");
         assertThat(matching(all, "ZELIA")).containsExactly("Zélia Prado");
         assertThat(matching(all, "joao")).containsExactly("João Pereira");
@@ -348,7 +371,8 @@ class StudentRepositoryAdapterIT extends RegistryPersistenceBase {
     void listOfScopeWithoutStudentsIsEmpty() {
         Teacher clara = teacher("Clara Souza", true);
 
-        assertThat(students.list(StudentScope.ofTeacher(clara.id()), StudentStatusFilter.ALL)).isEmpty();
+        assertThat(students.list(StudentScope.ofTeacher(clara.id()), StudentStatusFilter.ALL))
+                .isEmpty();
         assertThat(students.list(StudentScope.all(), StudentStatusFilter.ALL)).isEmpty();
     }
 

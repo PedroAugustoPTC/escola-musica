@@ -30,7 +30,16 @@ class StudentListPerformanceIT extends RegistryPersistenceBase {
         "Ana", "Álvaro", "Beatriz", "Caio", "Débora", "Érica", "Fábio", "Gabriela", "Hélio", "Íris"
     };
     private static final String[] LAST_NAMES = {
-        "Souza", "Lima", "Prado", "Alves", "Ferreira", "Dias", "Martins", "Rocha", "Nunes", "Tavares"
+        "Souza",
+        "Lima",
+        "Prado",
+        "Alves",
+        "Ferreira",
+        "Dias",
+        "Martins",
+        "Rocha",
+        "Nunes",
+        "Tavares"
     };
 
     private Teacher clara;
@@ -48,7 +57,7 @@ class StudentListPerformanceIT extends RegistryPersistenceBase {
                             + LAST_NAMES[(i / FIRST_NAMES.length) % LAST_NAMES.length]
                             + " "
                             + i;
-            byte[] encrypted = ("cifrado-" + i).getBytes(java.nio.charset.StandardCharsets.UTF_8);
+            byte[] encrypted = ("encrypted-" + i).getBytes(java.nio.charset.StandardCharsets.UTF_8);
             studentRows.add(
                     new Object[] {
                         id,
@@ -135,8 +144,12 @@ class StudentListPerformanceIT extends RegistryPersistenceBase {
             assertThat(listed.get()).hasSize(STUDENTS);
         }
 
-        assertThat(percentile95(listing)).as("p95 da lista (ms): %s", listing).isLessThanOrEqualTo(LIMIT_MS);
-        assertThat(percentile95(search)).as("p95 da busca (ms): %s", search).isLessThanOrEqualTo(LIMIT_MS);
+        assertThat(percentile95(listing))
+                .as("p95 da lista (ms): %s", listing)
+                .isLessThanOrEqualTo(LIMIT_MS);
+        assertThat(percentile95(search))
+                .as("p95 da busca (ms): %s", search)
+                .isLessThanOrEqualTo(LIMIT_MS);
         assertThat(percentile95(teacherListing))
                 .as("p95 da lista do professor (ms): %s", teacherListing)
                 .isLessThanOrEqualTo(LIMIT_MS);

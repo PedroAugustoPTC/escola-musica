@@ -83,8 +83,7 @@ class OpenReportsQueryAssociationIT extends RegistryPersistenceBase {
         assertThat(list)
                 .singleElement()
                 .satisfies(r -> assertThat(r.reportId()).isEqualTo(sofiaReport.id()));
-        assertThat(query.lastLessonByStudent(clara.id()))
-                .containsOnlyKeys(sofia.id());
+        assertThat(query.lastLessonByStudent(clara.id())).containsOnlyKeys(sofia.id());
     }
 
     @Test

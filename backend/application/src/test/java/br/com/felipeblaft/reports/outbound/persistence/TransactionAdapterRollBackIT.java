@@ -60,10 +60,10 @@ class TransactionAdapterRollBackIT extends RegistryPersistenceBase {
                             seenInside[0] = count("student");
                             seenInside[1] = count("teacher_student_assignment");
                             seenInside[2] = count("authorship_record");
-                            return "resultado";
+                            return "outcome";
                         });
 
-        assertThat(result).isEqualTo("resultado");
+        assertThat(result).isEqualTo("outcome");
         // dentro do trecho o que foi gravado era visível (a carga simulada valida de verdade)
         assertThat(seenInside).containsExactly(1, 1, 1);
         for (String table :
