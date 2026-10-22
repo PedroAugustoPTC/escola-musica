@@ -25,11 +25,24 @@ import java.util.UUID;
 /**
  * Edita um aluno ({@code STUDENT_UPDATE}); campos ausentes não mudam. Menor de 18 anos na data da
  * edição exige os três dados do responsável; o CPF novo segue o mesmo caminho do cadastro (em
- * branco mantém o atual). Serve também à carga inicial. Ramo do professor: tarefa T149.
+ * branco mantém o atual), inclusive as regras do professor contra sondagem (FR-024). O professor só
+ * edita aluno associado a ele. Serve também à carga inicial.
  */
 public class UpdateStudentUseCase {
 
-    public record Command(UUID studentId, StudentInput input, String correlationId) {
+    /**
+     * {@code lookupAlreadyCounted} é verdadeiro na nova verificação da confirmação do Telegram, que
+     * não conta outra consulta de CPF.
+     */
+    public record Command(
+            UUID studentId,
+            StudentInput input,
+            String correlationId,
+            boolean lookupAlreadyCounted) {
+
+        public Command(UUID studentId, StudentInput input, String correlationId) {
+            this(studentId, input, correlationId, false);
+        }
 
         @Override
         public String toString() {
@@ -44,6 +57,7 @@ public class UpdateStudentUseCase {
     private final AuthorshipService authorship;
     private final ClockPort clock;
     private final GetStudentUseCase.Views views;
+    private final RegisterStudentUseCase.TeacherCpfGuard guard;
 
     public UpdateStudentUseCase(
             ActorAuthorizationService authorization,
@@ -62,13 +76,12 @@ public class UpdateStudentUseCase {
         this.authorship = Objects.requireNonNull(authorship);
         this.clock = Objects.requireNonNull(clock);
         this.views = new GetStudentUseCase.Views(assignments, teachers, clock);
+        this.guard = new RegisterStudentUseCase.TeacherCpfGuard(assignments, attempts, authorship);
     }
 
     public StudentView run(Actor actor, Command command) {
         Permission permission = authorization.require(actor, Operation.STUDENT_UPDATE);
-        if (permission == Permission.ALLOW_OWN_STUDENTS) {
-            throw new UnsupportedOperationException("UpdateStudentUseCase: ramo do professor");
-        }
+        boolean byTeacher = permission == Permission.ALLOW_OWN_STUDENTS;
         Student student =
                 GetStudentUseCase.findVisibleOrRecordDenial(
                         access, authorship, actor, command.studentId(), command.correlationId());
@@ -77,7 +90,10 @@ public class UpdateStudentUseCase {
 
         ProtectedCpf newCpf = null;
         if (data.cpf() != null) {
-            newCpf = protectIfFree(student, data.cpf());
+            if (byTeacher) {
+                guard.beforeLookup(actor, command.correlationId(), command.lookupAlreadyCounted());
+            }
+            newCpf = protectIfFree(actor, byTeacher, student, data.cpf(), command.correlationId());
         }
         if (student.applyEdit(data, newCpf, now)) {
             students.save(student);
@@ -88,7 +104,7 @@ public class UpdateStudentUseCase {
                     student.id(),
                     command.correlationId());
         }
-        return views.of(student, false);
+        return views.of(student, byTeacher);
     }
 
     /**
@@ -109,18 +125,22 @@ public class UpdateStudentUseCase {
     }
 
     /**
-     * CPF informado: o do próprio aluno não muda nada; o de outro aluno é duplicidade (o nome dele
-     * vai ao administrador); livre, vira o valor protegido a gravar.
+     * CPF informado: o do próprio aluno não muda nada; o de outro aluno é duplicidade (ao
+     * administrador, o nome dele; ao professor, o código neutro); livre, vira o valor protegido a
+     * gravar.
      */
-    private ProtectedCpf protectIfFree(Student student, Cpf cpf) {
+    private ProtectedCpf protectIfFree(
+            Actor actor, boolean byTeacher, Student student, Cpf cpf, String correlationId) {
         String hash = protection.hashCpf(cpf);
         Optional<Student> holder = students.searchByCpfHash(hash);
         if (holder.isEmpty()) {
             return new ProtectedCpf(protection.encryptCpf(cpf), hash);
         }
-        if (!holder.get().id().equals(student.id())) {
-            throw RegisterStudentUseCase.duplicate(holder.get());
+        if (holder.get().id().equals(student.id())) {
+            return null;
         }
-        return null;
+        throw byTeacher
+                ? guard.refuse(actor, holder.get(), correlationId)
+                : RegisterStudentUseCase.duplicate(holder.get());
     }
 }

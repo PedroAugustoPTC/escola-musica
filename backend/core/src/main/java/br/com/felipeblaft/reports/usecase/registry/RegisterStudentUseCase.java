@@ -1,9 +1,13 @@
 package br.com.felipeblaft.reports.usecase.registry;
 
 import br.com.felipeblaft.reports.domain.access.Actor;
+import br.com.felipeblaft.reports.domain.access.AttemptScope;
+import br.com.felipeblaft.reports.domain.access.AuthorshipRecord;
+import br.com.felipeblaft.reports.domain.access.AuthorshipResult;
 import br.com.felipeblaft.reports.domain.access.AuthorshipTargetType;
 import br.com.felipeblaft.reports.domain.access.Operation;
 import br.com.felipeblaft.reports.domain.access.Permission;
+import br.com.felipeblaft.reports.domain.common.Channel;
 import br.com.felipeblaft.reports.domain.common.DomainException;
 import br.com.felipeblaft.reports.domain.common.ErrorCode;
 import br.com.felipeblaft.reports.domain.registry.Cpf;
@@ -35,12 +39,25 @@ import java.util.UUID;
  * ativos), pela carga inicial (ator de sistema) ou pelo professor (associado só a ele). Valida tudo
  * no núcleo antes de gravar qualquer coisa, grava o CPF só cifrado e trata a duplicidade de CPF: ao
  * administrador indica o nome do aluno existente, nunca o CPF; ao professor, só um código neutro
- * (ramo do professor: tarefa T149).
+ * ({@code CPF_UNAVAILABLE}) ou {@code STUDENT_ALREADY_YOURS}, com autoria da recusa e contagem nos
+ * limites contra sondagem (FR-024).
  */
 public class RegisterStudentUseCase {
 
-    /** {@code teacherIds} só vale para o administrador; o professor se associa a si mesmo. */
-    public record Command(StudentInput input, List<UUID> teacherIds, String correlationId) {
+    /**
+     * {@code teacherIds} só vale para o administrador; o professor se associa a si mesmo. {@code
+     * lookupAlreadyCounted} é verdadeiro na nova verificação da confirmação do Telegram, que não
+     * conta outra consulta de CPF (a recusa e o bloqueio continuam valendo).
+     */
+    public record Command(
+            StudentInput input,
+            List<UUID> teacherIds,
+            String correlationId,
+            boolean lookupAlreadyCounted) {
+
+        public Command(StudentInput input, List<UUID> teacherIds, String correlationId) {
+            this(input, teacherIds, correlationId, false);
+        }
 
         @Override
         public String toString() {
@@ -56,6 +73,7 @@ public class RegisterStudentUseCase {
     private final AuthorshipService authorship;
     private final ClockPort clock;
     private final GetStudentUseCase.Views views;
+    private final TeacherCpfGuard guard;
 
     public RegisterStudentUseCase(
             ActorAuthorizationService authorization,
@@ -74,28 +92,34 @@ public class RegisterStudentUseCase {
         this.authorship = Objects.requireNonNull(authorship);
         this.clock = Objects.requireNonNull(clock);
         this.views = new GetStudentUseCase.Views(assignments, teachers, clock);
+        this.guard = new TeacherCpfGuard(assignments, attempts, authorship);
     }
 
     public StudentView run(Actor actor, Command command) {
         Permission permission = authorization.require(actor, Operation.STUDENT_REGISTER);
-        if (permission == Permission.ALLOW_OWN_STUDENTS) {
-            throw new UnsupportedOperationException("RegisterStudentUseCase: ramo do professor");
-        }
+        boolean byTeacher = permission == Permission.ALLOW_OWN_STUDENTS;
         Instant now = clock.now();
         StudentData data = validate(command.input(), clock.todayInSchoolTimezone());
-        List<Teacher> owners = activeTeachers(command.teacherIds());
+        List<Teacher> owners = byTeacher ? List.of() : activeTeachers(command.teacherIds());
 
         Cpf cpf = data.cpf();
         String hash = protection.hashCpf(cpf);
+        if (byTeacher) {
+            guard.beforeLookup(actor, command.correlationId(), command.lookupAlreadyCounted());
+        }
         Optional<Student> existing = students.searchByCpfHash(hash);
         if (existing.isPresent()) {
-            throw duplicate(existing.get());
+            throw conflict(actor, byTeacher, existing.get(), command.correlationId());
         }
         Student student = create(data, protection.encryptCpf(cpf), hash, now);
         if (!students.insertIfAbsent(student)) {
-            throw duplicate(
+            Student holder =
                     students.searchByCpfHash(hash)
-                            .orElseThrow(() -> new DomainException(ErrorCode.OPERATION_NOT_SAVED)));
+                            .orElseThrow(() -> new DomainException(ErrorCode.OPERATION_NOT_SAVED));
+            throw conflict(actor, byTeacher, holder, command.correlationId());
+        }
+        if (byTeacher) {
+            assignments.save(TeacherStudent.create(actor.id(), student.id(), now));
         }
         for (Teacher owner : owners) {
             assignments.save(TeacherStudent.create(owner.id(), student.id(), now));
@@ -106,7 +130,13 @@ public class RegisterStudentUseCase {
                 AuthorshipTargetType.STUDENT,
                 student.id(),
                 command.correlationId());
-        return views.of(student, false);
+        return views.of(student, byTeacher);
+    }
+
+    /** CPF já usado: ao administrador o nome do aluno existente; ao professor, o código neutro. */
+    private DomainException conflict(
+            Actor actor, boolean byTeacher, Student holder, String correlationId) {
+        return byTeacher ? guard.refuse(actor, holder, correlationId) : duplicate(holder);
     }
 
     /** Valida o texto bruto do cadastro; o CPF é obrigatório. */
@@ -170,5 +200,71 @@ public class RegisterStudentUseCase {
     /** CPF já usado: ao administrador, o nome do aluno existente (nunca o CPF). */
     static DomainException duplicate(Student existing) {
         return new DomainException(ErrorCode.DUPLICATE_CPF, Map.of("name", existing.name()));
+    }
+
+    /**
+     * Regras do professor sobre o CPF digitado (FR-024), compartilhadas por cadastro e edição. A
+     * contagem é por professor, a mesma nos dois canais (por isso um canal fixo na chave): o
+     * bloqueio vale antes de qualquer consulta de duplicidade; cada consulta conta no teto de
+     * consultas; a recusa por aluno alheio deixa autoria e conta no limite de recusas.
+     */
+    static final class TeacherCpfGuard {
+
+        private final AssignmentRepository assignments;
+        private final AccessAttemptsControlService attempts;
+        private final AuthorshipService authorship;
+
+        TeacherCpfGuard(
+                AssignmentRepository assignments,
+                AccessAttemptsControlService attempts,
+                AuthorshipService authorship) {
+            this.assignments = Objects.requireNonNull(assignments);
+            this.attempts = Objects.requireNonNull(attempts);
+            this.authorship = Objects.requireNonNull(authorship);
+        }
+
+        /** Recusa se bloqueado e conta a consulta (salvo a nova verificação da confirmação). */
+        void beforeLookup(Actor actor, String correlationId, boolean alreadyCounted) {
+            String key = actor.id().toString();
+            try {
+                attempts.verifyLock(AttemptScope.TEACHER_CPF_PROBE, Channel.WEB, key);
+                attempts.verifyLock(AttemptScope.TEACHER_CPF_LOOKUP, Channel.WEB, key);
+            } catch (DomainException blocked) {
+                authorship.record(
+                        actor,
+                        AuthorshipRecord.ATTEMPT_BLOCKED,
+                        null,
+                        null,
+                        AuthorshipResult.BLOCKED,
+                        blocked.code().name(),
+                        correlationId);
+                throw blocked;
+            }
+            if (!alreadyCounted) {
+                attempts.registerFailure(AttemptScope.TEACHER_CPF_LOOKUP, Channel.WEB, key);
+            }
+        }
+
+        /**
+         * Resposta ao professor para um CPF que já existe: o aluno é dele ({@code
+         * STUDENT_ALREADY_YOURS}) ou não é ({@code CPF_UNAVAILABLE}, sem nome, professor ou
+         * qualquer dado; deixa autoria e conta a recusa).
+         */
+        DomainException refuse(Actor actor, Student holder, String correlationId) {
+            if (assignments.exists(actor.id(), holder.id())) {
+                return new DomainException(ErrorCode.STUDENT_ALREADY_YOURS);
+            }
+            authorship.record(
+                    actor,
+                    AuthorshipRecord.CPF_REFUSED_OTHER_STUDENT,
+                    AuthorshipTargetType.STUDENT,
+                    holder.id(),
+                    AuthorshipResult.DENIED,
+                    ErrorCode.CPF_UNAVAILABLE.name(),
+                    correlationId);
+            attempts.registerFailure(
+                    AttemptScope.TEACHER_CPF_PROBE, Channel.WEB, actor.id().toString());
+            return new DomainException(ErrorCode.CPF_UNAVAILABLE);
+        }
     }
 }

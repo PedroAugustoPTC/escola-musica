@@ -372,7 +372,7 @@ class RegisterStudentUseCaseTest {
      * Repositório em que o aluno já existente só é visto pelo insert (corrida entre dois
      * cadastros).
      */
-    private static final class RacingStudents extends InMemoryStudentRepository {
+    static final class RacingStudents extends InMemoryStudentRepository {
         private boolean first = true;
 
         RacingStudents(InMemoryAssignmentRepository assignments) {
@@ -390,7 +390,7 @@ class RegisterStudentUseCaseTest {
     }
 
     /** Insert recusado e dono do CPF que sumiu em seguida. */
-    private static final class VanishingStudents extends InMemoryStudentRepository {
+    static final class VanishingStudents extends InMemoryStudentRepository {
         VanishingStudents(InMemoryAssignmentRepository assignments) {
             super(assignments);
         }
