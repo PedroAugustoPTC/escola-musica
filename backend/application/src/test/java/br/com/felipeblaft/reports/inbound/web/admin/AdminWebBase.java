@@ -161,35 +161,12 @@ public abstract class AdminWebBase extends IntegrationBase {
                 .build();
     }
 
-    /**
-     * Caminho do contrato a usar nos testes. A fonte de verdade tem uma linha em YAML inválido (o
-     * {@code description} sem aspas de {@code DELETE /admin/teachers/{id}/telegram-link} contém
-     * vírgula dentro de um mapa de fluxo, e o carregador a recusa). Enquanto o contrato não é
-     * corrigido, os testes usam uma cópia temporária com essa única linha entre aspas; se o
-     * contrato for corrigido, a substituição não encontra nada e a cópia é idêntica.
-     */
+    /** Caminho do contrato (fonte de verdade); {@code CONTRACT_ADMIN_API} o sobrescreve. */
     public static Path contractPath() {
-        Path source;
         String configured = System.getenv("CONTRACT_ADMIN_API");
         if (configured != null && Files.exists(Path.of(configured))) {
-            source = Path.of(configured);
-        } else {
-            source = Path.of("../..", CONTRACT_RELATIVE).toAbsolutePath().normalize();
+            return Path.of(configured);
         }
-        try {
-            String text = Files.readString(source, java.nio.charset.StandardCharsets.UTF_8);
-            String fixed =
-                    text.replace(
-                            "{ description: Vínculo encerrado, ações pendentes e cadastro em"
-                                    + " andamento descartados. }",
-                            "{ description: \"Vínculo encerrado, ações pendentes e cadastro em"
-                                    + " andamento descartados.\" }");
-            Path copy = Files.createTempFile("api-administration-", ".openapi.yaml");
-            copy.toFile().deleteOnExit();
-            Files.writeString(copy, fixed, java.nio.charset.StandardCharsets.UTF_8);
-            return copy;
-        } catch (java.io.IOException error) {
-            throw new java.io.UncheckedIOException(error);
-        }
+        return Path.of("../..", CONTRACT_RELATIVE).toAbsolutePath().normalize();
     }
 }
