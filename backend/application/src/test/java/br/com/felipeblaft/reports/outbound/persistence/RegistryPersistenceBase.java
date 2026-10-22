@@ -45,7 +45,7 @@ abstract class RegistryPersistenceBase extends IntegrationBase {
         int n = ++sequence;
         Teacher teacher = Teacher.create(name, "professor" + n + "@example.test", true, now());
         teacher.replaceCode(
-                protection.hashAccessCode(AccessCode.of(String.format("K7QM%04d", n))),
+                protection.hashAccessCode(AccessCode.of(accessCodeOf(n))),
                 now(),
                 Duration.ofDays(7));
         if (!active) {
@@ -53,6 +53,18 @@ abstract class RegistryPersistenceBase extends IntegrationBase {
         }
         teachers.save(teacher);
         return teacher;
+    }
+
+    /** Código de acesso válido e distinto por sequência (8 caracteres do alfabeto do código). */
+    private static String accessCodeOf(int n) {
+        String alphabet = AccessCode.ALPHABET;
+        StringBuilder code = new StringBuilder("K7QM");
+        int rest = n;
+        for (int i = 0; i < 4; i++) {
+            code.append(alphabet.charAt(rest % alphabet.length()));
+            rest /= alphabet.length();
+        }
+        return code.toString();
     }
 
     protected void inactivate(Teacher teacher) {

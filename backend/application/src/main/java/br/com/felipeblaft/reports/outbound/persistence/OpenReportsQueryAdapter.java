@@ -7,7 +7,6 @@ import br.com.felipeblaft.reports.domain.job.ProcessingJob;
 import br.com.felipeblaft.reports.domain.report.OpenReport;
 import br.com.felipeblaft.reports.domain.report.ReportStatus;
 import br.com.felipeblaft.reports.domain.semester.SemesterReport;
-import br.com.felipeblaft.reports.outbound.PendingImplementation;
 import br.com.felipeblaft.reports.outbound.persistence.ReportEntities.LessonReportEntity;
 import br.com.felipeblaft.reports.port.OpenReportsQueryPort;
 import java.sql.Date;
@@ -15,9 +14,11 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -59,8 +60,27 @@ public class OpenReportsQueryAdapter implements OpenReportsQueryPort {
         fonts.add(font);
     }
 
+    /**
+     * Alunos cujos relatórios o professor enxerga: só os ainda associados a ele e só se o professor
+     * está ativo. Os demais relatórios ficam congelados, sem alteração, e voltam com a reassociação
+     * ou a reativação (R-23).
+     */
+    private Set<UUID> visibleStudents(UUID teacherId) {
+        return new HashSet<>(
+                jdbc.queryForList(
+                        "select a.student_id from teacher_student_assignment a"
+                                + " join teacher t on t.id = a.teacher_id"
+                                + " where a.teacher_id = ? and t.active",
+                        UUID.class,
+                        teacherId));
+    }
+
     @Override
     public List<OpenReport> listByTeacher(UUID teacherId) {
+        Set<UUID> visible = visibleStudents(teacherId);
+        if (visible.isEmpty()) {
+            return List.of();
+        }
         Map<UUID, String> names = new HashMap<>();
         List<OpenReport> list = new ArrayList<>();
         for (LessonReportEntity r : reports.listTeacherOpenReports(teacherId)) {
@@ -100,12 +120,16 @@ public class OpenReportsQueryAdapter implements OpenReportsQueryPort {
         for (OpenReportSource font : fonts) {
             list.addAll(font.listByTeacher(teacherId));
         }
+        list.removeIf(r -> !visible.contains(r.studentId()));
         list.sort(Comparator.comparing(OpenReport::updatedAt).reversed());
         return list;
     }
 
     @Override
     public Optional<OpenReport> searchByStudent(UUID teacherId, UUID studentId) {
+        if (!visibleStudents(teacherId).contains(studentId)) {
+            return Optional.empty();
+        }
         Optional<LessonReportEntity> report = reports.searchOpen(teacherId, studentId);
         if (report.isPresent()) {
             return Optional.of(ofReport(report.get(), name(new HashMap<>(), studentId)));
@@ -126,12 +150,32 @@ public class OpenReportsQueryAdapter implements OpenReportsQueryPort {
                     lasts.put(line.getObject("student_id", UUID.class), data.toLocalDate());
                 },
                 teacherId);
+        lasts.keySet().retainAll(visibleStudents(teacherId));
         return lasts;
     }
 
     @Override
     public int countOpenReports(UUID teacherId, UUID studentId) {
-        throw PendingImplementation.of("W-C2");
+        // inclui os relatórios congelados: é a prévia do que fica preservado ao retirar a associação
+        Integer total =
+                jdbc.queryForObject(
+                        "select"
+                                + " (select count(*) from lesson_report where teacher_id = ? and student_id = ?"
+                                + "    and status in ('PROCESSING', 'PROCESSING_FAILED', 'AWAITING_ANSWERS',"
+                                + "                   'AWAITING_REVIEW'))"
+                                + " + (select count(*) from processing_job where teacher_id = ? and student_id = ?"
+                                + "    and report_id is null and status in ('PENDING', 'RUNNING')"
+                                + "    and type in ('LESSON_REGISTRATION', 'SEMESTER_CONSOLIDATION'))"
+                                + " + (select count(*) from semester_report where teacher_id = ? and student_id = ?"
+                                + "    and status = 'AWAITING_REVIEW')",
+                        Integer.class,
+                        teacherId,
+                        studentId,
+                        teacherId,
+                        studentId,
+                        teacherId,
+                        studentId);
+        return total == null ? 0 : total;
     }
 
     private String name(Map<UUID, String> cache, UUID studentId) {
