@@ -17,6 +17,7 @@ import br.com.felipeblaft.reports.service.AccessCodeIssuanceService;
 import br.com.felipeblaft.reports.service.ActorAuthorizationService;
 import br.com.felipeblaft.reports.service.AuthorshipService;
 import br.com.felipeblaft.reports.service.SessionRevocationService;
+import br.com.felipeblaft.reports.service.TeacherAccessAuditService;
 import br.com.felipeblaft.reports.service.TelegramLinkTerminationService;
 import java.time.Duration;
 import java.time.Instant;
@@ -76,6 +77,8 @@ public class TeacherScenario extends AccessScenario {
     public final AuthorshipService authorship = new AuthorshipService(recorder, clock);
     public final ActorAuthorizationService actorAuthorization =
             new ActorAuthorizationService(PermissionMatrix.standard());
+    public final TeacherAccessAuditService audit =
+            new TeacherAccessAuditService(authorship, protection);
     public final AccessCodeIssuanceService issuance =
             new AccessCodeIssuanceService(generator, protection, teachers, parameters);
     public final SessionRevocationService revocation =

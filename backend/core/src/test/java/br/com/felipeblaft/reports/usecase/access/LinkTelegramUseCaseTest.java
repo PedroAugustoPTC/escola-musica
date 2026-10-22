@@ -23,8 +23,7 @@ class LinkTelegramUseCaseTest {
 
     private final TeacherScenario c = new TeacherScenario();
     private final LinkTelegramUseCase linkUseCase =
-            new LinkTelegramUseCase(
-                    c.authentication, c.renewal, c.links, c.authorship, c.protection, c.clock);
+            new LinkTelegramUseCase(c.authentication, c.renewal, c.links, c.audit, c.clock);
     private final IdentifyTelegramTeacherUseCase identify =
             new IdentifyTelegramTeacherUseCase(c.links, c.teachers, c.renewal, c.termination);
     private final EndTelegramLinkUseCase end = new EndTelegramLinkUseCase(c.links, c.termination);

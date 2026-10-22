@@ -168,8 +168,7 @@ class ReissueAndUnlinkTeacherUseCaseTest {
         assertThat(c.actions.stored("a1").state()).isEqualTo(ChannelActionState.DISCARDED);
         assertThat(c.teachers.searchById(clara.id()).orElseThrow().active()).isTrue();
         LinkTelegramUseCase relink =
-                new LinkTelegramUseCase(
-                        c.authentication, c.renewal, c.links, c.authorship, c.protection, c.clock);
+                new LinkTelegramUseCase(c.authentication, c.renewal, c.links, c.audit, c.clock);
         assertThat(failure(() -> relink.run(111L, 900L, "WRONG222")).code())
                 .isEqualTo(ErrorCode.INVALID_CODE);
         assertThat(relink.run(111L, 900L, "K7QM2XPA").teacher().id()).isEqualTo(clara.id());

@@ -24,7 +24,7 @@ class WebSessionUseCasesTest {
                     c.sessions,
                     c.links,
                     c.protection,
-                    c.authorship,
+                    c.audit,
                     c.clock,
                     c.parameters);
     private final ValidateSessionWebUseCase validate =

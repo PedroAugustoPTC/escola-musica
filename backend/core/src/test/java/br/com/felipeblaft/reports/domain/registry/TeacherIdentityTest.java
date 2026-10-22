@@ -52,7 +52,7 @@ class TeacherIdentityTest {
                     "a".repeat(250) + "@b.co"
                 }) {
             assertThat(TeacherIdentity.violations("Ana Souza", email))
-                    .as(String.valueOf(email).length() > 40 ? "longo" : String.valueOf(email))
+                    .as(String.valueOf(email).length() > 40 ? "long" : String.valueOf(email))
                     .containsExactly(
                             new TeacherIdentity.Violation("email", ErrorCode.INVALID_EMAIL));
         }

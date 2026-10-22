@@ -42,6 +42,7 @@ import br.com.felipeblaft.reports.service.JobProcessorService;
 import br.com.felipeblaft.reports.service.ReportAccessService;
 import br.com.felipeblaft.reports.service.SemesterAccessService;
 import br.com.felipeblaft.reports.service.SemesterProcessorService;
+import br.com.felipeblaft.reports.service.TeacherAccessAuditService;
 import br.com.felipeblaft.reports.service.TelegramLinkTerminationService;
 import br.com.felipeblaft.reports.service.TemporaryAudioService;
 import br.com.felipeblaft.reports.usecase.access.EndTelegramLinkUseCase;
@@ -149,6 +150,12 @@ public class UseCaseConfig {
         return new CodeAuthenticationService(attempts, teachers, protection, clock);
     }
 
+    @Bean
+    TeacherAccessAuditService teacherAccessAuditService(
+            AuthorshipService authorship, DataProtectionPort protection) {
+        return new TeacherAccessAuditService(authorship, protection);
+    }
+
     // ---- Carga inicial
 
     @Bean
@@ -178,11 +185,11 @@ public class UseCaseConfig {
             WebSessionRepository sessions,
             TelegramLinkRepository links,
             DataProtectionPort protection,
-            AuthorshipService authorship,
+            TeacherAccessAuditService audit,
             ClockPort clock,
             BusinessParameters parameters) {
         return new SignInPortalUseCase(
-                authentication, renewal, sessions, links, protection, authorship, clock, parameters);
+                authentication, renewal, sessions, links, protection, audit, clock, parameters);
     }
 
     @Bean
@@ -208,10 +215,9 @@ public class UseCaseConfig {
             CodeAuthenticationService authentication,
             AccessRenewalService renewal,
             TelegramLinkRepository links,
-            AuthorshipService authorship,
-            DataProtectionPort protection,
+            TeacherAccessAuditService audit,
             ClockPort clock) {
-        return new LinkTelegramUseCase(authentication, renewal, links, authorship, protection, clock);
+        return new LinkTelegramUseCase(authentication, renewal, links, audit, clock);
     }
 
     @Bean

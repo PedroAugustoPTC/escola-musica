@@ -11,7 +11,6 @@ import br.com.felipeblaft.reports.port.DataProtectionPort;
 import br.com.felipeblaft.reports.port.TelegramLinkRepository;
 import br.com.felipeblaft.reports.port.WebSessionRepository;
 import br.com.felipeblaft.reports.service.AccessRenewalService;
-import br.com.felipeblaft.reports.service.AuthorshipService;
 import br.com.felipeblaft.reports.service.CodeAuthenticationService;
 import br.com.felipeblaft.reports.service.TeacherAccessAuditService;
 import java.util.Objects;
@@ -47,7 +46,7 @@ public class SignInPortalUseCase {
             WebSessionRepository sessions,
             TelegramLinkRepository links,
             DataProtectionPort protection,
-            AuthorshipService authorship,
+            TeacherAccessAuditService audit,
             ClockPort clock,
             BusinessParameters parameters) {
         this.authentication = Objects.requireNonNull(authentication);
@@ -55,7 +54,7 @@ public class SignInPortalUseCase {
         this.sessions = Objects.requireNonNull(sessions);
         this.links = Objects.requireNonNull(links);
         this.protection = Objects.requireNonNull(protection);
-        this.audit = new TeacherAccessAuditService(authorship, protection);
+        this.audit = Objects.requireNonNull(audit);
         this.clock = Objects.requireNonNull(clock);
         this.parameters = Objects.requireNonNull(parameters);
     }

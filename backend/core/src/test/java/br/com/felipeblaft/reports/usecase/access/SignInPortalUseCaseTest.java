@@ -29,7 +29,7 @@ class SignInPortalUseCaseTest {
                     c.sessions,
                     c.links,
                     c.protection,
-                    c.authorship,
+                    c.audit,
                     c.clock,
                     c.parameters);
     private final Teacher clara = c.teacher("Clara Souza", "clara@example.test", "K7QM2XPA");
@@ -159,11 +159,11 @@ class SignInPortalUseCaseTest {
 
     @Test
     void malformedCodeRecordsFailureWithoutEchoingIt() {
-        failWith(() -> signIn("senha-colada-aqui", "ip"), ErrorCode.INVALID_CODE);
+        failWith(() -> signIn("pasted-password-here", "ip"), ErrorCode.INVALID_CODE);
 
         AuthorshipRecord record = c.recorder.independent().getFirst();
         assertThat(record.errorCode()).isEqualTo("UNKNOWN_CODE");
-        assertThat(record.toString()).doesNotContain("senha");
+        assertThat(record.toString()).doesNotContain("password");
     }
 
     @Test

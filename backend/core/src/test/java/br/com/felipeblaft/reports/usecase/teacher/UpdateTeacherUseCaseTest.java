@@ -45,10 +45,10 @@ class UpdateTeacherUseCaseTest {
         TeacherView view =
                 useCase.run(
                         ActorFixtures.administratorWeb(),
-                        command(clara.id(), " Clara S. Souza ", " NOVO@Example.test "));
+                        command(clara.id(), " Clara S. Souza ", " FRESH@Example.test "));
 
         assertThat(view.name()).isEqualTo("Clara S. Souza");
-        assertThat(view.email()).isEqualTo("novo@example.test");
+        assertThat(view.email()).isEqualTo("fresh@example.test");
         Teacher saved = c.teachers.searchById(clara.id()).orElseThrow();
         assertThat(saved.name()).isEqualTo("Clara S. Souza");
         assertThat(saved.updatedAt()).isEqualTo(c.clock.now());
