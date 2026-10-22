@@ -32,6 +32,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class AdminSessionFilter extends OncePerRequestFilter {
 
     public static final String CODE_ATTRIBUTE = AdminSessionFilter.class.getName() + ".code";
+
     /** Constante literal: usada em anotações ({@code @RequestAttribute}). */
     public static final String CORRELATION_ATTRIBUTE =
             "br.com.felipeblaft.reports.inbound.web.security.AdminSessionFilter.correlation";
