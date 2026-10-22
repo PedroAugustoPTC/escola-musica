@@ -301,7 +301,7 @@ paths:
       summary: Desvincular o Telegram do professor (FR-031)
       security: [{ adminSession: [] }]
       responses:
-        "204": { description: Vínculo encerrado, ações pendentes e cadastro em andamento descartados. }
+        "204": { description: "Vínculo encerrado, ações pendentes e cadastro em andamento descartados." }
         "401": { $ref: "#/components/responses/NotAuthenticated" }
         "403": { $ref: "#/components/responses/PasswordChangeRequired" }
         "404": { $ref: "#/components/responses/NotFound" }
