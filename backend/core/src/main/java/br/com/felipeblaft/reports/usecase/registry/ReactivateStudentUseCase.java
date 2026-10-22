@@ -4,6 +4,7 @@ import br.com.felipeblaft.reports.domain.access.Actor;
 import br.com.felipeblaft.reports.port.AssignmentRepository;
 import br.com.felipeblaft.reports.port.ClockPort;
 import br.com.felipeblaft.reports.port.StudentRepository;
+import br.com.felipeblaft.reports.port.TeacherRepository;
 import br.com.felipeblaft.reports.service.ActorAuthorizationService;
 import br.com.felipeblaft.reports.service.AuthorshipService;
 import br.com.felipeblaft.reports.service.StudentAccessService;
@@ -21,6 +22,7 @@ public class ReactivateStudentUseCase {
             ActorAuthorizationService authorization,
             StudentAccessService access,
             StudentRepository students,
+            TeacherRepository teachers,
             AssignmentRepository assignments,
             AuthorshipService authorship,
             ClockPort clock) {}

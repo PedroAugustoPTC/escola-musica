@@ -15,6 +15,7 @@ import br.com.felipeblaft.reports.port.JobQueuePort;
 import br.com.felipeblaft.reports.port.OpenReportsQueryPort;
 import br.com.felipeblaft.reports.service.AudioSendingService;
 import br.com.felipeblaft.reports.service.AuthorizationService;
+import br.com.felipeblaft.reports.service.ReportEligibilityService;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -32,13 +33,29 @@ public class RegisterLessonByAudioUseCase {
     private final AudioSendingService audioSending;
     private final JobQueuePort queue;
     private final ClockPort clock;
+    private final ReportEligibilityService eligibility;
 
+    /**
+     * Sem verificação de situação do professor e do aluno: só para os cenários da 001, que ainda não
+     * conhecem a situação. A montagem de produção usa o construtor completo.
+     */
     public RegisterLessonByAudioUseCase(
             AuthorizationService authorization,
             OpenReportsQueryPort open,
             AudioSendingService audioSending,
             JobQueuePort queue,
             ClockPort clock) {
+        this(authorization, open, audioSending, queue, clock, null);
+    }
+
+    public RegisterLessonByAudioUseCase(
+            AuthorizationService authorization,
+            OpenReportsQueryPort open,
+            AudioSendingService audioSending,
+            JobQueuePort queue,
+            ClockPort clock,
+            ReportEligibilityService eligibility) {
+        this.eligibility = eligibility;
         this.authorization = Objects.requireNonNull(authorization);
         this.open = Objects.requireNonNull(open);
         this.audioSending = Objects.requireNonNull(audioSending);

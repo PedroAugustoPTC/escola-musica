@@ -4,6 +4,7 @@ import br.com.felipeblaft.reports.domain.registry.Student;
 import br.com.felipeblaft.reports.domain.registry.StudentSearch;
 import br.com.felipeblaft.reports.port.OpenReportsQueryPort;
 import br.com.felipeblaft.reports.port.StudentRepository;
+import br.com.felipeblaft.reports.service.ReportEligibilityService;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -20,7 +21,13 @@ public class SearchStudentsUseCase {
     private final StudentRepository students;
     private final OpenReportsQueryPort query;
 
-    public SearchStudentsUseCase(StudentRepository students, OpenReportsQueryPort query) {
+    private final ReportEligibilityService eligibility;
+
+    public SearchStudentsUseCase(
+            StudentRepository students,
+            OpenReportsQueryPort query,
+            ReportEligibilityService eligibility) {
+        this.eligibility = Objects.requireNonNull(eligibility);
         this.students = Objects.requireNonNull(students);
         this.query = Objects.requireNonNull(query);
     }

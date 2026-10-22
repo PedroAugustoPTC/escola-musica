@@ -2,7 +2,6 @@ package br.com.felipeblaft.reports.usecase.registry;
 
 import br.com.felipeblaft.reports.domain.access.Actor;
 import br.com.felipeblaft.reports.port.AssignmentRepository;
-import br.com.felipeblaft.reports.port.ClockPort;
 import br.com.felipeblaft.reports.service.ActorAuthorizationService;
 import br.com.felipeblaft.reports.service.AuthorshipService;
 import java.util.UUID;
@@ -19,8 +18,7 @@ public class RemoveTeacherFromStudentUseCase {
     public RemoveTeacherFromStudentUseCase(
             ActorAuthorizationService authorization,
             AssignmentRepository assignments,
-            AuthorshipService authorship,
-            ClockPort clock) {}
+            AuthorshipService authorship) {}
 
     public void run(Actor actor, Command command) {
         throw new UnsupportedOperationException("RemoveTeacherFromStudentUseCase: fluxo W-C2");
