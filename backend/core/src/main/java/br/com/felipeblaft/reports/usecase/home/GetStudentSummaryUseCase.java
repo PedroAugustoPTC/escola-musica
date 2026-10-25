@@ -21,7 +21,10 @@ public class GetStudentSummaryUseCase {
     private final AuthorizationService authorization;
     private final ReportEligibilityService eligibility;
 
-    /** Sem verificação de situação do professor: só para os cenários da 001; produção usa o completo. */
+    /**
+     * Sem verificação de situação do professor: só para os cenários da 001; produção usa o
+     * completo.
+     */
     public GetStudentSummaryUseCase(
             StudentRepository students,
             OpenReportsQueryPort query,
@@ -41,6 +44,9 @@ public class GetStudentSummaryUseCase {
     }
 
     public StudentSummary run(UUID teacherId, UUID studentId) {
+        if (eligibility != null) {
+            eligibility.requireActiveTeacher(teacherId);
+        }
         authorization.requireAssignment(teacherId, studentId);
         Student student =
                 students.searchById(studentId)

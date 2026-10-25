@@ -29,8 +29,8 @@ public class GenerateSemesterReportUseCase {
     private final ReportEligibilityService eligibility;
 
     /**
-     * Sem verificação de situação do professor e do aluno: só para os cenários da 001, que ainda não
-     * conhecem a situação. A montagem de produção usa o construtor completo.
+     * Sem verificação de situação do professor e do aluno: só para os cenários da 001, que ainda
+     * não conhecem a situação. A montagem de produção usa o construtor completo.
      */
     public GenerateSemesterReportUseCase(
             GetSemesterPreviewUseCase preview, JobQueuePort queue, ClockPort clock) {
@@ -54,7 +54,13 @@ public class GenerateSemesterReportUseCase {
             String periodKey,
             boolean confirmEvenWithOpen,
             Channel channel) {
+        if (eligibility != null) {
+            eligibility.requireActiveTeacher(teacherId);
+        }
         Preview current = preview.run(teacherId, studentId, periodKey);
+        if (eligibility != null) {
+            eligibility.requireActiveStudent(studentId);
+        }
         requireCanGenerate(current, confirmEvenWithOpen);
         ProcessingJob job =
                 ProcessingJob.create(

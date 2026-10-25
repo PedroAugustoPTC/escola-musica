@@ -36,8 +36,8 @@ public class RegisterLessonByAudioUseCase {
     private final ReportEligibilityService eligibility;
 
     /**
-     * Sem verificação de situação do professor e do aluno: só para os cenários da 001, que ainda não
-     * conhecem a situação. A montagem de produção usa o construtor completo.
+     * Sem verificação de situação do professor e do aluno: só para os cenários da 001, que ainda
+     * não conhecem a situação. A montagem de produção usa o construtor completo.
      */
     public RegisterLessonByAudioUseCase(
             AuthorizationService authorization,
@@ -65,7 +65,13 @@ public class RegisterLessonByAudioUseCase {
 
     public ProcessingJob run(UUID teacherId, UUID studentId, AudioInput audio, Channel channel) {
         try {
+            if (eligibility != null) {
+                eligibility.requireActiveTeacher(teacherId);
+            }
             authorization.requireAssignment(teacherId, studentId);
+            if (eligibility != null) {
+                eligibility.requireActiveStudent(studentId);
+            }
             requireNoOpenReport(teacherId, studentId);
             audioSending.requireWithinLimit(audio);
             ProcessingJob job =

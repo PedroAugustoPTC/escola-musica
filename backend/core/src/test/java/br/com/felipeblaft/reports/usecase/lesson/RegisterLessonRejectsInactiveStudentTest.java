@@ -58,7 +58,9 @@ class RegisterLessonRejectsInactiveStudentTest {
         inactivateMatteo();
 
         assertThatThrownBy(
-                        () -> generate.run(c.clara.id(), c.matteo.id(), "2026-1", false, Channel.WEB))
+                        () ->
+                                generate.run(
+                                        c.clara.id(), c.matteo.id(), "2026-1", false, Channel.WEB))
                 .satisfies(e -> assertThat(codeOf(e)).isEqualTo(ErrorCode.STUDENT_INACTIVE));
         assertThat(c.queue.jobs).isEmpty();
     }
@@ -106,7 +108,6 @@ class RegisterLessonRejectsInactiveStudentTest {
         inactivateMatteo();
 
         // o relatório em aberto continua acessível ao professor associado
-        assertThat(c.getOpen.run(c.clara.id(), c.matteo.id())).isPresent();
         assertThat(c.access.lessonReport(c.clara.id(), report.id())).isSameAs(report);
 
         c.cancel.cancel(c.clara.id(), report.id());

@@ -24,9 +24,9 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 /**
- * Cenário dos casos de uso de situação do aluno e de associação: professores, alunos e
- * associações em memória, em que o dublê de associações conhece os professores (só os ativos
- * contam, FR-026), mais o registro de autoria e os casos de uso do fluxo.
+ * Cenário dos casos de uso de situação do aluno e de associação: professores, alunos e associações
+ * em memória, em que o dublê de associações conhece os professores (só os ativos contam, FR-026),
+ * mais o registro de autoria e os casos de uso do fluxo.
  */
 public class SituationScenario {
 
@@ -74,7 +74,8 @@ public class SituationScenario {
     /** Professor ativo, já guardado. */
     public Teacher teacher(String name) {
         Teacher teacher =
-                Teacher.create(name, "professor" + (++sequence) + "@example.test", true, clock.now());
+                Teacher.create(
+                        name, "professor" + (++sequence) + "@example.test", true, clock.now());
         teachers.save(teacher);
         return teacher;
     }

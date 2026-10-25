@@ -1,5 +1,7 @@
 package br.com.felipeblaft.reports.usecase.home;
 
+import br.com.felipeblaft.reports.domain.common.DomainException;
+import br.com.felipeblaft.reports.domain.common.ErrorCode;
 import br.com.felipeblaft.reports.domain.registry.Student;
 import br.com.felipeblaft.reports.domain.registry.Teacher;
 import br.com.felipeblaft.reports.domain.report.OpenReport;
@@ -35,9 +37,19 @@ public class GetTeacherHomeUseCase {
         this.query = Objects.requireNonNull(query);
     }
 
+    /**
+     * Professor inativo não tem início (TEACHER_INACTIVE): os relatórios dele ficam congelados.
+     * Aluno inativo sai da lista e do total, mas o relatório já em aberto continua à vista;
+     * relatório de aluno que deixou de estar associado fica de fora (congelado, R-23).
+     */
     public Home run(Teacher teacher) {
-        List<Student> all = students.listByTeacher(teacher.id());
-        List<OpenReport> open = query.listByTeacher(teacher.id());
+        if (!teacher.active()) {
+            throw new DomainException(ErrorCode.TEACHER_INACTIVE);
+        }
+        List<Student> associated = students.listByTeacher(teacher.id());
+        List<Student> all = associated.stream().filter(Student::active).toList();
+        List<OpenReport> open =
+                StudentSummaries.ofAssociated(query.listByTeacher(teacher.id()), associated);
         StudentSummaries summaries = StudentSummaries.load(query, teacher.id(), open);
         List<StudentSummary> first =
                 summaries.summaries(all.subList(0, Math.min(FIRST_STUDENTS, all.size())));

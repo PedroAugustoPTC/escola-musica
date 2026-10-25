@@ -48,9 +48,7 @@ class RemoveTeacherFromStudentUseCaseTest {
                                         Actor.teacher(clara.id(), ActionOrigin.WEB), student.id()))
                 .satisfies(e -> assertThat(codeOf(e)).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND));
         assertThatThrownBy(
-                        () ->
-                                c.assignmentAuthorization.requireAssignment(
-                                        clara.id(), student.id()))
+                        () -> c.assignmentAuthorization.requireAssignment(clara.id(), student.id()))
                 .satisfies(e -> assertThat(codeOf(e)).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND));
     }
 

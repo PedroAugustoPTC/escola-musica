@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import br.com.felipeblaft.reports.domain.common.DomainException;
 import br.com.felipeblaft.reports.domain.common.ErrorCode;
-import br.com.felipeblaft.reports.domain.registry.StudentSearch.ResultType;
 import br.com.felipeblaft.reports.domain.registry.Student;
+import br.com.felipeblaft.reports.domain.registry.StudentSearch.ResultType;
 import br.com.felipeblaft.reports.domain.registry.Teacher;
 import br.com.felipeblaft.reports.domain.report.OpenReport;
 import br.com.felipeblaft.reports.usecase.registry.SituationScenario;
@@ -70,7 +70,9 @@ class HomeInactiveTeacherTest {
         GetTeacherHomeUseCase.Home back = home.run(clara);
 
         assertThat(back.openReports()).containsExactly(report);
-        assertThat(back.students()).extracting(StudentSummary::name).containsExactly("Matteo Mafra");
+        assertThat(back.students())
+                .extracting(StudentSummary::name)
+                .containsExactly("Matteo Mafra");
         assertThat(search.run(clara.id(), "matteo").students()).hasSize(1);
         assertThat(summary.run(clara.id(), matteo.id()).hasOpenReport()).isTrue();
     }
@@ -90,7 +92,9 @@ class HomeInactiveTeacherTest {
         GetTeacherHomeUseCase.Home result = home.run(clara);
 
         assertThat(result.totalStudents()).isEqualTo(1);
-        assertThat(result.students()).extracting(StudentSummary::name).containsExactly("Olavo Torrente");
+        assertThat(result.students())
+                .extracting(StudentSummary::name)
+                .containsExactly("Olavo Torrente");
         // o relatório já em aberto continua à vista do professor associado
         assertThat(result.openReports()).containsExactly(report);
         assertThat(search.run(clara.id(), "").students())

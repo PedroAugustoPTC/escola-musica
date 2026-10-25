@@ -12,14 +12,14 @@ import br.com.felipeblaft.reports.domain.report.OpenReport;
 import br.com.felipeblaft.reports.doubles.ReportScenario;
 import br.com.felipeblaft.reports.service.ReportEligibilityService;
 import br.com.felipeblaft.reports.usecase.lesson.RegisterLessonByAudioUseCase;
-import br.com.felipeblaft.reports.usecase.semester.GenerateSemesterReportUseCase;
 import br.com.felipeblaft.reports.usecase.registry.PreviewAssignmentRemovalUseCase.Result;
+import br.com.felipeblaft.reports.usecase.semester.GenerateSemesterReportUseCase;
 import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 
 /**
- * Relatórios de professor inativo (R-23): congelados e preservados, fora das listas e das ações,
- * e de volta quando o professor é reativado. Nenhum estado novo de relatório existe.
+ * Relatórios de professor inativo (R-23): congelados e preservados, fora das listas e das ações, e
+ * de volta quando o professor é reativado. Nenhum estado novo de relatório existe.
  */
 class FrozenReportsAfterTeacherInactivationTest {
 
@@ -106,10 +106,7 @@ class FrozenReportsAfterTeacherInactivationTest {
     void activeTeacherWithActiveStudentRegistersNormally() {
         var job =
                 register.run(
-                        s.clara.id(),
-                        s.matteo.id(),
-                        ReportScenario.file("c.ogg", 10),
-                        Channel.WEB);
+                        s.clara.id(), s.matteo.id(), ReportScenario.file("c.ogg", 10), Channel.WEB);
 
         assertThat(s.queue.jobs).containsKey(job.id());
     }

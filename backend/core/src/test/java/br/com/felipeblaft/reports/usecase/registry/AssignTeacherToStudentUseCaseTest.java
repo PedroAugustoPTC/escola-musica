@@ -137,9 +137,7 @@ class AssignTeacherToStudentUseCaseTest {
     void initialLoadAssociatesByItsOwnAuthority() {
         Student student = c.student("Matteo Mafra");
 
-        c.assign.run(
-                ActorFixtures.initialLoad(),
-                new Command(student.id(), clara.id(), "load-a1"));
+        c.assign.run(ActorFixtures.initialLoad(), new Command(student.id(), clara.id(), "load-a1"));
 
         assertThat(c.assignments.exists(clara.id(), student.id())).isTrue();
         AuthorshipRecord record = c.recorder.last().orElseThrow();
