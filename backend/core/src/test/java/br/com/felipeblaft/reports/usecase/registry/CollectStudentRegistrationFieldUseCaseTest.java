@@ -32,7 +32,7 @@ class CollectStudentRegistrationFieldUseCaseTest {
                 .run(
                         scenario.actor,
                         new CollectStudentRegistrationFieldUseCase.Command(
-                                scenario.link.id(), field, text));
+                                scenario.link.id(), field, text, DraftScenario.CORRELATION));
     }
 
     private DomainException refused(Field field, String text) {
@@ -195,6 +195,120 @@ class CollectStudentRegistrationFieldUseCaseTest {
                 .doesNotContain("Pedro")
                 .doesNotContain(done.confirmationToken());
         assertThat(done.summary().toString()).doesNotContain("Pedro", "Maria", "2014");
+    }
+
+    // ---- Duplicidade de CPF no momento do CPF (FR-024)
+
+    @Test
+    void aCpfOfAStudentOfTheSameTeacherIsAlreadyYoursAndTheDraftKeepsNoCpf() {
+        scenario.studentWithCpf(scenario.teacher, "Aluno Meu", DraftScenario.CPF);
+        startCreate();
+        collect(Field.NAME, "Ana");
+        StudentRegistrationDraft before = draft();
+
+        DomainException error = refused(Field.CPF, DraftScenario.CPF);
+
+        assertThat(error.code()).isEqualTo(ErrorCode.STUDENT_ALREADY_YOURS);
+        assertThat(error.details()).isEmpty();
+        assertThat(draft()).isEqualTo(before);
+        assertThat(draft().cpfEncrypted()).isNull();
+    }
+
+    @Test
+    void aCpfOfAnotherTeachersStudentIsNeutralLeavesAuthorshipAndKeepsTheDraft() {
+        var alien =
+                scenario.studentWithCpf(scenario.otherTeacher, "Aluno Alheio", DraftScenario.CPF);
+        startCreate();
+        collect(Field.NAME, "Ana");
+        StudentRegistrationDraft before = draft();
+
+        DomainException error = refused(Field.CPF, DraftScenario.CPF);
+
+        assertThat(error.code()).isEqualTo(ErrorCode.CPF_UNAVAILABLE);
+        assertThat(error.details()).isEmpty();
+        assertThat(error.getMessage()).doesNotContain("Alheio").doesNotContain("529");
+        assertThat(draft()).isEqualTo(before);
+        var records = scenario.recorder.ofOperation("CPF_REFUSED_OTHER_STUDENT");
+        assertThat(records).hasSize(1);
+        assertThat(records.get(0).targetId()).isEqualTo(alien.id());
+        assertThat(records.get(0).authorId()).isEqualTo(scenario.teacher.id());
+        assertThat(records.get(0).correlationId()).isEqualTo(DraftScenario.CORRELATION);
+        assertThat(records.get(0).toString()).doesNotContain("529").doesNotContain("Alheio");
+    }
+
+    @Test
+    void theTeacherCanCorrectTheCpfAfterARefusal() {
+        scenario.studentWithCpf(scenario.otherTeacher, "Aluno Alheio", DraftScenario.CPF);
+        startCreate();
+        refused(Field.CPF, DraftScenario.CPF);
+
+        var accepted = collect(Field.CPF, DraftScenario.OTHER_CPF);
+
+        assertThat(accepted.nextField()).isEqualTo(Field.NAME);
+        assertThat(draft().providedFields()).containsExactly(Field.CPF);
+    }
+
+    @Test
+    void fiveRefusalsBlockEveryCpfTypedAfterwards() {
+        scenario.studentWithCpf(scenario.otherTeacher, "Aluno Alheio", DraftScenario.CPF);
+        startCreate();
+        for (int i = 0; i < 5; i++) {
+            assertThat(refused(Field.CPF, DraftScenario.CPF).code())
+                    .isEqualTo(ErrorCode.CPF_UNAVAILABLE);
+        }
+
+        DomainException blocked = refused(Field.CPF, DraftScenario.OTHER_CPF);
+
+        assertThat(blocked.code()).isEqualTo(ErrorCode.OPERATION_TEMPORARILY_BLOCKED);
+        assertThat(blocked.details()).containsKey("remainingSeconds");
+        assertThat(draft().providedFields()).isEmpty();
+        assertThat(scenario.recorder.ofOperation("ATTEMPT_BLOCKED")).isNotEmpty();
+        // outros campos não são afetados pelo bloqueio do CPF
+        assertThat(collect(Field.NAME, "Ana").nextField()).isEqualTo(Field.BIRTH_DATE);
+    }
+
+    @Test
+    void everyTypedCpfCountsOneLookupEvenWhenFree() {
+        startCreate();
+        for (int i = 0; i < 30; i++) {
+            collect(Field.CPF, DraftScenario.CPF);
+        }
+
+        assertThat(refused(Field.CPF, DraftScenario.CPF).code())
+                .isEqualTo(ErrorCode.OPERATION_TEMPORARILY_BLOCKED);
+    }
+
+    @Test
+    void anInvalidCpfDoesNotCountALookup() {
+        startCreate();
+        for (int i = 0; i < 31; i++) {
+            refused(Field.CPF, "123");
+        }
+
+        assertThat(collect(Field.CPF, DraftScenario.CPF).nextField()).isEqualTo(Field.NAME);
+    }
+
+    @Test
+    void anUpdateAcceptsTheCpfOfTheSameStudentAndRefusesOthers() {
+        var self = scenario.studentWithCpf(scenario.teacher, "Aluno Próprio", DraftScenario.CPF);
+        scenario.studentWithCpf(scenario.teacher, "Outro Meu", DraftScenario.OTHER_CPF);
+        scenario.studentWithCpf(scenario.otherTeacher, "Aluno Alheio", "390.533.447-05");
+        scenario.startDraft(Kind.UPDATE, self.id());
+
+        assertThat(collect(Field.CPF, DraftScenario.CPF).summary()).isNotNull();
+        assertThat(refused(Field.CPF, DraftScenario.OTHER_CPF).code())
+                .isEqualTo(ErrorCode.STUDENT_ALREADY_YOURS);
+        assertThat(refused(Field.CPF, "390.533.447-05").code())
+                .isEqualTo(ErrorCode.CPF_UNAVAILABLE);
+    }
+
+    @Test
+    void theCommandWithoutCorrelationUsesAValidPlaceholder() {
+        var command =
+                new CollectStudentRegistrationFieldUseCase.Command(
+                        scenario.link.id(), Field.NAME, "Ana");
+
+        assertThat(command.correlationId()).matches("[0-9]{1,10}");
     }
 
     @Test
@@ -431,7 +545,7 @@ class CollectStudentRegistrationFieldUseCaseTest {
                         .run(
                                 denied,
                                 new CollectStudentRegistrationFieldUseCase.Command(
-                                        scenario.link.id(), Field.NAME, "Ana"));
+                                        scenario.link.id(), Field.NAME, "Ana", "1"));
                 throw new AssertionError("esperava recusa");
             } catch (DomainException error) {
                 assertThat(error.code()).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND);
@@ -449,7 +563,7 @@ class CollectStudentRegistrationFieldUseCaseTest {
                     .run(
                             scenario.actor,
                             new CollectStudentRegistrationFieldUseCase.Command(
-                                    other, Field.NAME, "Ana"));
+                                    other, Field.NAME, "Ana", "1"));
             throw new AssertionError("esperava recusa");
         } catch (DomainException error) {
             assertThat(error.code()).isEqualTo(ErrorCode.CONFIRMATION_EXPIRED);
@@ -461,7 +575,7 @@ class CollectStudentRegistrationFieldUseCaseTest {
     void commandNeverRevealsTheTypedText() {
         var command =
                 new CollectStudentRegistrationFieldUseCase.Command(
-                        UUID.randomUUID(), Field.CPF, "52998224725");
+                        UUID.randomUUID(), Field.CPF, "52998224725", "1");
 
         assertThat(command.toString()).doesNotContain("52998224725");
     }

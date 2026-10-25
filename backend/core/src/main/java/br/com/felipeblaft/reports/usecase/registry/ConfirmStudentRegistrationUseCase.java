@@ -105,12 +105,12 @@ public class ConfirmStudentRegistrationUseCase {
                     register.run(
                             actor,
                             new RegisterStudentUseCase.Command(
-                                    inputOf(draft), List.of(), correlationId));
+                                    inputOf(draft), List.of(), correlationId, true));
             case UPDATE ->
                     update.run(
                             actor,
                             new UpdateStudentUseCase.Command(
-                                    draft.studentId(), inputOf(draft), correlationId));
+                                    draft.studentId(), inputOf(draft), correlationId, true));
             case INACTIVATE ->
                     inactivate.run(
                             actor,

@@ -189,6 +189,8 @@ public class StudentRegistryUseCaseConfig {
     CollectStudentRegistrationFieldUseCase collectStudentRegistrationFieldUseCase(
             ActorAuthorizationService authorization,
             StudentRegistrationDraftRepository drafts,
+            StudentRepository students,
+            AssignmentRepository assignments,
             DataProtectionPort protection,
             AccessAttemptsControlService attempts,
             AuthorshipService authorship,
@@ -197,6 +199,8 @@ public class StudentRegistryUseCaseConfig {
         return new CollectStudentRegistrationFieldUseCase(
                 authorization,
                 drafts,
+                students,
+                assignments,
                 protection,
                 attempts,
                 authorship,

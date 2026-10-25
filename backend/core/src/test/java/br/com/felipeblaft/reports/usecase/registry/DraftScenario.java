@@ -48,7 +48,7 @@ final class DraftScenario {
     static final String CPF = "529.982.247-25";
     static final String OTHER_CPF = "111.444.777-35";
     static final Duration VALIDITY = Duration.ofMinutes(30);
-    static final String CORRELATION = "update-1";
+    static final String CORRELATION = "12345";
 
     final FixedClock clock = new FixedClock();
     final FakeDataProtection protection = new FakeDataProtection();
@@ -138,6 +138,23 @@ final class DraftScenario {
         return student;
     }
 
+    /** Aluno já cadastrado com este CPF (resumo de verdade, para a checagem de duplicidade). */
+    Student studentWithCpf(Teacher owner, String name, String cpfText) {
+        Cpf cpf = Cpf.of(cpfText);
+        Student student =
+                Student.create(
+                        name,
+                        LocalDate.of(2012, 1, 1),
+                        protection.encryptCpf(cpf),
+                        protection.hashCpf(cpf),
+                        null,
+                        "Violão",
+                        clock.now());
+        students.save(student);
+        assignments.assign(owner.id(), student.id());
+        return student;
+    }
+
     Student ownStudent() {
         return student(teacher, "Aluno Próprio");
     }
@@ -178,7 +195,15 @@ final class DraftScenario {
 
     CollectStudentRegistrationFieldUseCase collect() {
         return new CollectStudentRegistrationFieldUseCase(
-                authorization, drafts, protection, attempts, authorship, clock, VALIDITY);
+                authorization,
+                drafts,
+                students,
+                assignments,
+                protection,
+                attempts,
+                authorship,
+                clock,
+                VALIDITY);
     }
 
     ConfirmStudentRegistrationUseCase confirm() {

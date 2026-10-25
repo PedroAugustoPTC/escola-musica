@@ -10,9 +10,11 @@ import br.com.felipeblaft.reports.domain.registry.EmailAddress;
 import br.com.felipeblaft.reports.domain.registry.Instrument;
 import br.com.felipeblaft.reports.domain.registry.PersonName;
 import br.com.felipeblaft.reports.domain.telegram.StudentRegistrationDraft;
+import br.com.felipeblaft.reports.port.AssignmentRepository;
 import br.com.felipeblaft.reports.port.ClockPort;
 import br.com.felipeblaft.reports.port.DataProtectionPort;
 import br.com.felipeblaft.reports.port.StudentRegistrationDraftRepository;
+import br.com.felipeblaft.reports.port.StudentRepository;
 import br.com.felipeblaft.reports.service.AccessAttemptsControlService;
 import br.com.felipeblaft.reports.service.ActorAuthorizationService;
 import br.com.felipeblaft.reports.service.AuthorshipService;
@@ -37,7 +39,16 @@ import java.util.function.Supplier;
  */
 public class CollectStudentRegistrationFieldUseCase {
 
-    public record Command(UUID linkId, StudentRegistrationDraft.Field field, String text) {
+    /**
+     * @param correlationId identificador do update do Telegram (autoria da recusa de CPF); o
+     *     construtor sem ele usa um valor neutro, só para quem ainda não o informa
+     */
+    public record Command(
+            UUID linkId, StudentRegistrationDraft.Field field, String text, String correlationId) {
+
+        public Command(UUID linkId, StudentRegistrationDraft.Field field, String text) {
+            this(linkId, field, text, "0");
+        }
 
         @Override
         public String toString() {
@@ -76,6 +87,8 @@ public class CollectStudentRegistrationFieldUseCase {
     private final ActorAuthorizationService authorization;
     private final StudentRegistrationDraftRepository drafts;
     private final DataProtectionPort protection;
+    private final StudentRepository students;
+    private final RegisterStudentUseCase.TeacherCpfGuard cpfGuard;
     private final ClockPort clock;
     private final Duration draftValidity;
 
@@ -83,6 +96,8 @@ public class CollectStudentRegistrationFieldUseCase {
     public CollectStudentRegistrationFieldUseCase(
             ActorAuthorizationService authorization,
             StudentRegistrationDraftRepository drafts,
+            StudentRepository students,
+            AssignmentRepository assignments,
             DataProtectionPort protection,
             AccessAttemptsControlService attempts,
             AuthorshipService authorship,
@@ -90,6 +105,9 @@ public class CollectStudentRegistrationFieldUseCase {
             Duration draftValidity) {
         this.authorization = Objects.requireNonNull(authorization);
         this.drafts = Objects.requireNonNull(drafts);
+        this.students = Objects.requireNonNull(students);
+        this.cpfGuard =
+                new RegisterStudentUseCase.TeacherCpfGuard(assignments, attempts, authorship);
         this.protection = Objects.requireNonNull(protection);
         this.clock = Objects.requireNonNull(clock);
         this.draftValidity = Objects.requireNonNull(draftValidity);
@@ -113,7 +131,7 @@ public class CollectStudentRegistrationFieldUseCase {
 
         LocalDate today = clock.todayInSchoolTimezone();
         String text = command.text() == null ? "" : command.text();
-        StudentRegistrationDraft updated = apply(draft, command.field(), text, today, now);
+        StudentRegistrationDraft updated = apply(actor, draft, command, text, today, now);
 
         Summary summary = null;
         String token = null;
@@ -133,12 +151,13 @@ public class CollectStudentRegistrationFieldUseCase {
     }
 
     private StudentRegistrationDraft apply(
+            Actor actor,
             StudentRegistrationDraft draft,
-            StudentRegistrationDraft.Field field,
+            Command command,
             String text,
             LocalDate today,
             Instant now) {
-        return switch (field) {
+        return switch (command.field()) {
             case NAME ->
                     draft.withName(
                             validate("name", () -> PersonName.of(text).value()),
@@ -154,12 +173,30 @@ public class CollectStudentRegistrationFieldUseCase {
             }
             case CPF -> {
                 Cpf cpf = validate("cpf", () -> Cpf.of(text));
-                yield draft.withCpf(
-                        protection.encryptCpf(cpf), protection.hashCpf(cpf), now, draftValidity);
+                String hash = protection.hashCpf(cpf);
+                checkCpfIsFree(actor, draft, hash, command.correlationId());
+                yield draft.withCpf(protection.encryptCpf(cpf), hash, now, draftValidity);
             }
             case INSTRUMENT -> draft.withInstrument(instrument(draft, text), now, draftValidity);
             case GUARDIAN -> guardianPart(draft, text, now);
         };
+    }
+
+    /**
+     * Duplicidade decidida já no CPF digitado (FR-024), com as mesmas regras do cadastro e da
+     * edição: o bloqueio vale antes da consulta, cada consulta conta no teto, e o CPF de aluno de
+     * outro professor responde só {@code CPF_UNAVAILABLE}. Na edição, o CPF do próprio aluno é
+     * aceito. O rascunho não é alterado na recusa, para o professor corrigir o CPF ou cancelar.
+     */
+    private void checkCpfIsFree(
+            Actor actor, StudentRegistrationDraft draft, String hash, String correlationId) {
+        cpfGuard.beforeLookup(actor, correlationId, false);
+        students.searchByCpfHash(hash)
+                .filter(holder -> !holder.id().equals(draft.studentId()))
+                .ifPresent(
+                        holder -> {
+                            throw cpfGuard.refuse(actor, holder, correlationId);
+                        });
     }
 
     /** Em branco pula a pergunta no cadastro; na edição não há como "limpar" o instrumento. */

@@ -76,6 +76,7 @@ class ConfirmStudentRegistrationUseCaseTest {
         assertThat(call.actor()).isEqualTo(scenario.actor);
         assertThat(call.command().correlationId()).isEqualTo(DraftScenario.CORRELATION);
         assertThat(call.command().teacherIds()).isEmpty();
+        assertThat(call.command().lookupAlreadyCounted()).isTrue();
         StudentInput input = call.command().input();
         assertThat(input.name()).isEqualTo("Ana Souza");
         assertThat(input.birthDate()).isEqualTo("1990-03-15");
@@ -152,6 +153,7 @@ class ConfirmStudentRegistrationUseCaseTest {
         var command = scenario.update.calls.get(0).command();
         assertThat(command.studentId()).isEqualTo(student);
         assertThat(command.correlationId()).isEqualTo(DraftScenario.CORRELATION);
+        assertThat(command.lookupAlreadyCounted()).isTrue();
         StudentInput input = command.input();
         assertThat(input.name()).isEqualTo("Nome Novo");
         assertThat(input.birthDate()).isNull();
