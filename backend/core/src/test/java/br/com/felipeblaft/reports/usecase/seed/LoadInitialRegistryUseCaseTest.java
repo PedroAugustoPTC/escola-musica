@@ -18,6 +18,7 @@ import br.com.felipeblaft.reports.usecase.seed.SeedResult.SeedError;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -487,5 +488,108 @@ class LoadInitialRegistryUseCaseTest {
         assertThat(result.errors())
                 .extracting(SeedError::section, SeedError::field)
                 .containsExactly(tuple("teachers", "name"));
+    }
+
+    @Test
+    void existingTeacherWithBlankNameInTheFileKeepsItsNameAndStaysInactive() {
+        useCase.run(
+                new SeedFile(
+                        List.of(new SeedTeacher("lia@example.test", "Lia Prado", false)),
+                        List.of()),
+                false);
+        world.calls.clear();
+
+        SeedResult result =
+                useCase.run(
+                        new SeedFile(
+                                List.of(new SeedTeacher("lia@example.test", " ", false)),
+                                List.of()),
+                        false);
+
+        assertThat(result.teachers()).isEqualTo(new Count(0, 0, 1));
+        assertThat(world.calls).isEmpty();
+        assertThat(world.teachers.searchByEmail("lia@example.test").orElseThrow().name())
+                .isEqualTo("Lia Prado");
+    }
+
+    @Test
+    void domainErrorWithoutAFieldIsReportedAsTheRecord() {
+        world.studentRegistrationFailure = new DomainException(ErrorCode.RESOURCE_NOT_FOUND);
+        SeedFile file =
+                new SeedFile(
+                        List.of(), List.of(student(CPF_OLAVO, "Olavo", "1990-02-01", null, null)));
+
+        SeedResult result = useCase.run(file, false);
+
+        assertThat(result.errors())
+                .extracting(SeedError::field, SeedError::code)
+                .containsExactly(tuple("record", ErrorCode.RESOURCE_NOT_FOUND));
+    }
+
+    @Test
+    void validationWithUnknownCodeOrMalformedItemsStaysSafe() {
+        world.studentRegistrationFailure =
+                new DomainException(
+                        ErrorCode.VALIDATION_FAILED,
+                        Map.of(
+                                "fields",
+                                List.of(
+                                        Map.of("field", "name", "code", "CODIGO_DESCONHECIDO"),
+                                        "item-fora-do-formato")));
+        SeedFile file =
+                new SeedFile(
+                        List.of(), List.of(student(CPF_OLAVO, "Olavo", "1990-02-01", null, null)));
+
+        SeedResult result = useCase.run(file, false);
+
+        assertThat(result.errors())
+                .extracting(SeedError::field, SeedError::code)
+                .containsExactly(tuple("name", ErrorCode.VALIDATION_FAILED));
+    }
+
+    @Test
+    void studentWithoutCpfIsRefusedByTheRegistrationAndPartialGuardianIsForwarded() {
+        SeedFile file =
+                new SeedFile(
+                        List.of(),
+                        List.of(
+                                new SeedStudent(
+                                        null,
+                                        "Sem CPF",
+                                        "1990-02-01",
+                                        null,
+                                        PHONE,
+                                        null,
+                                        null,
+                                        List.of())));
+
+        SeedResult result = useCase.run(file, false);
+
+        assertThat(result.errors())
+                .extracting(SeedError::field, SeedError::code)
+                .containsExactly(tuple("cpf", ErrorCode.INVALID_CPF));
+    }
+
+    @Test
+    void guardianWithOnlyTheEmailIsForwardedToTheSharedValidation() {
+        SeedFile file =
+                new SeedFile(
+                        List.of(),
+                        List.of(
+                                new SeedStudent(
+                                        CPF_OLAVO,
+                                        "Olavo",
+                                        "1990-02-01",
+                                        null,
+                                        null,
+                                        "responsavel@example.test",
+                                        null,
+                                        List.of())));
+
+        SeedResult result = useCase.run(file, false);
+
+        assertThat(result.success()).isTrue();
+        assertThat(world.students.searchByCpfHash("cpf:12345678909").orElseThrow().guardianEmail())
+                .isEqualTo("responsavel@example.test");
     }
 }

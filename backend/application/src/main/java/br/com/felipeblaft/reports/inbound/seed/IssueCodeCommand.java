@@ -72,9 +72,9 @@ public class IssueCodeCommand {
             return 0;
         } catch (DomainException error) {
             output.println(
-                    error.code().messageKey() == null
-                            ? error.code().name()
-                            : catalog.text(error.code().messageKey()));
+                    catalog.contains(error.code().messageKey())
+                            ? catalog.text(error.code().messageKey())
+                            : error.code().name());
             return 1;
         }
     }

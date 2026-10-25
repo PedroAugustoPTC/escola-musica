@@ -227,7 +227,13 @@ public class LoadInitialRegistryUseCase {
                 created.teacher().email(), created.accessCode().value(), created.validUntil());
     }
 
-    private record TeacherSnapshot(String name, boolean active) {}
+    private record TeacherSnapshot(String name, boolean active) {
+
+        @Override
+        public String toString() {
+            return "TeacherSnapshot";
+        }
+    }
 
     // ---- Alunos
 
@@ -368,6 +374,11 @@ public class LoadInitialRegistryUseCase {
             String guardianEmail,
             String instrument,
             boolean active) {
+
+        @Override
+        public String toString() {
+            return "StudentSnapshot";
+        }
 
         static StudentSnapshot of(Student student) {
             return new StudentSnapshot(

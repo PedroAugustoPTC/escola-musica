@@ -16,9 +16,9 @@ import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
- * Comando {@code seed --file <arquivo.json> [--simulate]} (contracts/initial-load.md). Chama a carga
- * inicial, que orquestra os casos de uso da administração. Mostra o resumo sem CPF e, para cada
- * professor novo, a linha {@code email → CÓDIGO (válido até …)}.
+ * Comando {@code seed --file <arquivo.json> [--simulate]} (contracts/initial-load.md). Chama a
+ * carga inicial, que orquestra os casos de uso da administração. Mostra o resumo sem CPF e, para
+ * cada professor novo, a linha {@code email → CÓDIGO (válido até …)}.
  */
 @Component
 @Profile("seed")
@@ -64,7 +64,7 @@ public class SeedCommand {
 
     /** Só o código e o texto do catálogo; o valor do campo (CPF, e-mail, nome) nunca é impresso. */
     private String messageOf(ErrorCode code) {
-        return code.messageKey() == null ? "" : " — " + catalog.text(code.messageKey());
+        return catalog.contains(code.messageKey()) ? " — " + catalog.text(code.messageKey()) : "";
     }
 
     private void print(SeedResult result, PrintStream output) {

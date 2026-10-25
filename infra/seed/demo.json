@@ -1,5 +1,5 @@
 {
-  "comment": "Massa de DEMONSTRAÇÃO, 100% fictícia (nomes, CPFs e responsáveis inventados). Usada por `local.sh subir --massa=true`.",
+  "comment": "Massa de DEMONSTRAÇÃO, 100% fictícia (nomes, CPFs e responsáveis inventados). Usada por `local.sh up --demo-data=true`.",
   "teachers": [
     {
       "email": "clara@example.test",
@@ -18,6 +18,8 @@
       "name": "Matteo Mafra",
       "birthDate": "2014-05-10",
       "guardianName": "Responsável Fictício de Matteo",
+      "guardianPhone": "(11) 91001-5001",
+      "guardianEmail": "responsavel1@example.test",
       "instrument": "Piano",
       "teachers": [
         "clara@example.test"
@@ -37,6 +39,8 @@
       "name": "Miguel de Castro Torrente",
       "birthDate": "2016-08-20",
       "guardianName": "Responsável Fictício de Miguel",
+      "guardianPhone": "(11) 91002-5002",
+      "guardianEmail": "responsavel2@example.test",
       "instrument": "Violino",
       "teachers": [
         "clara@example.test"
@@ -47,6 +51,8 @@
       "name": "Beatriz Arruda",
       "birthDate": "2009-11-14",
       "guardianName": "Responsável Fictícia de Beatriz",
+      "guardianPhone": "(11) 91003-5003",
+      "guardianEmail": "responsavel3@example.test",
       "instrument": "Canto",
       "teachers": [
         "clara@example.test"
@@ -57,6 +63,8 @@
       "name": "Lucas Pimentel",
       "birthDate": "2012-03-03",
       "guardianName": "Responsável Fictício de Lucas",
+      "guardianPhone": "(11) 91004-5004",
+      "guardianEmail": "responsavel4@example.test",
       "instrument": "Piano",
       "teachers": [
         "clara@example.test"
@@ -76,6 +84,8 @@
       "name": "Helena Prado",
       "birthDate": "2010-11-03",
       "guardianName": "Responsável Fictícia de Helena",
+      "guardianPhone": "(11) 91005-5005",
+      "guardianEmail": "responsavel5@example.test",
       "instrument": "Flauta",
       "teachers": [
         "bruno@example.test"
@@ -86,6 +96,8 @@
       "name": "Davi Coutinho",
       "birthDate": "2013-09-30",
       "guardianName": "Responsável Fictício de Davi",
+      "guardianPhone": "(11) 91006-5006",
+      "guardianEmail": "responsavel6@example.test",
       "instrument": "Bateria",
       "teachers": [
         "bruno@example.test"

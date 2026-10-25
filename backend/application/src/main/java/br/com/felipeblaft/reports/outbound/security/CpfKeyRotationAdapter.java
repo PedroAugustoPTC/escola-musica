@@ -210,13 +210,14 @@ class CpfKeyRotationAdapter implements CpfKeyRotationPort {
         try {
             Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
             cipher.init(
-                    Cipher.DECRYPT_MODE, key, new GCMParameterSpec(SIZE_TAG_BITS, data, 0, SIZE_IV));
+                    Cipher.DECRYPT_MODE,
+                    key,
+                    new GCMParameterSpec(SIZE_TAG_BITS, data, 0, SIZE_IV));
             return new String(
                     cipher.doFinal(data, SIZE_IV, data.length - SIZE_IV), StandardCharsets.UTF_8);
         } catch (GeneralSecurityException error) {
             throw new IllegalStateException(
-                    "A chave antiga não decifra o CPF de um aluno; confira "
-                            + OLD_ENCRYPTION_KEY);
+                    "A chave antiga não decifra o CPF de um aluno; confira " + OLD_ENCRYPTION_KEY);
         }
     }
 

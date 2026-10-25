@@ -25,8 +25,8 @@ import org.springframework.stereotype.Component;
  * BootstrapFirstAdministratorUseCase} com o ator de sistema {@code SYSTEM_STARTUP}. Quem decide é o
  * núcleo: se já existe algum administrador, ignora as variáveis (mesmo inválidas); se não existe e
  * as três vieram vazias, o sistema sobe e avisa em português; se não existe e algum valor é
- * inválido ou falta, <strong>recusa subir</strong> com mensagem que cita a variável, nunca o
- * valor. A senha nunca vai a log.
+ * inválido ou falta, <strong>recusa subir</strong> com mensagem que cita a variável, nunca o valor.
+ * A senha nunca vai a log.
  *
  * <p>Não roda no perfil {@code seed} (comandos de terminal) nem no {@code test} (os testes chamam
  * {@link #bootstrap()} direto).
@@ -70,7 +70,9 @@ public class FirstAdministratorBootstrap implements ApplicationRunner {
         bootstrap();
     }
 
-    /** Executa a verificação da subida; lança {@link IllegalStateException} para recusar a subida. */
+    /**
+     * Executa a verificação da subida; lança {@link IllegalStateException} para recusar a subida.
+     */
     public void bootstrap() {
         String name = text(configuration == null ? null : configuration.name());
         String email = text(configuration == null ? null : configuration.email());
@@ -141,9 +143,9 @@ public class FirstAdministratorBootstrap implements ApplicationRunner {
     private String reason(Object code) {
         try {
             ErrorCode errorCode = ErrorCode.valueOf(String.valueOf(code));
-            return errorCode.messageKey() == null
-                    ? errorCode.name()
-                    : catalog.text(errorCode.messageKey());
+            return catalog.contains(errorCode.messageKey())
+                    ? catalog.text(errorCode.messageKey())
+                    : errorCode.name();
         } catch (IllegalArgumentException unknown) {
             return "valor recusado";
         }
