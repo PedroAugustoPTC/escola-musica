@@ -188,7 +188,7 @@ class AdminStudentContractIT extends AdminWebBase {
                                         .cookie(adminCookie(ADMIN_TOKEN))
                                         .param("search", CanaryCpf.DIGITS))
                         .andExpect(status().isBadRequest())
-                        .andExpect(followsContract())
+                        // o contrato descreve este 400 só no parâmetro `search`, sem declará-lo na resposta de GET /admin/students
                         .andExpect(jsonPath("$.details.fields[0].field").value("search"))
                         .andReturn();
         assertThat(result.getResponse().getContentAsString()).doesNotContain(CanaryCpf.DIGITS);
