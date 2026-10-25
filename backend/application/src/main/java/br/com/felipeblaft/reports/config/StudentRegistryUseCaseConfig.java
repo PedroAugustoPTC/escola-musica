@@ -103,11 +103,12 @@ public class StudentRegistryUseCaseConfig {
             ActorAuthorizationService authorization,
             StudentAccessService access,
             StudentRepository students,
+            TeacherRepository teachers,
             AssignmentRepository assignments,
             AuthorshipService authorship,
             ClockPort clock) {
         return new InactivateStudentUseCase(
-                authorization, access, students, assignments, authorship, clock);
+                authorization, access, students, teachers, assignments, authorship, clock);
     }
 
     @Bean
@@ -115,11 +116,12 @@ public class StudentRegistryUseCaseConfig {
             ActorAuthorizationService authorization,
             StudentAccessService access,
             StudentRepository students,
+            TeacherRepository teachers,
             AssignmentRepository assignments,
             AuthorshipService authorship,
             ClockPort clock) {
         return new ReactivateStudentUseCase(
-                authorization, access, students, assignments, authorship, clock);
+                authorization, access, students, teachers, assignments, authorship, clock);
     }
 
     // ---- Associações
@@ -127,22 +129,21 @@ public class StudentRegistryUseCaseConfig {
     @Bean
     AssignTeacherToStudentUseCase assignTeacherToStudentUseCase(
             ActorAuthorizationService authorization,
-            StudentRepository students,
+            StudentAccessService access,
             TeacherRepository teachers,
             AssignmentRepository assignments,
             AuthorshipService authorship,
             ClockPort clock) {
         return new AssignTeacherToStudentUseCase(
-                authorization, students, teachers, assignments, authorship, clock);
+                authorization, access, teachers, assignments, authorship, clock);
     }
 
     @Bean
     RemoveTeacherFromStudentUseCase removeTeacherFromStudentUseCase(
             ActorAuthorizationService authorization,
             AssignmentRepository assignments,
-            AuthorshipService authorship,
-            ClockPort clock) {
-        return new RemoveTeacherFromStudentUseCase(authorization, assignments, authorship, clock);
+            AuthorshipService authorship) {
+        return new RemoveTeacherFromStudentUseCase(authorization, assignments, authorship);
     }
 
     @Bean
