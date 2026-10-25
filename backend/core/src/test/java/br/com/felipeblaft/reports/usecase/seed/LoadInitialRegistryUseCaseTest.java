@@ -21,8 +21,8 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 /**
- * A carga inicial só orquestra os casos de uso da administração (SC-011): estes testes usam
- * dublês deles (regra 5 do tasks.md) e conferem ator, tudo ou nada, idempotência e erros.
+ * A carga inicial só orquestra os casos de uso da administração (SC-011): estes testes usam dublês
+ * deles (regra 5 do tasks.md) e conferem ator, tudo ou nada, idempotência e erros.
  */
 class LoadInitialRegistryUseCaseTest {
 
@@ -316,13 +316,16 @@ class LoadInitialRegistryUseCaseTest {
                 .extracting(SeedError::section, SeedError::index, SeedError::field, SeedError::code)
                 .containsExactlyInAnyOrder(
                         tuple("teachers", 1, "email", ErrorCode.DUPLICATE_EMAIL_IN_FILE),
+                        tuple("teachers", 2, "name", ErrorCode.INVALID_NAME),
                         tuple("teachers", 2, "email", ErrorCode.INVALID_EMAIL),
+                        tuple("teachers", 3, "name", ErrorCode.INVALID_NAME),
                         tuple("teachers", 3, "email", ErrorCode.INVALID_EMAIL),
                         tuple("teachers", 4, "name", ErrorCode.INVALID_NAME),
                         tuple("students", 1, "cpf", ErrorCode.DUPLICATE_CPF_IN_FILE),
                         tuple("students", 2, "name", ErrorCode.INVALID_NAME),
                         tuple("students", 2, "cpf", ErrorCode.INVALID_CPF),
                         tuple("students", 2, "birthDate", ErrorCode.INVALID_BIRTH_DATE),
+                        tuple("students", 2, "guardian", ErrorCode.GUARDIAN_REQUIRED),
                         tuple("students", 2, "teachers[0]", ErrorCode.TEACHER_NOT_FOUND),
                         tuple("students", 3, "guardian", ErrorCode.GUARDIAN_REQUIRED),
                         tuple("students", 3, "teachers[0]", ErrorCode.TEACHER_NOT_FOUND),
@@ -404,8 +407,7 @@ class LoadInitialRegistryUseCaseTest {
 
         assertThat(result.errors())
                 .extracting(SeedError::section, SeedError::index, SeedError::field, SeedError::code)
-                .containsExactly(
-                        tuple("students", 0, "teachers[0]", ErrorCode.RESOURCE_NOT_FOUND));
+                .containsExactly(tuple("students", 0, "teachers[0]", ErrorCode.RESOURCE_NOT_FOUND));
         assertThat(world.transaction.rolledBack).isEqualTo(1);
     }
 

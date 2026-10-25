@@ -17,6 +17,7 @@ import br.com.felipeblaft.reports.doubles.FakeDataProtection;
 import br.com.felipeblaft.reports.doubles.FixedAccessCodeGenerator;
 import br.com.felipeblaft.reports.doubles.FixedClock;
 import br.com.felipeblaft.reports.doubles.InMemoryAccessAttemptRepository;
+import br.com.felipeblaft.reports.doubles.InMemoryAdministratorRepository;
 import br.com.felipeblaft.reports.doubles.InMemoryAdministratorSessionRepository;
 import br.com.felipeblaft.reports.doubles.InMemoryAssignmentRepository;
 import br.com.felipeblaft.reports.doubles.InMemoryChannelActionRepository;
@@ -208,9 +209,12 @@ final class RegistryUseCaseDoubles {
             violations.add(new String[] {"cpf", "INVALID_CPF"});
         }
         GuardianInput guardian = input.guardian();
-        String guardianName = current == null || current.guardian() == null ? null : current.guardian().name();
-        String guardianPhone = current == null || current.guardian() == null ? null : current.guardian().phone();
-        String guardianEmail = current == null || current.guardian() == null ? null : current.guardian().email();
+        String guardianName =
+                current == null || current.guardian() == null ? null : current.guardian().name();
+        String guardianPhone =
+                current == null || current.guardian() == null ? null : current.guardian().phone();
+        String guardianEmail =
+                current == null || current.guardian() == null ? null : current.guardian().email();
         if (guardian != null) {
             guardianName = blankToNull(guardian.name());
             guardianPhone = digits(blankToNull(guardian.phone()));
@@ -222,7 +226,8 @@ final class RegistryUseCaseDoubles {
                 violations.add(new String[] {"guardian.email", "INVALID_EMAIL"});
             }
         }
-        boolean minor = birth != null && Student.requiresGuardian(birth, clock.todayInSchoolTimezone());
+        boolean minor =
+                birth != null && Student.requiresGuardian(birth, clock.todayInSchoolTimezone());
         if (minor && (guardianName == null || guardianPhone == null || guardianEmail == null)) {
             violations.add(new String[] {"guardian", "GUARDIAN_REQUIRED"});
         }
@@ -330,12 +335,7 @@ final class RegistryUseCaseDoubles {
     private final class FakeUpdateTeacher extends UpdateTeacherUseCase {
 
         FakeUpdateTeacher() {
-            super(
-                    authorization,
-                    teachers,
-                    new InMemoryTelegramLinkRepository(),
-                    authorship,
-                    clock);
+            super(authorization, teachers, new InMemoryTelegramLinkRepository(), authorship, clock);
         }
 
         @Override
@@ -368,7 +368,8 @@ final class RegistryUseCaseDoubles {
                     teachers,
                     new SessionRevocationService(
                             new InMemoryWebSessionRepository(),
-                            new InMemoryAdministratorSessionRepository(),
+                            new InMemoryAdministratorSessionRepository(
+                                    new InMemoryAdministratorRepository()),
                             clock),
                     new TelegramLinkTerminationService(
                             new InMemoryTelegramLinkRepository(),
@@ -537,7 +538,8 @@ final class RegistryUseCaseDoubles {
             }
             if (!assignments.exists(command.teacherId(), command.studentId())) {
                 assignments.save(
-                        TeacherStudent.create(command.teacherId(), command.studentId(), clock.now()));
+                        TeacherStudent.create(
+                                command.teacherId(), command.studentId(), clock.now()));
             }
             authorship.record(
                     actor,

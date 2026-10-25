@@ -26,8 +26,7 @@ class RotateCpfKeysUseCaseTest {
                 if (failure != null) {
                     throw failure;
                 }
-                return new CpfKeyRotationPort.Report(
-                        7, options.rotateDigestSecret() ? 2 : 0);
+                return new CpfKeyRotationPort.Report(7, options.rotateDigestSecret() ? 2 : 0);
             };
 
     private final RotateCpfKeysUseCase useCase = new RotateCpfKeysUseCase(rotation, transaction);

@@ -22,16 +22,19 @@ class SeedCommandsExecutor implements ApplicationRunner {
     private final SeedCommand seed;
     private final IssueCodeCommand issueCode;
     private final DemoDataCommand demodata;
+    private final RotateCpfKeyCommand rotateCpfKey;
     private final ApplicationContext context;
 
     SeedCommandsExecutor(
             SeedCommand seed,
             IssueCodeCommand issueCode,
             DemoDataCommand demodata,
+            RotateCpfKeyCommand rotateCpfKey,
             ApplicationContext context) {
         this.seed = seed;
         this.issueCode = issueCode;
         this.demodata = demodata;
+        this.rotateCpfKey = rotateCpfKey;
         this.context = context;
     }
 
@@ -48,10 +51,12 @@ class SeedCommandsExecutor implements ApplicationRunner {
                     case SeedCommand.NAME -> seed.run(arguments, output);
                     case IssueCodeCommand.NAME -> issueCode.run(arguments, output);
                     case DemoDataCommand.NAME -> demodata.run(arguments, output);
+                    case RotateCpfKeyCommand.NAME -> rotateCpfKey.run(arguments, output);
                     default -> {
                         output.println(
                                 "Comandos: seed --file <arquivo.json> [--simulate] | issue-code --email <email>"
-                                        + " | demo-data --file <cadastros.json>");
+                                        + " | demo-data --file <cadastros.json>"
+                                        + " | rotate-cpf-key [--simulate] [--confirm-invalidate-codes]");
                         yield 2;
                     }
                 };

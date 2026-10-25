@@ -2,6 +2,7 @@ package br.com.felipeblaft.reports.inbound.seed;
 
 import br.com.felipeblaft.reports.config.MessageCatalog;
 import br.com.felipeblaft.reports.config.MessageFormatting;
+import br.com.felipeblaft.reports.domain.common.ErrorCode;
 import br.com.felipeblaft.reports.usecase.seed.LoadInitialRegistryUseCase;
 import br.com.felipeblaft.reports.usecase.seed.SeedFile;
 import br.com.felipeblaft.reports.usecase.seed.SeedResult;
@@ -15,8 +16,9 @@ import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
- * Comando {@code carga --arquivo <arquivo.json> [--simular]} (contracts/carga-inicial.md). Mostra o
- * resumo sem CPF e, para cada professor novo, a linha {@code email → CÓDIGO (válido até …)}.
+ * Comando {@code seed --file <arquivo.json> [--simulate]} (contracts/initial-load.md). Chama a carga
+ * inicial, que orquestra os casos de uso da administração. Mostra o resumo sem CPF e, para cada
+ * professor novo, a linha {@code email → CÓDIGO (válido até …)}.
  */
 @Component
 @Profile("seed")
@@ -60,17 +62,22 @@ public class SeedCommand {
         return result.success() ? 0 : 1;
     }
 
+    /** Só o código e o texto do catálogo; o valor do campo (CPF, e-mail, nome) nunca é impresso. */
+    private String messageOf(ErrorCode code) {
+        return code.messageKey() == null ? "" : " — " + catalog.text(code.messageKey());
+    }
+
     private void print(SeedResult result, PrintStream output) {
         if (!result.success()) {
             output.println("Carga recusada: nada foi gravado.");
             for (SeedResult.SeedError error : result.errors()) {
                 output.printf(
-                        "%s[%d].%s: %s — %s%n",
+                        "%s[%d].%s: %s%s%n",
                         error.section(),
                         error.index(),
                         error.field(),
                         error.code().name(),
-                        catalog.text(error.code().messageKey()));
+                        messageOf(error.code()));
             }
             return;
         }
