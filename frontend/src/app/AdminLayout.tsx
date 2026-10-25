@@ -22,6 +22,8 @@ export function AdminLayout() {
   const signOut = useAdminSignOut();
   const dark = theme === 'dark';
   const data = session.data;
+  // senha provisória: só a troca de senha é permitida, então a navegação não é oferecida
+  const restricted = data?.mustChangePassword === true;
 
   const expire = () => {
     window.dispatchEvent(new CustomEvent(ADMIN_SESSION_EXPIRED_EVENT, { detail: 'SESSION_EXPIRED' }));
@@ -72,7 +74,7 @@ export function AdminLayout() {
             <img src="/brand/fb-logo-metal.png" alt="Instituto Musical Felipe Blaft" width={170} />
           </Link>
           {identity}
-          <AdminNav placement="side" />
+          {restricted ? null : <AdminNav placement="side" />}
           {actions}
         </aside>
       )}
@@ -88,7 +90,7 @@ export function AdminLayout() {
           <Outlet />
         </main>
       </div>
-      {mobile ? <AdminNav placement="bottom" /> : null}
+      {mobile && !restricted ? <AdminNav placement="bottom" /> : null}
     </div>
   );
 }

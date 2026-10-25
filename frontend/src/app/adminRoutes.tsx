@@ -9,6 +9,9 @@ import { TeacherDetailScreen } from '../pages/admin/TeacherDetailScreen';
 import { StudentsScreen } from '../pages/admin/StudentsScreen';
 import { StudentFormScreen } from '../pages/admin/StudentFormScreen';
 import { StudentDetailScreen } from '../pages/admin/StudentDetailScreen';
+import { AdministratorsScreen } from '../pages/admin/AdministratorsScreen';
+import { ActivateScreen } from '../pages/admin/ActivateScreen';
+import { ChangePasswordScreen } from '../pages/admin/ChangePasswordScreen';
 import { EmptyState } from '../components/EmptyState';
 
 /** Página não encontrada dentro da moldura administrativa (rota `/admin/**` desconhecida com sessão). */
@@ -26,6 +29,7 @@ function AdminPageNotFound() {
  */
 export const adminRoutes: RouteObject[] = [
   { path: '/admin/sign-in', element: <AdminSignInScreen /> },
+  { path: '/admin/activate', element: <ActivateScreen /> },
   {
     element: (
       <AdminSessionGuard>
@@ -34,6 +38,8 @@ export const adminRoutes: RouteObject[] = [
     ),
     children: [
       { path: '/admin', element: <AdminHomeScreen /> },
+      { path: '/admin/change-password', element: <ChangePasswordScreen /> },
+      { path: '/admin/administrators', element: <AdministratorsScreen /> },
       { path: '/admin/teachers', element: <TeachersScreen /> },
       { path: '/admin/teachers/new', element: <TeacherFormScreen /> },
       { path: '/admin/teachers/:teacherId', element: <TeacherDetailScreen /> },

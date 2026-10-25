@@ -63,6 +63,7 @@ export function useAdminSignIn() {
   return useMutation<AdministratorSession, ApiError, AdminCredentials>({
     mutationFn: (credentials) =>
       request<AdministratorSession>('/admin/session', { method: 'POST', body: credentials, ignore401: true }),
+    gcTime: 0,
     onSuccess: (session) => {
       client.removeQueries({ queryKey: [ADMIN_QUERY_ROOT] });
       client.setQueryData(ADMIN_SESSION_KEY, session);
@@ -89,6 +90,7 @@ export function useActivateAdministrator() {
   return useMutation<void, ApiError, Activation>({
     mutationFn: (activation) =>
       request<void>('/admin/activation', { method: 'POST', body: activation, ignore401: true }),
+    gcTime: 0,
   });
 }
 
@@ -97,6 +99,7 @@ export function useChangeProvisionalPassword() {
   const client = useQueryClient();
   return useMutation<AdministratorSession, ApiError, string>({
     mutationFn: (newPassword) => api.put<AdministratorSession>('/admin/password', { newPassword }),
+    gcTime: 0,
     onSuccess: (session) => client.setQueryData(ADMIN_SESSION_KEY, session),
   });
 }
