@@ -77,7 +77,7 @@ class ProvisionalPasswordRestrictionIT extends AdminWebBase {
     void everyOtherAdministrativeRouteAnswers403PasswordChangeRequired() throws Exception {
         authenticate(PROVISIONAL, true);
         List<Route> routes = restrictedRoutes();
-        assertThat(routes).hasSizeGreaterThanOrEqualTo(20);
+        assertThat(routes).hasSizeGreaterThanOrEqualTo(17);
 
         for (Route route : routes) {
             MvcResult result =

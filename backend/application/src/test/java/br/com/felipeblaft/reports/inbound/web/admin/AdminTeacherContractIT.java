@@ -174,7 +174,7 @@ class AdminTeacherContractIT extends AdminWebBase {
         mvc.perform(
                         asAdmin(post(BASE + "/teachers"))
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"name\":\"A\",\"email\":\"invalido\"}"))
+                                .content("{\"name\":\"Nome Valido\",\"email\":\"invalido\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(followsContract())
                 .andExpect(jsonPath("$.details.fields.length()").value(2))

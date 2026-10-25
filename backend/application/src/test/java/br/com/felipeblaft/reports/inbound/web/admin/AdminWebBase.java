@@ -154,6 +154,11 @@ public abstract class AdminWebBase extends IntegrationBase {
                                 .withLevel(
                                         "validation.request.security.missing",
                                         ValidationReport.Level.IGNORE)
+                                // allOf do contrato (AdministratorStudentInput): o validador trata cada parte
+                                // como fechada e recusa campos que a outra parte define
+                                .withLevel(
+                                        "validation.request.body.schema.additionalProperties",
+                                        ValidationReport.Level.IGNORE)
                                 .withLevel(
                                         "validation.request.parameter.header.missing",
                                         ValidationReport.Level.IGNORE)

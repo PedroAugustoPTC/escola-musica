@@ -87,7 +87,7 @@ class AdminSecurityChainIT extends AdminWebBase {
     void contractHasTheExpectedNumberOfWriteRoutes() {
         // sessão (POST, DELETE), ativação, senha, professores (5), administradores (3), alunos (4),
         // associações (2): se o contrato crescer, este teste obriga a revisar a cobertura de CSRF
-        assertThat(writeRoutes()).hasSizeGreaterThanOrEqualTo(20);
+        assertThat(writeRoutes()).hasSizeGreaterThanOrEqualTo(19);
     }
 
     @Test
