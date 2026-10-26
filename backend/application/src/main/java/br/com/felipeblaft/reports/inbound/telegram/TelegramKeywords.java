@@ -22,7 +22,15 @@ public final class TelegramKeywords {
         RETRY,
         SIGN_OUT,
         HELP,
-        YES
+        YES,
+        /** "meus alunos" / "alunos": abre a lista (feature 005). */
+        MY_STUDENTS,
+        /** "cadastrar aluno" / "novo aluno": inicia o cadastro guiado. */
+        REGISTER_STUDENT,
+        /** "pular": só nas etapas opcionais (instrumento). */
+        SKIP,
+        /** "voltar": só na lista e no cartão do aluno. */
+        BACK
     }
 
     private static final Map<String, Command> WORDS =
@@ -44,7 +52,13 @@ public final class TelegramKeywords {
                     Map.entry("sair", Command.SIGN_OUT),
                     Map.entry("ajuda", Command.HELP),
                     Map.entry("help", Command.HELP),
-                    Map.entry("sim", Command.YES));
+                    Map.entry("sim", Command.YES),
+                    Map.entry("meus alunos", Command.MY_STUDENTS),
+                    Map.entry("alunos", Command.MY_STUDENTS),
+                    Map.entry("cadastrar aluno", Command.REGISTER_STUDENT),
+                    Map.entry("novo aluno", Command.REGISTER_STUDENT),
+                    Map.entry("pular", Command.SKIP),
+                    Map.entry("voltar", Command.BACK));
 
     private TelegramKeywords() {}
 

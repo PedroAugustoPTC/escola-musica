@@ -2,7 +2,10 @@ package br.com.felipeblaft.reports.inbound.telegram;
 
 import br.com.felipeblaft.reports.port.ClockPort;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -69,17 +72,34 @@ public class TelegramUpdateProcessorService {
             outputs = interpreter.interpret(update);
         } catch (RuntimeException error) {
             // só o tipo: a mensagem e a causa podem trazer dado de aluno (FR-029)
+            String reference = newReference();
             LOG.error(
-                    "telegram-interpretation-error updateId={} type={}",
+                    "telegram-interpretation-error updateId={} reference={} type={}",
                     update.updateId(),
+                    reference,
                     error.getClass().getSimpleName());
-            outputs = errorReply(update);
+            outputs = errorReply(update, reference);
         }
         return TelegramUpdateResult.create(update.updateId(), outputs);
     }
 
+    /**
+     * Código curto de referência da falha interna: vai ao log e à resposta, sem detalhe técnico.
+     */
+    static String newReference() {
+        return UUID.randomUUID()
+                .toString()
+                .replace("-", "")
+                .substring(0, 8)
+                .toUpperCase(Locale.ROOT);
+    }
+
     /** Toda mensagem recebe resposta (FR-039), mesmo diante de erro inesperado. */
     public List<TelegramOutput> errorReply(UpdateTelegram update) {
+        return errorReply(update, newReference());
+    }
+
+    private List<TelegramOutput> errorReply(UpdateTelegram update, String reference) {
         Long chatId = null;
         String callbackId = null;
         if (update.message() != null && update.message().chat() != null) {
@@ -94,7 +114,8 @@ public class TelegramUpdateProcessorService {
         if (chatId == null) {
             return List.of();
         }
-        TelegramOutput message = presenter.simple(chatId, "INTERNAL_ERROR");
+        TelegramOutput message =
+                presenter.simple(chatId, "INTERNAL_ERROR", Map.of("reference", reference));
         return callbackId == null
                 ? List.of(message)
                 : List.of(new TelegramOutput.CallbackReply(callbackId), message);

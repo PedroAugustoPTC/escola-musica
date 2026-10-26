@@ -48,6 +48,7 @@ public class TelegramOutboxPublicationAdapter implements TelegramActionPublicati
             case TelegramOutput.Edit e -> e.chatId();
             case TelegramOutput.Document d -> d.chatId();
             case TelegramOutput.StepMessage e -> e.chatId();
+            case TelegramOutput.DeleteMessage d -> d.chatId();
             case TelegramOutput.CallbackReply r -> 0L;
         };
     }

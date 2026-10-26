@@ -47,7 +47,12 @@ class LinkingConversationIT extends TelegramConversationBase {
                 .contains("2 aluno(s) associado(s)")
                 .contains("• Matteo Mafra · Piano");
         assertThat(buttons(lastMessage()))
-                .containsExactly("v1:register:", "v1:semester:", "v1:history:");
+                .containsExactly(
+                        "v1:register:",
+                        "v1:semester:",
+                        "v1:history:",
+                        "v1:reg-list:",
+                        "v1:reg-new:");
         assertThat(lastMessage().get("parse_mode").asString()).isEqualTo("HTML");
         assertThat(lastMessage().get("chat_id").asLong()).isEqualTo(USER_CLARA);
         assertThat(

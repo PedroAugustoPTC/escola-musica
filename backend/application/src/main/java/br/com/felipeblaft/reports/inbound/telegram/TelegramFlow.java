@@ -37,6 +37,12 @@ public interface TelegramFlow {
         return false;
     }
 
+    /**
+     * O professor saiu do fluxo (início, outro fluxo ou "sair"): descarta o que estiver em
+     * andamento. Chamado antes de a conversa mudar de fluxo.
+     */
+    default void onLeave(TelegramContext context) {}
+
     /** Aluno escolhido na lista ou encontrado pelo nome. */
     default boolean onChooseStudent(TelegramContext context, StudentSummary student) {
         return false;
