@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import br.com.felipeblaft.reports.domain.access.Actor;
 import br.com.felipeblaft.reports.domain.access.Administrator;
 import br.com.felipeblaft.reports.domain.access.PermissionMatrix;
-import br.com.felipeblaft.reports.domain.access.SessionRevocationReason;
 import br.com.felipeblaft.reports.domain.common.BusinessParameters;
 import br.com.felipeblaft.reports.domain.common.DomainException;
 import br.com.felipeblaft.reports.domain.common.ErrorCode;
@@ -19,8 +18,7 @@ import br.com.felipeblaft.reports.doubles.FixedClock;
 import br.com.felipeblaft.reports.doubles.InMemoryAccessAttemptRepository;
 import br.com.felipeblaft.reports.doubles.InMemoryAdministratorRepository;
 import br.com.felipeblaft.reports.doubles.InMemoryAdministratorSessionRepository;
-import br.com.felipeblaft.reports.port.AdministratorSessionRepository;
-import br.com.felipeblaft.reports.port.ClockPort;
+import br.com.felipeblaft.reports.doubles.InMemoryWebSessionRepository;
 import br.com.felipeblaft.reports.service.AccessAttemptsControlService;
 import br.com.felipeblaft.reports.service.ActivationCodeIssuanceService;
 import br.com.felipeblaft.reports.service.ActorAuthorizationService;
@@ -28,13 +26,12 @@ import br.com.felipeblaft.reports.service.AuthorshipService;
 import br.com.felipeblaft.reports.service.SessionRevocationService;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.UUID;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 
 /**
  * Monta os dublês e os serviços compartilhados pelos testes dos casos de uso do administrador. A
- * revogação usa um dublê do {@link SessionRevocationService} (o real é do fluxo W-B): faz o que a
- * regra pede, marcar as sessões do administrador pelo repositório.
+ * revogação usa o {@link SessionRevocationService} real, com o repositório de sessões Web em
+ * memória.
  */
 final class AdministratorScenario {
 
@@ -62,7 +59,8 @@ final class AdministratorScenario {
     final FixedActivationCodeGenerator generator = new FixedActivationCodeGenerator();
     final ActivationCodeIssuanceService issuance =
             new ActivationCodeIssuanceService(generator, protection);
-    final SessionRevocationService revocation = new AdministratorRevocation(sessions, clock);
+    final SessionRevocationService revocation =
+            new SessionRevocationService(new InMemoryWebSessionRepository(), sessions, clock);
 
     /** Administrador ativado, com a senha {@link #PASSWORD} e definitiva. */
     Administrator activated(String name, String email) {
@@ -143,23 +141,5 @@ final class AdministratorScenario {
         return new CreateAdministratorUseCase(
                         authorization, administrators, issuance, authorship, clock)
                 .run(actor, new CreateAdministratorUseCase.Command(name, email, CORRELATION));
-    }
-
-    /** Dublê da revogação do administrador: marca as sessões pelo repositório, no relógio dado. */
-    static final class AdministratorRevocation extends SessionRevocationService {
-
-        private final AdministratorSessionRepository sessions;
-        private final ClockPort clock;
-
-        AdministratorRevocation(AdministratorSessionRepository sessions, ClockPort clock) {
-            super(null, sessions, clock);
-            this.sessions = sessions;
-            this.clock = clock;
-        }
-
-        @Override
-        public int revokeAdministrator(UUID administratorId, SessionRevocationReason reason) {
-            return sessions.revokeAllOf(administratorId, reason, clock.now());
-        }
     }
 }

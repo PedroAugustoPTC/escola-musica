@@ -310,7 +310,14 @@ final class DraftScenario {
         StudentView result = view("Inativado");
 
         RecordingInactivate(DraftScenario s) {
-            super(s.authorization, s.access, s.students, s.assignments, s.authorship, s.clock);
+            super(
+                    s.authorization,
+                    s.access,
+                    s.students,
+                    s.teachers,
+                    s.assignments,
+                    s.authorship,
+                    s.clock);
         }
 
         @Override
@@ -329,7 +336,14 @@ final class DraftScenario {
         StudentView result = view("Reativado");
 
         RecordingReactivate(DraftScenario s) {
-            super(s.authorization, s.access, s.students, s.assignments, s.authorship, s.clock);
+            super(
+                    s.authorization,
+                    s.access,
+                    s.students,
+                    s.teachers,
+                    s.assignments,
+                    s.authorship,
+                    s.clock);
         }
 
         @Override

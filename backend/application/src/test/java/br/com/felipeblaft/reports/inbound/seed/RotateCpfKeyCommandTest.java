@@ -15,7 +15,9 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.env.MockEnvironment;
 
-/** Saída e códigos de saída do comando, sem banco: o caso de uso real sobre uma porta de mentira. */
+/**
+ * Saída e códigos de saída do comando, sem banco: o caso de uso real sobre uma porta de mentira.
+ */
 class RotateCpfKeyCommandTest {
 
     private final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -85,7 +87,8 @@ class RotateCpfKeyCommandTest {
 
     @Test
     void digestSecretWithoutConfirmationIsRefusedAfterWarningTheEffect() {
-        int code = command(RotateCpfKeyCommand.NEW_HMAC_SECRET).run(List.of("rotate-cpf-key"), output);
+        int code =
+                command(RotateCpfKeyCommand.NEW_HMAC_SECRET).run(List.of("rotate-cpf-key"), output);
 
         assertThat(code).isEqualTo(1);
         assertThat(text())
@@ -106,8 +109,7 @@ class RotateCpfKeyCommandTest {
                 .contains("Rotação concluída")
                 .contains("Alunos recifrados: 4")
                 .contains("Códigos de acesso invalidados: 2");
-        assertThat(received)
-                .containsExactly(new CpfKeyRotationPort.Options(true, true, false));
+        assertThat(received).containsExactly(new CpfKeyRotationPort.Options(true, true, false));
         assertThat(transactions).containsExactly("run");
     }
 

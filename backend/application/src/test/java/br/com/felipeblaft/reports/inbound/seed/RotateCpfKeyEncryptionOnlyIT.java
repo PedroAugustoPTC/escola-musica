@@ -21,8 +21,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 /**
- * Trocar só a chave de cifra reescreve {@code cpf_encrypted} e não tem efeito colateral: o resumo
- * e os códigos de acesso dos professores ficam como estão, e a confirmação não é exigida.
+ * Trocar só a chave de cifra reescreve {@code cpf_encrypted} e não tem efeito colateral: o resumo e
+ * os códigos de acesso dos professores ficam como estão, e a confirmação não é exigida.
  */
 @ActiveProfiles("seed")
 @TestPropertySource(properties = "ROTATE_NEW_CPF_ENCRYPTION_KEY=" + CpfKeyProbe.NEW_ENCRYPTION_KEY)

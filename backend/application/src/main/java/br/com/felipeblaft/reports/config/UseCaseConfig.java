@@ -1,5 +1,7 @@
 package br.com.felipeblaft.reports.config;
 
+import br.com.felipeblaft.reports.domain.access.AttemptPolicy;
+import br.com.felipeblaft.reports.domain.access.AttemptScope;
 import br.com.felipeblaft.reports.domain.channel.RetryPolicy;
 import br.com.felipeblaft.reports.domain.common.BusinessParameters;
 import br.com.felipeblaft.reports.port.AccessAttemptRepository;
@@ -34,8 +36,8 @@ import br.com.felipeblaft.reports.service.AccessAttemptsControlService;
 import br.com.felipeblaft.reports.service.AccessCodeIssuanceService;
 import br.com.felipeblaft.reports.service.AccessRenewalService;
 import br.com.felipeblaft.reports.service.AudioSendingService;
-import br.com.felipeblaft.reports.service.AuthorshipService;
 import br.com.felipeblaft.reports.service.AuthorizationService;
+import br.com.felipeblaft.reports.service.AuthorshipService;
 import br.com.felipeblaft.reports.service.CodeAuthenticationService;
 import br.com.felipeblaft.reports.service.DocumentGenerationService;
 import br.com.felipeblaft.reports.service.JobProcessorService;
@@ -93,6 +95,7 @@ import br.com.felipeblaft.reports.usecase.teacher.ReactivateTeacherUseCase;
 import br.com.felipeblaft.reports.usecase.teacher.RegisterTeacherUseCase;
 import br.com.felipeblaft.reports.usecase.teacher.UpdateTeacherUseCase;
 import java.time.Duration;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -138,8 +141,35 @@ public class UseCaseConfig {
             AccessAttemptRepository attempts,
             DataProtectionPort protection,
             ClockPort clock,
-            BusinessParameters parameters) {
-        return new AccessAttemptsControlService(attempts, protection, clock, parameters);
+            BusinessParameters parameters,
+            ApplicationProperties properties) {
+        return new AccessAttemptsControlService(
+                attempts,
+                protection,
+                clock,
+                parameters,
+                attemptPolicyOverrides(properties.access()));
+    }
+
+    /**
+     * Políticas das consultas de CPF do professor, lidas de {@code reports.access.cpf-probe.*} e
+     * {@code reports.access.cpf-lookup.*} (R-06); as demais seguem os parâmetros de negócio.
+     */
+    static Map<AttemptScope, AttemptPolicy> attemptPolicyOverrides(
+            ApplicationProperties.Access access) {
+        ApplicationProperties.CpfProbe probe = access.cpfProbe();
+        ApplicationProperties.CpfLookup lookup = access.cpfLookup();
+        return Map.of(
+                AttemptScope.TEACHER_CPF_PROBE,
+                AttemptPolicy.windowed(
+                        probe.maxRefusals(),
+                        Duration.ofMinutes(probe.lockMinutes()),
+                        Duration.ofMinutes(probe.windowMinutes())),
+                AttemptScope.TEACHER_CPF_LOOKUP,
+                AttemptPolicy.windowed(
+                        lookup.maxLookups(),
+                        Duration.ofMinutes(lookup.lockMinutes()),
+                        Duration.ofMinutes(lookup.windowMinutes())));
     }
 
     @Bean

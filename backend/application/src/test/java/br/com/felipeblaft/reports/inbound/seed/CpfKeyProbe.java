@@ -18,7 +18,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 public final class CpfKeyProbe {
 
     /** Chave de cifra configurada nos testes (application-test). */
-    public static final String CURRENT_ENCRYPTION_KEY = "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=";
+    public static final String CURRENT_ENCRYPTION_KEY =
+            "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=";
 
     /** Segredo do resumo configurado nos testes. */
     public static final String CURRENT_HMAC_SECRET = "test-hmac-secret-with-more-than-32-bytes";

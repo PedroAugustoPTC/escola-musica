@@ -89,7 +89,8 @@ class SeedCommandIT extends IntegrationBase {
                 .hasSize(3)
                 .allSatisfy(
                         student -> {
-                            assertThat(student.guardianPhone()).matches("\\(\\d{2}\\) 9\\d{4}-\\d{4}");
+                            assertThat(student.guardianPhone())
+                                    .matches("\\(\\d{2}\\) 9\\d{4}-\\d{4}");
                             assertThat(student.guardianEmail()).endsWith("@example.test");
                         });
     }
@@ -105,7 +106,8 @@ class SeedCommandIT extends IntegrationBase {
                 .contains("Professores: 2 criados, 0 atualizados, 0 inalterados")
                 .contains("Alunos: 4 criados, 1 atualizados, 0 inalterados")
                 .contains("Associações criadas: 4")
-                .containsPattern("clara@example\\.test → K7QM2XPA \\(válido até 28/09/2026 10:00\\)")
+                .containsPattern(
+                        "clara@example\\.test → K7QM2XPA \\(válido até 28/09/2026 10:00\\)")
                 .doesNotContain("529.982.247-25", "52998224725");
     }
 
@@ -117,9 +119,7 @@ class SeedCommandIT extends IntegrationBase {
 
         assertThat(code).isZero();
         verify(useCase).run(any(), eq(true));
-        assertThat(text())
-                .contains("Simulação concluída: nada foi gravado.")
-                .doesNotContain("→");
+        assertThat(text()).contains("Simulação concluída: nada foi gravado.").doesNotContain("→");
     }
 
     @Test

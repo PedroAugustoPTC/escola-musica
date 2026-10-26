@@ -479,6 +479,8 @@ final class RegistryUseCaseDoubles {
                     authorization,
                     new br.com.felipeblaft.reports.service.StudentAccessService(students),
                     students,
+                    assignments,
+                    teachers,
                     protection,
                     new AccessAttemptsControlService(
                             new InMemoryAccessAttemptRepository(),
@@ -526,7 +528,13 @@ final class RegistryUseCaseDoubles {
     private final class FakeAssign extends AssignTeacherToStudentUseCase {
 
         FakeAssign() {
-            super(authorization, students, teachers, assignments, authorship, clock);
+            super(
+                    authorization,
+                    new br.com.felipeblaft.reports.service.StudentAccessService(students),
+                    teachers,
+                    assignments,
+                    authorship,
+                    clock);
         }
 
         @Override

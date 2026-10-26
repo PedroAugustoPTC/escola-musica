@@ -26,9 +26,9 @@ import org.springframework.test.context.TestPropertySource;
 /**
  * Comando {@code rotate-cpf-key} contra o Postgres de teste, com as duas chaves novas no ambiente.
  * Confere a recifragem e o novo resumo, a confirmação exigida quando o segredo do resumo muda, o
- * aviso do efeito sobre os códigos de acesso e que a saída nunca traz o CPF. A simulação
- * ({@code --simulate}, que depende de {@code TransactionPort.runAndRollBack}) entra no Fecho (S5),
- * quando o adaptador de transação do fluxo W-G estiver integrado.
+ * aviso do efeito sobre os códigos de acesso e que a saída nunca traz o CPF. A simulação ({@code
+ * --simulate}, que depende de {@code TransactionPort.runAndRollBack}) entra no Fecho (S5), quando o
+ * adaptador de transação do fluxo W-G estiver integrado.
  */
 @ActiveProfiles("seed")
 @TestPropertySource(
@@ -107,8 +107,7 @@ class RotateCpfKeyCommandIT extends IntegrationBase {
 
     @Test
     void confirmedRotationRewritesCipherAndDigestInvalidatesCodesAndPrintsOnlyCounts() {
-        int code =
-                command.run(List.of("rotate-cpf-key", "--confirm-invalidate-codes"), output);
+        int code = command.run(List.of("rotate-cpf-key", "--confirm-invalidate-codes"), output);
 
         assertThat(code).isZero();
         assertThat(text())

@@ -27,10 +27,17 @@ public class UseCaseTransactionDecorator {
      * Casos de uso que ficam fora de uma transação única: a entrega proativa faz chamada de rede e
      * não pode segurar uma conexão do banco (FR-015); a leitura de PDF por identificador opaco
      * captura a exceção de outro caso de uso (que, dentro da mesma transação, a marcaria como
-     * só-reversão e faria o commit falhar). Cada gravação deles é atômica por si só.
+     * só-reversão e faria o commit falhar). A carga inicial e a rotação da chave do CPF controlam a
+     * própria transação (tudo-ou-nada, com opção de simulação): uma transação externa viraria
+     * só-reversão ao capturarem a falha de um caso de uso interno e o commit lançaria {@code
+     * UnexpectedRollbackException}. Cada gravação deles é atômica por si só.
      */
     static final Set<String> NO_TRANSACTION =
-            Set.of("DeliverPendingActionsUseCase", "GetChannelDocumentUseCase");
+            Set.of(
+                    "DeliverPendingActionsUseCase",
+                    "GetChannelDocumentUseCase",
+                    "LoadInitialRegistryUseCase",
+                    "RotateCpfKeysUseCase");
 
     @Bean
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)

@@ -57,7 +57,11 @@ class IssueCodeCommandIT extends IntegrationBase {
                 .thenReturn(
                         new TeacherWithCode(
                                 new TeacherView(
-                                        clara.id(), "Clara Souza", "clara@example.test", true, true),
+                                        clara.id(),
+                                        "Clara Souza",
+                                        "clara@example.test",
+                                        true,
+                                        true),
                                 new Secret("K7QM2XPA"),
                                 Instant.parse("2026-09-28T13:00:00Z")));
 
@@ -65,7 +69,8 @@ class IssueCodeCommandIT extends IntegrationBase {
 
         assertThat(code).isZero();
         assertThat(text())
-                .containsPattern("clara@example\\.test → K7QM2XPA \\(válido até 28/09/2026 10:00\\)");
+                .containsPattern(
+                        "clara@example\\.test → K7QM2XPA \\(válido até 28/09/2026 10:00\\)");
         ArgumentCaptor<Actor> actor = ArgumentCaptor.forClass(Actor.class);
         ArgumentCaptor<ReissueAccessCodeUseCase.Command> reissue =
                 ArgumentCaptor.forClass(ReissueAccessCodeUseCase.Command.class);
@@ -89,7 +94,8 @@ class IssueCodeCommandIT extends IntegrationBase {
     void refusalOfTheUseCaseIsPrintedWithTheCatalogText() {
         Teacher clara = Teacher.create("Clara Souza", "clara@example.test", true, clock.now());
         teachers.save(clara);
-        when(useCase.run(any(), any())).thenThrow(new DomainException(ErrorCode.RESOURCE_NOT_FOUND));
+        when(useCase.run(any(), any()))
+                .thenThrow(new DomainException(ErrorCode.RESOURCE_NOT_FOUND));
 
         int code = command.run(List.of("issue-code", "--email", "clara@example.test"), output);
 
