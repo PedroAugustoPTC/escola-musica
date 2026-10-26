@@ -77,7 +77,9 @@ import br.com.felipeblaft.reports.usecase.lesson.GetOpenReportUseCase;
 import br.com.felipeblaft.reports.usecase.lesson.RegisterLessonByAudioUseCase;
 import br.com.felipeblaft.reports.usecase.lesson.RequestLessonReportChangeUseCase;
 import br.com.felipeblaft.reports.usecase.lesson.RetryLessonReportUseCase;
-import br.com.felipeblaft.reports.usecase.seed.EmitAccessCodeUseCase;
+import br.com.felipeblaft.reports.usecase.registry.AssignTeacherToStudentUseCase;
+import br.com.felipeblaft.reports.usecase.registry.RegisterStudentUseCase;
+import br.com.felipeblaft.reports.usecase.registry.UpdateStudentUseCase;
 import br.com.felipeblaft.reports.usecase.seed.LoadInitialRegistryUseCase;
 import br.com.felipeblaft.reports.usecase.semester.ApproveSemesterReportUseCase;
 import br.com.felipeblaft.reports.usecase.semester.CancelSemesterReportUseCase;
@@ -86,6 +88,10 @@ import br.com.felipeblaft.reports.usecase.semester.GetSemesterPreviewUseCase;
 import br.com.felipeblaft.reports.usecase.semester.GetSemesterReportUseCase;
 import br.com.felipeblaft.reports.usecase.semester.ListAvailableSemestersUseCase;
 import br.com.felipeblaft.reports.usecase.semester.RequestSemesterReportChangeUseCase;
+import br.com.felipeblaft.reports.usecase.teacher.InactivateTeacherUseCase;
+import br.com.felipeblaft.reports.usecase.teacher.ReactivateTeacherUseCase;
+import br.com.felipeblaft.reports.usecase.teacher.RegisterTeacherUseCase;
+import br.com.felipeblaft.reports.usecase.teacher.UpdateTeacherUseCase;
 import java.time.Duration;
 import java.util.concurrent.ThreadLocalRandom;
 import org.springframework.context.annotation.Bean;
@@ -157,24 +163,36 @@ public class UseCaseConfig {
         return new TeacherAccessAuditService(authorship, protection);
     }
 
-    // ---- Carga inicial
+    // ---- Carga inicial (orquestra os casos de uso da administração; sem regra própria)
 
     @Bean
+    @SuppressWarnings("java:S107")
     LoadInitialRegistryUseCase loadInitialRegistryUseCase(
+            RegisterTeacherUseCase registerTeacher,
+            UpdateTeacherUseCase updateTeacher,
+            InactivateTeacherUseCase inactivateTeacher,
+            ReactivateTeacherUseCase reactivateTeacher,
+            RegisterStudentUseCase registerStudent,
+            UpdateStudentUseCase updateStudent,
+            AssignTeacherToStudentUseCase assign,
             TeacherRepository teachers,
             StudentRepository students,
             AssignmentRepository assignments,
             DataProtectionPort protection,
-            AccessCodeIssuanceService issuance,
-            ClockPort clock) {
+            TransactionPort transaction) {
         return new LoadInitialRegistryUseCase(
-                teachers, students, assignments, protection, issuance, clock);
-    }
-
-    @Bean
-    EmitAccessCodeUseCase emitAccessCodeUseCase(
-            TeacherRepository teachers, AccessCodeIssuanceService issuance, ClockPort clock) {
-        return new EmitAccessCodeUseCase(teachers, issuance, clock);
+                registerTeacher,
+                updateTeacher,
+                inactivateTeacher,
+                reactivateTeacher,
+                registerStudent,
+                updateStudent,
+                assign,
+                teachers,
+                students,
+                assignments,
+                protection,
+                transaction);
     }
 
     // ---- Acesso

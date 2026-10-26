@@ -5,8 +5,11 @@
 #        --demo-data=true                     #   zera os dados locais e sobe com a massa de demonstração
 #        --demo-data=false                    #   zera os dados locais e sobe só o sistema, vazio
 #        (sem --demo-data)                    #   mantém os dados que já existem
-#   sh infra/scripts/local.sh seed [file]     # carga inicial (padrão: infra/seed/example.json) e códigos
-#   sh infra/scripts/local.sh code <email>    # reemite o código de acesso de um professor
+#   sh infra/scripts/local.sh seed [file] [--simulate]  # carga inicial (padrão: infra/seed/example.json) e códigos;
+#                                             #   --simulate roda tudo numa transação desfeita (nada é gravado)
+#   sh infra/scripts/local.sh issue-code <email>  # emergência: reemite o código de um professor (alias: code)
+#   sh infra/scripts/local.sh rotate-cpf-key [--simulate] [--confirm-invalidate-codes]
+#                                             # rotação das chaves do CPF; chaves novas por variáveis de ambiente
 #   sh infra/scripts/local.sh status          # estado dos serviços
 #   sh infra/scripts/local.sh logs [serviço]  # acompanha os logs (padrão: backend)
 #   sh infra/scripts/local.sh database        # abre o psql no banco local (como administrador)
@@ -15,6 +18,9 @@
 #   sh infra/scripts/local.sh tests [suite]   # backend | frontend | e2e | n8n | rehearsal | real-ai | all (padrão: all)
 #   sh infra/scripts/local.sh stop            # para a pilha local (mantém os dados)
 #   sh infra/scripts/local.sh clean           # para e APAGA os dados locais (banco, PDFs, certificados)
+#
+# O `up` gera o AUTH_HMAC_SECRET local e, se o banco ainda não tem administrador, preenche no infra/.env o
+# administrador fictício local (admin@example.test) com uma senha aleatória provisória, impressa UMA vez.
 #
 # Com o Telegram habilitado, sobe também o n8n (transporte do canal; infra/scripts/n8n.sh opera o n8n).
 # Usa infra/.env (copie de infra/.env.example). Passo a passo em infra/scripts/README.md.
@@ -39,7 +45,7 @@ require_env() {
     exit 1
   fi
   missing=""
-  for key in POSTGRES_PASSWORD CPF_ENCRYPTION_KEY HMAC_SECRET; do
+  for key in POSTGRES_PASSWORD CPF_ENCRYPTION_KEY HMAC_SECRET AUTH_HMAC_SECRET; do
     [ -n "$(value "$key")" ] || missing="$missing $key"
   done
   if [ "$(value TELEGRAM_ENABLED)" = "true" ]; then
@@ -56,7 +62,44 @@ require_env() {
     echo "Preencha em infra/.env:$missing" >&2
     echo "(sem o bot: TELEGRAM_ENABLED=false; sem chaves de IA: AI_PROVIDERS=simulated)" >&2
     echo "Se o seu infra/.env é anterior à feature 003, regere-o a partir de infra/.env.example." >&2
+    echo "(AUTH_HMAC_SECRET local: rode 'sh infra/scripts/local.sh up', que o gera.)" >&2
     exit 1
+  fi
+}
+
+# Texto aleatório alfanumérico de $1 caracteres (nunca vai para argumento de comando nem para log).
+random_text() {
+  head -c 256 /dev/urandom | base64 | tr -d '/+=
+' | cut -c1-"$1"
+}
+
+# Grava CHAVE=valor no infra/.env (local, fora do Git): troca a linha existente ou acrescenta.
+set_env_value() {
+  if grep -q "^$1=" infra/.env; then
+    sed -i.bak "s|^$1=.*|$1=$2|" infra/.env && rm -f infra/.env.bak
+  else
+    printf '%s=%s
+' "$1" "$2" >> infra/.env
+  fi
+}
+
+# Só no ambiente local: gera o AUTH_HMAC_SECRET (distinto do HMAC_SECRET, com 48 caracteres) e, se as três
+# variáveis do primeiro administrador estão vazias, preenche o administrador fictício local. A senha
+# provisória aparece UMA vez, aqui; o banco só a usa se ainda não houver administrador.
+ensure_local_credentials() {
+  [ -f infra/.env ] || return 0
+  if [ -z "$(value AUTH_HMAC_SECRET)" ]; then
+    set_env_value AUTH_HMAC_SECRET "$(random_text 48)"
+    echo "AUTH_HMAC_SECRET local gerado em infra/.env."
+  fi
+  if [ -z "$(value ADMIN_BOOTSTRAP_NAME)" ] && [ -z "$(value ADMIN_BOOTSTRAP_EMAIL)" ] && [ -z "$(value ADMIN_BOOTSTRAP_PASSWORD)" ]; then
+    password="$(random_text 20)"
+    set_env_value ADMIN_BOOTSTRAP_NAME "Administrador Local"
+    set_env_value ADMIN_BOOTSTRAP_EMAIL "admin@example.test"
+    set_env_value ADMIN_BOOTSTRAP_PASSWORD "$password"
+    echo "Administrador fictício local: admin@example.test · senha provisória: $password"
+    echo "(anote agora: ela não será mostrada de novo; vale na primeira subida com banco sem administrador e deve ser trocada no primeiro acesso)"
+    password=""
   fi
 }
 
@@ -122,6 +165,7 @@ case "$command" in
       ""|true|false) ;;
       *) echo "Use --demo-data=true ou --demo-data=false" >&2; exit 2 ;;
     esac
+    ensure_local_credentials
     require_env
     [ -n "$demo_data" ] && reset_data
     # shellcheck disable=SC2046
@@ -152,17 +196,49 @@ case "$command" in
     ;;
   seed)
     require_env
-    file="${1:-infra/seed/example.json}"
+    file="infra/seed/example.json"
+    simulate=""
+    for argument in "$@"; do
+      case "$argument" in
+        --simulate) simulate="--simulate" ;;
+        -*) echo "Uso: sh infra/scripts/local.sh seed [infra/seed/arquivo.json] [--simulate]" >&2; exit 2 ;;
+        *) file="$argument" ;;
+      esac
+    done
     case "$file" in
       infra/seed/*) ;;
       *) echo "O arquivo precisa estar em infra/seed/ (montado em /seed no contêiner)." >&2; exit 1 ;;
     esac
-    $LOCAL run --rm backend seed --file "/seed/${file#infra/seed/}"
+    # shellcheck disable=SC2086
+    $LOCAL run --rm backend seed --file "/seed/${file#infra/seed/}" $simulate
     ;;
-  code)
+  issue-code|code)
     require_env
-    [ "$#" -ge 1 ] || { echo "Uso: sh infra/scripts/local.sh code <email-do-professor>" >&2; exit 2; }
+    [ "$#" -ge 1 ] || { echo "Uso: sh infra/scripts/local.sh issue-code <email-do-professor>" >&2; exit 2; }
+    echo "Atenção: este comando é de emergência. O caminho normal é o administrador reemitir o código na área administrativa."
     $LOCAL run --rm backend issue-code --email "$1"
+    ;;
+  rotate-cpf-key)
+    require_env
+    # As chaves NOVAS vêm de variáveis do seu terminal (não de argumentos, para não irem ao histórico do shell):
+    #   ROTATE_NEW_CPF_ENCRYPTION_KEY (Base64, 32 bytes) e/ou ROTATE_NEW_HMAC_SECRET (>= 32 bytes);
+    #   ROTATE_OLD_* só se as chaves antigas não forem as do infra/.env.
+    simulate=false
+    for argument in "$@"; do
+      case "$argument" in
+        --simulate) simulate=true ;;
+        --confirm-invalidate-codes) ;;
+        *) echo "Uso: sh infra/scripts/local.sh rotate-cpf-key [--simulate] [--confirm-invalidate-codes]" >&2; exit 2 ;;
+      esac
+    done
+    if [ "$simulate" = "false" ]; then
+      echo "Janela de manutenção: parando o portal e a API (o banco continua). Tenha uma cópia de segurança recente (ela não inclui as chaves)."
+      $LOCAL stop web backend >/dev/null 2>&1 || true
+    fi
+    $LOCAL run --rm       -e ROTATE_NEW_CPF_ENCRYPTION_KEY -e ROTATE_NEW_HMAC_SECRET       -e ROTATE_OLD_CPF_ENCRYPTION_KEY -e ROTATE_OLD_HMAC_SECRET       backend rotate-cpf-key "$@"
+    if [ "$simulate" = "false" ]; then
+      echo "Depois de conferir as contagens: troque CPF_ENCRYPTION_KEY e/ou HMAC_SECRET no infra/.env pelos valores novos e rode: sh infra/scripts/local.sh up"
+    fi
     ;;
   status)
     $LOCAL ps
