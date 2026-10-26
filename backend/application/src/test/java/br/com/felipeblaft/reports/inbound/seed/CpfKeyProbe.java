@@ -28,7 +28,8 @@ public final class CpfKeyProbe {
     public static final String NEW_ENCRYPTION_KEY = "ZmVkY2JhOTg3NjU0MzIxMGZlZGNiYTk4NzY1NDMyMTA=";
 
     /** Segredo novo do resumo usado nos testes de rotação. */
-    public static final String NEW_HMAC_SECRET = "novo-segredo-hmac-de-teste-com-mais-de-32-bytes";
+    public static final String NEW_HMAC_SECRET =
+            "new-hmac-secret-for-tests-with-more-than-32-bytes";
 
     private CpfKeyProbe() {}
 

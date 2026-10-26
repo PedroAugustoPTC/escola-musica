@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 class CpfDecryptionAdapterTest {
 
     private static final String HMAC_SECRET = "hmac-secret-for-tests-with-over-32-bytes";
+    private static final String AUTH_HMAC_SECRET = "auth-hmac-secret-for-tests-with-over-32-bytes";
     private static final String CPF_KEY = "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=";
 
     private static ApplicationProperties properties(String cpfKey) {
@@ -20,7 +21,7 @@ class CpfDecryptionAdapterTest {
                 null,
                 null,
                 null,
-                new ApplicationProperties.Security(cpfKey, HMAC_SECRET, null),
+                new ApplicationProperties.Security(cpfKey, HMAC_SECRET, AUTH_HMAC_SECRET),
                 null,
                 null,
                 null,

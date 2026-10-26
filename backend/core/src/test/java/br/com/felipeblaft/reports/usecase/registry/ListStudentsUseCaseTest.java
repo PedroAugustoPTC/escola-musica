@@ -42,7 +42,7 @@ class ListStudentsUseCaseTest {
     private void seed() {
         scenario.student("Ana Souza", "1990-03-04", CPF_A, "Piano", clara);
         scenario.student("Álvaro Prado", "1985-01-01", CPF_B, "Violão", bruno);
-        scenario.student("Beatriz Luz", "2000-07-07", CPF_C, "Canto", clara, bruno);
+        scenario.student("Beatriz Luz", "2000-07-07", CPF_C, "Sax", clara, bruno);
         Student inactive = scenario.student("Carlos Inativo", "1999-09-09", CPF_D, "Piano");
         inactive.inactivate(scenario.clock.now());
     }
@@ -80,7 +80,7 @@ class ListStudentsUseCaseTest {
 
         assertThat(names(run("violao", null, null))).containsExactly("Álvaro Prado");
         assertThat(names(run("PIANO", null, null))).containsExactly("Ana Souza");
-        assertThat(names(run("canto", null, null))).containsExactly("Beatriz Luz");
+        assertThat(names(run("sax", null, null))).containsExactly("Beatriz Luz");
     }
 
     @Test
@@ -176,7 +176,7 @@ class ListStudentsUseCaseTest {
         StudentView view = run(null, null, null).items().getFirst();
 
         assertThat(view.guardian().name()).isEqualTo("Maria Silva");
-        assertThat(view.guardian().email()).isEqualTo("maria@exemplo.com");
+        assertThat(view.guardian().email()).isEqualTo("maria@example.com");
         assertThat(view.toString()).doesNotContain("Matteo");
     }
 

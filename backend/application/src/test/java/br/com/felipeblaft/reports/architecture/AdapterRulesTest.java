@@ -5,6 +5,7 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import br.com.felipeblaft.reports.domain.access.Actor;
+import br.com.felipeblaft.reports.usecase.seed.LoadInitialRegistryUseCase;
 import br.com.felipeblaft.reports.domain.access.Operation;
 import br.com.felipeblaft.reports.domain.access.Permission;
 import br.com.felipeblaft.reports.domain.access.PermissionMatrix;
@@ -209,9 +210,12 @@ class AdapterRulesTest {
     void systemActorIsOnlyCreatedAtStartupAndInitialLoad() {
         systemActorRule(
                         DescribedPredicate.describe(
-                                "estão fora de inbound.seed e inbound.bootstrap",
+                                "estão fora de inbound.seed, inbound.bootstrap e da própria carga inicial",
                                 javaClass ->
                                         !javaClass
+                                                        .getFullName()
+                                                        .equals(LoadInitialRegistryUseCase.class.getName())
+                                                && !javaClass
                                                         .getPackageName()
                                                         .startsWith(BASE + ".inbound.seed")
                                                 && !javaClass

@@ -205,7 +205,7 @@ class AdministratorRepositoryAdapterIT extends IntegrationBase {
         administrators.insertIfAbsent(
                 AdministratorTestData.active("Ana Souza", "ana@example.test"));
         administrators.insertIfAbsent(
-                AdministratorTestData.active("Álvaro Lima", "alvaro.lima@escola.example"));
+                AdministratorTestData.active("Álvaro Lima", "alvaro.lima@school.example"));
         administrators.insertIfAbsent(
                 AdministratorTestData.inactive("Bruno Reis", "bruno@example.test"));
 
@@ -221,7 +221,7 @@ class AdministratorRepositoryAdapterIT extends IntegrationBase {
         assertThat(administrators.list("ALVARO", null, PageRequest.first()).items())
                 .extracting(Administrator::name)
                 .containsExactly("Álvaro Lima");
-        assertThat(administrators.list("@escola.example", null, PageRequest.first()).items())
+        assertThat(administrators.list("@school.example", null, PageRequest.first()).items())
                 .extracting(Administrator::name)
                 .containsExactly("Álvaro Lima");
         assertThat(administrators.list("nobody", null, PageRequest.first()).items()).isEmpty();

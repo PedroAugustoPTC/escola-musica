@@ -100,7 +100,7 @@ final class RegistryScenario {
         Teacher teacher =
                 Teacher.create(
                         name,
-                        name.toLowerCase(java.util.Locale.ROOT).replace(' ', '.') + "@escola.com",
+                        name.toLowerCase(java.util.Locale.ROOT).replace(' ', '.') + "@school.com",
                         active,
                         clock.now());
         teachers.save(teacher);
@@ -139,7 +139,7 @@ final class RegistryScenario {
                 name,
                 "2014-05-10",
                 new Secret(cpf),
-                new GuardianInput("Maria Silva", "(11) 98765-4321", "Maria@Exemplo.com"),
+                new GuardianInput("Maria Silva", "(11) 98765-4321", "Maria@Example.com"),
                 "Piano");
     }
 

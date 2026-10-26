@@ -9,19 +9,15 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 
 /**
- * A carga pelos casos de uso reais da administração, contra o Postgres de teste. Fica desligada na
- * fatia S2: depende dos casos de uso de professor (W-B), aluno (W-C1) e associação (W-C2) e dos
- * adaptadores de persistência de autoria (W-F) e de transação (W-G), que só se integram no Fecho
- * (S5). Reative removendo o {@code @Disabled}.
+ * A carga pelos casos de uso reais da administração (professor, aluno e associação), com os
+ * adaptadores reais de persistência, autoria e transação, contra o Postgres de teste.
  */
-@Disabled("Integração real dos fluxos W-B, W-C1, W-C2, W-F e W-G: reativar no Fecho (S5)")
 @ActiveProfiles("seed")
 class SeedCommandFullStackIT extends IntegrationBase {
 

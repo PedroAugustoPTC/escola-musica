@@ -12,6 +12,7 @@ import br.com.felipeblaft.reports.service.TelegramLinkTerminationService;
 import br.com.felipeblaft.reports.support.IntegrationBase;
 import br.com.felipeblaft.reports.usecase.seed.RotateCpfKeysUseCase;
 import com.tngtech.archunit.core.domain.JavaClass;
+import com.tngtech.archunit.core.domain.JavaModifier;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
 import java.util.List;
@@ -46,6 +47,17 @@ class UseCaseWiringTest extends IntegrationBase {
                         .stream()
                         .filter(JavaClass::isTopLevelClass)
                         .filter(javaClass -> !javaClass.isInterface() && !javaClass.isEnum())
+                        // utilitário estático (construtor privado) não é bean
+                        .filter(
+                                javaClass ->
+                                        javaClass.getConstructors().stream()
+                                                .anyMatch(
+                                                        constructor ->
+                                                                constructor
+                                                                        .getModifiers()
+                                                                        .contains(
+                                                                                JavaModifier
+                                                                                        .PUBLIC)))
                         .filter(
                                 javaClass ->
                                         services
@@ -106,6 +118,14 @@ class UseCaseWiringTest extends IntegrationBase {
     void administrationUseCasesRunInsideATransaction() {
         for (Class<?> useCase : coreClasses(false)) {
             Object bean = context.getBean(useCase);
+            if (UseCaseTransactionDecorator.NO_TRANSACTION.contains(useCase.getSimpleName())) {
+                assertThat(AopUtils.isAopProxy(bean))
+                        .as(
+                                "%s controla a própria transação e não leva o proxy do decorador",
+                                useCase.getSimpleName())
+                        .isFalse();
+                continue;
+            }
             assertThat(AopUtils.isAopProxy(bean))
                     .as(
                             "%s deve rodar numa transação (proxy do decorador)",

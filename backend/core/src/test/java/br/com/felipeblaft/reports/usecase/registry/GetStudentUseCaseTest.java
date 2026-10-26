@@ -79,7 +79,7 @@ class GetStudentUseCaseTest {
 
         assertThat(view.guardian())
                 .extracting("name", "phone", "email")
-                .containsExactly("Maria Silva", "11987654321", "maria@exemplo.com");
+                .containsExactly("Maria Silva", "11987654321", "maria@example.com");
     }
 
     @Test

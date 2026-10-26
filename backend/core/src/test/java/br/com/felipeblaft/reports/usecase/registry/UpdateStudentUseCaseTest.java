@@ -92,7 +92,7 @@ class UpdateStudentUseCaseTest {
                                         "11/05/2014",
                                         null,
                                         new GuardianInput(
-                                                "Joana Lima", "1134567890", "joana@exemplo.com"),
+                                                "Joana Lima", "1134567890", "joana@example.com"),
                                         "")));
 
         assertThat(view.name()).isEqualTo("Matteo Mafra Jr.");
@@ -204,7 +204,7 @@ class UpdateStudentUseCaseTest {
                                 "2014-05-10",
                                 null,
                                 new GuardianInput(
-                                        "Maria Silva", "11987654321", "maria@exemplo.com"),
+                                        "Maria Silva", "11987654321", "maria@example.com"),
                                 null)));
 
         assertThat(adult.guardianName()).isEqualTo("Maria Silva");
@@ -249,7 +249,7 @@ class UpdateStudentUseCaseTest {
                                 null,
                                 null,
                                 new GuardianInput(
-                                        "Maria Silva", "11987654321", "maria@exemplo.com"),
+                                        "Maria Silva", "11987654321", "maria@example.com"),
                                 null)));
 
         StudentView view =

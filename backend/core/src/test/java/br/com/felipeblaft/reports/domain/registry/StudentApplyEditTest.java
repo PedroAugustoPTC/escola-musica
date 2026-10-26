@@ -20,7 +20,7 @@ class StudentApplyEditTest {
                 "hash",
                 "Maria Silva",
                 "11987654321",
-                "maria@exemplo.com",
+                "maria@example.com",
                 "Piano",
                 T0);
     }
@@ -33,7 +33,7 @@ class StudentApplyEditTest {
                 instrument,
                 guardian,
                 guardian == null ? null : "11987654321",
-                guardian == null ? null : "maria@exemplo.com",
+                guardian == null ? null : "maria@example.com",
                 TODAY);
     }
 
@@ -59,7 +59,7 @@ class StudentApplyEditTest {
         assertThat(student.instrument()).isEqualTo("Violão");
         assertThat(student.guardianName()).isEqualTo("Joana Lima");
         assertThat(student.guardianPhone()).isEqualTo("11987654321");
-        assertThat(student.guardianEmail()).isEqualTo("maria@exemplo.com");
+        assertThat(student.guardianEmail()).isEqualTo("maria@example.com");
         assertThat(student.updatedAt()).isEqualTo(T1);
         assertThat(student.cpfHash()).isEqualTo("hash");
     }
@@ -87,7 +87,7 @@ class StudentApplyEditTest {
                         "Piano",
                         "Maria Silva",
                         "1134567890",
-                        "maria@exemplo.com",
+                        "maria@example.com",
                         TODAY);
         assertThat(student.applyEdit(edit, null, T1)).isTrue();
         assertThat(student.guardianPhone()).isEqualTo("1134567890");
@@ -99,10 +99,10 @@ class StudentApplyEditTest {
                         "Piano",
                         "Maria Silva",
                         "1134567890",
-                        "outro@exemplo.com",
+                        "other@example.com",
                         TODAY);
         assertThat(student.applyEdit(other, null, T1)).isTrue();
-        assertThat(student.guardianEmail()).isEqualTo("outro@exemplo.com");
+        assertThat(student.guardianEmail()).isEqualTo("other@example.com");
     }
 
     @Test

@@ -133,7 +133,7 @@ class BootstrapFirstAdministratorUseCaseTest {
                         super.save(
                                 Administrator.first(
                                         "Outra",
-                                        "outra@school.test",
+                                        "other@school.test",
                                         "hash",
                                         Duration.ofDays(7),
                                         c.clock.now()));

@@ -26,7 +26,7 @@ class EmailAddressTest {
 
     @Test
     void acceptsTheMaximumLengthAndRefusesOneMore() {
-        String domain = "@exemplo.com";
+        String domain = "@example.com";
         String at254 = "a".repeat(254 - domain.length()) + domain;
         assertThat(at254).hasSize(254);
         assertThat(EmailAddress.of(at254).value()).hasSize(254);
@@ -38,12 +38,12 @@ class EmailAddressTest {
     @ValueSource(
             strings = {
                 "   ",
-                "sem-arroba.com",
-                "@exemplo.com",
+                "no-at-sign.com",
+                "@example.com",
                 "maria@",
-                "maria@exemplo",
-                "maria@@exemplo.com",
-                "ma ria@exemplo.com",
+                "maria@example",
+                "maria@@example.com",
+                "ma ria@example.com",
                 "maria@exem plo.com"
             })
     void invalidFormatIsRefused(String text) {
@@ -52,17 +52,17 @@ class EmailAddressTest {
 
     @Test
     void controlCharactersAreRefusedAsInvalidText() {
-        refuses("maria\u0000@exemplo.com", ErrorCode.INVALID_TEXT);
+        refuses("maria\u0000@example.com", ErrorCode.INVALID_TEXT);
         refuses("maria@exe\tmplo.com", ErrorCode.INVALID_TEXT);
     }
 
     @Test
     void equalityByValueAndNoPersonalDataInText() {
-        EmailAddress email = EmailAddress.of("maria@exemplo.com");
-        assertThat(email).isEqualTo(EmailAddress.of(" MARIA@exemplo.com "));
-        assertThat(email).hasSameHashCodeAs(EmailAddress.of("maria@exemplo.com"));
-        assertThat(email).isNotEqualTo(EmailAddress.of("outra@exemplo.com"));
-        assertThat(email).isNotEqualTo("maria@exemplo.com");
-        assertThat(email.toString()).doesNotContain("maria").doesNotContain("exemplo");
+        EmailAddress email = EmailAddress.of("maria@example.com");
+        assertThat(email).isEqualTo(EmailAddress.of(" MARIA@example.com "));
+        assertThat(email).hasSameHashCodeAs(EmailAddress.of("maria@example.com"));
+        assertThat(email).isNotEqualTo(EmailAddress.of("other@example.com"));
+        assertThat(email).isNotEqualTo("maria@example.com");
+        assertThat(email.toString()).doesNotContain("maria").doesNotContain("example");
     }
 }

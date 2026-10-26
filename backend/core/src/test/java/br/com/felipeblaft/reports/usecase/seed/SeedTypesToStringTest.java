@@ -17,7 +17,7 @@ class SeedTypesToStringTest {
     private static final String TEACHER = "Clara Dias";
     private static final String EMAIL = "clara@example.test";
     private static final String PHONE = "(11) 91234-5678";
-    private static final String GUARDIAN_EMAIL = "responsavel@example.test";
+    private static final String GUARDIAN_EMAIL = "guardian@example.test";
 
     @Test
     void seedFileAndItsEntriesNeverRevealPersonalData() {

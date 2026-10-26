@@ -44,7 +44,7 @@ class RotateCpfKeyCommandTest {
     private RotateCpfKeyCommand command(String... variables) {
         MockEnvironment environment = new MockEnvironment();
         for (String variable : variables) {
-            environment.setProperty(variable, "valor-qualquer");
+            environment.setProperty(variable, "any-value");
         }
         CpfKeyRotationPort port =
                 options -> {
@@ -147,6 +147,6 @@ class RotateCpfKeyCommandTest {
         assertThat(code).isEqualTo(1);
         assertThat(text())
                 .contains("Rotação desfeita: Variável ROTATE_OLD_CPF_ENCRYPTION_KEY")
-                .doesNotContain("valor-qualquer");
+                .doesNotContain("any-value");
     }
 }

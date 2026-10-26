@@ -101,7 +101,7 @@ class RegisterStudentUseCaseTest {
                                         new GuardianInput(
                                                 " Maria Silva ",
                                                 "(11) 98765-4321",
-                                                " Maria@Exemplo.com "),
+                                                " Maria@Example.com "),
                                         "  Piano "),
                                 clara.id()));
 
@@ -110,10 +110,10 @@ class RegisterStudentUseCaseTest {
         assertThat(view.instrument()).isEqualTo("Piano");
         assertThat(view.guardian())
                 .extracting("name", "phone", "email")
-                .containsExactly("Maria Silva", "11987654321", "maria@exemplo.com");
+                .containsExactly("Maria Silva", "11987654321", "maria@example.com");
         Student saved = scenario.students.all().getFirst();
         assertThat(saved.guardianPhone()).isEqualTo("11987654321");
-        assertThat(saved.guardianEmail()).isEqualTo("maria@exemplo.com");
+        assertThat(saved.guardianEmail()).isEqualTo("maria@example.com");
     }
 
     @Test

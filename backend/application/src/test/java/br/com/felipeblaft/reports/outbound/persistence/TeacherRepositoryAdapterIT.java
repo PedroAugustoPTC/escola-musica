@@ -36,7 +36,7 @@ class TeacherRepositoryAdapterIT extends IntegrationBase {
     @Test
     void listIsAlphabeticalAndSearchesNameOrEmailWithoutAccentsOrCase() {
         saved("Zélia Prado", "zelia@example.test", true);
-        saved("Ana Souza", "ana@escola.example", true);
+        saved("Ana Souza", "ana@school.example", true);
         saved("Álvaro Lima", "alvaro@example.test", false);
 
         PageResult<Teacher> all = teachers.list(null, null, PageRequest.first());
@@ -51,7 +51,7 @@ class TeacherRepositoryAdapterIT extends IntegrationBase {
         assertThat(teachers.list("alvaro", null, PageRequest.first()).items())
                 .extracting(Teacher::name)
                 .containsExactly("Álvaro Lima");
-        assertThat(teachers.list("@escola", null, PageRequest.first()).items())
+        assertThat(teachers.list("@school", null, PageRequest.first()).items())
                 .extracting(Teacher::name)
                 .containsExactly("Ana Souza");
         assertThat(teachers.list("nobody", null, PageRequest.first()).total()).isZero();

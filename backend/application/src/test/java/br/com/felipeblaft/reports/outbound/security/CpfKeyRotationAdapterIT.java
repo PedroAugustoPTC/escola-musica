@@ -130,7 +130,7 @@ class CpfKeyRotationAdapterIT extends IntegrationBase {
                                                         .withProperty(
                                                                 CpfKeyRotationAdapter
                                                                         .NEW_HMAC_SECRET,
-                                                                "curto"))
+                                                                "short"))
                                         .rotate(new Options(false, true, false)))
                 .hasMessageContaining("32 bytes");
     }

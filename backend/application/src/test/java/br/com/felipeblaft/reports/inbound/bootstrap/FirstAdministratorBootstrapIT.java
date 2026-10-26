@@ -133,14 +133,14 @@ class FirstAdministratorBootstrapIT {
         when(useCase.run(any(), any())).thenThrow(invalid("password:PASSWORD_LENGTH"));
 
         try (LogCapture log = LogCapture.start()) {
-            assertThatThrownBy(() -> bootstrap(NAME, EMAIL, "curta-demais").bootstrap())
+            assertThatThrownBy(() -> bootstrap(NAME, EMAIL, "too-short").bootstrap())
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessageContaining("ADMIN_BOOTSTRAP_PASSWORD inválida")
                     .hasMessageContaining("A senha deve ter de 12 a 128 caracteres.")
-                    .hasMessageNotContaining("curta-demais")
+                    .hasMessageNotContaining("too-short")
                     .hasMessageNotContaining(EMAIL)
                     .hasMessageNotContaining(NAME);
-            assertThat(log.text()).doesNotContain("curta-demais");
+            assertThat(log.text()).doesNotContain("too-short");
         }
     }
 
@@ -148,10 +148,10 @@ class FirstAdministratorBootstrapIT {
     void invalidEmailRefusesToStartNamingTheVariableOnly() {
         when(useCase.run(any(), any())).thenThrow(invalid("email:INVALID_EMAIL"));
 
-        assertThatThrownBy(() -> bootstrap(NAME, "sem-arroba", PASSWORD).bootstrap())
+        assertThatThrownBy(() -> bootstrap(NAME, "no-at-sign", PASSWORD).bootstrap())
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("ADMIN_BOOTSTRAP_EMAIL inválida")
-                .hasMessageNotContaining("sem-arroba")
+                .hasMessageNotContaining("no-at-sign")
                 .hasMessageNotContaining(PASSWORD);
     }
 
@@ -179,7 +179,7 @@ class FirstAdministratorBootstrapIT {
 
     @Test
     void unknownFieldCodeFallsBackToAGenericReason() {
-        when(useCase.run(any(), any())).thenThrow(invalid("password:CODIGO_QUE_NAO_EXISTE"));
+        when(useCase.run(any(), any())).thenThrow(invalid("password:CODE_THAT_DOES_NOT_EXIST"));
 
         assertThatThrownBy(() -> bootstrap(NAME, EMAIL, PASSWORD).bootstrap())
                 .hasMessageContaining("valor recusado");

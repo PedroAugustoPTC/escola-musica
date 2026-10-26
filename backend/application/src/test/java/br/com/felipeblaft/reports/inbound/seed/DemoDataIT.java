@@ -18,17 +18,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * Massa de demonstração do ambiente local (local.sh up --demo-data=true). Passa a usar a carga
- * inicial que orquestra os casos de uso da administração; fica desligada na fatia S2 porque esses
- * casos de uso (W-B, W-C1, W-C2) e os adaptadores de autoria (W-F) só se integram no Fecho (S5).
- * Reative removendo o {@code @Disabled}.
+ * Massa de demonstração do ambiente local (local.sh up --demo-data=true), montada pela carga
+ * inicial que orquestra os casos de uso reais da administração.
  */
-@Disabled("Integração real dos fluxos W-B, W-C1, W-C2 e W-F: reativar no Fecho (S5)")
 class DemoDataIT extends IntegrationBase {
 
     private static final List<String> ARGUMENTS =

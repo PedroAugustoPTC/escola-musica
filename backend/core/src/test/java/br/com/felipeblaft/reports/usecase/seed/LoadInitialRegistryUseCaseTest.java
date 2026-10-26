@@ -48,7 +48,7 @@ class LoadInitialRegistryUseCaseTest {
                 birth,
                 guardianName,
                 guardian ? PHONE : null,
-                guardian ? "responsavel@example.test" : null,
+                guardian ? "guardian@example.test" : null,
                 instrument,
                 List.of(teacherEmails));
     }
@@ -102,7 +102,7 @@ class LoadInitialRegistryUseCaseTest {
         Teacher clara = world.teachers.searchByEmail("clara@example.test").orElseThrow();
         Student matteo = world.students.searchByCpfHash("cpf:52998224725").orElseThrow();
         assertThat(matteo.guardianPhone()).isEqualTo("11912345678");
-        assertThat(matteo.guardianEmail()).isEqualTo("responsavel@example.test");
+        assertThat(matteo.guardianEmail()).isEqualTo("guardian@example.test");
         Student olavo = world.students.searchByCpfHash("cpf:12345678909").orElseThrow();
         assertThat(olavo.instrument()).isNull();
         assertThat(world.students.listByTeacher(clara.id()))
@@ -376,7 +376,7 @@ class LoadInitialRegistryUseCaseTest {
                                         "2014-05-10",
                                         "Responsável Fictício",
                                         "123",
-                                        "sem-arroba",
+                                        "no-at-sign",
                                         null,
                                         List.of())));
 
@@ -534,8 +534,8 @@ class LoadInitialRegistryUseCaseTest {
                         Map.of(
                                 "fields",
                                 List.of(
-                                        Map.of("field", "name", "code", "CODIGO_DESCONHECIDO"),
-                                        "item-fora-do-formato")));
+                                        Map.of("field", "name", "code", "UNKNOWN_CODE"),
+                                        "malformed-item")));
         SeedFile file =
                 new SeedFile(
                         List.of(), List.of(student(CPF_OLAVO, "Olavo", "1990-02-01", null, null)));
@@ -582,7 +582,7 @@ class LoadInitialRegistryUseCaseTest {
                                         "1990-02-01",
                                         null,
                                         null,
-                                        "responsavel@example.test",
+                                        "guardian@example.test",
                                         null,
                                         List.of())));
 
@@ -590,6 +590,6 @@ class LoadInitialRegistryUseCaseTest {
 
         assertThat(result.success()).isTrue();
         assertThat(world.students.searchByCpfHash("cpf:12345678909").orElseThrow().guardianEmail())
-                .isEqualTo("responsavel@example.test");
+                .isEqualTo("guardian@example.test");
     }
 }

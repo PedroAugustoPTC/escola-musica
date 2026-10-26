@@ -84,11 +84,11 @@ class StudentDataTest {
                         null,
                         "Maria Silva",
                         "(11) 98765-4321",
-                        "Maria@Exemplo.com",
+                        "Maria@Example.com",
                         TODAY);
         assertThat(data.guardian().isComplete()).isTrue();
         assertThat(data.guardian().phone().digits()).isEqualTo("11987654321");
-        assertThat(data.guardian().email().value()).isEqualTo("maria@exemplo.com");
+        assertThat(data.guardian().email().value()).isEqualTo("maria@example.com");
     }
 
     @Test
@@ -148,7 +148,7 @@ class StudentDataTest {
                         null,
                         "Maria Silva",
                         "1134567890",
-                        "maria@exemplo.com",
+                        "maria@example.com",
                         TODAY);
         assertThat(data.guardian().name().value()).isEqualTo("Maria Silva");
     }
@@ -192,7 +192,7 @@ class StudentDataTest {
                                         "x".repeat(61),
                                         "B",
                                         "123",
-                                        "sem-arroba",
+                                        "no-at-sign",
                                         TODAY));
         assertThat(violations(error))
                 .containsExactlyInAnyOrder(

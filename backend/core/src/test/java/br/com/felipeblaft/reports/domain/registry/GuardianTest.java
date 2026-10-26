@@ -15,10 +15,10 @@ class GuardianTest {
                 new Guardian(
                         NAME,
                         BrazilianPhone.of("(11) 98765-4321"),
-                        EmailAddress.of("maria@exemplo.com"));
+                        EmailAddress.of("maria@example.com"));
         assertThat(guardian.name().value()).isEqualTo("Maria Silva");
         assertThat(guardian.phone().digits()).isEqualTo("11987654321");
-        assertThat(guardian.email().value()).isEqualTo("maria@exemplo.com");
+        assertThat(guardian.email().value()).isEqualTo("maria@example.com");
         assertThat(guardian.isComplete()).isTrue();
     }
 
@@ -27,7 +27,7 @@ class GuardianTest {
         assertThat(new Guardian(NAME, null, null).isComplete()).isFalse();
         assertThat(new Guardian(NAME, BrazilianPhone.of("1134567890"), null).isComplete())
                 .isFalse();
-        assertThat(new Guardian(NAME, null, EmailAddress.of("maria@exemplo.com")).isComplete())
+        assertThat(new Guardian(NAME, null, EmailAddress.of("maria@example.com")).isComplete())
                 .isFalse();
     }
 
@@ -43,10 +43,10 @@ class GuardianTest {
                 new Guardian(
                         NAME,
                         BrazilianPhone.of("11987654321"),
-                        EmailAddress.of("maria@exemplo.com"));
+                        EmailAddress.of("maria@example.com"));
         assertThat(guardian.toString())
                 .doesNotContain("Maria")
                 .doesNotContain("987")
-                .doesNotContain("exemplo");
+                .doesNotContain("example");
     }
 }
