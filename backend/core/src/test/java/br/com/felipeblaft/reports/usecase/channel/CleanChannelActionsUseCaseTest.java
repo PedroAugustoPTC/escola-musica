@@ -59,8 +59,7 @@ class CleanChannelActionsUseCaseTest {
 
         assertThat(first.expiredActions()).isEqualTo(2);
         assertThat(second.expiredActions()).isZero();
-        assertThat(actions.stored("u7-0").state())
-                .isEqualTo(ChannelActionState.PERMANENTLY_FAILED);
+        assertThat(actions.stored("u7-0").state()).isEqualTo(ChannelActionState.PERMANENTLY_FAILED);
         assertThat(actions.stored("u7-0").reasonCode())
                 .isEqualTo(ChannelAction.CODE_WITHOUT_CONFIRMATION);
         assertThat(actions.stored("u7-0-c")).isNotNull();

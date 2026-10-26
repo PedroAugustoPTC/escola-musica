@@ -23,8 +23,9 @@ import tools.jackson.databind.JsonNode;
 /**
  * Ação v1 {@code DELETE_MESSAGE} (feature 005, FR-036) contra o contrato normativo da 002 ({@code
  * actions-v1.schema.json}): o formato é fechado, o código de falha {@code MESSAGE_NOT_DELETABLE}
- * está documentado, o backend gera a compensação em qualquer falha final (inclusive o receptor antigo, que não
- * conhece o tipo e responde {@code ACTION_NOT_SUPPORTED}), uma só vez, e nada se perde.
+ * está documentado, o backend gera a compensação em qualquer falha final (inclusive o receptor
+ * antigo, que não conhece o tipo e responde {@code ACTION_NOT_SUPPORTED}), uma só vez, e nada se
+ * perde.
  */
 class DeleteMessageActionContractIT extends OrchestratorDeliveryBase {
 

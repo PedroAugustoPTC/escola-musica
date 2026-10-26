@@ -20,9 +20,8 @@ import org.junit.jupiter.api.Test;
 /**
  * Ação {@code DELETE_MESSAGE} (feature 005, US4, FR-036): apagar a mensagem em que o professor
  * digitou o CPF. Em qualquer falha final (Telegram recusou, chat indisponível, receptor antigo,
- * prazo vencido), o backend gera a compensação, uma só: um aviso ({@code
- * CPF_MESSAGE_NOT_DELETED}) no mesmo chat. O orquestrador só classifica a falha; a decisão de
- * compensar é do núcleo.
+ * prazo vencido), o backend gera a compensação, uma só: um aviso ({@code CPF_MESSAGE_NOT_DELETED})
+ * no mesmo chat. O orquestrador só classifica a falha; a decisão de compensar é do núcleo.
  */
 class ChannelActionDeleteMessageTest {
 
