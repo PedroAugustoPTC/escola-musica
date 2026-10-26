@@ -19,9 +19,10 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Ação {@code DELETE_MESSAGE} (feature 005, US4, FR-036): apagar a mensagem em que o professor
- * digitou o CPF. Se o Telegram recusar ({@code MESSAGE_NOT_DELETABLE}), o backend gera a
- * compensação: um aviso ({@code CPF_MESSAGE_NOT_DELETED}) no mesmo chat. O orquestrador só
- * classifica a falha; a decisão de compensar é do núcleo.
+ * digitou o CPF. Em qualquer falha final (Telegram recusou, chat indisponível, receptor antigo,
+ * prazo vencido), o backend gera a compensação, uma só: um aviso ({@code
+ * CPF_MESSAGE_NOT_DELETED}) no mesmo chat. O orquestrador só classifica a falha; a decisão de
+ * compensar é do núcleo.
  */
 class ChannelActionDeleteMessageTest {
 
@@ -55,17 +56,60 @@ class ChannelActionDeleteMessageTest {
     // ---- domínio
 
     @Test
-    void deletionCompensatesOnlyByMessageNotDeletable() {
+    void deletionCompensatesByAnyFinalFailureCode() {
         ChannelAction deletion = deletion(NOTICE);
 
         assertThat(deletion.hasCompensation()).isTrue();
-        assertThat(deletion.compensatesBy("MESSAGE_NOT_DELETABLE")).isTrue();
         assertThat(deletion.compensatesBy(ChannelAction.MESSAGE_NOT_DELETABLE_CODE)).isTrue();
-        assertThat(deletion.compensatesBy("MESSAGE_NOT_EDITABLE")).isFalse();
-        assertThat(deletion.compensatesBy("DOCUMENT_UNAVAILABLE")).isFalse();
-        assertThat(deletion.compensatesBy("ACTION_NOT_SUPPORTED")).isFalse();
-        assertThat(deletion.compensatesBy("CHAT_UNAVAILABLE")).isFalse();
-        assertThat(deletion.compensatesBy("TELEGRAM_ERROR")).isFalse();
+        for (String code :
+                List.of(
+                        "MESSAGE_NOT_DELETABLE",
+                        "MESSAGE_NOT_EDITABLE",
+                        "DOCUMENT_UNAVAILABLE",
+                        "ACTION_NOT_SUPPORTED",
+                        "CHAT_UNAVAILABLE",
+                        "RATE_LIMITED",
+                        "TELEGRAM_ERROR")) {
+            assertThat(deletion.compensatesBy(code)).as(code).isTrue();
+        }
+        assertThat(deletion.compensatesBy(null)).isFalse();
+        assertThat(deletion.compensatesBy(" ")).isFalse();
+    }
+
+    @Test
+    void deletionThatExpiredCompensatesOnlyWhenFinalAndWithAlternative() {
+        ChannelAction pending = deletion(NOTICE);
+        assertThat(pending.compensatesPermanentFailure()).isFalse();
+
+        ChannelAction expired = deletion(NOTICE);
+        expired.expire(NOW.plus(Duration.ofHours(25)));
+        assertThat(expired.state()).isEqualTo(ChannelActionState.PERMANENTLY_FAILED);
+        assertThat(expired.compensatesPermanentFailure()).isTrue();
+
+        ChannelAction executed = deletion(NOTICE);
+        executed.confirmExecuted(NOW);
+        assertThat(executed.compensatesPermanentFailure()).isFalse();
+
+        ChannelAction withoutAlternative = deletion(null);
+        withoutAlternative.expire(NOW.plus(Duration.ofHours(25)));
+        assertThat(withoutAlternative.compensatesPermanentFailure()).isFalse();
+
+        ChannelAction message =
+                ChannelAction.create(
+                        "p:x:0",
+                        "p:x",
+                        ChannelActionOrigin.PROACTIVE,
+                        null,
+                        CHAT,
+                        TEACHER,
+                        null,
+                        ChannelActionType.MESSAGE,
+                        "{}",
+                        NOTICE,
+                        NOW,
+                        policy);
+        message.expire(NOW.plus(Duration.ofHours(25)));
+        assertThat(message.compensatesPermanentFailure()).isFalse();
     }
 
     @Test
@@ -177,7 +221,42 @@ class ChannelActionDeleteMessageTest {
     }
 
     @Test
-    void oldReceiverAnswersActionNotSupportedAndNothingIsCompensated() {
+    void everyFinalFailureCodeOfTheDeletionIsCompensatedExactlyOnce() {
+        for (String code :
+                List.of("CHAT_UNAVAILABLE", "RATE_LIMITED", "TELEGRAM_ERROR", "SOMETHING_NEW")) {
+            FixedClock clock = new FixedClock();
+            InMemoryChannelActionRepository repository = new InMemoryChannelActionRepository();
+            SaveChannelActionsUseCase save =
+                    new SaveChannelActionsUseCase(repository, clock, policy);
+            ConfirmChannelActionsExecutionUseCase confirm =
+                    new ConfirmChannelActionsExecutionUseCase(
+                            repository, new InMemoryJobQueue(), clock, policy);
+            save.run(
+                    "u200",
+                    ChannelActionOrigin.UPDATE_REPLY,
+                    200L,
+                    List.of(
+                            new NewAction(
+                                    "u200-0",
+                                    ChannelActionType.DELETE_MESSAGE,
+                                    CHAT,
+                                    TEACHER,
+                                    null,
+                                    DELETE_PAYLOAD,
+                                    NOTICE)));
+
+            Result failure = new Result("u200-0", Status.FAILED, code, null);
+            confirm.run(List.of(failure));
+            confirm.run(List.of(failure));
+
+            assertThat(repository.all()).as(code).hasSize(2);
+            assertThat(repository.stored("u200-0-c")).as(code).isNotNull();
+            assertThat(repository.stored("u200-0-c").payload()).isEqualTo(NOTICE);
+        }
+    }
+
+    @Test
+    void oldReceiverAnswersActionNotSupportedAndTheDeletionIsCompensated() {
         FixedClock clock = new FixedClock();
         InMemoryChannelActionRepository repository = new InMemoryChannelActionRepository();
         SaveChannelActionsUseCase save = new SaveChannelActionsUseCase(repository, clock, policy);
@@ -205,7 +284,8 @@ class ChannelActionDeleteMessageTest {
         assertThat(response.accepted()).isEqualTo(1);
         assertThat(repository.stored("u124-0").state()).isEqualTo(ChannelActionState.FAILED);
         assertThat(repository.stored("u124-0").reasonCode()).isEqualTo("ACTION_NOT_SUPPORTED");
-        assertThat(repository.stored("u124-0-c")).isNull();
+        assertThat(repository.stored("u124-0-c")).isNotNull();
+        assertThat(repository.stored("u124-0-c").payload()).isEqualTo(NOTICE);
     }
 
     @Test

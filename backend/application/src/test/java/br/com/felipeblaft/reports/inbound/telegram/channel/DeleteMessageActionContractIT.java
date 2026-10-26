@@ -23,8 +23,8 @@ import tools.jackson.databind.JsonNode;
 /**
  * Ação v1 {@code DELETE_MESSAGE} (feature 005, FR-036) contra o contrato normativo da 002 ({@code
  * actions-v1.schema.json}): o formato é fechado, o código de falha {@code MESSAGE_NOT_DELETABLE}
- * está documentado, o backend gera a compensação só para ele e um receptor antigo, que não conhece
- * o tipo, responde {@code ACTION_NOT_SUPPORTED} sem que o backend compense nem se perca.
+ * está documentado, o backend gera a compensação em qualquer falha final (inclusive o receptor antigo, que não
+ * conhece o tipo e responde {@code ACTION_NOT_SUPPORTED}), uma só vez, e nada se perde.
  */
 class DeleteMessageActionContractIT extends OrchestratorDeliveryBase {
 
@@ -162,7 +162,7 @@ class DeleteMessageActionContractIT extends OrchestratorDeliveryBase {
     }
 
     @Test
-    void oldReceiverAnswersActionNotSupportedAndTheBackendKeepsTheStateWithoutCompensating()
+    void oldReceiverAnswersActionNotSupportedAndTheBackendCompensatesTheUndeletedMessage()
             throws Exception {
         link(CHAT, ScenarioIT.CODE_CLARA);
         String id = publishDeletion("p:cpf:3");
@@ -179,13 +179,15 @@ class DeleteMessageActionContractIT extends OrchestratorDeliveryBase {
         assertThat(response.path("ignored")).isEmpty();
         assertThat(state(id)).isEqualTo("FAILED");
         assertThat(reason(id)).isEqualTo("ACTION_NOT_SUPPORTED");
+        // o CPF segue visível: o aviso alternativo é gerado, uma só vez
+        assertThat(state(id + "-c")).isEqualTo("PENDING");
         assertThat(jdbc.queryForObject("select count(*) from channel_action", Integer.class))
-                .isEqualTo(1);
+                .isEqualTo(2);
         assertThat(sentTexts()).isEmpty();
     }
 
     @Test
-    void unknownCodeFromANewerReceiverBecomesTelegramErrorWithoutCompensating() throws Exception {
+    void unknownCodeFromANewerReceiverBecomesTelegramErrorAndIsCompensated() throws Exception {
         link(CHAT, ScenarioIT.CODE_CLARA);
         String id = publishDeletion("p:cpf:4");
 
@@ -195,8 +197,9 @@ class DeleteMessageActionContractIT extends OrchestratorDeliveryBase {
                         + "\",\"outcome\":\"FAILED\",\"reasonCode\":\"MESSAGE_PINNED\"}");
 
         assertThat(reason(id)).isEqualTo("TELEGRAM_ERROR");
+        assertThat(state(id + "-c")).isEqualTo("PENDING");
         assertThat(jdbc.queryForObject("select count(*) from channel_action", Integer.class))
-                .isEqualTo(1);
+                .isEqualTo(2);
     }
 
     @Test

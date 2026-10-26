@@ -51,6 +51,40 @@ class ChannelActionsCleanupIT extends IntegrationBase {
     }
 
     @Test
+    void deletionDeliveredAndNeverConfirmedExpiresWithOneCompensationInThePostgres() {
+        save.run(
+                "u77",
+                ChannelActionOrigin.UPDATE_REPLY,
+                77L,
+                List.of(
+                        new NewAction(
+                                "u77-0",
+                                ChannelActionType.DELETE_MESSAGE,
+                                1L,
+                                null,
+                                null,
+                                "{\"type\":\"DELETE_MESSAGE\",\"chatId\":1,\"messageId\":9}",
+                                "{\"type\":\"MESSAGE\",\"chatId\":1,\"text\":\"aviso\"}")));
+        clock.advance(Duration.ofHours(25));
+
+        clean.run();
+        clean.run();
+
+        assertThat(
+                        jdbc.queryForObject(
+                                "select state || ':' || reason_code from channel_action where id = 'u77-0'",
+                                String.class))
+                .isEqualTo("PERMANENTLY_FAILED:NO_CONFIRMATION");
+        assertThat(
+                        jdbc.queryForObject(
+                                "select state || ':' || type from channel_action where id = 'u77-0-c'",
+                                String.class))
+                .isEqualTo("PENDING:MESSAGE");
+        assertThat(jdbc.queryForObject("select count(*) from channel_action", Integer.class))
+                .isEqualTo(2);
+    }
+
+    @Test
     void contentClearedAfter24HRecordRemovedAfter7DaysAndExpiredDocumentRemoved() {
         finalizedAction("p:a:0");
         save.run(

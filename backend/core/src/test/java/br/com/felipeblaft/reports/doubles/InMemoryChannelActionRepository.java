@@ -2,6 +2,7 @@ package br.com.felipeblaft.reports.doubles;
 
 import br.com.felipeblaft.reports.domain.channel.ChannelAction;
 import br.com.felipeblaft.reports.domain.channel.ChannelActionState;
+import br.com.felipeblaft.reports.domain.channel.ChannelActionType;
 import br.com.felipeblaft.reports.port.ChannelActionRepository;
 import java.time.Duration;
 import java.time.Instant;
@@ -93,6 +94,15 @@ public class InMemoryChannelActionRepository implements ChannelActionRepository 
         data.put(action.id(), saved);
         action.defineVersion(expectedVersion + 1);
         return true;
+    }
+
+    @Override
+    public List<ChannelAction> searchOverdueDelivered(Instant now, ChannelActionType type) {
+        return ordered(
+                a ->
+                        a.type() == type
+                                && a.state() == ChannelActionState.DELIVERED
+                                && a.expired(now));
     }
 
     @Override

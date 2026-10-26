@@ -121,6 +121,12 @@ class ChannelActionRepositoryAdapter implements ChannelActionRepository {
 
     @Override
     @Transactional
+    public List<ChannelAction> searchOverdueDelivered(Instant now, ChannelActionType type) {
+        return jpa.findOverdueDelivered(now, type.name()).stream().map(this::read).toList();
+    }
+
+    @Override
+    @Transactional
     public int expireOverdueDelivered(Instant now) {
         return jpa.expireOverdueDelivered(now);
     }

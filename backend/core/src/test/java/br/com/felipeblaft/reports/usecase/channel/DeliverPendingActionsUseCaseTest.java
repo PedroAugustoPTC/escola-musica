@@ -171,6 +171,62 @@ class DeliverPendingActionsUseCaseTest {
         assertThat(state("p:r:1:0")).isEqualTo(ChannelActionState.PERMANENTLY_FAILED);
     }
 
+    private void deletionBatch(String batchId, long chatId, UUID teacher, String id) {
+        save.run(
+                batchId,
+                ChannelActionOrigin.PROACTIVE,
+                null,
+                List.of(
+                        new NewAction(
+                                id,
+                                ChannelActionType.DELETE_MESSAGE,
+                                chatId,
+                                teacher,
+                                null,
+                                "{\"type\":\"DELETE_MESSAGE\"}",
+                                "{\"text\":\"aviso\"}")));
+    }
+
+    @Test
+    void deletionThatExpiredBeforeDeliveryIsCompensatedOnce() {
+        UUID teacher = linkedTeacher(CHAT_A);
+        deletionBatch("p:d:1", CHAT_A, teacher, "p:d:1:0");
+        clock.advance(Duration.ofHours(24));
+
+        deliver.run(10);
+        deliver.run(10);
+
+        assertThat(state("p:d:1:0")).isEqualTo(ChannelActionState.PERMANENTLY_FAILED);
+        assertThat(repository.stored("p:d:1:0-c")).isNotNull();
+        assertThat(repository.stored("p:d:1:0-c").payload()).isEqualTo("{\"text\":\"aviso\"}");
+        assertThat(repository.all()).hasSize(2);
+    }
+
+    @Test
+    void deletionWhoseRefusalCrossedTheDeadlineIsCompensated() {
+        UUID teacher = linkedTeacher(CHAT_A);
+        deletionBatch("p:d:1", CHAT_A, teacher, "p:d:1:0");
+        clock.advance(Duration.ofHours(24).minusSeconds(1));
+        orchestrator.duringDelivery = () -> clock.advance(Duration.ofSeconds(2));
+        orchestrator.refuseNext("TIMEOUT", 1);
+
+        deliver.run(10);
+
+        assertThat(state("p:d:1:0")).isEqualTo(ChannelActionState.PERMANENTLY_FAILED);
+        assertThat(repository.stored("p:d:1:0-c")).isNotNull();
+    }
+
+    @Test
+    void messageThatExpiredIsNotCompensated() {
+        UUID teacher = linkedTeacher(CHAT_A);
+        batch("p:r:1", CHAT_A, teacher, "p:r:1:0");
+        clock.advance(Duration.ofHours(24));
+
+        deliver.run(10);
+
+        assertThat(repository.stored("p:r:1:0-c")).isNull();
+    }
+
     // ---- vínculo
 
     @Test

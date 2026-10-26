@@ -611,12 +611,14 @@ public class UseCaseConfig {
             ChannelActionRepository actions,
             ChannelDocumentRepository documents,
             ClockPort clock,
+            RetryPolicy policy,
             ApplicationProperties properties) {
         ApplicationProperties.TelegramChannel channel = properties.telegramChannel();
         return new CleanChannelActionsUseCase(
                 actions,
                 documents,
                 clock,
+                policy,
                 Duration.ofHours(channel.payloadRetentionHours()),
                 Duration.ofDays(channel.recordRetentionDays()));
     }
