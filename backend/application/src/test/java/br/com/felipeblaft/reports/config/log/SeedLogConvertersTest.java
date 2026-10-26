@@ -28,7 +28,7 @@ class SeedLogConvertersTest {
     void messageIsMaskedLikeTheJsonProfile() {
         String text =
                 new MaskedMessageConverter()
-                        .convert(event("falha para ana@example.test cpf 529.982.247-25", null));
+                        .convert(event("failure for ana@example.test cpf 529.982.247-25", null));
 
         assertThat(text).doesNotContain("ana@example.test").doesNotContain("529.982");
         assertThat(text).contains(SensitiveDataMaskingConverter.MASK);
@@ -45,7 +45,7 @@ class SeedLogConvertersTest {
         Throwable root = new IllegalStateException("Key (email)=(ana@example.test) already exists");
         Throwable error = new RuntimeException("detalhe com 529.982.247-25", root);
 
-        String text = new ExceptionTypeConverter().convert(event("falha", error));
+        String text = new ExceptionTypeConverter().convert(event("failure", error));
 
         assertThat(text)
                 .contains("RuntimeException")
@@ -66,7 +66,7 @@ class SeedLogConvertersTest {
     void exceptionWithoutCauseNamesItOnce() {
         String text =
                 new ExceptionTypeConverter()
-                        .convert(event("falha", new IllegalStateException("x")));
+                        .convert(event("failure", new IllegalStateException("x")));
 
         assertThat(text).contains("IllegalStateException");
         assertThat(text.indexOf("IllegalStateException"))

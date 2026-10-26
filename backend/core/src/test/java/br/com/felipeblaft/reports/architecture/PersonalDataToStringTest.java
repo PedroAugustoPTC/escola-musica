@@ -43,7 +43,7 @@ class PersonalDataToStringTest {
             Map.of(
                     "correlationId", "req-1",
                     "errorCode", "TECHNICAL",
-                    "operation", "TECHNICAL",
+                    "operation", "ADMIN_SIGN_IN",
                     "originHash", "0123456789abcdef".repeat(4),
                     // nome de seção e de campo da carga inicial, nunca o valor
                     "section", "students",
