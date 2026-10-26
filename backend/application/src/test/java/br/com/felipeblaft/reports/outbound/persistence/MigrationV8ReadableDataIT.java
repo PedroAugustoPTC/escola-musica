@@ -46,6 +46,10 @@ import tools.jackson.databind.json.JsonMapper;
 @SpringBootTest(
         properties = {
             "spring.flyway.target=8",
+            // o modelo atual tem colunas de migrações posteriores à V8; aqui só se leem as tabelas
+            // da V8
+            "spring.jpa.hibernate.ddl-auto=none",
+            "spring.jpa.hibernate.ddl-auto=none",
             "spring.flyway.schemas=" + MigrationV8ReadableDataIT.SCHEMA,
             "spring.flyway.default-schema=" + MigrationV8ReadableDataIT.SCHEMA,
         })
