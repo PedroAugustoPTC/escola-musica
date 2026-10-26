@@ -51,13 +51,15 @@ class StudentRegistryInactivateConversationIT extends RegistryConversationBase {
         assertThat(command.getValue().kind()).isEqualTo(Kind.INACTIVATE);
         assertThat(command.getValue().studentId()).isEqualTo(bia.id());
         assertThat(lastText())
-                .isEqualTo("Inativar Bia Lima? O aluno deixa de aparecer para novas aulas; nada é apagado.");
+                .isEqualTo(
+                        "Inativar Bia Lima? O aluno deixa de aparecer para novas aulas; nada é apagado.");
         assertThat(buttonLabels(lastMessage())).containsExactly("Confirmar", "Cancelar");
         assertThat(buttonData(lastMessage()))
                 .containsExactly("v1:reg-confirm:" + TOKEN, "v1:reg-cancel:");
         assertThat(persistedStep()).isEqualTo("REGISTRY_CONFIRM");
 
-        when(confirm.run(any(), any())).thenReturn(view("Bia Lima", 12, "Violão", false, "Marta Lima"));
+        when(confirm.run(any(), any()))
+                .thenReturn(view("Bia Lima", 12, "Violão", false, "Marta Lima"));
         tap("v1:reg-confirm:" + TOKEN);
 
         ArgumentCaptor<ConfirmStudentRegistrationUseCase.Command> confirmation =
@@ -112,7 +114,8 @@ class StudentRegistryInactivateConversationIT extends RegistryConversationBase {
     void secondTapAnswersAlreadyDoneWithoutRecordingAgain() {
         open(bia);
         tap("v1:reg-inactivate:");
-        when(confirm.run(any(), any())).thenReturn(view("Bia Lima", 12, "Violão", false, "Marta Lima"));
+        when(confirm.run(any(), any()))
+                .thenReturn(view("Bia Lima", 12, "Violão", false, "Marta Lima"));
         tap("v1:reg-confirm:" + TOKEN);
 
         when(confirm.run(any(), any())).thenThrow(error(ErrorCode.CONFIRMATION_ALREADY_DONE));
@@ -168,7 +171,8 @@ class StudentRegistryInactivateConversationIT extends RegistryConversationBase {
         assertThat(lastText()).isEqualTo("Essa operação já foi concluída.");
         // a conversa continua esperando a confirmação do resumo novo
         assertThat(persistedStep()).isEqualTo("REGISTRY_CONFIRM");
-        when(confirm.run(any(), any())).thenReturn(view("Bia Lima", 12, "Violão", false, "Marta Lima"));
+        when(confirm.run(any(), any()))
+                .thenReturn(view("Bia Lima", 12, "Violão", false, "Marta Lima"));
         send("sim");
         assertThat(lastText()).isEqualTo("Bia Lima foi inativado(a).");
     }

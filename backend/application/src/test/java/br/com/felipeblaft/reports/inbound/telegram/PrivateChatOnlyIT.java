@@ -26,7 +26,11 @@ class PrivateChatOnlyIT extends RegistryConversationBase {
         for (String type : new String[] {"group", "supergroup", "channel"}) {
             for (String data :
                     new String[] {
-                        "v1:register:", "v1:home:", "v1:sign-out-ok:", "v1:approve:1", "v1:student:0"
+                        "v1:register:",
+                        "v1:home:",
+                        "v1:sign-out-ok:",
+                        "v1:approve:1",
+                        "v1:student:0"
                     }) {
                 tap(USER, type, data);
 

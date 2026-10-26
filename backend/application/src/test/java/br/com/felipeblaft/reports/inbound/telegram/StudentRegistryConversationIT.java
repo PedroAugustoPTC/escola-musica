@@ -21,8 +21,8 @@ import org.mockito.ArgumentCaptor;
 
 /**
  * Cadastro guiado de aluno pelo Telegram (contracts/telegram-student-registry.md §3.1 e §4): nome,
- * data, CPF, responsável se menor, instrumento ou "pular", resumo sem CPF e confirmação. O núcleo
- * é um dublê (fatia S2); o adaptador só encaminha, apresenta e apaga a mensagem com o CPF.
+ * data, CPF, responsável se menor, instrumento ou "pular", resumo sem CPF e confirmação. O núcleo é
+ * um dublê (fatia S2); o adaptador só encaminha, apresenta e apaga a mensagem com o CPF.
  */
 @ConversationState({10})
 class StudentRegistryConversationIT extends RegistryConversationBase {
@@ -73,7 +73,8 @@ class StudentRegistryConversationIT extends RegistryConversationBase {
 
         when(confirm.run(any(), any())).thenReturn(view("Ana Souza", 36, null, true, null));
         tap("v1:reg-confirm:" + TOKEN);
-        assertThat(lastText()).isEqualTo("Pronto! Ana Souza foi cadastrado(a) e está entre os seus alunos.");
+        assertThat(lastText())
+                .isEqualTo("Pronto! Ana Souza foi cadastrado(a) e está entre os seus alunos.");
         ArgumentCaptor<ConfirmStudentRegistrationUseCase.Command> confirmation =
                 ArgumentCaptor.forClass(ConfirmStudentRegistrationUseCase.Command.class);
         verify(confirm).run(any(), confirmation.capture());
@@ -111,7 +112,8 @@ class StudentRegistryConversationIT extends RegistryConversationBase {
                         new CollectStudentRegistrationFieldUseCase.Result(
                                 Field.GUARDIAN, true, null, null));
         send(CPF);
-        assertThat(lastText()).startsWith("O aluno tem menos de 18 anos. Qual é o nome do responsável?");
+        assertThat(lastText())
+                .startsWith("O aluno tem menos de 18 anos. Qual é o nome do responsável?");
         assertThat(persistedStep()).isEqualTo("REGISTRY_ASK_GUARDIAN_NAME");
 
         when(collect.run(any(), any()))
@@ -266,7 +268,8 @@ class StudentRegistryConversationIT extends RegistryConversationBase {
         send("Ana Souza");
 
         assertThat(lastText())
-                .isEqualTo("O cadastro ficou parado por muito tempo e foi descartado. Nada foi gravado.");
+                .isEqualTo(
+                        "O cadastro ficou parado por muito tempo e foi descartado. Nada foi gravado.");
         assertThat(persistedFlow()).isEqualTo("NONE");
         verify(confirm, never()).run(any(), any());
     }

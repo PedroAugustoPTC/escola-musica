@@ -9,13 +9,13 @@ import static org.mockito.Mockito.when;
 import br.com.felipeblaft.reports.domain.telegram.StudentRegistrationDraft.Field;
 import br.com.felipeblaft.reports.domain.telegram.StudentRegistrationDraft.Kind;
 import br.com.felipeblaft.reports.support.ConversationState;
+import br.com.felipeblaft.reports.usecase.registry.CancelStudentRegistrationUseCase;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
-import br.com.felipeblaft.reports.usecase.registry.CancelStudentRegistrationUseCase;
 
 /**
  * "Sair" no meio de um cadastro de aluno encerra o vínculo e descarta o rascunho: o adaptador pede

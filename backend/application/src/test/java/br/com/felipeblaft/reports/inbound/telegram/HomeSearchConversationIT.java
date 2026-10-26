@@ -90,7 +90,7 @@ class HomeSearchConversationIT extends TelegramConversationBase {
         sendText(USER_CLARA, "Helena");
         assertThat(lastMessage().get("text").asString())
                 .isEqualTo("Nenhum aluno encontrado para \"Helena\".");
-        assertThat(buttonLabels(lastMessage())).doesNotContain("Helena Prado").hasSize(4);
+        assertThat(buttonLabels(lastMessage())).doesNotContain("Helena Prado").hasSize(9);
     }
 
     @Test

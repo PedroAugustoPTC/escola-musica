@@ -10,10 +10,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * O Telegram nunca reconhece operação administrativa (SC-003, contracts/telegram-student-registry.md
- * §6): "criar professor", "reemitir código", e-mail e senha recebem a resposta de texto não
- * reconhecido seguida do menu do professor, sem citar Web, administrador ou área administrativa. A
- * conta sem vínculo recebe só a orientação de entrada.
+ * O Telegram nunca reconhece operação administrativa (SC-003,
+ * contracts/telegram-student-registry.md §6): "criar professor", "reemitir código", e-mail e senha
+ * recebem a resposta de texto não reconhecido seguida do menu do professor, sem citar Web,
+ * administrador ou área administrativa. A conta sem vínculo recebe só a orientação de entrada.
  */
 class AdminOperationDeniedConversationIT extends RegistryConversationBase {
 

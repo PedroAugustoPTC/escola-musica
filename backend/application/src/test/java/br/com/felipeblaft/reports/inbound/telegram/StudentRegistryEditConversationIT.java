@@ -117,7 +117,8 @@ class StudentRegistryEditConversationIT extends RegistryConversationBase {
         when(collect.run(any(), any())).thenReturn(ready("Bia Lima", "Piano", "Marta Lima"));
         send("Piano");
 
-        when(confirm.run(any(), any())).thenReturn(view("Bia Lima", 12, "Piano", true, "Marta Lima"));
+        when(confirm.run(any(), any()))
+                .thenReturn(view("Bia Lima", 12, "Piano", true, "Marta Lima"));
         tap("v1:reg-confirm:" + TOKEN);
 
         assertThat(lastText()).isEqualTo("Pronto! Os dados de Bia Lima foram atualizados.");

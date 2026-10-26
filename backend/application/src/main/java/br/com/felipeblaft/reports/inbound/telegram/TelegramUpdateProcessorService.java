@@ -83,9 +83,15 @@ public class TelegramUpdateProcessorService {
         return TelegramUpdateResult.create(update.updateId(), outputs);
     }
 
-    /** Código curto de referência da falha interna: vai ao log e à resposta, sem detalhe técnico. */
+    /**
+     * Código curto de referência da falha interna: vai ao log e à resposta, sem detalhe técnico.
+     */
     static String newReference() {
-        return UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase(Locale.ROOT);
+        return UUID.randomUUID()
+                .toString()
+                .replace("-", "")
+                .substring(0, 8)
+                .toUpperCase(Locale.ROOT);
     }
 
     /** Toda mensagem recebe resposta (FR-039), mesmo diante de erro inesperado. */
@@ -108,7 +114,8 @@ public class TelegramUpdateProcessorService {
         if (chatId == null) {
             return List.of();
         }
-        TelegramOutput message = presenter.simple(chatId, "INTERNAL_ERROR", Map.of("reference", reference));
+        TelegramOutput message =
+                presenter.simple(chatId, "INTERNAL_ERROR", Map.of("reference", reference));
         return callbackId == null
                 ? List.of(message)
                 : List.of(new TelegramOutput.CallbackReply(callbackId), message);

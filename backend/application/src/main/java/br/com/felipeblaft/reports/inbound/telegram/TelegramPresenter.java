@@ -116,6 +116,7 @@ public class TelegramPresenter {
     public Message noStudents(long chatId) {
         return new Message(chatId, text("NO_STUDENTS"), registerFirstStudentAction());
     }
+
     /** Bloco de início (FR-012): saudação, relatórios em aberto, total e até 5 alunos, ações. */
     public Message start(long chatId, GetTeacherHomeUseCase.Home start, String prefix) {
         StringBuilder text = new StringBuilder();

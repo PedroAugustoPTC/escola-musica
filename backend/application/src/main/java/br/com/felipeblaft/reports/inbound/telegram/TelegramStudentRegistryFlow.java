@@ -37,10 +37,10 @@ import org.springframework.stereotype.Component;
 /**
  * "Meus alunos" no Telegram (contracts/telegram-student-registry.md): lista paginada, cartão,
  * cadastro guiado, edição, inativação e reativação. É só adaptador: valida nada, decide nada e não
- * grava nada; cada passo chama o caso de uso do núcleo (o mesmo da Web) e apresenta o resultado
- * com os textos do catálogo. Todo o estado está na conversa persistida e no cadastro em andamento
- * do núcleo; nada fica em memória. O CPF nunca é guardado, mostrado nem repetido aqui: a mensagem
- * que o traz é apagada antes da próxima pergunta.
+ * grava nada; cada passo chama o caso de uso do núcleo (o mesmo da Web) e apresenta o resultado com
+ * os textos do catálogo. Todo o estado está na conversa persistida e no cadastro em andamento do
+ * núcleo; nada fica em memória. O CPF nunca é guardado, mostrado nem repetido aqui: a mensagem que
+ * o traz é apagada antes da próxima pergunta.
  */
 @Component
 @Order(4)
@@ -287,7 +287,8 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
         TelegramConversation conversation = context.conversation();
         conversation.cleanFocus();
         conversation.discardAudio();
-        conversation.startFlow(ConversationFlow.STUDENT_REGISTRY, ConversationFlowStep.REGISTRY_LIST);
+        conversation.startFlow(
+                ConversationFlow.STUDENT_REGISTRY, ConversationFlowStep.REGISTRY_LIST);
         conversation.store(FILTER, StudentStatusFilter.ACTIVE.name());
         conversation.store(PAGE, "0");
         showList(context);
@@ -302,7 +303,10 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
     private void showList(TelegramContext context) {
         TelegramConversation conversation = context.conversation();
         StudentStatusFilter filter =
-                conversation.data(FILTER).map(StudentStatusFilter::valueOf).orElse(StudentStatusFilter.ACTIVE);
+                conversation
+                        .data(FILTER)
+                        .map(StudentStatusFilter::valueOf)
+                        .orElse(StudentStatusFilter.ACTIVE);
         int page = conversation.data(PAGE).map(Integer::parseInt).orElse(0);
         String search = conversation.data(SEARCH).orElse("");
         PageResult<StudentView> result =
@@ -333,7 +337,10 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
         if (page > 0) {
             navigation.add(
                     presenter.button(
-                            "PREVIOUS_PAGE_BUTTON", Map.of(), "reg-page", Integer.toString(page - 1)));
+                            "PREVIOUS_PAGE_BUTTON",
+                            Map.of(),
+                            "reg-page",
+                            Integer.toString(page - 1)));
         }
         if (page + 1 < pages) {
             navigation.add(
@@ -345,8 +352,7 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
         }
         rows.add(
                 List.of(
-                        presenter.button(
-                                "FILTER_ACTIVE_BUTTON", Map.of(), "reg-filter", "ACTIVE"),
+                        presenter.button("FILTER_ACTIVE_BUTTON", Map.of(), "reg-filter", "ACTIVE"),
                         presenter.button(
                                 "FILTER_INACTIVE_BUTTON", Map.of(), "reg-filter", "INACTIVE")));
         rows.add(List.of(presenter.button("HOME_BUTTON", "home")));
@@ -375,7 +381,9 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
             return false;
         }
         StudentView student =
-                get.run(actor(context), new GetStudentUseCase.Command(studentId.get(), correlation()));
+                get.run(
+                        actor(context),
+                        new GetStudentUseCase.Command(studentId.get(), correlation(context)));
         conversation.store(STUDENT, student.id().toString());
         conversation.defineStep(ConversationFlowStep.REGISTRY_CARD);
         String empty = presenter.label("EMPTY_SECTION");
@@ -406,9 +414,11 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
                                         List.of(
                                                 student.active()
                                                         ? presenter.button(
-                                                                "INACTIVATE_BUTTON", "reg-inactivate")
+                                                                "INACTIVATE_BUTTON",
+                                                                "reg-inactivate")
                                                         : presenter.button(
-                                                                "REACTIVATE_BUTTON", "reg-reactivate")),
+                                                                "REACTIVATE_BUTTON",
+                                                                "reg-reactivate")),
                                         List.of(presenter.button("BACK_BUTTON", "reg-back"))))));
         return true;
     }
@@ -447,7 +457,8 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
         UUID studentId = UUID.fromString(conversation.data(STUDENT).orElseThrow());
         start.run(
                 actor(context),
-                new StartStudentRegistrationUseCase.Command(linkId(context), Kind.UPDATE, studentId));
+                new StartStudentRegistrationUseCase.Command(
+                        linkId(context), Kind.UPDATE, studentId));
         conversation.store(KIND, Kind.UPDATE.name());
         conversation.store(EDITED, "");
         conversation.defineStep(ConversationFlowStep.REGISTRY_EDIT_FIELD);
@@ -463,8 +474,12 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
                                         List.of(
                                                 editButton("REGISTRY_FIELD_CPF", "cpf"),
                                                 editButton("REGISTRY_FIELD_GUARDIAN", "guardian")),
-                                        List.of(editButton("REGISTRY_FIELD_INSTRUMENT", "instrument")),
-                                        List.of(presenter.button("CANCEL_BUTTON", "reg-cancel"))))));
+                                        List.of(
+                                                editButton(
+                                                        "REGISTRY_FIELD_INSTRUMENT", "instrument")),
+                                        List.of(
+                                                presenter.button(
+                                                        "CANCEL_BUTTON", "reg-cancel"))))));
     }
 
     private Button editButton(String label, String field) {
@@ -494,9 +509,10 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
         StartStudentRegistrationUseCase.Result started =
                 start.run(
                         actor(context),
-                        new StartStudentRegistrationUseCase.Command(linkId(context), kind, studentId));
+                        new StartStudentRegistrationUseCase.Command(
+                                linkId(context), kind, studentId));
         StudentView student =
-                get.run(actor(context), new GetStudentUseCase.Command(studentId, correlation()));
+                get.run(actor(context), new GetStudentUseCase.Command(studentId, correlation(context)));
         conversation.store(KIND, kind.name());
         conversation.store(TOKEN, started.confirmationToken());
         conversation.defineStep(ConversationFlowStep.REGISTRY_CONFIRM);
@@ -580,7 +596,8 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
         };
     }
 
-    private void fieldFailed(TelegramContext context, ConversationFlowStep step, DomainException error) {
+    private void fieldFailed(
+            TelegramContext context, ConversationFlowStep step, DomainException error) {
         ErrorCode code = error.code();
         if (code == ErrorCode.CONFIRMATION_EXPIRED) {
             context.conversation().endFlow();
@@ -622,14 +639,18 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
 
     private static void markEdited(TelegramConversation conversation, Field field) {
         Set<String> edited = new LinkedHashSet<>();
-        conversation.data(EDITED).filter(s -> !s.isBlank()).ifPresent(s -> edited.addAll(List.of(s.split(","))));
+        conversation
+                .data(EDITED)
+                .filter(s -> !s.isBlank())
+                .ifPresent(s -> edited.addAll(List.of(s.split(","))));
         edited.add(field.name());
         conversation.store(EDITED, String.join(",", edited));
     }
 
     // ------------------------------------------------------------------ resumo e confirmação
 
-    private void showSummary(TelegramContext context, CollectStudentRegistrationFieldUseCase.Result result) {
+    private void showSummary(
+            TelegramContext context, CollectStudentRegistrationFieldUseCase.Result result) {
         TelegramConversation conversation = context.conversation();
         CollectStudentRegistrationFieldUseCase.Summary summary = result.summary();
         if (summary == null || result.confirmationToken() == null) {
@@ -637,7 +658,10 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
         }
         boolean update = Kind.UPDATE.name().equals(conversation.data(KIND).orElse(null));
         Set<String> edited = new LinkedHashSet<>();
-        conversation.data(EDITED).filter(s -> !s.isBlank()).ifPresent(s -> edited.addAll(List.of(s.split(","))));
+        conversation
+                .data(EDITED)
+                .filter(s -> !s.isBlank())
+                .ifPresent(s -> edited.addAll(List.of(s.split(","))));
         List<String> lines = new ArrayList<>();
         addLine(lines, update, edited, Field.NAME, "REGISTRY_FIELD_NAME", summary.name());
         addLine(
@@ -652,8 +676,20 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
         if (update && edited.contains(Field.CPF.name())) {
             lines.add(presenter.label("REGISTRY_CPF_WILL_CHANGE"));
         }
-        addLine(lines, update, edited, Field.INSTRUMENT, "REGISTRY_FIELD_INSTRUMENT", summary.instrument());
-        addLine(lines, update, edited, Field.GUARDIAN, "REGISTRY_FIELD_GUARDIAN", summary.guardianName());
+        addLine(
+                lines,
+                update,
+                edited,
+                Field.INSTRUMENT,
+                "REGISTRY_FIELD_INSTRUMENT",
+                summary.instrument());
+        addLine(
+                lines,
+                update,
+                edited,
+                Field.GUARDIAN,
+                "REGISTRY_FIELD_GUARDIAN",
+                summary.guardianName());
         String joined = String.join("\n", lines);
 
         conversation.store(TOKEN, result.confirmationToken());
@@ -662,7 +698,9 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
         if (update) {
             UUID studentId = UUID.fromString(conversation.data(STUDENT).orElseThrow());
             StudentView student =
-                    get.run(actor(context), new GetStudentUseCase.Command(studentId, correlation()));
+                    get.run(
+                            actor(context),
+                            new GetStudentUseCase.Command(studentId, correlation(context)));
             text =
                     presenter.text(
                             "REGISTRY_CONFIRM_UPDATE",
@@ -690,8 +728,7 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
     private Keyboard confirmKeyboard(String token) {
         return new Keyboard(
                 List.of(
-                        List.of(
-                                presenter.button("CONFIRM_BUTTON", Map.of(), "reg-confirm", token)),
+                        List.of(presenter.button("CONFIRM_BUTTON", Map.of(), "reg-confirm", token)),
                         List.of(presenter.button("CANCEL_BUTTON", "reg-cancel"))));
     }
 
@@ -714,7 +751,7 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
                     confirm.run(
                             actor(context),
                             new ConfirmStudentRegistrationUseCase.Command(
-                                    linkId(context), token, correlation()));
+                                    linkId(context), token, correlation(context)));
         } catch (DomainException error) {
             if (error.code() == ErrorCode.CONFIRMATION_ALREADY_DONE) {
                 // segundo toque ou resumo anterior: nada é gravado e a conversa segue como está
@@ -751,10 +788,13 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
                         presenter.homeActions()));
     }
 
-    /** Descarte sem aviso (saída do fluxo, recusa na confirmação): falha do núcleo não interrompe. */
+    /**
+     * Descarte sem aviso (saída do fluxo, recusa na confirmação): falha do núcleo não interrompe.
+     */
     private void discardQuietly(TelegramContext context) {
         try {
-            cancel.run(actor(context), new CancelStudentRegistrationUseCase.Command(linkId(context)));
+            cancel.run(
+                    actor(context), new CancelStudentRegistrationUseCase.Command(linkId(context)));
         } catch (DomainException ignored) {
             // o rascunho vence sozinho em 30 minutos e some com o vínculo
         }
@@ -778,8 +818,8 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
         return context.link().id();
     }
 
-    private static String correlation() {
-        return UUID.randomUUID().toString();
+    private static String correlation(TelegramContext context) {
+        return "telegram-" + context.updateId();
     }
 
     private static Integer number(String argument) {

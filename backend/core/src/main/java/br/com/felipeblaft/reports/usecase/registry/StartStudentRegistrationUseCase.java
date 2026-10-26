@@ -23,9 +23,9 @@ public class StartStudentRegistrationUseCase {
     public record Command(UUID linkId, StudentRegistrationDraft.Kind kind, UUID studentId) {}
 
     /**
-     * @param confirmationToken token de uso único do resumo de {@code INACTIVATE}/{@code REACTIVATE}
-     *     (que não passam pela coleta de campos); nulo em {@code CREATE} e {@code UPDATE}, cujo
-     *     token vem da coleta
+     * @param confirmationToken token de uso único do resumo de {@code INACTIVATE}/{@code
+     *     REACTIVATE} (que não passam pela coleta de campos); nulo em {@code CREATE} e {@code
+     *     UPDATE}, cujo token vem da coleta
      */
     public record Result(
             StudentRegistrationDraft.Kind kind, Instant expiresAt, String confirmationToken) {

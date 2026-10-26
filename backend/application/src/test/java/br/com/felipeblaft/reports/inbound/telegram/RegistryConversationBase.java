@@ -32,12 +32,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 /**
- * Base dos testes de conversa de "Meus alunos" (feature 005, contracts/telegram-student-registry.md).
- * Usa Postgres real para o vínculo e o estado persistido da conversa e <strong>dublês</strong> dos
- * casos de uso do núcleo da fatia S2 (cadastro em andamento, listagem e abertura), que entram no
- * Fecho. O interpretador é chamado direto: as saídas ({@link TelegramOutput}) são verificadas sem
- * passar pelo mapeador de ações do canal, que é do fluxo W-L. Nenhum dado real: nomes e CPF são
- * fictícios.
+ * Base dos testes de conversa de "Meus alunos" (feature 005,
+ * contracts/telegram-student-registry.md). Usa Postgres real para o vínculo e o estado persistido
+ * da conversa e <strong>dublês</strong> dos casos de uso do núcleo da fatia S2 (cadastro em
+ * andamento, listagem e abertura), que entram no Fecho. O interpretador é chamado direto: as saídas
+ * ({@link TelegramOutput}) são verificadas sem passar pelo mapeador de ações do canal, que é do
+ * fluxo W-L. Nenhum dado real: nomes e CPF são fictícios.
  */
 public abstract class RegistryConversationBase extends IntegrationBase {
 
@@ -142,10 +142,7 @@ public abstract class RegistryConversationBase extends IntegrationBase {
     // ---------------------------------------------------------------- leitura das saídas
 
     protected List<Message> messages() {
-        return out.stream()
-                .filter(Message.class::isInstance)
-                .map(Message.class::cast)
-                .toList();
+        return out.stream().filter(Message.class::isInstance).map(Message.class::cast).toList();
     }
 
     protected Message lastMessage() {
@@ -215,13 +212,13 @@ public abstract class RegistryConversationBase extends IntegrationBase {
                 active,
                 guardianName == null
                         ? null
-                        : new StudentView.GuardianView(guardianName, "11999990000", "g@example.test"),
+                        : new StudentView.GuardianView(
+                                guardianName, "11999990000", "g@example.test"),
                 List.of(),
                 active ? Boolean.TRUE : null);
     }
 
-    protected static PageResult<StudentView> page(
-            int page, long total, StudentView... students) {
+    protected static PageResult<StudentView> page(int page, long total, StudentView... students) {
         return new PageResult<>(List.of(students), page, 6, total);
     }
 

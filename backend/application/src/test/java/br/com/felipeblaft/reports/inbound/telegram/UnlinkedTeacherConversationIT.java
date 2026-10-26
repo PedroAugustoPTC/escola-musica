@@ -19,11 +19,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * Desvinculação e reemissão do código (US6), vistas pelo bot: depois de desvinculada a conta
- * recebe a orientação de entrada; o código antigo responde como código inexistente e o novo
- * vincula. Reemitir o código sem encerrar o vínculo não mexe num cadastro em andamento; encerrar o
- * vínculo o descarta. A reemissão e a desvinculação são do núcleo (S2): o teste as reproduz pelo
- * estado que deixam (código novo no professor, vínculo removido).
+ * Desvinculação e reemissão do código (US6), vistas pelo bot: depois de desvinculada a conta recebe
+ * a orientação de entrada; o código antigo responde como código inexistente e o novo vincula.
+ * Reemitir o código sem encerrar o vínculo não mexe num cadastro em andamento; encerrar o vínculo o
+ * descarta. A reemissão e a desvinculação são do núcleo (S2): o teste as reproduz pelo estado que
+ * deixam (código novo no professor, vínculo removido).
  */
 @ConversationState({1, 10})
 class UnlinkedTeacherConversationIT extends RegistryConversationBase {

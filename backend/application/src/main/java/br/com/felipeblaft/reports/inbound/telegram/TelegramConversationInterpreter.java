@@ -89,20 +89,21 @@ public class TelegramConversationInterpreter {
 
     public List<TelegramOutput> interpret(UpdateTelegram update) {
         if (update.callbackQuery() != null) {
-            return callback(update.callbackQuery());
+            return callback(update.callbackQuery(), update.updateId());
         }
         if (update.message() != null && update.message().from() != null) {
-            return message(update.message());
+            return message(update.message(), update.updateId());
         }
         return List.of();
     }
 
     // ------------------------------------------------------------------ mensagens
 
-    private List<TelegramOutput> message(TelegramMessage message) {
+    private List<TelegramOutput> message(TelegramMessage message, long updateId) {
         TelegramContext context =
                 new TelegramContext(message.from().id(), message.chat().id(), null)
-                        .withIncomingMessage(message.messageId());
+                        .withIncomingMessage(message.messageId())
+                        .withUpdate(updateId);
         if (!message.chat().privateChat()) {
             context.answer(presenter.simple(context.chatId(), "PRIVATE_CONVERSATION_ONLY"));
             return context.outputs();
@@ -209,7 +210,9 @@ public class TelegramConversationInterpreter {
         searchStudent(context, text);
     }
 
-    /** Só o CPF do cadastro e o telefone do responsável (11 dígitos) aceitam texto com essa forma. */
+    /**
+     * Só o CPF do cadastro e o telefone do responsável (11 dígitos) aceitam texto com essa forma.
+     */
     private static boolean acceptsCpfShapedText(TelegramConversation conversation) {
         return conversation.flow() == ConversationFlow.STUDENT_REGISTRY
                 && (conversation.step() == ConversationFlowStep.REGISTRY_ASK_CPF
@@ -222,7 +225,9 @@ public class TelegramConversationInterpreter {
      */
     private void rejectCpfShapedText(TelegramContext context) {
         if (context.incomingMessageId() != null) {
-            context.answer(new TelegramOutput.DeleteMessage(context.chatId(), context.incomingMessageId()));
+            context.answer(
+                    new TelegramOutput.DeleteMessage(
+                            context.chatId(), context.incomingMessageId()));
         }
         context.answer(presenter.error(context.chatId(), ErrorCode.VALIDATION_FAILED, Map.of()));
     }
@@ -425,13 +430,13 @@ public class TelegramConversationInterpreter {
 
     // ------------------------------------------------------------------ botões
 
-    private List<TelegramOutput> callback(CallbackTelegram callback) {
+    private List<TelegramOutput> callback(CallbackTelegram callback, long updateId) {
         long chatId =
                 callback.message() != null && callback.message().chat() != null
                         ? callback.message().chat().id()
                         : callback.from().id();
         Long messageId = callback.message() != null ? callback.message().messageId() : null;
-        TelegramContext context = new TelegramContext(callback.from().id(), chatId, messageId);
+        TelegramContext context = new TelegramContext(callback.from().id(), chatId, messageId).withUpdate(updateId);
         context.answer(new TelegramOutput.CallbackReply(callback.id()));
         if (callback.message() != null
                 && callback.message().chat() != null

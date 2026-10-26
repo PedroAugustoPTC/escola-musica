@@ -77,7 +77,8 @@ class StudentRegistryListConversationIT extends RegistryConversationBase {
         when(list.run(any(), any())).thenReturn(page(0, 1, ana));
         send("meus alunos");
 
-        when(list.run(any(), any())).thenReturn(page(0, 1, view("Caio Reis", 9, null, false, "Rita")));
+        when(list.run(any(), any()))
+                .thenReturn(page(0, 1, view("Caio Reis", 9, null, false, "Rita")));
         tap("v1:reg-filter:INACTIVE");
 
         assertThat(lastText()).contains("Seus alunos (inativos), página 1 de 1");
@@ -151,7 +152,9 @@ class StudentRegistryListConversationIT extends RegistryConversationBase {
         tap("v1:reg-open:0");
 
         assertThat(lastText()).contains("Situação: Inativo");
-        assertThat(buttonData(lastMessage())).contains("v1:reg-reactivate:").doesNotContain("v1:reg-inactivate:");
+        assertThat(buttonData(lastMessage()))
+                .contains("v1:reg-reactivate:")
+                .doesNotContain("v1:reg-inactivate:");
     }
 
     @Test

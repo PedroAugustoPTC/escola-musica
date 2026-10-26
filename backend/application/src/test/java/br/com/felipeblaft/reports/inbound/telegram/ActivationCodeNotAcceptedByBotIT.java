@@ -35,12 +35,17 @@ class ActivationCodeNotAcceptedByBotIT extends RegistryConversationBase {
 
     @Test
     void longPasswordsAndEmailsGetTheEntryOrientationAndNoState() {
-        for (String text : new String[] {"S3nh@Forte-2026", "admin@example.test", "Senha provisória 12"}) {
+        for (String text :
+                new String[] {"S3nh@Forte-2026", "admin@example.test", "Senha provisória 12"}) {
             send(OTHER_USER, text);
             assertThat(lastText()).isEqualTo(ENTRY);
         }
         assertThat(links()).isEqualTo(1);
-        assertThat(jdbc.queryForObject("select count(*) from telegram_link where telegram_user_id = ?", Integer.class, OTHER_USER))
+        assertThat(
+                        jdbc.queryForObject(
+                                "select count(*) from telegram_link where telegram_user_id = ?",
+                                Integer.class,
+                                OTHER_USER))
                 .isZero();
     }
 

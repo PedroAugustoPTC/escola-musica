@@ -17,6 +17,7 @@ public final class TelegramContext {
     private final long chatId;
     private final Long callbackMessageId;
     private Long incomingMessageId;
+    private long updateId;
     private Identification identification;
     private boolean endedLink;
     private final List<TelegramOutput> outputs = new ArrayList<>();
@@ -43,6 +44,16 @@ public final class TelegramContext {
     /** Id da mensagem de texto do professor que originou o update (para apagá-la, FR-036). */
     public Long incomingMessageId() {
         return incomingMessageId;
+    }
+
+    /** Id do update do Telegram em processamento (correlação da autoria, sem conteúdo). */
+    public long updateId() {
+        return updateId;
+    }
+
+    public TelegramContext withUpdate(long updateId) {
+        this.updateId = updateId;
+        return this;
     }
 
     public TelegramContext withIncomingMessage(long messageId) {
