@@ -4,6 +4,8 @@ import br.com.felipeblaft.reports.domain.access.Actor;
 import br.com.felipeblaft.reports.domain.access.AuthorshipTargetType;
 import br.com.felipeblaft.reports.domain.access.Operation;
 import br.com.felipeblaft.reports.domain.access.Permission;
+import br.com.felipeblaft.reports.domain.common.DomainException;
+import br.com.felipeblaft.reports.domain.common.ErrorCode;
 import br.com.felipeblaft.reports.domain.registry.Cpf;
 import br.com.felipeblaft.reports.domain.registry.ProtectedCpf;
 import br.com.felipeblaft.reports.domain.registry.Student;
@@ -99,7 +101,7 @@ public class UpdateStudentUseCase {
             newCpf = protectIfFree(actor, byTeacher, student, data.cpf(), command.correlationId());
         }
         if (student.applyEdit(data, newCpf, now)) {
-            students.save(student);
+            saveOrRefuseDuplicate(actor, byTeacher, student);
             authorship.record(
                     actor,
                     Operation.STUDENT_UPDATE,
@@ -108,6 +110,23 @@ public class UpdateStudentUseCase {
                     command.correlationId());
         }
         return views.of(student, byTeacher);
+    }
+
+    /**
+     * Grava; se outra edição ou cadastro tomou o mesmo CPF entre a verificação e a gravação (o
+     * índice único recusa e o adaptador traduz em {@code DUPLICATE_CPF}), responde como o cadastro:
+     * ao administrador, a duplicidade com o nome do aluno que tem o CPF; ao professor, o código
+     * neutro, contando a recusa no limite contra sondagem (FR-024).
+     */
+    private void saveOrRefuseDuplicate(Actor actor, boolean byTeacher, Student student) {
+        try {
+            students.save(student);
+        } catch (DomainException conflict) {
+            if (conflict.code() != ErrorCode.DUPLICATE_CPF || !byTeacher) {
+                throw conflict;
+            }
+            throw guard.refuseConcurrent(actor);
+        }
     }
 
     /**

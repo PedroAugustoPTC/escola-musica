@@ -247,6 +247,16 @@ public class RegisterStudentUseCase {
         }
 
         /**
+         * Recusa neutra quando o índice único decide a corrida na gravação: o dono do CPF não é
+         * consultado (a transação já foi abortada), então só conta no limite de sondagem.
+         */
+        DomainException refuseConcurrent(Actor actor) {
+            attempts.registerFailure(
+                    AttemptScope.TEACHER_CPF_PROBE, Channel.WEB, actor.id().toString());
+            return new DomainException(ErrorCode.CPF_UNAVAILABLE);
+        }
+
+        /**
          * Resposta ao professor para um CPF que já existe: o aluno é dele ({@code
          * STUDENT_ALREADY_YOURS}) ou não é ({@code CPF_UNAVAILABLE}, sem nome, professor ou
          * qualquer dado; deixa autoria e conta a recusa).

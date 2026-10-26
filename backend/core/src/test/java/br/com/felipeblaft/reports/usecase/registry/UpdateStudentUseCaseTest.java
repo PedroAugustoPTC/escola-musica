@@ -313,4 +313,93 @@ class UpdateStudentUseCaseTest {
         assertThat(command.toString()).contains(id.toString()).doesNotContain("Matteo");
         assertThat(command.toString()).doesNotContain("529");
     }
+
+    /** Gravação que perde a corrida do CPF: o índice único recusa e o adaptador traduz. */
+    static class ConflictOnSaveStudents
+            extends br.com.felipeblaft.reports.doubles.InMemoryStudentRepository {
+        boolean conflict;
+        ErrorCode failure = ErrorCode.DUPLICATE_CPF;
+
+        ConflictOnSaveStudents(
+                br.com.felipeblaft.reports.doubles.InMemoryAssignmentRepository assignments) {
+            super(assignments);
+        }
+
+        @Override
+        public void save(Student student) {
+            if (conflict) {
+                throw failure == ErrorCode.DUPLICATE_CPF
+                        ? new DomainException(failure, Map.of("name", "Ana Souza"))
+                        : new DomainException(failure);
+            }
+            super.save(student);
+        }
+    }
+
+    @Test
+    void administratorLosingTheCpfRaceGetsTheDuplicateWithTheName() {
+        ConflictOnSaveStudents[] holder = new ConflictOnSaveStudents[1];
+        RegistryScenario racing =
+                new RegistryScenario(
+                        a -> {
+                            holder[0] = new ConflictOnSaveStudents(a);
+                            return holder[0];
+                        });
+        Student mine = racing.student("Matteo Mafra", "1990-03-04", CPF_A, null);
+        holder[0].conflict = true;
+
+        DomainException error =
+                catchThrowableOfType(
+                        DomainException.class,
+                        () ->
+                                racing.update.run(
+                                        admin,
+                                        updateCommand(
+                                                mine.id(),
+                                                new StudentInput(
+                                                        null,
+                                                        null,
+                                                        new Secret(CPF_B),
+                                                        null,
+                                                        null))));
+
+        assertThat(error.code()).isEqualTo(ErrorCode.DUPLICATE_CPF);
+        assertThat(error.details()).isEqualTo(Map.of("name", "Ana Souza"));
+    }
+
+    @Test
+    void otherSaveFailuresAreNotRewritten() {
+        ConflictOnSaveStudents[] holder = new ConflictOnSaveStudents[1];
+        RegistryScenario racing =
+                new RegistryScenario(
+                        a -> {
+                            holder[0] =
+                                    new ConflictOnSaveStudents(a) {
+                                        @Override
+                                        public void save(Student student) {
+                                            if (conflict) {
+                                                throw new DomainException(
+                                                        ErrorCode.OPERATION_NOT_SAVED);
+                                            }
+                                            super.save(student);
+                                        }
+                                    };
+                            return holder[0];
+                        });
+        Student mine = racing.student("Matteo Mafra", "1990-03-04", CPF_A, null);
+        holder[0].conflict = true;
+
+        DomainException error =
+                catchThrowableOfType(
+                        DomainException.class,
+                        () ->
+                                racing.update.run(
+                                        admin,
+                                        updateCommand(
+                                                mine.id(),
+                                                new StudentInput(
+                                                        "Outro Nome", null, null, null, null))));
+
+        assertThat(error.code()).isEqualTo(ErrorCode.OPERATION_NOT_SAVED);
+    }
 }

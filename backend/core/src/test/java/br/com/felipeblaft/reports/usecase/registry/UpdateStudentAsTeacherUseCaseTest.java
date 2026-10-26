@@ -265,4 +265,31 @@ class UpdateStudentAsTeacherUseCaseTest {
         assertThat(scenario.students.searchById(theirs.id()).orElseThrow().name())
                 .isEqualTo("Aluno Dele");
     }
+
+    @Test
+    void teacherLosingTheCpfRaceGetsTheNeutralRefusalAndItCountsAsAProbe() {
+        UpdateStudentUseCaseTest.ConflictOnSaveStudents[] holder =
+                new UpdateStudentUseCaseTest.ConflictOnSaveStudents[1];
+        RegistryScenario racing =
+                new RegistryScenario(
+                        a -> {
+                            holder[0] = new UpdateStudentUseCaseTest.ConflictOnSaveStudents(a);
+                            return holder[0];
+                        });
+        Teacher dona = racing.teacher("Dona Clara");
+        Student own = racing.student("Minha Aluna", "1990-03-04", CPF_A, "Piano", dona);
+        holder[0].conflict = true;
+
+        DomainException error =
+                catchThrowableOfType(
+                        DomainException.class,
+                        () ->
+                                racing.update.run(
+                                        ActorFixtures.teacherWeb(dona.id()),
+                                        updateCommand(own.id(), cpfOnly(CPF_D))));
+
+        assertThat(error.code()).isEqualTo(ErrorCode.CPF_UNAVAILABLE);
+        assertThat(error.details()).as("sem nome nem dado do outro aluno").isEmpty();
+        assertThat(racing.attemptsRepository.all()).as("consulta e recusa contadas").isNotEmpty();
+    }
 }
