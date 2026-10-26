@@ -160,6 +160,7 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/TeacherPage" }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
         "401": { $ref: "#/components/responses/NotAuthenticated" }
         "403": { $ref: "#/components/responses/PasswordChangeRequired" }
         "404": { $ref: "#/components/responses/NotFound" }
@@ -404,6 +405,7 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/StudentPage" }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
         "401": { $ref: "#/components/responses/NotAuthenticated" }
         "403": { $ref: "#/components/responses/PasswordChangeRequired" }
         "404": { $ref: "#/components/responses/NotFound" }
@@ -570,6 +572,7 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/StudentPage" }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
         "401": { $ref: "#/components/responses/NotAuthenticated" }
         "404": { $ref: "#/components/responses/NotFound" }
     post:

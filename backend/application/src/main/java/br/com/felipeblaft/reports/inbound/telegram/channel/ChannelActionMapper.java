@@ -76,9 +76,13 @@ public class ChannelActionMapper {
                 case TelegramOutput.StepMessage e -> step(actions, e, positionId);
                 case TelegramOutput.CallbackReply r ->
                         callback(actions, r, chatDoUpdate, positionId);
-                // provisório da fatia S3: o mapeamento real (DELETE_MESSAGE) é do fluxo W-L
                 case TelegramOutput.DeleteMessage d ->
-                        throw new IllegalStateException("DELETE_MESSAGE ainda não mapeada");
+                        actions.add(
+                                deleteMessage(
+                                        positionId.apply(actions.size()),
+                                        d.chatId(),
+                                        d.messageId(),
+                                        d.compensation()));
             }
         }
         return actions;

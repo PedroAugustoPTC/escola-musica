@@ -168,7 +168,9 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
                 if (context.incomingMessageId() != null) {
                     context.answer(
                             new TelegramOutput.DeleteMessage(
-                                    context.chatId(), context.incomingMessageId()));
+                                    context.chatId(),
+                                    context.incomingMessageId(),
+                                    presenter.simple(context.chatId(), "CPF_MESSAGE_NOT_DELETED")));
                 }
                 collectField(context, Field.CPF, text);
             }

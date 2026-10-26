@@ -65,9 +65,16 @@ public sealed interface TelegramOutput {
     /**
      * Apaga uma mensagem do professor (a que trouxe um CPF, FR-036). Ação só de transporte: sai
      * sempre <em>antes</em> da próxima pergunta. Carrega apenas os identificadores, nunca o
-     * conteúdo.
+     * conteúdo. A {@code compensation} é o aviso entregue se o Telegram recusar apagar (FR-036); nulo
+     * quando não há alternativa.
      */
-    record DeleteMessage(long chatId, long messageId) implements TelegramOutput {}
+    record DeleteMessage(long chatId, long messageId, Message compensation)
+            implements TelegramOutput {
+
+        public DeleteMessage(long chatId, long messageId) {
+            this(chatId, messageId, null);
+        }
+    }
 
     /** Confirma o toque num botão (tira o indicador de carregamento do Telegram). */
     record CallbackReply(String callbackId) implements TelegramOutput {}

@@ -34,7 +34,7 @@ class TelegramChannelContractIT extends TelegramConversationBase {
 
     private static final String BASE = "/internal/v1/channel/telegram";
     private static final String INTERNAL_ERROR_TEXT =
-            "Algo deu errado. Informe o código de referência  ao suporte.";
+            "Algo deu errado\. Informe o código de referência [A-Z0-9]{8} ao suporte\.";
 
     @MockitoSpyBean TelegramConversationInterpreter interpreter;
 
@@ -144,7 +144,7 @@ class TelegramChannelContractIT extends TelegramConversationBase {
         JsonNode byText = actions(update(text));
         assertThat(byText).hasSize(1);
         assertThat(byText.get(0).path("type").asString()).isEqualTo("MESSAGE");
-        assertThat(byText.get(0).path("text").asString()).isEqualTo(INTERNAL_ERROR_TEXT);
+        assertThat(byText.get(0).path("text").asString()).matches(INTERNAL_ERROR_TEXT);
         assertThat(byText.get(0).path("chatId").asLong()).isEqualTo(USER_CLARA);
         assertThat(byText.get(0).path("actionId").asString()).isEqualTo("u" + textId + "-0");
         assertThat(actions(update(text))).isEqualTo(byText);
@@ -161,7 +161,7 @@ class TelegramChannelContractIT extends TelegramConversationBase {
         assertThat(byTouch).hasSize(2);
         assertThat(byTouch.get(0).path("type").asString()).isEqualTo("CALLBACK_REPLY");
         assertThat(byTouch.get(0).path("callbackId").asString()).isEqualTo("cb" + touchId);
-        assertThat(byTouch.get(1).path("text").asString()).isEqualTo(INTERNAL_ERROR_TEXT);
+        assertThat(byTouch.get(1).path("text").asString()).matches(INTERNAL_ERROR_TEXT);
         assertThat(byTouch.get(0).path("actionId").asString()).isEqualTo("u" + touchId + "-0");
         assertThat(byTouch.get(1).path("actionId").asString()).isEqualTo("u" + touchId + "-1");
         assertThat(actions(update(touch))).isEqualTo(byTouch);
@@ -178,7 +178,7 @@ class TelegramChannelContractIT extends TelegramConversationBase {
 
         JsonNode byText = actions(update(text));
         assertThat(byText).hasSize(1);
-        assertThat(byText.get(0).path("text").asString()).isEqualTo(INTERNAL_ERROR_TEXT);
+        assertThat(byText.get(0).path("text").asString()).matches(INTERNAL_ERROR_TEXT);
         assertThat(byText.get(0).path("actionId").asString()).isEqualTo("u" + textId + "-e0");
         assertThat(actions(update(text))).isEqualTo(byText);
 
@@ -198,7 +198,7 @@ class TelegramChannelContractIT extends TelegramConversationBase {
         assertThat(byTouch).hasSize(2);
         assertThat(byTouch.get(0).path("type").asString()).isEqualTo("CALLBACK_REPLY");
         assertThat(byTouch.get(0).path("actionId").asString()).isEqualTo("u" + touchId + "-e0");
-        assertThat(byTouch.get(1).path("text").asString()).isEqualTo(INTERNAL_ERROR_TEXT);
+        assertThat(byTouch.get(1).path("text").asString()).matches(INTERNAL_ERROR_TEXT);
         assertThat(byTouch.get(1).path("actionId").asString()).isEqualTo("u" + touchId + "-e1");
         assertThat(actions(update(touch))).isEqualTo(byTouch);
     }
