@@ -107,7 +107,7 @@ Esse é o código de acesso. Ele só aparece nessa saída (no banco fica apenas 
 gere outro (o anterior deixa de valer):
 
 ```bash
-sh infra/scripts/local.sh code clara@example.test
+sh infra/scripts/local.sh issue-code clara@example.test
 ```
 
 Com `--demo-data=false`, o sistema começa sem professores. Para cadastrar os de exemplo (só cadastros,
@@ -142,8 +142,9 @@ relatório de exemplo, com duas perguntas pendentes. Serve para testar o fluxo c
 | `sh infra/scripts/local.sh up --demo-data=false` | zera os dados locais e sobe o sistema vazio |
 | `sh infra/scripts/local.sh status` | estado de cada serviço |
 | `sh infra/scripts/local.sh logs` | acompanha os logs do backend (`Ctrl+C` sai); `logs web` ou `logs postgres` para os outros |
-| `sh infra/scripts/local.sh seed [file]` | carga inicial de professores e alunos |
-| `sh infra/scripts/local.sh code <email>` | novo código de acesso para um professor |
+| `sh infra/scripts/local.sh seed [file] [--simulate]` | carga inicial de professores e alunos (`--simulate` valida e desfaz) |
+| `sh infra/scripts/local.sh issue-code <email>` | emergência: novo código de acesso para um professor (`code` é alias obsoleto) |
+| `sh infra/scripts/local.sh rotate-cpf-key` | rotação das chaves do CPF; veja [Credenciais locais](#credenciais-locais-código-de-emergência-e-rotação-das-chaves) |
 | `sh infra/scripts/local.sh database` | abre o `psql` no banco local |
 | `sh infra/scripts/local.sh database-port` / `database-close` | publica / fecha o banco em `127.0.0.1` para DBeaver ou pgAdmin |
 | `sh infra/scripts/local.sh tests [suite]` | roda os testes em contêiner: `backend`, `frontend`, `e2e`, `real-ai` ou `all` |
@@ -153,6 +154,70 @@ relatório de exemplo, com duas perguntas pendentes. Serve para testar o fluxo c
 
 Depois de mudar código do backend ou do portal, rode `up` de novo: ele reconstrói as imagens e
 recria só o que mudou.
+
+## Credenciais locais, código de emergência e rotação das chaves
+
+### AUTH_HMAC_SECRET e administrador fictício (gerados pelo `up`)
+
+O `local.sh up` cuida de duas coisas no `infra/.env` (que nunca vai para o Git):
+
+- **`AUTH_HMAC_SECRET`**: se estiver vazio, é gerado (48 caracteres aleatórios, distinto do
+  `HMAC_SECRET`). Ele protege os códigos de ativação e as origens das tentativas de acesso.
+- **Administrador fictício local**: se `ADMIN_BOOTSTRAP_NAME`, `ADMIN_BOOTSTRAP_EMAIL` e
+  `ADMIN_BOOTSTRAP_PASSWORD` estão vazios, o `up` preenche `admin@example.test` ("Administrador
+  Local") com uma senha provisória aleatória, **impressa uma única vez**. Ela só vale se o banco
+  ainda não tiver administrador; se já houver, o bootstrap a ignora. Entre com ela, troque a senha
+  no primeiro acesso e **esvazie `ADMIN_BOOTSTRAP_PASSWORD` no `infra/.env`** em seguida, para que
+  a senha provisória não fique guardada em disco.
+
+### Carga inicial: `seed [file] [--simulate]`
+
+```bash
+sh infra/scripts/local.sh seed                                  # infra/seed/example.json
+sh infra/scripts/local.sh seed infra/seed/my-data.json          # outro arquivo (precisa estar em infra/seed/)
+sh infra/scripts/local.sh seed infra/seed/my-data.json --simulate   # valida tudo e desfaz: nada é gravado
+```
+
+A carga é idempotente (rodar de novo não duplica cadastros) e imprime os códigos de acesso uma
+única vez.
+
+### Reemitir o código de um professor: `issue-code`
+
+```bash
+sh infra/scripts/local.sh issue-code clara@example.test
+```
+
+É um comando de **emergência**: o caminho normal é o administrador reemitir o código na área
+administrativa. O nome antigo, `code`, continua funcionando como alias, mas está **obsoleto**.
+
+### Rotacionar as chaves do CPF: `rotate-cpf-key`
+
+```bash
+sh infra/scripts/local.sh rotate-cpf-key [--simulate] [--confirm-invalidate-codes]
+```
+
+As chaves **novas** entram por variáveis de ambiente do terminal, nunca por argumento (não ficam
+no histórico do shell): `ROTATE_NEW_CPF_ENCRYPTION_KEY` (Base64, 32 bytes) e/ou
+`ROTATE_NEW_HMAC_SECRET` (32 bytes ou mais). `ROTATE_OLD_*` só é preciso se as chaves antigas não
+forem as do `infra/.env`. Trocar o `ROTATE_NEW_HMAC_SECRET` invalida os códigos de acesso vigentes
+dos professores e exige `--confirm-invalidate-codes` (a simulação dispensa). A rotação também
+descarta os rascunhos de cadastro do Telegram em andamento (duram 30 minutos e estão cifrados com a
+chave antiga).
+
+Roteiro, **numa máquina confiável** (as chaves ficam no ambiente do terminal):
+
+```bash
+export ROTATE_NEW_CPF_ENCRYPTION_KEY="$(openssl rand -base64 32)"
+sh infra/scripts/local.sh rotate-cpf-key --simulate               # confere e desfaz
+sh infra/scripts/local.sh rotate-cpf-key                          # para o portal e a API e rotaciona
+# troque CPF_ENCRYPTION_KEY no infra/.env pelo valor novo e rode: sh infra/scripts/local.sh up
+unset ROTATE_NEW_CPF_ENCRYPTION_KEY ROTATE_NEW_HMAC_SECRET ROTATE_OLD_CPF_ENCRYPTION_KEY ROTATE_OLD_HMAC_SECRET
+```
+
+O comando valida as variáveis e a confirmação **antes** de parar o portal e a API; se a rotação
+falhar depois disso, nada foi gravado e a mensagem diz como religar o ambiente (`up`). Tenha uma
+cópia de segurança recente do banco (ela não inclui as chaves). Termine sempre com o `unset` das
+variáveis.
 
 ## Massa de demonstração
 
@@ -263,7 +328,7 @@ firewall.
 - **Códigos de acesso e sessões**: só os hashes (`teacher.access_code_hash`, `web_session.token_hash`).
 - **Áudio**: não existe em nenhuma tabela; é apagado logo após a transcrição (FR-018).
 - **Evite alterar dados à mão.** Relatórios e versões têm regras (versão vigente, aprovação,
-  cancelamento) que só a aplicação garante. Para cadastros, use o `seed`; para códigos, o `code`.
+  cancelamento) que só a aplicação garante. Para cadastros, use o `seed`; para códigos, o `issue-code`.
 
 ## Ligar a IA real e o bot do Telegram
 

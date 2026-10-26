@@ -67,16 +67,22 @@ require_env() {
   fi
 }
 
-# Texto aleatório alfanumérico de $1 caracteres (nunca vai para argumento de comando nem para log).
+# Texto aleatório alfanumérico de $1 caracteres. Sai só pela saída padrão, capturada em variável do shell:
+# não vai para log. A gravação no infra/.env (set_env_value) também não o passa como argumento de processo.
 random_text() {
   head -c 256 /dev/urandom | base64 | tr -d '/+=
 ' | cut -c1-"$1"
 }
 
-# Grava CHAVE=valor no infra/.env (local, fora do Git): troca a linha existente ou acrescenta.
+# Grava CHAVE=valor no infra/.env (local, fora do Git): troca a linha existente ou acrescenta. O valor viaja
+# só por variável de ambiente do awk (e pelo printf, embutido no shell), nunca como argumento de um
+# processo, que apareceria na lista de processos; o arquivo temporário nasce com permissão 600.
 set_env_value() {
   if grep -q "^$1=" infra/.env; then
-    sed -i.bak "s|^$1=.*|$1=$2|" infra/.env && rm -f infra/.env.bak
+    (umask 077; ENV_KEY="$1" ENV_VALUE="$2" awk 'BEGIN { key = ENVIRON["ENV_KEY"]; value = ENVIRON["ENV_VALUE"] }
+      index($0, key "=") == 1 { print key "=" value; next }
+      { print }' infra/.env > infra/.env.tmp)
+    cat infra/.env.tmp > infra/.env && rm -f infra/.env.tmp
   else
     printf '%s=%s
 ' "$1" "$2" >> infra/.env
@@ -98,7 +104,8 @@ ensure_local_credentials() {
     set_env_value ADMIN_BOOTSTRAP_EMAIL "admin@example.test"
     set_env_value ADMIN_BOOTSTRAP_PASSWORD "$password"
     echo "Administrador fictício local: admin@example.test · senha provisória: $password"
-    echo "(anote agora: ela não será mostrada de novo; vale na primeira subida com banco sem administrador e deve ser trocada no primeiro acesso)"
+    echo "(anote agora: ela não será mostrada de novo. Só vale se o banco ainda não tiver administrador; se já houver, o bootstrap a ignora."
+    echo " Troque-a no primeiro acesso e esvazie ADMIN_BOOTSTRAP_PASSWORD no infra/.env em seguida.)"
     password=""
   fi
 }
@@ -224,21 +231,42 @@ case "$command" in
     #   ROTATE_NEW_CPF_ENCRYPTION_KEY (Base64, 32 bytes) e/ou ROTATE_NEW_HMAC_SECRET (>= 32 bytes);
     #   ROTATE_OLD_* só se as chaves antigas não forem as do infra/.env.
     simulate=false
+    confirm=false
     for argument in "$@"; do
       case "$argument" in
         --simulate) simulate=true ;;
-        --confirm-invalidate-codes) ;;
+        --confirm-invalidate-codes) confirm=true ;;
         *) echo "Uso: sh infra/scripts/local.sh rotate-cpf-key [--simulate] [--confirm-invalidate-codes]" >&2; exit 2 ;;
       esac
     done
+    # Valida ANTES de parar o portal e a API: um erro aqui não pode deixar o ambiente fora do ar.
+    if [ -z "${ROTATE_NEW_CPF_ENCRYPTION_KEY:-}" ] && [ -z "${ROTATE_NEW_HMAC_SECRET:-}" ]; then
+      echo "Nenhuma chave nova informada: defina ROTATE_NEW_CPF_ENCRYPTION_KEY e/ou ROTATE_NEW_HMAC_SECRET no terminal." >&2
+      echo "Nada foi parado nem alterado." >&2
+      exit 2
+    fi
+    if [ -n "${ROTATE_NEW_HMAC_SECRET:-}" ] && [ "$confirm" = "false" ] && [ "$simulate" = "false" ]; then
+      echo "Trocar o segredo do resumo (HMAC_SECRET) invalida os códigos de acesso vigentes dos professores." >&2
+      echo "Repita o comando com --confirm-invalidate-codes. Nada foi parado nem alterado." >&2
+      exit 1
+    fi
     if [ "$simulate" = "false" ]; then
       echo "Janela de manutenção: parando o portal e a API (o banco continua). Tenha uma cópia de segurança recente (ela não inclui as chaves)."
       $LOCAL stop web backend >/dev/null 2>&1 || true
     fi
-    $LOCAL run --rm       -e ROTATE_NEW_CPF_ENCRYPTION_KEY -e ROTATE_NEW_HMAC_SECRET       -e ROTATE_OLD_CPF_ENCRYPTION_KEY -e ROTATE_OLD_HMAC_SECRET       backend rotate-cpf-key "$@"
+    status=0
+    $LOCAL run --rm \
+      -e ROTATE_NEW_CPF_ENCRYPTION_KEY -e ROTATE_NEW_HMAC_SECRET \
+      -e ROTATE_OLD_CPF_ENCRYPTION_KEY -e ROTATE_OLD_HMAC_SECRET \
+      backend rotate-cpf-key "$@" || status=$?
     if [ "$simulate" = "false" ]; then
-      echo "Depois de conferir as contagens: troque CPF_ENCRYPTION_KEY e/ou HMAC_SECRET no infra/.env pelos valores novos e rode: sh infra/scripts/local.sh up"
+      if [ "$status" -eq 0 ]; then
+        echo "Depois de conferir as contagens: troque CPF_ENCRYPTION_KEY e/ou HMAC_SECRET no infra/.env pelos valores novos e rode: sh infra/scripts/local.sh up"
+      else
+        echo "A rotação falhou e nada foi gravado. O portal e a API continuam parados: para religá-los com as chaves atuais, rode: sh infra/scripts/local.sh up" >&2
+      fi
     fi
+    exit "$status"
     ;;
   status)
     $LOCAL ps

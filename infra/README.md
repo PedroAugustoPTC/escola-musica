@@ -17,7 +17,7 @@ A validação funcional completa está em
 | `.env.example` | modelo das variáveis; copie para `infra/.env` (**nunca versionado**) |
 | `seed/example.json` | carga fictícia; cargas reais ficam fora do Git (`infra/seed/*.json`) |
 | `seed/demo.json` | cadastros fictícios da massa de demonstração (`local.sh up --demo-data=true`) |
-| `scripts/local.sh` | ambiente local: up, seed, code, database, status, logs, tests, stop, clean — passo a passo em [`scripts/README.md`](scripts/README.md) |
+| `scripts/local.sh` | ambiente local: up, seed, issue-code (alias obsoleto: code), rotate-cpf-key, database, status, logs, tests, stop, clean — passo a passo em [`scripts/README.md`](scripts/README.md) |
 | `compose.database.yaml` | só local: publica o banco em `127.0.0.1` para ferramentas gráficas (`local.sh database-port`) |
 | `scripts/deploy.sh` | atualização e subida da pilha de produção na VPS |
 | `n8n/` | n8n, o transporte do Telegram: imagem fina, workflows como código e utilitários — leia [`n8n/CLAUDE.md`](n8n/CLAUDE.md) |
@@ -78,7 +78,7 @@ sh infra/scripts/local.sh up --demo-data=true
 | `--demo-data=false` | zera banco e PDFs locais e sobe só o sistema, vazio |
 | sem `--demo-data` | sobe mantendo os dados existentes |
 
-Os demais comandos: `seed [infra/seed/arquivo.json]`, `code <email>`, `database` (psql),
+Os demais comandos: `seed [infra/seed/arquivo.json] [--simulate]`, `issue-code <email>` (o alias `code` é obsoleto), `rotate-cpf-key` (veja a seção 2), `database` (psql),
 `database-port`/`database-close` (banco em `127.0.0.1` para DBeaver/pgAdmin), `status`,
 `logs [serviço]`, `tests [backend|frontend|e2e|real-ai|all]`, `stop` e `clean` (apaga os dados
 locais, pede confirmação). O `up` confere o `infra/.env` antes (segredos, credenciais do bot se
@@ -231,6 +231,24 @@ seguida (ele contém CPF):
 ```bash
 docker compose -f infra/compose.yaml -f infra/compose.prod.yaml run --rm -v "$PWD/infra/seed:/seed:ro" backend seed --file /seed/real-data.json
 ```
+
+### Primeiro administrador, `AUTH_HMAC_SECRET` e rotação das chaves
+
+- **Local**: o `local.sh up` gera o `AUTH_HMAC_SECRET` (48 caracteres, distinto do `HMAC_SECRET`) e, se
+  as três variáveis `ADMIN_BOOTSTRAP_*` estão vazias, preenche o administrador fictício
+  `admin@example.test` com uma senha provisória impressa **uma única vez**. A senha só vale se o
+  banco ainda não tiver administrador. Depois do primeiro acesso (quando a troca da senha é
+  obrigatória), **esvazie `ADMIN_BOOTSTRAP_PASSWORD` no `infra/.env`**.
+- **Produção**: preencha `AUTH_HMAC_SECRET` e `ADMIN_BOOTSTRAP_*` à mão no `infra/.env` da VPS e
+  esvazie `ADMIN_BOOTSTRAP_PASSWORD` depois do primeiro acesso.
+- **`seed [arquivo] [--simulate]`**: carga idempotente; `--simulate` valida e desfaz.
+- **`issue-code <email>`**: emergência; reemite o código de um professor (`code` é alias obsoleto).
+- **`rotate-cpf-key [--simulate] [--confirm-invalidate-codes]`**: troca a chave de cifra do CPF e/ou
+  o segredo do resumo. As chaves novas vêm em `ROTATE_NEW_CPF_ENCRYPTION_KEY` e/ou
+  `ROTATE_NEW_HMAC_SECRET` (e as antigas, se diferirem do `.env`, em `ROTATE_OLD_*`), exportadas no
+  terminal de uma **máquina confiável**, e devem receber `unset` ao terminar. O comando valida tudo
+  antes de parar o portal e a API, descarta os rascunhos de cadastro do Telegram e, se falhar,
+  informa como religar (`up`). Detalhes em [`scripts/README.md`](scripts/README.md).
 
 ## 3. Testes
 
