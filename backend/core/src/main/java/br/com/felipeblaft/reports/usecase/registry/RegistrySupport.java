@@ -12,13 +12,10 @@ import br.com.felipeblaft.reports.domain.common.ErrorCode;
 import br.com.felipeblaft.reports.domain.registry.Student;
 import br.com.felipeblaft.reports.domain.registry.Teacher;
 import br.com.felipeblaft.reports.port.AssignmentRepository;
-import br.com.felipeblaft.reports.port.ClockPort;
 import br.com.felipeblaft.reports.port.TeacherRepository;
 import br.com.felipeblaft.reports.service.AuthorshipService;
 import br.com.felipeblaft.reports.service.StudentAccessService;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -29,10 +26,11 @@ import java.util.UUID;
 interface RegistrySupport {
 
     /**
-     * Aluno visível ao ator. Para o professor, aluno alheio, sem professor ou inexistente deixa o
-     * mesmo registro de negativa (FR-040, FR-025) e o mesmo erro, sem nenhum dado.
+     * Aluno visível ao ator ou {@code RESOURCE_NOT_FOUND}. Quando o professor não encontra (aluno
+     * alheio, sem professor ou inexistente, sem distinguir), grava a negativa (FR-040, FR-025) com
+     * o mesmo caminho nos dois casos. É a única implementação, de todos os casos de uso de aluno.
      */
-    static Student visible(
+    static Student findVisibleOrRecordDenial(
             StudentAccessService access,
             AuthorshipService authorship,
             Actor actor,
@@ -40,24 +38,27 @@ interface RegistrySupport {
             String correlationId) {
         try {
             return access.findVisible(actor, studentId);
-        } catch (DomainException denied) {
-            if (actor.role() == Role.TEACHER) {
+        } catch (DomainException error) {
+            if (error.code() == ErrorCode.RESOURCE_NOT_FOUND && actor.role() == Role.TEACHER) {
                 authorship.record(
                         actor,
                         AuthorshipRecord.AUTHORIZATION_DENIED,
                         AuthorshipTargetType.STUDENT,
                         studentId,
                         AuthorshipResult.DENIED,
-                        denied.code().name(),
+                        ErrorCode.RESOURCE_NOT_FOUND.name(),
                         correlationId);
             }
-            throw denied;
+            throw error;
         }
     }
 
-    /** O professor inativo não age (a sessão dele já terminou; aqui é a defesa do núcleo). */
-    static void requireActiveActor(Permission permission, Actor actor, TeacherRepository teachers) {
-        if (permission != Permission.ALLOW_SOLE_ACTIVE_TEACHER || actor.role() != Role.TEACHER) {
+    /**
+     * O professor inativo não age (a sessão dele já terminou; aqui é a defesa do núcleo); professor
+     * desconhecido é {@code RESOURCE_NOT_FOUND}. Vale para toda operação de aluno do professor.
+     */
+    static void requireActiveActor(Actor actor, TeacherRepository teachers) {
+        if (actor.role() != Role.TEACHER) {
             return;
         }
         Teacher teacher =
@@ -93,50 +94,6 @@ interface RegistrySupport {
                 ErrorCode.SHARED_STUDENT_ACTION_DENIED.name(),
                 correlationId);
         throw new DomainException(ErrorCode.SHARED_STUDENT_ACTION_DENIED);
-    }
-
-    /**
-     * O aluno como a interface o recebe (sem CPF). O administrador vê os professores associados; o
-     * professor nunca vê os outros e recebe se ainda pode inativar (FR-026).
-     */
-    static StudentView view(
-            Actor actor,
-            Student student,
-            TeacherRepository teachers,
-            AssignmentRepository assignments,
-            ClockPort clock) {
-        boolean hasGuardian =
-                student.guardianName() != null
-                        || student.guardianPhone() != null
-                        || student.guardianEmail() != null;
-        StudentView.GuardianView guardian =
-                hasGuardian
-                        ? new StudentView.GuardianView(
-                                student.guardianName(),
-                                student.guardianPhone(),
-                                student.guardianEmail())
-                        : null;
-        boolean administrator = actor.role() == Role.ADMINISTRATOR;
-        List<StudentView.TeacherRef> refs =
-                administrator
-                        ? assignments.listTeachersOfStudent(student.id()).stream()
-                                .map(teachers::searchById)
-                                .flatMap(Optional::stream)
-                                .map(t -> new StudentView.TeacherRef(t.id(), t.name(), t.active()))
-                                .toList()
-                        : List.of();
-        Boolean canInactivate =
-                administrator ? null : assignments.countActiveTeachers(student.id()) <= 1;
-        return new StudentView(
-                student.id(),
-                student.name(),
-                student.birthDate(),
-                student.ageAt(clock.todayInSchoolTimezone()),
-                student.instrument(),
-                student.active(),
-                guardian,
-                refs,
-                canInactivate);
     }
 
     /**

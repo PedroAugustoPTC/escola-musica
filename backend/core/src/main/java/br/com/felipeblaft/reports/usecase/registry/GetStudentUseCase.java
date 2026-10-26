@@ -1,13 +1,8 @@
 package br.com.felipeblaft.reports.usecase.registry;
 
 import br.com.felipeblaft.reports.domain.access.Actor;
-import br.com.felipeblaft.reports.domain.access.AuthorshipRecord;
-import br.com.felipeblaft.reports.domain.access.AuthorshipResult;
-import br.com.felipeblaft.reports.domain.access.AuthorshipTargetType;
 import br.com.felipeblaft.reports.domain.access.Operation;
 import br.com.felipeblaft.reports.domain.access.Role;
-import br.com.felipeblaft.reports.domain.common.DomainException;
-import br.com.felipeblaft.reports.domain.common.ErrorCode;
 import br.com.felipeblaft.reports.domain.registry.Student;
 import br.com.felipeblaft.reports.domain.registry.StudentSearch;
 import br.com.felipeblaft.reports.domain.registry.Teacher;
@@ -54,36 +49,9 @@ public class GetStudentUseCase {
     public StudentView run(Actor actor, Command command) {
         authorization.require(actor, Operation.STUDENT_GET);
         Student student =
-                findVisibleOrRecordDenial(
+                RegistrySupport.findVisibleOrRecordDenial(
                         access, authorship, actor, command.studentId(), command.correlationId());
         return views.of(student, actor.role() == Role.TEACHER);
-    }
-
-    /**
-     * Aluno visível ao ator ou {@code RESOURCE_NOT_FOUND}. Quando o professor não encontra (aluno
-     * alheio ou inexistente, sem distinguir), grava a negativa com o mesmo caminho nos dois casos.
-     */
-    static Student findVisibleOrRecordDenial(
-            StudentAccessService access,
-            AuthorshipService authorship,
-            Actor actor,
-            UUID studentId,
-            String correlationId) {
-        try {
-            return access.findVisible(actor, studentId);
-        } catch (DomainException error) {
-            if (error.code() == ErrorCode.RESOURCE_NOT_FOUND && actor.role() == Role.TEACHER) {
-                authorship.record(
-                        actor,
-                        AuthorshipRecord.AUTHORIZATION_DENIED,
-                        AuthorshipTargetType.STUDENT,
-                        studentId,
-                        AuthorshipResult.DENIED,
-                        ErrorCode.RESOURCE_NOT_FOUND.name(),
-                        correlationId);
-            }
-            throw error;
-        }
     }
 
     /**
@@ -104,12 +72,12 @@ public class GetStudentUseCase {
 
         StudentView of(Student student, boolean forTeacher) {
             StudentView.GuardianView guardian =
-                    student.guardianName() == null
-                            ? null
-                            : new StudentView.GuardianView(
+                    hasGuardian(student)
+                            ? new StudentView.GuardianView(
                                     student.guardianName(),
                                     student.guardianPhone(),
-                                    student.guardianEmail());
+                                    student.guardianEmail())
+                            : null;
             List<StudentView.TeacherRef> refs = forTeacher ? List.of() : teachersOf(student);
             Boolean canInactivate =
                     forTeacher ? assignments.countActiveTeachers(student.id()) <= 1 : null;
@@ -123,6 +91,12 @@ public class GetStudentUseCase {
                     guardian,
                     refs,
                     canInactivate);
+        }
+
+        private static boolean hasGuardian(Student student) {
+            return student.guardianName() != null
+                    || student.guardianPhone() != null
+                    || student.guardianEmail() != null;
         }
 
         private List<StudentView.TeacherRef> teachersOf(Student student) {

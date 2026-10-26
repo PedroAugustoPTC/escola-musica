@@ -395,4 +395,25 @@ class RegisterStudentAsTeacherUseCaseTest {
                                 .lookupAlreadyCounted())
                 .isFalse();
     }
+
+    @Test
+    void inactiveTeacherCannotRegisterAndNothingIsSaved() {
+        Teacher inactive = scenario.teacher("Diego Inativo", false);
+        Actor actor = ActorFixtures.teacherWeb(inactive.id());
+
+        DomainException error = refusal(actor, registerCommand(adult("Pessoa Teste", CPF_A)));
+
+        assertThat(error.code()).isEqualTo(ErrorCode.TEACHER_INACTIVE);
+        assertThat(scenario.students.all()).isEmpty();
+        assertThat(scenario.attemptsRepository.all()).isEmpty();
+    }
+
+    @Test
+    void unknownTeacherActorIsNotFound() {
+        Actor ghost = ActorFixtures.teacherWeb(UUID.randomUUID());
+
+        DomainException error = refusal(ghost, registerCommand(adult("Pessoa Teste", CPF_A)));
+
+        assertThat(error.code()).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND);
+    }
 }

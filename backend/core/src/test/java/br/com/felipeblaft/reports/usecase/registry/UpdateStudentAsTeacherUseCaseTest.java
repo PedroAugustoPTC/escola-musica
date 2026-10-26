@@ -248,4 +248,21 @@ class UpdateStudentAsTeacherUseCaseTest {
                 .isEqualTo("UpdateStudentUseCase.Command[studentId=" + mine.id() + "]");
         assertThat(command.lookupAlreadyCounted()).isFalse();
     }
+
+    @Test
+    void inactiveTeacherCannotEditEvenAStudentStillAssociated() {
+        Teacher inactive = scenario.teacher("Diego Inativo", false);
+        Student theirs = scenario.student("Aluno Dele", "1990-03-04", CPF_B, "Piano", inactive);
+
+        DomainException error =
+                refusal(
+                        ActorFixtures.teacherWeb(inactive.id()),
+                        updateCommand(
+                                theirs.id(),
+                                new StudentInput("Outro Nome", null, null, null, null)));
+
+        assertThat(error.code()).isEqualTo(ErrorCode.TEACHER_INACTIVE);
+        assertThat(scenario.students.searchById(theirs.id()).orElseThrow().name())
+                .isEqualTo("Aluno Dele");
+    }
 }

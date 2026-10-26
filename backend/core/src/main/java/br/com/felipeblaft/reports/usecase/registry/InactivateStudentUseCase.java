@@ -4,6 +4,7 @@ import br.com.felipeblaft.reports.domain.access.Actor;
 import br.com.felipeblaft.reports.domain.access.AuthorshipTargetType;
 import br.com.felipeblaft.reports.domain.access.Operation;
 import br.com.felipeblaft.reports.domain.access.Permission;
+import br.com.felipeblaft.reports.domain.access.Role;
 import br.com.felipeblaft.reports.domain.registry.Student;
 import br.com.felipeblaft.reports.port.AssignmentRepository;
 import br.com.felipeblaft.reports.port.ClockPort;
@@ -33,6 +34,7 @@ public class InactivateStudentUseCase {
     private final AssignmentRepository assignments;
     private final AuthorshipService authorship;
     private final ClockPort clock;
+    private final GetStudentUseCase.Views views;
 
     public InactivateStudentUseCase(
             ActorAuthorizationService authorization,
@@ -49,13 +51,14 @@ public class InactivateStudentUseCase {
         this.assignments = Objects.requireNonNull(assignments);
         this.authorship = Objects.requireNonNull(authorship);
         this.clock = Objects.requireNonNull(clock);
+        this.views = new GetStudentUseCase.Views(assignments, teachers, clock);
     }
 
     public StudentView run(Actor actor, Command command) {
         Permission permission = authorization.require(actor, Operation.STUDENT_INACTIVATE);
-        RegistrySupport.requireActiveActor(permission, actor, teachers);
+        RegistrySupport.requireActiveActor(actor, teachers);
         Student student =
-                RegistrySupport.visible(
+                RegistrySupport.findVisibleOrRecordDenial(
                         access, authorship, actor, command.studentId(), command.correlationId());
         RegistrySupport.requireSoleActiveTeacher(
                 permission,
@@ -74,6 +77,6 @@ public class InactivateStudentUseCase {
                     student.id(),
                     command.correlationId());
         }
-        return RegistrySupport.view(actor, student, teachers, assignments, clock);
+        return views.of(student, actor.role() == Role.TEACHER);
     }
 }

@@ -56,6 +56,7 @@ public class UpdateStudentUseCase {
     private final DataProtectionPort protection;
     private final AuthorshipService authorship;
     private final ClockPort clock;
+    private final TeacherRepository teachers;
     private final GetStudentUseCase.Views views;
     private final RegisterStudentUseCase.TeacherCpfGuard guard;
 
@@ -75,6 +76,7 @@ public class UpdateStudentUseCase {
         this.protection = Objects.requireNonNull(protection);
         this.authorship = Objects.requireNonNull(authorship);
         this.clock = Objects.requireNonNull(clock);
+        this.teachers = Objects.requireNonNull(teachers);
         this.views = new GetStudentUseCase.Views(assignments, teachers, clock);
         this.guard = new RegisterStudentUseCase.TeacherCpfGuard(assignments, attempts, authorship);
     }
@@ -82,8 +84,9 @@ public class UpdateStudentUseCase {
     public StudentView run(Actor actor, Command command) {
         Permission permission = authorization.require(actor, Operation.STUDENT_UPDATE);
         boolean byTeacher = permission == Permission.ALLOW_OWN_STUDENTS;
+        RegistrySupport.requireActiveActor(actor, teachers);
         Student student =
-                GetStudentUseCase.findVisibleOrRecordDenial(
+                RegistrySupport.findVisibleOrRecordDenial(
                         access, authorship, actor, command.studentId(), command.correlationId());
         Instant now = clock.now();
         StudentData data = merge(student, command.input());

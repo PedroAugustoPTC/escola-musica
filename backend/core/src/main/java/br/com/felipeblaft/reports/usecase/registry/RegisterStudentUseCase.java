@@ -98,6 +98,7 @@ public class RegisterStudentUseCase {
     public StudentView run(Actor actor, Command command) {
         Permission permission = authorization.require(actor, Operation.STUDENT_REGISTER);
         boolean byTeacher = permission == Permission.ALLOW_OWN_STUDENTS;
+        RegistrySupport.requireActiveActor(actor, teachers);
         Instant now = clock.now();
         StudentData data = validate(command.input(), clock.todayInSchoolTimezone());
         List<Teacher> owners = byTeacher ? List.of() : activeTeachers(command.teacherIds());
