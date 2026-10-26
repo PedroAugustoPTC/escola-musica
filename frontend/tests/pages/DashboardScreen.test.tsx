@@ -51,6 +51,14 @@ describe('TelaPainel (02)', () => {
     expect(router.state.location.pathname).toBe(`/students/${MATTEO.id}/open-report`);
   });
 
+  it('tem o atalho Meus alunos', async () => {
+    mockApi({ 'GET /api/v1/session': { body: LIGHT_SESSION }, 'GET /api/v1/home': { body: HOME } });
+    const user = userEvent.setup();
+    const { router } = renderRoutes(routes, '/');
+    await user.click(await screen.findByRole('button', { name: 'Meus alunos' }));
+    expect(router.state.location.pathname).toBe('/my-students');
+  });
+
   it('registrar aula leva à escolha do aluno', async () => {
     mockApi({ 'GET /api/v1/session': { body: LIGHT_SESSION }, 'GET /api/v1/home': { body: HOME } });
     const user = userEvent.setup();
@@ -66,9 +74,28 @@ describe('TelaPainel (02)', () => {
     });
     renderRoutes(routes, '/');
     expect(await screen.findByText('Nenhum aluno por aqui')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Meus alunos' })).toBeInTheDocument();
     expect(
       screen.getByText('Você ainda não tem alunos. Cadastre o primeiro em “Meus alunos”.'),
     ).toBeInTheDocument();
+  });
+
+  it('sem alunos, orienta cadastrar o primeiro e leva ao formulário', async () => {
+    mockApi({
+      'GET /api/v1/session': { body: LIGHT_SESSION },
+      'GET /api/v1/home': { body: { ...HOME, totalStudents: 0, students: [], openReports: [] } },
+    });
+    const user = userEvent.setup();
+    const { router } = renderRoutes(routes, '/');
+    await user.click(await screen.findByRole('button', { name: 'Cadastrar o primeiro aluno' }));
+    expect(router.state.location.pathname).toBe('/my-students/new');
+  });
+
+  it('com alunos não mostra a orientação de cadastrar o primeiro', async () => {
+    mockApi({ 'GET /api/v1/session': { body: LIGHT_SESSION }, 'GET /api/v1/home': { body: HOME } });
+    renderRoutes(routes, '/');
+    await screen.findByRole('heading', { name: 'Olá, Clara' });
+    expect(screen.queryByRole('button', { name: 'Cadastrar o primeiro aluno' })).not.toBeInTheDocument();
   });
 
   it('menu (02c) com tema e encerrar sessão; 401 leva a Entrar', async () => {

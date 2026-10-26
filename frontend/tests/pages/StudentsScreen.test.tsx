@@ -70,6 +70,22 @@ describe('TelaAlunos (03)', () => {
     await waitFor(() => expect(screen.queryByText(/Nenhum aluno encontrado/)).not.toBeInTheDocument());
   });
 
+  it('a escolha de aluno para aula pede e mostra só alunos ativos', async () => {
+    const api = mockApi({
+      'GET /api/v1/session': { body: LIGHT_SESSION },
+      'GET /api/v1/students': { body: { result: 'ALL', students: STUDENTS } },
+    });
+    renderRoutes(routes, '/students?register=1');
+    expect(await screen.findByRole('heading', { name: 'Para qual aluno?' })).toBeInTheDocument();
+    await screen.findByRole('heading', { name: 'Matteo Mafra' });
+    // nenhum filtro de situação: o servidor só devolve ativos (a lista de inativos fica em Meus alunos)
+    const calls = api.calls.filter((c) => c.url.startsWith('/api/v1/students'));
+    expect(calls.length).toBeGreaterThan(0);
+    expect(calls.every((c) => !/status|inactive|active/i.test(c.url))).toBe(true);
+    expect(screen.queryByText('Inativo')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Reativar/ })).not.toBeInTheDocument();
+  });
+
   it('carregando (03c) anuncia ocupado', async () => {
     mockApi({
       'GET /api/v1/session': { body: LIGHT_SESSION },

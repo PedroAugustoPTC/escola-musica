@@ -1,0 +1,205 @@
+/* Cadastro de alunos (Meus alunos e área administrativa): lista, formulário e filtros.
+   Só tokens do design system; alvos de toque >= 44 px; mobile-first. */
+
+.student-registry {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr));
+  gap: 12px;
+}
+
+.student-registry__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 72px;
+  padding: 12px 16px;
+  border: 1px solid var(--bd);
+  border-radius: 8px;
+  background: var(--sf);
+}
+
+.student-registry__item:hover {
+  background: var(--sf2);
+}
+
+.student-registry__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.student-registry__name {
+  font-weight: 600;
+  color: var(--tx);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+/* o cartão inteiro é alvo de toque */
+.student-registry__name::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.student-registry__name:hover {
+  text-decoration: underline;
+}
+
+.student-registry__chevron {
+  color: var(--mu);
+}
+
+.situation-badge {
+  border: 1px solid currentColor;
+}
+
+.situation-badge--active {
+  background: var(--okbg);
+  color: var(--ok);
+}
+
+.situation-badge--inactive {
+  background: var(--sf2);
+  color: var(--mu);
+}
+
+/* ---------- Formulário de aluno ---------- */
+
+.student-form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.student-form__section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0;
+  padding: 20px;
+  border: 1px solid var(--bd);
+  border-radius: 8px;
+  background: var(--sf);
+  min-width: 0;
+}
+
+.student-form__legend {
+  padding: 0 6px;
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gs);
+}
+
+.student-form__summary {
+  outline-offset: 2px;
+}
+
+.student-form__summary ul {
+  margin: 6px 0 0;
+  padding-left: 20px;
+}
+
+.student-form__summary a {
+  color: var(--err);
+  display: inline-block;
+  min-height: 24px;
+}
+
+.student-form__checkbox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.student-form__checkbox input {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  accent-color: var(--gs);
+}
+
+.student-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.student-form__actions .button {
+  flex: 1 1 160px;
+}
+
+/* ---------- Busca e filtro de situação ---------- */
+
+.student-search {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.student-search__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.student-search__field {
+  flex: 1 1 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.student-search__row .search {
+  max-width: none;
+}
+
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--gd);
+  border-radius: 6px;
+  overflow: hidden;
+  align-self: flex-start;
+}
+
+.segmented__option {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 16px;
+  border: none;
+  border-right: 1px solid var(--gd);
+  background: transparent;
+  color: var(--gs);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.segmented__option:last-child {
+  border-right: none;
+}
+
+.segmented__option[aria-pressed='true'] {
+  background: var(--pbg);
+  color: var(--ptx);
+}
+
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}

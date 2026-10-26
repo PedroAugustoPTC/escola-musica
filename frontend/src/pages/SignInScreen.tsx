@@ -1,5 +1,5 @@
 import { useEffect, useId, useState, type FormEvent } from 'react';
-import { useNavigate, useSearchParams } from 'react-router';
+import { Link, useNavigate, useSearchParams } from 'react-router';
 import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
 import { msg } from '../messages/messages';
@@ -145,6 +145,11 @@ export function SignInScreen() {
               >
                 {signin.isPending ? 'Entrando…' : 'Entrar'}
               </Button>
+              <div>
+                <Link to="/admin/sign-in" className="button button--link">
+                  {msg('ADMIN_LINK_FROM_SIGN_IN')}
+                </Link>
+              </div>
             </form>
           </div>
         </div>

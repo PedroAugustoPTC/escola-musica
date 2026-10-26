@@ -56,8 +56,23 @@ export function DashboardScreen() {
           <h1 className="page-title">{msg('GREETING', { name: firstName(data.teacher.name) })}</h1>
           <p className="subtitle dashboard__subtitle">{msg('HOME_SUBTITLE')}</p>
         </div>
+        <div>
+          <Button variant="secondary" icon="group" onClick={() => navigate('/my-students')}>
+            {msg('HOME_MY_STUDENTS')}
+          </Button>
+        </div>
         {noStudents ? (
-          <EmptyState monogram solid title="Nenhum aluno por aqui" text={msg('NO_STUDENTS')} />
+          <EmptyState
+            monogram
+            solid
+            title="Nenhum aluno por aqui"
+            text={msg('NO_STUDENTS')}
+            action={
+              <Button icon="person_add" onClick={() => navigate('/my-students/new')}>
+                Cadastrar o primeiro aluno
+              </Button>
+            }
+          />
         ) : (
           <>
             {data.openReports.map((report) => (
