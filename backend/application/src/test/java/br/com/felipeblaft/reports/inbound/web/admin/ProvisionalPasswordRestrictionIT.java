@@ -131,7 +131,7 @@ class ProvisionalPasswordRestrictionIT extends AdminWebBase {
                         new AdministratorSessionResult(
                                 administratorId,
                                 "Administrador",
-                                new Secret("novo"),
+                                new Secret("fresh"),
                                 sessionExpiry,
                                 false));
 
@@ -143,7 +143,7 @@ class ProvisionalPasswordRestrictionIT extends AdminWebBase {
                                 .cookie(adminCookie(PROVISIONAL))
                                 .with(csrf().asHeader())
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"newPassword\":\"senha-definitiva-bem-longa\"}"))
+                                .content("{\"newPassword\":\"final-password-long-enough\"}"))
                 .andExpect(status().isOk());
         mvc.perform(
                         MockMvcRequestBuilders.delete(BASE + "/session")
@@ -159,21 +159,21 @@ class ProvisionalPasswordRestrictionIT extends AdminWebBase {
     @Test
     void secondSessionWithTheProvisionalPasswordIsRevokedByTheChangeAndNeverGetsFullAccess()
             throws Exception {
-        authenticate("sessao-a", true);
-        authenticate("sessao-b", true);
-        mvc.perform(get(BASE + "/teachers").cookie(adminCookie("sessao-b")))
+        authenticate("session-a", true);
+        authenticate("session-b", true);
+        mvc.perform(get(BASE + "/teachers").cookie(adminCookie("session-b")))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("PASSWORD_CHANGE_REQUIRED"));
 
         // a troca na sessão A revoga as outras e abre uma sessão nova sem restrição
-        revoke("sessao-b", ErrorCode.SESSION_EXPIRED);
-        authenticate("sessao-nova", false);
+        revoke("session-b", ErrorCode.SESSION_EXPIRED);
+        authenticate("session-fresh", false);
 
-        mvc.perform(get(BASE + "/teachers").cookie(adminCookie("sessao-b")))
+        mvc.perform(get(BASE + "/teachers").cookie(adminCookie("session-b")))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("SESSION_EXPIRED"));
         MvcResult fresh =
-                mvc.perform(get(BASE + "/teachers").cookie(adminCookie("sessao-nova"))).andReturn();
+                mvc.perform(get(BASE + "/teachers").cookie(adminCookie("session-fresh"))).andReturn();
         assertThat(fresh.getResponse().getStatus()).isNotIn(401, 403);
     }
 }

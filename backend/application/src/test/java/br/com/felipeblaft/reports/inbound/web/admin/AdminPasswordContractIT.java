@@ -27,7 +27,7 @@ import org.springframework.test.web.servlet.MvcResult;
 /** Contrato de {@code PUT /admin/password} (FR-034a): troca da senha provisória e cookie novo. */
 class AdminPasswordContractIT extends AdminWebBase {
 
-    private static final String NEW_PASSWORD = "senha-definitiva-bem-longa";
+    private static final String NEW_PASSWORD = "final-password-long-enough";
     private static final String BODY = "{\"newPassword\":\"" + NEW_PASSWORD + "\"}";
 
     @Test
@@ -38,7 +38,7 @@ class AdminPasswordContractIT extends AdminWebBase {
                         new AdministratorSessionResult(
                                 administratorId,
                                 "Administrador de Teste",
-                                new Secret("token-depois-da-troca"),
+                                new Secret("token-after-the-change"),
                                 sessionExpiry,
                                 false));
 
@@ -62,7 +62,7 @@ class AdminPasswordContractIT extends AdminWebBase {
                             .andReturn();
 
             assertThat(result.getResponse().getHeader("Set-Cookie"))
-                    .startsWith("admin_session=token-depois-da-troca;")
+                    .startsWith("admin_session=token-after-the-change;")
                     .contains("HttpOnly")
                     .contains("Secure")
                     .contains("SameSite=Strict")

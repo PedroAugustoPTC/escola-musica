@@ -43,7 +43,7 @@ class AdminSessionContractIT extends AdminWebBase {
     private static final JsonMapper JSON = JsonMapper.builder().build();
     private static final String SIGN_IN_BODY =
             "{\"email\":\"administrator.test@example.test\",\"password\":\"long-test-password-1\"}";
-    private static final String INTERNAL_DETAIL = "detalhe-interno-secreto-xyz";
+    private static final String INTERNAL_DETAIL = "secret-internal-detail-xyz";
 
     private AdministratorSessionResult opened(String token, boolean mustChange) {
         return new AdministratorSessionResult(
@@ -73,7 +73,7 @@ class AdminSessionContractIT extends AdminWebBase {
 
     @Test
     void signInReturnsSessionAndSetsRestrictedCookie() throws Exception {
-        given(signIn.run(any())).willReturn(opened("novo-token-1", false));
+        given(signIn.run(any())).willReturn(opened("fresh-token-1", false));
 
         MvcResult result =
                 signInRequest("200.1.1.1", null)
@@ -88,7 +88,7 @@ class AdminSessionContractIT extends AdminWebBase {
 
         String cookie = result.getResponse().getHeader("Set-Cookie");
         assertThat(cookie)
-                .startsWith("admin_session=novo-token-1;")
+                .startsWith("admin_session=fresh-token-1;")
                 .contains("HttpOnly")
                 .contains("Secure")
                 .contains("SameSite=Strict")
@@ -96,7 +96,7 @@ class AdminSessionContractIT extends AdminWebBase {
                 .doesNotContain("Max-Age")
                 .doesNotContain("Expires");
         assertThat(result.getResponse().getContentAsString())
-                .doesNotContain("novo-token-1")
+                .doesNotContain("fresh-token-1")
                 .doesNotContain("long-test-password-1");
 
         ArgumentCaptor<SignInAdministratorUseCase.Command> command =
@@ -110,21 +110,21 @@ class AdminSessionContractIT extends AdminWebBase {
 
     @Test
     void sessionIdentifierComesFromTheServerNeverFromTheClient() throws Exception {
-        given(signIn.run(any())).willReturn(opened("emitido-pelo-servidor", false));
+        given(signIn.run(any())).willReturn(opened("issued-by-the-server", false));
 
         MvcResult result =
                 mvc.perform(
                                 post(BASE + "/session")
                                         .with(csrf().asHeader())
-                                        .cookie(adminCookie("fixado-pelo-cliente"))
+                                        .cookie(adminCookie("set-by-the-client"))
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(SIGN_IN_BODY))
                         .andExpect(status().isOk())
                         .andReturn();
 
         assertThat(result.getResponse().getHeader("Set-Cookie"))
-                .contains("admin_session=emitido-pelo-servidor")
-                .doesNotContain("fixado-pelo-cliente");
+                .contains("admin_session=issued-by-the-server")
+                .doesNotContain("set-by-the-client");
     }
 
     @Test

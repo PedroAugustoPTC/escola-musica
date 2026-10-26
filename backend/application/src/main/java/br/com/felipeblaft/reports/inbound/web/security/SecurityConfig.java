@@ -42,7 +42,7 @@ public class SecurityConfig {
             HttpSecurity http,
             ValidateSessionWebUseCase validateSession,
             SessionCookie cookieSession,
-            CrossCredentialResponder crossCredential,
+            CrossCredentialAnswerer crossCredential,
             MessageCatalog catalog,
             ApplicationProperties properties)
             throws Exception {

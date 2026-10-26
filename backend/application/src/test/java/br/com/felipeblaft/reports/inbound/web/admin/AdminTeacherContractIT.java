@@ -145,7 +145,7 @@ class AdminTeacherContractIT extends AdminWebBase {
         mvc.perform(
                         asAdmin(post(BASE + "/teachers"))
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"name\":\"Outra\",\"email\":\"clara@example.test\"}"))
+                                .content("{\"name\":\"Another\",\"email\":\"clara@example.test\"}"))
                 .andExpect(status().isConflict())
                 .andExpect(followsContract())
                 .andExpect(jsonPath("$.code").value("DUPLICATE_EMAIL"))
@@ -201,7 +201,7 @@ class AdminTeacherContractIT extends AdminWebBase {
     @Test
     void malformedIdentifierIsNotFoundOrInvalidNeverServerError() throws Exception {
         MvcResult result =
-                mvc.perform(get(BASE + "/teachers/nao-e-uuid").cookie(adminCookie(ADMIN_TOKEN)))
+                mvc.perform(get(BASE + "/teachers/not-a-uuid").cookie(adminCookie(ADMIN_TOKEN)))
                         .andReturn();
         assertThat(result.getResponse().getStatus()).isEqualTo(400);
     }
@@ -213,7 +213,7 @@ class AdminTeacherContractIT extends AdminWebBase {
         mvc.perform(
                         asAdmin(patch(BASE + "/teachers/" + TEACHER))
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"name\":\"Clara S.\",\"email\":\"nova@example.test\"}"))
+                                .content("{\"name\":\"Clara S.\",\"email\":\"fresh@example.test\"}"))
                 .andExpect(status().isOk())
                 .andExpect(followsContract());
 
@@ -222,7 +222,7 @@ class AdminTeacherContractIT extends AdminWebBase {
         verify(updateTeacher).run(any(Actor.class), command.capture());
         assertThat(command.getValue().teacherId()).isEqualTo(TEACHER);
         assertThat(command.getValue().name()).isEqualTo("Clara S.");
-        assertThat(command.getValue().email()).isEqualTo("nova@example.test");
+        assertThat(command.getValue().email()).isEqualTo("fresh@example.test");
     }
 
     @Test

@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
  * seu cookie; esta classe apenas decide se o cookie do outro papel estava presente e valia.
  */
 @Component
-public class CrossCredentialResponder {
+public class CrossCredentialAnswerer {
 
     private final ValidateSessionWebUseCase validateTeacher;
     private final ValidateAdministratorSessionUseCase validateAdministrator;
@@ -27,7 +27,7 @@ public class CrossCredentialResponder {
     private final AdminSessionCookie administratorCookie;
     private final MessageCatalog catalog;
 
-    public CrossCredentialResponder(
+    public CrossCredentialAnswerer(
             ValidateSessionWebUseCase validateTeacher,
             ValidateAdministratorSessionUseCase validateAdministrator,
             SessionCookie teacherCookie,

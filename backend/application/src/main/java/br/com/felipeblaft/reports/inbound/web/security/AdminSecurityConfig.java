@@ -20,7 +20,7 @@ import org.springframework.security.web.access.intercept.AuthorizationFilter;
  * Cache-Control: no-store}. Entrar e ativar a conta são as únicas rotas sem credencial.
  *
  * <p>Sem credencial: 401. Com a credencial válida do professor e sem a do administrador: a resposta
- * de rota inexistente ({@link CrossCredentialResponder}). Fica antes da cadeia geral do professor.
+ * de rota inexistente ({@link CrossCredentialAnswerer}). Fica antes da cadeia geral do professor.
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
@@ -34,7 +34,7 @@ public class AdminSecurityConfig {
             HttpSecurity http,
             ValidateAdministratorSessionUseCase validateSession,
             AdminSessionCookie cookie,
-            CrossCredentialResponder crossCredential,
+            CrossCredentialAnswerer crossCredential,
             MessageCatalog catalog,
             ApplicationProperties properties)
             throws Exception {

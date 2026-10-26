@@ -103,8 +103,8 @@ class AdminSecurityChainIT extends AdminWebBase {
                     mvc.perform(
                                     route.builder()
                                             .cookie(adminCookie(ADMIN_TOKEN))
-                                            .cookie(new Cookie("XSRF-TOKEN", "um-valor"))
-                                            .header("X-CSRF-TOKEN", "outro-valor"))
+                                            .cookie(new Cookie("XSRF-TOKEN", "a-value"))
+                                            .header("X-CSRF-TOKEN", "another-value"))
                             .andReturn();
             assertThat(wrongToken.getResponse().getStatus())
                     .as("%s %s com token errado", route.method(), route.uri())

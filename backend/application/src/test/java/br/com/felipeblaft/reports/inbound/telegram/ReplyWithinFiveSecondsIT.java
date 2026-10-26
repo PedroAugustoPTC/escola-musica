@@ -101,7 +101,8 @@ class ReplyWithinFiveSecondsIT extends OrchestratorDeliveryBase {
         assertThat(spent).isLessThanOrEqualTo(LIMIT);
         assertThat(sentTexts()).hasSize(1);
         assertThat(sentTexts().getFirst())
-                .matches("Algo deu errado\\. Informe o código de referência [A-Z0-9]{8} ao suporte\\.");
+                .matches(
+                        "Algo deu errado\\. Informe o código de referência [A-Z0-9]{8} ao suporte\\.");
     }
 
     @Test

@@ -40,7 +40,7 @@ class AdminAdministratorContractIT extends AdminWebBase {
 
     private static final UUID OTHER = UUID.fromString("00000000-0000-4000-8000-0000000000a2");
     private static final String ACTIVATION_CODE = "K7QM2XPA9TBD";
-    private static final String NEW_PASSWORD = "uma-senha-nova-bem-longa";
+    private static final String NEW_PASSWORD = "a-new-long-password";
 
     private AdministratorView view(ActivationState state, boolean active) {
         return new AdministratorView(
@@ -138,7 +138,7 @@ class AdminAdministratorContractIT extends AdminWebBase {
         mvc.perform(
                         asAdmin(post(BASE + "/administrators"))
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"name\":\"Outra\",\"email\":\"maria@example.test\"}"))
+                                .content("{\"name\":\"Another\",\"email\":\"maria@example.test\"}"))
                 .andExpect(status().isConflict())
                 .andExpect(followsContract())
                 .andExpect(jsonPath("$.details.name").value("Maria Diretora"));
