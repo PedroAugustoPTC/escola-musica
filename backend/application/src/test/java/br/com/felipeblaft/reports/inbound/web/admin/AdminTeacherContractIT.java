@@ -213,7 +213,8 @@ class AdminTeacherContractIT extends AdminWebBase {
         mvc.perform(
                         asAdmin(patch(BASE + "/teachers/" + TEACHER))
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"name\":\"Clara S.\",\"email\":\"fresh@example.test\"}"))
+                                .content(
+                                        "{\"name\":\"Clara S.\",\"email\":\"fresh@example.test\"}"))
                 .andExpect(status().isOk())
                 .andExpect(followsContract());
 

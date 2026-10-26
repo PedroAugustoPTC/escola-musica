@@ -140,7 +140,9 @@ class CrossCredentialAnswererIT extends AdminWebBase {
     void staleCookiesOfTheOtherRoleDoNotTurnIntoNotFound() throws Exception {
         // cookie do professor que já não vale: a rota administrativa pede a entrada do
         // administrador
-        mvc.perform(get(BASE + "/session").cookie(new Cookie("session", "token-that-does-not-exist")))
+        mvc.perform(
+                        get(BASE + "/session")
+                                .cookie(new Cookie("session", "token-that-does-not-exist")))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("NOT_AUTHENTICATED"));
         // cookie do administrador que já não vale: a rota do professor pede a entrada do professor
@@ -167,7 +169,10 @@ class CrossCredentialAnswererIT extends AdminWebBase {
 
         // sessão de administrador vencida e a do professor válida: 401 do administrador, não 404
         MvcResult expired =
-                run(get(BASE + "/teachers").cookie(teacherCookie).cookie(adminCookie("expired-token")));
+                run(
+                        get(BASE + "/teachers")
+                                .cookie(teacherCookie)
+                                .cookie(adminCookie("expired-token")));
         assertThat(expired.getResponse().getStatus()).isEqualTo(401);
         assertThat(expired.getResponse().getContentAsString()).contains("SESSION_EXPIRED");
     }

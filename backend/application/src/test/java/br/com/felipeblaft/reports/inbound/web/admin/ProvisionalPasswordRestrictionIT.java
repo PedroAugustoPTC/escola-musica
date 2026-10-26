@@ -173,7 +173,8 @@ class ProvisionalPasswordRestrictionIT extends AdminWebBase {
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("SESSION_EXPIRED"));
         MvcResult fresh =
-                mvc.perform(get(BASE + "/teachers").cookie(adminCookie("session-fresh"))).andReturn();
+                mvc.perform(get(BASE + "/teachers").cookie(adminCookie("session-fresh")))
+                        .andReturn();
         assertThat(fresh.getResponse().getStatus()).isNotIn(401, 403);
     }
 }
