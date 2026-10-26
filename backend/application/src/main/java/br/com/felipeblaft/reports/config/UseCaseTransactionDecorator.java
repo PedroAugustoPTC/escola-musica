@@ -16,7 +16,7 @@ import org.springframework.transaction.interceptor.TransactionInterceptor;
 /**
  * Envolve cada método público dos casos de uso do núcleo numa transação, sem que o núcleo conheça
  * Spring (Princípio I). Os casos de uso são classes simples; o proxy é aplicado aos beans cujo nome
- * termina em {@code CasoDeUso}.
+ * termina em {@code UseCase}.
  */
 @Configuration(proxyBeanMethods = false)
 public class UseCaseTransactionDecorator {
