@@ -2,6 +2,7 @@ package br.com.felipeblaft.reports.config;
 
 import br.com.felipeblaft.reports.port.AssignmentRepository;
 import br.com.felipeblaft.reports.port.ClockPort;
+import br.com.felipeblaft.reports.port.CpfDecryptionPort;
 import br.com.felipeblaft.reports.port.CpfKeyRotationPort;
 import br.com.felipeblaft.reports.port.DataProtectionPort;
 import br.com.felipeblaft.reports.port.OpenReportsQueryPort;
@@ -189,6 +190,8 @@ public class StudentRegistryUseCaseConfig {
     CollectStudentRegistrationFieldUseCase collectStudentRegistrationFieldUseCase(
             ActorAuthorizationService authorization,
             StudentRegistrationDraftRepository drafts,
+            StudentRepository students,
+            AssignmentRepository assignments,
             DataProtectionPort protection,
             AccessAttemptsControlService attempts,
             AuthorshipService authorship,
@@ -197,6 +200,8 @@ public class StudentRegistryUseCaseConfig {
         return new CollectStudentRegistrationFieldUseCase(
                 authorization,
                 drafts,
+                students,
+                assignments,
                 protection,
                 attempts,
                 authorship,
@@ -212,6 +217,7 @@ public class StudentRegistryUseCaseConfig {
             UpdateStudentUseCase update,
             InactivateStudentUseCase inactivate,
             ReactivateStudentUseCase reactivate,
+            CpfDecryptionPort cpfDecryption,
             TransactionPort transaction,
             ClockPort clock) {
         return new ConfirmStudentRegistrationUseCase(
@@ -221,6 +227,7 @@ public class StudentRegistryUseCaseConfig {
                 update,
                 inactivate,
                 reactivate,
+                cpfDecryption,
                 transaction,
                 clock);
     }

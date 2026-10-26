@@ -4,6 +4,7 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import br.com.felipeblaft.reports.port.StudentRepository;
+import br.com.felipeblaft.reports.usecase.registry.CollectStudentRegistrationFieldUseCase;
 import br.com.felipeblaft.reports.usecase.registry.RegisterStudentUseCase;
 import br.com.felipeblaft.reports.usecase.registry.UpdateStudentUseCase;
 import com.tngtech.archunit.base.DescribedPredicate;
@@ -26,7 +27,11 @@ class StudentCpfRulesTest {
 
     /** Cadastro e edição, com as classes aninhadas e geradas por eles. */
     private static final Set<String> ALLOWED =
-            Set.of(RegisterStudentUseCase.class.getName(), UpdateStudentUseCase.class.getName());
+            Set.of(
+                    RegisterStudentUseCase.class.getName(),
+                    UpdateStudentUseCase.class.getName(),
+                    // o CPF digitado no Telegram é checado na hora, com as mesmas regras
+                    CollectStudentRegistrationFieldUseCase.class.getName());
 
     private static final JavaClasses CORE =
             new ClassFileImporter()
