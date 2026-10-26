@@ -65,8 +65,8 @@ public sealed interface TelegramOutput {
     /**
      * Apaga uma mensagem do professor (a que trouxe um CPF, FR-036). Ação só de transporte: sai
      * sempre <em>antes</em> da próxima pergunta. Carrega apenas os identificadores, nunca o
-     * conteúdo. A {@code compensation} é o aviso entregue se o Telegram recusar apagar (FR-036); nulo
-     * quando não há alternativa.
+     * conteúdo. A {@code compensation} é o aviso entregue se o Telegram recusar apagar (FR-036);
+     * nulo quando não há alternativa.
      */
     record DeleteMessage(long chatId, long messageId, Message compensation)
             implements TelegramOutput {

@@ -34,7 +34,7 @@ class TelegramChannelContractIT extends TelegramConversationBase {
 
     private static final String BASE = "/internal/v1/channel/telegram";
     private static final String INTERNAL_ERROR_TEXT =
-            "Algo deu errado\. Informe o código de referência [A-Z0-9]{8} ao suporte\.";
+            "Algo deu errado\\. Informe o código de referência [A-Z0-9]{8} ao suporte\\.";
 
     @MockitoSpyBean TelegramConversationInterpreter interpreter;
 

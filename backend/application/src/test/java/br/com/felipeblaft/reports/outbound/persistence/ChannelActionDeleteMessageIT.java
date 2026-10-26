@@ -62,7 +62,12 @@ class ChannelActionDeleteMessageIT extends IntegrationBase {
         assertThat(read.type()).isEqualTo(ChannelActionType.DELETE_MESSAGE);
         assertThat(read.state()).isEqualTo(ChannelActionState.PENDING);
         assertThat(read.chatId()).isEqualTo(4567L);
-        assertThat(tools.jackson.databind.json.JsonMapper.builder().build().readTree(read.payload()).path("messageId").asLong())
+        assertThat(
+                        tools.jackson.databind.json.JsonMapper.builder()
+                                .build()
+                                .readTree(read.payload())
+                                .path("messageId")
+                                .asLong())
                 .isEqualTo(89L);
         assertThat(read.compensation()).contains("aviso");
         assertThat(read.compensatesBy("MESSAGE_NOT_DELETABLE")).isTrue();
