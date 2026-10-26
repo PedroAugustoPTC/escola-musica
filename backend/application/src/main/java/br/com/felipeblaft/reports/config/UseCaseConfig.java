@@ -34,6 +34,7 @@ import br.com.felipeblaft.reports.service.AccessAttemptsControlService;
 import br.com.felipeblaft.reports.service.AccessCodeIssuanceService;
 import br.com.felipeblaft.reports.service.AccessRenewalService;
 import br.com.felipeblaft.reports.service.AudioSendingService;
+import br.com.felipeblaft.reports.service.AuthorshipService;
 import br.com.felipeblaft.reports.service.AuthorizationService;
 import br.com.felipeblaft.reports.service.CodeAuthenticationService;
 import br.com.felipeblaft.reports.service.DocumentGenerationService;
@@ -41,6 +42,8 @@ import br.com.felipeblaft.reports.service.JobProcessorService;
 import br.com.felipeblaft.reports.service.ReportAccessService;
 import br.com.felipeblaft.reports.service.SemesterAccessService;
 import br.com.felipeblaft.reports.service.SemesterProcessorService;
+import br.com.felipeblaft.reports.service.TeacherAccessAuditService;
+import br.com.felipeblaft.reports.service.TelegramLinkTerminationService;
 import br.com.felipeblaft.reports.service.TemporaryAudioService;
 import br.com.felipeblaft.reports.usecase.access.EndTelegramLinkUseCase;
 import br.com.felipeblaft.reports.usecase.access.EndWebSessionUseCase;
@@ -147,6 +150,12 @@ public class UseCaseConfig {
         return new CodeAuthenticationService(attempts, teachers, protection, clock);
     }
 
+    @Bean
+    TeacherAccessAuditService teacherAccessAuditService(
+            AuthorshipService authorship, DataProtectionPort protection) {
+        return new TeacherAccessAuditService(authorship, protection);
+    }
+
     // ---- Carga inicial
 
     @Bean
@@ -176,10 +185,11 @@ public class UseCaseConfig {
             WebSessionRepository sessions,
             TelegramLinkRepository links,
             DataProtectionPort protection,
+            TeacherAccessAuditService audit,
             ClockPort clock,
             BusinessParameters parameters) {
         return new SignInPortalUseCase(
-                authentication, renewal, sessions, links, protection, clock, parameters);
+                authentication, renewal, sessions, links, protection, audit, clock, parameters);
     }
 
     @Bean
@@ -205,21 +215,24 @@ public class UseCaseConfig {
             CodeAuthenticationService authentication,
             AccessRenewalService renewal,
             TelegramLinkRepository links,
+            TeacherAccessAuditService audit,
             ClockPort clock) {
-        return new LinkTelegramUseCase(authentication, renewal, links, clock);
+        return new LinkTelegramUseCase(authentication, renewal, links, audit, clock);
     }
 
     @Bean
     IdentifyTelegramTeacherUseCase identifyTeacherTelegramUseCase(
             TelegramLinkRepository links,
             TeacherRepository teachers,
-            AccessRenewalService renewal) {
-        return new IdentifyTelegramTeacherUseCase(links, teachers, renewal);
+            AccessRenewalService renewal,
+            TelegramLinkTerminationService termination) {
+        return new IdentifyTelegramTeacherUseCase(links, teachers, renewal, termination);
     }
 
     @Bean
-    EndTelegramLinkUseCase endTelegramLinkUseCase(TelegramLinkRepository links) {
-        return new EndTelegramLinkUseCase(links);
+    EndTelegramLinkUseCase endTelegramLinkUseCase(
+            TelegramLinkRepository links, TelegramLinkTerminationService termination) {
+        return new EndTelegramLinkUseCase(links, termination);
     }
 
     @Bean
