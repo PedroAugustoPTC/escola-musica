@@ -3,12 +3,12 @@ package br.com.felipeblaft.reports.outbound.persistence;
 import br.com.felipeblaft.reports.domain.registry.Student;
 import br.com.felipeblaft.reports.domain.registry.StudentScope;
 import br.com.felipeblaft.reports.domain.registry.StudentStatusFilter;
-import br.com.felipeblaft.reports.outbound.PendingImplementation;
 import br.com.felipeblaft.reports.port.StudentRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 class StudentRepositoryAdapter implements StudentRepository {
@@ -41,16 +41,44 @@ class StudentRepositoryAdapter implements StudentRepository {
 
     @Override
     public Optional<Student> findVisible(StudentScope scope, UUID id) {
-        throw PendingImplementation.of("W-G");
+        Optional<StudentEntity> found =
+                scope.unrestricted()
+                        ? jpa.findById(id)
+                        : jpa.findVisibleToTeacher(id, scope.teacherId());
+        return found.map(RegistryMapper::toDomain);
     }
 
     @Override
     public List<Student> list(StudentScope scope, StudentStatusFilter status) {
-        throw PendingImplementation.of("W-G");
+        List<Boolean> states =
+                switch (status) {
+                    case ACTIVE -> List.of(true);
+                    case INACTIVE -> List.of(false);
+                    case ALL -> List.of(true, false);
+                };
+        List<StudentEntity> entities =
+                scope.unrestricted()
+                        ? jpa.listByState(states)
+                        : jpa.listByTeacherAndState(scope.teacherId(), states);
+        return entities.stream().map(RegistryMapper::toDomain).toList();
     }
 
     @Override
+    @Transactional
     public boolean insertIfAbsent(Student student) {
-        throw PendingImplementation.of("W-G");
+        return jpa.insertIfNewCpf(
+                        student.id(),
+                        student.name(),
+                        student.birthDate(),
+                        student.encryptedCpf(),
+                        student.cpfHash(),
+                        student.guardianName(),
+                        student.guardianPhone(),
+                        student.guardianEmail(),
+                        student.instrument(),
+                        student.active(),
+                        student.createdAt(),
+                        student.updatedAt())
+                > 0;
     }
 }

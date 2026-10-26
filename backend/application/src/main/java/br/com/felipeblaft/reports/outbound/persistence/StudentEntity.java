@@ -29,6 +29,12 @@ public class StudentEntity {
     @Column(name = "guardian_name")
     private String guardianName;
 
+    @Column(name = "guardian_phone")
+    private String guardianPhone;
+
+    @Column(name = "guardian_email")
+    private String guardianEmail;
+
     private String instrument;
 
     @Column(nullable = false)
@@ -49,6 +55,8 @@ public class StudentEntity {
             byte[] cpfEncrypted,
             String cpfHash,
             String guardianName,
+            String guardianPhone,
+            String guardianEmail,
             String instrument,
             boolean active,
             Instant createdAt,
@@ -59,6 +67,8 @@ public class StudentEntity {
         this.cpfEncrypted = cpfEncrypted;
         this.cpfHash = cpfHash;
         this.guardianName = guardianName;
+        this.guardianPhone = guardianPhone;
+        this.guardianEmail = guardianEmail;
         this.instrument = instrument;
         this.active = active;
         this.createdAt = createdAt;
@@ -87,6 +97,14 @@ public class StudentEntity {
 
     String getGuardianName() {
         return guardianName;
+    }
+
+    String getGuardianPhone() {
+        return guardianPhone;
+    }
+
+    String getGuardianEmail() {
+        return guardianEmail;
     }
 
     String getInstrument() {
