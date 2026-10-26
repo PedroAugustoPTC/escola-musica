@@ -26,7 +26,7 @@ class RotateCpfKeysUseCaseTest {
                 if (failure != null) {
                     throw failure;
                 }
-                return new CpfKeyRotationPort.Report(7, options.rotateDigestSecret() ? 2 : 0);
+                return new CpfKeyRotationPort.Report(7, options.rotateDigestSecret() ? 2 : 0, 1);
             };
 
     private final RotateCpfKeysUseCase useCase = new RotateCpfKeysUseCase(rotation, transaction);
@@ -35,7 +35,7 @@ class RotateCpfKeysUseCaseTest {
     void encryptionKeyOnlyRotatesInATransactionWithoutInvalidatingCodes() {
         CpfKeyRotationPort.Report report = useCase.run(new Command(true, false, false, false));
 
-        assertThat(report).isEqualTo(new CpfKeyRotationPort.Report(7, 0));
+        assertThat(report).isEqualTo(new CpfKeyRotationPort.Report(7, 0, 1));
         assertThat(received).containsExactly(new CpfKeyRotationPort.Options(true, false, false));
         assertThat(transaction.committed).isEqualTo(1);
         assertThat(transaction.rolledBack).isZero();
@@ -57,7 +57,7 @@ class RotateCpfKeysUseCaseTest {
     void confirmedDigestSecretRotatesAndReportsTheInvalidatedCodes() {
         CpfKeyRotationPort.Report report = useCase.run(new Command(true, true, false, true));
 
-        assertThat(report).isEqualTo(new CpfKeyRotationPort.Report(7, 2));
+        assertThat(report).isEqualTo(new CpfKeyRotationPort.Report(7, 2, 1));
         assertThat(received).containsExactly(new CpfKeyRotationPort.Options(true, true, false));
     }
 
@@ -65,7 +65,7 @@ class RotateCpfKeysUseCaseTest {
     void simulationCountsInATransactionThatIsRolledBackEvenWithoutConfirmation() {
         CpfKeyRotationPort.Report report = useCase.run(new Command(false, true, true, false));
 
-        assertThat(report).isEqualTo(new CpfKeyRotationPort.Report(7, 2));
+        assertThat(report).isEqualTo(new CpfKeyRotationPort.Report(7, 2, 1));
         assertThat(received).containsExactly(new CpfKeyRotationPort.Options(false, true, true));
         assertThat(transaction.rolledBack).isEqualTo(1);
         assertThat(transaction.committed).isZero();

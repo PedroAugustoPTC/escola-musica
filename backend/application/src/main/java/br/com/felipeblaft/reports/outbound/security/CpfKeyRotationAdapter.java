@@ -29,8 +29,9 @@ import org.springframework.stereotype.Component;
  * ROTATE_OLD_HMAC_SECRET} e {@code ROTATE_NEW_HMAC_SECRET}; a chave antiga omitida vale a
  * configurada no servidor. Cada CPF é decifrado em memória, recifrado com a chave nova e tem o
  * resumo recalculado com o segredo novo; os resumos novos são conferidos contra colisão antes de
- * qualquer gravação. Nada é registrado, impresso ou gravado em claro: só contagens. Roda na
- * transação do chamador (o caso de uso a desfaz em {@code --simulate} ou em colisão).
+ * qualquer gravação. Os rascunhos de cadastro do Telegram (cifrados com a chave antiga) são
+ * descartados na mesma transação. Nada é registrado, impresso ou gravado em claro: só contagens.
+ * Roda na transação do chamador (o caso de uso a desfaz em {@code --simulate} ou em colisão).
  */
 @Component
 class CpfKeyRotationAdapter implements CpfKeyRotationPort {
@@ -76,7 +77,8 @@ class CpfKeyRotationAdapter implements CpfKeyRotationPort {
         }
         write(rotated);
         int invalidated = options.rotateDigestSecret() ? invalidateAccessCodes() : 0;
-        return new Report(rotated.size(), invalidated);
+        int discarded = discardDrafts();
+        return new Report(rotated.size(), invalidated, discarded);
     }
 
     // ---- Leitura e recálculo
@@ -156,6 +158,15 @@ class CpfKeyRotationAdapter implements CpfKeyRotationPort {
         return jdbc.update(
                 "update teacher set access_code_hash = null, access_code_expires_at = null,"
                         + " access_code_renewed_at = null where access_code_hash is not null");
+    }
+
+    /**
+     * Os rascunhos de cadastro do Telegram (30 min) guardam o CPF cifrado com a chave antiga e o
+     * resumo com o segredo antigo: depois da rotação não servem mais e são descartados na mesma
+     * transação. O professor recomeça o cadastro. Devolve só a contagem.
+     */
+    private int discardDrafts() {
+        return jdbc.update("delete from student_registration_draft");
     }
 
     // ---- Chaves e criptografia

@@ -52,7 +52,8 @@ class RotateCpfKeyCommandTest {
                     if (failure != null) {
                         throw failure;
                     }
-                    return new CpfKeyRotationPort.Report(4, options.rotateDigestSecret() ? 2 : 0);
+                    return new CpfKeyRotationPort.Report(
+                            4, options.rotateDigestSecret() ? 2 : 0, 3);
                 };
         return new RotateCpfKeyCommand(new RotateCpfKeysUseCase(port, transaction), environment);
     }
@@ -79,7 +80,7 @@ class RotateCpfKeyCommandTest {
         RotateCpfKeyCommand command =
                 new RotateCpfKeyCommand(
                         new RotateCpfKeysUseCase(
-                                options -> new CpfKeyRotationPort.Report(0, 0), transaction),
+                                options -> new CpfKeyRotationPort.Report(0, 0, 0), transaction),
                         environment);
 
         assertThat(command.run(List.of("rotate-cpf-key"), output)).isEqualTo(2);
@@ -108,7 +109,8 @@ class RotateCpfKeyCommandTest {
         assertThat(text())
                 .contains("Rotação concluída")
                 .contains("Alunos recifrados: 4")
-                .contains("Códigos de acesso invalidados: 2");
+                .contains("Códigos de acesso invalidados: 2")
+                .contains("Rascunhos de cadastro do Telegram descartados: 3");
         assertThat(received).containsExactly(new CpfKeyRotationPort.Options(true, true, false));
         assertThat(transactions).containsExactly("run");
     }

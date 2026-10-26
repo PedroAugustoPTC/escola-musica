@@ -17,7 +17,7 @@ public interface CpfKeyRotationPort {
     record Options(boolean rotateEncryptionKey, boolean rotateDigestSecret, boolean simulate) {}
 
     /** Contagens do que foi (ou seria) rotacionado; nunca CPF. */
-    record Report(int rotatedStudents, int invalidatedAccessCodes) {}
+    record Report(int rotatedStudents, int invalidatedAccessCodes, int discardedDrafts) {}
 
     Report rotate(Options options);
 }

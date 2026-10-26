@@ -61,6 +61,9 @@ public class RotateCpfKeyCommand {
                             : "Rotação concluída. Reinicie o serviço com as chaves novas.");
             output.printf("Alunos recifrados: %d%n", report.rotatedStudents());
             output.printf("Códigos de acesso invalidados: %d%n", report.invalidatedAccessCodes());
+            output.printf(
+                    "Rascunhos de cadastro do Telegram descartados: %d%n",
+                    report.discardedDrafts());
             return 0;
         } catch (RotationRefusedException refusal) {
             return refuse(refusal.reason(), output);
