@@ -49,8 +49,12 @@ public class StudentRegistryUseCaseConfig {
 
     @Bean
     ListStudentsUseCase listStudentsUseCase(
-            ActorAuthorizationService authorization, StudentAccessService access) {
-        return new ListStudentsUseCase(authorization, access);
+            ActorAuthorizationService authorization,
+            StudentAccessService access,
+            AssignmentRepository assignments,
+            TeacherRepository teachers,
+            ClockPort clock) {
+        return new ListStudentsUseCase(authorization, access, assignments, teachers, clock);
     }
 
     @Bean
@@ -59,8 +63,10 @@ public class StudentRegistryUseCaseConfig {
             StudentAccessService access,
             AssignmentRepository assignments,
             TeacherRepository teachers,
+            AuthorshipService authorship,
             ClockPort clock) {
-        return new GetStudentUseCase(authorization, access, assignments, teachers, clock);
+        return new GetStudentUseCase(
+                authorization, access, assignments, teachers, authorship, clock);
     }
 
     @Bean
@@ -86,16 +92,27 @@ public class StudentRegistryUseCaseConfig {
     }
 
     @Bean
+    @SuppressWarnings("java:S107")
     UpdateStudentUseCase updateStudentUseCase(
             ActorAuthorizationService authorization,
             StudentAccessService access,
             StudentRepository students,
+            AssignmentRepository assignments,
+            TeacherRepository teachers,
             DataProtectionPort protection,
             AccessAttemptsControlService attempts,
             AuthorshipService authorship,
             ClockPort clock) {
         return new UpdateStudentUseCase(
-                authorization, access, students, protection, attempts, authorship, clock);
+                authorization,
+                access,
+                students,
+                assignments,
+                teachers,
+                protection,
+                attempts,
+                authorship,
+                clock);
     }
 
     @Bean
