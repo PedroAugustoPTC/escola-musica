@@ -62,6 +62,13 @@ public sealed interface TelegramOutput {
     record StepMessage(long chatId, Long editMessageId, String text, java.util.UUID jobId)
             implements TelegramOutput {}
 
+    /**
+     * Apaga uma mensagem do professor (a que trouxe um CPF, FR-036). Ação só de transporte: sai
+     * sempre <em>antes</em> da próxima pergunta. Carrega apenas os identificadores, nunca o
+     * conteúdo.
+     */
+    record DeleteMessage(long chatId, long messageId) implements TelegramOutput {}
+
     /** Confirma o toque num botão (tira o indicador de carregamento do Telegram). */
     record CallbackReply(String callbackId) implements TelegramOutput {}
 }

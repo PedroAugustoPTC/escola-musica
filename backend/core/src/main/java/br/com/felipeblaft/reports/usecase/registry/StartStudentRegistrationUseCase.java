@@ -22,7 +22,19 @@ public class StartStudentRegistrationUseCase {
     /** {@code studentId} é nulo em {@code CREATE} e obrigatório nos demais tipos. */
     public record Command(UUID linkId, StudentRegistrationDraft.Kind kind, UUID studentId) {}
 
-    public record Result(StudentRegistrationDraft.Kind kind, Instant expiresAt) {}
+    /**
+     * @param confirmationToken token de uso único do resumo de {@code INACTIVATE}/{@code REACTIVATE}
+     *     (que não passam pela coleta de campos); nulo em {@code CREATE} e {@code UPDATE}, cujo
+     *     token vem da coleta
+     */
+    public record Result(
+            StudentRegistrationDraft.Kind kind, Instant expiresAt, String confirmationToken) {
+
+        @Override
+        public String toString() {
+            return "StartStudentRegistrationUseCase.Result[kind=" + kind + "]";
+        }
+    }
 
     public StartStudentRegistrationUseCase(
             ActorAuthorizationService authorization,

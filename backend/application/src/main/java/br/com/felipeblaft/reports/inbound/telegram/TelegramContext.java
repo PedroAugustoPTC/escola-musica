@@ -16,6 +16,7 @@ public final class TelegramContext {
     private final long userId;
     private final long chatId;
     private final Long callbackMessageId;
+    private Long incomingMessageId;
     private Identification identification;
     private boolean endedLink;
     private final List<TelegramOutput> outputs = new ArrayList<>();
@@ -37,6 +38,16 @@ public final class TelegramContext {
     /** Mensagem que continha o botão tocado (para editar no lugar), se o update é um callback. */
     public Long callbackMessageId() {
         return callbackMessageId;
+    }
+
+    /** Id da mensagem de texto do professor que originou o update (para apagá-la, FR-036). */
+    public Long incomingMessageId() {
+        return incomingMessageId;
+    }
+
+    public TelegramContext withIncomingMessage(long messageId) {
+        this.incomingMessageId = messageId;
+        return this;
     }
 
     public void identify(Identification identification) {
