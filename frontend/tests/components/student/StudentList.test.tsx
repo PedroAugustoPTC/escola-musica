@@ -81,7 +81,12 @@ describe('StudentList', () => {
 
   it('é uma lista com nome acessível e não mostra CPF', () => {
     renderWithProviders(
-      <StudentList variant="teacher" students={[MY_STUDENT_ACTIVE]} detailPath={detailPath} label="Meus alunos" />,
+      <StudentList
+        variant="teacher"
+        students={[MY_STUDENT_ACTIVE]}
+        detailPath={detailPath}
+        label="Meus alunos"
+      />,
     );
     expect(screen.getByRole('list', { name: 'Meus alunos' })).toBeInTheDocument();
     expect(document.body.textContent).not.toMatch(/\d{3}\.?\d{3}\.?\d{3}-?\d{2}/);

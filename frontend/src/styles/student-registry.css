@@ -155,8 +155,15 @@
   align-items: flex-start;
 }
 
-.student-search__row .search {
+.student-search__field {
   flex: 1 1 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.student-search__row .search {
+  max-width: none;
 }
 
 .segmented {

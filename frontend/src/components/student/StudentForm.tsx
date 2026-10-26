@@ -69,7 +69,8 @@ function initialValues(props: StudentFormProps): StudentFormValues {
  * (CPF, data, responsável de menor, unicidade) vêm do servidor em `details.fields`.
  */
 export function StudentForm(props: StudentFormProps) {
-  const { variant, mode, teacherOptions, fieldErrors, submitting, blockedSeconds, onSubmit, onCancel } = props;
+  const { variant, mode, teacherOptions, fieldErrors, submitting, blockedSeconds, onSubmit, onCancel } =
+    props;
   const base = useId();
   const [values, setValues] = useState<StudentFormValues>(() => initialValues(props));
   const [attempt, setAttempt] = useState(0);
@@ -128,7 +129,16 @@ export function StudentForm(props: StudentFormProps) {
     extra?: Record<string, string | boolean | undefined>;
   }
 
-  const textField = ({ key, value, onChange, type = 'text', maxLength, hintId, hint, extra }: TextFieldOptions) => {
+  const textField = ({
+    key,
+    value,
+    onChange,
+    type = 'text',
+    maxLength,
+    hintId,
+    hint,
+    extra,
+  }: TextFieldOptions) => {
     const invalid = (errorsByKey.get(key) ?? []).length > 0;
     const described = [...errorIds(key), ...(hintId ? [hintId] : [])].join(' ') || undefined;
     return (
@@ -176,7 +186,10 @@ export function StudentForm(props: StudentFormProps) {
                 return (
                   <li key={index}>
                     {key ? (
-                      <a href={`#${id(key === 'guardian' ? 'guardian.name' : key)}`} onClick={focusField(key)}>
+                      <a
+                        href={`#${id(key === 'guardian' ? 'guardian.name' : key)}`}
+                        onClick={focusField(key)}
+                      >
                         <span>{FIELD_LABELS[key]}: </span>
                         {text}
                       </a>
@@ -243,7 +256,10 @@ export function StudentForm(props: StudentFormProps) {
       </fieldset>
 
       {variant === 'admin' ? (
-        <fieldset className="student-form__section" aria-describedby={errorIds('teacherIds').join(' ') || undefined}>
+        <fieldset
+          className="student-form__section"
+          aria-describedby={errorIds('teacherIds').join(' ') || undefined}
+        >
           <legend className="student-form__legend">Professores</legend>
           {(teacherOptions ?? []).length === 0 ? (
             <div className="field__help">Nenhum professor ativo cadastrado.</div>

@@ -80,7 +80,10 @@ describe('StudentForm — campos e privacidade', () => {
   });
 
   it('na edição de aluno sem responsável deixa os campos do responsável vazios', () => {
-    renderForm({ mode: 'edit', student: { ...MY_STUDENT_ACTIVE, guardian: undefined, instrument: undefined } });
+    renderForm({
+      mode: 'edit',
+      student: { ...MY_STUDENT_ACTIVE, guardian: undefined, instrument: undefined },
+    });
     expect(screen.getByLabelText('Nome do responsável')).toHaveValue('');
     expect(screen.getByLabelText('Instrumento')).toHaveValue('');
   });
@@ -180,7 +183,10 @@ describe('StudentForm — variante do administrador', () => {
       variant: 'admin',
       mode: 'edit',
       teacherOptions: TEACHERS,
-      student: { ...MY_STUDENT_ACTIVE, teachers: [{ id: TEACHERS[0]!.id, name: 'Clara Souza', active: true }] },
+      student: {
+        ...MY_STUDENT_ACTIVE,
+        teachers: [{ id: TEACHERS[0]!.id, name: 'Clara Souza', active: true }],
+      },
     });
     expect(screen.getByRole('checkbox', { name: 'Clara Souza' })).toBeChecked();
     expect(screen.getByRole('checkbox', { name: 'Davi Prado' })).not.toBeChecked();
@@ -218,7 +224,11 @@ describe('StudentForm — erros por campo', () => {
   });
 
   it('na edição o campo com erro descreve o erro e também a dica do CPF', () => {
-    renderForm({ mode: 'edit', student: MY_STUDENT_ACTIVE, fieldErrors: [{ field: 'cpf', code: 'INVALID_CPF' }] });
+    renderForm({
+      mode: 'edit',
+      student: MY_STUDENT_ACTIVE,
+      fieldErrors: [{ field: 'cpf', code: 'INVALID_CPF' }],
+    });
     expect(screen.getByLabelText('CPF').getAttribute('aria-describedby')!.split(' ')).toHaveLength(2);
     expect(screen.getByLabelText('CPF')).toHaveAccessibleDescription(
       `${msg('INVALID_CPF')} ${msg('MY_STUDENTS_CPF_KEEP')}`,
@@ -275,7 +285,9 @@ describe('StudentForm — bloqueio contra sondagem', () => {
   it('desabilita só o envio e mostra o tempo restante', () => {
     renderForm({ blockedSeconds: 90 });
     expect(screen.getByRole('button', { name: 'Cadastrar aluno' })).toBeDisabled();
-    expect(screen.getByRole('status')).toHaveTextContent(msg('OPERATION_TEMPORARILY_BLOCKED', { minutes: 2 }));
+    expect(screen.getByRole('status')).toHaveTextContent(
+      msg('OPERATION_TEMPORARILY_BLOCKED', { minutes: 2 }),
+    );
     expect(screen.getByLabelText('CPF')).toBeEnabled();
     expect(screen.getByLabelText('Nome do aluno')).toBeEnabled();
     expect(screen.getByRole('button', { name: 'Cancelar' })).toBeEnabled();
