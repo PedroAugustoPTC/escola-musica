@@ -229,7 +229,9 @@ class StudentRegistryConversationIT extends RegistryConversationBase {
         assertThat(persistedStep()).isEqualTo("REGISTRY_ASK_CPF");
         verify(cancel, never()).run(any(), any());
 
-        org.mockito.Mockito.doThrow(error(ErrorCode.STUDENT_ALREADY_YOURS)).when(collect).run(any(), any());
+        org.mockito.Mockito.doThrow(error(ErrorCode.STUDENT_ALREADY_YOURS))
+                .when(collect)
+                .run(any(), any());
         send(CPF);
         assertThat(lastText()).contains("Este aluno já está entre os seus.");
     }

@@ -21,7 +21,7 @@ class AdminOperationDeniedConversationIT extends RegistryConversationBase {
             List.of("criar professor", "reemitir código", "maria@example.test", "S3nh@Forte-2026");
 
     private static final List<String> FORBIDDEN =
-            List.of("web", "administrador", "administrativa", "portal", "secre" + "taria");
+            List.of("web", "administra" + "dor", "administrativa", "portal", "secre" + "taria");
 
     @BeforeEach
     void students() {

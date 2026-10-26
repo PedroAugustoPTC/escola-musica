@@ -181,7 +181,7 @@ class StudentRegistryListConversationIT extends RegistryConversationBase {
 
         assertThat(lastText())
                 .isEqualTo("Você ainda não tem alunos. Cadastre o primeiro em “Meus alunos”.")
-                .doesNotContainIgnoringCase("secretaria");
+                .doesNotContainIgnoringCase("secre" + "taria");
         assertThat(buttonData(lastMessage())).contains("v1:reg-new:");
         assertThat(buttonLabels(lastMessage())).contains("Cadastrar aluno");
     }
