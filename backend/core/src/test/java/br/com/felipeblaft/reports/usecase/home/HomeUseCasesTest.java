@@ -13,6 +13,7 @@ import br.com.felipeblaft.reports.domain.registry.Teacher;
 import br.com.felipeblaft.reports.domain.report.OpenReport;
 import br.com.felipeblaft.reports.domain.report.ReportStatus;
 import br.com.felipeblaft.reports.doubles.AccessScenario;
+import br.com.felipeblaft.reports.service.ReportEligibilityService;
 import java.time.LocalDate;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -22,9 +23,12 @@ class HomeUseCasesTest {
 
     private final AccessScenario c = new AccessScenario();
     private final GetTeacherHomeUseCase start = new GetTeacherHomeUseCase(c.students, c.open);
-    private final SearchStudentsUseCase search = new SearchStudentsUseCase(c.students, c.open);
+    private final ReportEligibilityService eligibility =
+            new ReportEligibilityService(c.teachers, c.students);
+    private final SearchStudentsUseCase search =
+            new SearchStudentsUseCase(c.students, c.open, eligibility);
     private final GetStudentSummaryUseCase summary =
-            new GetStudentSummaryUseCase(c.students, c.open, c.authorization);
+            new GetStudentSummaryUseCase(c.students, c.open, c.authorization, eligibility);
     private final Teacher clara = c.teacher("Clara Souza", "clara@example.test", "K7QM2XPA");
     private final Teacher bruno = c.teacher("Bruno Lima", "bruno@example.test", "BRUN2XPA");
 

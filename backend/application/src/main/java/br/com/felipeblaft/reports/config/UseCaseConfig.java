@@ -40,6 +40,7 @@ import br.com.felipeblaft.reports.service.CodeAuthenticationService;
 import br.com.felipeblaft.reports.service.DocumentGenerationService;
 import br.com.felipeblaft.reports.service.JobProcessorService;
 import br.com.felipeblaft.reports.service.ReportAccessService;
+import br.com.felipeblaft.reports.service.ReportEligibilityService;
 import br.com.felipeblaft.reports.service.SemesterAccessService;
 import br.com.felipeblaft.reports.service.SemesterProcessorService;
 import br.com.felipeblaft.reports.service.TeacherAccessAuditService;
@@ -249,6 +250,12 @@ public class UseCaseConfig {
     // ---- Início e alunos
 
     @Bean
+    ReportEligibilityService reportEligibilityService(
+            TeacherRepository teachers, StudentRepository students) {
+        return new ReportEligibilityService(teachers, students);
+    }
+
+    @Bean
     GetTeacherHomeUseCase getTeacherHomeUseCase(
             StudentRepository students, OpenReportsQueryPort query) {
         return new GetTeacherHomeUseCase(students, query);
@@ -256,16 +263,19 @@ public class UseCaseConfig {
 
     @Bean
     SearchStudentsUseCase searchStudentsUseCase(
-            StudentRepository students, OpenReportsQueryPort query) {
-        return new SearchStudentsUseCase(students, query);
+            StudentRepository students,
+            OpenReportsQueryPort query,
+            ReportEligibilityService eligibility) {
+        return new SearchStudentsUseCase(students, query, eligibility);
     }
 
     @Bean
     GetStudentSummaryUseCase getStudentSummaryUseCase(
             StudentRepository students,
             OpenReportsQueryPort query,
-            AuthorizationService authorization) {
-        return new GetStudentSummaryUseCase(students, query, authorization);
+            AuthorizationService authorization,
+            ReportEligibilityService eligibility) {
+        return new GetStudentSummaryUseCase(students, query, authorization, eligibility);
     }
 
     // ---- Registro de aula (US1): serviços
@@ -339,8 +349,10 @@ public class UseCaseConfig {
             OpenReportsQueryPort open,
             AudioSendingService audioSending,
             JobQueuePort queue,
-            ClockPort clock) {
-        return new RegisterLessonByAudioUseCase(authorization, open, audioSending, queue, clock);
+            ClockPort clock,
+            ReportEligibilityService eligibility) {
+        return new RegisterLessonByAudioUseCase(
+                authorization, open, audioSending, queue, clock, eligibility);
     }
 
     @Bean
@@ -495,8 +507,11 @@ public class UseCaseConfig {
 
     @Bean
     GenerateSemesterReportUseCase generateSemesterReportUseCase(
-            GetSemesterPreviewUseCase preview, JobQueuePort queue, ClockPort clock) {
-        return new GenerateSemesterReportUseCase(preview, queue, clock);
+            GetSemesterPreviewUseCase preview,
+            JobQueuePort queue,
+            ClockPort clock,
+            ReportEligibilityService eligibility) {
+        return new GenerateSemesterReportUseCase(preview, queue, clock, eligibility);
     }
 
     @Bean
