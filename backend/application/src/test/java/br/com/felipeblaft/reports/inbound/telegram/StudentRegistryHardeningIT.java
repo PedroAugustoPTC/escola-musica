@@ -26,7 +26,8 @@ import org.junit.jupiter.api.Test;
 @ConversationState({10})
 class StudentRegistryHardeningIT extends RegistryConversationBase {
 
-    private static final String UNAVAILABLE = "Não foi possível usar este CPF. Procure o administrador.";
+    private static final String UNAVAILABLE =
+            "Não foi possível usar este CPF. Procure o administrador.";
     private static final String EXPIRED = "Este botão não vale mais. Use o menu.";
 
     @BeforeEach
@@ -67,7 +68,8 @@ class StudentRegistryHardeningIT extends RegistryConversationBase {
     @Test
     void duplicateCpfWhileCollectingShowsOnlyTheNeutralTextWithoutTheName() {
         reachCpfStep();
-        when(collect.run(any(), any())).thenThrow(duplicate(ErrorCode.DUPLICATE_CPF, "Joana Prado"));
+        when(collect.run(any(), any()))
+                .thenThrow(duplicate(ErrorCode.DUPLICATE_CPF, "Joana Prado"));
 
         send(CPF);
 
@@ -101,6 +103,7 @@ class StudentRegistryHardeningIT extends RegistryConversationBase {
 
     @Test
     void cpfShapedSearchWithSeparatorsIsDeletedNeverSearchedNorStored() {
+        when(list.run(any(), any())).thenReturn(page(0, 1, view("Ana Souza", 36, null, true, null)));
         send("meus alunos");
         verify(list, times(1)).run(any(), any());
 
@@ -109,7 +112,10 @@ class StudentRegistryHardeningIT extends RegistryConversationBase {
 
             assertThat(deletions()).as(shaped).isEqualTo(1);
             assertThat(everythingSent()).as(shaped).doesNotContain("529").doesNotContain("247");
-            assertThat(persistedData()).as(shaped).doesNotContain("529").doesNotContain("regSearch");
+            assertThat(persistedData())
+                    .as(shaped)
+                    .doesNotContain("529")
+                    .doesNotContain("regSearch");
         }
         verify(list, times(1)).run(any(), any());
     }
@@ -119,7 +125,9 @@ class StudentRegistryHardeningIT extends RegistryConversationBase {
         send("529 982 247 25");
 
         assertThat(deletions()).isEqualTo(1);
-        assertThat(everythingSent()).doesNotContain("529").doesNotContain("Nenhum aluno encontrado");
+        assertThat(everythingSent())
+                .doesNotContain("529")
+                .doesNotContain("Nenhum aluno encontrado");
     }
 
     @Test
@@ -130,10 +138,12 @@ class StudentRegistryHardeningIT extends RegistryConversationBase {
         send("529.982.247-25");
 
         assertThat(deletions()).isEqualTo(1);
-        DeleteMessage delete = (DeleteMessage) out.stream()
-                .filter(DeleteMessage.class::isInstance)
-                .findFirst()
-                .orElseThrow();
+        DeleteMessage delete =
+                (DeleteMessage)
+                        out.stream()
+                                .filter(DeleteMessage.class::isInstance)
+                                .findFirst()
+                                .orElseThrow();
         assertThat(delete.messageId()).isEqualTo(lastIncomingMessageId);
         assertThat(lastText())
                 .contains("Informe um telefone com DDD")

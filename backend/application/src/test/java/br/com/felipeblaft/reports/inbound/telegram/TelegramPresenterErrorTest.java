@@ -25,9 +25,9 @@ class TelegramPresenterErrorTest {
 
     @Test
     void duplicateCpfAndEmailBecomeTheNeutralTextWithoutTheName() {
-        for (ErrorCode code : new ErrorCode[] {ErrorCode.DUPLICATE_CPF, ErrorCode.DUPLICATE_EMAIL}) {
-            String text =
-                    presenter.error(1L, code, Map.of("name", "Joana Prado")).text();
+        for (ErrorCode code :
+                new ErrorCode[] {ErrorCode.DUPLICATE_CPF, ErrorCode.DUPLICATE_EMAIL}) {
+            String text = presenter.error(1L, code, Map.of("name", "Joana Prado")).text();
 
             assertThat(text).as(code.name()).isEqualTo(UNAVAILABLE);
         }
@@ -50,13 +50,16 @@ class TelegramPresenterErrorTest {
         String text = presenter.error(1L, ErrorCode.INTERNAL_ERROR, Map.of()).text();
 
         assertThat(text)
-                .matches("Algo deu errado\\. Informe o código de referência [A-Z0-9]{8} ao suporte\\.");
+                .matches(
+                        "Algo deu errado\\. Informe o código de referência [A-Z0-9]{8} ao suporte\\.");
     }
 
     @Test
     void internalErrorKeepsTheReferenceThatWasGiven() {
         String text =
-                presenter.error(1L, ErrorCode.INTERNAL_ERROR, Map.of("reference", "ABCD2345")).text();
+                presenter
+                        .error(1L, ErrorCode.INTERNAL_ERROR, Map.of("reference", "ABCD2345"))
+                        .text();
 
         assertThat(text).contains("ABCD2345");
     }

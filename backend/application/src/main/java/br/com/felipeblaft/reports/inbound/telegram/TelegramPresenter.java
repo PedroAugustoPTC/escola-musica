@@ -78,7 +78,9 @@ public class TelegramPresenter {
         Map<String, Object> parameters = duplicate ? Map.of() : details;
         return new Message(
                 chatId,
-                escape(catalog.text(shown.messageKey(), formatting.errorParameters(shown, parameters))),
+                escape(
+                        catalog.text(
+                                shown.messageKey(), formatting.errorParameters(shown, parameters))),
                 Keyboard.NONE);
     }
 

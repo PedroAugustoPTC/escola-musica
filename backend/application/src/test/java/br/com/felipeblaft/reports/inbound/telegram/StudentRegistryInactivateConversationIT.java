@@ -111,18 +111,17 @@ class StudentRegistryInactivateConversationIT extends RegistryConversationBase {
     }
 
     @Test
-    void secondTapAnswersAlreadyDoneWithoutRecordingAgain() {
+    void secondTapAfterTheFlowEndedAnswersExpiredWithoutRecordingAgain() {
         open(bia);
         tap("v1:reg-inactivate:");
         when(confirm.run(any(), any()))
                 .thenReturn(view("Bia Lima", 12, "Violão", false, "Marta Lima"));
         tap("v1:reg-confirm:" + TOKEN);
 
-        when(confirm.run(any(), any())).thenThrow(error(ErrorCode.CONFIRMATION_ALREADY_DONE));
         tap("v1:reg-confirm:" + TOKEN);
 
-        assertThat(lastText()).isEqualTo("Essa operação já foi concluída.");
-        verify(confirm, times(2)).run(any(), any());
+        assertThat(lastText()).isEqualTo("Este botão não vale mais. Use o menu.");
+        verify(confirm, times(1)).run(any(), any());
     }
 
     @Test

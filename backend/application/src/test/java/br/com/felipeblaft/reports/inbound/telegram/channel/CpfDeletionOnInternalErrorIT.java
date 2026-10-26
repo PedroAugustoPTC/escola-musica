@@ -102,8 +102,7 @@ class CpfDeletionOnInternalErrorIT extends TelegramConversationBase {
     }
 
     @Test
-    void anyTextWhileTheConversationAwaitsTheCpfIsDeletedBeforeTheInternalError()
-            throws Exception {
+    void anyTextWhileTheConversationAwaitsTheCpfIsDeletedBeforeTheInternalError() throws Exception {
         scenario.clara();
         link(USER_CLARA, ScenarioIT.CODE_CLARA);
         jdbc.update(

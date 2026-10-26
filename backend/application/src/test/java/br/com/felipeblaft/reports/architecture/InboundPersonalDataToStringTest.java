@@ -38,9 +38,12 @@ class InboundPersonalDataToStringTest {
     private static final String SENTINEL = "PERSONAL-DATA-SENTINEL-4711";
     private static final String BASE = "br.com.felipeblaft.reports";
 
-    /** Campos de texto que carregam só identificadores técnicos. */
+    /**
+     * Campos de texto que carregam só identificadores técnicos (o {@code id} do toque é do
+     * Telegram).
+     */
     private static final Map<String, String> TECHNICAL_FIELDS =
-            Map.of("type", "private", "activationState", "ACTIVE");
+            Map.of("type", "private", "activationState", "ACTIVE", "id", "cb-1");
 
     private static final List<String> SCOPES =
             List.of(
@@ -125,8 +128,7 @@ class InboundPersonalDataToStringTest {
         Object[] arguments = new Object[components.length];
         for (int i = 0; i < components.length; i++) {
             types[i] = components[i].getType();
-            arguments[i] =
-                    value(types[i], components[i].getGenericType(), components[i].getName());
+            arguments[i] = value(types[i], components[i].getGenericType(), components[i].getName());
         }
         Constructor<?> constructor = type.getDeclaredConstructor(types);
         constructor.setAccessible(true);

@@ -218,7 +218,8 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
         switch (action) {
             case "reg-list" -> openList(context);
             case "reg-new" -> startRegistration(context);
-            // dono, token e prazo são conferidos pelo núcleo; aqui só a conversa e o tamanho do token
+            // dono, token e prazo são conferidos pelo núcleo; aqui só a conversa e o tamanho do
+            // token
             case "reg-confirm" -> {
                 if (active(context)
                         && DRAFT_STEPS.contains(context.conversation().step())

@@ -51,6 +51,7 @@ class SecurityResponsesTest {
         JsonNode body = write(ErrorCode.RESOURCE_NOT_FOUND, 404);
 
         assertThat(body.has("reference")).isFalse();
-        assertThat(body.path("message").asString()).isEqualTo("Não encontramos o que você procurou.");
+        assertThat(body.path("message").asString())
+                .isEqualTo("Não encontramos o que você procurou.");
     }
 }

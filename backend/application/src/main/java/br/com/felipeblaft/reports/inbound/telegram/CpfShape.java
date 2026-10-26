@@ -12,13 +12,14 @@ import java.util.regex.Pattern;
  */
 final class CpfShape {
 
-    private static final Pattern SEPARATORS = Pattern.compile("[\s.\-/]");
-    private static final Pattern ELEVEN_DIGITS = Pattern.compile("\d{11}");
+    private static final Pattern SEPARATORS = Pattern.compile("[\\s.\\-/]");
+    private static final Pattern ELEVEN_DIGITS = Pattern.compile("\\d{11}");
 
     private CpfShape() {}
 
     static boolean matches(String text) {
-        return text != null && ELEVEN_DIGITS.matcher(SEPARATORS.matcher(text).replaceAll("")).matches();
+        return text != null
+                && ELEVEN_DIGITS.matcher(SEPARATORS.matcher(text).replaceAll("")).matches();
     }
 
     /** Forma de CPF e dígitos verificadores corretos (o núcleo é quem sabe validar). */

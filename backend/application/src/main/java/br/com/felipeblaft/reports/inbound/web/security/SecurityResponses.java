@@ -36,7 +36,8 @@ final class SecurityResponses {
         Map<String, String> parameters =
                 reference == null ? Map.of() : Map.of("reference", reference);
         ErrorResponse body =
-                new ErrorResponse(code.name(), catalog.text(code, parameters), null, null, reference);
+                new ErrorResponse(
+                        code.name(), catalog.text(code, parameters), null, null, reference);
         response.setStatus(status);
         response.setContentType("application/json");
         response.getOutputStream()
