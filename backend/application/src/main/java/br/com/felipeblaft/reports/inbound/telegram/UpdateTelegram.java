@@ -30,6 +30,12 @@ public record UpdateTelegram(
             Object location,
             Object contact) {
 
+        /** Sem o texto digitado nem os anexos: podem trazer CPF e dado de aluno. */
+        @Override
+        public String toString() {
+            return "TelegramMessage[messageId=" + messageId + "]";
+        }
+
         /**
          * Primeiro arquivo de áudio ou vídeo da mensagem, se houver (voz, áudio, vídeo, documento).
          */
@@ -74,9 +80,23 @@ public record UpdateTelegram(
             @JsonProperty("mime_type") String mimeType,
             @JsonProperty("file_size") Long fileSize,
             @JsonProperty("file_name") String fileName,
-            Integer duration) {}
+            Integer duration) {
+
+        /** Sem o nome do arquivo: pode trazer o nome de um aluno. */
+        @Override
+        public String toString() {
+            return "TelegramFile[size=" + fileSize + "]";
+        }
+    }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record CallbackTelegram(
-            String id, TelegramUser from, TelegramMessage message, String data) {}
+            String id, TelegramUser from, TelegramMessage message, String data) {
+
+        /** Sem {@code data}: o toque pode levar o token de confirmação. */
+        @Override
+        public String toString() {
+            return "CallbackTelegram[id=" + id + "]";
+        }
+    }
 }

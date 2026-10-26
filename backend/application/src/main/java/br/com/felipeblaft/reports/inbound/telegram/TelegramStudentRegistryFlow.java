@@ -165,18 +165,11 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
             case REGISTRY_ASK_BIRTH_DATE -> collectField(context, Field.BIRTH_DATE, text);
             case REGISTRY_ASK_CPF -> {
                 // a mensagem com o CPF sai do chat antes de qualquer resposta (FR-036)
-                if (context.incomingMessageId() != null) {
-                    context.answer(
-                            new TelegramOutput.DeleteMessage(
-                                    context.chatId(),
-                                    context.incomingMessageId(),
-                                    presenter.simple(context.chatId(), "CPF_MESSAGE_NOT_DELETED")));
-                }
+                deleteIncomingMessage(context);
                 collectField(context, Field.CPF, text);
             }
-            case REGISTRY_ASK_GUARDIAN_NAME,
-                    REGISTRY_ASK_GUARDIAN_PHONE,
-                    REGISTRY_ASK_GUARDIAN_EMAIL ->
+            case REGISTRY_ASK_GUARDIAN_PHONE -> guardianPhone(context, text);
+            case REGISTRY_ASK_GUARDIAN_NAME, REGISTRY_ASK_GUARDIAN_EMAIL ->
                     collectField(context, Field.GUARDIAN, text);
             case REGISTRY_ASK_INSTRUMENT -> collectField(context, Field.INSTRUMENT, text);
             case REGISTRY_LIST -> search(context, text);
@@ -191,6 +184,32 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
         return true;
     }
 
+    /**
+     * Um CPF válido digitado no lugar do telefone do responsável: a mensagem sai do chat, o valor
+     * não chega ao núcleo nem é repetido, e a pergunta do telefone volta com o motivo (FR-036).
+     */
+    private void guardianPhone(TelegramContext context, String text) {
+        if (!CpfShape.isValid(text)) {
+            collectField(context, Field.GUARDIAN, text);
+            return;
+        }
+        deleteIncomingMessage(context);
+        ask(
+                context,
+                ConversationFlowStep.REGISTRY_ASK_GUARDIAN_PHONE,
+                presenter.error(context.chatId(), ErrorCode.INVALID_PHONE, Map.of()).text());
+    }
+
+    private void deleteIncomingMessage(TelegramContext context) {
+        if (context.incomingMessageId() != null) {
+            context.answer(
+                    new TelegramOutput.DeleteMessage(
+                            context.chatId(),
+                            context.incomingMessageId(),
+                            presenter.simple(context.chatId(), "CPF_MESSAGE_NOT_DELETED")));
+        }
+    }
+
     @Override
     public boolean aoCallback(TelegramContext context, String action, String argument) {
         if (!action.startsWith("reg-")) {
@@ -199,8 +218,16 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
         switch (action) {
             case "reg-list" -> openList(context);
             case "reg-new" -> startRegistration(context);
-            // a confirmação é sempre conferida pelo núcleo (dono, token e prazo)
-            case "reg-confirm" -> confirmWith(context, argument);
+            // dono, token e prazo são conferidos pelo núcleo; aqui só a conversa e o tamanho do token
+            case "reg-confirm" -> {
+                if (active(context)
+                        && DRAFT_STEPS.contains(context.conversation().step())
+                        && CallbackDataCodec.fits("reg-confirm", argument)) {
+                    confirmWith(context, argument);
+                } else {
+                    expired(context);
+                }
+            }
             case "reg-cancel" -> {
                 if (active(context) && DRAFT_STEPS.contains(context.conversation().step())) {
                     cancelDraft(context);
@@ -732,11 +759,17 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
         lines.add(presenter.label(labelKey) + ": " + value);
     }
 
+    /**
+     * Botões do resumo. O token vai em `callback_data` (64 bytes no máximo); se não couber, só o
+     * "Cancelar" é oferecido e a confirmação segue por "sim", com o token guardado na conversa.
+     */
     private Keyboard confirmKeyboard(String token) {
-        return new Keyboard(
-                List.of(
-                        List.of(presenter.button("CONFIRM_BUTTON", Map.of(), "reg-confirm", token)),
-                        List.of(presenter.button("CANCEL_BUTTON", "reg-cancel"))));
+        List<List<Button>> rows = new ArrayList<>();
+        if (CallbackDataCodec.fits("reg-confirm", token)) {
+            rows.add(List.of(presenter.button("CONFIRM_BUTTON", Map.of(), "reg-confirm", token)));
+        }
+        rows.add(List.of(presenter.button("CANCEL_BUTTON", "reg-cancel")));
+        return new Keyboard(rows);
     }
 
     private void confirmByText(TelegramContext context, String text) {
@@ -751,7 +784,11 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
 
     private void confirmWith(TelegramContext context, String token) {
         TelegramConversation conversation = context.conversation();
-        String kind = conversation.data(KIND).orElse(Kind.CREATE.name());
+        Optional<Kind> kind = conversation.data(KIND).flatMap(TelegramStudentRegistryFlow::kindOf);
+        if (kind.isEmpty()) {
+            expired(context);
+            return;
+        }
         StudentView student;
         try {
             student =
@@ -772,7 +809,7 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
         }
         conversation.endFlow();
         String key =
-                switch (Kind.valueOf(kind)) {
+                switch (kind.get()) {
                     case CREATE -> "REGISTRY_SAVED";
                     case UPDATE -> "REGISTRY_UPDATED";
                     case INACTIVATE -> "STUDENT_INACTIVATED";
@@ -827,6 +864,14 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
 
     private static String correlation(TelegramContext context) {
         return "telegram-" + context.updateId();
+    }
+
+    private static Optional<Kind> kindOf(String name) {
+        try {
+            return Optional.of(Kind.valueOf(name));
+        } catch (IllegalArgumentException unknown) {
+            return Optional.empty();
+        }
     }
 
     private static Integer number(String argument) {

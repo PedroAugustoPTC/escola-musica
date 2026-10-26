@@ -54,7 +54,13 @@ public final class AdminStudentDtos {
         }
     }
 
-    public record AdminTeacherRefResponse(UUID id, String name, boolean active) {}
+    public record AdminTeacherRefResponse(UUID id, String name, boolean active) {
+
+        @Override
+        public String toString() {
+            return "AdminTeacherRefResponse[id=" + id + "]";
+        }
+    }
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public record AdminStudentResponse(

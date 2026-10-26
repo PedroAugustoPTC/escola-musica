@@ -10,7 +10,6 @@ import br.com.felipeblaft.reports.usecase.administrator.CreateAdministratorUseCa
 import br.com.felipeblaft.reports.usecase.administrator.InactivateAdministratorUseCase;
 import br.com.felipeblaft.reports.usecase.administrator.ListAdministratorsUseCase;
 import br.com.felipeblaft.reports.usecase.administrator.ReactivateAdministratorUseCase;
-import jakarta.validation.Valid;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -67,7 +66,7 @@ public class AdminAdministratorController {
     @PostMapping
     public ResponseEntity<AdminAdministratorWithCodeResponse> create(
             @AuthenticationPrincipal AuthenticatedAdministrator admin,
-            @Valid @RequestBody AdminAdministratorRequest request,
+            @RequestBody AdminAdministratorRequest request,
             @RequestAttribute(CORRELATION) String correlationId) {
         var result =
                 create.run(

@@ -4,6 +4,7 @@ import br.com.felipeblaft.reports.config.MessageCatalog;
 import br.com.felipeblaft.reports.domain.common.DomainException;
 import br.com.felipeblaft.reports.domain.common.ErrorCode;
 import br.com.felipeblaft.reports.domain.common.Secret;
+import br.com.felipeblaft.reports.inbound.web.RequestCorrelation;
 import br.com.felipeblaft.reports.usecase.administrator.ValidateAdministratorSessionUseCase;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -12,7 +13,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -33,9 +33,8 @@ public class AdminSessionFilter extends OncePerRequestFilter {
 
     public static final String CODE_ATTRIBUTE = AdminSessionFilter.class.getName() + ".code";
 
-    /** Constante literal: usada em anotações ({@code @RequestAttribute}). */
-    public static final String CORRELATION_ATTRIBUTE =
-            "br.com.felipeblaft.reports.inbound.web.security.AdminSessionFilter.correlation";
+    /** Mesmo atributo das rotas do professor ({@link RequestCorrelation}). */
+    public static final String CORRELATION_ATTRIBUTE = RequestCorrelation.ATTRIBUTE;
 
     private static final String PREFIX = "/api/v1/admin/";
     private static final String SESSION = PREFIX + "session";
@@ -66,7 +65,7 @@ public class AdminSessionFilter extends OncePerRequestFilter {
     protected void doFilterInternal(
             HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        request.setAttribute(CORRELATION_ATTRIBUTE, UUID.randomUUID().toString());
+        RequestCorrelation.assign(request);
         if (isPublic(request)) {
             chain.doFilter(request, response);
             return;

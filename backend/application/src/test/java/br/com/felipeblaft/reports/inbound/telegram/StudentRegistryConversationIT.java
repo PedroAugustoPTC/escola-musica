@@ -283,13 +283,12 @@ class StudentRegistryConversationIT extends RegistryConversationBase {
         when(collect.run(any(), any())).thenReturn(ready("Ana Souza", null, null));
         send("Ana Souza");
 
-        when(confirm.run(any(), any())).thenReturn(view("Ana Souza", 36, null, true, null));
-        tap("v1:reg-confirm:" + TOKEN);
         when(confirm.run(any(), any())).thenThrow(error(ErrorCode.CONFIRMATION_ALREADY_DONE));
         tap("v1:reg-confirm:" + TOKEN);
 
         assertThat(lastText()).isEqualTo("Essa operação já foi concluída.");
-        verify(confirm, org.mockito.Mockito.times(2)).run(any(), any());
+        assertThat(persistedStep()).isEqualTo("REGISTRY_CONFIRM");
+        verify(confirm).run(any(), any());
     }
 
     @Test

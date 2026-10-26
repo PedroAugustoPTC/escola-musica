@@ -68,10 +68,17 @@ public class TelegramPresenter {
         return simple(chatId, code, Map.of());
     }
 
+    /**
+     * Erro do núcleo em texto do catálogo. Duplicidade de CPF ou de e-mail nunca mostra ao
+     * professor quem já tem o dado: vira o texto neutro {@code CPF_UNAVAILABLE}, sem detalhes.
+     */
     public Message error(long chatId, ErrorCode code, Map<String, Object> details) {
+        boolean duplicate = code == ErrorCode.DUPLICATE_CPF || code == ErrorCode.DUPLICATE_EMAIL;
+        ErrorCode shown = duplicate ? ErrorCode.CPF_UNAVAILABLE : code;
+        Map<String, Object> parameters = duplicate ? Map.of() : details;
         return new Message(
                 chatId,
-                escape(catalog.text(code.messageKey(), formatting.errorParameters(code, details))),
+                escape(catalog.text(shown.messageKey(), formatting.errorParameters(shown, parameters))),
                 Keyboard.NONE);
     }
 

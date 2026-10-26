@@ -11,6 +11,7 @@ import br.com.felipeblaft.reports.usecase.registry.ListStudentsUseCase;
 import br.com.felipeblaft.reports.usecase.registry.ReactivateStudentUseCase;
 import br.com.felipeblaft.reports.usecase.registry.RegisterStudentUseCase;
 import br.com.felipeblaft.reports.usecase.registry.UpdateStudentUseCase;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
@@ -72,17 +73,20 @@ public class MyStudentController {
     @ResponseStatus(HttpStatus.CREATED)
     public MyStudentDto register(
             @AuthenticationPrincipal AuthenticatedTeacher teacher,
-            @RequestBody MyStudentRequest request) {
+            @RequestBody MyStudentRequest request,
+            HttpServletRequest http) {
         var command =
                 new RegisterStudentUseCase.Command(
-                        MyStudentMapper.input(request), List.of(), correlation());
+                        MyStudentMapper.input(request), List.of(), RequestCorrelation.of(http));
         return MyStudentMapper.student(registerStudent.run(actor(teacher), command));
     }
 
     @GetMapping("/{studentId}")
     public MyStudentDto open(
-            @AuthenticationPrincipal AuthenticatedTeacher teacher, @PathVariable UUID studentId) {
-        var command = new GetStudentUseCase.Command(studentId, correlation());
+            @AuthenticationPrincipal AuthenticatedTeacher teacher,
+            @PathVariable UUID studentId,
+            HttpServletRequest http) {
+        var command = new GetStudentUseCase.Command(studentId, RequestCorrelation.of(http));
         return MyStudentMapper.student(getStudent.run(actor(teacher), command));
     }
 
@@ -90,34 +94,34 @@ public class MyStudentController {
     public MyStudentDto update(
             @AuthenticationPrincipal AuthenticatedTeacher teacher,
             @PathVariable UUID studentId,
-            @RequestBody MyStudentUpdateRequest request) {
+            @RequestBody MyStudentUpdateRequest request,
+            HttpServletRequest http) {
         var command =
                 new UpdateStudentUseCase.Command(
-                        studentId, MyStudentMapper.input(request), correlation());
+                        studentId, MyStudentMapper.input(request), RequestCorrelation.of(http));
         return MyStudentMapper.student(updateStudent.run(actor(teacher), command));
     }
 
     @PostMapping("/{studentId}/inactivation")
     public MyStudentDto inactivate(
-            @AuthenticationPrincipal AuthenticatedTeacher teacher, @PathVariable UUID studentId) {
-        var command = new InactivateStudentUseCase.Command(studentId, correlation());
+            @AuthenticationPrincipal AuthenticatedTeacher teacher,
+            @PathVariable UUID studentId,
+            HttpServletRequest http) {
+        var command = new InactivateStudentUseCase.Command(studentId, RequestCorrelation.of(http));
         return MyStudentMapper.student(inactivateStudent.run(actor(teacher), command));
     }
 
     @PostMapping("/{studentId}/reactivation")
     public MyStudentDto reactivate(
-            @AuthenticationPrincipal AuthenticatedTeacher teacher, @PathVariable UUID studentId) {
-        var command = new ReactivateStudentUseCase.Command(studentId, correlation());
+            @AuthenticationPrincipal AuthenticatedTeacher teacher,
+            @PathVariable UUID studentId,
+            HttpServletRequest http) {
+        var command = new ReactivateStudentUseCase.Command(studentId, RequestCorrelation.of(http));
         return MyStudentMapper.student(reactivateStudent.run(actor(teacher), command));
     }
 
     /** O ator é sempre o professor da sessão, no canal Web. */
     private static Actor actor(AuthenticatedTeacher teacher) {
         return Actor.teacher(teacher.id(), ActionOrigin.WEB);
-    }
-
-    /** Identificador da requisição para a autoria (Web: UUID). */
-    private static String correlation() {
-        return UUID.randomUUID().toString();
     }
 }

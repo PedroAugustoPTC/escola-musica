@@ -45,10 +45,22 @@ public final class AdminSessionDtos {
         }
     }
 
-    public record AdminSummaryResponse(UUID id, String name) {}
+    public record AdminSummaryResponse(UUID id, String name) {
+
+        @Override
+        public String toString() {
+            return "AdminSummaryResponse[id=" + id + "]";
+        }
+    }
 
     public record AdminSessionResponse(
-            AdminSummaryResponse administrator, Instant expiresAt, boolean mustChangePassword) {}
+            AdminSummaryResponse administrator, Instant expiresAt, boolean mustChangePassword) {
+
+        @Override
+        public String toString() {
+            return "AdminSessionResponse[expiresAt=" + expiresAt + "]";
+        }
+    }
 
     static Secret secret(String value) {
         return new Secret(value == null ? "" : value);

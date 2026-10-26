@@ -89,7 +89,7 @@ public class AdminTeacherController {
     @PostMapping
     public ResponseEntity<AdminTeacherWithCodeResponse> register(
             @AuthenticationPrincipal AuthenticatedAdministrator admin,
-            @Valid @RequestBody AdminTeacherRequest request,
+            @RequestBody AdminTeacherRequest request,
             @RequestAttribute(CORRELATION) String correlationId) {
         var result =
                 register.run(
@@ -111,7 +111,7 @@ public class AdminTeacherController {
     public AdminTeacherResponse update(
             @AuthenticationPrincipal AuthenticatedAdministrator admin,
             @PathVariable UUID teacherId,
-            @Valid @RequestBody AdminTeacherRequest request,
+            @RequestBody AdminTeacherRequest request,
             @RequestAttribute(CORRELATION) String correlationId) {
         return AdminTeacherDtos.teacher(
                 update.run(

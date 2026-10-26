@@ -27,7 +27,13 @@ public final class AdminAdministratorDtos {
             String email,
             boolean active,
             String activationState,
-            Instant activatedAt) {}
+            Instant activatedAt) {
+
+        @Override
+        public String toString() {
+            return "AdminAdministratorResponse[id=" + id + "]";
+        }
+    }
 
     /** O código de ativação só existe nesta resposta (FR-011). */
     public record AdminAdministratorWithCodeResponse(

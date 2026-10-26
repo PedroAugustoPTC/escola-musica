@@ -1,11 +1,11 @@
 package br.com.felipeblaft.reports.inbound.telegram;
 
+import br.com.felipeblaft.reports.config.log.ErrorReference;
 import br.com.felipeblaft.reports.port.ClockPort;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -72,7 +72,7 @@ public class TelegramUpdateProcessorService {
             outputs = interpreter.interpret(update);
         } catch (RuntimeException error) {
             // só o tipo: a mensagem e a causa podem trazer dado de aluno (FR-029)
-            String reference = newReference();
+            String reference = ErrorReference.newReference();
             LOG.error(
                     "telegram-interpretation-error updateId={} reference={} type={}",
                     update.updateId(),
@@ -83,20 +83,9 @@ public class TelegramUpdateProcessorService {
         return TelegramUpdateResult.create(update.updateId(), outputs);
     }
 
-    /**
-     * Código curto de referência da falha interna: vai ao log e à resposta, sem detalhe técnico.
-     */
-    static String newReference() {
-        return UUID.randomUUID()
-                .toString()
-                .replace("-", "")
-                .substring(0, 8)
-                .toUpperCase(Locale.ROOT);
-    }
-
     /** Toda mensagem recebe resposta (FR-039), mesmo diante de erro inesperado. */
     public List<TelegramOutput> errorReply(UpdateTelegram update) {
-        return errorReply(update, newReference());
+        return errorReply(update, ErrorReference.newReference());
     }
 
     private List<TelegramOutput> errorReply(UpdateTelegram update, String reference) {
@@ -116,8 +105,29 @@ public class TelegramUpdateProcessorService {
         }
         TelegramOutput message =
                 presenter.simple(chatId, "INTERNAL_ERROR", Map.of("reference", reference));
-        return callbackId == null
-                ? List.of(message)
-                : List.of(new TelegramOutput.CallbackReply(callbackId), message);
+        if (callbackId != null) {
+            return List.of(new TelegramOutput.CallbackReply(callbackId), message);
+        }
+        List<TelegramOutput> replies = new ArrayList<>();
+        if (carriesCpf(update)) {
+            // a falha não pode deixar o CPF no chat: a exclusão vem antes do aviso (FR-036)
+            replies.add(
+                    new TelegramOutput.DeleteMessage(
+                            chatId,
+                            update.message().messageId(),
+                            presenter.simple(chatId, "CPF_MESSAGE_NOT_DELETED")));
+        }
+        replies.add(message);
+        return List.copyOf(replies);
+    }
+
+    /** Texto com forma de CPF, ou texto enviado enquanto o bot esperava o CPF do cadastro. */
+    private boolean carriesCpf(UpdateTelegram update) {
+        UpdateTelegram.TelegramMessage message = update.message();
+        if (message == null || message.text() == null) {
+            return false;
+        }
+        return CpfShape.matches(message.text())
+                || (message.from() != null && interpreter.awaitingCpf(message.from().id()));
     }
 }

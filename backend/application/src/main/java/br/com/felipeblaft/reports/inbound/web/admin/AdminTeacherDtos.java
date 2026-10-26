@@ -24,7 +24,13 @@ public final class AdminTeacherDtos {
     public record AdminReissueCodeRequest(@NotNull Boolean endTelegramLink) {}
 
     public record AdminTeacherResponse(
-            UUID id, String name, String email, boolean active, boolean telegramLinked) {}
+            UUID id, String name, String email, boolean active, boolean telegramLinked) {
+
+        @Override
+        public String toString() {
+            return "AdminTeacherResponse[id=" + id + "]";
+        }
+    }
 
     /** O código de acesso só existe nesta resposta (FR-011). */
     public record AdminTeacherWithCodeResponse(

@@ -234,6 +234,26 @@ public class TelegramConversationInterpreter {
         context.answer(presenter.error(context.chatId(), ErrorCode.VALIDATION_FAILED, Map.of()));
     }
 
+    /**
+     * A conversa persistida do professor está na pergunta do CPF do cadastro? Serve ao tratamento
+     * de falha inesperada, que ainda precisa apagar a mensagem com o CPF (FR-036). Qualquer erro na
+     * leitura vale como "não": a consulta nunca agrava a falha original.
+     */
+    public boolean awaitingCpf(long telegramUserId) {
+        try {
+            return identify.run(telegramUserId)
+                    .map(identification -> identification.link().conversation())
+                    .filter(
+                            conversation ->
+                                    conversation.flow() == ConversationFlow.STUDENT_REGISTRY
+                                            && conversation.step()
+                                                    == ConversationFlowStep.REGISTRY_ASK_CPF)
+                    .isPresent();
+        } catch (RuntimeException error) {
+            return false;
+        }
+    }
+
     /** Avisa os fluxos de que o professor está saindo deles (descarte do que estiver em curso). */
     public void leaveFlows(TelegramContext context) {
         for (TelegramFlow flow : flows()) {
