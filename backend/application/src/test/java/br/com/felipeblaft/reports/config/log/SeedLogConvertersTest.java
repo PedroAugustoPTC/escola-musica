@@ -85,6 +85,6 @@ class SeedLogConvertersTest {
                 .contains("MaskedMessageConverter")
                 .contains("ExceptionTypeConverter")
                 .contains("org.hibernate.orm.jdbc.error")
-                .doesNotContainPattern("%(msg|message|ex|exception|throwable|rEx)\b");
+                .doesNotContainPattern("%(msg|message|ex|exception|throwable|rEx)\\b");
     }
 }

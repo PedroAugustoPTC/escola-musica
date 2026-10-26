@@ -201,25 +201,65 @@ class AuthorshipRecordAdapterIT extends IntegrationBase {
 
     @Test
     void originHashOnlyInAuthenticationEvents() {
-        AuthorshipRecord notAuthentication =
-                new AuthorshipRecord(
-                        UUID.randomUUID(),
-                        Instant.parse("2026-09-21T13:00:00Z"),
-                        UUID.randomUUID(),
-                        Role.TEACHER,
-                        ActionOrigin.WEB,
-                        "STUDENT_REGISTER",
-                        AuthorshipTargetType.STUDENT,
-                        UUID.randomUUID(),
-                        AuthorshipResult.SUCCESS,
-                        null,
-                        HASH,
-                        "req-ab12cd");
-
-        assertThatThrownBy(() -> recorder.record(notAuthentication))
+        // o domínio já recusa; o CHECK do banco continua valendo para quem grava direto
+        assertThatThrownBy(() -> authorshipWith("STUDENT_REGISTER", HASH))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(
+                        () ->
+                                jdbc.update(
+                                        "insert into authorship_record (id, occurred_at, origin,"
+                                                + " operation, result, origin_hash, correlation_id)"
+                                                + " values (gen_random_uuid(), now(), 'WEB',"
+                                                + " 'STUDENT_REGISTER', 'SUCCESS', ?,"
+                                                + " 'req-ab12cd')",
+                                        HASH))
                 .isInstanceOf(DataAccessException.class);
 
         assertThat(count()).isZero();
+    }
+
+    private static AuthorshipRecord authorshipWith(String operation, String hash) {
+        return new AuthorshipRecord(
+                UUID.randomUUID(),
+                Instant.parse("2026-09-21T13:00:00Z"),
+                UUID.randomUUID(),
+                Role.TEACHER,
+                ActionOrigin.WEB,
+                operation,
+                AuthorshipTargetType.STUDENT,
+                UUID.randomUUID(),
+                AuthorshipResult.SUCCESS,
+                null,
+                hash,
+                "req-ab12cd");
+    }
+
+    /**
+     * O CHECK {@code ck_authorship_record_origin_hash_event} (V10) e o conjunto do domínio ({@link
+     * AuthorshipRecord#ORIGIN_HASH_EVENTS}) não podem divergir: falha se um deles mudar sem o
+     * outro.
+     */
+    @Test
+    void originHashCheckMatchesTheDomainEventSet() {
+        String definition =
+                jdbc.queryForObject(
+                        "select pg_get_constraintdef(oid) from pg_constraint where conname ="
+                                + " 'ck_authorship_record_origin_hash_event'",
+                        String.class);
+        java.util.Set<String> inTheDatabase = new java.util.TreeSet<>();
+        java.util.regex.Matcher quoted =
+                java.util.regex.Pattern.compile("'([A-Z][A-Z0-9_]*)'").matcher(definition);
+        while (quoted.find()) {
+            inTheDatabase.add(quoted.group(1));
+        }
+
+        assertThat(inTheDatabase)
+                .containsExactlyInAnyOrderElementsOf(AuthorshipRecord.ORIGIN_HASH_EVENTS);
+        for (String event : AuthorshipRecord.ORIGIN_HASH_EVENTS) {
+            assertThatCode(() -> recorder.record(authorshipWith(event, HASH)))
+                    .as(event)
+                    .doesNotThrowAnyException();
+        }
     }
 
     @Test

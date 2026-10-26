@@ -139,4 +139,18 @@ class AuthorshipRecordTest {
         assertThatThrownBy(() -> with("ADMIN_SIGN_IN", null, null, "52998224725"))
                 .hasMessageNotContaining("52998224725");
     }
+
+    @Test
+    void originHashIsOnlyAcceptedInAuthenticationAndBlockEvents() {
+        for (String event : AuthorshipRecord.ORIGIN_HASH_EVENTS) {
+            assertThatCode(() -> with(event, null, HASH, "req-1"))
+                    .as(event)
+                    .doesNotThrowAnyException();
+        }
+        assertThatThrownBy(() -> with("STUDENT_REGISTER", null, HASH, "req-1"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageNotContaining(HASH);
+        assertThatCode(() -> with("STUDENT_REGISTER", null, null, "req-1"))
+                .doesNotThrowAnyException();
+    }
 }
