@@ -260,6 +260,17 @@ class StartStudentRegistrationUseCaseTest {
     }
 
     @Test
+    void theResultWithoutATokenKeepsTheKindAndTheDeadline() {
+        var deadline = scenario.clock.now();
+        var result = new StartStudentRegistrationUseCase.Result(Kind.CREATE, deadline);
+
+        assertThat(result.kind()).isEqualTo(Kind.CREATE);
+        assertThat(result.expiresAt()).isEqualTo(deadline);
+        assertThat(result.confirmationToken()).isNull();
+        assertThat(result.toString()).contains("CREATE");
+    }
+
+    @Test
     void resultAndCommandNeverRevealTheTokenOrTheStudentInToString() {
         Student student = scenario.ownStudent();
         StartStudentRegistrationUseCase.Result result =
