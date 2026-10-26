@@ -131,6 +131,48 @@ test('guarda a transcrição por chat, na ordem', async () => {
   assert.equal((await control('/transcript?chat=6')).transcript.length, 1);
 });
 
+test('deleteMessage apaga a mensagem, registra na transcrição e repetir vira "message to delete not found"', async () => {
+  await control('/reset', 'POST');
+  const sent = (await bot('sendMessage', { chat_id: 21, text: 'a apagar' })).json.result;
+
+  const first = await bot('deleteMessage', { chat_id: 21, message_id: sent.message_id });
+  const again = await bot('deleteMessage', { chat_id: 21, message_id: sent.message_id });
+
+  assert.equal(first.status, 200);
+  assert.deepEqual(first.json, { ok: true, result: true });
+  assert.equal(again.status, 400);
+  assert.equal(again.json.ok, false);
+  assert.equal(again.json.description, 'Bad Request: message to delete not found');
+  const transcript = (await control('/transcript?chat=21')).transcript;
+  assert.deepEqual(transcript.map((item) => item.kind), ['message', 'delete']);
+  assert.equal(transcript[1].messageId, sent.message_id);
+  assert.equal(transcript[1].text, undefined);
+});
+
+test('deleteMessage apaga mensagem de usuário injetada e exige message_id', async () => {
+  await control('/reset', 'POST');
+
+  const missing = await bot('deleteMessage', { chat_id: 22 });
+  const unknown = await bot('deleteMessage', { chat_id: 22, message_id: 99999 });
+
+  assert.equal(missing.status, 400);
+  assert.equal(missing.json.description, 'Bad Request: message identifier is not specified');
+  assert.equal(unknown.status, 200);
+});
+
+test('deleteMessage recusado pela falha programada (MESSAGE_NOT_DELETABLE no transporte)', async () => {
+  await control('/reset', 'POST');
+  await control('/fail-next', 'POST', { method: 'deleteMessage', status: 400, description: "Bad Request: message can't be deleted" });
+
+  const refused = await bot('deleteMessage', { chat_id: 23, message_id: 5 });
+  const worked = await bot('deleteMessage', { chat_id: 23, message_id: 5 });
+
+  assert.equal(refused.status, 400);
+  assert.equal(refused.json.description, "Bad Request: message can't be deleted");
+  assert.equal(worked.status, 200);
+  assert.deepEqual((await control('/transcript?chat=23')).transcript.map((item) => item.kind), ['delete']);
+});
+
 test('falha programada vale só para a próxima chamada do método', async () => {
   await control('/reset', 'POST');
   await control('/fail-next', 'POST', { method: 'sendMessage', status: 403, description: 'Forbidden: bot was blocked by the user' });

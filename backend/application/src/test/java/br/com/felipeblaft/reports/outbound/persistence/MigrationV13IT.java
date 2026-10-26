@@ -1,0 +1,83 @@
+package br.com.felipeblaft.reports.outbound.persistence;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import br.com.felipeblaft.reports.support.MigrationTestSupport;
+import java.sql.SQLException;
+import java.util.Map;
+import java.util.UUID;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+/**
+ * Feature 005, {@code V13__channel_action_delete_message.sql}: antes da migração o banco recusa o
+ * tipo {@code DELETE_MESSAGE}; depois aceita, sem mexer nas linhas existentes, no nome da restrição
+ * nem nos tipos anteriores.
+ */
+class MigrationV13IT {
+
+    private static final String SCHEMA = "migration_v13_test";
+
+    private final MigrationTestSupport db = new MigrationTestSupport(SCHEMA);
+
+    @BeforeEach
+    void startAtV8() throws Exception {
+        db.dropSchema();
+        db.flyway("8").migrate();
+    }
+
+    @AfterEach
+    void cleanSchema() throws SQLException {
+        db.dropSchema();
+    }
+
+    private int channelAction(String type) throws SQLException {
+        return db.update(
+                "insert into channel_action (id, batch_id, channel, origin, chat_id, type, state,"
+                        + " deadline_at, created_at) values ('"
+                        + UUID.randomUUID()
+                        + "', 'u1', 'TELEGRAM', 'PROACTIVE', 7, '"
+                        + type
+                        + "', 'PENDING', now() + interval '1 day', now())");
+    }
+
+    @Test
+    void beforeV13TheDatabaseRefusesTheNewType() {
+        assertThatThrownBy(() -> channelAction("DELETE_MESSAGE"))
+                .hasMessageContaining("ck_channel_action_type");
+    }
+
+    @Test
+    void afterV13TheNewTypeIsAcceptedAndExistingRowsSurvive() throws Exception {
+        assertThat(channelAction("STEP_MESSAGE")).isEqualTo(1);
+
+        db.flyway(null).migrate();
+
+        assertThat(db.single("select count(*) from channel_action")).isEqualTo("1");
+        assertThat(channelAction("DELETE_MESSAGE")).isEqualTo(1);
+        for (String type : new String[] {"MESSAGE", "EDIT", "DOCUMENT", "CALLBACK_REPLY"}) {
+            assertThat(channelAction(type)).as(type).isEqualTo(1);
+        }
+        assertThatThrownBy(() -> channelAction("DELETE_CHAT"))
+                .hasMessageContaining("ck_channel_action_type");
+    }
+
+    @Test
+    void v13OnlyReplacesTheTypeConstraintKeepingItsName() throws Exception {
+        MigrationTestSupport.Catalog before = db.catalog();
+
+        db.flyway(null).migrate();
+
+        MigrationTestSupport.Catalog after = db.catalog();
+        assertThat(after.columns()).isEqualTo(before.columns());
+        assertThat(after.indexes()).isEqualTo(before.indexes());
+        assertThat(after.sequences()).isEqualTo(before.sequences());
+        assertThat(after.constraints().keySet()).isEqualTo(before.constraints().keySet());
+        Map<String, String> changed = new java.util.TreeMap<>(after.constraints());
+        changed.entrySet().removeIf(e -> e.getValue().equals(before.constraints().get(e.getKey())));
+        assertThat(changed.keySet()).containsExactly("channel_action.ck_channel_action_type");
+        assertThat(changed.get("channel_action.ck_channel_action_type")).contains("DELETE_MESSAGE");
+    }
+}

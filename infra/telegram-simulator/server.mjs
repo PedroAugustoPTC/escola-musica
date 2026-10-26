@@ -1,5 +1,5 @@
 // Simulador do Telegram para os ensaios (feature 004, R-12). SÓ para testes: faz o papel do servidor local da API de
-// bots (registro de webhook, envio e edição de mensagem, documento, resposta de toque) e o papel do Telegram na
+// bots (registro de webhook, envio, edição e remoção de mensagem, documento, resposta de toque) e o papel do Telegram na
 // nuvem (entrega o update ao webhook com o cabeçalho de segredo e RETÉM e REENVIA enquanto a resposta não for 2xx).
 // Sem dependências. API de controle em /_control/* (nunca exposta fora da rede de teste).
 import { createServer } from 'node:http';
@@ -24,6 +24,7 @@ export function createSimulator({ botToken = '', retryMs = 1000, deliveryTimeout
       lastErrorDate: 0,
       delivered: 0,
       history: new Map(),
+      deleted: new Set(),
     };
   }
 
@@ -177,6 +178,21 @@ export function createSimulator({ botToken = '', retryMs = 1000, deliveryTimeout
         const file = body.document ?? {};
         transcript(body.chat_id).push({ kind: 'document', messageId, fileName: file.fileName, size: file.size, caption: body.caption ?? null });
         reply(response, 200, { ok: true, result: { message_id: messageId, chat: { id: Number(body.chat_id) } } });
+        return;
+      }
+      case 'deleteMessage': {
+        const key = `${body.chat_id}:${body.message_id}`;
+        if (body.message_id === undefined || body.message_id === null) {
+          reply(response, 400, { ok: false, error_code: 400, description: 'Bad Request: message identifier is not specified' });
+          return;
+        }
+        if (state.deleted.has(key)) {
+          reply(response, 400, { ok: false, error_code: 400, description: 'Bad Request: message to delete not found' });
+          return;
+        }
+        state.deleted.add(key);
+        transcript(body.chat_id).push({ kind: 'delete', messageId: body.message_id });
+        reply(response, 200, { ok: true, result: true });
         return;
       }
       case 'answerCallbackQuery':

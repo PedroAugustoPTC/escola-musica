@@ -6,6 +6,7 @@ import br.com.felipeblaft.reports.inbound.telegram.TelegramOutput;
 import br.com.felipeblaft.reports.inbound.telegram.TelegramPresenter;
 import br.com.felipeblaft.reports.inbound.telegram.channel.ActionDto.ButtonDto;
 import br.com.felipeblaft.reports.inbound.telegram.channel.ActionDto.CallbackReplyActionDto;
+import br.com.felipeblaft.reports.inbound.telegram.channel.ActionDto.DeleteMessageActionDto;
 import br.com.felipeblaft.reports.inbound.telegram.channel.ActionDto.DocumentActionDto;
 import br.com.felipeblaft.reports.inbound.telegram.channel.ActionDto.EditActionDto;
 import br.com.felipeblaft.reports.inbound.telegram.channel.ActionDto.KeyboardDto;
@@ -232,6 +233,33 @@ public class ChannelActionMapper {
                         chatDoUpdate,
                         null,
                         null));
+    }
+
+    /**
+     * Apagar a mensagem do professor (a que contém o CPF; FR-036). Só formato: a ação leva {@code
+     * chatId} e {@code messageId}, nunca texto. Se o Telegram recusar, a compensação é o aviso
+     * entregue pelo apresentador ({@code notice}, ou nulo para não ter alternativa).
+     */
+    public MappedAction deleteMessage(
+            String actionId, long chatId, long messageId, TelegramOutput.Message notice) {
+        String compensation = null;
+        if (notice != null) {
+            compensation =
+                    withoutActionId(
+                            new MessageActionDto(
+                                    null,
+                                    ActionDto.MESSAGE_TYPE,
+                                    notice.chatId(),
+                                    notice.text(),
+                                    keyboard(notice.keyboard(), false)));
+        }
+        return mount(
+                new DeleteMessageActionDto(
+                        actionId, ActionDto.DELETE_MESSAGE_TYPE, chatId, messageId),
+                ChannelActionType.DELETE_MESSAGE,
+                chatId,
+                null,
+                compensation);
     }
 
     // ---- apoio

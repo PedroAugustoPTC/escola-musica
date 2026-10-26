@@ -16,6 +16,7 @@ public sealed interface ActionDto {
     String DOCUMENT_TYPE = "DOCUMENT";
     String CALLBACK_REPLY_TYPE = "CALLBACK_REPLY";
     String STEP_MESSAGE_TYPE = "STEP_MESSAGE";
+    String DELETE_MESSAGE_TYPE = "DELETE_MESSAGE";
 
     String actionId();
 
@@ -59,5 +60,8 @@ public sealed interface ActionDto {
             String text,
             String jobId,
             Long editMessageId)
+            implements ActionDto {}
+
+    record DeleteMessageActionDto(String actionId, String type, long chatId, long messageId)
             implements ActionDto {}
 }
