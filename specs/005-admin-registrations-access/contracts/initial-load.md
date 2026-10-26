@@ -30,7 +30,7 @@ Para `seed`, o ator é `Actor.system(INITIAL_LOAD)`: o autor do registro de auto
       "birthDate": "2014-05-10",
       "guardianName": "Responsável Fictício",
       "guardianPhone": "(11) 91234-5678",
-      "guardianEmail": "responsavel@example.test",
+      "guardianEmail": "guardian@example.test",
       "instrument": "Piano",
       "teachers": ["clara@example.test"]
     }

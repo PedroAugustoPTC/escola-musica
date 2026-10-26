@@ -136,7 +136,8 @@ class AudioNonRetentionIT extends TelegramConversationBase {
                                 + " where table_schema = 'public' and data_type = 'bytea'");
         assertThat(binary)
                 .extracting(c -> c.get("table_name") + "." + c.get("column_name"))
-                .containsExactly("student.cpf_encrypted");
+                .containsExactlyInAnyOrder(
+                        "student.cpf_encrypted", "student_registration_draft.cpf_encrypted");
 
         List<String> withBrand = new ArrayList<>();
         for (Map<String, Object> column :

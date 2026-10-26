@@ -5,12 +5,12 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import br.com.felipeblaft.reports.domain.access.Actor;
-import br.com.felipeblaft.reports.usecase.seed.LoadInitialRegistryUseCase;
 import br.com.felipeblaft.reports.domain.access.Operation;
 import br.com.felipeblaft.reports.domain.access.Permission;
 import br.com.felipeblaft.reports.domain.access.PermissionMatrix;
 import br.com.felipeblaft.reports.port.AdministratorRepository;
 import br.com.felipeblaft.reports.port.AdministratorSessionRepository;
+import br.com.felipeblaft.reports.usecase.seed.LoadInitialRegistryUseCase;
 import com.tngtech.archunit.base.DescribedPredicate;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
@@ -214,7 +214,9 @@ class AdapterRulesTest {
                                 javaClass ->
                                         !javaClass
                                                         .getFullName()
-                                                        .equals(LoadInitialRegistryUseCase.class.getName())
+                                                        .equals(
+                                                                LoadInitialRegistryUseCase.class
+                                                                        .getName())
                                                 && !javaClass
                                                         .getPackageName()
                                                         .startsWith(BASE + ".inbound.seed")
