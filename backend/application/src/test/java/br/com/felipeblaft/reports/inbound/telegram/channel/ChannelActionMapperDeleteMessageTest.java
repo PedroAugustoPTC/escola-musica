@@ -66,9 +66,7 @@ class ChannelActionMapperDeleteMessageTest {
 
         assertThat(action.compensation())
                 .isEqualTo(
-                        "{\"type\":\"MESSAGE\",\"chatId\":4567,\"text\":\""
-                                + NOTICE_TEXT
-                                + "\"}");
+                        "{\"type\":\"MESSAGE\",\"chatId\":4567,\"text\":\"" + NOTICE_TEXT + "\"}");
         // a compensação, com id <id>-c, também é uma ação v1 válida
         ActionsSchemaV1.require(
                 "MessageAction",

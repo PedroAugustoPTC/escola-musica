@@ -76,7 +76,7 @@ Entrada: `actions` (lista v1). Percorre **em ordem**, uma ação por vez.
 | Etapa | Regra |
 |---|---|
 | E1. Estado | `GET {BACKEND_INTERNAL_URL}/internal/v1/channel/telegram/actions/{actionId}`. **Só `PENDING` e `DELIVERED` executam.** `state` `EXECUTED`, `FAILED`, `PERMANENTLY_FAILED` ou `DISCARDED` → **pula** (nem executa nem confirma): são decisões do backend (vínculo desfeito, prazo vencido, resultado já registrado) que o n8n não pode desfazer (Princípios II e IV). `404` (ação que o backend desconhece) → **pula**, sem confirmar, com log técnico só do `actionId`. Erro de conexão ou `5xx` → **aborta** a lista com falha de transporte. Qualquer outro `4xx` (`401`) → aborta com falha de transporte (configuração errada deve aparecer, não ser engolida). Esta leitura é mais estrita que a do contrato 002 §4 item 5 (que cita só `EXECUTED`/`FAILED`) e não o altera |
-| E2. Despacho por `type` | `MESSAGE`, `EDIT`, `DOCUMENT`, `CALLBACK_REPLY`, `STEP_MESSAGE`; qualquer outro valor → resultado `FAILED` `ACTION_NOT_SUPPORTED`, **sem chamada externa**, e segue (FR-019). Campos desconhecidos de ação conhecida são ignorados |
+| E2. Despacho por `type` | `MESSAGE`, `EDIT`, `DOCUMENT`, `CALLBACK_REPLY`, `STEP_MESSAGE`, `DELETE_MESSAGE` (feature 005); qualquer outro valor → resultado `FAILED` `ACTION_NOT_SUPPORTED`, **sem chamada externa**, e segue (FR-019). Campos desconhecidos de ação conhecida são ignorados |
 | E3. Chamada à API de bots | `POST {TELEGRAM_API_URL}/bot{TELEGRAM_BOT_TOKEN}/<método>` conforme a tabela abaixo; sem retentativa própria; `neverError` |
 | E4. Classificação | tabela de erros abaixo; função pura |
 | E5. Confirmação | `POST …/confirmations` com **um** item `{actionId, outcome, reasonCode?, messageId?}` e `version: "v1"`, imediatamente após a execução; até 3 tentativas com 1 s de espera; se falhar, **não** aborta nem derruba a resposta (R-06) |
@@ -90,6 +90,7 @@ Entrada: `actions` (lista v1). Percorre **em ordem**, uma ação por vez.
 | `EDIT` | `editMessageText` | `chat_id`, `message_id`, `text`, `parse_mode=HTML`, `reply_markup` (teclado vazio **remove** os botões) |
 | `DOCUMENT` | `sendDocument` (`multipart/form-data`) | `chat_id`; `document` = bytes de **uma única** `GET …/documents/{documentId}`; `caption` + `parse_mode=HTML` se houver `caption`; nome do arquivo = `fileName`. `404`, `5xx` ou erro de conexão na busca → `FAILED` `DOCUMENT_UNAVAILABLE` **sem** chamar a API de bots e sem repetir. Os bytes não são guardados além da ação |
 | `CALLBACK_REPLY` | `answerCallbackQuery` | `callback_query_id = callbackId` |
+| `DELETE_MESSAGE` | `deleteMessage` | `chat_id`, `message_id` (feature 005, FR-036). Sem texto e sem `messageId` na confirmação: apagar não cria nem edita mensagem |
 | `STEP_MESSAGE` | `editMessageText` se há `editMessageId`, senão `sendMessage` | como `EDIT`/`MESSAGE`; o `messageId` informado é o de `result.message_id` (envio) ou o `editMessageId` (edição) |
 
 ### 4.2 Classificação da resposta da API de bots (única decisão do n8n, só rótulo)
@@ -99,6 +100,7 @@ Entrada: `actions` (lista v1). Percorre **em ordem**, uma ação por vez.
 | `2xx` | `EXECUTED` | — | `messageId` conforme 4.1 |
 | `editMessageText` com "message is not modified" | `EXECUTED` | — | sem compensação |
 | edição com mensagem inexistente, apagada ou antiga ("message to edit not found", "message can't be edited", `MESSAGE_ID_INVALID`) | `FAILED` | `MESSAGE_NOT_EDITABLE` | o backend decide a compensação |
+| `deleteMessage` com mensagem inexistente, já apagada ou que o Telegram não deixa apagar ("message to delete not found", "message can't be deleted", `MESSAGE_ID_INVALID`) | `FAILED` | `MESSAGE_NOT_DELETABLE` | o backend decide a compensação (aviso ao professor); o n8n não monta o texto |
 | `403` ou "chat not found" | `FAILED` | `CHAT_UNAVAILABLE` | |
 | `429` | `FAILED` | `RATE_LIMITED` | o n8n **não** espera nem reenvia |
 | busca de PDF sem sucesso | `FAILED` | `DOCUMENT_UNAVAILABLE` | |
@@ -149,3 +151,5 @@ e o caminho JSON do nó, **nunca** o valor encontrado.
 | N15 | update com `message` de áudio (voice/audio/document) | o corpo segue ao backend com `file_id`; **nenhuma** chamada a `getFile` nem download |
 | N16 | confirmação recusada (`5xx`) 3 vezes | a lista continua e a resposta ao Telegram é `200`; nada é reexecutado |
 | N17 | update de grupo, update de tipo não suportado ou corpo ilegível, isto é, **JSON bem formado de formato inesperado** (backend devolve `PRIVATE_CONVERSATION_ONLY` ou `actions: []`); corpo que nem é JSON o próprio n8n recusa com `422` antes do workflow (spike S-4/F-4; o Telegram nunca o envia) | grupo: a mensagem de atendimento só em conversa privada; tipo não suportado ou ilegível: `200`, nenhuma chamada à API de bots, nenhuma confirmação, nenhum erro ao Telegram |
+| D1 | `DELETE_MESSAGE` seguida de `MESSAGE` (feature 005) | `deleteMessage` com `chat_id` e `message_id`, depois `sendMessage`; ambas `EXECUTED`, sem `messageId` na confirmação da exclusão |
+| D2 | `DELETE_MESSAGE` recusada pelo Telegram ("message to delete not found", "message can't be deleted", `MESSAGE_ID_INVALID`) | `FAILED` `MESSAGE_NOT_DELETABLE`; a lista segue; o n8n não cria ação nem aviso. Outros erros seguem a tabela geral (`403` `CHAT_UNAVAILABLE`, `429` `RATE_LIMITED`, demais `TELEGRAM_ERROR`) |

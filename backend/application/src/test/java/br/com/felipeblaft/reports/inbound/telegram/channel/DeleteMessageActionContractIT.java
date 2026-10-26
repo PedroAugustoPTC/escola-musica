@@ -93,8 +93,7 @@ class DeleteMessageActionContractIT extends OrchestratorDeliveryBase {
     @Test
     void failureCodeMessageNotDeletableIsDocumentedAndAcceptedByTheConfirmationSchema()
             throws Exception {
-        String contract =
-                Files.readString(ActionsSchemaV1.contract("actions-v1.schema.json"));
+        String contract = Files.readString(ActionsSchemaV1.contract("actions-v1.schema.json"));
 
         assertThat(JSON.readTree(contract).at("/$defs/ReasonCode/description").asString())
                 .contains("MESSAGE_NOT_DELETABLE");

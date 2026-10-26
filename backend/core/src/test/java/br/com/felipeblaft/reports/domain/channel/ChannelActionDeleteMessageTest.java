@@ -199,7 +199,8 @@ class ChannelActionDeleteMessageTest {
                                 NOTICE)));
 
         Response response =
-                confirm.run(List.of(new Result("u124-0", Status.FAILED, "ACTION_NOT_SUPPORTED", null)));
+                confirm.run(
+                        List.of(new Result("u124-0", Status.FAILED, "ACTION_NOT_SUPPORTED", null)));
 
         assertThat(response.accepted()).isEqualTo(1);
         assertThat(repository.stored("u124-0").state()).isEqualTo(ChannelActionState.FAILED);

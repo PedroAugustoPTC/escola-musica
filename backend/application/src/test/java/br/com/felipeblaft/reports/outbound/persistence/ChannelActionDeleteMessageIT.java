@@ -29,7 +29,8 @@ class ChannelActionDeleteMessageIT extends IntegrationBase {
     private static final Instant T0 = Instant.parse("2026-10-21T12:00:00Z");
     private static final String PAYLOAD =
             "{\"type\":\"DELETE_MESSAGE\",\"chatId\":4567,\"messageId\":89}";
-    private static final String NOTICE = "{\"type\":\"MESSAGE\",\"chatId\":4567,\"text\":\"aviso\"}";
+    private static final String NOTICE =
+            "{\"type\":\"MESSAGE\",\"chatId\":4567,\"text\":\"aviso\"}";
 
     private final RetryPolicy policy =
             new RetryPolicy(Duration.ofSeconds(30), Duration.ofMinutes(15), Duration.ofHours(24));
@@ -61,7 +62,8 @@ class ChannelActionDeleteMessageIT extends IntegrationBase {
         assertThat(read.type()).isEqualTo(ChannelActionType.DELETE_MESSAGE);
         assertThat(read.state()).isEqualTo(ChannelActionState.PENDING);
         assertThat(read.chatId()).isEqualTo(4567L);
-        assertThat(read.payload()).contains("\"messageId\":89");
+        assertThat(tools.jackson.databind.json.JsonMapper.builder().build().readTree(read.payload()).path("messageId").asLong())
+                .isEqualTo(89L);
         assertThat(read.compensation()).contains("aviso");
         assertThat(read.compensatesBy("MESSAGE_NOT_DELETABLE")).isTrue();
     }

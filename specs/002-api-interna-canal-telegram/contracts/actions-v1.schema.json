@@ -134,13 +134,26 @@
         }
       }
     },
+    "DeleteMessageAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actionId", "type", "chatId", "messageId"],
+      "description": "Acréscimo compatível da feature 005 (FR-036): apaga uma mensagem do chat (a que contém o CPF digitado pelo professor). Só transporte: sem texto. Falha de exclusão = MESSAGE_NOT_DELETABLE, e a compensação (aviso ao professor) é decidida pelo backend. Um receptor antigo responde ACTION_NOT_SUPPORTED.",
+      "properties": {
+        "actionId": { "$ref": "#/$defs/ActionId" },
+        "type": { "const": "DELETE_MESSAGE" },
+        "chatId": { "$ref": "#/$defs/ChatId" },
+        "messageId": { "$ref": "#/$defs/MessageId" }
+      }
+    },
     "Action": {
       "oneOf": [
         { "$ref": "#/$defs/MessageAction" },
         { "$ref": "#/$defs/EditAction" },
         { "$ref": "#/$defs/DocumentAction" },
         { "$ref": "#/$defs/CallbackReplyAction" },
-        { "$ref": "#/$defs/StepMessageAction" }
+        { "$ref": "#/$defs/StepMessageAction" },
+        { "$ref": "#/$defs/DeleteMessageAction" }
       ]
     },
     "UpdateResponse": {
@@ -181,7 +194,7 @@
     "ReasonCode": {
       "type": "string",
       "pattern": "^[A-Z][A-Z0-9_]{1,39}$",
-      "description": "Motivo de falha informado pelo orquestrador; nunca contém texto de aluno. Codigos conhecidos: MESSAGE_NOT_EDITABLE, CHAT_UNAVAILABLE, ACTION_NOT_SUPPORTED, DOCUMENT_UNAVAILABLE, RATE_LIMITED, TELEGRAM_ERROR. Aberto de proposito (evolucao aditiva, contracts/telegram-channel-internal.md secao 5): o backend trata um codigo desconhecido como TELEGRAM_ERROR em vez de recusar o lote."
+      "description": "Motivo de falha informado pelo orquestrador; nunca contém texto de aluno. Codigos conhecidos: MESSAGE_NOT_EDITABLE, MESSAGE_NOT_DELETABLE, CHAT_UNAVAILABLE, ACTION_NOT_SUPPORTED, DOCUMENT_UNAVAILABLE, RATE_LIMITED, TELEGRAM_ERROR. Aberto de proposito (evolucao aditiva, contracts/telegram-channel-internal.md secao 5): o backend trata um codigo desconhecido como TELEGRAM_ERROR em vez de recusar o lote."
     },
     "ActionResult": {
       "type": "object",

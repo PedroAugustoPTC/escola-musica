@@ -522,6 +522,29 @@
               },
               "renameOutput": true,
               "outputKey": "STEP_MESSAGE"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose"
+                },
+                "conditions": [
+                  {
+                    "id": "condition-45",
+                    "leftValue": "={{ $('Loop').item.json.type }}",
+                    "rightValue": "DELETE_MESSAGE",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "DELETE_MESSAGE"
             }
           ]
         },
@@ -541,7 +564,7 @@
       ],
       "parameters": {
         "language": "javaScript",
-        "jsCode": "const action = $('Loop').item.json;\nconst rows = action.keyboard && Array.isArray(action.keyboard.rows) ? action.keyboard.rows : [];\nconst inline = rows.map((row) => row.map((button) => ({ text: button.label, callback_data: button.data })));\nif (action.type === 'CALLBACK_REPLY') {\n  return [{ json: { method: 'answerCallbackQuery', body: { callback_query_id: action.callbackId } } }];\n}\nconst base = { chat_id: action.chatId, text: action.text, parse_mode: 'HTML' };\nconst editingStep = action.type === 'STEP_MESSAGE' && action.editMessageId !== undefined && action.editMessageId !== null;\nif (action.type === 'EDIT' || editingStep) {\n  const messageId = action.type === 'EDIT' ? action.messageId : action.editMessageId;\n  return [{ json: { method: 'editMessageText', body: { ...base, message_id: messageId, reply_markup: { inline_keyboard: inline } } } }];\n}\nconst body = { ...base, link_preview_options: { is_disabled: true } };\nif (inline.length > 0) {\n  body.reply_markup = { inline_keyboard: inline };\n}\nreturn [{ json: { method: 'sendMessage', body } }];"
+        "jsCode": "const action = $('Loop').item.json;\nconst rows = action.keyboard && Array.isArray(action.keyboard.rows) ? action.keyboard.rows : [];\nconst inline = rows.map((row) => row.map((button) => ({ text: button.label, callback_data: button.data })));\nif (action.type === 'CALLBACK_REPLY') {\n  return [{ json: { method: 'answerCallbackQuery', body: { callback_query_id: action.callbackId } } }];\n}\nif (action.type === 'DELETE_MESSAGE') {\n  return [{ json: { method: 'deleteMessage', body: { chat_id: action.chatId, message_id: action.messageId } } }];\n}\nconst base = { chat_id: action.chatId, text: action.text, parse_mode: 'HTML' };\nconst editingStep = action.type === 'STEP_MESSAGE' && action.editMessageId !== undefined && action.editMessageId !== null;\nif (action.type === 'EDIT' || editingStep) {\n  const messageId = action.type === 'EDIT' ? action.messageId : action.editMessageId;\n  return [{ json: { method: 'editMessageText', body: { ...base, message_id: messageId, reply_markup: { inline_keyboard: inline } } } }];\n}\nconst body = { ...base, link_preview_options: { is_disabled: true } };\nif (inline.length > 0) {\n  body.reply_markup = { inline_keyboard: inline };\n}\nreturn [{ json: { method: 'sendMessage', body } }];"
       }
     },
     {
@@ -593,7 +616,7 @@
             {
               "id": "assign-33",
               "name": "reasonCode",
-              "value": "={{ $json.error !== undefined ? 'TELEGRAM_ERROR' : Math.floor($json.statusCode / 100) === 2 ? '' : (d => d.includes('message is not modified') ? '' : (d.includes('message to edit not found') || d.includes(\"message can't be edited\") || d.includes('message_id_invalid')) ? 'MESSAGE_NOT_EDITABLE' : ($json.statusCode === 403 || d.includes('chat not found')) ? 'CHAT_UNAVAILABLE' : $json.statusCode === 429 ? 'RATE_LIMITED' : 'TELEGRAM_ERROR')(String(($json.body && $json.body.description) || '').toLowerCase()) }}",
+              "value": "={{ $json.error !== undefined ? 'TELEGRAM_ERROR' : Math.floor($json.statusCode / 100) === 2 ? '' : (d => d.includes('message is not modified') ? '' : ($('Loop').item.json.type === 'DELETE_MESSAGE' && (d.includes('message to delete not found') || d.includes(\"message can't be deleted\") || d.includes('message_id_invalid'))) ? 'MESSAGE_NOT_DELETABLE' : (d.includes('message to edit not found') || d.includes(\"message can't be edited\") || d.includes('message_id_invalid')) ? 'MESSAGE_NOT_EDITABLE' : ($json.statusCode === 403 || d.includes('chat not found')) ? 'CHAT_UNAVAILABLE' : $json.statusCode === 429 ? 'RATE_LIMITED' : 'TELEGRAM_ERROR')(String(($json.body && $json.body.description) || '').toLowerCase()) }}",
               "type": "string"
             }
           ]
@@ -674,7 +697,7 @@
         "sendBody": true,
         "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ (action => ({ version: 'v1', results: [Object.assign({ actionId: action.actionId, outcome: $json.reasonCode === '' ? 'EXECUTED' : 'FAILED' }, $json.reasonCode !== '' ? { reasonCode: $json.reasonCode } : {}, $json.reasonCode === '' && action.type === 'EDIT' ? { messageId: action.messageId } : {}, $json.reasonCode === '' && action.type === 'STEP_MESSAGE' && action.editMessageId !== undefined && action.editMessageId !== null ? { messageId: action.editMessageId } : {}, $json.reasonCode === '' && action.type !== 'EDIT' && !(action.type === 'STEP_MESSAGE' && action.editMessageId !== undefined && action.editMessageId !== null) && $json.body && $json.body.result && typeof $json.body.result.message_id === 'number' ? { messageId: $json.body.result.message_id } : {})] }))($('Loop').item.json) }}",
+        "jsonBody": "={{ (action => ({ version: 'v1', results: [Object.assign({ actionId: action.actionId, outcome: $json.reasonCode === '' ? 'EXECUTED' : 'FAILED' }, $json.reasonCode !== '' ? { reasonCode: $json.reasonCode } : {}, $json.reasonCode === '' && action.type === 'EDIT' ? { messageId: action.messageId } : {}, $json.reasonCode === '' && action.type === 'STEP_MESSAGE' && action.editMessageId !== undefined && action.editMessageId !== null ? { messageId: action.editMessageId } : {}, $json.reasonCode === '' && action.type !== 'EDIT' && action.type !== 'DELETE_MESSAGE' && !(action.type === 'STEP_MESSAGE' && action.editMessageId !== undefined && action.editMessageId !== null) && $json.body && $json.body.result && typeof $json.body.result.message_id === 'number' ? { messageId: $json.body.result.message_id } : {})] }))($('Loop').item.json) }}",
         "options": {
           "redirect": {
             "redirect": {
@@ -964,6 +987,13 @@
         [
           {
             "node": "Fetch",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build",
             "type": "main",
             "index": 0
           }

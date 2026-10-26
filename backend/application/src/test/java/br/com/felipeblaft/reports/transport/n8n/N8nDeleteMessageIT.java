@@ -94,13 +94,13 @@ class N8nDeleteMessageIT {
     }
 
     @Test
-    @DisplayName("D1: DELETE_MESSAGE chama deleteMessage com chat_id e message_id e confirma EXECUTED")
+    @DisplayName(
+            "D1: DELETE_MESSAGE chama deleteMessage com chat_id e message_id e confirma EXECUTED")
     void deletionCallsDeleteMessageAndConfirmsExecuted() {
         Reply reply = update(message(1, "One") + "," + delete(2) + "," + message(3, "Three"));
 
         assertThat(reply.status()).isEqualTo(200);
-        assertThat(botApi.methods())
-                .containsExactly("sendMessage", "deleteMessage", "sendMessage");
+        assertThat(botApi.methods()).containsExactly("sendMessage", "deleteMessage", "sendMessage");
         JsonNode body = JSON.readTree(botApi.callsOf("deleteMessage").getFirst().getBodyAsString());
         assertThat(body.get("chat_id").asLong()).isEqualTo(7001L);
         assertThat(body.get("message_id").asLong()).isEqualTo(89L);
@@ -111,7 +111,9 @@ class N8nDeleteMessageIT {
                 .containsExactly("EXECUTED", "EXECUTED", "EXECUTED");
         assertThat(results.get(1).get("actionId").asString()).isEqualTo("u31-2");
         assertThat(results.get(1).has("reasonCode")).isFalse();
-        assertThat(results.get(1).has("messageId")).as("apagar não cria nem edita mensagem").isFalse();
+        assertThat(results.get(1).has("messageId"))
+                .as("apagar não cria nem edita mensagem")
+                .isFalse();
         assertThat(botApi.sentTexts()).containsExactly("One", "Three");
     }
 
@@ -179,7 +181,8 @@ class N8nDeleteMessageIT {
     }
 
     @Test
-    @DisplayName("D5: ação DELETE_MESSAGE já tratada pelo backend é pulada, sem chamada nem confirmação")
+    @DisplayName(
+            "D5: ação DELETE_MESSAGE já tratada pelo backend é pulada, sem chamada nem confirmação")
     void alreadyHandledDeletionIsSkipped() {
         backend.actionState("u31-1", "EXECUTED");
 
