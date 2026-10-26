@@ -180,7 +180,16 @@ Pré-condição de todos os fluxos `W-*`, `X-1` e `X-2`: **S1 (Fundação, T004 
 - **W-M/X-2 (T057, T193, T222)**: `signInAsAdministrator` lê `E2E_ADMIN_EMAIL`/`E2E_ADMIN_PASSWORD`; semear o administrador de teste e entregar as variáveis ao serviço `tests-e2e`. O `AdminSessionGuard` escuta `ADMIN_SESSION_EXPIRED_EVENT` e `ADMIN_PASSWORD_CHANGE_REQUIRED_EVENT`; mensagens de bloqueio formatadas a partir de `blockedRemainingSeconds`.
 - **W-K (T207, T216)**: `infra/scripts/local.sh up` gerar o `AUTH_HMAC_SECRET` local e exigi-lo no `require_env`; `compose.dev.yaml`/`compose.prod.yaml` herdam o `environment` de `compose.yaml` (decisão registrada: não repetir ali).
 - **X-3 (T228)**: documentar `AUTH_HMAC_SECRET` e `ADMIN_BOOTSTRAP_*` em `infra/README.md`, `infra/scripts/README.md` e `infra/CLAUDE.md`; recomendar não registrar a query string (`search`) no proxy.
-- **Fecho**: remover `PendingImplementation`; unificar o mapa `OPERATION_OF` das regras ArchUnit (core e application); acrescentar `*Task` aos sufixos do Princípio VI; trocar a regra de dependência de `ActorAuthorizationService` por chamada a `require()`.
+- **Fecho**: ~~remover `PendingImplementation`~~ (feito na S2); unificar o mapa `OPERATION_OF` das regras ArchUnit (core e application); acrescentar `*Task` aos sufixos do Princípio VI; trocar a regra de dependência de `ActorAuthorizationService` por chamada a `require()`.
+
+### Pendências da S2 (revisão pré-PR; fora do escopo desta fatia, nada foi feito)
+
+- **Concorrência otimista**: sem `@Version`/lock otimista em `student` e `teacher`; edições simultâneas do mesmo aluno seguem "a última grava". Só o CPF é protegido (índice único traduzido em duplicidade).
+- **N+1**: `StudentView` das listas consulta professores e contagens por aluno; avaliar uma consulta agregada se o volume crescer.
+- **Política de bloqueio do administrador**: mantida como a spec define (5 falhas em 15 minutos por origem); sem mudança.
+- **`originHash` do professor**: mantido como está; mudá-lo quebraria a correlação histórica dos registros de autoria.
+- **Contato no rascunho do Telegram**: nome/telefone/e-mail do responsável seguem em claro no rascunho (30 min); cifrar fica como melhoria.
+- **Perdedor da corrida de CPF (professor)**: recebe `CPF_UNAVAILABLE` e a recusa conta no limite de sondagem, mas não deixa o registro de autoria `CPF_REFUSED_OTHER_STUDENT` (a transação já foi abortada pelo índice único e o dono do CPF não é consultado).
 
 ---
 

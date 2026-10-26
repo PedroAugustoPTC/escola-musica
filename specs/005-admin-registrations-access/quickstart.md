@@ -63,7 +63,7 @@ Verificações dedicadas desta feature (todas parte de `tests backend`, salvo in
 - **Acesso cruzado gerado da matriz**: itera `contracts/permission-matrix.json` × (administrador Web, professor Web,
   professor Telegram, sem credencial) sobre **todas** as rotas e comandos; compara com a `PermissionMatrix` do núcleo.
 - **Enumerações**: `Role.values().length == 2`; nenhuma rota/comando/tela para aluno ou responsável; nenhuma referência de
-  `inbound.telegram` ao administrador (ArchUnit); `Actor.system` só em `inbound.seed` e bootstrap (ArchUnit).
+  `inbound.telegram` ao administrador (ArchUnit); `Actor.system` só em `inbound.seed`, `inbound.bootstrap` e `LoadInitialRegistryUseCase` (ArchUnit).
 - **Indistinguibilidade**: corpo/cabeçalhos idênticos e mesma ordem de grandeza de tempo entre aluno alheio e inexistente.
 - **Concorrência** (Postgres real): duplicidade de CPF/e-mail, último administrador, contagem de tentativas, confirmação do bot.
 - **Append-only**: `UPDATE`/`DELETE`/`TRUNCATE` em `authorship_record` falham.

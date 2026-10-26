@@ -257,7 +257,7 @@ Entrega um build **verde** com tudo o que é compartilhado e o esqueleto das ass
   `UnsupportedOperationException`), mais `Student`/`Teacher` com os métodos de estado triviais.
 - **F4** Adaptadores com **stubs compiláveis** das portas alteradas; `AdministrationUseCaseConfig`,
   `TeacherManagementUseCaseConfig` e `StudentRegistryUseCaseConfig` (beans de todos os casos de uso) e a regra ArchUnit
-  nova (Role = 2; `Actor.system` só em `inbound.seed`/bootstrap; `inbound.telegram` sem referência ao administrador).
+  nova (Role = 2; `Actor.system` só em `inbound.seed`, `inbound.bootstrap` e `LoadInitialRegistryUseCase`; `inbound.telegram` sem referência ao administrador).
 - **F5** Frontend: segundo gerador de tipos (`generate:administration-api`), `adminRoutes.tsx`/`myStudentsRoutes.tsx`
   (listas vazias) ligados em `routes.tsx`, interface de props de `StudentForm` e do `OneTimeSecretPanel`, hooks de erro/evento de
   sessão do administrador em `apiClient.ts`.

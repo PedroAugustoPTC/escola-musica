@@ -14,11 +14,11 @@
   ],
   "students": [
     {
-      "cpf": "300.007.919-03",
+      "cpf": "168.995.350-09",
       "name": "Matteo Mafra",
       "birthDate": "2014-05-10",
       "guardianName": "Responsável Fictício de Matteo",
-      "guardianPhone": "(11) 91001-5001",
+      "guardianPhone": "(11) 99999-0004",
       "guardianEmail": "guardian1@example.test",
       "instrument": "Piano",
       "teachers": [
@@ -26,7 +26,7 @@
       ]
     },
     {
-      "cpf": "300.015.838-32",
+      "cpf": "987.654.321-00",
       "name": "Olavo Torrente",
       "birthDate": "1998-02-01",
       "instrument": "Violão",
@@ -35,11 +35,11 @@
       ]
     },
     {
-      "cpf": "300.023.757-70",
+      "cpf": "012.345.678-90",
       "name": "Miguel de Castro Torrente",
       "birthDate": "2016-08-20",
       "guardianName": "Responsável Fictício de Miguel",
-      "guardianPhone": "(11) 91002-5002",
+      "guardianPhone": "(11) 99999-0005",
       "guardianEmail": "guardian2@example.test",
       "instrument": "Violino",
       "teachers": [
@@ -47,11 +47,11 @@
       ]
     },
     {
-      "cpf": "300.031.676-07",
+      "cpf": "222.333.444-05",
       "name": "Beatriz Arruda",
       "birthDate": "2009-11-14",
       "guardianName": "Responsável Fictícia de Beatriz",
-      "guardianPhone": "(11) 91003-5003",
+      "guardianPhone": "(11) 99999-0006",
       "guardianEmail": "guardian3@example.test",
       "instrument": "Canto",
       "teachers": [
@@ -59,11 +59,11 @@
       ]
     },
     {
-      "cpf": "300.039.595-46",
+      "cpf": "333.444.555-08",
       "name": "Lucas Pimentel",
       "birthDate": "2012-03-03",
       "guardianName": "Responsável Fictício de Lucas",
-      "guardianPhone": "(11) 91004-5004",
+      "guardianPhone": "(11) 99999-0007",
       "guardianEmail": "guardian4@example.test",
       "instrument": "Piano",
       "teachers": [
@@ -71,7 +71,7 @@
       ]
     },
     {
-      "cpf": "300.047.514-18",
+      "cpf": "444.555.666-19",
       "name": "Sofia Rangel",
       "birthDate": "2001-07-22",
       "instrument": "Violão",
@@ -80,11 +80,11 @@
       ]
     },
     {
-      "cpf": "300.055.433-55",
+      "cpf": "555.666.777-20",
       "name": "Helena Prado",
       "birthDate": "2010-11-03",
       "guardianName": "Responsável Fictícia de Helena",
-      "guardianPhone": "(11) 91005-5005",
+      "guardianPhone": "(11) 99999-0008",
       "guardianEmail": "guardian5@example.test",
       "instrument": "Flauta",
       "teachers": [
@@ -92,11 +92,11 @@
       ]
     },
     {
-      "cpf": "300.063.352-92",
+      "cpf": "666.777.888-30",
       "name": "Davi Coutinho",
       "birthDate": "2013-09-30",
       "guardianName": "Responsável Fictício de Davi",
-      "guardianPhone": "(11) 91006-5006",
+      "guardianPhone": "(11) 99999-0009",
       "guardianEmail": "guardian6@example.test",
       "instrument": "Bateria",
       "teachers": [

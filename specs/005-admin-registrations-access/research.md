@@ -54,8 +54,8 @@ controller — vaza dado se o filtro falhar e quebra FR-038.
 ## R-02 — Exatamente dois papéis; "sistema" não é papel
 
 **Decisão**: `enum Role { ADMINISTRATOR, TEACHER }`. Operações sem usuário (primeiro administrador, carga inicial) usam
-`Actor.system(ActionOrigin)`, **não autenticável**: não vem de cookie, vínculo nem requisição; só `inbound.seed` e o
-bootstrap o constroem (regra ArchUnit). `ActionOrigin` = `WEB`, `TELEGRAM`, `SYSTEM_STARTUP`, `INITIAL_LOAD` (é o "canal"
+`Actor.system(ActionOrigin)`, **não autenticável**: não vem de cookie, vínculo nem requisição; só `inbound.seed`, `inbound.bootstrap` e `LoadInitialRegistryUseCase` (que cria o ator
+`INITIAL_LOAD` para orquestrar os casos de uso de cadastro) o constroem (regra ArchUnit). `ActionOrigin` = `WEB`, `TELEGRAM`, `SYSTEM_STARTUP`, `INITIAL_LOAD` (é o "canal"
 do registro de autoria; `Channel` WEB/TELEGRAM continua só para o que já usa). Um teste enumera `Role.values()` e exige 2
 (SC-007).
 
