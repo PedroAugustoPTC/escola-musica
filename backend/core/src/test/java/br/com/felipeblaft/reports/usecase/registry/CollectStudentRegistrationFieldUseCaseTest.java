@@ -344,7 +344,7 @@ class CollectStudentRegistrationFieldUseCaseTest {
         collect(Field.GUARDIAN, "Maria Souza");
         assertViolation(refused(Field.GUARDIAN, "123"), "guardian.phone", "INVALID_PHONE");
         collect(Field.GUARDIAN, "11912345678");
-        assertViolation(refused(Field.GUARDIAN, "sem-arroba"), "guardian.email", "INVALID_EMAIL");
+        assertViolation(refused(Field.GUARDIAN, "no-at-sign"), "guardian.email", "INVALID_EMAIL");
         assertThat(draft().providedFields()).isEmpty();
     }
 

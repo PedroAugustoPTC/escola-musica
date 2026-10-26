@@ -114,7 +114,7 @@ final class DraftScenario {
         Teacher created =
                 Teacher.create(
                         name,
-                        name.toLowerCase(java.util.Locale.ROOT).replace(' ', '.') + "@escola.com",
+                        name.toLowerCase(java.util.Locale.ROOT).replace(' ', '.') + "@school.com",
                         true,
                         clock.now());
         teachers.save(created);
