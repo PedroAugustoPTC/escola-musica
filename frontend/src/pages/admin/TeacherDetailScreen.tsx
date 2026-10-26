@@ -35,11 +35,18 @@ export function TeacherDetailScreen() {
   const [notice, setNotice] = useState('');
   const [saved, setSaved] = useState(false);
   const [confirmInactivate, setConfirmInactivate] = useState(false);
-  const [issued, setIssued] = useState<TeacherWithCode | null>(null);
+  const [issued, setIssued] = useState<{ result: TeacherWithCode; emission: number } | null>(null);
+  const emissions = useRef(0);
   const heading = useRef<HTMLHeadingElement>(null);
   const data = teacher.data;
   const active = data?.active;
   const firstRender = useRef(true);
+
+  /** Cada emissão tem a própria `key`: um código novo nunca reaproveita o painel (e o valor) do anterior. */
+  const showIssued = (result: TeacherWithCode) => {
+    emissions.current += 1;
+    setIssued({ result, emission: emissions.current });
+  };
 
   // a ação de situação troca os botões: devolve o foco ao título para não o perder
   useEffect(() => {
@@ -80,10 +87,11 @@ export function TeacherDetailScreen() {
 
       {issued ? (
         <OneTimeSecretPanel
+          key={`${issued.result.teacher.id}:${issued.result.validUntil}:${issued.emission}`}
           kind="access-code"
-          secret={issued.accessCode}
-          recipientName={issued.teacher.name}
-          validUntil={issued.validUntil}
+          secret={issued.result.accessCode}
+          recipientName={issued.result.teacher.name}
+          validUntil={issued.result.validUntil}
           onAcknowledge={() => setIssued(null)}
         />
       ) : null}
@@ -118,6 +126,8 @@ export function TeacherDetailScreen() {
               <Button
                 variant="secondary"
                 icon="key"
+                // com o código na tela, nenhuma outra emissão: ele só aparece uma vez
+                disabled={issued !== null}
                 onClick={() => {
                   setEndTelegramLink(false);
                   setConfirmReissue(true);
@@ -138,10 +148,11 @@ export function TeacherDetailScreen() {
             <Button
               icon="person_check"
               loading={reactivate.isPending}
+              disabled={issued !== null}
               onClick={() =>
                 reactivate.mutate(undefined, {
                   onSuccess: (result) => {
-                    setIssued(result);
+                    showIssued(result);
                     reactivate.reset();
                   },
                 })
@@ -211,7 +222,7 @@ export function TeacherDetailScreen() {
             {
               onSuccess: (result) => {
                 setConfirmReissue(false);
-                setIssued(result);
+                showIssued(result);
                 setNotice('');
                 reissue.reset();
               },

@@ -8,10 +8,28 @@ export type AdministratorSession = components['schemas']['AdministratorSession']
 export const ADMIN_QUERY_ROOT = 'admin' as const;
 export const ADMIN_SESSION_KEY = [ADMIN_QUERY_ROOT, 'session'] as const;
 
-/** Rota de entrada do administrador guardando o destino (só dentro da área administrativa). */
+/**
+ * Destino sem a busca: o que o administrador digitou na busca (nome, e-mail, até um CPF por engano) nunca vai
+ * à URL de entrada. Ficam só o caminho, a situação (`status`) e a página (`page`), se existirem.
+ */
+export function adminDestinationWithoutSearch(destination: string): string {
+  const [path = '', query = ''] = destination.split('#')[0]!.split('?');
+  const original = new URLSearchParams(query);
+  const kept = new URLSearchParams();
+  for (const key of ['status', 'page']) {
+    const value = original.get(key);
+    if (value !== null) kept.set(key, value);
+  }
+  const text = kept.toString();
+  return text ? `${path}?${text}` : path;
+}
+
+/** Rota de entrada do administrador guardando o destino (só dentro da área administrativa, sem a busca). */
 export function adminSignInRoute(destination: string, reason?: string): string {
   const params = new URLSearchParams();
-  if (isAdminDestination(destination) && destination !== '/admin') params.set('destination', destination);
+  const safeDestination = adminDestinationWithoutSearch(destination);
+  if (isAdminDestination(safeDestination) && safeDestination !== '/admin')
+    params.set('destination', safeDestination);
   if (reason) params.set('reason', reason);
   const query = params.toString();
   return query ? `/admin/sign-in?${query}` : '/admin/sign-in';

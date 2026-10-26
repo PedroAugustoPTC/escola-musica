@@ -51,7 +51,9 @@ export function MyStudentsScreen() {
           }}
         />
         {students.isPending ? <CardsSkeleton label="Carregando alunos" /> : null}
-        {students.isError ? <ErrorAlert error={students.error} onRetry={() => students.refetch()} /> : null}
+        {students.isError ? (
+          <ErrorAlert error={students.error} onRetry={() => students.refetch()} fromCatalog />
+        ) : null}
         {empty && term ? (
           <EmptyState
             icon="person_search"

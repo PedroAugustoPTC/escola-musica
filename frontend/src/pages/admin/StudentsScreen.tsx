@@ -6,7 +6,11 @@ import { ErrorAlert } from '../../components/ErrorState';
 import { Icon } from '../../components/Icon';
 import { LoadingState } from '../../components/LoadingState';
 import { Pagination, SearchForm, SegmentedFilter, StatusBadge } from '../../components/admin/ui';
-import { looksLikeCpf, useAdminStudents, type StudentStatus } from '../../services/admin/students';
+import { useSearchParamTerm } from '../../components/admin/useSearchParamTerm';
+import { looksLikeCpf } from '../../components/student/cpfShape';
+import { useAdminStudents, type StudentStatus } from '../../services/admin/students';
+
+const CPF_REFUSED = 'Não há busca por CPF. Procure pelo nome ou pelo instrumento.';
 
 const FILTERS: { value: StudentStatus; label: string }[] = [
   { value: 'ACTIVE', label: 'Ativos' },
@@ -21,7 +25,8 @@ function statusOf(value: string | null): StudentStatus {
 /** A10 — Alunos da escola: busca (nome ou instrumento), situação, paginação e professores associados. */
 export function StudentsScreen() {
   const [params, setParams] = useSearchParams();
-  const search = params.get('search') ?? '';
+  // um `?search=` com forma de CPF é descartado ao ler: não entra na chave de consulta nem na API
+  const { search, refusedFromUrl, dismissRefusal } = useSearchParamTerm(params, setParams);
   const status = statusOf(params.get('status'));
   const page = Math.max(0, Number(params.get('page')) || 0);
   const [draft, setDraft] = useState(search);
@@ -45,11 +50,12 @@ export function StudentsScreen() {
 
   const submitSearch = () => {
     // não existe busca por CPF: recusado aqui, sem ir à URL, à API nem à chave de consulta
-    if (looksLikeCpf(draft)) {
-      setSearchError('Não há busca por CPF. Procure pelo nome ou pelo instrumento.');
+    if (looksLikeCpf(draft.trim())) {
+      setSearchError(CPF_REFUSED);
       return;
     }
     setSearchError('');
+    dismissRefusal();
     update({ search: draft });
   };
 
@@ -74,9 +80,10 @@ export function StudentsScreen() {
           onChange={(value) => {
             setDraft(value);
             setSearchError('');
+            dismissRefusal();
           }}
           onSubmit={submitSearch}
-          error={searchError}
+          error={searchError || (refusedFromUrl ? CPF_REFUSED : '')}
         />
         <SegmentedFilter
           label="Situação"

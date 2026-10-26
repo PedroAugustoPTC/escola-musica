@@ -16,7 +16,7 @@ import {
 } from '../../components/admin/NewPasswordFields';
 import { FormErrorSummary, TextField } from '../../components/admin/ui';
 import { msg } from '../../messages/messages';
-import { blockedRemainingSeconds } from '../../services/apiClient';
+import { blockedRemainingSeconds, type ApiError } from '../../services/apiClient';
 import { useActivateAdministrator } from '../../services/admin/session';
 
 interface Missing extends NewPasswordErrors {
@@ -37,11 +37,13 @@ export function ActivateScreen() {
   const [confirmation, setConfirmation] = useState('');
   const [missing, setMissing] = useState<Missing>({});
   const [done, setDone] = useState(false);
+  // a falha é copiada para o estado da tela e a mutação é zerada: o código e a senha não ficam em memória
+  const [failure, setFailure] = useState<ApiError | null>(null);
 
-  const fields = fieldErrorsOf(activate.error);
+  const fields = fieldErrorsOf(failure);
   const passwordServer = errorOfField(fields, 'newPassword');
   const emailServer = errorOfField(fields, 'email');
-  const blockedFor = blockedRemainingSeconds(activate.error);
+  const blockedFor = blockedRemainingSeconds(failure);
 
   const passwordErrors: NewPasswordErrors = {
     newPassword: missing.newPassword ?? (passwordServer ? fieldErrorText(passwordServer.code) : undefined),
@@ -51,10 +53,8 @@ export function ActivateScreen() {
   const summary = [emailError, missing.code, passwordErrors.newPassword, passwordErrors.confirmation].filter(
     (text): text is string => Boolean(text),
   );
-  if (summary.length === 0 && activate.isError && blockedFor === null && fields.length === 0) {
-    summary.push(
-      activate.error.code === 'INVALID_ACTIVATION' ? msg('INVALID_ACTIVATION') : apiErrorText(activate.error),
-    );
+  if (summary.length === 0 && failure !== null && blockedFor === null && fields.length === 0) {
+    summary.push(failure.code === 'INVALID_ACTIVATION' ? msg('INVALID_ACTIVATION') : apiErrorText(failure));
   }
 
   const submit = (event: FormEvent) => {
@@ -68,17 +68,23 @@ export function ActivateScreen() {
     };
     setMissing(pending);
     if (pending.email || pending.code || pending.newPassword || pending.confirmation) return;
+    setFailure(null);
     activate.mutate(
       { email: email.trim(), activationCode: code.trim(), newPassword },
       {
         onSuccess: () => {
+          setCode('');
           setNewPassword('');
           setConfirmation('');
+          activate.reset();
           setDone(true);
         },
         onError: (error) => {
+          setCode('');
           setNewPassword('');
           setConfirmation('');
+          setFailure(error);
+          activate.reset();
           const wait = blockedRemainingSeconds(error);
           if (wait !== null) countdown.block(wait);
         },

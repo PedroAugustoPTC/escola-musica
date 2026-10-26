@@ -149,4 +149,20 @@ describe('AdminLayout', () => {
     expect(screen.queryByLabelText('Rascunho')).not.toBeInTheDocument();
     expect(document.body.textContent).not.toContain('texto digitado');
   });
+
+  it('ao trocar de rota o foco vai para o título da nova página; sem mudar de rota ele fica onde está', async () => {
+    mockApi({ 'GET /api/v1/admin/session': { body: ADMIN_SESSION } });
+    const user = userEvent.setup();
+    renderRoutes(routes, '/admin');
+    await screen.findByRole('heading', { name: 'Início' });
+    // a primeira carga não rouba o foco do campo que o usuário alcançar primeiro
+    expect(screen.getByRole('heading', { name: 'Início' })).not.toHaveFocus();
+    await user.click(screen.getByLabelText('Rascunho'));
+    expect(screen.getByLabelText('Rascunho')).toHaveFocus();
+
+    await user.click(screen.getByRole('link', { name: 'Professores' }));
+
+    const heading = await screen.findByRole('heading', { name: 'Professores da escola' });
+    await waitFor(() => expect(heading).toHaveFocus());
+  });
 });

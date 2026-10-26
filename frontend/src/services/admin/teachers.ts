@@ -1,6 +1,7 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, type ApiError } from '../apiClient';
 import type { components } from '../administration-api-types';
+import { looksLikeCpf, searchTermOf } from '../../components/student/cpfShape';
 import { ADMIN_QUERY_ROOT } from './session';
 import { DEFAULT_PAGE_SIZE, queryString } from './query';
 
@@ -24,7 +25,8 @@ export interface TeacherListParams {
 
 /** Lista de professores com busca, filtro de situação e paginação (FR-012). */
 export function useTeachers({ search, filter, page }: TeacherListParams) {
-  const term = search.trim();
+  // termo com forma de CPF nunca entra na chave de consulta nem na API (não existe busca por CPF)
+  const term = searchTermOf(search);
   const active = filter === 'all' ? undefined : filter === 'active';
   return useQuery<TeacherPage>({
     queryKey: [...TEACHERS, 'list', term, filter, page],
@@ -34,6 +36,7 @@ export function useTeachers({ search, filter, page }: TeacherListParams) {
         signal,
       ),
     placeholderData: keepPreviousData,
+    enabled: !looksLikeCpf(search.trim()),
   });
 }
 

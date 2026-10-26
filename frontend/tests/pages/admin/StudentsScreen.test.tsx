@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TEACHER_ACTIVE, TEST_CPF, administratorStudent, pageOf } from '../../support/adminFixtures';
 import { renderAdminArea } from './adminTestSupport';
@@ -142,4 +142,30 @@ describe('StudentsScreen (A10)', () => {
     await screen.findByText('Matteo Mafra');
     expect(api.calls.some((call) => call.url.includes('page=1'))).toBe(true);
   });
+
+  it.each([TEST_CPF, '111.444.777-35', '111 444 777 35'])(
+    '?search= com forma de CPF (%s) na URL é descartado: limpa a URL, avisa e nunca vai à API nem à chave',
+    async (term) => {
+      const api = renderAdminArea(`/admin/students?search=${encodeURIComponent(term)}`, {
+        [LIST]: { body: pageOf([MATTEO]) },
+      });
+      await screen.findByText('Matteo Mafra');
+
+      expect(
+        await screen.findByText('Não há busca por CPF. Procure pelo nome ou pelo instrumento.'),
+      ).toBeInTheDocument();
+      await waitFor(() => expect(api.router.state.location.search).toBe(''));
+      expect(screen.getByRole('searchbox', { name: 'Buscar aluno' })).toHaveValue('');
+      expect(api.calls.map((call) => call.url).join(' ')).not.toMatch(
+        /11144477735|111\.444|111%20444|111\+444/,
+      );
+      const keys = JSON.stringify(
+        api.client
+          .getQueryCache()
+          .getAll()
+          .map((query) => query.queryKey),
+      );
+      expect(keys).not.toMatch(/11144477735|111\.444|111 444/);
+    },
+  );
 });

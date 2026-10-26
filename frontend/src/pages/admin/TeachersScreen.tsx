@@ -6,7 +6,11 @@ import { ErrorAlert } from '../../components/ErrorState';
 import { Icon } from '../../components/Icon';
 import { LoadingState } from '../../components/LoadingState';
 import { Pagination, SearchForm, SegmentedFilter, StatusBadge } from '../../components/admin/ui';
+import { useSearchParamTerm } from '../../components/admin/useSearchParamTerm';
+import { looksLikeCpf } from '../../components/student/cpfShape';
 import { useTeachers, type TeacherActiveFilter } from '../../services/admin/teachers';
+
+const CPF_REFUSED = 'Não há busca por CPF. Procure pelo nome ou pelo e-mail.';
 
 const FILTERS: { value: TeacherActiveFilter; label: string }[] = [
   { value: 'all', label: 'Todos' },
@@ -21,10 +25,12 @@ function filterOf(value: string | null): TeacherActiveFilter {
 /** A05 — Professores: lista, busca e filtro de situação (nunca mostra código de acesso). */
 export function TeachersScreen() {
   const [params, setParams] = useSearchParams();
-  const search = params.get('search') ?? '';
+  // um `?search=` com forma de CPF é descartado ao ler: não entra na chave de consulta nem na API
+  const { search, refusedFromUrl, dismissRefusal } = useSearchParamTerm(params, setParams);
   const filter = filterOf(params.get('status'));
   const page = Math.max(0, Number(params.get('page')) || 0);
   const [draft, setDraft] = useState(search);
+  const [searchError, setSearchError] = useState('');
   const teachers = useTeachers({ search, filter, page });
   const data = teachers.data;
 
@@ -40,6 +46,17 @@ export function TeachersScreen() {
     if (nextPage > 0) next.set('page', String(nextPage));
     else next.delete('page');
     setParams(next);
+  };
+
+  const submitSearch = () => {
+    // não existe busca por CPF: recusado aqui, sem ir à URL, à API nem à chave de consulta
+    if (looksLikeCpf(draft.trim())) {
+      setSearchError(CPF_REFUSED);
+      return;
+    }
+    setSearchError('');
+    dismissRefusal();
+    update({ search: draft });
   };
 
   const hasCriteria = search.trim() !== '' || filter !== 'all';
@@ -60,8 +77,13 @@ export function TeachersScreen() {
         <SearchForm
           label="Buscar professor"
           value={draft}
-          onChange={setDraft}
-          onSubmit={() => update({ search: draft })}
+          onChange={(value) => {
+            setDraft(value);
+            setSearchError('');
+            dismissRefusal();
+          }}
+          onSubmit={submitSearch}
+          error={searchError || (refusedFromUrl ? CPF_REFUSED : '')}
         />
         <SegmentedFilter
           label="Situação"

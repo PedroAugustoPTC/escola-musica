@@ -232,4 +232,87 @@ describe('P02 Cadastrar aluno', () => {
       'name',
     ]);
   });
+
+  it('DUPLICATE_CPF no fluxo do professor vira CPF_UNAVAILABLE: nunca "pertence ao aluno", sem oráculo de existência', async () => {
+    const user = userEvent.setup();
+    renderAsTeacher(routes, '/my-students/new', {
+      ...LIST,
+      'POST /api/v1/my-students': {
+        status: 409,
+        body: {
+          code: 'DUPLICATE_CPF',
+          message: 'Este CPF já pertence ao aluno Fulano Alheio.',
+          details: { name: 'Fulano Alheio' },
+        },
+      },
+    });
+    await screen.findByRole('heading', { level: 1, name: 'Cadastrar aluno' });
+    await user.type(screen.getByLabelText('CPF'), TEST_CPF);
+    await user.click(screen.getByRole('button', { name: 'Cadastrar aluno' }));
+
+    await waitFor(() =>
+      expect(screen.getByLabelText('CPF')).toHaveAccessibleDescription(msg('CPF_UNAVAILABLE')),
+    );
+    expect(document.body.textContent).not.toContain('pertence ao aluno');
+    expect(document.body.textContent).not.toContain('Fulano Alheio');
+  });
+
+  it('erro geral mostra o texto do catálogo pelo código, nunca a mensagem crua do servidor', async () => {
+    const user = userEvent.setup();
+    renderAsTeacher(routes, '/my-students/new', {
+      ...LIST,
+      'POST /api/v1/my-students': {
+        status: 500,
+        body: { code: 'RESOURCE_NOT_FOUND', message: 'java.lang.IllegalStateException: detalhe interno' },
+      },
+    });
+    await screen.findByRole('heading', { level: 1, name: 'Cadastrar aluno' });
+    await user.type(screen.getByLabelText('CPF'), TEST_CPF);
+    await user.click(screen.getByRole('button', { name: 'Cadastrar aluno' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(msg('RESOURCE_NOT_FOUND'));
+    expect(document.body.textContent).not.toContain('IllegalStateException');
+  });
+
+  it('código fora do catálogo cai em INTERNAL_ERROR', async () => {
+    const user = userEvent.setup();
+    renderAsTeacher(routes, '/my-students/new', {
+      ...LIST,
+      'POST /api/v1/my-students': {
+        status: 500,
+        body: { code: 'SOME_NEW_CODE', message: 'texto cru do servidor' },
+      },
+    });
+    await screen.findByRole('heading', { level: 1, name: 'Cadastrar aluno' });
+    await user.type(screen.getByLabelText('CPF'), TEST_CPF);
+    await user.click(screen.getByRole('button', { name: 'Cadastrar aluno' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(msg('INTERNAL_ERROR'));
+    expect(document.body.textContent).not.toContain('texto cru do servidor');
+  });
+
+  it('depois da resposta com erro a mutação é zerada: o CPF não fica nas variáveis em memória', async () => {
+    const user = userEvent.setup();
+    const api = renderAsTeacher(routes, '/my-students/new', {
+      ...LIST,
+      'POST /api/v1/my-students': {
+        status: 400,
+        body: validationError([{ field: 'cpf', code: 'INVALID_CPF' }]),
+      },
+    });
+    await screen.findByRole('heading', { level: 1, name: 'Cadastrar aluno' });
+    await user.type(screen.getByLabelText('CPF'), TEST_CPF);
+    await user.click(screen.getByRole('button', { name: 'Cadastrar aluno' }));
+
+    // o erro de campo continua na tela, mesmo com a mutação zerada
+    await waitFor(() => expect(screen.getByLabelText('CPF')).toHaveAccessibleDescription(msg('INVALID_CPF')));
+    expect(
+      JSON.stringify(
+        api.client
+          .getMutationCache()
+          .getAll()
+          .map((m) => m.state.variables ?? null),
+      ),
+    ).not.toContain(TEST_CPF);
+  });
 });

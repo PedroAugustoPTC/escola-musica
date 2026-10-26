@@ -41,9 +41,21 @@ export function OneTimeSecretPanel({
   onAcknowledge,
 }: OneTimeSecretPanelProps) {
   const [value, setValue] = useState<string | null>(secret);
+  const [shownSecret, setShownSecret] = useState(secret);
   const [copyNotice, setCopyNotice] = useState('');
   const shown = useRef(true);
   const blocker = useBlocker(() => shown.current);
+
+  // um código novo recebido com o painel aberto substitui o exibido: nunca fica na tela o valor antigo
+  if (secret !== shownSecret) {
+    setShownSecret(secret);
+    setValue(secret);
+    setCopyNotice('');
+  }
+
+  useEffect(() => {
+    shown.current = true;
+  }, [secret]);
 
   useEffect(() => {
     const warn = (event: BeforeUnloadEvent) => {

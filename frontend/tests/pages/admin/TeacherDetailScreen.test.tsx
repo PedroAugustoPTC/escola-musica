@@ -152,4 +152,38 @@ describe('TeacherDetailScreen (A08)', () => {
     });
     expect(await screen.findByRole('alert')).toHaveTextContent('Não encontramos o que você procurou.');
   });
+
+  it('com o código na tela, "Reemitir código" e "Reativar" ficam desabilitados até o "Já anotei"', async () => {
+    renderAdminArea(`/admin/teachers/${TEACHER_ACTIVE.id}`, {
+      [`GET ${PATH}`]: { body: TEACHER_ACTIVE },
+      [`POST ${PATH}/access-code`]: {
+        body: {
+          teacher: TEACHER_ACTIVE,
+          accessCode: TEACHER_ACCESS_CODE,
+          validUntil: '2099-09-28T12:00:00Z',
+        },
+      },
+    });
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole('button', { name: 'Reemitir código' }));
+    await user.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Reemitir' }));
+    expect(await screen.findByText(TEACHER_ACCESS_CODE)).toBeInTheDocument();
+
+    expect(screen.getByRole('button', { name: 'Reemitir código' })).toBeDisabled();
+
+    await user.click(screen.getByRole('button', { name: 'Já anotei o código' }));
+    expect(screen.getByRole('button', { name: 'Reemitir código' })).toBeEnabled();
+  });
+
+  it('com o código na tela, "Reativar" fica desabilitado', async () => {
+    renderAdminArea(`/admin/teachers/${TEACHER_INACTIVE.id}`, {
+      [`GET ${INACTIVE_PATH}`]: { body: TEACHER_INACTIVE },
+      [`POST ${INACTIVE_PATH}/reactivation`]: { body: TEACHER_WITH_CODE },
+    });
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole('button', { name: 'Reativar' }));
+    expect(await screen.findByText(TEACHER_ACCESS_CODE)).toBeInTheDocument();
+    // a ficha ainda mostra o professor como inativo (a lista só recarrega depois): a ação não pode repetir
+    expect(screen.getByRole('button', { name: 'Reativar' })).toBeDisabled();
+  });
 });

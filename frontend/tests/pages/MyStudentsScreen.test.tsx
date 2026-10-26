@@ -255,4 +255,15 @@ describe('P01 Meus alunos', () => {
     await user.click(screen.getByRole('button', { name: 'Tentar novamente' }));
     expect(await screen.findByRole('link', { name: 'Olavo Torrente' })).toBeInTheDocument();
   });
+
+  it('erro de carga da lista mostra o texto do catálogo pelo código, nunca a mensagem crua', async () => {
+    renderAsTeacher(routes, '/my-students', {
+      'GET /api/v1/my-students': {
+        status: 500,
+        body: { code: 'INTERNAL_ERROR', message: 'java.lang.NullPointerException: detalhe interno' },
+      },
+    });
+    expect(await screen.findByRole('alert')).toHaveTextContent(msg('INTERNAL_ERROR'));
+    expect(document.body.textContent).not.toContain('NullPointerException');
+  });
 });

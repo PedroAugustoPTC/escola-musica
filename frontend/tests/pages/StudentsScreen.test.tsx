@@ -94,4 +94,55 @@ describe('TelaAlunos (03)', () => {
     renderRoutes(routes, '/students');
     expect(await screen.findByLabelText('Carregando alunos')).toHaveAttribute('aria-busy', 'true');
   });
+
+  it.each(['11144477735', '111.444.777-35'])(
+    '?search= com forma de CPF (%s) é descartado: limpa a URL, avisa e nunca vai à API',
+    async (term) => {
+      const api = mockApi({
+        'GET /api/v1/session': { body: LIGHT_SESSION },
+        'GET /api/v1/students': { body: { result: 'ALL', students: STUDENTS } },
+      });
+      const { router, client } = renderRoutes(routes, `/students?search=${encodeURIComponent(term)}`);
+      await screen.findByRole('heading', { name: 'Matteo Mafra' });
+
+      expect(await screen.findByText(/Não há busca por CPF/)).toBeInTheDocument();
+      await waitFor(() => expect(router.state.location.search).toBe(''));
+      expect(screen.getByRole('searchbox', { name: 'Buscar aluno por nome' })).toHaveValue('');
+      expect(api.calls.map((c) => c.url).join(' ')).not.toMatch(/11144477735|111\.444/);
+      expect(
+        JSON.stringify(
+          client
+            .getQueryCache()
+            .getAll()
+            .map((q) => q.queryKey),
+        ),
+      ).not.toMatch(/11144477735|111\.444/);
+    },
+  );
+
+  it('digitar um termo com forma de CPF avisa e não o leva à URL, à API nem ao cache', async () => {
+    const api = mockApi({
+      'GET /api/v1/session': { body: LIGHT_SESSION },
+      'GET /api/v1/students': { body: { result: 'ALL', students: STUDENTS } },
+    });
+    const user = userEvent.setup();
+    const { router, client } = renderRoutes(routes, '/students');
+    await screen.findByRole('heading', { name: 'Matteo Mafra' });
+    const before = api.calls.length;
+
+    await user.type(screen.getByRole('searchbox', { name: 'Buscar aluno por nome' }), '11144477735');
+
+    expect(await screen.findByText(/Não há busca por CPF/)).toBeInTheDocument();
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    expect(router.state.location.search).toBe('');
+    expect(api.calls.slice(before).map((c) => c.url)).toEqual([]);
+    expect(
+      JSON.stringify(
+        client
+          .getQueryCache()
+          .getAll()
+          .map((q) => q.queryKey),
+      ),
+    ).not.toContain('11144477735');
+  });
 });

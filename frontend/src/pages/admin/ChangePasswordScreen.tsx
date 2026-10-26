@@ -15,6 +15,7 @@ import {
 } from '../../components/admin/NewPasswordFields';
 import { FormErrorSummary } from '../../components/admin/ui';
 import { msg } from '../../messages/messages';
+import type { ApiError } from '../../services/apiClient';
 import { useAdminSession, useChangeProvisionalPassword } from '../../services/admin/session';
 
 /**
@@ -28,6 +29,8 @@ export function ChangePasswordScreen() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmation, setConfirmation] = useState('');
   const [local, setLocal] = useState<NewPasswordErrors>({});
+  // a falha é copiada para o estado da tela e a mutação é zerada: a senha não fica em memória
+  const [failure, setFailure] = useState<ApiError | null>(null);
 
   if (session.isPending) return <LoadingState label="Carregando" rows={2} />;
   // quem já definiu a senha não tem o que trocar aqui
@@ -35,13 +38,13 @@ export function ChangePasswordScreen() {
     return <Navigate to="/admin" replace />;
   }
 
-  const serverField = errorOfField(fieldErrorsOf(change.error), 'newPassword');
+  const serverField = errorOfField(fieldErrorsOf(failure), 'newPassword');
   const errors: NewPasswordErrors = {
     newPassword: local.newPassword ?? (serverField ? fieldErrorText(serverField.code) : undefined),
     confirmation: local.confirmation,
   };
   const summary = [errors.newPassword, errors.confirmation].filter((text): text is string => Boolean(text));
-  if (summary.length === 0 && change.isError && !serverField) summary.push(apiErrorText(change.error));
+  if (summary.length === 0 && failure !== null && !serverField) summary.push(apiErrorText(failure));
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
@@ -49,15 +52,19 @@ export function ChangePasswordScreen() {
     const found = checkNewPassword(newPassword, confirmation);
     setLocal(found);
     if (found.newPassword || found.confirmation) return;
+    setFailure(null);
     change.mutate(newPassword, {
       onSuccess: () => {
         setNewPassword('');
         setConfirmation('');
+        change.reset();
         navigate('/admin', { replace: true });
       },
-      onError: () => {
+      onError: (error) => {
         setNewPassword('');
         setConfirmation('');
+        setFailure(error);
+        change.reset();
       },
     });
   };

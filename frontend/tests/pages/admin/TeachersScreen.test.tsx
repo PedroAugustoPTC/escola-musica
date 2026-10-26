@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { TEACHER_ACCESS_CODE, TEACHER_ACTIVE, TEACHER_INACTIVE, pageOf } from '../../support/adminFixtures';
+import {
+  TEACHER_ACCESS_CODE,
+  TEACHER_ACTIVE,
+  TEACHER_INACTIVE,
+  TEST_CPF,
+  pageOf,
+} from '../../support/adminFixtures';
 import { renderAdminArea } from './adminTestSupport';
 
 const LIST = 'GET /api/v1/admin/teachers';
@@ -101,4 +107,53 @@ describe('TeachersScreen (A05)', () => {
     await screen.findByText('Clara Souza');
     expect(api.calls.some((call) => call.url.includes('page=1'))).toBe(true);
   });
+
+  it.each([TEST_CPF, '111.444.777-35', '111 444 777 35'])(
+    'busca com forma de CPF (%s) é recusada no cliente, sem ir à URL, à API nem ao cache',
+    async (term) => {
+      const api = renderAdminArea('/admin/teachers', { [LIST]: { body: pageOf([TEACHER_ACTIVE]) } });
+      const user = userEvent.setup();
+      await screen.findByText('Clara Souza');
+      const before = api.calls.length;
+
+      await user.type(screen.getByRole('searchbox', { name: 'Buscar professor' }), term);
+      await user.click(screen.getByRole('button', { name: 'Buscar' }));
+
+      expect(
+        await screen.findByText('Não há busca por CPF. Procure pelo nome ou pelo e-mail.'),
+      ).toBeInTheDocument();
+      expect(api.router.state.location.search).toBe('');
+      expect(api.calls.slice(before)).toEqual([]);
+      const keys = JSON.stringify(
+        api.client
+          .getQueryCache()
+          .getAll()
+          .map((query) => query.queryKey),
+      );
+      expect(keys).not.toMatch(/11144477735|111\.444|111 444/);
+    },
+  );
+
+  it.each([TEST_CPF, '111.444.777-35'])(
+    '?search= com forma de CPF (%s) na URL é descartado: limpa a URL, avisa e nunca vai à API nem à chave',
+    async (term) => {
+      const api = renderAdminArea(`/admin/teachers?search=${encodeURIComponent(term)}`, {
+        [LIST]: { body: pageOf([TEACHER_ACTIVE]) },
+      });
+      await screen.findByText('Clara Souza');
+
+      expect(
+        await screen.findByText('Não há busca por CPF. Procure pelo nome ou pelo e-mail.'),
+      ).toBeInTheDocument();
+      await waitFor(() => expect(api.router.state.location.search).toBe(''));
+      expect(api.calls.map((call) => call.url).join(' ')).not.toMatch(/11144477735|111\.444/);
+      const keys = JSON.stringify(
+        api.client
+          .getQueryCache()
+          .getAll()
+          .map((query) => query.queryKey),
+      );
+      expect(keys).not.toMatch(/11144477735|111\.444/);
+    },
+  );
 });

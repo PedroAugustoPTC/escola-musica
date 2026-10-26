@@ -176,4 +176,33 @@ describe('AdministratorsScreen (A09)', () => {
     await user.click(screen.getByRole('button', { name: 'Já anotei o código' }));
     expect(screen.queryByText(ADMINISTRATOR_ACTIVATION_CODE)).not.toBeInTheDocument();
   });
+
+  it('com o código na tela, "Reativar" fica desabilitado em todas as linhas até o "Já anotei"', async () => {
+    const other = {
+      ...INACTIVE,
+      id: '0190a000-0000-7000-8000-0000000000c9',
+      name: 'Paula Reis',
+      email: 'paula@example.test',
+    };
+    let reactivations = 0;
+    open({
+      [LIST]: { body: pageOf([INACTIVE, other]) },
+      [`POST /api/v1/admin/administrators/${INACTIVE.id}/reactivation`]: () => {
+        reactivations += 1;
+        return { body: ADMINISTRATOR_WITH_ACTIVATION_CODE };
+      },
+    });
+    const user = userEvent.setup();
+    await screen.findByText('Paula Reis');
+    await user.click(within(row('Renato Alves')).getByRole('button', { name: 'Reativar Renato Alves' }));
+    expect(await screen.findByText(ADMINISTRATOR_ACTIVATION_CODE)).toBeInTheDocument();
+
+    const buttons = screen.getAllByRole('button', { name: /^Reativar / });
+    expect(buttons).toHaveLength(2);
+    buttons.forEach((button) => expect(button).toBeDisabled());
+    expect(reactivations).toBe(1);
+
+    await user.click(screen.getByRole('button', { name: 'Já anotei o código' }));
+    screen.getAllByRole('button', { name: /^Reativar / }).forEach((button) => expect(button).toBeEnabled());
+  });
 });

@@ -1,4 +1,5 @@
-import { Link, Outlet, useNavigate } from 'react-router';
+import { useEffect, useRef } from 'react';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router';
 import { ADMIN_SESSION_EXPIRED_EVENT } from '../services/apiClient';
 import { useAdminSession, useAdminSignOut } from '../services/admin/session';
 import { msg } from '../messages/messages';
@@ -21,7 +22,24 @@ export function AdminLayout() {
   const session = useAdminSession();
   const signOut = useAdminSignOut();
   const dark = theme === 'dark';
+  const main = useRef<HTMLElement>(null);
+  const { pathname } = useLocation();
+  const previousPath = useRef(pathname);
   const data = session.data;
+
+  // ao trocar de rota o foco vai para o título da página (ou, sem título ainda, para o conteúdo): sem isso o
+  // leitor de tela e o teclado ficam presos no link da navegação, no meio da página anterior
+  useEffect(() => {
+    if (previousPath.current === pathname) return;
+    previousPath.current = pathname;
+    const heading = main.current?.querySelector<HTMLElement>('h1');
+    if (heading) {
+      if (!heading.hasAttribute('tabindex')) heading.setAttribute('tabindex', '-1');
+      heading.focus();
+    } else {
+      main.current?.focus();
+    }
+  }, [pathname]);
   // senha provisória: só a troca de senha é permitida, então a navegação não é oferecida
   const restricted = data?.mustChangePassword === true;
 
@@ -86,7 +104,7 @@ export function AdminLayout() {
             <div className="alert__text">{errorText(signOut.error)}</div>
           </div>
         ) : null}
-        <main id="content" className="admin-layout__main" tabIndex={-1}>
+        <main id="content" className="admin-layout__main" tabIndex={-1} ref={main}>
           <Outlet />
         </main>
       </div>

@@ -1,13 +1,14 @@
-import { useId, useMemo, useState } from 'react';
+import { useId, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router';
 import { Button } from '../components/Button';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
-import { ErrorAlert, ErrorState, errorText } from '../components/ErrorState';
+import { ErrorAlert, ErrorState, catalogErrorText } from '../components/ErrorState';
 import { Icon } from '../components/Icon';
 import { Layout } from '../components/Layout';
 import { LoadingState } from '../components/LoadingState';
 import { SituationBadge } from '../components/student/SituationBadge';
 import { StudentForm } from '../components/student/StudentForm';
+import type { StudentFormFieldError } from '../components/student/studentFormTypes';
 import { buildStudentUpdate } from '../components/student/studentPayload';
 import { useBlockedCountdown } from '../components/student/useBlockedCountdown';
 import { msg } from '../messages/messages';
@@ -18,6 +19,7 @@ import {
   useUpdateMyStudent,
 } from '../services/myStudents';
 
+const NO_FIELD_ERRORS: StudentFormFieldError[] = [];
 const CONTEXT = { kicker: msg('MY_STUDENTS_TITLE'), title: 'Aluno', backTo: '/my-students' };
 
 /** P03 — Aluno: editar os dados, inativar (com confirmação) e reativar. */
@@ -34,10 +36,11 @@ export function MyStudentDetailScreen() {
   const [notice, setNotice] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
   const [formVersion, setFormVersion] = useState(0);
-  const fieldErrors = useMemo(
-    () => (update.isError ? fieldErrorsOf(update.error) : []),
-    [update.isError, update.error],
+  // a falha é copiada para o estado da tela e a mutação é zerada: as variáveis (com o CPF) não ficam em memória
+  const [failure, setFailure] = useState<{ error: unknown; fieldErrors: StudentFormFieldError[] } | null>(
+    null,
   );
+  const fieldErrors = failure?.fieldErrors ?? NO_FIELD_ERRORS;
 
   if (student.isPending) {
     return (
@@ -49,7 +52,7 @@ export function MyStudentDetailScreen() {
   if (student.isError) {
     return (
       <Layout context={CONTEXT} bottomNav>
-        <ErrorState error={student.error} onRetry={() => student.refetch()} />
+        <ErrorState error={student.error} onRetry={() => student.refetch()} fromCatalog />
       </Layout>
     );
   }
@@ -58,7 +61,7 @@ export function MyStudentDetailScreen() {
   const shared = data.canInactivate === false;
   const shownNotice = notice ?? (created ? msg('REGISTRY_SAVED', { name: data.name }) : null);
   const updateGeneralError =
-    update.isError && fieldErrors.length === 0 && countdown.remainingSeconds === null;
+    failure !== null && fieldErrors.length === 0 && countdown.remainingSeconds === null;
 
   const changeSituation = (action: 'inactivation' | 'reactivation') => {
     situation.mutate(action, {
@@ -87,7 +90,7 @@ export function MyStudentDetailScreen() {
             <div className="alert__text">{shownNotice}</div>
           </div>
         ) : null}
-        {updateGeneralError ? <ErrorAlert error={update.error} /> : null}
+        {updateGeneralError ? <ErrorAlert error={failure.error} fromCatalog /> : null}
         <StudentForm
           key={`${data.id}:${formVersion}`}
           variant="teacher"
@@ -98,12 +101,18 @@ export function MyStudentDetailScreen() {
           blockedSeconds={countdown.remainingSeconds}
           onSubmit={(values) => {
             setNotice(null);
+            setFailure(null);
             update.mutate(buildStudentUpdate(values, data), {
               onSuccess: (saved) => {
+                update.reset();
                 setNotice(msg('REGISTRY_UPDATED', { name: saved.name }));
                 setFormVersion((version) => version + 1);
               },
-              onError: countdown.register,
+              onError: (error) => {
+                setFailure({ error, fieldErrors: fieldErrorsOf(error) });
+                countdown.register(error);
+                update.reset();
+              },
             });
           }}
           onCancel={() => navigate('/my-students')}
@@ -117,7 +126,7 @@ export function MyStudentDetailScreen() {
               {msg('SHARED_STUDENT_ACTION_DENIED')}
             </p>
           ) : null}
-          {situation.isError && !confirming ? <ErrorAlert error={situation.error} /> : null}
+          {situation.isError && !confirming ? <ErrorAlert error={situation.error} fromCatalog /> : null}
           {data.active ? (
             <Button
               variant="danger"
@@ -155,7 +164,7 @@ export function MyStudentDetailScreen() {
         text={msg('MY_STUDENTS_CONFIRM_INACTIVATE', { name: data.name })}
         confirmLabel="Inativar"
         loading={situation.isPending}
-        error={situation.isError ? errorText(situation.error) : undefined}
+        error={situation.isError ? catalogErrorText(situation.error) : undefined}
         onConfirm={() => {
           setNotice(null);
           changeSituation('inactivation');

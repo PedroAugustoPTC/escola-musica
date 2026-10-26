@@ -116,4 +116,24 @@ describe('ChangePasswordScreen (A03)', () => {
     });
     await waitFor(() => expect(router.state.location.pathname).toBe('/admin'));
   });
+
+  it('depois da resposta (erro de campo ou geral) a senha não fica nas variáveis da mutação e o erro continua na tela', async () => {
+    const api = renderAdminArea('/admin/change-password', {
+      [SESSION]: { body: PROVISIONAL_SESSION },
+      [CHANGE]: { status: 409, body: { code: 'PASSWORD_CHANGE_NOT_REQUIRED', message: 'x' } },
+    });
+    const user = userEvent.setup();
+    await typePasswords(user, NEW_PASSWORD, NEW_PASSWORD);
+    await user.click(screen.getByRole('button', { name: 'Trocar senha' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Sua senha já foi definida.');
+    expect(
+      JSON.stringify(
+        api.client
+          .getMutationCache()
+          .getAll()
+          .map((mutation) => mutation.state.variables ?? null),
+      ),
+    ).not.toContain(NEW_PASSWORD);
+  });
 });

@@ -2,6 +2,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { ApiError, api } from './apiClient';
 import { HOME_KEY } from './home';
 import type { components } from './administration-api-types';
+import { looksLikeCpf, searchTermOf } from '../components/student/cpfShape';
 import type { StudentFormFieldError } from '../components/student/studentFormTypes';
 import type { StudentInputBody, StudentUpdateBody } from '../components/student/studentPayload';
 
@@ -28,16 +29,19 @@ function listPath(filter: MyStudentsFilter): string {
     page: String(filter.page),
     size: String(MY_STUDENTS_PAGE_SIZE),
   });
-  if (filter.search) params.set('search', filter.search);
+  const search = searchTermOf(filter.search);
+  if (search) params.set('search', search);
   return `/my-students?${params.toString()}`;
 }
 
 /** Alunos do professor da sessão (FR-025): lista paginada com busca e filtro de situação. */
 export function useMyStudents(filter: MyStudentsFilter) {
   return useQuery<MyStudentPage>({
-    queryKey: [...MY_STUDENTS_KEY, 'list', filter.status, filter.page, filter.search],
+    // termo com forma de CPF nunca entra na chave de consulta nem na API (não existe busca por CPF)
+    queryKey: [...MY_STUDENTS_KEY, 'list', filter.status, filter.page, searchTermOf(filter.search)],
     queryFn: ({ signal }) => api.get<MyStudentPage>(listPath(filter), signal),
     placeholderData: keepPreviousData,
+    enabled: !looksLikeCpf(filter.search.trim()),
   });
 }
 
@@ -93,14 +97,17 @@ export function useChangeMyStudentSituation(studentId: string) {
   });
 }
 
-const CPF_ERROR_CODES = new Set(['CPF_UNAVAILABLE', 'STUDENT_ALREADY_YOURS', 'DUPLICATE_CPF']);
+const CPF_ERROR_CODES = new Set(['CPF_UNAVAILABLE', 'STUDENT_ALREADY_YOURS']);
 
 /**
  * Erros por campo de uma falha de gravação: `details.fields` da validação, ou o CPF recusado por
  * unicidade (mensagem neutra no campo, sem nome nem professor: nada além do código é usado).
+ * No fluxo do professor `DUPLICATE_CPF` vale `CPF_UNAVAILABLE`: nunca "pertence ao aluno ...", para não
+ * virar oráculo de existência de CPF.
  */
 export function fieldErrorsOf(error: unknown): StudentFormFieldError[] {
   if (!(error instanceof ApiError)) return [];
+  if (error.code === 'DUPLICATE_CPF') return [{ field: 'cpf', code: 'CPF_UNAVAILABLE' }];
   if (CPF_ERROR_CODES.has(error.code)) return [{ field: 'cpf', code: error.code }];
   const fields = error.details.fields;
   if (!Array.isArray(fields)) return [];

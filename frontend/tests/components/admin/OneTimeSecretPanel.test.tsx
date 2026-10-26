@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { useState } from 'react';
 import { Link, type RouteObject } from 'react-router';
 import { OneTimeSecretPanel } from '../../../src/components/admin/OneTimeSecretPanel';
 import { renderRoutes } from '../../utils';
@@ -132,5 +133,34 @@ describe('OneTimeSecretPanel', () => {
     await user.click(screen.getByRole('link', { name: 'Ir para a lista' }));
     await user.click(await screen.findByRole('button', { name: 'Sair mesmo assim' }));
     await waitFor(() => expect(router.state.location.pathname).toBe('/admin/teachers'));
+  });
+
+  it('um código novo recebido com o painel aberto substitui o exibido (nunca fica o antigo)', async () => {
+    const newCode = 'N3WC0D3X';
+    function Swappable() {
+      const [secret, setSecret] = useState(TEACHER_ACCESS_CODE);
+      return (
+        <>
+          <OneTimeSecretPanel
+            kind="access-code"
+            secret={secret}
+            recipientName="Clara Souza"
+            validUntil="2099-09-28T12:00:00Z"
+            onAcknowledge={() => undefined}
+          />
+          <button type="button" onClick={() => setSecret(newCode)}>
+            Emitir de novo
+          </button>
+        </>
+      );
+    }
+    const user = userEvent.setup();
+    renderRoutes([{ path: '*', element: <Swappable /> }], '/admin/teachers/new');
+    expect(screen.getByText(TEACHER_ACCESS_CODE)).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Emitir de novo' }));
+
+    expect(screen.getByText(newCode)).toBeInTheDocument();
+    expect(screen.queryByText(TEACHER_ACCESS_CODE)).not.toBeInTheDocument();
   });
 });

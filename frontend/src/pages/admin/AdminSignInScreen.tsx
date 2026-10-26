@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router';
 import { Button } from '../../components/Button';
 import { Icon } from '../../components/Icon';
 import { BlockedNotice, useBlockedCountdown } from '../../components/admin/useBlockedCountdown';
-import { apiErrorText } from '../../components/admin/fieldErrors';
+import { catalogErrorText } from '../../components/ErrorState';
 import { msg } from '../../messages/messages';
 import { ApiError, blockedRemainingSeconds } from '../../services/apiClient';
 import { isAdminDestination, useAdminSignIn } from '../../services/admin/session';
@@ -37,6 +37,7 @@ export function AdminSignInScreen() {
       {
         onSuccess: (session) => {
           setPassword('');
+          signIn.reset();
           const destination = params.get('destination');
           navigate(
             session.mustChangePassword
@@ -49,16 +50,18 @@ export function AdminSignInScreen() {
         },
         onError: (error) => {
           setPassword('');
+          signIn.reset();
           const blockedFor = blockedRemainingSeconds(error);
           if (blockedFor !== null) {
             countdown.block(blockedFor);
           } else if (error instanceof ApiError && error.status === 0) {
             setFailure('no-connection');
-          } else if (error instanceof ApiError && error.status < 500) {
+          } else if (error instanceof ApiError && error.status === 401) {
             // mesma mensagem para e-mail inexistente, senha errada, conta inativa ou não ativada
             setFailure('credentials');
           } else {
-            setErrorMessage(apiErrorText(error));
+            // qualquer outra falha (403, 5xx...) é erro genérico: o texto vem do catálogo pelo código
+            setErrorMessage(catalogErrorText(error));
             setFailure('error');
           }
         },

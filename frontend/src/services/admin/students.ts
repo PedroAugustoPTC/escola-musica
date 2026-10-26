@@ -1,6 +1,7 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, type ApiError } from '../apiClient';
 import type { components } from '../administration-api-types';
+import { looksLikeCpf, searchTermOf } from '../../components/student/cpfShape';
 import type { StudentFormValues } from '../../components/student/studentFormTypes';
 import { ADMIN_QUERY_ROOT } from './session';
 import { DEFAULT_PAGE_SIZE, queryString } from './query';
@@ -17,14 +18,6 @@ export type StudentStatus = 'ACTIVE' | 'INACTIVE' | 'ALL';
 const STUDENTS = [ADMIN_QUERY_ROOT, 'students'] as const;
 export const adminStudentKey = (id: string) => [...STUDENTS, 'detail', id] as const;
 
-/**
- * Termo com forma de CPF (11 dígitos, com ou sem pontos, traço e espaços). Não existe busca por CPF: o
- * termo é recusado no cliente, antes de ir à URL, à API ou à chave de consulta.
- */
-export function looksLikeCpf(term: string): boolean {
-  return /^\d{11}$/.test(term.replace(/[.\-\s]/g, ''));
-}
-
 export interface StudentListParams {
   search: string;
   status: StudentStatus;
@@ -33,7 +26,8 @@ export interface StudentListParams {
 
 /** Lista de alunos de toda a escola (FR-021). */
 export function useAdminStudents({ search, status, page }: StudentListParams) {
-  const term = search.trim();
+  // termo com forma de CPF nunca entra na chave de consulta nem na API (não existe busca por CPF)
+  const term = searchTermOf(search);
   return useQuery<AdminStudentPage>({
     queryKey: [...STUDENTS, 'list', term, status, page],
     queryFn: ({ signal }) =>
@@ -47,8 +41,8 @@ export function useAdminStudents({ search, status, page }: StudentListParams) {
         signal,
       ),
     placeholderData: keepPreviousData,
-    // um termo com forma de CPF nunca chega aqui (a tela o recusa), mas a guarda é dupla
-    enabled: !looksLikeCpf(term),
+    // a tela já recusa o CPF; aqui a guarda é dupla: sem consulta enquanto o termo for CPF
+    enabled: !looksLikeCpf(search.trim()),
   });
 }
 

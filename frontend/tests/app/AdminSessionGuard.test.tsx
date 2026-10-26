@@ -70,7 +70,7 @@ describe('AdminSessionGuard', () => {
     });
     const { router } = renderGuard('/admin/teachers?search=ana');
     await waitFor(() => expect(router.state.location.pathname).toBe('/admin/sign-in'));
-    expect(router.state.location.search).toBe('?destination=%2Fadmin%2Fteachers%3Fsearch%3Dana');
+    expect(router.state.location.search).toBe('?destination=%2Fadmin%2Fteachers');
   });
 
   it('com credencial de outro papel (404) mostra "Página não encontrada" sem revelar a área', async () => {
@@ -98,9 +98,7 @@ describe('AdminSessionGuard', () => {
     fire(ADMIN_SESSION_EXPIRED_EVENT);
 
     await waitFor(() => expect(router.state.location.pathname).toBe('/admin/sign-in'));
-    expect(router.state.location.search).toBe(
-      '?destination=%2Fadmin%2Fteachers%3Fsearch%3Dana&reason=SESSION_EXPIRED',
-    );
+    expect(router.state.location.search).toBe('?destination=%2Fadmin%2Fteachers&reason=SESSION_EXPIRED');
     expect(client.getQueryData(['admin', 'teachers', 'list'])).toBeUndefined();
     expect(client.getQueryData(ADMIN_SESSION_KEY)).toBeNull();
     expect(client.getQueryData(['session'])).toEqual(LIGHT_SESSION);
@@ -145,5 +143,39 @@ describe('AdminSessionGuard', () => {
     const { router } = renderGuard('/admin/teachers');
     await waitFor(() => expect(router.state.location.pathname).toBe('/admin/change-password'));
     expect(screen.queryByText('Conteúdo administrativo')).not.toBeInTheDocument();
+  });
+
+  it('o destino guardado nunca leva a busca: mantém só a situação e a página', async () => {
+    mockApi({
+      'GET /api/v1/admin/session': { status: 401, body: { code: 'NOT_AUTHENTICATED', message: 'x' } },
+    });
+    const { router } = renderGuard('/admin/teachers?search=ana&status=active&page=2');
+    await waitFor(() => expect(router.state.location.pathname).toBe('/admin/sign-in'));
+    expect(router.state.location.search).toBe(
+      '?destination=%2Fadmin%2Fteachers%3Fstatus%3Dactive%26page%3D2',
+    );
+    expect(decodeURIComponent(router.state.location.search)).not.toContain('search');
+  });
+
+  it('o evento de sessão expirada do professor limpa só o cache dele e preserva o do administrador', async () => {
+    mockApi({
+      'GET /api/v1/admin/session': { body: ADMIN_SESSION },
+      'GET /api/v1/session': { body: LIGHT_SESSION },
+    });
+    const { client, router } = renderGuard('/teacher-area');
+    await screen.findByText('Conteúdo do professor');
+    client.setQueryData(['admin', 'teachers', 'list'], { items: [] });
+    client.setQueryData(ADMIN_SESSION_KEY, ADMIN_SESSION);
+    client.setQueryData(['students', 'ana'], { students: [] });
+    client.setQueryData(['my-students', 'list'], { items: [] });
+
+    fire(SESSION_EXPIRED_EVENT);
+
+    await waitFor(() => expect(router.state.location.pathname).toBe('/sign-in'));
+    expect(client.getQueryData(['students', 'ana'])).toBeUndefined();
+    expect(client.getQueryData(['my-students', 'list'])).toBeUndefined();
+    expect(client.getQueryData(['session'])).toBeNull();
+    expect(client.getQueryData(['admin', 'teachers', 'list'])).toEqual({ items: [] });
+    expect(client.getQueryData(ADMIN_SESSION_KEY)).toEqual(ADMIN_SESSION);
   });
 });

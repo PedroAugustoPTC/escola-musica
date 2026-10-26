@@ -97,7 +97,7 @@ describe('ActivateScreen (A02)', () => {
     );
     expect(screen.getByLabelText('Nova senha')).toHaveValue('');
     expect(screen.getByLabelText('Confirme a nova senha')).toHaveValue('');
-    expect(screen.getByLabelText('Código de ativação')).toHaveValue('K7QM2XPA9TBD');
+    expect(screen.getByLabelText('Código de ativação')).toHaveValue('');
   });
 
   it('erro de senha por campo aparece ligado à nova senha', async () => {
@@ -135,5 +135,38 @@ describe('ActivateScreen (A02)', () => {
       'href',
       '/admin/sign-in',
     );
+  });
+
+  it('depois da resposta, com erro ou sucesso, o código e a senha não ficam nas variáveis da mutação nem no campo', async () => {
+    let attempt = 0;
+    const { client } = open({
+      [ACTIVATE]: () => {
+        attempt += 1;
+        return attempt === 1
+          ? { status: 401, body: { code: 'INVALID_ACTIVATION', message: 'x' } }
+          : { status: 204 };
+      },
+    });
+    const user = userEvent.setup();
+    const kept = () =>
+      JSON.stringify(
+        client
+          .getMutationCache()
+          .getAll()
+          .map((mutation) => mutation.state.variables ?? null),
+      );
+
+    await fillAll(user);
+    await user.click(screen.getByRole('button', { name: 'Definir senha' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Código de ativação inválido ou vencido');
+    expect(screen.getByLabelText('Código de ativação')).toHaveValue('');
+    expect(kept()).not.toMatch(/K7QM2XPA9TBD|a-long-valid-password/i);
+
+    await user.type(screen.getByLabelText('Código de ativação'), 'k7qm2xpa9tbd');
+    await user.type(screen.getByLabelText('Nova senha'), VALID_PASSWORD);
+    await user.type(screen.getByLabelText('Confirme a nova senha'), VALID_PASSWORD);
+    await user.click(screen.getByRole('button', { name: 'Definir senha' }));
+    expect(await screen.findByText('Senha definida. Agora você já pode entrar.')).toBeInTheDocument();
+    expect(kept()).not.toMatch(/K7QM2XPA9TBD|a-long-valid-password/i);
   });
 });

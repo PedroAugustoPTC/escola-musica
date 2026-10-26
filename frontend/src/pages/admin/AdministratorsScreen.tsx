@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { Button } from '../../components/Button';
 import { ConfirmationDialog } from '../../components/ConfirmationDialog';
@@ -42,9 +42,18 @@ export function AdministratorsScreen() {
   const inactivate = useInactivateAdministrator();
   const reactivate = useReactivateAdministrator();
   const [creating, setCreating] = useState(false);
-  const [issued, setIssued] = useState<AdministratorWithActivationCode | null>(null);
+  const [issued, setIssued] = useState<{ result: AdministratorWithActivationCode; emission: number } | null>(
+    null,
+  );
+  const emissions = useRef(0);
   const [target, setTarget] = useState<Administrator | null>(null);
   const data = administrators.data;
+
+  /** Cada emissão tem a própria `key`: um código novo nunca reaproveita o painel (e o valor) do anterior. */
+  const showIssued = (result: AdministratorWithActivationCode) => {
+    emissions.current += 1;
+    setIssued({ result, emission: emissions.current });
+  };
 
   const update = (changes: { status?: TeacherActiveFilter; page?: number }) => {
     const next = new URLSearchParams(params);
@@ -73,10 +82,11 @@ export function AdministratorsScreen() {
 
       {issued ? (
         <OneTimeSecretPanel
+          key={`${issued.result.administrator.id}:${issued.result.validUntil}:${issued.emission}`}
           kind="activation-code"
-          secret={issued.activationCode}
-          recipientName={issued.administrator.name}
-          validUntil={issued.validUntil}
+          secret={issued.result.activationCode}
+          recipientName={issued.result.administrator.name}
+          validUntil={issued.result.validUntil}
           onAcknowledge={() => setIssued(null)}
         />
       ) : null}
@@ -93,7 +103,7 @@ export function AdministratorsScreen() {
             onSubmit={(values) =>
               create.mutate(values, {
                 onSuccess: (result) => {
-                  setIssued(result);
+                  showIssued(result);
                   setCreating(false);
                   create.reset();
                 },
@@ -169,10 +179,12 @@ export function AdministratorsScreen() {
                     size="compact"
                     aria-label={`Reativar ${administrator.name}`}
                     loading={reactivate.isPending && reactivate.variables === administrator.id}
+                    // com o código na tela, nenhuma outra emissão: ele só aparece uma vez
+                    disabled={issued !== null}
                     onClick={() =>
                       reactivate.mutate(administrator.id, {
                         onSuccess: (result) => {
-                          setIssued(result);
+                          showIssued(result);
                           setCreating(false);
                           reactivate.reset();
                         },

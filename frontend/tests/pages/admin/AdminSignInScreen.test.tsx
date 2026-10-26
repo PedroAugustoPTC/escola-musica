@@ -209,4 +209,46 @@ describe('AdminSignInScreen (A01)', () => {
     renderRoutes(adminRoutes, '/admin/sign-in?reason=ACCESS_ENDED');
     expect(await screen.findByText('Seu acesso foi encerrado. Procure o administrador.')).toBeInTheDocument();
   });
+
+  it('só 401 vira "e-mail ou senha incorretos"; os demais erros mostram o erro genérico do catálogo', async () => {
+    mockApi({
+      'GET /api/v1/admin/session': NOT_AUTHENTICATED,
+      'POST /api/v1/admin/session': {
+        status: 403,
+        body: { code: 'SOME_OTHER_CODE', message: 'texto cru do servidor' },
+      },
+    });
+    const user = userEvent.setup();
+    renderRoutes(adminRoutes, '/admin/sign-in');
+    await screen.findByLabelText('E-mail');
+    await fillAndSend(user, 'alguem@example.test', 'any-password-123');
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Ocorreu um erro inesperado. Tente novamente mais tarde.',
+    );
+    expect(screen.queryByText(WRONG_CREDENTIALS)).not.toBeInTheDocument();
+    expect(document.body.textContent).not.toContain('texto cru do servidor');
+  });
+
+  it('a senha não fica nas variáveis da mutação depois da resposta', async () => {
+    const api = mockApi({
+      'GET /api/v1/admin/session': NOT_AUTHENTICATED,
+      'POST /api/v1/admin/session': { status: 401, body: { code: 'INVALID_CREDENTIALS', message: 'x' } },
+    });
+    const user = userEvent.setup();
+    const { client } = renderRoutes(adminRoutes, '/admin/sign-in');
+    await screen.findByLabelText('E-mail');
+    await fillAndSend(user, 'alguem@example.test', 'any-password-123');
+    await screen.findByText(WRONG_CREDENTIALS);
+
+    expect(api.calls.some((call) => call.method === 'POST')).toBe(true);
+    expect(
+      JSON.stringify(
+        client
+          .getMutationCache()
+          .getAll()
+          .map((mutation) => mutation.state.variables ?? null),
+      ),
+    ).not.toContain('any-password-123');
+  });
 });

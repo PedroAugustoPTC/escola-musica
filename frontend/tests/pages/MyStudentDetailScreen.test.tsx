@@ -267,4 +267,90 @@ describe('P03 Aluno', () => {
     await user.click(screen.getByRole('button', { name: 'Cancelar' }));
     await waitFor(() => expect(router.state.location.pathname).toBe('/my-students'));
   });
+
+  it('erro de situação mostra o texto do catálogo pelo código, nunca a mensagem crua do servidor', async () => {
+    const user = userEvent.setup();
+    renderAsTeacher(
+      routes,
+      `/my-students/${MY_STUDENT_ACTIVE.id}`,
+      detail(MY_STUDENT_ACTIVE, {
+        [`POST /api/v1/my-students/${MY_STUDENT_ACTIVE.id}/inactivation`]: {
+          status: 409,
+          body: { code: 'SHARED_STUDENT_ACTION_DENIED', message: 'texto cru: professores Fulano e Beltrano' },
+        },
+      }),
+    );
+    await screen.findByRole('heading', { level: 1, name: 'Olavo Torrente' });
+    await user.click(screen.getByRole('button', { name: 'Inativar aluno' }));
+    const dialog = await screen.findByRole('dialog');
+    await user.click(within(dialog).getByRole('button', { name: 'Inativar' }));
+    expect(await within(dialog).findByRole('alert')).toHaveTextContent(msg('SHARED_STUDENT_ACTION_DENIED'));
+    expect(document.body.textContent).not.toContain('Beltrano');
+  });
+
+  it('aluno que não carrega mostra o texto do catálogo pelo código', async () => {
+    renderAsTeacher(routes, `/my-students/${MY_STUDENT_ACTIVE.id}`, {
+      'GET /api/v1/my-students': { body: myStudentsPage([]) },
+      [`GET /api/v1/my-students/${MY_STUDENT_ACTIVE.id}`]: {
+        status: 404,
+        body: { code: 'RESOURCE_NOT_FOUND', message: 'texto cru do servidor' },
+      },
+    });
+    expect(await screen.findByRole('alert')).toHaveTextContent(msg('RESOURCE_NOT_FOUND'));
+    expect(document.body.textContent).not.toContain('texto cru do servidor');
+  });
+
+  it('erro de gravação: a mutação é zerada e o CPF não fica nas variáveis em memória', async () => {
+    const user = userEvent.setup();
+    const api = renderAsTeacher(
+      routes,
+      `/my-students/${MY_STUDENT_ACTIVE.id}`,
+      detail(MY_STUDENT_ACTIVE, {
+        [`PATCH /api/v1/my-students/${MY_STUDENT_ACTIVE.id}`]: {
+          status: 400,
+          body: validationError([{ field: 'cpf', code: 'INVALID_CPF' }]),
+        },
+      }),
+    );
+    await screen.findByRole('heading', { level: 1, name: 'Olavo Torrente' });
+    await user.type(screen.getByLabelText('CPF'), TEST_CPF);
+    await user.click(screen.getByRole('button', { name: 'Salvar alterações' }));
+
+    await waitFor(() =>
+      expect(screen.getByLabelText('CPF')).toHaveAccessibleDescription(
+        `${msg('INVALID_CPF')} ${msg('MY_STUDENTS_CPF_KEEP')}`,
+      ),
+    );
+    expect(
+      JSON.stringify(
+        api.client
+          .getMutationCache()
+          .getAll()
+          .map((m) => m.state.variables ?? null),
+      ),
+    ).not.toContain(TEST_CPF);
+  });
+
+  it('gravação com sucesso também zera a mutação (o CPF não fica nas variáveis em memória)', async () => {
+    const user = userEvent.setup();
+    const api = renderAsTeacher(
+      routes,
+      `/my-students/${MY_STUDENT_ACTIVE.id}`,
+      detail(MY_STUDENT_ACTIVE, {
+        [`PATCH /api/v1/my-students/${MY_STUDENT_ACTIVE.id}`]: { body: MY_STUDENT_ACTIVE },
+      }),
+    );
+    await screen.findByRole('heading', { level: 1, name: 'Olavo Torrente' });
+    await user.type(screen.getByLabelText('CPF'), TEST_CPF);
+    await user.click(screen.getByRole('button', { name: 'Salvar alterações' }));
+    await screen.findByText(msg('REGISTRY_UPDATED', { name: 'Olavo Torrente' }));
+    expect(
+      JSON.stringify(
+        api.client
+          .getMutationCache()
+          .getAll()
+          .map((m) => m.state.variables ?? null),
+      ),
+    ).not.toContain(TEST_CPF);
+  });
 });
