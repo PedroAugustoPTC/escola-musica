@@ -163,9 +163,9 @@ class StudentRegistryListConversationIT extends RegistryConversationBase {
         send("meus alunos");
 
         tap("v1:reg-open:9");
-        assertThat(lastText()).isEqualTo("Este botão não vale mais. Use o menu.");
+        assertThat(lastText()).isEqualTo("Não encontramos o que você procurou.");
         tap("v1:reg-open:abc");
-        assertThat(lastText()).isEqualTo("Este botão não vale mais. Use o menu.");
+        assertThat(lastText()).isEqualTo("Não encontramos o que você procurou.");
         verify(get, never()).run(any(), any());
 
         when(get.run(any(), any())).thenThrow(error(ErrorCode.RESOURCE_NOT_FOUND));
@@ -216,6 +216,7 @@ class StudentRegistryListConversationIT extends RegistryConversationBase {
 
     @Test
     void theMenuOffersMyStudentsAndRegisterStudent() {
+        scenario.student(clara, "Matteo Mafra", "Piano");
         send("início");
 
         assertThat(buttonLabels(lastMessage())).contains("Meus alunos", "Cadastrar aluno");

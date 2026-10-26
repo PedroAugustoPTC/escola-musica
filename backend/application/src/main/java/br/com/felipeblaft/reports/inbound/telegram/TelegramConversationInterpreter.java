@@ -436,7 +436,8 @@ public class TelegramConversationInterpreter {
                         ? callback.message().chat().id()
                         : callback.from().id();
         Long messageId = callback.message() != null ? callback.message().messageId() : null;
-        TelegramContext context = new TelegramContext(callback.from().id(), chatId, messageId).withUpdate(updateId);
+        TelegramContext context =
+                new TelegramContext(callback.from().id(), chatId, messageId).withUpdate(updateId);
         context.answer(new TelegramOutput.CallbackReply(callback.id()));
         if (callback.message() != null
                 && callback.message().chat() != null

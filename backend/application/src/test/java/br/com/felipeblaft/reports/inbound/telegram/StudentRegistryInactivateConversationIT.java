@@ -171,8 +171,9 @@ class StudentRegistryInactivateConversationIT extends RegistryConversationBase {
         assertThat(lastText()).isEqualTo("Essa operação já foi concluída.");
         // a conversa continua esperando a confirmação do resumo novo
         assertThat(persistedStep()).isEqualTo("REGISTRY_CONFIRM");
-        when(confirm.run(any(), any()))
-                .thenReturn(view("Bia Lima", 12, "Violão", false, "Marta Lima"));
+        org.mockito.Mockito.doReturn(view("Bia Lima", 12, "Violão", false, "Marta Lima"))
+                .when(confirm)
+                .run(any(), any());
         send("sim");
         assertThat(lastText()).isEqualTo("Bia Lima foi inativado(a).");
     }

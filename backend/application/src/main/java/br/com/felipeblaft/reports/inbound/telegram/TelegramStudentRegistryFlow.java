@@ -378,7 +378,10 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
         TelegramConversation conversation = context.conversation();
         Optional<UUID> studentId = TelegramConversationInterpreter.option(conversation, argument);
         if (studentId.isEmpty()) {
-            return false;
+            // posição adulterada ou de lista antiga: tratada como aluno inexistente (FR-025)
+            context.answer(
+                    presenter.error(context.chatId(), ErrorCode.RESOURCE_NOT_FOUND, Map.of()));
+            return true;
         }
         StudentView student =
                 get.run(
@@ -512,7 +515,9 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
                         new StartStudentRegistrationUseCase.Command(
                                 linkId(context), kind, studentId));
         StudentView student =
-                get.run(actor(context), new GetStudentUseCase.Command(studentId, correlation(context)));
+                get.run(
+                        actor(context),
+                        new GetStudentUseCase.Command(studentId, correlation(context)));
         conversation.store(KIND, kind.name());
         conversation.store(TOKEN, started.confirmationToken());
         conversation.defineStep(ConversationFlowStep.REGISTRY_CONFIRM);

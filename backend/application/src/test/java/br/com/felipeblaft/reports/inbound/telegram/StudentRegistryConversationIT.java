@@ -141,7 +141,7 @@ class StudentRegistryConversationIT extends RegistryConversationBase {
 
         ArgumentCaptor<CollectStudentRegistrationFieldUseCase.Command> commands =
                 ArgumentCaptor.forClass(CollectStudentRegistrationFieldUseCase.Command.class);
-        verify(collect, org.mockito.Mockito.times(6)).run(any(), commands.capture());
+        verify(collect, org.mockito.Mockito.times(7)).run(any(), commands.capture());
         assertThat(commands.getAllValues())
                 .extracting(CollectStudentRegistrationFieldUseCase.Command::field)
                 .containsExactly(
@@ -150,7 +150,8 @@ class StudentRegistryConversationIT extends RegistryConversationBase {
                         Field.CPF,
                         Field.GUARDIAN,
                         Field.GUARDIAN,
-                        Field.GUARDIAN);
+                        Field.GUARDIAN,
+                        Field.INSTRUMENT);
     }
 
     @Test
@@ -228,7 +229,7 @@ class StudentRegistryConversationIT extends RegistryConversationBase {
         assertThat(persistedStep()).isEqualTo("REGISTRY_ASK_CPF");
         verify(cancel, never()).run(any(), any());
 
-        when(collect.run(any(), any())).thenThrow(error(ErrorCode.STUDENT_ALREADY_YOURS));
+        org.mockito.Mockito.doThrow(error(ErrorCode.STUDENT_ALREADY_YOURS)).when(collect).run(any(), any());
         send(CPF);
         assertThat(lastText()).contains("Este aluno já está entre os seus.");
     }

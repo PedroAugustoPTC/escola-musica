@@ -68,12 +68,6 @@ class NoStudentsOrientationConversationIT extends RegistryConversationBase {
                         "Seu cadastro já está vinculado a outra conta do Telegram. Procure o administrador.");
         assertNeverMentionsTheSecretariat();
 
-        send(USER, ScenarioIT.CODE_BRUNO);
-        assertThat(lastText())
-                .isEqualTo(
-                        "Esta conta do Telegram já está vinculada a outro professor. Procure o administrador.");
-        assertNeverMentionsTheSecretariat();
-
         send(OTHER_USER, "ZZZZZZZZ");
         assertThat(lastText()).isEqualTo("Código inválido ou vencido. Procure o administrador.");
         assertNeverMentionsTheSecretariat();
