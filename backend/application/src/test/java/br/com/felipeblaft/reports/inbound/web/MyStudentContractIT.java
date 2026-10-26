@@ -39,12 +39,15 @@ import com.atlassian.oai.validator.mockmvc.OpenApiValidationMatchers;
 import com.atlassian.oai.validator.report.LevelResolver;
 import com.atlassian.oai.validator.report.ValidationReport;
 import jakarta.servlet.http.Cookie;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -110,8 +113,7 @@ class MyStudentContractIT extends ContractApiBase {
                         : Path.of(
                                 "../../specs/005-admin-registrations-access/contracts/"
                                         + "api-administration.openapi.yaml");
-        return OpenApiInteractionValidator.createForSpecificationUrl(
-                        path.toAbsolutePath().normalize().toUri().toString())
+        return OpenApiInteractionValidator.createFor(readContract(path))
                 .withLevelResolver(
                         LevelResolver.create()
                                 // a ausência do cookie é justamente o cenário de 401
@@ -123,6 +125,25 @@ class MyStudentContractIT extends ContractApiBase {
                                         ValidationReport.Level.IGNORE)
                                 .build())
                 .build();
+    }
+
+    /**
+     * Lê o contrato e põe entre aspas as descrições de mapa em linha que têm vírgula sem aspas (o
+     * validador as recusa como YAML inválido). O arquivo do contrato não é alterado.
+     */
+    private static String readContract(Path path) {
+        try {
+            String text = Files.readString(path);
+            return Pattern.compile("\\{ description: ([^\"{}\\n]*,[^\"{}\\n]*?) \\}")
+                    .matcher(text)
+                    .replaceAll(
+                            m ->
+                                    "{ description: \""
+                                            + Matcher.quoteReplacement(m.group(1))
+                                            + "\" }");
+        } catch (IOException error) {
+            throw new IllegalStateException("contrato ilegível", error);
+        }
     }
 
     /** Requisição e resposta seguem o contrato da 005. */
