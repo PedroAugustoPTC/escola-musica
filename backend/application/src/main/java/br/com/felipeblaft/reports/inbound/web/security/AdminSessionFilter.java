@@ -1,17 +1,21 @@
 package br.com.felipeblaft.reports.inbound.web.security;
 
 import br.com.felipeblaft.reports.config.MessageCatalog;
+import br.com.felipeblaft.reports.domain.access.Operation;
 import br.com.felipeblaft.reports.domain.common.DomainException;
 import br.com.felipeblaft.reports.domain.common.ErrorCode;
 import br.com.felipeblaft.reports.domain.common.Secret;
 import br.com.felipeblaft.reports.inbound.web.RequestCorrelation;
+import br.com.felipeblaft.reports.service.ActorAuthorizationService;
 import br.com.felipeblaft.reports.usecase.administrator.ValidateAdministratorSessionUseCase;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -107,12 +111,31 @@ public class AdminSessionFilter extends OncePerRequestFilter {
                         || ACTIVATION.equals(request.getRequestURI()));
     }
 
-    /** Senha provisória: ler a sessão, sair e trocar a senha (FR-034a). */
+    /** Rota (método e caminho) de uma operação administrativa. */
+    record Route(HttpMethod method, String path) {
+        boolean matches(HttpServletRequest request) {
+            return method.matches(request.getMethod()) && path.equals(request.getRequestURI());
+        }
+    }
+
+    /**
+     * Rota de cada operação que o núcleo permite com a senha provisória. A lista de operações vem
+     * de {@link ActorAuthorizationService#ALLOWED_WHILE_RESTRICTED}; aqui só se diz onde cada uma
+     * mora na Web. Operação nova no núcleo sem rota aqui reprova o teste do filtro.
+     */
+    static final Map<Operation, Route> RESTRICTED_ROUTES =
+            new EnumMap<>(
+                    Map.of(
+                            Operation.ADMIN_GET_SESSION, new Route(HttpMethod.GET, SESSION),
+                            Operation.ADMIN_SIGN_OUT, new Route(HttpMethod.DELETE, SESSION),
+                            Operation.ADMIN_CHANGE_PASSWORD, new Route(HttpMethod.PUT, PASSWORD)));
+
+    /** Senha provisória: só as operações que o núcleo permite (FR-034a). */
     private static boolean allowedWhileRestricted(HttpServletRequest request) {
-        String uri = request.getRequestURI();
-        String method = request.getMethod();
-        return (SESSION.equals(uri)
-                        && (HttpMethod.GET.matches(method) || HttpMethod.DELETE.matches(method)))
-                || (PASSWORD.equals(uri) && HttpMethod.PUT.matches(method));
+        return RESTRICTED_ROUTES.entrySet().stream()
+                .anyMatch(
+                        entry ->
+                                ActorAuthorizationService.allowedWhileRestricted(entry.getKey())
+                                        && entry.getValue().matches(request));
     }
 }

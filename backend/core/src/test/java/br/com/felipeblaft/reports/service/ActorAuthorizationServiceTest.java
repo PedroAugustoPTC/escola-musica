@@ -85,6 +85,23 @@ class ActorAuthorizationServiceTest {
     }
 
     @Test
+    void theRestrictedSetIsPublicAndMatchesWhatTheServiceAllows() {
+        assertThat(ActorAuthorizationService.ALLOWED_WHILE_RESTRICTED)
+                .containsExactlyInAnyOrder(
+                        Operation.ADMIN_CHANGE_PASSWORD,
+                        Operation.ADMIN_GET_SESSION,
+                        Operation.ADMIN_SIGN_OUT);
+        for (Operation operation : Operation.values()) {
+            assertThat(ActorAuthorizationService.allowedWhileRestricted(operation))
+                    .as(operation.name())
+                    .isEqualTo(
+                            ActorAuthorizationService.ALLOWED_WHILE_RESTRICTED.contains(operation));
+        }
+        assertThatThrownBy(() -> ActorAuthorizationService.ALLOWED_WHILE_RESTRICTED.clear())
+                .isInstanceOf(UnsupportedOperationException.class);
+    }
+
+    @Test
     void theMatrixDecidesBeforeTheRestriction() {
         assertCode(
                 () ->
