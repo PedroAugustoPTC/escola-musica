@@ -6,6 +6,7 @@ import { useEndSession, useSession } from '../services/session';
 import { msg } from '../messages/messages';
 import { Icon } from './Icon';
 import { errorText } from './ErrorState';
+import { searchTermOf } from './student/cpfShape';
 
 export type NavigationItem = 'dashboard' | 'students' | 'register';
 
@@ -163,7 +164,8 @@ export function Header({ context, activeNav }: { context?: HeaderContext; active
 
   const submitSearch = (event: FormEvent) => {
     event.preventDefault();
-    const term = search.trim();
+    // termo com forma de CPF não existe como busca: não vai à URL
+    const term = searchTermOf(search);
     navigate(term ? `/students?search=${encodeURIComponent(term)}` : '/students');
   };
 

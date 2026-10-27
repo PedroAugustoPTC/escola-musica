@@ -8,6 +8,7 @@ import { EmptyState } from '../components/EmptyState';
 import { Layout } from '../components/Layout';
 import { Icon } from '../components/Icon';
 import { msg } from '../messages/messages';
+import { looksLikeCpf } from '../components/student/cpfShape';
 import { useStudents } from '../services/students';
 
 const SEARCH_DELAY_MS = 300;
@@ -16,12 +17,20 @@ const SEARCH_DELAY_MS = 300;
 export function StudentsScreen() {
   const [params, setParams] = useSearchParams();
   const registering = params.get('register') === '1';
-  const [search, setSearch] = useState(params.get('search') ?? '');
-  const [term, setTerm] = useState(search);
+  // um `?search=` com forma de CPF é descartado ao ler: não vai à chave de consulta nem à API
+  const initialSearch = params.get('search') ?? '';
+  const initialRefused = looksLikeCpf(initialSearch.trim());
+  const [search, setSearch] = useState(initialRefused ? '' : initialSearch);
+  const [refusedFromUrl, setRefusedFromUrl] = useState(initialRefused);
+  const [term, setTerm] = useState(initialRefused ? '' : initialSearch);
   const field = useRef<HTMLInputElement>(null);
   const students = useStudents(term);
 
+  const refused = refusedFromUrl || looksLikeCpf(search.trim());
+
   useEffect(() => {
+    // não existe busca por CPF: o termo não chega a virar consulta (nem URL)
+    if (looksLikeCpf(search.trim())) return;
     const wait = window.setTimeout(() => setTerm(search), SEARCH_DELAY_MS);
     return () => window.clearTimeout(wait);
   }, [search]);
@@ -60,9 +69,20 @@ export function StudentsScreen() {
             className="input"
             value={search}
             placeholder="Buscar aluno por nome"
-            onChange={(event) => setSearch(event.target.value)}
+            aria-invalid={refused ? true : undefined}
+            aria-describedby={refused ? 'search-refused' : undefined}
+            onChange={(event) => {
+              setSearch(event.target.value);
+              setRefusedFromUrl(false);
+            }}
           />
         </label>
+        {refused ? (
+          <div id="search-refused" className="field__error" role="alert">
+            <Icon name="error" size="small" />
+            Não há busca por CPF. Procure pelo nome.
+          </div>
+        ) : null}
         {students.isPending ? <CardsSkeleton label="Carregando alunos" /> : null}
         {students.isError ? <ErrorAlert error={students.error} onRetry={() => students.refetch()} /> : null}
         {data && data.students.length === 0 ? (

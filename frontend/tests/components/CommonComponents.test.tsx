@@ -202,4 +202,15 @@ describe('Cabecalho', () => {
     expect(initials('Miguel de Castro Torrente')).toBe('MT');
     expect(initials('Matteo')).toBe('M');
   });
+
+  it('computador: busca com forma de CPF não vai à URL (a navegação segue sem termo)', async () => {
+    (globalThis as { __testWidth?: number }).__testWidth = 1440;
+    mockApi({ 'GET /api/v1/session': { body: LIGHT_SESSION } });
+    const user = userEvent.setup();
+    const { router } = renderWithProviders(<Header activeNav="students" />);
+    await user.type(screen.getByRole('searchbox', { name: 'Buscar aluno' }), '111.444.777-35{Enter}');
+    await waitFor(() => expect(router.state.location.pathname).toBe('/students'));
+    expect(router.state.location.search).toBe('');
+    expect(router.state.location.pathname + router.state.location.search).not.toMatch(/111|444/);
+  });
 });
