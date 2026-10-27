@@ -106,7 +106,9 @@ openssl rand -base64 48
 ```
 
 O primeiro vai em `POSTGRES_PASSWORD`, o segundo em `CPF_ENCRYPTION_KEY` e o terceiro em
-`HMAC_SECRET`. Sem chaves de IA, use
+`HMAC_SECRET`; gere outro valor com o mesmo comando do terceiro para o `AUTH_HMAC_SECRET` (precisa ser **diferente** do
+`HMAC_SECRET`). No passo a passo manual, preencha também as três `ADMIN_BOOTSTRAP_*` (seção 2) para ter o primeiro
+administrador; o `local.sh up` faz as duas coisas sozinho. Sem chaves de IA, use
 `AI_PROVIDERS=simulated`.
 
 ```bash
@@ -212,7 +214,11 @@ No ambiente local, `sh infra/scripts/local.sh up --demo-data=true` já faz a car
 `seed/demo.json`) e cria relatórios e PDFs fictícios; os comandos abaixo servem para cargas
 avulsas e para a produção.
 
-Formato e regras em [`contracts/carga-inicial.md`](../specs/001-fluxo-relatorios/contracts/carga-inicial.md).
+Formato e regras vigentes em [`initial-load.md`](../specs/005-admin-registrations-access/contracts/initial-load.md)
+(feature 005; a [versão da 001](../specs/001-fluxo-relatorios/contracts/carga-inicial.md) é histórico). Depois da
+feature 005 a carga não tem regra própria: cada linha chama os mesmos casos de uso do administrador, e o cadastro normal
+de professores e alunos é feito na área administrativa (`/admin`); a carga e o `issue-code` ficam para a primeira
+carga e para emergência.
 
 ```bash
 docker compose -f infra/compose.yaml -f infra/compose.dev.yaml run --rm backend seed --file /seed/example.json
@@ -232,23 +238,129 @@ seguida (ele contém CPF):
 docker compose -f infra/compose.yaml -f infra/compose.prod.yaml run --rm -v "$PWD/infra/seed:/seed:ro" backend seed --file /seed/real-data.json
 ```
 
-### Primeiro administrador, `AUTH_HMAC_SECRET` e rotação das chaves
+### Variáveis da administração (feature 005)
 
-- **Local**: o `local.sh up` gera o `AUTH_HMAC_SECRET` (48 caracteres, distinto do `HMAC_SECRET`) e, se
-  as três variáveis `ADMIN_BOOTSTRAP_*` estão vazias, preenche o administrador fictício
-  `admin@example.test` com uma senha provisória impressa **uma única vez**. A senha só vale se o
-  banco ainda não tiver administrador. Depois do primeiro acesso (quando a troca da senha é
-  obrigatória), **esvazie `ADMIN_BOOTSTRAP_PASSWORD` no `infra/.env`**.
-- **Produção**: preencha `AUTH_HMAC_SECRET` e `ADMIN_BOOTSTRAP_*` à mão no `infra/.env` da VPS e
-  esvazie `ADMIN_BOOTSTRAP_PASSWORD` depois do primeiro acesso.
-- **`seed [arquivo] [--simulate]`**: carga idempotente; `--simulate` valida e desfaz.
-- **`issue-code <email>`**: emergência; reemite o código de um professor (`code` é alias obsoleto).
-- **`rotate-cpf-key [--simulate] [--confirm-invalidate-codes]`**: troca a chave de cifra do CPF e/ou
-  o segredo do resumo. As chaves novas vêm em `ROTATE_NEW_CPF_ENCRYPTION_KEY` e/ou
-  `ROTATE_NEW_HMAC_SECRET` (e as antigas, se diferirem do `.env`, em `ROTATE_OLD_*`), exportadas no
-  terminal de uma **máquina confiável**, e devem receber `unset` ao terminar. O comando valida tudo
-  antes de parar o portal e a API, descarta os rascunhos de cadastro do Telegram e, se falhar,
-  informa como religar (`up`). Detalhes em [`scripts/README.md`](scripts/README.md).
+Todas estão em `infra/.env.example` (copie para `infra/.env`, que nunca vai para o Git) e são repassadas ao backend por
+`compose.yaml`. Sem valor, vale o **padrão**; as quatro primeiras não têm padrão e ficam **vazias** no repositório (não existe
+credencial padrão).
+
+| Variável | Padrão | Função |
+|---|---|---|
+| `AUTH_HMAC_SECRET` | nenhum (obrigatória) | Segredo (≥ 32 bytes, **diferente** do `HMAC_SECRET`; o backend recusa subir de outro modo) de onde saem as chaves do código de ativação do administrador e da origem das tentativas de entrada. Trocá-lo invalida as ativações pendentes e zera o bloqueio por tentativas do administrador |
+| `ADMIN_BOOTSTRAP_NAME` | vazio | Nome do primeiro administrador (só vale em banco sem administrador) |
+| `ADMIN_BOOTSTRAP_EMAIL` | vazio | E-mail do primeiro administrador |
+| `ADMIN_BOOTSTRAP_PASSWORD` | vazio | Senha **provisória** do primeiro administrador (12 a 128 caracteres, diferente do nome e do e-mail); troca obrigatória no primeiro acesso. Nunca vai a log. Esvazie depois do primeiro acesso |
+| `ADMIN_SESSION_HOURS` | `2` | Duração **fixa** da sessão do administrador, em horas (não renova por uso) |
+| `ADMIN_PROVISIONAL_PASSWORD_DAYS` | `7` | Dias de validade da senha provisória |
+| `ADMIN_PASSWORD_ARGON2_MEMORY_KIB` | `19456` | Memória (KiB) do hash Argon2id da senha |
+| `ADMIN_PASSWORD_ARGON2_ITERATIONS` | `2` | Iterações do Argon2id. Mudar o custo não invalida senhas antigas (são recalculadas na próxima entrada) |
+| `ACCESS_CPF_PROBE_MAX_REFUSALS` | `5` | Recusas por CPF de aluno alheio, pelo professor, antes do bloqueio da operação |
+| `ACCESS_CPF_PROBE_WINDOW_MINUTES` | `15` | Janela dessa contagem |
+| `ACCESS_CPF_PROBE_LOCK_MINUTES` | `15` | Duração do bloqueio |
+| `ACCESS_CPF_LOOKUP_MAX` | `30` | Consultas de CPF digitado pelo professor (livre ou ocupado) antes do bloqueio |
+| `ACCESS_CPF_LOOKUP_WINDOW_MINUTES` | `60` | Janela dessa contagem |
+| `ACCESS_CPF_LOOKUP_LOCK_MINUTES` | `60` | Duração do bloqueio |
+| `TELEGRAM_STUDENT_DRAFT_MINUTES` | `30` | Minutos de inatividade que descartam o cadastro de aluno em andamento no Telegram |
+
+`ROTATE_NEW_*` e `ROTATE_OLD_*` (rotação das chaves, abaixo) **não** vão para o `.env`: são variáveis do terminal.
+
+### Subida com o primeiro administrador
+
+O backend cria o primeiro administrador na subida, a partir das três `ADMIN_BOOTSTRAP_*`, **somente se o banco ainda não tem
+nenhum administrador** (em qualquer situação); se já existe algum, as variáveis são ignoradas, até as inválidas. Sem as três
+variáveis e sem administrador, o sistema sobe e avisa no log; com valor inválido (por exemplo, senha curta), **recusa subir** e a
+mensagem cita a variável, nunca o valor.
+
+- **Local**: o `local.sh up` gera o `AUTH_HMAC_SECRET` (48 caracteres, distinto do `HMAC_SECRET`) e, se as três variáveis
+  `ADMIN_BOOTSTRAP_*` estão vazias, preenche o administrador fictício `admin@example.test` com uma senha provisória impressa
+  **uma única vez**. Entre em `https://localhost/admin/sign-in`, troque a senha (obrigatória no primeiro acesso) e **esvazie
+  `ADMIN_BOOTSTRAP_PASSWORD` no `infra/.env`**. Antes de zerar os dados (`up --demo-data=true|false`) esvazie também
+  `ADMIN_BOOTSTRAP_NAME` e `ADMIN_BOOTSTRAP_EMAIL`: com o banco vazio e as variáveis incompletas, o backend recusa subir.
+- **Produção**: no `infra/.env` da VPS (permissão `600`) preencha `AUTH_HMAC_SECRET` (`openssl rand -base64 48`) e as três
+  `ADMIN_BOOTSTRAP_*` (senha com `openssl rand -base64 24`), rode `sh infra/scripts/deploy.sh main`, entre em
+  `https://<domínio>/admin/sign-in`, troque a senha e **esvazie `ADMIN_BOOTSTRAP_PASSWORD`** no `.env` (a senha provisória não
+  deve ficar em disco). Daí em diante o administrador cria os demais administradores pela própria área administrativa (cada um
+  recebe um código de ativação exibido uma única vez).
+
+### Recuperação: nenhum administrador consegue entrar
+
+Não existe variável, rota nem comando que redefina a senha de um administrador existente. Se nenhum administrador ativo consegue
+entrar (senha perdida, contas inativadas), o mantenedor da VPS refaz o primeiro administrador:
+
+1. **Pare o backend** (o portal fica fora do ar durante o procedimento):
+
+   ```bash
+   docker compose -f infra/compose.yaml -f infra/compose.prod.yaml stop backend
+   ```
+
+2. **Apague os administradores** (as sessões saem em cascata; o registro de autoria **é preservado**, porque não tem chave
+   estrangeira):
+
+   ```bash
+   docker compose -f infra/compose.yaml -f infra/compose.prod.yaml exec -T postgres psql -U reports -d reports -c "DELETE FROM administrator;"
+   ```
+
+3. **Preencha** `ADMIN_BOOTSTRAP_NAME`, `ADMIN_BOOTSTRAP_EMAIL` e `ADMIN_BOOTSTRAP_PASSWORD` (uma senha nova, 12 a 128 caracteres)
+   no `infra/.env`.
+4. **Reinicie** (recria o contêiner com o `.env` novo; o backend cria o administrador porque não há nenhum):
+
+   ```bash
+   docker compose -f infra/compose.yaml -f infra/compose.prod.yaml up -d --force-recreate backend
+   ```
+
+5. **Entre, troque a senha e apague a senha do `.env`**: acesse `/admin/sign-in` com a senha provisória, defina a nova senha
+   (obrigatória; a provisória vale `ADMIN_PROVISIONAL_PASSWORD_DAYS` dias) e **esvazie `ADMIN_BOOTSTRAP_PASSWORD`** no `infra/.env`.
+   Recrie o backend de novo para que a variável saia do contêiner.
+
+Professores, alunos, relatórios e códigos de acesso dos professores não são tocados. Os códigos de ativação pendentes de outros
+administradores somem junto com as contas; crie-os de novo pela área administrativa.
+
+### Comandos operacionais (perfil `seed`)
+
+- **`seed [arquivo] [--simulate]`**: carga inicial idempotente (professor por e-mail, aluno pelo resumo do CPF; nunca apaga) e
+  tudo ou nada; `--simulate` roda os mesmos casos de uso e **desfaz** a transação. Imprime os códigos de acesso uma única vez.
+- **`issue-code <email>`**: **emergência**; o caminho normal é o administrador reemitir o código na área administrativa. O código
+  anterior morre na hora e as **sessões Web do professor são encerradas**; o vínculo do Telegram é mantido (`code` é alias obsoleto).
+- **`rotate-cpf-key [--simulate] [--confirm-invalidate-codes]`**: troca a chave de cifra do CPF e/ou o segredo do resumo (abaixo).
+
+### Rotação das chaves do CPF
+
+Use numa **janela de manutenção** e numa **máquina confiável**, com uma cópia de segurança recente do banco (que não inclui as
+chaves). As chaves **novas** entram por variáveis de ambiente do terminal, nunca por argumento (não ficam no histórico do shell):
+
+- `ROTATE_NEW_CPF_ENCRYPTION_KEY` (Base64 de 32 bytes) troca a chave de cifra: reescreve o CPF cifrado, sem efeito colateral;
+- `ROTATE_NEW_HMAC_SECRET` (≥ 32 bytes) troca o segredo do resumo: recalcula o resumo do CPF **e invalida os códigos de acesso
+  vigentes dos professores** (o administrador os reemite); exige `--confirm-invalidate-codes` (a simulação dispensa). Os códigos
+  de ativação e as origens de tentativas usam o `AUTH_HMAC_SECRET` e não mudam;
+- `ROTATE_OLD_CPF_ENCRYPTION_KEY` e `ROTATE_OLD_HMAC_SECRET` só são necessárias se as chaves antigas forem diferentes das do `.env`.
+
+Cada chave é opcional e independente. O comando decifra e cifra **em memória**, confere que não surgiram colisões, nunca imprime
+o CPF (só contagens) e descarta os rascunhos de cadastro do Telegram em andamento (duram 30 minutos e estão cifrados com a chave
+antiga). No ambiente local o `local.sh rotate-cpf-key` valida tudo **antes** de parar o portal e a API e, se a rotação falhar,
+informa como religar (`up`). Roteiro local em [`scripts/README.md`](scripts/README.md); na VPS, com os mesmos argumentos:
+
+```bash
+export ROTATE_NEW_CPF_ENCRYPTION_KEY="$(openssl rand -base64 32)"
+docker compose -f infra/compose.yaml -f infra/compose.prod.yaml run --rm -e ROTATE_NEW_CPF_ENCRYPTION_KEY backend rotate-cpf-key --simulate
+```
+
+```bash
+docker compose -f infra/compose.yaml -f infra/compose.prod.yaml stop web backend
+docker compose -f infra/compose.yaml -f infra/compose.prod.yaml run --rm -e ROTATE_NEW_CPF_ENCRYPTION_KEY backend rotate-cpf-key
+```
+
+Depois de conferir as contagens, troque `CPF_ENCRYPTION_KEY` (e/ou `HMAC_SECRET`) no `infra/.env` pelo valor novo, religue com
+`docker compose -f infra/compose.yaml -f infra/compose.prod.yaml up -d` e rode `unset ROTATE_NEW_CPF_ENCRYPTION_KEY ROTATE_NEW_HMAC_SECRET ROTATE_OLD_CPF_ENCRYPTION_KEY ROTATE_OLD_HMAC_SECRET`.
+Guarde as chaves novas no cofre junto do backup e **não** apague as antigas antes de confirmar que o sistema subiu e lê os CPFs.
+
+### Privacidade do CPF na infraestrutura
+
+- **O n8n não guarda execuções.** O update em que o professor digita o CPF no cadastro pelo Telegram passa pelo n8n, e o backend
+  manda apagar essa mensagem no chat (ação `DELETE_MESSAGE`). Por isso o banco do n8n e o `binaryData` ficam em memória (`tmpfs`)
+  e nenhuma execução é persistida: **não ligue** persistência de execuções, exportação de logs de execução nem editor em produção.
+- **O proxy não deve registrar a query string.** A busca de professores e alunos usa `?search=` (nome ou instrumento) e a
+  interface recusa termo com forma de CPF, mas, por defesa em profundidade, o `Caddyfile` não habilita registro de acesso. Se algum
+  dia habilitar, descarte a query do URI no registro.
 
 ## 3. Testes
 
@@ -297,6 +409,8 @@ requisito.
    - `POSTGRES_PASSWORD`, `CPF_ENCRYPTION_KEY`, `HMAC_SECRET` novos, gerados na VPS e guardados
      num cofre (perder `CPF_ENCRYPTION_KEY` torna os CPFs ilegíveis; trocar `HMAC_SECRET` invalida
      códigos e vínculos);
+   - `AUTH_HMAC_SECRET` novo (`openssl rand -base64 48`, diferente do `HMAC_SECRET`; o backend não sobe sem ele) e as três
+     `ADMIN_BOOTSTRAP_*` do primeiro administrador (seção 2; esvazie a senha depois do primeiro acesso);
    - `TELEGRAM_ENABLED=true`, `TELEGRAM_BOT_TOKEN` do bot de produção, `TELEGRAM_API_ID`,
      `TELEGRAM_API_HASH` e um `TELEGRAM_WEBHOOK_SECRET` aleatório;
    - `AI_PROVIDERS=real` e as chaves `TRANSCRIPTION_API_KEY` e `LLM_API_KEY`.
