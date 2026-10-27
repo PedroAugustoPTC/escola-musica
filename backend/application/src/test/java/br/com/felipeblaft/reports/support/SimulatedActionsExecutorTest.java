@@ -104,6 +104,7 @@ public class SimulatedActionsExecutorTest {
                                                     action.path("callbackId").asString())),
                             null);
             case "STEP_MESSAGE" -> step(actionId, action);
+            case "DELETE_MESSAGE" -> deleteMessage(actionId, action);
             // tipo novo: pula, informa e segue com as demais (FR-003a)
             default -> new Result(actionId, "FAILED", "ACTION_NOT_SUPPORTED", null);
         };
@@ -131,6 +132,17 @@ public class SimulatedActionsExecutorTest {
         // teclado vazio remove os botões
         body.set("reply_markup", keyboardTelegram(action.path("keyboard")));
         return resultOf(actionId, callJson("editMessageText", body), messageId);
+    }
+
+    /** Apaga a mensagem com o CPF (FR-036); falha vira MESSAGE_NOT_DELETABLE, como no n8n. */
+    private Result deleteMessage(String actionId, JsonNode action) throws Exception {
+        ObjectNode body = JSON.createObjectNode();
+        body.put("chat_id", action.path("chatId").asLong());
+        body.put("message_id", action.path("messageId").asLong());
+        HttpResponse<String> response = callJson("deleteMessage", body);
+        return response.statusCode() / 100 == 2
+                ? new Result(actionId, "EXECUTED", null, null)
+                : new Result(actionId, "FAILED", "MESSAGE_NOT_DELETABLE", null);
     }
 
     private Result step(String actionId, JsonNode action) throws Exception {
