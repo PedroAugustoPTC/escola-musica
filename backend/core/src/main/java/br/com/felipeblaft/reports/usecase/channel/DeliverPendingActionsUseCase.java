@@ -90,6 +90,7 @@ public class DeliverPendingActionsUseCase {
                     action.expire(now);
                     if (actions.updateIfVersion(action, readVersion)) {
                         failures.add(action.id());
+                        compensateDeletion(action, now);
                     }
                 } else if (action.teacherId() != null
                         && links.searchByTeacherId(action.teacherId()).isEmpty()) {
@@ -118,6 +119,7 @@ public class DeliverPendingActionsUseCase {
                         && action.state().finalized()
                         && !result.accepted()) {
                     failures.add(action.id());
+                    compensateDeletion(action, after);
                 }
             }
             if (result.accepted()) {
@@ -127,6 +129,16 @@ public class DeliverPendingActionsUseCase {
             }
         }
         return new Cycle(accepted, refused, discarded, List.copyOf(failures));
+    }
+
+    /**
+     * A mensagem a apagar (o CPF no chat) que venceu o prazo gera o aviso alternativo, uma só vez
+     * (id {@code <id>-c}, gravação idempotente).
+     */
+    private void compensateDeletion(ChannelAction action, Instant now) {
+        if (action.compensatesPermanentFailure()) {
+            actions.saveBatch(List.of(action.createCompensation(now, policy)));
+        }
     }
 
     private DeliveryBatch forBatch(List<ChannelAction> batch) {

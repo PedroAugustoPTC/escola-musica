@@ -2,8 +2,10 @@ package br.com.felipeblaft.reports.inbound.web;
 
 import br.com.felipeblaft.reports.config.MessageCatalog;
 import br.com.felipeblaft.reports.config.MessageFormatting;
+import br.com.felipeblaft.reports.config.log.ErrorReference;
 import br.com.felipeblaft.reports.domain.common.DomainException;
 import br.com.felipeblaft.reports.domain.common.ErrorCode;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +37,10 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 public class ErrorHandlerController {
 
     private static final Logger LOG = LoggerFactory.getLogger(ErrorHandlerController.class);
+    private static final String ADMINISTRATIVE_PREFIX = "/api/v1/admin/";
+
+    /** Texto neutro do e-mail duplicado fora da área administrativa (sem nome, sem CPF). */
+    private static final String EMAIL_UNAVAILABLE = "EMAIL_UNAVAILABLE";
 
     private static final Map<ErrorCode, HttpStatus> STATUS = new EnumMap<>(ErrorCode.class);
 
@@ -117,9 +123,30 @@ public class ErrorHandlerController {
         return STATUS.get(code);
     }
 
+    /**
+     * O núcleo já decide, pelo papel do ator, se a duplicidade traz o nome do registro existente
+     * (só o administrador o recebe, R-13). A rota é apenas a rede de segurança: fora da área
+     * administrativa a recusa é sempre a neutra, sem nome e sem detalhe. O CPF vira {@code
+     * CPF_UNAVAILABLE}; o e-mail mantém o código e usa o texto neutro do e-mail, que não fala de
+     * CPF.
+     */
     @ExceptionHandler(DomainException.class)
-    public ResponseEntity<ErrorResponse> domain(DomainException error) {
+    public ResponseEntity<ErrorResponse> domain(DomainException error, HttpServletRequest request) {
+        if (!isAdministrativeRoute(request)) {
+            if (error.code() == ErrorCode.DUPLICATE_CPF) {
+                return response(ErrorCode.CPF_UNAVAILABLE, Map.of());
+            }
+            if (error.code() == ErrorCode.DUPLICATE_EMAIL) {
+                return response(ErrorCode.DUPLICATE_EMAIL, EMAIL_UNAVAILABLE, Map.of(), null);
+            }
+        }
         return response(error.code(), error.details());
+    }
+
+    private static boolean isAdministrativeRoute(HttpServletRequest request) {
+        return request != null
+                && request.getRequestURI() != null
+                && request.getRequestURI().startsWith(ADMINISTRATIVE_PREFIX);
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
@@ -156,8 +183,13 @@ public class ErrorHandlerController {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> unexpected(Exception error) {
         // sem a mensagem nem a causa: podem trazer SQL, caminhos ou dados de aluno (FR-054, FR-055)
-        LOG.error("unexpected-error type={} local={}", error.getClass().getName(), localOf(error));
-        return response(ErrorCode.INTERNAL_ERROR, Map.of());
+        String reference = ErrorReference.newReference();
+        LOG.error(
+                "unexpected-error reference={} type={} local={}",
+                reference,
+                error.getClass().getName(),
+                localOf(error));
+        return response(ErrorCode.INTERNAL_ERROR, Map.of(), reference);
     }
 
     /**
@@ -177,9 +209,22 @@ public class ErrorHandlerController {
     }
 
     ResponseEntity<ErrorResponse> response(ErrorCode code, Map<String, Object> details) {
+        return response(code, details, null);
+    }
+
+    private ResponseEntity<ErrorResponse> response(
+            ErrorCode code, Map<String, Object> details, String reference) {
+        return response(code, code.messageKey(), details, reference);
+    }
+
+    private ResponseEntity<ErrorResponse> response(
+            ErrorCode code, String messageKey, Map<String, Object> details, String reference) {
         HttpStatus status = statusOf(code);
         Map<String, Object> textParameters =
                 new HashMap<>(parameters.errorParameters(code, details));
+        if (reference != null) {
+            textParameters.put("reference", reference);
+        }
         Integer retryAfter = null;
         ResponseEntity.BodyBuilder body = ResponseEntity.status(status);
         if ((code == ErrorCode.TEMPORARILY_BLOCKED
@@ -188,9 +233,13 @@ public class ErrorHandlerController {
             retryAfter = seconds.intValue();
             body.header(HttpHeaders.RETRY_AFTER, String.valueOf(retryAfter));
         }
-        String message = catalog.text(code, textParameters);
+        String message = catalog.text(messageKey, textParameters);
         return body.body(
                 new ErrorResponse(
-                        code.name(), message, retryAfter, details.isEmpty() ? null : details));
+                        code.name(),
+                        message,
+                        retryAfter,
+                        details.isEmpty() ? null : details,
+                        reference));
     }
 }

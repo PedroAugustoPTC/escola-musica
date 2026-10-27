@@ -56,6 +56,7 @@ GUARDIAN_REQUIRED=Para alunos menores de 18 anos, informe nome, telefone e e-mai
 DUPLICATE_EMAIL=Já existe um cadastro com este e-mail: {name}.
 DUPLICATE_CPF=Este CPF já pertence ao aluno {name}.
 CPF_UNAVAILABLE=Não foi possível usar este CPF. Procure o administrador.
+EMAIL_UNAVAILABLE=Não foi possível usar este e-mail. Procure o administrador.
 STUDENT_ALREADY_YOURS=Este aluno já está entre os seus.
 SHARED_STUDENT_ACTION_DENIED=Este aluno tem mais de um professor. Procure o administrador para inativá-lo ou reativá-lo.
 OPERATION_TEMPORARILY_BLOCKED=Esta operação está indisponível no momento. Tente novamente em {minutes} minuto(s).
@@ -143,5 +144,5 @@ MY_STUDENTS_CONFIRM_INACTIVATE=Inativar {name}? O aluno deixa de aparecer para n
 
 - Todo `ErrorCode` novo tem texto (teste do catálogo); nenhum texto menciona "secretaria"; nenhum texto interpola CPF,
   senha ou código (placeholders permitidos: `{name}`, `{minutes}`, `{reference}`, `{summary}` montado sem CPF).
-- Em `DUPLICATE_*` o `{name}` só é preenchido para o administrador; para o professor o núcleo devolve `CPF_UNAVAILABLE`.
+- Em `DUPLICATE_*` o `{name}` só é preenchido para o administrador; para o professor o núcleo devolve `CPF_UNAVAILABLE`. Rede de segurança do adaptador (fora de `/api/v1/admin/` e no Telegram): `DUPLICATE_CPF` vira `CPF_UNAVAILABLE` e `DUPLICATE_EMAIL` mantém o código com o texto neutro `EMAIL_UNAVAILABLE` (chave só do catálogo, não é código de erro), sem nome e sem falar de CPF.
 - O corpo de `RESOURCE_NOT_FOUND` é idêntico para inexistente, aluno alheio e credencial do outro papel.

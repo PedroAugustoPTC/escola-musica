@@ -1740,7 +1740,9 @@
         "sair",
         "ajuda",
         "help",
-        "sim"
+        "sim",
+        "alunos",
+        "voltar"
       ],
       "reason": "Palavras que o professor digita no bot são entrada do usuário (FR-011, constituição VI); permanecem em português, sem acento, como o reconhecedor as normaliza.",
       "constitutionCategory": "texto do usuário (explicitamente em português no Princípio VI)",

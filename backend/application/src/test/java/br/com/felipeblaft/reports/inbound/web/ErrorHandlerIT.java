@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
+import br.com.felipeblaft.reports.domain.common.DomainException;
 import br.com.felipeblaft.reports.domain.common.ErrorCode;
 import br.com.felipeblaft.reports.support.ContractApiBase;
 import br.com.felipeblaft.reports.support.ScenarioIT;
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MvcResult;
 import tools.jackson.databind.JsonNode;
@@ -83,8 +85,13 @@ class ErrorHandlerIT extends ContractApiBase {
         String body = result.getResponse().getContentAsString();
         JsonNode json = JSON_READER.readTree(body);
         assertThat(json.path("code").asString()).isEqualTo("INTERNAL_ERROR");
+        String reference = json.path("reference").asString();
+        assertThat(reference).matches("[A-Z0-9]{8}");
         assertThat(json.path("message").asString())
-                .isEqualTo("Ocorreu um erro inesperado. Tente novamente mais tarde.");
+                .isEqualTo(
+                        "Algo deu errado. Informe o código de referência "
+                                + reference
+                                + " ao suporte.");
         assertThat(body)
                 .doesNotContain(
                         "IllegalStateException",
@@ -202,6 +209,70 @@ class ErrorHandlerIT extends ContractApiBase {
                         Map.of("fields", List.of(Map.of("field", "cpf", "code", "INVALID_CPF"))));
         assertThat(validation.getStatusCode().value()).isEqualTo(400);
         assertThat(validation.getBody().details()).containsKey("fields");
+    }
+
+    // ---- duplicidade: o núcleo decide pelo papel; a rota é só a rede de segurança
+
+    private static MockHttpServletRequest requestTo(String path) {
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", path);
+        request.setRequestURI(path);
+        return request;
+    }
+
+    @Test
+    void duplicateOutsideTheAdministrativeAreaIsNeutralAndNeverCarriesTheName() {
+        var request = requestTo("/api/v1/my-students");
+
+        var cpf =
+                handler.domain(
+                        new DomainException(ErrorCode.DUPLICATE_CPF, Map.of("name", "Joana Prado")),
+                        request);
+        assertThat(cpf.getBody().code()).isEqualTo("CPF_UNAVAILABLE");
+        assertThat(cpf.getBody().message())
+                .isEqualTo("Não foi possível usar este CPF. Procure o administrador.");
+        assertThat(cpf.getBody().details()).isNull();
+
+        var email =
+                handler.domain(
+                        new DomainException(
+                                ErrorCode.DUPLICATE_EMAIL, Map.of("name", "Joana Prado")),
+                        request);
+        assertThat(email.getStatusCode().value()).isEqualTo(409);
+        assertThat(email.getBody().code()).isEqualTo("DUPLICATE_EMAIL");
+        assertThat(email.getBody().message())
+                .isEqualTo("Não foi possível usar este e-mail. Procure o administrador.")
+                .doesNotContainIgnoringCase("CPF")
+                .doesNotContain("Joana");
+        assertThat(email.getBody().details()).isNull();
+    }
+
+    @Test
+    void duplicateInTheAdministrativeAreaKeepsTheNameTheCoreGave() {
+        var request = requestTo("/api/v1/admin/teachers");
+
+        var email =
+                handler.domain(
+                        new DomainException(
+                                ErrorCode.DUPLICATE_EMAIL, Map.of("name", "Joana Prado")),
+                        request);
+        assertThat(email.getBody().message())
+                .isEqualTo("Já existe um cadastro com este e-mail: Joana Prado.");
+
+        var cpf =
+                handler.domain(
+                        new DomainException(ErrorCode.DUPLICATE_CPF, Map.of("name", "Joana Prado")),
+                        request);
+        assertThat(cpf.getBody().code()).isEqualTo("DUPLICATE_CPF");
+        assertThat(cpf.getBody().message()).isEqualTo("Este CPF já pertence ao aluno Joana Prado.");
+    }
+
+    @Test
+    void duplicateWithoutARequestIsNeutralToo() {
+        var cpf =
+                handler.domain(
+                        new DomainException(ErrorCode.DUPLICATE_CPF, Map.of("name", "Joana Prado")),
+                        null);
+        assertThat(cpf.getBody().code()).isEqualTo("CPF_UNAVAILABLE");
     }
 
     private static final tools.jackson.databind.json.JsonMapper JSON_READER =

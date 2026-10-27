@@ -68,10 +68,19 @@ public class TelegramPresenter {
         return simple(chatId, code, Map.of());
     }
 
+    /**
+     * Erro do núcleo em texto do catálogo. Duplicidade de CPF ou de e-mail nunca mostra ao
+     * professor quem já tem o dado: vira o texto neutro {@code CPF_UNAVAILABLE}, sem detalhes.
+     */
     public Message error(long chatId, ErrorCode code, Map<String, Object> details) {
+        boolean duplicate = code == ErrorCode.DUPLICATE_CPF || code == ErrorCode.DUPLICATE_EMAIL;
+        ErrorCode shown = duplicate ? ErrorCode.CPF_UNAVAILABLE : code;
+        Map<String, Object> parameters = duplicate ? Map.of() : details;
         return new Message(
                 chatId,
-                escape(catalog.text(code.messageKey(), formatting.errorParameters(code, details))),
+                escape(
+                        catalog.text(
+                                shown.messageKey(), formatting.errorParameters(shown, parameters))),
                 Keyboard.NONE);
     }
 
@@ -101,7 +110,20 @@ public class TelegramPresenter {
                 List.of(
                         List.of(button("REGISTER_LESSON_BUTTON", "register")),
                         List.of(button("SEMESTER_REPORT_BUTTON", "semester")),
-                        List.of(button("HISTORY_BUTTON", "history"))));
+                        List.of(button("HISTORY_BUTTON", "history")),
+                        List.of(
+                                button("MY_STUDENTS_BUTTON", "reg-list"),
+                                button("REGISTER_STUDENT_BUTTON", "reg-new"))));
+    }
+
+    /** Convite para cadastrar o primeiro aluno (FR-042): sem alunos, só esta ação faz sentido. */
+    public Keyboard registerFirstStudentAction() {
+        return Keyboard.of(button("REGISTER_STUDENT_BUTTON", "reg-new"));
+    }
+
+    /** Aviso "Você ainda não tem alunos" com o botão de cadastrar o primeiro. */
+    public Message noStudents(long chatId) {
+        return new Message(chatId, text("NO_STUDENTS"), registerFirstStudentAction());
     }
 
     /** Bloco de início (FR-012): saudação, relatórios em aberto, total e até 5 alunos, ações. */
@@ -116,7 +138,7 @@ public class TelegramPresenter {
                 .append(text("HOME_SUBTITLE"));
         if (start.withoutStudents()) {
             text.append("\n\n").append(text("NO_STUDENTS"));
-            return new Message(chatId, text.toString(), Keyboard.NONE);
+            return new Message(chatId, text.toString(), registerFirstStudentAction());
         }
         text.append("\n\n<b>").append(text("HOME_OPEN_REPORTS")).append("</b>\n");
         if (start.openReports().isEmpty()) {
@@ -199,6 +221,19 @@ public class TelegramPresenter {
                                     CallbackDataCodec.encode("student", Integer.toString(i)))));
         }
         rows.add(List.of(button("HOME_BUTTON", "home")));
+        return new Message(chatId, header, new Keyboard(rows));
+    }
+
+    /**
+     * Texto não reconhecido: a mesma lista de alunos, seguida do menu do professor (contracts/
+     * telegram-student-registry.md §6). Nunca cita Web nem administrador.
+     */
+    public Message studentListWithMenu(long chatId, String header, List<StudentSummary> students) {
+        Message list = studentList(chatId, header, students);
+        List<List<Button>> rows = new ArrayList<>(list.keyboard().rows());
+        Button home = rows.removeLast().getFirst();
+        rows.addAll(homeActions().rows());
+        rows.add(List.of(home));
         return new Message(chatId, header, new Keyboard(rows));
     }
 

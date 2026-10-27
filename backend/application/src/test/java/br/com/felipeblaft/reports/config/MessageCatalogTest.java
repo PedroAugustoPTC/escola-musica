@@ -69,6 +69,7 @@ class MessageCatalogTest {
                     "STUDENT_INACTIVATED",
                     "STUDENT_REACTIVATED",
                     "CPF_MESSAGE_NOT_DELETED",
+                    "GUARDIAN_PHONE_LOOKS_LIKE_CPF",
                     "ADMIN_AREA_TITLE",
                     "ADMIN_SIGN_IN_TITLE",
                     "ADMIN_LINK_FROM_SIGN_IN",

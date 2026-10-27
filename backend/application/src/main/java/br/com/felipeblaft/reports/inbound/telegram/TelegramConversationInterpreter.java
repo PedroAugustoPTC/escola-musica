@@ -89,19 +89,21 @@ public class TelegramConversationInterpreter {
 
     public List<TelegramOutput> interpret(UpdateTelegram update) {
         if (update.callbackQuery() != null) {
-            return callback(update.callbackQuery());
+            return callback(update.callbackQuery(), update.updateId());
         }
         if (update.message() != null && update.message().from() != null) {
-            return message(update.message());
+            return message(update.message(), update.updateId());
         }
         return List.of();
     }
 
     // ------------------------------------------------------------------ mensagens
 
-    private List<TelegramOutput> message(TelegramMessage message) {
+    private List<TelegramOutput> message(TelegramMessage message, long updateId) {
         TelegramContext context =
-                new TelegramContext(message.from().id(), message.chat().id(), null);
+                new TelegramContext(message.from().id(), message.chat().id(), null)
+                        .withIncomingMessage(message.messageId())
+                        .withUpdate(updateId);
         if (!message.chat().privateChat()) {
             context.answer(presenter.simple(context.chatId(), "PRIVATE_CONVERSATION_ONLY"));
             return context.outputs();
@@ -114,11 +116,26 @@ public class TelegramConversationInterpreter {
                 linked(context, message);
             }
         } catch (DomainException error) {
-            context.answer(presenter.error(context.chatId(), error.code(), error.details()));
+            answerError(context, error);
         } finally {
             save(context);
         }
         return context.outputs();
+    }
+
+    /**
+     * Erro do núcleo vira o texto do catálogo. Acesso encerrado (ou professor inativo, que para o
+     * professor é a mesma coisa) mostra só a mensagem de acesso encerrado e não grava mais a
+     * conversa: o vínculo acaba de ser (ou está para ser) desfeito pelo núcleo.
+     */
+    void answerError(TelegramContext context, DomainException error) {
+        ErrorCode code = error.code();
+        if (code == ErrorCode.ACCESS_ENDED || code == ErrorCode.TEACHER_INACTIVE) {
+            context.answer(presenter.error(context.chatId(), ErrorCode.ACCESS_ENDED, Map.of()));
+            context.markEndedLink();
+            return;
+        }
+        context.answer(presenter.error(context.chatId(), code, error.details()));
     }
 
     private void load(TelegramContext context) {
@@ -167,6 +184,10 @@ public class TelegramConversationInterpreter {
 
     private void text(TelegramContext context, String text) {
         TelegramConversation conversation = context.conversation();
+        if (CpfShape.matches(text) && !acceptsCpfShapedText(conversation)) {
+            rejectCpfShapedText(context);
+            return;
+        }
         Optional<Command> command = TelegramKeywords.identify(text);
         Optional<String> confirmation = conversation.pendingConfirmation();
         if (confirmation.isPresent()) {
@@ -187,6 +208,57 @@ public class TelegramConversationInterpreter {
             }
         }
         searchStudent(context, text);
+    }
+
+    /**
+     * Só o CPF do cadastro e o telefone do responsável (11 dígitos) aceitam texto com essa forma.
+     */
+    private static boolean acceptsCpfShapedText(TelegramConversation conversation) {
+        return conversation.flow() == ConversationFlow.STUDENT_REGISTRY
+                && (conversation.step() == ConversationFlowStep.REGISTRY_ASK_CPF
+                        || conversation.step() == ConversationFlowStep.REGISTRY_ASK_GUARDIAN_PHONE);
+    }
+
+    /**
+     * Texto com forma de CPF fora da pergunta do CPF nunca vira busca nem é guardado: a mensagem do
+     * professor é apagada antes de qualquer resposta e a resposta não o repete (FR-036).
+     */
+    private void rejectCpfShapedText(TelegramContext context) {
+        if (context.incomingMessageId() != null) {
+            context.answer(
+                    new TelegramOutput.DeleteMessage(
+                            context.chatId(),
+                            context.incomingMessageId(),
+                            presenter.simple(context.chatId(), "CPF_MESSAGE_NOT_DELETED")));
+        }
+        context.answer(presenter.error(context.chatId(), ErrorCode.VALIDATION_FAILED, Map.of()));
+    }
+
+    /**
+     * A conversa persistida do professor está na pergunta do CPF do cadastro? Serve ao tratamento
+     * de falha inesperada, que ainda precisa apagar a mensagem com o CPF (FR-036). Qualquer erro na
+     * leitura vale como "não": a consulta nunca agrava a falha original.
+     */
+    public boolean awaitingCpf(long telegramUserId) {
+        try {
+            return identify.run(telegramUserId)
+                    .map(identification -> identification.link().conversation())
+                    .filter(
+                            conversation ->
+                                    conversation.flow() == ConversationFlow.STUDENT_REGISTRY
+                                            && conversation.step()
+                                                    == ConversationFlowStep.REGISTRY_ASK_CPF)
+                    .isPresent();
+        } catch (RuntimeException error) {
+            return false;
+        }
+    }
+
+    /** Avisa os fluxos de que o professor está saindo deles (descarte do que estiver em curso). */
+    public void leaveFlows(TelegramContext context) {
+        for (TelegramFlow flow : flows()) {
+            flow.onLeave(context);
+        }
     }
 
     private void audio(TelegramContext context, TelegramMessage message, TelegramFile file) {
@@ -232,6 +304,7 @@ public class TelegramConversationInterpreter {
         TelegramConversation conversation = context.conversation();
         switch (command) {
             case HOME -> {
+                leaveFlows(context);
                 conversation.endFlow();
                 conversation.cleanFocus();
                 conversation.discardAudio();
@@ -270,6 +343,7 @@ public class TelegramConversationInterpreter {
 
     private void confirm(TelegramContext context, String confirmation) {
         if (SIGN_OUT_CONFIRMATION.equals(confirmation)) {
+            leaveFlows(context);
             endLink.run(context.userId());
             context.markEndedLink();
             context.answer(presenter.simple(context.chatId(), "LINK_ENDED"));
@@ -295,12 +369,13 @@ public class TelegramConversationInterpreter {
      */
     public void startStudentChoice(TelegramContext context, ConversationFlow flow) {
         TelegramConversation conversation = context.conversation();
+        leaveFlows(context);
         conversation.cleanFocus();
         conversation.discardAudio();
         conversation.startFlow(flow, ConversationFlowStep.CHOOSING_STUDENT);
         SearchStudentsUseCase.Result all = searchStudents.run(context.teacher().id(), "");
         if (all.students().isEmpty()) {
-            context.answer(presenter.simple(context.chatId(), "NO_STUDENTS"));
+            context.answer(presenter.noStudents(context.chatId()));
             return;
         }
         offerStudents(context, presenter.text("CHOOSE_STUDENT"), all.students());
@@ -321,7 +396,7 @@ public class TelegramConversationInterpreter {
     private void searchStudent(TelegramContext context, String text) {
         SearchStudentsUseCase.Result result = searchStudents.run(context.teacher().id(), text);
         if (result.students().isEmpty()) {
-            context.answer(presenter.simple(context.chatId(), "NO_STUDENTS"));
+            context.answer(presenter.noStudents(context.chatId()));
             return;
         }
         if (result.type() == ResultType.FOUND && result.students().size() == 1) {
@@ -329,10 +404,18 @@ public class TelegramConversationInterpreter {
         } else if (result.type() == ResultType.FOUND) {
             offerStudents(context, presenter.text("SEVERAL_STUDENTS_FOUND"), result.students());
         } else if (result.type() == ResultType.NONE) {
-            offerStudents(
-                    context,
-                    presenter.text("NO_STUDENT_FOUND", Map.of("search", text)),
-                    result.students());
+            // texto não reconhecido: a lista de alunos seguida do menu do professor
+            TelegramConversation conversation = context.conversation();
+            conversation.defineStep(ConversationFlowStep.CHOOSING_STUDENT);
+            conversation.store(
+                    STUDENT_OPTIONS,
+                    String.join(
+                            ",", result.students().stream().map(a -> a.id().toString()).toList()));
+            context.answer(
+                    presenter.studentListWithMenu(
+                            context.chatId(),
+                            presenter.text("NO_STUDENT_FOUND", Map.of("search", text)),
+                            result.students()));
         } else {
             offerStudents(context, presenter.text("CHOOSE_STUDENT"), result.students());
         }
@@ -369,14 +452,22 @@ public class TelegramConversationInterpreter {
 
     // ------------------------------------------------------------------ botões
 
-    private List<TelegramOutput> callback(CallbackTelegram callback) {
+    private List<TelegramOutput> callback(CallbackTelegram callback, long updateId) {
         long chatId =
                 callback.message() != null && callback.message().chat() != null
                         ? callback.message().chat().id()
                         : callback.from().id();
         Long messageId = callback.message() != null ? callback.message().messageId() : null;
-        TelegramContext context = new TelegramContext(callback.from().id(), chatId, messageId);
+        TelegramContext context =
+                new TelegramContext(callback.from().id(), chatId, messageId).withUpdate(updateId);
         context.answer(new TelegramOutput.CallbackReply(callback.id()));
+        if (callback.message() != null
+                && callback.message().chat() != null
+                && !callback.message().chat().privateChat()) {
+            // botões também só valem em conversa privada: nada é executado nem gravado
+            context.answer(presenter.simple(chatId, "PRIVATE_CONVERSATION_ONLY"));
+            return context.outputs();
+        }
         load(context);
         try {
             if (!context.linked()) {
@@ -388,7 +479,7 @@ public class TelegramConversationInterpreter {
                 expiredAction(context);
             }
         } catch (DomainException error) {
-            context.answer(presenter.error(chatId, error.code(), error.details()));
+            answerError(context, error);
         } finally {
             save(context);
         }

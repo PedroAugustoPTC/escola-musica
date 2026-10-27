@@ -6,6 +6,7 @@ import br.com.felipeblaft.reports.domain.access.Permission;
 import br.com.felipeblaft.reports.domain.access.PermissionMatrix;
 import br.com.felipeblaft.reports.domain.common.DomainException;
 import br.com.felipeblaft.reports.domain.common.ErrorCode;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Set;
@@ -18,12 +19,20 @@ import java.util.Set;
  */
 public class ActorAuthorizationService {
 
-    /** Operações permitidas ao ator restrito (senha provisória ainda não trocada). */
-    private static final Set<Operation> ALLOWED_WHILE_RESTRICTED =
-            EnumSet.of(
-                    Operation.ADMIN_CHANGE_PASSWORD,
-                    Operation.ADMIN_GET_SESSION,
-                    Operation.ADMIN_SIGN_OUT);
+    /**
+     * Operações permitidas ao ator restrito (senha provisória ainda não trocada). Fonte única: a
+     * segunda barreira da Web (filtro de sessão) deriva as rotas daqui, em vez de repetir a lista.
+     */
+    public static final Set<Operation> ALLOWED_WHILE_RESTRICTED =
+            Collections.unmodifiableSet(
+                    EnumSet.of(
+                            Operation.ADMIN_CHANGE_PASSWORD,
+                            Operation.ADMIN_GET_SESSION,
+                            Operation.ADMIN_SIGN_OUT));
+
+    public static boolean allowedWhileRestricted(Operation operation) {
+        return ALLOWED_WHILE_RESTRICTED.contains(operation);
+    }
 
     private final PermissionMatrix matrix;
 
@@ -40,7 +49,7 @@ public class ActorAuthorizationService {
         if (!permission.allowed()) {
             throw new DomainException(ErrorCode.RESOURCE_NOT_FOUND);
         }
-        if (actor.passwordChangeRequired() && !ALLOWED_WHILE_RESTRICTED.contains(operation)) {
+        if (actor.passwordChangeRequired() && !allowedWhileRestricted(operation)) {
             throw new DomainException(ErrorCode.PASSWORD_CHANGE_REQUIRED);
         }
         return permission;

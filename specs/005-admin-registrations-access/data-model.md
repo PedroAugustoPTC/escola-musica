@@ -151,7 +151,7 @@ Acrescenta `scope varchar(24) NOT NULL` (preenchida com `TEACHER_CODE` nas linha
 troca a unicidade `(channel, source_hash)` por `(scope, channel, source_hash)`. Para `ADMIN_*` o `channel` é `WEB`; para
 `TEACHER_CPF_PROBE` e `TEACHER_CPF_LOOKUP` a chave é o hash do id do professor (canal do ator).
 
-### 3.8 `channel_action` (alterada em `V13__channel_action_delete_message.sql`)
+### 3.8 `channel_action` (alterada em `V15__channel_action_delete_message.sql`)
 
 Estende a `CHECK` do tipo de ação com `DELETE_MESSAGE` (o nome real da constraint é descoberto nas migrações `V6`/`V7`/`V8`
 na primeira tarefa do fluxo). Nenhuma coluna nova.

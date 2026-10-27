@@ -25,6 +25,7 @@ public class ConfirmChannelActionsExecutionUseCase {
 
     public static final String MESSAGE_NOT_EDITABLE = ChannelAction.MESSAGE_NOT_EDITABLE_CODE;
     public static final String DOCUMENT_UNAVAILABLE = ChannelAction.DOCUMENT_UNAVAILABLE_CODE;
+    public static final String MESSAGE_NOT_DELETABLE = ChannelAction.MESSAGE_NOT_DELETABLE_CODE;
     public static final String TELEGRAM_ERROR = "TELEGRAM_ERROR";
 
     private static final Set<String> KNOWN_CODES =
@@ -33,6 +34,7 @@ public class ConfirmChannelActionsExecutionUseCase {
                     "CHAT_UNAVAILABLE",
                     "ACTION_NOT_SUPPORTED",
                     DOCUMENT_UNAVAILABLE,
+                    MESSAGE_NOT_DELETABLE,
                     "RATE_LIMITED",
                     TELEGRAM_ERROR);
     private static final Pattern CODE_FORMAT = Pattern.compile("^[A-Z][A-Z0-9_]{1,39}$");

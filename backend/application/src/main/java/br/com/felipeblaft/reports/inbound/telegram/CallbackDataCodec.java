@@ -17,13 +17,27 @@ public final class CallbackDataCodec {
 
     private CallbackDataCodec() {}
 
+    /** Bytes que sobram para o argumento depois de `v1:<acao>:` dentro do limite de 64 bytes. */
+    public static int maxArgumentBytes(String action) {
+        return LIMIT_BYTES - bytes(VERSION + ":" + action + ":");
+    }
+
+    /** O argumento cabe em `callback_data` sem estourar o limite do Telegram? */
+    public static boolean fits(String action, String argument) {
+        return argument == null || bytes(argument) <= maxArgumentBytes(action);
+    }
+
+    private static int bytes(String text) {
+        return text.getBytes(StandardCharsets.UTF_8).length;
+    }
+
     public static String encode(String action) {
         return encode(action, "");
     }
 
     public static String encode(String action, String argument) {
         String data = VERSION + ":" + action + ":" + (argument == null ? "" : argument);
-        if (data.getBytes(StandardCharsets.UTF_8).length > LIMIT_BYTES) {
+        if (bytes(data) > LIMIT_BYTES) {
             throw new IllegalArgumentException("callback_data acima de 64 bytes");
         }
         return data;

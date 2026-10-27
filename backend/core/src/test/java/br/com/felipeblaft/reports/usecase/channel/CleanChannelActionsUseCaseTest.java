@@ -12,6 +12,7 @@ import br.com.felipeblaft.reports.domain.common.ReportType;
 import br.com.felipeblaft.reports.doubles.FixedClock;
 import br.com.felipeblaft.reports.doubles.InMemoryChannelActionRepository;
 import br.com.felipeblaft.reports.doubles.InMemoryChannelDocumentRepository;
+import br.com.felipeblaft.reports.doubles.ProcessingDoubles;
 import br.com.felipeblaft.reports.usecase.channel.SaveChannelActionsUseCase.NewAction;
 import java.time.Duration;
 import java.util.List;
@@ -24,9 +25,91 @@ class CleanChannelActionsUseCaseTest {
     private final InMemoryChannelActionRepository actions = new InMemoryChannelActionRepository();
     private final InMemoryChannelDocumentRepository documents =
             new InMemoryChannelDocumentRepository();
+    private final RetryPolicy retry =
+            new RetryPolicy(Duration.ofSeconds(30), Duration.ofMinutes(15), Duration.ofHours(24));
     private final CleanChannelActionsUseCase clean =
             new CleanChannelActionsUseCase(
-                    actions, documents, clock, Duration.ofHours(24), Duration.ofDays(7));
+                    actions, documents, clock, retry, Duration.ofHours(24), Duration.ofDays(7));
+
+    private void deliveredDeletion(String id, long updateId, String compensation) {
+        new SaveChannelActionsUseCase(actions, clock, retry)
+                .run(
+                        "u" + updateId,
+                        ChannelActionOrigin.UPDATE_REPLY,
+                        updateId,
+                        List.of(
+                                new NewAction(
+                                        id,
+                                        ChannelActionType.DELETE_MESSAGE,
+                                        1L,
+                                        null,
+                                        null,
+                                        "{\"type\":\"DELETE_MESSAGE\"}",
+                                        compensation)));
+    }
+
+    @Test
+    void deletionDeliveredAndNeverConfirmedIsCompensatedOnceWhenItExpires() {
+        deliveredDeletion("u7-0", 7L, "{\"text\":\"aviso\"}");
+        deliveredReply("u8-e0", 8L);
+
+        clock.advance(Duration.ofHours(24));
+        CleanChannelActionsUseCase.Result first = clean.run();
+        CleanChannelActionsUseCase.Result second = clean.run();
+
+        assertThat(first.expiredActions()).isEqualTo(2);
+        assertThat(second.expiredActions()).isZero();
+        assertThat(actions.stored("u7-0").state()).isEqualTo(ChannelActionState.PERMANENTLY_FAILED);
+        assertThat(actions.stored("u7-0").reasonCode())
+                .isEqualTo(ChannelAction.CODE_WITHOUT_CONFIRMATION);
+        assertThat(actions.stored("u7-0-c")).isNotNull();
+        assertThat(actions.stored("u7-0-c").payload()).isEqualTo("{\"text\":\"aviso\"}");
+        assertThat(actions.stored("u7-0-c").state()).isEqualTo(ChannelActionState.PENDING);
+        assertThat(actions.stored("u8-e0-c")).isNull();
+        assertThat(actions.all()).hasSize(3);
+    }
+
+    @Test
+    void deletionWithoutAlternativeOrConfirmedIsNotCompensated() {
+        deliveredDeletion("u7-0", 7L, null);
+        deliveredDeletion("u9-0", 9L, "{\"text\":\"aviso\"}");
+        actions.stored("u9-0").confirmExecuted(clock.now());
+
+        clock.advance(Duration.ofHours(24));
+        CleanChannelActionsUseCase.Result result = clean.run();
+
+        assertThat(result.expiredActions()).isEqualTo(1);
+        assertThat(actions.all()).hasSize(2);
+    }
+
+    @Test
+    void deletionConfirmedWhileTheCleanupRunsDoesNotGenerateCompensation() {
+        deliveredDeletion("u7-0", 7L, "{\"text\":\"aviso\"}");
+        clock.advance(Duration.ofHours(24));
+        ConfirmChannelActionsExecutionUseCase confirm =
+                new ConfirmChannelActionsExecutionUseCase(
+                        actions, new ProcessingDoubles.InMemoryJobQueue(), clock, retry);
+        boolean[] confirmed = {false};
+        actions.beforeUpdate =
+                () -> {
+                    if (!confirmed[0]) {
+                        confirmed[0] = true;
+                        confirm.run(
+                                List.of(
+                                        new ConfirmChannelActionsExecutionUseCase.Result(
+                                                "u7-0",
+                                                ConfirmChannelActionsExecutionUseCase.Status
+                                                        .EXECUTED,
+                                                null,
+                                                null)));
+                    }
+                };
+
+        clean.run();
+
+        assertThat(actions.stored("u7-0").state()).isEqualTo(ChannelActionState.EXECUTED);
+        assertThat(actions.stored("u7-0-c")).isNull();
+    }
 
     private void finalizedAction(String id) {
         new SaveChannelActionsUseCase(

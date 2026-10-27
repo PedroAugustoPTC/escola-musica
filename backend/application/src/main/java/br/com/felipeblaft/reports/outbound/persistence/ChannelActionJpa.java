@@ -106,6 +106,12 @@ interface ChannelActionJpa extends JpaRepository<ChannelActionEntity, String> {
             String payload,
             String compensation);
 
+    /** Entregues do tipo informado cujo prazo venceu sem confirmação, na ordem de criação. */
+    @Query(
+            "select a from ChannelActionEntity a where a.state = 'DELIVERED'"
+                    + " and a.type = :type and a.deadlineAt <= :now order by a.seq")
+    List<ChannelActionEntity> findOverdueDelivered(Instant now, String type);
+
     /** Entregues cujo prazo venceu sem confirmação: estado final {@code SEM_CONFIRMACAO}. */
     @Modifying
     @Query(

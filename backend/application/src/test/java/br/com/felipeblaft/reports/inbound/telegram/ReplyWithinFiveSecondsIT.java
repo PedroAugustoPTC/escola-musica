@@ -99,8 +99,10 @@ class ReplyWithinFiveSecondsIT extends OrchestratorDeliveryBase {
                 receiveAndRun(messageJson(nextUpdate(), USER_CLARA, "\"text\": \"oi\""), actions);
 
         assertThat(spent).isLessThanOrEqualTo(LIMIT);
-        assertThat(sentTexts())
-                .containsExactly("Ocorreu um erro inesperado. Tente novamente mais tarde.");
+        assertThat(sentTexts()).hasSize(1);
+        assertThat(sentTexts().getFirst())
+                .matches(
+                        "Algo deu errado\\. Informe o código de referência [A-Z0-9]{8} ao suporte\\.");
     }
 
     @Test

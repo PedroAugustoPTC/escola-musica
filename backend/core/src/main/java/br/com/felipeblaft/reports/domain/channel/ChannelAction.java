@@ -17,6 +17,7 @@ public class ChannelAction {
     public static final String DEADLINE_EXPIRED_CODE = "DEADLINE_EXPIRED";
     public static final String CODE_WITHOUT_CONFIRMATION = "NO_CONFIRMATION";
     public static final String MESSAGE_NOT_EDITABLE_CODE = "MESSAGE_NOT_EDITABLE";
+    public static final String MESSAGE_NOT_DELETABLE_CODE = "MESSAGE_NOT_DELETABLE";
     public static final String DOCUMENT_UNAVAILABLE_CODE = "DOCUMENT_UNAVAILABLE";
     public static final String COMPENSATION_SUFFIX = "-c";
 
@@ -235,16 +236,32 @@ public class ChannelAction {
 
     /**
      * A falha informada pelo orquestrador pede a compensação desta ação: edição ou etapa que não
-     * pôde ser editada ({@code MENSAGEM_NAO_EDITAVEL}) ou documento que não pôde ser buscado
-     * ({@code DOCUMENTO_INDISPONIVEL}), desde que haja alternativa gravada (FR-007b, FR-007c).
+     * pôde ser editada ({@code MESSAGE_NOT_EDITABLE}), documento que não pôde ser buscado ({@code
+     * DOCUMENT_UNAVAILABLE}). A mensagem a apagar (o CPF no chat) é diferente: qualquer falha final
+     * pede a compensação, seja qual for o código, porque o CPF continuaria visível. Em todos os
+     * casos é preciso haver alternativa gravada (FR-007b, FR-007c, FR-036).
      */
     public boolean compensatesBy(String code) {
         if (!hasCompensation()) {
             return false;
         }
-        return type == ChannelActionType.DOCUMENT
-                ? DOCUMENT_UNAVAILABLE_CODE.equals(code)
-                : MESSAGE_NOT_EDITABLE_CODE.equals(code);
+        return switch (type) {
+            case DOCUMENT -> DOCUMENT_UNAVAILABLE_CODE.equals(code);
+            case DELETE_MESSAGE -> code != null && !code.isBlank();
+            case MESSAGE, EDIT, CALLBACK_REPLY, STEP_MESSAGE ->
+                    MESSAGE_NOT_EDITABLE_CODE.equals(code);
+        };
+    }
+
+    /**
+     * A mensagem a apagar venceu o prazo sem execução (nunca entregue, nunca confirmada): o CPF
+     * seguiria visível, então a alternativa também é devida (FR-036). Só vale em estado final de
+     * falha definitiva.
+     */
+    public boolean compensatesPermanentFailure() {
+        return type == ChannelActionType.DELETE_MESSAGE
+                && state == ChannelActionState.PERMANENTLY_FAILED
+                && hasCompensation();
     }
 
     public String compensationId() {

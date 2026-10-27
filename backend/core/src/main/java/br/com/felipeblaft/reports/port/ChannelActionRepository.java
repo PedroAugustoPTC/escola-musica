@@ -1,6 +1,7 @@
 package br.com.felipeblaft.reports.port;
 
 import br.com.felipeblaft.reports.domain.channel.ChannelAction;
+import br.com.felipeblaft.reports.domain.channel.ChannelActionType;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -53,6 +54,12 @@ public interface ChannelActionRepository {
      * não mudam. Devolve quantas foram descartadas.
      */
     int discardPendingByChat(long chatId, Instant now);
+
+    /**
+     * Ações {@code DELIVERED} do tipo informado que o orquestrador nunca confirmou e cujo prazo já
+     * venceu, para a expiração uma a uma (a mensagem a apagar gera aviso alternativo).
+     */
+    List<ChannelAction> searchOverdueDelivered(Instant now, ChannelActionType type);
 
     /**
      * Encerra, com o código {@code SEM_CONFIRMACAO}, as ações {@code ENTREGUE} que o orquestrador

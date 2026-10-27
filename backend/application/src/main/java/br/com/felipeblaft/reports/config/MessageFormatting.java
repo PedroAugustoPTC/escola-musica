@@ -1,5 +1,6 @@
 package br.com.felipeblaft.reports.config;
 
+import br.com.felipeblaft.reports.config.log.ErrorReference;
 import br.com.felipeblaft.reports.domain.common.Channel;
 import br.com.felipeblaft.reports.domain.common.ErrorCode;
 import br.com.felipeblaft.reports.domain.common.ReportType;
@@ -10,6 +11,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -21,6 +24,8 @@ public class MessageFormatting {
 
     private static final DateTimeFormatter DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
+
+    private static final Logger LOG = LoggerFactory.getLogger(MessageFormatting.class);
 
     private final MessageCatalog catalog;
     private final ClockPort clock;
@@ -78,6 +83,14 @@ public class MessageFormatting {
                 long seconds =
                         details.get("remainingSeconds") instanceof Number n ? n.longValue() : 0L;
                 parameters.put("minutes", Math.max(1, (seconds + 59) / 60));
+            }
+            case INTERNAL_ERROR -> {
+                // nenhum canal mostra "{reference}" nem texto vazio: sem referência da origem, gera
+                if (!(details.get("reference") instanceof String)) {
+                    String reference = ErrorReference.newReference();
+                    LOG.error("internal-error-without-reference reference={}", reference);
+                    parameters.put("reference", reference);
+                }
             }
             case PROCESSING_IN_PROGRESS -> {
                 Object step = details.get("step");

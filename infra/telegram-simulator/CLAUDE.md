@@ -6,7 +6,7 @@ produção e não tem dependências.
 
 | Arquivo | O que é |
 |---|---|
-| `server.mjs` | a API de bots mínima (`setWebhook`, `getWebhookInfo`, `deleteWebhook`, `getMe`, `setMyCommands`, `sendMessage`, `editMessageText`, `sendDocument`, `answerCallbackQuery`) e a API de controle `/_control/*` |
+| `server.mjs` | a API de bots mínima (`setWebhook`, `getWebhookInfo`, `deleteWebhook`, `getMe`, `setMyCommands`, `sendMessage`, `editMessageText`, `deleteMessage`, `sendDocument`, `answerCallbackQuery`) e a API de controle `/_control/*` |
 | `server.test.mjs` | testes `node:test` do próprio simulador (`tests-simulator` do `compose.test.yaml`) |
 | `Dockerfile` | `node:24.15.0-alpine` fixado |
 

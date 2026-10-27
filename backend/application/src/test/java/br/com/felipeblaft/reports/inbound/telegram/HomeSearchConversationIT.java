@@ -36,8 +36,10 @@ class HomeSearchConversationIT extends TelegramConversationBase {
 
         String text = messageJson(nextUpdate(), USER_CLARA, "\"text\": \"oi\"");
         sendUpdate(text);
-        assertThat(sentTexts())
-                .containsExactly("Ocorreu um erro inesperado. Tente novamente mais tarde.");
+        assertThat(sentTexts()).hasSize(1);
+        assertThat(sentTexts().getFirst())
+                .matches(
+                        "Algo deu errado\\. Informe o código de referência [A-Z0-9]{8} ao suporte\\.");
         sendUpdate(text);
         assertThat(sentTexts()).hasSize(1);
 
@@ -53,7 +55,8 @@ class HomeSearchConversationIT extends TelegramConversationBase {
         assertThat(calls("answerCallbackQuery")).hasSize(1);
         assertThat(sentTexts()).hasSize(2);
         assertThat(lastMessage().get("text").asString())
-                .isEqualTo("Ocorreu um erro inesperado. Tente novamente mais tarde.");
+                .matches(
+                        "Algo deu errado\\. Informe o código de referência [A-Z0-9]{8} ao suporte\\.");
         sendUpdate(touch);
         assertThat(calls("answerCallbackQuery")).hasSize(1);
         assertThat(sentTexts()).hasSize(2);
@@ -90,7 +93,7 @@ class HomeSearchConversationIT extends TelegramConversationBase {
         sendText(USER_CLARA, "Helena");
         assertThat(lastMessage().get("text").asString())
                 .isEqualTo("Nenhum aluno encontrado para \"Helena\".");
-        assertThat(buttonLabels(lastMessage())).doesNotContain("Helena Prado").hasSize(4);
+        assertThat(buttonLabels(lastMessage())).doesNotContain("Helena Prado").hasSize(9);
     }
 
     @Test
