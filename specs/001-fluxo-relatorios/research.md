@@ -291,6 +291,8 @@ e exige que as escolhas sejam registradas e justificadas aqui.
 - **Alternativas consideradas**: *seed SQL* (não cifra o CPF); *endpoint administrativo temporário*
   (superfície de ataque sem tela nem autenticação de secretaria).
 
+> **Nota (feature 005)**: a "feature da secretaria" que este item aguardava é a área administrativa da 005 (papel administrador, somente Web, com autenticação própria), que passou a ser o caminho normal de cadastro. A carga inicial segue existindo como procedimento da primeira carga, mas sem regra própria (chama os mesmos casos de uso) e o `issue-code` virou comando de emergência. Ver [`005-admin-registrations-access/research.md`](../005-admin-registrations-access/research.md) e [`contracts/initial-load.md`](../005-admin-registrations-access/contracts/initial-load.md).
+
 ## R-15. Contêineres, proxy e implantação
 
 - **Decisão**: Docker Compose com os serviços `web` (Caddy 2 servindo o build do SPA e fazendo

@@ -2,6 +2,8 @@
 
 **Feature**: `001-fluxo-relatorios` | Referências: FR-011, FR-004, FR-005; [research.md](../research.md) R-14.
 
+> **Nota (feature 005)**: este contrato é histórico; a versão vigente é [`005-admin-registrations-access/contracts/initial-load.md`](../../005-admin-registrations-access/contracts/initial-load.md). A carga deixa de ter regra própria (chama os mesmos casos de uso da administração, com o ator de sistema `INITIAL_LOAD`), o aluno ganha `guardianPhone` e `guardianEmail`, o `--simulate` desfaz uma transação real, o `issue-code` passa a **encerrar as sessões Web** do professor (o vínculo do Telegram é mantido) e vira comando de emergência, e há dois comandos novos: o primeiro administrador por `ADMIN_BOOTSTRAP_*` na subida e `rotate-cpf-key`. A frase "não encerra sessões nem vínculos" abaixo não vale mais.
+
 Procedimento operacional usado até existir a feature da secretaria. Roda **dentro do contêiner do
 backend** e passa pelos casos de uso do núcleo (Princípio II). Nenhum dado pessoal real entra no
 repositório: o arquivo de carga fica fora do Git (`infra/carga/*.json` está no `.gitignore`). Só o
