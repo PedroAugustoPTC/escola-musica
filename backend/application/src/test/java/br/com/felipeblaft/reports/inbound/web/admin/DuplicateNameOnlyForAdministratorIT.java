@@ -19,7 +19,8 @@ import org.springframework.test.web.servlet.MvcResult;
 /**
  * O nome do registro existente em {@code DUPLICATE_CPF} e {@code DUPLICATE_EMAIL} só sai em rotas
  * do administrador (FR-024, R-13): se um erro de duplicidade com nome escapar numa rota do
- * professor, a resposta é a neutra {@code CPF_UNAVAILABLE}, sem nome e sem detalhe.
+ * professor, a resposta é a neutra, sem nome e sem detalhe: {@code CPF_UNAVAILABLE} para o CPF e o
+ * texto neutro do e-mail (que não fala de CPF) para o e-mail.
  */
 class DuplicateNameOnlyForAdministratorIT extends ContractApiBase {
 
@@ -48,7 +49,7 @@ class DuplicateNameOnlyForAdministratorIT extends ContractApiBase {
     }
 
     @Test
-    void duplicateEmailWithNameOnATeacherRouteIsAlsoNeutral() throws Exception {
+    void duplicateEmailWithNameOnATeacherRouteIsNeutralAndNeverTalksAboutCpf() throws Exception {
         scenario.clara();
         Cookie session = signIn(ScenarioIT.CODE_CLARA);
         doThrow(new DomainException(ErrorCode.DUPLICATE_EMAIL, Map.of("name", EXISTING_NAME)))
@@ -59,7 +60,10 @@ class DuplicateNameOnlyForAdministratorIT extends ContractApiBase {
 
         assertThat(result.getResponse().getStatus()).isEqualTo(409);
         assertThat(result.getResponse().getContentAsString())
-                .contains("CPF_UNAVAILABLE")
-                .doesNotContain(EXISTING_NAME);
+                .contains("\"code\":\"DUPLICATE_EMAIL\"")
+                .contains("Não foi possível usar este e-mail. Procure o administrador.")
+                .doesNotContain(EXISTING_NAME)
+                .doesNotContain("details")
+                .doesNotContainIgnoringCase("CPF");
     }
 }

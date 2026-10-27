@@ -103,7 +103,8 @@ class StudentRegistryHardeningIT extends RegistryConversationBase {
 
     @Test
     void cpfShapedSearchWithSeparatorsIsDeletedNeverSearchedNorStored() {
-        when(list.run(any(), any())).thenReturn(page(0, 1, view("Ana Souza", 36, null, true, null)));
+        when(list.run(any(), any()))
+                .thenReturn(page(0, 1, view("Ana Souza", 36, null, true, null)));
         send("meus alunos");
         verify(list, times(1)).run(any(), any());
 
@@ -112,9 +113,10 @@ class StudentRegistryHardeningIT extends RegistryConversationBase {
 
             assertThat(deletions()).as(shaped).isEqualTo(1);
             assertThat(everythingSent()).as(shaped).doesNotContain("529").doesNotContain("247");
+            // o estado guarda UUIDs, que podem conter "529" por acaso: confere o valor inteiro
             assertThat(persistedData())
                     .as(shaped)
-                    .doesNotContain("529")
+                    .doesNotContain(CPF_DIGITS)
                     .doesNotContain("regSearch");
         }
         verify(list, times(1)).run(any(), any());
@@ -150,7 +152,7 @@ class StudentRegistryHardeningIT extends RegistryConversationBase {
                 .contains("telefone do responsável");
         assertThat(everythingSent()).doesNotContain("529").doesNotContain("247");
         assertThat(persistedStep()).isEqualTo("REGISTRY_ASK_GUARDIAN_PHONE");
-        assertThat(persistedData()).doesNotContain("529");
+        assertThat(persistedData()).doesNotContain(CPF_DIGITS);
         assertThat(org.mockito.Mockito.mockingDetails(collect).getInvocations())
                 .hasSize(collectedBefore);
     }
