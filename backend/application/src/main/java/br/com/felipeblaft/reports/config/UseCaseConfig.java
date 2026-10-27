@@ -467,7 +467,8 @@ public class UseCaseConfig {
     }
 
     @Bean
-    QueryJobUseCase queryJobUseCase(JobQueuePort queue, ClockPort clock) {
+    QueryJobUseCase queryJobUseCase(
+            AuthorizationService authorization, JobQueuePort queue, ClockPort clock) {
         return new QueryJobUseCase(authorization, queue, clock);
     }
 

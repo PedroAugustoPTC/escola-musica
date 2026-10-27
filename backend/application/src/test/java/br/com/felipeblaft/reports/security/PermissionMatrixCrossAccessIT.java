@@ -176,8 +176,9 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
         webChecks(row, fx, false, failures);
         telegramChecks(row, fx, false, failures);
         assertThat(snapshot()).as("a negativa não altera dado algum").isEqualTo(before);
-        webChecks(row, fx, true, failures);
+        // o Telegram antes da Web: os roteiros param antes de confirmar, e a Web muda a situação do aluno
         telegramChecks(row, fx, true, failures);
+        webChecks(row, fx, true, failures);
 
         assertThat(failures).as("divergências da matriz em %s", operation).isEmpty();
     }
