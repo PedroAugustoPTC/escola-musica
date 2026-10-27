@@ -187,6 +187,11 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
     /**
      * Um CPF válido digitado no lugar do telefone do responsável: a mensagem sai do chat, o valor
      * não chega ao núcleo nem é repetido, e a pergunta do telefone volta com o motivo (FR-036).
+     *
+     * <p>Decisão sobre o falso positivo (cerca de 1 em cada 100 telefones de 11 dígitos também
+     * fecha os dígitos verificadores de um CPF): na dúvida vale a privacidade, e o CPF vence. O
+     * telefone de verdade sai do impasse digitado com o DDD entre parênteses, que nunca tem a forma
+     * de CPF; a resposta ensina isso. Mudar a decisão exige mudar o FR-036 e o {@code tasks.md}.
      */
     private void guardianPhone(TelegramContext context, String text) {
         if (!CpfShape.isValid(text)) {
@@ -197,7 +202,9 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
         ask(
                 context,
                 ConversationFlowStep.REGISTRY_ASK_GUARDIAN_PHONE,
-                presenter.error(context.chatId(), ErrorCode.INVALID_PHONE, Map.of()).text());
+                presenter.error(context.chatId(), ErrorCode.INVALID_PHONE, Map.of()).text()
+                        + " "
+                        + presenter.text("GUARDIAN_PHONE_LOOKS_LIKE_CPF"));
     }
 
     private void deleteIncomingMessage(TelegramContext context) {
@@ -785,15 +792,10 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
 
     private void confirmWith(TelegramContext context, String token) {
         TelegramConversation conversation = context.conversation();
-        Optional<Kind> kind = conversation.data(KIND).flatMap(TelegramStudentRegistryFlow::kindOf);
-        if (kind.isEmpty()) {
-            expired(context);
-            return;
-        }
-        StudentView student;
+        ConfirmStudentRegistrationUseCase.Outcome outcome;
         try {
-            student =
-                    confirm.run(
+            outcome =
+                    confirm.runWithKind(
                             actor(context),
                             new ConfirmStudentRegistrationUseCase.Command(
                                     linkId(context), token, correlation(context)));
@@ -810,7 +812,7 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
         }
         conversation.endFlow();
         String key =
-                switch (kind.get()) {
+                switch (outcome.kind()) {
                     case CREATE -> "REGISTRY_SAVED";
                     case UPDATE -> "REGISTRY_UPDATED";
                     case INACTIVATE -> "STUDENT_INACTIVATED";
@@ -819,7 +821,7 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
         context.answer(
                 new Message(
                         context.chatId(),
-                        presenter.text(key, Map.of("name", student.name())),
+                        presenter.text(key, Map.of("name", outcome.student().name())),
                         presenter.homeActions()));
     }
 
@@ -865,14 +867,6 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
 
     private static String correlation(TelegramContext context) {
         return "telegram-" + context.updateId();
-    }
-
-    private static Optional<Kind> kindOf(String name) {
-        try {
-            return Optional.of(Kind.valueOf(name));
-        } catch (IllegalArgumentException unknown) {
-            return Optional.empty();
-        }
     }
 
     private static Integer number(String argument) {

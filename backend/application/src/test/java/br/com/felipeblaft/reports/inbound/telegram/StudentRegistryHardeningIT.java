@@ -173,6 +173,38 @@ class StudentRegistryHardeningIT extends RegistryConversationBase {
         assertThat(persistedStep()).isEqualTo("REGISTRY_ASK_GUARDIAN_EMAIL");
     }
 
+    /**
+     * Falso positivo decidido (tasks.md, pendência da S3): um telefone de 11 dígitos que também
+     * fecha os dígitos verificadores de um CPF é tratado como CPF (a privacidade vence), mas a
+     * resposta ensina a saída: o DDD entre parênteses, que nunca tem a forma de CPF e segue para o
+     * núcleo.
+     */
+    @Test
+    void aPhoneThatIsAlsoAValidCpfIsRefusedAndTheReplyTeachesTheParenthesesEscape() {
+        reachGuardianPhoneStep();
+        int collectedBefore = org.mockito.Mockito.mockingDetails(collect).getInvocations().size();
+
+        send("11987654374");
+
+        assertThat(deletions()).isEqualTo(1);
+        assertThat(lastText()).contains("entre parênteses").contains("(11) 98888-7777");
+        assertThat(everythingSent()).doesNotContain("98765");
+        assertThat(persistedStep()).isEqualTo("REGISTRY_ASK_GUARDIAN_PHONE");
+        assertThat(org.mockito.Mockito.mockingDetails(collect).getInvocations())
+                .hasSize(collectedBefore);
+
+        when(collect.run(any(), any()))
+                .thenReturn(
+                        new br.com.felipeblaft.reports.usecase.registry
+                                .CollectStudentRegistrationFieldUseCase.Result(
+                                Field.GUARDIAN, true, null, null));
+
+        send("(11) 98765-4374");
+
+        assertThat(lastText()).startsWith("Qual é o e-mail do responsável?");
+        assertThat(persistedStep()).isEqualTo("REGISTRY_ASK_GUARDIAN_EMAIL");
+    }
+
     // ---- 5. reg-confirm
 
     @Test

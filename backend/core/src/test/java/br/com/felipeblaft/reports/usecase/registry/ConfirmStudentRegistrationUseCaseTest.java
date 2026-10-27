@@ -1,6 +1,7 @@
 package br.com.felipeblaft.reports.usecase.registry;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import br.com.felipeblaft.reports.domain.access.ActionOrigin;
 import br.com.felipeblaft.reports.domain.access.Actor;
@@ -472,6 +473,49 @@ class ConfirmStudentRegistrationUseCaseTest {
             }
             assertThat(restricted.writes()).isZero();
         }
+    }
+
+    // ---- tipo do rascunho confirmado (o canal escolhe a resposta por ele, não pela conversa)
+
+    private ConfirmStudentRegistrationUseCase.Outcome confirmWithKind() {
+        return scenario.confirm()
+                .runWithKind(
+                        scenario.actor,
+                        new ConfirmStudentRegistrationUseCase.Command(
+                                scenario.link.id(), TOKEN, DraftScenario.CORRELATION));
+    }
+
+    @Test
+    void theOutcomeCarriesTheKindOfTheConfirmedDraftAndTheStudent() {
+        scenario.confirmableCreate(TOKEN);
+        var created = confirmWithKind();
+        assertThat(created.kind()).isEqualTo(Kind.CREATE);
+        assertThat(created.student()).isSameAs(scenario.register.result);
+
+        updateDraft(scenario.ownStudent().id());
+        var updated = confirmWithKind();
+        assertThat(updated.kind()).isEqualTo(Kind.UPDATE);
+        assertThat(updated.student()).isSameAs(scenario.update.result);
+
+        statusDraft(Kind.INACTIVATE, scenario.ownStudent().id());
+        var inactivated = confirmWithKind();
+        assertThat(inactivated.kind()).isEqualTo(Kind.INACTIVATE);
+        assertThat(inactivated.student()).isSameAs(scenario.inactivate.result);
+
+        statusDraft(Kind.REACTIVATE, scenario.ownStudent().id());
+        var reactivated = confirmWithKind();
+        assertThat(reactivated.kind()).isEqualTo(Kind.REACTIVATE);
+        assertThat(reactivated.student()).isSameAs(scenario.reactivate.result);
+    }
+
+    @Test
+    void theOutcomeIsNotProducedWhenTheConfirmationIsRefused() {
+        assertThatThrownBy(this::confirmWithKind)
+                .isInstanceOfSatisfying(
+                        DomainException.class,
+                        error ->
+                                assertThat(error.code())
+                                        .isEqualTo(ErrorCode.CONFIRMATION_ALREADY_DONE));
     }
 
     @Test

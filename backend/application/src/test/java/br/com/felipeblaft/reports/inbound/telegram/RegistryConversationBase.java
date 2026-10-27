@@ -1,10 +1,13 @@
 package br.com.felipeblaft.reports.inbound.telegram;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import br.com.felipeblaft.reports.domain.common.ErrorCode;
 import br.com.felipeblaft.reports.domain.common.PageResult;
 import br.com.felipeblaft.reports.domain.registry.Teacher;
+import br.com.felipeblaft.reports.domain.telegram.StudentRegistrationDraft.Kind;
 import br.com.felipeblaft.reports.inbound.telegram.TelegramOutput.Keyboard;
 import br.com.felipeblaft.reports.inbound.telegram.TelegramOutput.Message;
 import br.com.felipeblaft.reports.inbound.telegram.UpdateTelegram.CallbackTelegram;
@@ -67,6 +70,27 @@ public abstract class RegistryConversationBase extends IntegrationBase {
 
     /** Id da mensagem do professor no último texto enviado. */
     protected long lastIncomingMessageId;
+
+    /**
+     * O fluxo pede ao núcleo o resultado com o tipo (`runWithKind`). Os testes de conversa
+     * continuam programando `confirm.run(...)`: este dublê delega a ele e devolve o tipo que a
+     * conversa guardou ao iniciar (o que o rascunho real teria), sem mudar nenhuma expectativa.
+     */
+    @BeforeEach
+    void delegateConfirmationWithKindToRun() {
+        when(confirm.runWithKind(any(), any()))
+                .thenAnswer(
+                        call -> {
+                            StudentView student =
+                                    confirm.run(call.getArgument(0), call.getArgument(1));
+                            String kind =
+                                    jdbc.queryForObject(
+                                            "select flow_data ->> 'regKind' from telegram_link",
+                                            String.class);
+                            return new ConfirmStudentRegistrationUseCase.Outcome(
+                                    kind == null ? Kind.CREATE : Kind.valueOf(kind), student);
+                        });
+    }
 
     @BeforeEach
     void linkTeacher() {

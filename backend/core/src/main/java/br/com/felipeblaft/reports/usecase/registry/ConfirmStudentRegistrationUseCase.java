@@ -69,7 +69,18 @@ public class ConfirmStudentRegistrationUseCase {
         this.clock = Objects.requireNonNull(clock);
     }
 
+    /** Resultado da confirmação: o tipo do rascunho consumido e o aluno gravado. */
+    public record Outcome(StudentRegistrationDraft.Kind kind, StudentView student) {}
+
     public StudentView run(Actor actor, Command command) {
+        return runWithKind(actor, command).student();
+    }
+
+    /**
+     * Igual a {@link #run}, mas devolve também o tipo do rascunho confirmado: o canal escolhe o
+     * texto da resposta pelo que o núcleo executou, e não pelo que a conversa lembra.
+     */
+    public Outcome runWithKind(Actor actor, Command command) {
         TelegramRegistrationAccessService.requireTelegramTeacher(actor);
         Instant now = clock.now();
         UUID linkId = command.linkId();
@@ -81,7 +92,7 @@ public class ConfirmStudentRegistrationUseCase {
         return transaction.run(() -> confirm(actor, command, now));
     }
 
-    private StudentView confirm(Actor actor, Command command, Instant now) {
+    private Outcome confirm(Actor actor, Command command, Instant now) {
         UUID linkId = command.linkId();
         StudentRegistrationDraft draft =
                 drafts.searchByLinkId(linkId)
@@ -96,7 +107,7 @@ public class ConfirmStudentRegistrationUseCase {
         }
         StudentView view = execute(actor, draft, command.correlationId());
         drafts.removeByLinkId(linkId);
-        return view;
+        return new Outcome(draft.kind(), view);
     }
 
     private StudentView execute(Actor actor, StudentRegistrationDraft draft, String correlationId) {
