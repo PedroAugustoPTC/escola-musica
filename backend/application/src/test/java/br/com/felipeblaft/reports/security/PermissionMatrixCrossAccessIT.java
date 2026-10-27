@@ -167,8 +167,8 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
         List<String> failures = new ArrayList<>();
 
         // permitido a um ator exige rota no espaço dele (zero puladas)
-        requireRouteFor("administrador", row.administratorWeb(), row, true, failures);
-        requireRouteFor("professor", row.teacherWeb(), row, false, failures);
+        requireRouteFor("administrator", row.administratorWeb(), row, true, failures);
+        requireRouteFor("teacher", row.teacherWeb(), row, false, failures);
 
         Map<String, Integer> before = snapshot();
 
@@ -295,8 +295,8 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
                 String body = body(probe);
                 boolean administratorSpace = isAdministratorRoute(declared);
 
-                checkWeb(row, "administrador", row.administratorWeb(), administratorSpace, probe, path, body, fx.administrator(), reaching, failures);
-                checkWeb(row, "professor", row.teacherWeb(), !administratorSpace, probe, path, body, fx.clara(), reaching, failures);
+                checkWeb(row, "administrator", row.administratorWeb(), administratorSpace, probe, path, body, fx.administrator(), reaching, failures);
+                checkWeb(row, "teacher", row.teacherWeb(), !administratorSpace, probe, path, body, fx.clara(), reaching, failures);
                 // sem credencial: só a operação pública responde; o resto é 401
                 boolean publicOperation = row.administratorWeb() == Permission.PUBLIC || row.teacherWeb() == Permission.PUBLIC;
                 Outcome expected = publicOperation ? Outcome.REACHED : Outcome.DENIED_401;
@@ -344,7 +344,7 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
             return;
         }
         if (expected == Outcome.DENIED_404) {
-            String baseline = path.startsWith(API + "/admin") ? API + "/admin/nao-existe" : API + "/nao-existe";
+            String baseline = path.startsWith(API + "/admin") ? API + "/admin/missing-route" : API + "/missing-route";
             MvcResult unknown = call(HttpMethod.GET, baseline, null, cookie);
             if (!bodyOf(result).equals(bodyOf(unknown))
                     || !String.valueOf(result.getResponse().getContentType())
@@ -427,7 +427,7 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
                             + AdministratorFixture.DEFAULT_PASSWORD
                             + "\"}";
             case "POST /admin/activation" ->
-                    "{\"email\":\"ninguem@example.test\",\"activationCode\":\"AAAA-AAAA-AAAA\",\"newPassword\":\"long-test-password-2\"}";
+                    "{\"email\":\"nobody@example.test\",\"activationCode\":\"AAAA-AAAA-AAAA\",\"newPassword\":\"long-test-password-2\"}";
             case "PUT /admin/password" -> "{\"newPassword\":\"long-test-password-3\"}";
             case "POST /session" -> "{\"code\":\"" + ScenarioIT.CODE_CLARA + "\"}";
             case "POST /admin/teachers" ->

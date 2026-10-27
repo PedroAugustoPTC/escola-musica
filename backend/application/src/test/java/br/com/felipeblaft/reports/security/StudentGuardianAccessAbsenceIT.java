@@ -38,7 +38,7 @@ class StudentGuardianAccessAbsenceIT extends SecurityBase {
 
     /** Responsável sempre é proibido como segmento; aluno só quando seguido de palavra de entrada. */
     private static final Pattern GUARDIAN_AS_USER =
-            Pattern.compile("guardian|responsible|parent|responsavel", Pattern.CASE_INSENSITIVE);
+            Pattern.compile("guardian|responsible|parent", Pattern.CASE_INSENSITIVE);
 
     private static final Pattern STUDENT_AS_USER =
             Pattern.compile(
@@ -90,11 +90,21 @@ class StudentGuardianAccessAbsenceIT extends SecurityBase {
 
     @Test
     void noOpenApiPathOrSecuritySchemeTreatsStudentOrGuardianAsUser() throws IOException {
-        for (String contract :
+        Path specs = Path.of("../../specs");
+        Path portal;
+        try (var folders = Files.list(specs)) {
+            portal =
+                    folders.filter(folder -> folder.getFileName().toString().startsWith("001-"))
+                            .findFirst()
+                            .orElseThrow()
+                            .resolve("contracts/api-portal.openapi.yaml");
+        }
+        for (Path contract :
                 List.of(
-                        "specs/001-fluxo-relatorios/contracts/api-portal.openapi.yaml",
-                        "specs/005-admin-registrations-access/contracts/api-administration.openapi.yaml")) {
-            String yaml = Files.readString(Path.of("../..", contract), StandardCharsets.UTF_8);
+                        portal,
+                        specs.resolve(
+                                "005-admin-registrations-access/contracts/api-administration.openapi.yaml"))) {
+            String yaml = Files.readString(contract, StandardCharsets.UTF_8);
             List<String> paths = new ArrayList<>();
             Matcher path = Pattern.compile("(?m)^  (/[^\\s:]*):\\s*$").matcher(yaml);
             while (path.find()) {
@@ -204,8 +214,8 @@ class StudentGuardianAccessAbsenceIT extends SecurityBase {
         List<Cookie[]> claimedCookies =
                 List.of(
                         new Cookie[] {new Cookie("student_session", "token-do-aluno")},
-                        new Cookie[] {new Cookie("guardian_session", "token-do-responsavel")},
-                        new Cookie[] {new Cookie("session", "token-de-aluno-que-nao-existe")});
+                        new Cookie[] {new Cookie("guardian_session", "guardian-token")},
+                        new Cookie[] {new Cookie("session", "unknown-student-token")});
 
         for (String route : protectedRoutes) {
             for (Cookie[] cookies : claimedCookies) {

@@ -87,7 +87,7 @@ class AssignmentRemovalAccessIT extends SecurityBase {
                 new Attempt("aluno (001)", HttpMethod.GET, "/students/" + studentId, null),
                 new Attempt("histórico", HttpMethod.GET, "/students/" + studentId + "/history", null),
                 new Attempt("em aberto", HttpMethod.GET, "/students/" + studentId + "/open-report", null),
-                new Attempt("semestres", HttpMethod.GET, "/students/" + studentId + "/semesters", null),
+                new Attempt("semesters", HttpMethod.GET, "/students/" + studentId + "/semesters", null),
                 new Attempt(
                         "gerar semestral",
                         HttpMethod.POST,
@@ -125,7 +125,7 @@ class AssignmentRemovalAccessIT extends SecurityBase {
                         HttpMethod.POST,
                         "/semester-reports/" + semester + "/cancellation",
                         null),
-                new Attempt("trabalho", HttpMethod.GET, "/jobs/" + job, null),
+                new Attempt("job", HttpMethod.GET, "/jobs/" + job, null),
                 new Attempt("descartar trabalho", HttpMethod.POST, "/jobs/" + job + "/discard", null));
     }
 

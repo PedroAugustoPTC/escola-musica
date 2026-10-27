@@ -71,7 +71,7 @@ class StudentIsolationWebIT extends SecurityBase {
 
     private List<Attempt> studentAttempts() {
         return List.of(
-                Attempt.registry("abrir", HttpMethod.GET, "/my-students/{id}", null),
+                Attempt.registry("open", HttpMethod.GET, "/my-students/{id}", null),
                 Attempt.registry(
                         "editar o nome",
                         HttpMethod.PATCH,
@@ -83,9 +83,9 @@ class StudentIsolationWebIT extends SecurityBase {
                         "/my-students/{id}",
                         "{\"cpf\":\"" + CanaryCpf.MASKED + "\"}"),
                 Attempt.registry(
-                        "inativar", HttpMethod.POST, "/my-students/{id}/inactivation", null),
+                        "inactivate", HttpMethod.POST, "/my-students/{id}/inactivation", null),
                 Attempt.registry(
-                        "reativar", HttpMethod.POST, "/my-students/{id}/reactivation", null),
+                        "reactivate", HttpMethod.POST, "/my-students/{id}/reactivation", null),
                 Attempt.of("001: aluno", HttpMethod.GET, "/students/{id}", null),
                 Attempt.of("001: relatório em aberto", HttpMethod.GET, "/students/{id}/open-report", null),
                 Attempt.upload("001: registrar aula", "/students/{id}/lesson-reports"),

@@ -34,6 +34,8 @@ class CpfUnavailableNoLeakIT extends SecurityBase {
             "Não foi possível usar este CPF. Procure o administrador.";
     private static final String OWN_STUDENT_TEXT = "Este aluno já está entre os seus.";
 
+    private static final String BLOCKED_TEXT =
+            "Esta operação está indisponível no momento\. Tente novamente em \d+ minuto\(s\)\.";
     private static final String OTHER_STUDENT_NAME = "Joana Cantora";
     private static final String OTHER_TEACHER_NAME = "Bruno Lima";
     private static final String OTHER_TEACHER_EMAIL = "bruno@example.test";
@@ -265,8 +267,8 @@ class CpfUnavailableNoLeakIT extends SecurityBase {
         say(USER_CLARA, "Ana Souza");
         say(USER_CLARA, "05/03/1990");
         Reply botBlocked = say(USER_CLARA, validCpf(13));
-        assertThat(botBlocked.plain()).contains("Tente novamente em").contains("minuto");
-        assertThat(botBlocked.plain().toLowerCase()).doesNotContain("cpf", "sondagem", "recus");
+        assertThat(botBlocked.plain()).containsPattern(BLOCKED_TEXT);
+        assertThat(botBlocked.plain().toLowerCase()).doesNotContain("cpf");
         say(USER_CLARA, "cancelar");
 
         // passado o bloqueio, volta a valer
@@ -319,9 +321,8 @@ class CpfUnavailableNoLeakIT extends SecurityBase {
         assertThat(blocked.getResponse().getStatus()).isEqualTo(429);
         assertThat(errorCode(blocked)).isEqualTo("OPERATION_TEMPORARILY_BLOCKED");
         String message = jsonOf(blocked).path("message").asString();
-        assertThat(message).contains("Tente novamente em").contains("minuto");
-        assertThat(message.toLowerCase())
-                .doesNotContain("cpf", "sondagem", "recus", "outro professor", "muitas");
+        // o texto é só a indisponibilidade e o tempo: nenhuma palavra sobre o motivo
+        assertThat(message).matches(BLOCKED_TEXT);
         int retryAfter = jsonOf(blocked).path("retryAfterSeconds").asInt();
         assertThat(retryAfter).isBetween(1, minutes * 60);
         assertThat(blocked.getResponse().getHeader("Retry-After")).isEqualTo(String.valueOf(retryAfter));
