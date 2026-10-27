@@ -8,8 +8,8 @@ import br.com.felipeblaft.reports.inbound.seed.RotateCpfKeyCommand;
 import br.com.felipeblaft.reports.inbound.seed.SeedCommand;
 import br.com.felipeblaft.reports.support.CanaryCpf;
 import br.com.felipeblaft.reports.support.CanaryStudent;
-import br.com.felipeblaft.reports.support.LeakAudit;
 import br.com.felipeblaft.reports.support.IntegrationBase;
+import br.com.felipeblaft.reports.support.LeakAudit;
 import br.com.felipeblaft.reports.support.LogCapture;
 import br.com.felipeblaft.reports.support.PrivacyProbes;
 import br.com.felipeblaft.reports.support.ResponseSweeper.Place;
@@ -118,7 +118,10 @@ class InitialLoadNoCpfLeakIT extends IntegrationBase {
         Path invalid =
                 file(
                         "invalid.json",
-                        canaryRow("111.444.777-36", "(11) 94321-8765x", "balburdia.cantarelli@example")
+                        canaryRow(
+                                        "111.444.777-36",
+                                        "(11) 94321-8765x",
+                                        "balburdia.cantarelli@example")
                                 + ","
                                 + canaryRow(
                                         CanaryCpf.DIGITS,
@@ -176,7 +179,8 @@ class InitialLoadNoCpfLeakIT extends IntegrationBase {
         assertThat(PrivacyProbes.authorshipText(jdbc)).contains("INITIAL_LOAD");
         for (String table : PrivacyProbes.tables(jdbc)) {
             if (!table.equals("student")) {
-                audit.text("tabela " + table, Place.AUTHORSHIP, PrivacyProbes.tableText(jdbc, table));
+                audit.text(
+                        "tabela " + table, Place.AUTHORSHIP, PrivacyProbes.tableText(jdbc, table));
             }
         }
         audit.text("CPF cifrado na tabela do aluno", Place.AUTHORSHIP, studentCipherColumns());

@@ -53,12 +53,14 @@ class NoDefaultCredentialsTest {
 
     private static final Pattern ARGON2_HASH =
             Pattern.compile("\\$argon2(?:id|i|d)\\$v=\\d+\\$m=\\d+,t=\\d+,p=\\d+\\$");
-    private static final Pattern BCRYPT_HASH = Pattern.compile("\\$2[abxy]\\$\\d{2}\\$[./A-Za-z0-9]{50,}");
+    private static final Pattern BCRYPT_HASH =
+            Pattern.compile("\\$2[abxy]\\$\\d{2}\\$[./A-Za-z0-9]{50,}");
     private static final Pattern PBKDF2_HASH = Pattern.compile("\\$pbkdf2-[a-z0-9]+\\$");
 
     /** {@code ADMIN_BOOTSTRAP_X=valor} ou {@code ADMIN_BOOTSTRAP_X: valor} com valor literal. */
     private static final Pattern BOOTSTRAP_ASSIGNMENT =
-            Pattern.compile("(?<!\\{)\\bADMIN_BOOTSTRAP_(NAME|EMAIL|PASSWORD)\\b\\s*[:=]\\s*(\\S.*)$");
+            Pattern.compile(
+                    "(?<!\\{)\\bADMIN_BOOTSTRAP_(NAME|EMAIL|PASSWORD)\\b\\s*[:=]\\s*(\\S.*)$");
 
     /** {@code ${ADMIN_BOOTSTRAP_X:padrão}} e {@code ${ADMIN_BOOTSTRAP_X:-padrão}}. */
     private static final Pattern BOOTSTRAP_DEFAULT =
@@ -89,9 +91,12 @@ class NoDefaultCredentialsTest {
             scanned++;
             violations.addAll(scan(entry.path(), content));
         }
-        assertThat(scanned).as("a varredura precisa examinar os arquivos do repositório").isGreaterThan(200);
+        assertThat(scanned)
+                .as("a varredura precisa examinar os arquivos do repositório")
+                .isGreaterThan(200);
         assertThat(violations)
-                .as("credenciais de administrador versionadas (arquivo, linha e regra; nunca o valor)")
+                .as(
+                        "credenciais de administrador versionadas (arquivo, linha e regra; nunca o valor)")
                 .isEmpty();
     }
 
@@ -101,7 +106,10 @@ class NoDefaultCredentialsTest {
         Path file = GlossaryFile.load().root().resolve("infra/.env.example");
         List<String> lines = Files.readAllLines(file);
         for (String variable :
-                List.of("ADMIN_BOOTSTRAP_NAME", "ADMIN_BOOTSTRAP_EMAIL", "ADMIN_BOOTSTRAP_PASSWORD")) {
+                List.of(
+                        "ADMIN_BOOTSTRAP_NAME",
+                        "ADMIN_BOOTSTRAP_EMAIL",
+                        "ADMIN_BOOTSTRAP_PASSWORD")) {
             List<String> declarations =
                     lines.stream().filter(line -> line.startsWith(variable + "=")).toList();
             assertThat(declarations).as("declaração de " + variable).hasSize(1);
@@ -121,7 +129,8 @@ class NoDefaultCredentialsTest {
     }
 
     @Test
-    @DisplayName("o compose e o application.yaml só repassam as variáveis ADMIN_BOOTSTRAP_*, sem padrão")
+    @DisplayName(
+            "o compose e o application.yaml só repassam as variáveis ADMIN_BOOTSTRAP_*, sem padrão")
     void composeAndConfigurationHaveNoBootstrapDefaults() throws IOException {
         Path root = GlossaryFile.load().root();
         List<String> files =
@@ -147,12 +156,16 @@ class NoDefaultCredentialsTest {
                 }
             }
         }
-        assertThat(passed).as("o repasse das variáveis ao backend existe").isGreaterThanOrEqualTo(3);
+        assertThat(passed)
+                .as("o repasse das variáveis ao backend existe")
+                .isGreaterThanOrEqualTo(3);
     }
 
     // ---------------------------------------------------------------- regras
 
-    /** Texto de produção, infraestrutura e documentação; fora o que não é versionado ou é de teste. */
+    /**
+     * Texto de produção, infraestrutura e documentação; fora o que não é versionado ou é de teste.
+     */
     private static boolean scannable(String path) {
         if (UNVERSIONED.contains(path) || WORK_TREE.matcher(path).matches()) {
             return false;
@@ -201,7 +214,10 @@ class NoDefaultCredentialsTest {
             }
             Matcher bootstrap = BOOTSTRAP_ASSIGNMENT.matcher(line);
             if (bootstrap.find() && literal(bootstrap.group(2))) {
-                found.add(where + " [BOOTSTRAP_VALUE] valor literal em ADMIN_BOOTSTRAP_" + bootstrap.group(1));
+                found.add(
+                        where
+                                + " [BOOTSTRAP_VALUE] valor literal em ADMIN_BOOTSTRAP_"
+                                + bootstrap.group(1));
             }
             Matcher defaulted = BOOTSTRAP_DEFAULT.matcher(line);
             while (defaulted.find()) {
@@ -215,7 +231,9 @@ class NoDefaultCredentialsTest {
             }
             Matcher property = ADMIN_PASSWORD_PROPERTY.matcher(line);
             if (property.find() && literal(property.group(1))) {
-                found.add(where + " [BOOTSTRAP_PROPERTY] valor literal na propriedade da senha do primeiro administrador");
+                found.add(
+                        where
+                                + " [BOOTSTRAP_PROPERTY] valor literal na propriedade da senha do primeiro administrador");
             }
         }
         return found;
@@ -231,9 +249,15 @@ class NoDefaultCredentialsTest {
             return false;
         }
         value = value.replaceAll("^[\"'`]+|[\"'`]+$", "").strip();
-        if (value.isEmpty() || value.startsWith("$") || value.startsWith("<") || value.startsWith("{")) {
+        if (value.isEmpty()
+                || value.startsWith("$")
+                || value.startsWith("<")
+                || value.startsWith("{")) {
             return false;
         }
-        return !(value.equals("...") || value.equals("…") || value.equals("\\") || value.endsWith("`"));
+        return !(value.equals("...")
+                || value.equals("…")
+                || value.equals("\\")
+                || value.endsWith("`"));
     }
 }

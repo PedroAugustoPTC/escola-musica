@@ -1,9 +1,9 @@
 package br.com.felipeblaft.reports.privacy;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 import br.com.felipeblaft.reports.support.CanaryCpf;
 import br.com.felipeblaft.reports.support.CanaryStudent;
@@ -24,9 +24,9 @@ import org.springframework.test.web.servlet.MvcResult;
 /**
  * SC-004 (administrador): o CPF canário nunca aparece em log, resposta, cabeçalho, URL, mensagem de
  * erro, rastro de exceção nem em {@code authorship_record} (e, cifrado, em nenhuma tabela), nos
- * fluxos de cadastro, edição, duplicidade e validação. O aluno canário (nome, nascimento e dados
- * do responsável) só aparece no corpo das respostas de sucesso ao administrador, nunca em log,
- * rastro, URL, autoria nem fora da tabela do aluno. Pilha real, nenhum dublê.
+ * fluxos de cadastro, edição, duplicidade e validação. O aluno canário (nome, nascimento e dados do
+ * responsável) só aparece no corpo das respostas de sucesso ao administrador, nunca em log, rastro,
+ * URL, autoria nem fora da tabela do aluno. Pilha real, nenhum dublê.
  */
 class StudentCpfCanaryAdminIT extends RealStackBase {
 
@@ -49,7 +49,8 @@ class StudentCpfCanaryAdminIT extends RealStackBase {
         teacherB = createTeacher(admin, "Professor Beta", "beta@example.test").id();
         cpf = LeakAudit.searching(CanaryCpf.sweepValues());
         data = LeakAudit.searching(CanaryStudent.sweepValues());
-        successSweeper = ResponseSweeper.searching(CanaryStudent.sweepValues()).allowing(Place.BODY);
+        successSweeper =
+                ResponseSweeper.searching(CanaryStudent.sweepValues()).allowing(Place.BODY);
         // a recusa por duplicidade pode nomear o aluno existente ao administrador (FR-021)
         Map<String, String> withoutName = new LinkedHashMap<>(CanaryStudent.sweepValues());
         withoutName.remove("nome do aluno canário");
@@ -67,7 +68,10 @@ class StudentCpfCanaryAdminIT extends RealStackBase {
 
     /** Como {@link #seen}, mas a requisição leva o CPF na URL de propósito: só ela é dispensada. */
     private MvcResult seenWithCpfInRequestUrl(String step, MvcResult result) {
-        cpf.exchange(step, result, ResponseSweeper.searching(CanaryCpf.sweepValues()).allowing(Place.URL));
+        cpf.exchange(
+                step,
+                result,
+                ResponseSweeper.searching(CanaryCpf.sweepValues()).allowing(Place.URL));
         data.exchange(step, result, failureSweeper);
         return result;
     }
@@ -82,9 +86,13 @@ class StudentCpfCanaryAdminIT extends RealStackBase {
     void cpfNeverLeaksAndStudentDataStaysOnTheAuthorizedResponse() throws Exception {
         // cadastro com o CPF canário e com os dois professores
         MvcResult created =
-                seen("cadastro canário", adminPost(admin, STUDENTS, canaryStudentJson(List.of(teacherA, teacherB))));
+                seen(
+                        "cadastro canário",
+                        adminPost(admin, STUDENTS, canaryStudentJson(List.of(teacherA, teacherB))));
         assertThat(created.getResponse().getStatus()).isEqualTo(201);
-        assertThat(text(created)).contains(CanaryStudent.NAME).contains(CanaryStudent.GUARDIAN_NAME);
+        assertThat(text(created))
+                .contains(CanaryStudent.NAME)
+                .contains(CanaryStudent.GUARDIAN_NAME);
         String studentId = body(created).path("id").asString();
         String other =
                 register(
@@ -134,12 +142,18 @@ class StudentCpfCanaryAdminIT extends RealStackBase {
         mvcStatus(
                 seen(
                         "troca do CPF do canário",
-                        adminPatch(admin, STUDENTS + "/" + studentId, "{\"cpf\":\"" + THIRD_CPF + "\"}")),
+                        adminPatch(
+                                admin,
+                                STUDENTS + "/" + studentId,
+                                "{\"cpf\":\"" + THIRD_CPF + "\"}")),
                 200);
         mvcStatus(
                 seen(
                         "CPF canário para o outro aluno",
-                        adminPatch(admin, STUDENTS + "/" + other, "{\"cpf\":\"" + CanaryCpf.DIGITS + "\"}")),
+                        adminPatch(
+                                admin,
+                                STUDENTS + "/" + other,
+                                "{\"cpf\":\"" + CanaryCpf.DIGITS + "\"}")),
                 200);
         mvcStatus(
                 seen(
@@ -158,24 +172,112 @@ class StudentCpfCanaryAdminIT extends RealStackBase {
                                         null))),
                 200);
         mvcStatus(
-                seen("inativação", adminPost(admin, STUDENTS + "/" + studentId + "/inactivation", null)),
+                seen(
+                        "inativação",
+                        adminPost(admin, STUDENTS + "/" + studentId + "/inactivation", null)),
                 200);
         mvcStatus(
-                seen("reativação", adminPost(admin, STUDENTS + "/" + studentId + "/reactivation", null)),
+                seen(
+                        "reativação",
+                        adminPost(admin, STUDENTS + "/" + studentId + "/reactivation", null)),
                 200);
 
         // validação: o CPF canário digitado no campo errado ou em corpo malformado
-        invalid("nome em branco", studentJson(" ", "2000-01-01", CanaryCpf.MASKED, null, null, null, null, List.of(teacherA)));
-        invalid("nascimento futuro", studentJson("Nome Válido", "2999-01-01", CanaryCpf.MASKED, null, null, null, null, List.of(teacherA)));
-        invalid("CPF no campo de nascimento", studentJson("Nome Válido", CanaryCpf.DIGITS, "529.982.247-25", null, null, null, null, List.of(teacherA)));
-        invalid("CPF no telefone do responsável", studentJson("Menor Válido", "2016-03-14", "987.654.321-00", "Responsável Válido", CanaryCpf.MASKED, "g@example.test", null, List.of(teacherA)));
-        invalid("CPF no e-mail do responsável", studentJson("Menor Válido", "2016-03-14", "987.654.321-00", "Responsável Válido", "(11) 98888-7777", CanaryCpf.MASKED, null, List.of(teacherA)));
-        invalid("CPF com dígito verificador errado", studentJson("Nome Válido", "2000-01-01", "111.444.777-36", null, null, null, null, List.of(teacherA)));
-        invalid("menor sem responsável", studentJson("Menor Sem Responsável", "2016-03-14", CanaryCpf.MASKED, null, null, null, null, List.of(teacherA)));
-        invalid("sem professor", studentJson("Nome Válido", "2000-01-01", CanaryCpf.MASKED, null, null, null, null, List.of()));
-        invalid("corpo truncado", "{\"name\":\"Nome Válido\",\"cpf\":\"" + CanaryCpf.MASKED + "\",\"birthDate\":");
+        invalid(
+                "nome em branco",
+                studentJson(
+                        " ",
+                        "2000-01-01",
+                        CanaryCpf.MASKED,
+                        null,
+                        null,
+                        null,
+                        null,
+                        List.of(teacherA)));
+        invalid(
+                "nascimento futuro",
+                studentJson(
+                        "Nome Válido",
+                        "2999-01-01",
+                        CanaryCpf.MASKED,
+                        null,
+                        null,
+                        null,
+                        null,
+                        List.of(teacherA)));
+        invalid(
+                "CPF no campo de nascimento",
+                studentJson(
+                        "Nome Válido",
+                        CanaryCpf.DIGITS,
+                        "529.982.247-25",
+                        null,
+                        null,
+                        null,
+                        null,
+                        List.of(teacherA)));
+        invalid(
+                "CPF no telefone do responsável",
+                studentJson(
+                        "Menor Válido",
+                        "2016-03-14",
+                        "987.654.321-00",
+                        "Responsável Válido",
+                        CanaryCpf.MASKED,
+                        "g@example.test",
+                        null,
+                        List.of(teacherA)));
+        invalid(
+                "CPF no e-mail do responsável",
+                studentJson(
+                        "Menor Válido",
+                        "2016-03-14",
+                        "987.654.321-00",
+                        "Responsável Válido",
+                        "(11) 98888-7777",
+                        CanaryCpf.MASKED,
+                        null,
+                        List.of(teacherA)));
+        invalid(
+                "CPF com dígito verificador errado",
+                studentJson(
+                        "Nome Válido",
+                        "2000-01-01",
+                        "111.444.777-36",
+                        null,
+                        null,
+                        null,
+                        null,
+                        List.of(teacherA)));
+        invalid(
+                "menor sem responsável",
+                studentJson(
+                        "Menor Sem Responsável",
+                        "2016-03-14",
+                        CanaryCpf.MASKED,
+                        null,
+                        null,
+                        null,
+                        null,
+                        List.of(teacherA)));
+        invalid(
+                "sem professor",
+                studentJson(
+                        "Nome Válido",
+                        "2000-01-01",
+                        CanaryCpf.MASKED,
+                        null,
+                        null,
+                        null,
+                        null,
+                        List.of()));
+        invalid(
+                "corpo truncado",
+                "{\"name\":\"Nome Válido\",\"cpf\":\"" + CanaryCpf.MASKED + "\",\"birthDate\":");
         invalid("CPF como número", "{\"name\":\"Nome Válido\",\"cpf\":" + CanaryCpf.DIGITS + "}");
-        invalid("campo desconhecido com CPF", "{\"oldCpf\":\"" + CanaryCpf.MASKED + "\",\"name\":\"X\"}");
+        invalid(
+                "campo desconhecido com CPF",
+                "{\"oldCpf\":\"" + CanaryCpf.MASKED + "\",\"name\":\"X\"}");
         invalid("lista no lugar do texto", "{\"name\":[\"" + CanaryCpf.MASKED + "\"]}");
         invalid("CPF no corpo de outro tipo", "\"" + CanaryCpf.MASKED + "\"");
         MvcResult wrongType =

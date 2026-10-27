@@ -8,8 +8,8 @@ import java.util.Map;
 import org.springframework.test.web.servlet.MvcResult;
 
 /**
- * Acumula as varreduras de vazamento de um teste (SC-004) e falha uma única vez, ao final, com todos
- * os achados. Cada achado cita o passo, o rótulo do valor e o lugar, nunca o valor. Serve aos
+ * Acumula as varreduras de vazamento de um teste (SC-004) e falha uma única vez, ao final, com
+ * todos os achados. Cada achado cita o passo, o rótulo do valor e o lugar, nunca o valor. Serve aos
  * testes transversais de privacidade que percorrem vários passos e querem ver todos os vazamentos
  * de uma vez.
  */
@@ -66,7 +66,9 @@ public final class LeakAudit {
     public void assertClean() {
         if (!failures.isEmpty()) {
             throw new AssertionError(
-                    "Dado canário em lugar não permitido (" + failures.size() + "):\n  "
+                    "Dado canário em lugar não permitido ("
+                            + failures.size()
+                            + "):\n  "
                             + String.join("\n  ", failures));
         }
     }

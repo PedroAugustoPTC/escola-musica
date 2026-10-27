@@ -62,8 +62,7 @@ class ExceptionsWithStudentDataIT extends RealStackBase {
         notInSummary.remove("nascimento do aluno canário (BR)");
         outbox = LeakAudit.searching(notInSummary);
         RuntimeException failure =
-                new IllegalStateException(
-                        POISON, new IllegalArgumentException("causa: " + POISON));
+                new IllegalStateException(POISON, new IllegalArgumentException("causa: " + POISON));
         doThrow(failure).when(students).insertIfAbsent(any());
         doThrow(failure).when(students).save(any());
     }
@@ -77,10 +76,7 @@ class ExceptionsWithStudentDataIT extends RealStackBase {
         logs.clear();
 
         MvcResult byAdmin =
-                adminPost(
-                        admin,
-                        ADMIN_BASE + "/students",
-                        canaryStudentJson(List.of(teacher)));
+                adminPost(admin, ADMIN_BASE + "/students", canaryStudentJson(List.of(teacher)));
         assertThat(byAdmin.getResponse().getStatus()).isEqualTo(500);
         assertThat(body(byAdmin).path("code").asString()).isEqualTo("INTERNAL_ERROR");
         audit.exchange("resposta ao administrador", byAdmin);
@@ -130,7 +126,9 @@ class ExceptionsWithStudentDataIT extends RealStackBase {
     /** O log registrou o erro (só tipo e referência) e nenhum evento carrega a exceção anexada. */
     private void assertErrorsLoggedWithoutContent() {
         List<ILoggingEvent> errors =
-                logs.events().stream().filter(event -> event.getLevel().isGreaterOrEqual(Level.ERROR)).toList();
+                logs.events().stream()
+                        .filter(event -> event.getLevel().isGreaterOrEqual(Level.ERROR))
+                        .toList();
         assertThat(errors).as("a falha foi registrada").isNotEmpty();
         assertThat(errors)
                 .as("o evento de erro não anexa a exceção (mensagem, causa e pilha)")

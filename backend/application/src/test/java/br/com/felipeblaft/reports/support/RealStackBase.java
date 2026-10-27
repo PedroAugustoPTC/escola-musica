@@ -1,8 +1,8 @@
 package br.com.felipeblaft.reports.support;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static com.github.tomakehurst.wiremock.client.WireMock.anyRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.anyUrl;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -28,8 +28,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.AbstractMockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.RequestBuilder;
+import org.springframework.test.web.servlet.request.AbstractMockHttpServletRequestBuilder;
 import tools.jackson.databind.JsonNode;
 
 /**
@@ -169,8 +169,10 @@ public abstract class RealStackBase extends TelegramConversationBase {
     /** Entra como professor pelo código e devolve o cookie de sessão. */
     protected Cookie teacherSignIn(String code) throws Exception {
         MvcResult result =
-                call(asJson(post("/api/v1/session").with(csrf().asHeader()),
-                        "{\"code\":\"" + code + "\"}"));
+                call(
+                        asJson(
+                                post("/api/v1/session").with(csrf().asHeader()),
+                                "{\"code\":\"" + code + "\"}"));
         mvcStatus(result, 200);
         return cookieOf(result, "session");
     }
@@ -179,8 +181,13 @@ public abstract class RealStackBase extends TelegramConversationBase {
         int actual = result.getResponse().getStatus();
         if (actual != expected) {
             throw new AssertionError(
-                    "status " + actual + " no lugar de " + expected + " em "
-                            + result.getRequest().getMethod() + " "
+                    "status "
+                            + actual
+                            + " no lugar de "
+                            + expected
+                            + " em "
+                            + result.getRequest().getMethod()
+                            + " "
                             + result.getRequest().getRequestURI());
         }
     }
@@ -282,7 +289,10 @@ public abstract class RealStackBase extends TelegramConversationBase {
         action.run();
         StringBuilder calls = new StringBuilder();
         for (LoggedRequest request : API_BOTS.findAll(anyRequestedFor(anyUrl()))) {
-            calls.append(request.getUrl()).append(' ').append(request.getBodyAsString()).append('\n');
+            calls.append(request.getUrl())
+                    .append(' ')
+                    .append(request.getBodyAsString())
+                    .append('\n');
         }
         return new TelegramStep(calls.toString(), String.join("\n", channelBodies));
     }

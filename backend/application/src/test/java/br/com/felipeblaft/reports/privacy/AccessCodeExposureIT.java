@@ -108,7 +108,9 @@ class AccessCodeExposureIT extends RealStackBase {
                                     null),
                             200);
                     return adminPost(
-                            admin, ADMIN_BASE + "/teachers/" + teacher.id() + "/reactivation", null);
+                            admin,
+                            ADMIN_BASE + "/teachers/" + teacher.id() + "/reactivation",
+                            null);
                 }
             case ACCESS_CODE_REISSUE:
                 {

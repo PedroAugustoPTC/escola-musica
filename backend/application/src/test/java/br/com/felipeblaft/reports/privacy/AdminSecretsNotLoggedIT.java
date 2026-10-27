@@ -20,9 +20,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  * FR-005, FR-032, FR-039 e SC-004: a senha digitada e a provisória do administrador nunca aparecem
  * em log, resposta, cabeçalho, mensagem de erro, URL, rastro de exceção, {@code authorship_record}
  * nem em tabela alguma (a senha só existe como hash). O roteiro percorre, com a pilha real, a
- * subida com senha provisória, a entrada errada e certa, a troca obrigatória (recusada e aceita),
- * a criação e a ativação de um segundo administrador (recusada e aceita), corpos malformados e
- * longos demais.
+ * subida com senha provisória, a entrada errada e certa, a troca obrigatória (recusada e aceita), a
+ * criação e a ativação de um segundo administrador (recusada e aceita), corpos malformados e longos
+ * demais.
  */
 class AdminSecretsNotLoggedIT extends RealStackBase {
 
@@ -95,7 +95,9 @@ class AdminSecretsNotLoggedIT extends RealStackBase {
         mvcStatus(provisional, 200);
         seen("entrada com senha provisória", provisional);
         Cookie provisionalSession = cookieOf(provisional, ADMIN_COOKIE);
-        seen("rota restrita com senha provisória", adminGet(provisionalSession, ADMIN_BASE + "/teachers"));
+        seen(
+                "rota restrita com senha provisória",
+                adminGet(provisionalSession, ADMIN_BASE + "/teachers"));
 
         // troca recusada (curta; igual ao e-mail) e aceita
         MvcResult shortPassword =
@@ -179,8 +181,7 @@ class AdminSecretsNotLoggedIT extends RealStackBase {
             hashes.put("hash da senha " + ++index, hash);
         }
         for (String hash :
-                jdbc.queryForList(
-                        "select token_hash from administrator_session", String.class)) {
+                jdbc.queryForList("select token_hash from administrator_session", String.class)) {
             hashes.put("resumo da sessão " + ++index, hash);
         }
         assertThat(hashes).as("há hashes no banco para procurar").hasSizeGreaterThanOrEqualTo(3);

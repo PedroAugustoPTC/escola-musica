@@ -33,7 +33,6 @@ import jakarta.servlet.http.Cookie;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,11 +55,11 @@ import tools.jackson.databind.json.JsonMapper;
 
 /**
  * FR-017, FR-044 e Princípio IV: com o aluno canário (CPF, nascimento e responsável) cadastrado, a
- * geração do relatório de aula (estruturação, resposta, alteração) e a do semestral
- * (consolidação, alteração) não enviam à IA nada do aluno: a entrada capturada na porta, a
- * mensagem de sistema e a do usuário montadas pelo adaptador real (reproduzidas num servidor
- * simulado) e o texto do relatório (JSON e PDF) não têm CPF nem dado do responsável. Pilha real,
- * com a porta de IA espionada.
+ * geração do relatório de aula (estruturação, resposta, alteração) e a do semestral (consolidação,
+ * alteração) não enviam à IA nada do aluno: a entrada capturada na porta, a mensagem de sistema e a
+ * do usuário montadas pelo adaptador real (reproduzidas num servidor simulado) e o texto do
+ * relatório (JSON e PDF) não têm CPF nem dado do responsável. Pilha real, com a porta de IA
+ * espionada.
  */
 class StudentDataNotSentToAiIT extends RealStackBase {
 
@@ -69,7 +68,8 @@ class StudentDataNotSentToAiIT extends RealStackBase {
     private static final String ANSWER = "O aluno treinou o trecho final devagar durante a semana";
     private static final String CHANGE = "Incluir a observação sobre a postura ao tocar";
 
-    private static final WireMockServer PROVIDER = new WireMockServer(wireMockConfig().dynamicPort());
+    private static final WireMockServer PROVIDER =
+            new WireMockServer(wireMockConfig().dynamicPort());
 
     @BeforeAll
     static void startProvider() {
@@ -82,7 +82,8 @@ class StudentDataNotSentToAiIT extends RealStackBase {
     }
 
     /** Uma chamada à porta de IA: a tarefa, a entrada, o tipo pedido e a resposta. */
-    private record Captured(TaskLlm task, TaskInput input, Class<?> type, ResponseLlm<?> response) {}
+    private record Captured(
+            TaskLlm task, TaskInput input, Class<?> type, ResponseLlm<?> response) {}
 
     @MockitoSpyBean LlmPort llm;
     @Autowired StudentRepository students;
@@ -107,7 +108,9 @@ class StudentDataNotSentToAiIT extends RealStackBase {
                 .generateJson(any(), any(), any());
     }
 
-    /** Nada do aluno pode ir à IA, nem o nome, nem o instrumento: o contrato só autoriza o conteúdo. */
+    /**
+     * Nada do aluno pode ir à IA, nem o nome, nem o instrumento: o contrato só autoriza o conteúdo.
+     */
     private static Map<String, String> forbiddenInAiInput() {
         Map<String, String> values = new LinkedHashMap<>(CanaryStudent.sweepValuesWithCpf());
         values.put("instrumento do aluno canário", CanaryStudent.INSTRUMENT);
@@ -131,15 +134,18 @@ class StudentDataNotSentToAiIT extends RealStackBase {
                 call(
                         asJson(
                                 withCookie(
-                                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-                                                .post("/api/v1/my-students"),
+                                        org.springframework.test.web.servlet.request
+                                                .MockMvcRequestBuilders.post("/api/v1/my-students"),
                                         session),
                                 canaryStudentJson(null)));
         mvcStatus(registered, 201);
         UUID studentId = UUID.fromString(body(registered).path("id").asString());
         Student student = students.searchById(studentId).orElseThrow();
         // o aluno guarda mesmo o CPF e o responsável que a varredura procura
-        assertThat(jdbc.queryForObject("select count(*) from student where guardian_name is not null", Integer.class))
+        assertThat(
+                        jdbc.queryForObject(
+                                "select count(*) from student where guardian_name is not null",
+                                Integer.class))
                 .isEqualTo(1);
         captured.clear();
 
@@ -170,20 +176,27 @@ class StudentDataNotSentToAiIT extends RealStackBase {
                 call(
                         asJson(
                                 withCookie(
-                                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-                                                .post("/api/v1/lesson-reports/{id}/answers", lessonReport),
+                                        org.springframework.test.web.servlet.request
+                                                .MockMvcRequestBuilders.post(
+                                                "/api/v1/lesson-reports/{id}/answers",
+                                                lessonReport),
                                         session),
                                 "{\"text\":\"" + ANSWER + "\"}")),
                 202);
         scenario.processQueue();
         int version =
-                jdbc.queryForObject("select current_version from lesson_report where id = ?", Integer.class, lessonReport);
+                jdbc.queryForObject(
+                        "select current_version from lesson_report where id = ?",
+                        Integer.class,
+                        lessonReport);
         mvcStatus(
                 call(
                         asJson(
                                 withCookie(
-                                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-                                                .post("/api/v1/lesson-reports/{id}/changes", lessonReport),
+                                        org.springframework.test.web.servlet.request
+                                                .MockMvcRequestBuilders.post(
+                                                "/api/v1/lesson-reports/{id}/changes",
+                                                lessonReport),
                                         session),
                                 "{\"text\":\"" + CHANGE + "\",\"baseVersion\":" + version + "}")),
                 202);
@@ -191,7 +204,10 @@ class StudentDataNotSentToAiIT extends RealStackBase {
         report.exchange(
                 "relatório de aula (alterado)",
                 call(get("/api/v1/lesson-reports/{id}", lessonReport).cookie(session)));
-        report.text("PDF do relatório de aula", Place.BODY, pdfText(session, "/api/v1/lesson-reports/" + lessonReport + "/versions/1/pdf"));
+        report.text(
+                "PDF do relatório de aula",
+                Place.BODY,
+                pdfText(session, "/api/v1/lesson-reports/" + lessonReport + "/versions/1/pdf"));
 
         // relatório semestral: aulas aprovadas, consolidação, alteração
         scenario.approvedLesson(clara, student, LocalDate.of(2026, 3, 10), "Escala de Dó maior");
@@ -200,8 +216,10 @@ class StudentDataNotSentToAiIT extends RealStackBase {
                 call(
                         asJson(
                                 withCookie(
-                                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-                                                .post("/api/v1/students/{id}/semester-reports", studentId),
+                                        org.springframework.test.web.servlet.request
+                                                .MockMvcRequestBuilders.post(
+                                                "/api/v1/students/{id}/semester-reports",
+                                                studentId),
                                         session),
                                 "{\"periodKey\":\"2026-1\",\"confirmDespiteOpenReports\":true}")),
                 202);
@@ -214,8 +232,9 @@ class StudentDataNotSentToAiIT extends RealStackBase {
                 call(
                         asJson(
                                 withCookie(
-                                        org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-                                                .post("/api/v1/semester-reports/{id}/changes", semester),
+                                        org.springframework.test.web.servlet.request
+                                                .MockMvcRequestBuilders.post(
+                                                "/api/v1/semester-reports/{id}/changes", semester),
                                         session),
                                 "{\"text\":\"Parecer: " + CHANGE + "\",\"baseVersion\":1}")),
                 202);
@@ -223,7 +242,10 @@ class StudentDataNotSentToAiIT extends RealStackBase {
         report.exchange(
                 "relatório semestral (alterado)",
                 call(get("/api/v1/semester-reports/{id}", semester).cookie(session)));
-        report.text("PDF do relatório semestral", Place.BODY, pdfText(session, "/api/v1/semester-reports/" + semester + "/versions/1/pdf"));
+        report.text(
+                "PDF do relatório semestral",
+                Place.BODY,
+                pdfText(session, "/api/v1/semester-reports/" + semester + "/versions/1/pdf"));
 
         // o que a porta de IA recebeu
         List<Captured> calls = List.copyOf(captured);
@@ -240,9 +262,18 @@ class StudentDataNotSentToAiIT extends RealStackBase {
         LeakAudit ai = LeakAudit.searching(forbiddenInAiInput());
         for (Captured call : calls) {
             TaskLlm task = call.task();
-            ai.text("entrada da tarefa " + task, Place.ACTION_PAYLOAD, JSON_MAPPER.writeValueAsString(call.input()));
-            ai.text("texto da entrada (toString) da tarefa " + task, Place.ACTION_PAYLOAD, String.valueOf(call.input()));
-            ai.text("saída da tarefa " + task, Place.ACTION_PAYLOAD, JSON_MAPPER.writeValueAsString(call.response().output()));
+            ai.text(
+                    "entrada da tarefa " + task,
+                    Place.ACTION_PAYLOAD,
+                    JSON_MAPPER.writeValueAsString(call.input()));
+            ai.text(
+                    "texto da entrada (toString) da tarefa " + task,
+                    Place.ACTION_PAYLOAD,
+                    String.valueOf(call.input()));
+            ai.text(
+                    "saída da tarefa " + task,
+                    Place.ACTION_PAYLOAD,
+                    JSON_MAPPER.writeValueAsString(call.response().output()));
         }
 
         // o prompt: as mensagens que o adaptador real monta com as mesmas entradas
@@ -256,7 +287,9 @@ class StudentDataNotSentToAiIT extends RealStackBase {
             }
         }
 
-        assertThat(requests).as("pedidos ao provedor simulado").isGreaterThanOrEqualTo(calls.size());
+        assertThat(requests)
+                .as("pedidos ao provedor simulado")
+                .isGreaterThanOrEqualTo(calls.size());
         assertThat(ai.sweeps()).isGreaterThan(calls.size() * 3);
         ai.assertClean();
         report.assertClean();
@@ -280,7 +313,10 @@ class StudentDataNotSentToAiIT extends RealStackBase {
                             .willReturn(
                                     aResponse()
                                             .withHeader("Content-Type", "application/json")
-                                            .withBody(completion(JSON_MAPPER.writeValueAsString(response.output())))));
+                                            .withBody(
+                                                    completion(
+                                                            JSON_MAPPER.writeValueAsString(
+                                                                    response.output())))));
             try {
                 adapter.generateJson(call.task(), call.input(), call.type());
             } catch (RuntimeException invalidOutputOrUnavailable) {

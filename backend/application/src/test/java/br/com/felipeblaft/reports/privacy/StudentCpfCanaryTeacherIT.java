@@ -44,14 +44,16 @@ class StudentCpfCanaryTeacherIT extends RealStackBase {
         scenario.bruno();
         cpf = LeakAudit.searching(CanaryCpf.sweepValues());
         data = LeakAudit.searching(CanaryStudent.sweepValues());
-        // o cartão (§3.2) e o resumo (§3.1, item 5) mostram o nome do aluno, o nome do responsável e,
+        // o cartão (§3.2) e o resumo (§3.1, item 5) mostram o nome do aluno, o nome do responsável
+        // e,
         // no resumo, o nascimento como dd/mm/aaaa; telefone, e-mail e o CPF nunca saem pelo bot
         Map<String, String> notInCard = new LinkedHashMap<>(CanaryStudent.sweepValues());
         notInCard.remove("nome do aluno canário");
         notInCard.remove("nome do responsável canário");
         notInCard.remove("nascimento do aluno canário (BR)");
         cardData = LeakAudit.searching(notInCard);
-        successSweeper = ResponseSweeper.searching(CanaryStudent.sweepValues()).allowing(Place.BODY);
+        successSweeper =
+                ResponseSweeper.searching(CanaryStudent.sweepValues()).allowing(Place.BODY);
     }
 
     // ---------------------------------------------------------------- Web
@@ -60,12 +62,18 @@ class StudentCpfCanaryTeacherIT extends RealStackBase {
         cpf.exchange(step, result);
         boolean success = result.getResponse().getStatus() / 100 == 2;
         // fora do sucesso a resposta é neutra: nenhum dado do aluno, nem o nome
-        data.exchange(step, result, success ? successSweeper : ResponseSweeper.searching(CanaryStudent.sweepValues()));
+        data.exchange(
+                step,
+                result,
+                success ? successSweeper : ResponseSweeper.searching(CanaryStudent.sweepValues()));
         return result;
     }
 
     private MvcResult seenWithCpfInRequestUrl(String step, MvcResult result) {
-        cpf.exchange(step, result, ResponseSweeper.searching(CanaryCpf.sweepValues()).allowing(Place.URL));
+        cpf.exchange(
+                step,
+                result,
+                ResponseSweeper.searching(CanaryCpf.sweepValues()).allowing(Place.URL));
         data.exchange(step, result);
         return result;
     }
@@ -81,7 +89,8 @@ class StudentCpfCanaryTeacherIT extends RealStackBase {
         Cookie bruno = teacherSignIn(ScenarioIT.CODE_BRUNO);
         logs.clear();
 
-        MvcResult created = seen("cadastro canário", teacherPost(clara, MY_STUDENTS, canaryStudentJson(null)));
+        MvcResult created =
+                seen("cadastro canário", teacherPost(clara, MY_STUDENTS, canaryStudentJson(null)));
         assertThat(created.getResponse().getStatus()).isEqualTo(201);
         assertThat(text(created)).contains(CanaryStudent.NAME);
         String id = body(created).path("id").asString();
@@ -91,12 +100,21 @@ class StudentCpfCanaryTeacherIT extends RealStackBase {
         seen("abertura do aluno", call(get(MY_STUDENTS + "/" + id).cookie(clara)));
 
         // duplicidade: o professor do aluno e outro professor recebem recusa neutra
-        MvcResult own = seen("duplicidade com aluno próprio", teacherPost(clara, MY_STUDENTS, duplicateJson()));
+        MvcResult own =
+                seen(
+                        "duplicidade com aluno próprio",
+                        teacherPost(clara, MY_STUDENTS, duplicateJson()));
         assertThat(own.getResponse().getStatus()).isEqualTo(409);
-        MvcResult foreign = seen("duplicidade com aluno alheio", teacherPost(bruno, MY_STUDENTS, duplicateJson()));
+        MvcResult foreign =
+                seen(
+                        "duplicidade com aluno alheio",
+                        teacherPost(bruno, MY_STUDENTS, duplicateJson()));
         assertThat(foreign.getResponse().getStatus()).isEqualTo(409);
         assertThat(text(foreign)).doesNotContain("Clara").doesNotContain("Souza");
-        MvcResult foreignRead = seen("abertura por outro professor", call(get(MY_STUDENTS + "/" + id).cookie(bruno)));
+        MvcResult foreignRead =
+                seen(
+                        "abertura por outro professor",
+                        call(get(MY_STUDENTS + "/" + id).cookie(bruno)));
         assertThat(foreignRead.getResponse().getStatus()).isEqualTo(404);
 
         // edição, inativação e reativação
@@ -105,10 +123,7 @@ class StudentCpfCanaryTeacherIT extends RealStackBase {
                         "edição do responsável",
                         call(
                                 asJson(
-                                        withCookie(
-                                                patch(
-                                                        MY_STUDENTS + "/" + id),
-                                                clara),
+                                        withCookie(patch(MY_STUDENTS + "/" + id), clara),
                                         studentJson(
                                                 null,
                                                 null,
@@ -119,18 +134,90 @@ class StudentCpfCanaryTeacherIT extends RealStackBase {
                                                 "Violino",
                                                 null)))),
                 200);
-        mvcStatus(seen("inativação", teacherPost(clara, MY_STUDENTS + "/" + id + "/inactivation", null)), 200);
-        mvcStatus(seen("reativação", teacherPost(clara, MY_STUDENTS + "/" + id + "/reactivation", null)), 200);
+        mvcStatus(
+                seen(
+                        "inativação",
+                        teacherPost(clara, MY_STUDENTS + "/" + id + "/inactivation", null)),
+                200);
+        mvcStatus(
+                seen(
+                        "reativação",
+                        teacherPost(clara, MY_STUDENTS + "/" + id + "/reactivation", null)),
+                200);
 
         // validação com o CPF canário em lugares errados e corpos malformados
-        invalid(clara, "nome em branco", studentJson(" ", "2000-01-01", CanaryCpf.MASKED, null, null, null, null, null));
-        invalid(clara, "CPF no campo de nascimento", studentJson("Nome Válido", CanaryCpf.DIGITS, "529.982.247-25", null, null, null, null, null));
-        invalid(clara, "CPF no telefone do responsável", studentJson("Menor Válido", "2016-03-14", "987.654.321-00", "Responsável Válido", CanaryCpf.MASKED, "g@example.test", null, null));
-        invalid(clara, "CPF no e-mail do responsável", studentJson("Menor Válido", "2016-03-14", "987.654.321-00", "Responsável Válido", "(11) 98888-7777", CanaryCpf.MASKED, null, null));
-        invalid(clara, "CPF com dígito verificador errado", studentJson("Nome Válido", "2000-01-01", "111.444.777-36", null, null, null, null, null));
-        invalid(clara, "menor sem responsável", studentJson("Menor Sem Responsável", "2016-03-14", "987.654.321-00", null, null, null, null, null));
-        invalid(clara, "corpo truncado", "{\"name\":\"Nome Válido\",\"cpf\":\"" + CanaryCpf.MASKED + "\",\"birthDate\":");
-        invalid(clara, "CPF como número", "{\"name\":\"Nome Válido\",\"cpf\":" + CanaryCpf.DIGITS + "}");
+        invalid(
+                clara,
+                "nome em branco",
+                studentJson(" ", "2000-01-01", CanaryCpf.MASKED, null, null, null, null, null));
+        invalid(
+                clara,
+                "CPF no campo de nascimento",
+                studentJson(
+                        "Nome Válido",
+                        CanaryCpf.DIGITS,
+                        "529.982.247-25",
+                        null,
+                        null,
+                        null,
+                        null,
+                        null));
+        invalid(
+                clara,
+                "CPF no telefone do responsável",
+                studentJson(
+                        "Menor Válido",
+                        "2016-03-14",
+                        "987.654.321-00",
+                        "Responsável Válido",
+                        CanaryCpf.MASKED,
+                        "g@example.test",
+                        null,
+                        null));
+        invalid(
+                clara,
+                "CPF no e-mail do responsável",
+                studentJson(
+                        "Menor Válido",
+                        "2016-03-14",
+                        "987.654.321-00",
+                        "Responsável Válido",
+                        "(11) 98888-7777",
+                        CanaryCpf.MASKED,
+                        null,
+                        null));
+        invalid(
+                clara,
+                "CPF com dígito verificador errado",
+                studentJson(
+                        "Nome Válido",
+                        "2000-01-01",
+                        "111.444.777-36",
+                        null,
+                        null,
+                        null,
+                        null,
+                        null));
+        invalid(
+                clara,
+                "menor sem responsável",
+                studentJson(
+                        "Menor Sem Responsável",
+                        "2016-03-14",
+                        "987.654.321-00",
+                        null,
+                        null,
+                        null,
+                        null,
+                        null));
+        invalid(
+                clara,
+                "corpo truncado",
+                "{\"name\":\"Nome Válido\",\"cpf\":\"" + CanaryCpf.MASKED + "\",\"birthDate\":");
+        invalid(
+                clara,
+                "CPF como número",
+                "{\"name\":\"Nome Válido\",\"cpf\":" + CanaryCpf.DIGITS + "}");
         invalid(clara, "lista no lugar do texto", "{\"name\":[\"" + CanaryCpf.MASKED + "\"]}");
 
         // a busca com forma de CPF é recusada sem ser repetida
@@ -204,30 +291,45 @@ class StudentCpfCanaryTeacherIT extends RealStackBase {
         strict("pergunta do nome", () -> sendText(USER_CLARA, CanaryStudent.NAME));
         strict("pergunta do nascimento", () -> sendText(USER_CLARA, CanaryStudent.BIRTH_DATE_BR));
         TelegramStep cpfStep = strict("CPF", () -> sendText(USER_CLARA, CanaryCpf.MASKED));
-        assertThat(cpfStep.botCalls()).as("a mensagem com o CPF é apagada").contains("deleteMessage");
+        assertThat(cpfStep.botCalls())
+                .as("a mensagem com o CPF é apagada")
+                .contains("deleteMessage");
         strict("nome do responsável", () -> sendText(USER_CLARA, CanaryStudent.GUARDIAN_NAME));
-        strict("telefone do responsável", () -> sendText(USER_CLARA, CanaryStudent.GUARDIAN_PHONE_MASKED));
+        strict(
+                "telefone do responsável",
+                () -> sendText(USER_CLARA, CanaryStudent.GUARDIAN_PHONE_MASKED));
         strict("e-mail do responsável", () -> sendText(USER_CLARA, CanaryStudent.GUARDIAN_EMAIL));
         card("resumo do cadastro", () -> sendText(USER_CLARA, CanaryStudent.INSTRUMENT));
         String confirm = lastButtonWith("Confirmar");
-        TelegramStep saved = card("confirmação do cadastro", () -> sendCallback(USER_CLARA, confirm));
+        TelegramStep saved =
+                card("confirmação do cadastro", () -> sendCallback(USER_CLARA, confirm));
         assertThat(saved.botCalls()).as("o cadastro foi gravado").contains("foi cadastrado(a)");
         assertThat(jdbc.queryForObject("select count(*) from student", Integer.class)).isEqualTo(1);
 
         // lista, cartão, edição e inativação (cada uma confirmada ou cancelada)
         card("lista de alunos", () -> sendText(USER_CLARA, "meus alunos"));
-        String open = buttons(lastMessage()).stream().filter(c -> c.contains("reg-open")).findFirst().orElseThrow();
+        String open =
+                buttons(lastMessage()).stream()
+                        .filter(c -> c.contains("reg-open"))
+                        .findFirst()
+                        .orElseThrow();
         card("cartão", () -> sendCallback(USER_CLARA, open));
         String edit = lastButtonWith("Editar");
         card("escolha do campo", () -> sendCallback(USER_CLARA, edit));
         String editCpf = lastButtonWith("CPF");
         card("editar CPF", () -> sendCallback(USER_CLARA, editCpf));
         TelegramStep newCpf = card("novo CPF", () -> sendText(USER_CLARA, OTHER_CPF));
-        assertThat(newCpf.botCalls()).as("a mensagem com o novo CPF é apagada").contains("deleteMessage");
+        assertThat(newCpf.botCalls())
+                .as("a mensagem com o novo CPF é apagada")
+                .contains("deleteMessage");
         String cancelEdit = lastButtonWith("Cancelar");
         card("cancelar edição", () -> sendCallback(USER_CLARA, cancelEdit));
         card("lista de novo", () -> sendText(USER_CLARA, "meus alunos"));
-        String openAgain = buttons(lastMessage()).stream().filter(c -> c.contains("reg-open")).findFirst().orElseThrow();
+        String openAgain =
+                buttons(lastMessage()).stream()
+                        .filter(c -> c.contains("reg-open"))
+                        .findFirst()
+                        .orElseThrow();
         card("cartão de novo", () -> sendCallback(USER_CLARA, openAgain));
         String inactivate = lastButtonWith("Inativar");
         card("pedido de inativação", () -> sendCallback(USER_CLARA, inactivate));
@@ -241,8 +343,11 @@ class StudentCpfCanaryTeacherIT extends RealStackBase {
         // o CPF canário digitado onde não se espera: etapas erradas, busca e conta sem vínculo
         strict("CPF solto no menu", () -> sendText(USER_CLARA, CanaryCpf.DIGITS));
         card("lista para buscar", () -> sendText(USER_CLARA, "meus alunos"));
-        TelegramStep search = strict("CPF na busca da lista", () -> sendText(USER_CLARA, CanaryCpf.MASKED));
-        assertThat(search.botCalls()).as("a mensagem com o CPF é apagada").contains("deleteMessage");
+        TelegramStep search =
+                strict("CPF na busca da lista", () -> sendText(USER_CLARA, CanaryCpf.MASKED));
+        assertThat(search.botCalls())
+                .as("a mensagem com o CPF é apagada")
+                .contains("deleteMessage");
         card("registrar aula", () -> sendText(USER_CLARA, "registrar aula"));
         strict("CPF na escolha do aluno da aula", () -> sendText(USER_CLARA, CanaryCpf.DIGITS));
         strict("cancelar", () -> sendText(USER_CLARA, "cancelar"));
@@ -257,13 +362,17 @@ class StudentCpfCanaryTeacherIT extends RealStackBase {
                                         "group",
                                         "\"text\": \"" + CanaryCpf.DIGITS + "\"")));
         strict("cadastro para o CPF errado", () -> sendText(USER_CLARA, "cadastrar aluno"));
-        strict("nome do cadastro do CPF errado", () -> sendText(USER_CLARA, "Aluno Adulto Fictício"));
+        strict(
+                "nome do cadastro do CPF errado",
+                () -> sendText(USER_CLARA, "Aluno Adulto Fictício"));
         strict("nascimento do cadastro do CPF errado", () -> sendText(USER_CLARA, "04/05/1990"));
         strict("CPF com dígito verificador errado", () -> sendText(USER_CLARA, "111.444.777-36"));
         strict("CPF curto demais", () -> sendText(USER_CLARA, "111.444.777"));
         strict("cancelar cadastro", () -> sendText(USER_CLARA, "cancelar"));
 
-        assertThat(jdbc.queryForObject("select count(*) from student_registration_draft", Integer.class))
+        assertThat(
+                        jdbc.queryForObject(
+                                "select count(*) from student_registration_draft", Integer.class))
                 .as("nenhum cadastro em andamento sobra")
                 .isZero();
         finish("Telegram");
@@ -274,7 +383,8 @@ class StudentCpfCanaryTeacherIT extends RealStackBase {
         strict("cadastro duplicado (início)", () -> sendText(user, "cadastrar aluno"));
         strict("cadastro duplicado (nome)", () -> sendText(user, name));
         strict("cadastro duplicado (nascimento)", () -> sendText(user, "03/02/1991"));
-        TelegramStep step = strict("cadastro duplicado (CPF)", () -> sendText(user, CanaryCpf.MASKED));
+        TelegramStep step =
+                strict("cadastro duplicado (CPF)", () -> sendText(user, CanaryCpf.MASKED));
         assertThat(step.botCalls()).contains("deleteMessage");
         strict("cadastro duplicado (cancelar)", () -> sendText(user, "cancelar"));
     }
@@ -289,7 +399,8 @@ class StudentCpfCanaryTeacherIT extends RealStackBase {
         data.text("rastros de exceção (" + channel + ")", Place.EXCEPTION_TRACE, traceText());
         data.text("authorship_record (" + channel + ")", Place.AUTHORSHIP, authorshipText());
         for (String table : tables()) {
-            // o CPF só existe cifrado; os dados do aluno só podem estar na tabela dele e, como cartão
+            // o CPF só existe cifrado; os dados do aluno só podem estar na tabela dele e, como
+            // cartão
             // ou resumo, na caixa de saída do canal
             cpf.text("tabela " + table, Place.AUTHORSHIP, tableText(table));
             if (table.equals("channel_action")) {
@@ -303,5 +414,4 @@ class StudentCpfCanaryTeacherIT extends RealStackBase {
         data.assertClean();
         cardData.assertClean();
     }
-
 }
