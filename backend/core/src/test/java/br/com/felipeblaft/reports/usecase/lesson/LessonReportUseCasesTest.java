@@ -206,6 +206,18 @@ class LessonReportUseCasesTest {
     }
 
     @Test
+    void queryJobIsDeniedAfterTheAssignmentOfTheStudentIsRemoved() {
+        LessonReport report = c.reportInReview();
+        ProcessingJob job =
+                c.change.changeByText(c.clara.id(), report.id(), "texto digitado", 1, Channel.WEB);
+        assertThat(c.queryJob.run(c.clara.id(), job.id()).understoodText()).isPresent();
+
+        c.assignments.delete(c.clara.id(), c.matteo.id());
+
+        failWith(() -> c.queryJob.run(c.clara.id(), job.id()), ErrorCode.RESOURCE_NOT_FOUND);
+    }
+
+    @Test
     void reviewAndOfficialDocuments() {
         LessonReport report = c.reportInReview();
         GetReportDocumentUseCase.ObtainedDocument review =

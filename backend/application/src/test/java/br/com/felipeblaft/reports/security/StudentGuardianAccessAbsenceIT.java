@@ -151,8 +151,9 @@ class StudentGuardianAccessAbsenceIT extends SecurityBase {
             // vinculado ou não, é um texto qualquer: nenhum vínculo novo nem papel novo
             Reply linked = say(USER_CLARA, claim);
             assertThat(linked.plain()).contains("Nenhum aluno encontrado");
-            Reply unlinked = say(7050L, claim);
-            assertThat(unlinked.plain()).contains("envie o código de acesso");
+            // sem vínculo, o texto é tratado como um código de acesso e recusado (usuário novo a cada vez)
+            Reply unlinked = say(7050L + claims.indexOf(claim), claim);
+            assertThat(unlinked.plain()).containsAnyOf("envie o código de acesso", "Código inválido");
         }
         assertThat(count("telegram_link")).isEqualTo(links);
     }

@@ -54,6 +54,18 @@ class DiscardRegistrationInProcessingUseCaseTest {
     }
 
     @Test
+    void teacherWithoutAssignmentReceivesNotFoundAndTheJobStaysPending() {
+        ProcessingJob job = register();
+        c.assignments.delete(c.clara.id(), c.matteo.id());
+
+        assertThatThrownBy(() -> c.discardRegistration.run(c.clara.id(), job.id()))
+                .isInstanceOfSatisfying(
+                        DomainException.class,
+                        e -> assertThat(e.code()).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND));
+        assertThat(c.queue.searchById(job.id()).orElseThrow().status()).isEqualTo(JobStatus.PENDING);
+    }
+
+    @Test
     void otherTeacherReceivesNotFound() {
         ProcessingJob job = register();
 

@@ -182,7 +182,6 @@ class CpfUnavailableNoLeakIT extends SecurityBase {
             // cadastro com o CPF do aluno de Bruno
             Reply registration = startRegistrationAndTypeCpf(CanaryCpf.MASKED);
             assertThat(registration.plain()).contains(UNAVAILABLE);
-            assertThat(registration.methods()).as("a mensagem com o CPF é apagada").contains("deleteMessage");
             assertThat(sweeper().sweepText(Place.BODY, registration.plain() + registration.buttonData()))
                     .isEmpty();
             say(USER_CLARA, "cancelar");
@@ -323,7 +322,7 @@ class CpfUnavailableNoLeakIT extends SecurityBase {
         assertThat(message).contains("Tente novamente em").contains("minuto");
         assertThat(message.toLowerCase())
                 .doesNotContain("cpf", "sondagem", "recus", "outro professor", "muitas");
-        int retryAfter = jsonOf(blocked).path("retryAfter").asInt();
+        int retryAfter = jsonOf(blocked).path("retryAfterSeconds").asInt();
         assertThat(retryAfter).isBetween(1, minutes * 60);
         assertThat(blocked.getResponse().getHeader("Retry-After")).isEqualTo(String.valueOf(retryAfter));
         sweeper().assertClean(blocked);

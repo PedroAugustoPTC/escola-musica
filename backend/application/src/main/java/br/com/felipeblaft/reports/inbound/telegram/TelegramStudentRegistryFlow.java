@@ -866,7 +866,7 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
     }
 
     private static String correlation(TelegramContext context) {
-        return "telegram-" + context.updateId();
+        return Long.toString(context.updateId());
     }
 
     private static Integer number(String argument) {
