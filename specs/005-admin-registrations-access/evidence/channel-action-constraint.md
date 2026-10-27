@@ -13,7 +13,7 @@ novo `DELETE_MESSAGE`?
 
 **Nome real em vigor: `ck_channel_action_type`** (tabela `channel_action`, coluna `type`). A `V13` troca essa restrição
 (`DROP CONSTRAINT` + `ADD CONSTRAINT`, mesmo nome) acrescentando `'DELETE_MESSAGE'` ao conjunto; os cinco valores atuais
-continuam aceitos e qualquer outro continua barrado. A `V13` é aditiva: não toca nas linhas existentes.
+continuam aceitos e qualquer outro continua barrado. A `V15` (antes planejada como `V13`) é aditiva: não toca nas linhas existentes.
 
 ## Largura das colunas
 

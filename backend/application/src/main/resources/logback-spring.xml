@@ -3,13 +3,20 @@
      profundidade (FR-055). Nunca registrar áudio, transcrição, conteúdo, nomes, CPF, código nem token. -->
 <configuration>
     <springProfile name="seed">
-        <!-- Comandos de carga: só avisos e erros, em texto, para não poluir a saída do terminal. -->
+        <!-- Comandos operacionais: só avisos e erros, em texto, para não poluir o terminal. A mensagem
+             passa pelo mesmo mascaramento do perfil JSON e a exceção sai só pelo tipo (a mensagem do
+             Hibernate/PostgreSQL traz valores, como Key (email)=(...)); sem pilha. -->
+        <conversionRule conversionWord="maskedMsg"
+                        converterClass="br.com.felipeblaft.reports.config.log.MaskedMessageConverter"/>
+        <conversionRule conversionWord="exType"
+                        converterClass="br.com.felipeblaft.reports.config.log.ExceptionTypeConverter"/>
         <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
             <target>System.err</target>
             <encoder>
-                <pattern>%level %logger{0} - %msg%n</pattern>
+                <pattern>%level %logger{0} - %maskedMsg%exType%n</pattern>
             </encoder>
         </appender>
+        <logger name="org.hibernate.orm.jdbc.error" level="OFF"/>
         <root level="WARN">
             <appender-ref ref="CONSOLE"/>
         </root>

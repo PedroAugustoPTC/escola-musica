@@ -1,5 +1,7 @@
 package br.com.felipeblaft.reports.config;
 
+import br.com.felipeblaft.reports.domain.access.AttemptPolicy;
+import br.com.felipeblaft.reports.domain.access.AttemptScope;
 import br.com.felipeblaft.reports.domain.channel.RetryPolicy;
 import br.com.felipeblaft.reports.domain.common.BusinessParameters;
 import br.com.felipeblaft.reports.port.AccessAttemptRepository;
@@ -35,12 +37,16 @@ import br.com.felipeblaft.reports.service.AccessCodeIssuanceService;
 import br.com.felipeblaft.reports.service.AccessRenewalService;
 import br.com.felipeblaft.reports.service.AudioSendingService;
 import br.com.felipeblaft.reports.service.AuthorizationService;
+import br.com.felipeblaft.reports.service.AuthorshipService;
 import br.com.felipeblaft.reports.service.CodeAuthenticationService;
 import br.com.felipeblaft.reports.service.DocumentGenerationService;
 import br.com.felipeblaft.reports.service.JobProcessorService;
 import br.com.felipeblaft.reports.service.ReportAccessService;
+import br.com.felipeblaft.reports.service.ReportEligibilityService;
 import br.com.felipeblaft.reports.service.SemesterAccessService;
 import br.com.felipeblaft.reports.service.SemesterProcessorService;
+import br.com.felipeblaft.reports.service.TeacherAccessAuditService;
+import br.com.felipeblaft.reports.service.TelegramLinkTerminationService;
 import br.com.felipeblaft.reports.service.TemporaryAudioService;
 import br.com.felipeblaft.reports.usecase.access.EndTelegramLinkUseCase;
 import br.com.felipeblaft.reports.usecase.access.EndWebSessionUseCase;
@@ -73,7 +79,9 @@ import br.com.felipeblaft.reports.usecase.lesson.GetOpenReportUseCase;
 import br.com.felipeblaft.reports.usecase.lesson.RegisterLessonByAudioUseCase;
 import br.com.felipeblaft.reports.usecase.lesson.RequestLessonReportChangeUseCase;
 import br.com.felipeblaft.reports.usecase.lesson.RetryLessonReportUseCase;
-import br.com.felipeblaft.reports.usecase.seed.EmitAccessCodeUseCase;
+import br.com.felipeblaft.reports.usecase.registry.AssignTeacherToStudentUseCase;
+import br.com.felipeblaft.reports.usecase.registry.RegisterStudentUseCase;
+import br.com.felipeblaft.reports.usecase.registry.UpdateStudentUseCase;
 import br.com.felipeblaft.reports.usecase.seed.LoadInitialRegistryUseCase;
 import br.com.felipeblaft.reports.usecase.semester.ApproveSemesterReportUseCase;
 import br.com.felipeblaft.reports.usecase.semester.CancelSemesterReportUseCase;
@@ -82,7 +90,12 @@ import br.com.felipeblaft.reports.usecase.semester.GetSemesterPreviewUseCase;
 import br.com.felipeblaft.reports.usecase.semester.GetSemesterReportUseCase;
 import br.com.felipeblaft.reports.usecase.semester.ListAvailableSemestersUseCase;
 import br.com.felipeblaft.reports.usecase.semester.RequestSemesterReportChangeUseCase;
+import br.com.felipeblaft.reports.usecase.teacher.InactivateTeacherUseCase;
+import br.com.felipeblaft.reports.usecase.teacher.ReactivateTeacherUseCase;
+import br.com.felipeblaft.reports.usecase.teacher.RegisterTeacherUseCase;
+import br.com.felipeblaft.reports.usecase.teacher.UpdateTeacherUseCase;
 import java.time.Duration;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -128,8 +141,35 @@ public class UseCaseConfig {
             AccessAttemptRepository attempts,
             DataProtectionPort protection,
             ClockPort clock,
-            BusinessParameters parameters) {
-        return new AccessAttemptsControlService(attempts, protection, clock, parameters);
+            BusinessParameters parameters,
+            ApplicationProperties properties) {
+        return new AccessAttemptsControlService(
+                attempts,
+                protection,
+                clock,
+                parameters,
+                attemptPolicyOverrides(properties.access()));
+    }
+
+    /**
+     * Políticas das consultas de CPF do professor, lidas de {@code reports.access.cpf-probe.*} e
+     * {@code reports.access.cpf-lookup.*} (R-06); as demais seguem os parâmetros de negócio.
+     */
+    static Map<AttemptScope, AttemptPolicy> attemptPolicyOverrides(
+            ApplicationProperties.Access access) {
+        ApplicationProperties.CpfProbe probe = access.cpfProbe();
+        ApplicationProperties.CpfLookup lookup = access.cpfLookup();
+        return Map.of(
+                AttemptScope.TEACHER_CPF_PROBE,
+                AttemptPolicy.windowed(
+                        probe.maxRefusals(),
+                        Duration.ofMinutes(probe.lockMinutes()),
+                        Duration.ofMinutes(probe.windowMinutes())),
+                AttemptScope.TEACHER_CPF_LOOKUP,
+                AttemptPolicy.windowed(
+                        lookup.maxLookups(),
+                        Duration.ofMinutes(lookup.lockMinutes()),
+                        Duration.ofMinutes(lookup.windowMinutes())));
     }
 
     @Bean
@@ -147,24 +187,42 @@ public class UseCaseConfig {
         return new CodeAuthenticationService(attempts, teachers, protection, clock);
     }
 
-    // ---- Carga inicial
+    @Bean
+    TeacherAccessAuditService teacherAccessAuditService(
+            AuthorshipService authorship, DataProtectionPort protection) {
+        return new TeacherAccessAuditService(authorship, protection);
+    }
+
+    // ---- Carga inicial (orquestra os casos de uso da administração; sem regra própria)
 
     @Bean
+    @SuppressWarnings("java:S107")
     LoadInitialRegistryUseCase loadInitialRegistryUseCase(
+            RegisterTeacherUseCase registerTeacher,
+            UpdateTeacherUseCase updateTeacher,
+            InactivateTeacherUseCase inactivateTeacher,
+            ReactivateTeacherUseCase reactivateTeacher,
+            RegisterStudentUseCase registerStudent,
+            UpdateStudentUseCase updateStudent,
+            AssignTeacherToStudentUseCase assign,
             TeacherRepository teachers,
             StudentRepository students,
             AssignmentRepository assignments,
             DataProtectionPort protection,
-            AccessCodeIssuanceService issuance,
-            ClockPort clock) {
+            TransactionPort transaction) {
         return new LoadInitialRegistryUseCase(
-                teachers, students, assignments, protection, issuance, clock);
-    }
-
-    @Bean
-    EmitAccessCodeUseCase emitAccessCodeUseCase(
-            TeacherRepository teachers, AccessCodeIssuanceService issuance, ClockPort clock) {
-        return new EmitAccessCodeUseCase(teachers, issuance, clock);
+                registerTeacher,
+                updateTeacher,
+                inactivateTeacher,
+                reactivateTeacher,
+                registerStudent,
+                updateStudent,
+                assign,
+                teachers,
+                students,
+                assignments,
+                protection,
+                transaction);
     }
 
     // ---- Acesso
@@ -176,10 +234,11 @@ public class UseCaseConfig {
             WebSessionRepository sessions,
             TelegramLinkRepository links,
             DataProtectionPort protection,
+            TeacherAccessAuditService audit,
             ClockPort clock,
             BusinessParameters parameters) {
         return new SignInPortalUseCase(
-                authentication, renewal, sessions, links, protection, clock, parameters);
+                authentication, renewal, sessions, links, protection, audit, clock, parameters);
     }
 
     @Bean
@@ -205,21 +264,24 @@ public class UseCaseConfig {
             CodeAuthenticationService authentication,
             AccessRenewalService renewal,
             TelegramLinkRepository links,
+            TeacherAccessAuditService audit,
             ClockPort clock) {
-        return new LinkTelegramUseCase(authentication, renewal, links, clock);
+        return new LinkTelegramUseCase(authentication, renewal, links, audit, clock);
     }
 
     @Bean
     IdentifyTelegramTeacherUseCase identifyTeacherTelegramUseCase(
             TelegramLinkRepository links,
             TeacherRepository teachers,
-            AccessRenewalService renewal) {
-        return new IdentifyTelegramTeacherUseCase(links, teachers, renewal);
+            AccessRenewalService renewal,
+            TelegramLinkTerminationService termination) {
+        return new IdentifyTelegramTeacherUseCase(links, teachers, renewal, termination);
     }
 
     @Bean
-    EndTelegramLinkUseCase endTelegramLinkUseCase(TelegramLinkRepository links) {
-        return new EndTelegramLinkUseCase(links);
+    EndTelegramLinkUseCase endTelegramLinkUseCase(
+            TelegramLinkRepository links, TelegramLinkTerminationService termination) {
+        return new EndTelegramLinkUseCase(links, termination);
     }
 
     @Bean
@@ -236,6 +298,12 @@ public class UseCaseConfig {
     // ---- Início e alunos
 
     @Bean
+    ReportEligibilityService reportEligibilityService(
+            TeacherRepository teachers, StudentRepository students) {
+        return new ReportEligibilityService(teachers, students);
+    }
+
+    @Bean
     GetTeacherHomeUseCase getTeacherHomeUseCase(
             StudentRepository students, OpenReportsQueryPort query) {
         return new GetTeacherHomeUseCase(students, query);
@@ -243,16 +311,19 @@ public class UseCaseConfig {
 
     @Bean
     SearchStudentsUseCase searchStudentsUseCase(
-            StudentRepository students, OpenReportsQueryPort query) {
-        return new SearchStudentsUseCase(students, query);
+            StudentRepository students,
+            OpenReportsQueryPort query,
+            ReportEligibilityService eligibility) {
+        return new SearchStudentsUseCase(students, query, eligibility);
     }
 
     @Bean
     GetStudentSummaryUseCase getStudentSummaryUseCase(
             StudentRepository students,
             OpenReportsQueryPort query,
-            AuthorizationService authorization) {
-        return new GetStudentSummaryUseCase(students, query, authorization);
+            AuthorizationService authorization,
+            ReportEligibilityService eligibility) {
+        return new GetStudentSummaryUseCase(students, query, authorization, eligibility);
     }
 
     // ---- Registro de aula (US1): serviços
@@ -326,8 +397,10 @@ public class UseCaseConfig {
             OpenReportsQueryPort open,
             AudioSendingService audioSending,
             JobQueuePort queue,
-            ClockPort clock) {
-        return new RegisterLessonByAudioUseCase(authorization, open, audioSending, queue, clock);
+            ClockPort clock,
+            ReportEligibilityService eligibility) {
+        return new RegisterLessonByAudioUseCase(
+                authorization, open, audioSending, queue, clock, eligibility);
     }
 
     @Bean
@@ -482,8 +555,11 @@ public class UseCaseConfig {
 
     @Bean
     GenerateSemesterReportUseCase generateSemesterReportUseCase(
-            GetSemesterPreviewUseCase preview, JobQueuePort queue, ClockPort clock) {
-        return new GenerateSemesterReportUseCase(preview, queue, clock);
+            GetSemesterPreviewUseCase preview,
+            JobQueuePort queue,
+            ClockPort clock,
+            ReportEligibilityService eligibility) {
+        return new GenerateSemesterReportUseCase(preview, queue, clock, eligibility);
     }
 
     @Bean

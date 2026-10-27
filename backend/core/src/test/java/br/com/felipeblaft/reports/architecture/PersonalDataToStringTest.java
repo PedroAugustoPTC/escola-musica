@@ -3,7 +3,15 @@ package br.com.felipeblaft.reports.architecture;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import br.com.felipeblaft.reports.domain.common.Secret;
+import br.com.felipeblaft.reports.domain.registry.BirthDate;
+import br.com.felipeblaft.reports.domain.registry.BrazilianPhone;
 import br.com.felipeblaft.reports.domain.registry.Cpf;
+import br.com.felipeblaft.reports.domain.registry.EmailAddress;
+import br.com.felipeblaft.reports.domain.registry.Guardian;
+import br.com.felipeblaft.reports.domain.registry.Instrument;
+import br.com.felipeblaft.reports.domain.registry.PersonName;
+import br.com.felipeblaft.reports.domain.registry.ProtectedCpf;
+import br.com.felipeblaft.reports.domain.registry.StudentData;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
@@ -35,7 +43,7 @@ class PersonalDataToStringTest {
             Map.of(
                     "correlationId", "req-1",
                     "errorCode", "TECHNICAL",
-                    "operation", "TECHNICAL",
+                    "operation", "ADMIN_SIGN_IN",
                     "originHash", "0123456789abcdef".repeat(4),
                     // nome de seção e de campo da carga inicial, nunca o valor
                     "section", "students",
@@ -74,6 +82,84 @@ class PersonalDataToStringTest {
         assertThat(leaks).as("records cujo toString revela dado pessoal").isEmpty();
     }
 
+    /**
+     * Classes (não records) com estado de dado pessoal declaram o próprio {@code toString}: sem
+     * isso, a representação padrão do objeto poderia vazar um campo quando alguém acrescentar um.
+     */
+    @Test
+    void stateClassesOfRegistryDeclareTheirOwnToString() {
+        List<String> missing = new ArrayList<>();
+        int checked = 0;
+        for (JavaClass type :
+                new ClassFileImporter()
+                        .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
+                        .importPackages(BASE + ".domain.registry")) {
+            Class<?> reflected = type.reflect();
+            boolean hasState =
+                    java.util.Arrays.stream(reflected.getDeclaredFields())
+                            .anyMatch(
+                                    f ->
+                                            !java.lang.reflect.Modifier.isStatic(f.getModifiers())
+                                                    && !f.isSynthetic());
+            if (type.isRecord()
+                    || type.isEnum()
+                    || type.isInterface()
+                    || type.isAnonymousClass()
+                    || !hasState) {
+                continue;
+            }
+            checked++;
+            try {
+                reflected.getDeclaredMethod("toString");
+            } catch (NoSuchMethodException error) {
+                missing.add(type.getName());
+            }
+        }
+        assertThat(checked).as("classes verificadas").isGreaterThanOrEqualTo(8);
+        assertThat(missing).as("classes sem toString próprio").isEmpty();
+    }
+
+    /** Valores de objeto montados com sentinela nunca aparecem na representação textual. */
+    @Test
+    void valueObjectsDoNotRevealTheirContentInToString() {
+        LocalDate today = LocalDate.of(2026, 9, 21);
+        PersonName name = PersonName.of(SENTINEL);
+        Guardian guardian =
+                new Guardian(
+                        name,
+                        BrazilianPhone.of("11987654321"),
+                        EmailAddress.of(SENTINEL.toLowerCase(java.util.Locale.ROOT) + "@x.com"));
+        Object[] samples = {
+            name,
+            guardian.phone(),
+            guardian.email(),
+            guardian,
+            BirthDate.parse("2014-05-10", today),
+            Instrument.of(SENTINEL),
+            Cpf.of("529.982.247-25"),
+            new ProtectedCpf(SENTINEL.getBytes(java.nio.charset.StandardCharsets.UTF_8), SENTINEL),
+            StudentData.of(
+                    SENTINEL,
+                    "2014-05-10",
+                    "529.982.247-25",
+                    SENTINEL,
+                    SENTINEL,
+                    "11987654321",
+                    "a@x.com",
+                    today)
+        };
+        for (Object sample : samples) {
+            String text = sample.toString();
+            assertThat(text)
+                    .as(sample.getClass().getSimpleName())
+                    .doesNotContain(SENTINEL)
+                    .doesNotContain(SENTINEL.toLowerCase(java.util.Locale.ROOT))
+                    .doesNotContain("987654321")
+                    .doesNotContain("52998224725")
+                    .doesNotContain("2014");
+        }
+    }
+
     /** Constrói o record com sentinelas em todo texto, recursivamente. */
     private static Object sample(Class<?> type) throws Exception {
         RecordComponent[] components = type.getRecordComponents();
@@ -97,6 +183,21 @@ class PersonalDataToStringTest {
         }
         if (type == Cpf.class) {
             return Cpf.of("529.982.247-25");
+        }
+        if (type == PersonName.class) {
+            return PersonName.of(SENTINEL);
+        }
+        if (type == BrazilianPhone.class) {
+            return BrazilianPhone.of("11987654321");
+        }
+        if (type == EmailAddress.class) {
+            return EmailAddress.of("sentinel@x.com");
+        }
+        if (type == BirthDate.class) {
+            return BirthDate.parse("2014-05-10", LocalDate.of(2026, 9, 21));
+        }
+        if (type == Instrument.class) {
+            return Instrument.of(SENTINEL);
         }
         if (type == UUID.class) {
             return UUID.randomUUID();

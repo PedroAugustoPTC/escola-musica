@@ -31,5 +31,10 @@ public interface StudentRepository {
      */
     boolean insertIfAbsent(Student student);
 
+    /**
+     * Grava o aluno. Se outro aluno já tem o mesmo resumo de CPF (corrida entre duas edições ou
+     * cadastros), lança {@code DomainException} com {@code DUPLICATE_CPF} e o nome do aluno que o
+     * tem em {@code details} ("name"); a transação do chamador deve ser desfeita.
+     */
     void save(Student student);
 }

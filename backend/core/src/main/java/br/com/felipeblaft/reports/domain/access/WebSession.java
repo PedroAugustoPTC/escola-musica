@@ -19,6 +19,8 @@ public class WebSession {
     private final Instant createdAt;
     private Instant lastUsedAt;
     private Instant expiresAt;
+    private Instant revokedAt;
+    private SessionRevocationReason revocationReason;
 
     public WebSession(
             UUID id,
@@ -27,12 +29,33 @@ public class WebSession {
             Instant createdAt,
             Instant lastUsedAt,
             Instant expiresAt) {
+        this(id, teacherId, tokenHash, createdAt, lastUsedAt, expiresAt, null, null);
+    }
+
+    /**
+     * Reconstrói a sessão com o estado de revogação (R-08): a data e o motivo vêm juntos ou não
+     * vêm.
+     */
+    public WebSession(
+            UUID id,
+            UUID teacherId,
+            String tokenHash,
+            Instant createdAt,
+            Instant lastUsedAt,
+            Instant expiresAt,
+            Instant revokedAt,
+            SessionRevocationReason revocationReason) {
+        if ((revokedAt == null) != (revocationReason == null)) {
+            throw new IllegalArgumentException("a revogação exige data e motivo juntos");
+        }
         this.id = Objects.requireNonNull(id);
         this.teacherId = Objects.requireNonNull(teacherId);
         this.tokenHash = Objects.requireNonNull(tokenHash);
         this.createdAt = Objects.requireNonNull(createdAt);
         this.lastUsedAt = Objects.requireNonNull(lastUsedAt);
         this.expiresAt = Objects.requireNonNull(expiresAt);
+        this.revokedAt = revokedAt;
+        this.revocationReason = revocationReason;
     }
 
     public static WebSession create(
@@ -41,8 +64,36 @@ public class WebSession {
                 GeneratorId.create(), teacherId, tokenHash, now, now, now.plus(inactivity));
     }
 
+    /** Válida = não revogada e dentro da expiração deslizante. */
     public boolean validAt(Instant instant) {
-        return instant.isBefore(expiresAt);
+        return revokedAt == null && instant.isBefore(expiresAt);
+    }
+
+    /**
+     * Marca a sessão como revogada, sem removê-la (R-08). A primeira revogação prevalece; devolve
+     * {@code true} se esta chamada a marcou.
+     */
+    public boolean revoke(SessionRevocationReason reason, Instant now) {
+        Objects.requireNonNull(reason);
+        Objects.requireNonNull(now);
+        if (revokedAt != null) {
+            return false;
+        }
+        revokedAt = now;
+        revocationReason = reason;
+        return true;
+    }
+
+    public boolean revoked() {
+        return revokedAt != null;
+    }
+
+    public Instant revokedAt() {
+        return revokedAt;
+    }
+
+    public SessionRevocationReason revocationReason() {
+        return revocationReason;
     }
 
     /**

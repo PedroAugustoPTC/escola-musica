@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { routes } from '../../src/app/routes';
+import { msg } from '../../src/messages/messages';
 import { LIGHT_SESSION, renderRoutes, mockApi } from '../utils';
 
 const HOME = {
@@ -51,14 +52,36 @@ describe('TelaEntrar (01)', () => {
     expect((post!.init.headers as Record<string, string>)['X-CSRF-TOKEN']).toBe('test-token');
   });
 
+  it('mostra o link para a área administrativa e nenhuma menção à secretaria', async () => {
+    mockApi({});
+    renderRoutes(routes, '/sign-in');
+    const link = screen.getByRole('link', { name: 'É administrador? Acesse a área administrativa.' });
+    expect(link).toHaveAttribute('href', '/admin/sign-in');
+    expect(link).toHaveTextContent(msg('ADMIN_LINK_FROM_SIGN_IN'));
+    expect(document.body.textContent).not.toMatch(/secretaria/i);
+  });
+
+  it('o link da área administrativa leva a /admin/sign-in', async () => {
+    mockApi({});
+    const user = userEvent.setup();
+    const { router } = renderRoutes(
+      [
+        ...routes.filter((route) => route.path === '/sign-in'),
+        { path: '/admin/sign-in', element: <p>entrada do administrador</p> },
+      ],
+      '/sign-in',
+    );
+    await user.click(screen.getByRole('link', { name: 'É administrador? Acesse a área administrativa.' }));
+    expect(router.state.location.pathname).toBe('/admin/sign-in');
+  });
+
   it('código inválido (01b) mostra a mensagem do catálogo no campo', async () => {
     mockApi({
       'POST /api/v1/session': {
         status: 401,
         body: {
           code: 'INVALID_CODE',
-          message:
-            'Código inválido ou vencido. Procure o administrador.',
+          message: 'Código inválido ou vencido. Procure o administrador.',
         },
       },
     });
@@ -67,7 +90,9 @@ describe('TelaEntrar (01)', () => {
     await user.type(screen.getByLabelText('Código de acesso'), 'ZZZZZZZZ');
     await user.click(screen.getByRole('button', { name: 'Entrar' }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Código inválido ou vencido. Procure o administrador.');
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Código inválido ou vencido. Procure o administrador.',
+    );
     expect(screen.getByLabelText('Código de acesso')).toHaveAttribute('aria-invalid', 'true');
   });
 

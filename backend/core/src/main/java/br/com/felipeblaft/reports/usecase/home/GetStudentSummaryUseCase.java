@@ -6,6 +6,7 @@ import br.com.felipeblaft.reports.domain.registry.Student;
 import br.com.felipeblaft.reports.port.OpenReportsQueryPort;
 import br.com.felipeblaft.reports.port.StudentRepository;
 import br.com.felipeblaft.reports.service.AuthorizationService;
+import br.com.felipeblaft.reports.service.ReportEligibilityService;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -18,17 +19,34 @@ public class GetStudentSummaryUseCase {
     private final StudentRepository students;
     private final OpenReportsQueryPort query;
     private final AuthorizationService authorization;
+    private final ReportEligibilityService eligibility;
 
+    /**
+     * Sem verificação de situação do professor: só para os cenários da 001; produção usa o
+     * completo.
+     */
     public GetStudentSummaryUseCase(
             StudentRepository students,
             OpenReportsQueryPort query,
             AuthorizationService authorization) {
+        this(students, query, authorization, null);
+    }
+
+    public GetStudentSummaryUseCase(
+            StudentRepository students,
+            OpenReportsQueryPort query,
+            AuthorizationService authorization,
+            ReportEligibilityService eligibility) {
+        this.eligibility = eligibility;
         this.students = Objects.requireNonNull(students);
         this.query = Objects.requireNonNull(query);
         this.authorization = Objects.requireNonNull(authorization);
     }
 
     public StudentSummary run(UUID teacherId, UUID studentId) {
+        if (eligibility != null) {
+            eligibility.requireActiveTeacher(teacherId);
+        }
         authorization.requireAssignment(teacherId, studentId);
         Student student =
                 students.searchById(studentId)

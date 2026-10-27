@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 
 /**
- * Migração {@code V13} (feature 005, verificação 1 do plano): a {@code CHECK} {@code
+ * Migração {@code V15} (feature 005, verificação 1 do plano): a {@code CHECK} {@code
  * ck_channel_action_type} passa a aceitar {@code DELETE_MESSAGE}, o repositório grava e lê o tipo
  * novo (com a compensação e a falha {@code MESSAGE_NOT_DELETABLE}) e a restrição continua barrando
  * qualquer outro valor.

@@ -55,4 +55,41 @@ class AccessAttemptTest {
         assertThat(attempt.lockEnded(T0)).isFalse();
         assertThat(attempt.id()).isNotNull();
     }
+
+    @Test
+    void legacyRowWithoutWindowStartIsHandledByBothPolicies() {
+        // linha anterior à V11: falhas contadas, sem início de janela
+        AccessAttempt legacy =
+                new AccessAttempt(
+                        java.util.UUID.randomUUID(),
+                        AttemptScope.TEACHER_CPF_PROBE,
+                        Channel.WEB,
+                        "origin",
+                        3,
+                        null,
+                        null,
+                        T0);
+        AttemptPolicy windowed = AttemptPolicy.windowed(5, FIFTEEN, FIFTEEN);
+
+        legacy.registerFailure(T0.plusSeconds(1), windowed);
+
+        assertThat(legacy.failedAttempts()).isEqualTo(4);
+        assertThat(legacy.windowStartedAt()).isEqualTo(T0.plusSeconds(1));
+        legacy.registerFailure(T0.plusSeconds(2), windowed);
+        assertThat(legacy.blockedUntil()).isNotNull();
+
+        AccessAttempt consecutive =
+                new AccessAttempt(
+                        java.util.UUID.randomUUID(),
+                        AttemptScope.TEACHER_CODE,
+                        Channel.WEB,
+                        "origin",
+                        4,
+                        null,
+                        null,
+                        T0);
+        consecutive.registerFailure(T0.plusSeconds(1), 5, FIFTEEN);
+        assertThat(consecutive.blockedUntil()).isNotNull();
+        assertThat(consecutive.windowStartedAt()).isNull();
+    }
 }

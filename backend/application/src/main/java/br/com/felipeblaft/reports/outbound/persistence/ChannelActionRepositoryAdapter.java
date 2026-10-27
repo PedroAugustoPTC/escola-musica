@@ -5,7 +5,6 @@ import br.com.felipeblaft.reports.domain.channel.ChannelActionOrigin;
 import br.com.felipeblaft.reports.domain.channel.ChannelActionState;
 import br.com.felipeblaft.reports.domain.channel.ChannelActionType;
 import br.com.felipeblaft.reports.domain.common.Channel;
-import br.com.felipeblaft.reports.outbound.PendingImplementation;
 import br.com.felipeblaft.reports.port.ChannelActionRepository;
 import jakarta.persistence.EntityManager;
 import java.time.Duration;
@@ -149,8 +148,9 @@ class ChannelActionRepositoryAdapter implements ChannelActionRepository {
     }
 
     @Override
+    @Transactional
     public int discardPendingByChat(long chatId, Instant now) {
-        throw PendingImplementation.of("W-B");
+        return jpa.discardPendingByChat(chatId, now, ChannelAction.LINK_UNDONE_CODE);
     }
 
     private ChannelAction read(ChannelActionEntity e) {

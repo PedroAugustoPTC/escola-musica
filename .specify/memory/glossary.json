@@ -2040,6 +2040,20 @@
       ],
       "reason": "Arquivos gerados no build (npm run generate) a partir do contrato OpenAPI e do catálogo de mensagens, ambos varridos na origem e ignorados pelo Git; só refletem os nomes que o guardião já examina nos geradores.",
       "constitutionCategory": "nomes de terceiros ou exigidos por ferramenta (permitido pelo Princípio VI)"
+    },
+    {
+      "id": "log-masking-field-names",
+      "scope": "string-literal: nomes de campo de log que o mascarador cobre, incluindo o nome em português de campo de senha",
+      "terms": ["senha"],
+      "reason": "O mascarador de log (defesa em profundidade, FR-039) esconde por completo o campo de senha mesmo quando algum registro antigo ou de terceiro o nomeie em português; o literal é dado de configuração do mascarador, não identificador.",
+      "constitutionCategory": "texto do usuário (explicitamente em português no Princípio VI)",
+      "mode": "term",
+      "where": "literal",
+      "paths": [
+        "backend/application/src/main/java/**/SensitiveDataMaskingConverter.java",
+        "backend/application/src/test/java/**/SensitiveDataMaskingConverterTest.java"
+      ],
+      "appliesTo": ["java"]
     }
   ],
   "contextual": [

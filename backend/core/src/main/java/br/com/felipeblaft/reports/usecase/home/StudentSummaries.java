@@ -20,6 +20,14 @@ record StudentSummaries(Map<UUID, LocalDate> lastLessons, Set<UUID> studentsWith
                 open.stream().map(OpenReport::studentId).collect(Collectors.toSet()));
     }
 
+    /**
+     * Só os relatórios de aluno ainda associado ao professor; os demais ficam congelados (R-23).
+     */
+    static List<OpenReport> ofAssociated(List<OpenReport> open, List<Student> associated) {
+        Set<UUID> ids = associated.stream().map(Student::id).collect(Collectors.toSet());
+        return open.stream().filter(report -> ids.contains(report.studentId())).toList();
+    }
+
     StudentSummary summary(Student student) {
         return StudentSummary.of(
                 student,

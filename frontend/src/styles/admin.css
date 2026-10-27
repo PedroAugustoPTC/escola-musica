@@ -1,0 +1,577 @@
+/* Área administrativa (feature 005). Só tokens de tokens.css; mobile-first a partir de 390 px;
+   alvos de toque ≥ 44 px; nenhuma informação só por cor (situação leva ícone e texto). Ponto de
+   quebra largo: 900 px (o mesmo do portal); cartões empilhados abaixo de 640 px. */
+
+/* ---------- Moldura ---------- */
+
+.admin-layout {
+  flex-direction: column;
+}
+
+.admin-layout--wide {
+  flex-direction: row;
+}
+
+.admin-layout__header {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 8px 8px 12px;
+  background: var(--sf);
+  border-bottom: 1px solid var(--bd);
+}
+
+.admin-layout__brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.admin-layout__identity {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-layout__seal {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  border: 1px solid var(--gd);
+  border-radius: 999px;
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gs);
+  white-space: nowrap;
+}
+
+.admin-layout__name {
+  font-size: 14px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-layout__actions {
+  display: flex;
+  gap: 4px;
+}
+
+.admin-layout__action {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--tx);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-layout__action:hover:not(:disabled) {
+  background: var(--sf2);
+}
+
+.admin-layout__action[aria-pressed='true'] {
+  border-color: var(--gd);
+}
+
+.admin-layout__action .icon {
+  color: var(--gs);
+}
+
+/* Em telas estreitas os botões do cabeçalho mostram só o ícone; o texto continua para leitores de tela. */
+.admin-layout--narrow .admin-layout__action span:not(.icon) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.admin-layout__side {
+  flex: none;
+  width: 264px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 28px 16px 20px;
+  background: var(--sf);
+  border-right: 1px solid var(--bd);
+  overflow-y: auto;
+}
+
+.admin-layout__side .admin-layout__brand {
+  justify-content: flex-start;
+}
+
+.admin-layout__side .admin-layout__actions {
+  flex-direction: column;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--bd);
+}
+
+.admin-layout__side .admin-layout__action {
+  justify-content: flex-start;
+}
+
+.admin-layout__body {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-layout__main {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-layout__skip:focus {
+  position: fixed;
+  z-index: 60;
+  top: 8px;
+  left: 8px;
+  width: auto;
+  height: auto;
+  padding: 10px 14px;
+  clip: auto;
+  margin: 0;
+  background: var(--sf);
+  border: 2px solid var(--focus);
+  border-radius: 6px;
+}
+
+/* ---------- Navegação ---------- */
+
+.admin-nav__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 0 12px;
+  border-radius: 6px;
+  color: var(--mu);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.admin-nav__item .icon {
+  color: var(--gs);
+}
+
+.admin-nav__item[aria-current='page'] {
+  color: var(--gs);
+  background: var(--sf2);
+  box-shadow: inset 3px 0 0 var(--gd);
+}
+
+.admin-nav--side {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-nav--bottom {
+  flex: none;
+  min-height: 68px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: var(--sf);
+  border-top: 1px solid var(--bd);
+}
+
+.admin-nav--bottom .admin-nav__item {
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: 6px 4px;
+  font-size: 13px;
+  text-align: center;
+  border-radius: 0;
+}
+
+.admin-nav--bottom .admin-nav__item[aria-current='page'] {
+  box-shadow: inset 0 3px 0 var(--gd);
+}
+
+/* ---------- Relógio da sessão ---------- */
+
+.session-clock {
+  flex: none;
+  padding: 8px 20px 0;
+}
+
+.session-clock__time {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--mu);
+}
+
+.session-clock__warning {
+  margin-top: 8px;
+}
+
+/* ---------- Cabeçalho de página, barra de ferramentas e lista ---------- */
+
+.admin-page-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (min-width: 640px) {
+  .admin-toolbar {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+}
+
+.admin-search {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+  max-width: 560px;
+}
+
+.admin-search .search {
+  flex: 1;
+  max-width: none;
+}
+
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--gd);
+  border-radius: 6px;
+  overflow: hidden;
+  align-self: flex-start;
+}
+
+.segmented__option {
+  min-height: 44px;
+  padding: 0 16px;
+  border: none;
+  border-right: 1px solid var(--gd);
+  background: transparent;
+  color: var(--gs);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.segmented__option:last-child {
+  border-right: none;
+}
+
+.segmented__option[aria-pressed='true'] {
+  background: var(--pbg);
+  color: var(--ptx);
+}
+
+.admin-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-list__item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  border: 1px solid var(--bd);
+  border-radius: 8px;
+  background: var(--sf);
+}
+
+.admin-list__title {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  font-weight: 600;
+  font-size: 17px;
+}
+
+.admin-list__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  align-items: center;
+  font-size: 14px;
+  color: var(--mu);
+}
+
+.admin-list__meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (min-width: 640px) {
+  .admin-list__item {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .admin-list__main {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.admin-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-badge--active {
+  background: var(--okbg);
+  color: var(--ok);
+}
+
+.status-badge--inactive {
+  background: var(--sf2);
+  color: var(--mu);
+  border: 1px solid var(--bd);
+}
+
+.status-badge--pending {
+  background: var(--warnbg);
+  color: var(--warn);
+}
+
+/* ---------- Formulários ---------- */
+
+.admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 560px;
+}
+
+.admin-form__actions {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 8px;
+}
+
+@media (min-width: 640px) {
+  .admin-form__actions {
+    flex-direction: row;
+    justify-content: flex-start;
+  }
+}
+
+.admin-form__summary {
+  scroll-margin-top: 16px;
+}
+
+.admin-form__summary ul {
+  margin: 4px 0 0;
+  padding-left: 20px;
+}
+
+.checkbox-field {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: 44px;
+}
+
+.checkbox-field input {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  margin: 10px 0 0;
+  accent-color: var(--gs);
+}
+
+.checkbox-field label {
+  padding: 10px 0;
+}
+
+/* ---------- Código exibido uma única vez ---------- */
+
+.secret-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px 20px;
+  border: 1px solid var(--gd);
+  border-radius: 8px;
+  background: var(--sf);
+  max-width: 560px;
+}
+
+.secret-panel__code {
+  margin: 0;
+  padding: 16px;
+  border-radius: 6px;
+  background: var(--sf2);
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-align: center;
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+
+.secret-panel__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+@media (min-width: 640px) {
+  .secret-panel__actions {
+    flex-direction: row;
+  }
+}
+
+/* ---------- Início e detalhe ---------- */
+
+.admin-shortcuts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: 16px;
+}
+
+.admin-shortcuts__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--gs);
+}
+
+.admin-shortcuts__head .card-title {
+  color: var(--tx);
+}
+
+.admin-shortcuts__count {
+  margin: 0;
+  color: var(--mu);
+}
+
+.admin-shortcuts__number {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 40px;
+  font-weight: 600;
+  color: var(--tx);
+}
+
+.admin-shortcuts__links {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+.admin-detail__facts {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+@media (min-width: 640px) {
+  .admin-detail__facts {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.admin-detail__facts dt {
+  font-size: 13px;
+  color: var(--mu);
+}
+
+.admin-detail__facts dd {
+  margin: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-teacher-options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.blocked-countdown {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}

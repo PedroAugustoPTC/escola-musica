@@ -16,7 +16,7 @@ administração, com o ator "sistema" de origem `INITIAL_LOAD`. Nenhum papel e n
 | `rotate-cpf-key` (novo) | — | rotação das chaves do CPF (seção 4) |
 
 Para `seed`, o ator é `Actor.system(INITIAL_LOAD)`: o autor do registro de autoria é "sistema" e o canal
-"carga inicial". `Actor.system` só pode ser criado por `inbound.seed` e pelo bootstrap (regra ArchUnit).
+"carga inicial". `Actor.system` só pode ser criado por `inbound.seed`, pelo bootstrap e pela própria `LoadInitialRegistryUseCase` (que cria o ator `INITIAL_LOAD` internamente; regra ArchUnit).
 
 ## 2. Formato do arquivo (acrescenta dois campos opcionais ao aluno)
 
@@ -30,7 +30,7 @@ Para `seed`, o ator é `Actor.system(INITIAL_LOAD)`: o autor do registro de auto
       "birthDate": "2014-05-10",
       "guardianName": "Responsável Fictício",
       "guardianPhone": "(11) 91234-5678",
-      "guardianEmail": "responsavel@example.test",
+      "guardianEmail": "guardian@example.test",
       "instrument": "Piano",
       "teachers": ["clara@example.test"]
     }

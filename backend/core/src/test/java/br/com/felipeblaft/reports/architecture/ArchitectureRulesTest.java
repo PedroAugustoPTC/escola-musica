@@ -219,15 +219,11 @@ class ArchitectureRulesTest {
             Set.of("ValidateAdministratorSessionUseCase");
 
     /**
-     * Chamadas de {@code TelegramLinkRepository.remove} que ainda estão fora do serviço de
-     * encerramento. O fluxo W-B (T093 a T097) as migra para o {@code
-     * TelegramLinkTerminationService} e esvazia este conjunto; {@link
-     * #linkRemovalExemptionsAreStillNeeded()} reprova a isenção que sobrar.
+     * Chamadas de {@code TelegramLinkRepository.remove} fora do serviço de encerramento. Está
+     * vazio: todo fim de vínculo passa pelo {@code TelegramLinkTerminationService}; {@link
+     * #linkRemovalExemptionsAreStillNeeded()} reprova a isenção que um dia sobrar.
      */
-    private static final Set<String> PENDING_LINK_REMOVAL =
-            Set.of(
-                    BASE + ".usecase.access.EndTelegramLinkUseCase",
-                    BASE + ".usecase.access.IdentifyTelegramTeacherUseCase");
+    private static final Set<String> PENDING_LINK_REMOVAL = Set.of();
 
     private static final DescribedPredicate<JavaClass> ADMINISTRATION_USE_CASES =
             DescribedPredicate.describe(

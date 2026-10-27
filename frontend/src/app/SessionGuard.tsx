@@ -2,7 +2,7 @@ import { useEffect, type ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Navigate, useLocation, useNavigate } from 'react-router';
 import { SESSION_EXPIRED_EVENT } from '../services/apiClient';
-import { SESSION_KEY, useSession } from '../services/session';
+import { forgetTeacherSession, useSession } from '../services/session';
 import { LoadingState } from '../components/LoadingState';
 import { ErrorState } from '../components/ErrorState';
 
@@ -30,8 +30,7 @@ export function SessionGuard({ children }: { children: ReactNode }) {
   useEffect(() => {
     const onExpire = (event: Event) => {
       const reason = (event as CustomEvent<string>).detail;
-      client.clear();
-      client.setQueryData(SESSION_KEY, null);
+      forgetTeacherSession(client);
       navigate(signInRoute(destination, reason), { replace: true });
     };
     window.addEventListener(SESSION_EXPIRED_EVENT, onExpire);

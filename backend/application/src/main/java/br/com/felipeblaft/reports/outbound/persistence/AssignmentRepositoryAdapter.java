@@ -1,11 +1,11 @@
 package br.com.felipeblaft.reports.outbound.persistence;
 
 import br.com.felipeblaft.reports.domain.registry.TeacherStudent;
-import br.com.felipeblaft.reports.outbound.PendingImplementation;
 import br.com.felipeblaft.reports.port.AssignmentRepository;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 class AssignmentRepositoryAdapter implements AssignmentRepository {
@@ -27,17 +27,18 @@ class AssignmentRepositoryAdapter implements AssignmentRepository {
     }
 
     @Override
+    @Transactional
     public boolean delete(UUID teacherId, UUID studentId) {
-        throw PendingImplementation.of("W-G");
+        return jpa.deleteByPair(teacherId, studentId) > 0;
     }
 
     @Override
     public List<UUID> listTeachersOfStudent(UUID studentId) {
-        throw PendingImplementation.of("W-G");
+        return jpa.listTeachersOfStudent(studentId);
     }
 
     @Override
     public int countActiveTeachers(UUID studentId) {
-        throw PendingImplementation.of("W-G");
+        return jpa.countActiveTeachers(studentId);
     }
 }

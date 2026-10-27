@@ -2,6 +2,7 @@ package br.com.felipeblaft.reports.domain.access;
 
 import java.time.Instant;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -46,6 +47,21 @@ public record AuthorshipRecord(
     public static final String AUTHORIZATION_DENIED = "AUTHORIZATION_DENIED";
     public static final String CPF_REFUSED_OTHER_STUDENT = "CPF_REFUSED_OTHER_STUDENT";
 
+    /**
+     * Operações e eventos que podem levar o resumo da origem; espelha, e o teste compara, o CHECK
+     * {@code ck_authorship_record_origin_hash_event} (V10).
+     */
+    public static final Set<String> ORIGIN_HASH_EVENTS =
+            Set.of(
+                    Operation.ADMIN_SIGN_IN.name(),
+                    Operation.ADMIN_ACTIVATE.name(),
+                    Operation.ADMIN_SIGN_OUT.name(),
+                    Operation.ADMIN_CHANGE_PASSWORD.name(),
+                    Operation.TEACHER_SIGN_IN.name(),
+                    TEACHER_LINK_TELEGRAM,
+                    ATTEMPT_BLOCKED,
+                    AUTHORIZATION_DENIED);
+
     private static final Pattern CODE = Pattern.compile("[A-Z][A-Z0-9_]{0,47}");
     private static final Pattern ORIGIN_HASH = Pattern.compile("[0-9a-f]{64}");
     private static final Pattern UUID_FORM =
@@ -75,6 +91,9 @@ public record AuthorshipRecord(
         }
         if (originHash != null && !ORIGIN_HASH.matcher(originHash).matches()) {
             throw new IllegalArgumentException("resumo de origem de autoria fora do formato");
+        }
+        if (originHash != null && !ORIGIN_HASH_EVENTS.contains(operation)) {
+            throw new IllegalArgumentException("operação não pode levar resumo de origem");
         }
         if (!validCorrelation(correlationId)) {
             throw new IllegalArgumentException("identificador de correlação fora do formato");

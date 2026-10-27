@@ -1,9 +1,19 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { ApiError, api, request, type Schemas } from './apiClient';
+import { ADMIN_QUERY_ROOT } from './admin/session';
 
 export type SessionDto = Schemas['SessionDto'];
 
 export const SESSION_KEY = ['session'] as const;
+
+/**
+ * Esquece tudo do professor e deixa a sessão como "sem sessão", sem tocar no cache do administrador
+ * (raiz `admin`): cada guarda limpa só o seu cache.
+ */
+export function forgetTeacherSession(client: QueryClient): void {
+  client.removeQueries({ predicate: (query) => query.queryKey[0] !== ADMIN_QUERY_ROOT });
+  client.setQueryData(SESSION_KEY, null);
+}
 
 /** Sessão atual; `null` quando não há sessão (401). */
 export function useSession() {
@@ -28,7 +38,7 @@ export function useSignIn() {
     mutationFn: (code) =>
       request<SessionDto>('/session', { method: 'POST', body: { code }, ignore401: true }),
     onSuccess: (session) => {
-      client.clear();
+      client.removeQueries({ predicate: (query) => query.queryKey[0] !== ADMIN_QUERY_ROOT });
       client.setQueryData(SESSION_KEY, session);
     },
   });
@@ -39,9 +49,6 @@ export function useEndSession() {
   const client = useQueryClient();
   return useMutation<void, ApiError, void>({
     mutationFn: () => api.delete<void>('/session'),
-    onSuccess: () => {
-      client.clear();
-      client.setQueryData(SESSION_KEY, null);
-    },
+    onSuccess: () => forgetTeacherSession(client),
   });
 }

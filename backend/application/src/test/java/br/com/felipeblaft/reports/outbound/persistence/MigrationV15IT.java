@@ -12,13 +12,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Feature 005, {@code V13__channel_action_delete_message.sql}: antes da migração o banco recusa o
+ * Feature 005, {@code V15__channel_action_delete_message.sql}: antes da migração o banco recusa o
  * tipo {@code DELETE_MESSAGE}; depois aceita, sem mexer nas linhas existentes, no nome da restrição
  * nem nos tipos anteriores.
  */
-class MigrationV13IT {
+class MigrationV15IT {
 
-    private static final String SCHEMA = "migration_v13_test";
+    private static final String SCHEMA = "migration_v15_test";
 
     private final MigrationTestSupport db = new MigrationTestSupport(SCHEMA);
 
@@ -44,13 +44,13 @@ class MigrationV13IT {
     }
 
     @Test
-    void beforeV13TheDatabaseRefusesTheNewType() {
+    void beforeV15TheDatabaseRefusesTheNewType() {
         assertThatThrownBy(() -> channelAction("DELETE_MESSAGE"))
                 .hasMessageContaining("ck_channel_action_type");
     }
 
     @Test
-    void afterV13TheNewTypeIsAcceptedAndExistingRowsSurvive() throws Exception {
+    void afterV15TheNewTypeIsAcceptedAndExistingRowsSurvive() throws Exception {
         assertThat(channelAction("STEP_MESSAGE")).isEqualTo(1);
 
         db.flyway(null).migrate();
@@ -65,7 +65,7 @@ class MigrationV13IT {
     }
 
     @Test
-    void v13OnlyReplacesTheTypeConstraintKeepingItsName() throws Exception {
+    void v15OnlyReplacesTheTypeConstraintKeepingItsName() throws Exception {
         MigrationTestSupport.Catalog before = db.catalog();
 
         db.flyway(null).migrate();

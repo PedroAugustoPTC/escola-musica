@@ -1,9 +1,8 @@
 package br.com.felipeblaft.reports.service;
 
 import br.com.felipeblaft.reports.domain.access.AccessCode;
+import br.com.felipeblaft.reports.domain.access.CodeRejectedException;
 import br.com.felipeblaft.reports.domain.common.Channel;
-import br.com.felipeblaft.reports.domain.common.DomainException;
-import br.com.felipeblaft.reports.domain.common.ErrorCode;
 import br.com.felipeblaft.reports.domain.registry.Teacher;
 import br.com.felipeblaft.reports.port.ClockPort;
 import br.com.felipeblaft.reports.port.DataProtectionPort;
@@ -14,9 +13,9 @@ import java.util.Optional;
 
 /**
  * Validação do código de acesso, a mesma nos dois canais (FR-004, FR-007): bloqueio verificado
- * antes do código; código inexistente, fora do formato ou de professor inativo conta como tentativa
- * incorreta; código vencido é recusado com a mesma mensagem do inválido (FR-042). O código nunca é
- * consumido.
+ * antes do código; código inexistente, fora do formato, substituído, de professor inativo ou
+ * vencido conta como tentativa incorreta e é recusado com a mesma resposta, de modo que o bloqueio
+ * não revele qual deles ocorreu (FR-042). O código nunca é consumido.
  */
 public class CodeAuthenticationService {
 
@@ -46,11 +45,12 @@ public class CodeAuthenticationService {
                         .filter(Teacher::active);
         if (teacher.isEmpty()) {
             attempts.registerFailure(channel, origin);
-            throw new DomainException(ErrorCode.INVALID_CODE);
+            throw CodeRejectedException.unknown();
         }
         if (!teacher.get().validCodeAt(now)) {
-            // vencido não se distingue de inválido (FR-042); o tratamento completo é do fluxo W-B
-            throw new DomainException(ErrorCode.INVALID_CODE);
+            // vencido conta como tentativa, igual ao inexistente (FR-042)
+            attempts.registerFailure(channel, origin);
+            throw CodeRejectedException.expired(teacher.get().id());
         }
         attempts.registerSuccess(channel, origin);
         return teacher.get();

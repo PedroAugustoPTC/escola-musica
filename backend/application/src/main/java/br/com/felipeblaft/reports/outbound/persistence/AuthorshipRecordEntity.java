@@ -1,0 +1,95 @@
+package br.com.felipeblaft.reports.outbound.persistence;
+
+import br.com.felipeblaft.reports.domain.access.ActionOrigin;
+import br.com.felipeblaft.reports.domain.access.AuthorshipRecord;
+import br.com.felipeblaft.reports.domain.access.AuthorshipResult;
+import br.com.felipeblaft.reports.domain.access.AuthorshipTargetType;
+import br.com.felipeblaft.reports.domain.access.Role;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import java.time.Instant;
+import java.util.UUID;
+import org.springframework.data.domain.Persistable;
+
+/**
+ * Linha de {@code authorship_record} (V10). Só é inserida: {@link #isNew()} é sempre verdadeiro, de
+ * modo que o Spring Data nunca faz {@code merge} (que viraria {@code UPDATE}, barrado pelo gatilho
+ * de somente acréscimo).
+ */
+@Entity
+@Table(name = "authorship_record")
+public class AuthorshipRecordEntity implements Persistable<UUID> {
+
+    @Id private UUID id;
+
+    @Column(name = "occurred_at", nullable = false)
+    private Instant occurredAt;
+
+    @Column(name = "author_id")
+    private UUID authorId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "author_role")
+    private Role authorRole;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ActionOrigin origin;
+
+    @Column(nullable = false)
+    private String operation;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "target_type")
+    private AuthorshipTargetType targetType;
+
+    @Column(name = "target_id")
+    private UUID targetId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AuthorshipResult result;
+
+    @Column(name = "error_code")
+    private String errorCode;
+
+    @Column(name = "origin_hash")
+    private String originHash;
+
+    @Column(name = "correlation_id", nullable = false)
+    private String correlationId;
+
+    @Transient private boolean inserted = true;
+
+    protected AuthorshipRecordEntity() {}
+
+    AuthorshipRecordEntity(AuthorshipRecord record) {
+        this.id = record.id();
+        this.occurredAt = record.occurredAt();
+        this.authorId = record.authorId();
+        this.authorRole = record.authorRole();
+        this.origin = record.origin();
+        this.operation = record.operation();
+        this.targetType = record.targetType();
+        this.targetId = record.targetId();
+        this.result = record.result();
+        this.errorCode = record.errorCode();
+        this.originHash = record.originHash();
+        this.correlationId = record.correlationId();
+    }
+
+    @Override
+    public UUID getId() {
+        return id;
+    }
+
+    @Override
+    public boolean isNew() {
+        return inserted;
+    }
+}

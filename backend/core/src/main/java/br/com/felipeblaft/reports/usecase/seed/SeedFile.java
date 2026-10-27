@@ -33,6 +33,8 @@ public record SeedFile(List<SeedTeacher> teachers, List<SeedStudent> students) {
             String name,
             String birthDate,
             String guardianName,
+            String guardianPhone,
+            String guardianEmail,
             String instrument,
             List<String> teachers) {
 
@@ -43,7 +45,9 @@ public record SeedFile(List<SeedTeacher> teachers, List<SeedStudent> students) {
                             : Collections.unmodifiableList(new ArrayList<>(teachers));
         }
 
-        /** Sem CPF, nome, data de nascimento, responsável, instrumento nem e-mails. */
+        /**
+         * Sem CPF, nome, nascimento, responsável (nome, telefone, e-mail), instrumento nem e-mails.
+         */
         @Override
         public String toString() {
             return "SeedStudent[teachers=" + teachers.size() + "]";

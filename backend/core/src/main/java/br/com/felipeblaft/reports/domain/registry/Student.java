@@ -18,8 +18,8 @@ public class Student {
     private final UUID id;
     private String name;
     private LocalDate birthDate;
-    private final byte[] encryptedCpf;
-    private final String cpfHash;
+    private byte[] encryptedCpf;
+    private String cpfHash;
     private String guardianName;
     private String instrument;
     private String guardianPhone;
@@ -160,6 +160,45 @@ public class Student {
         guardianName = newGuardian;
         instrument = newInstrument;
         updatedAt = now;
+        return true;
+    }
+
+    /**
+     * Aplica uma edição já validada e mesclada com os dados atuais (nome, nascimento, instrumento e
+     * responsável); o CPF só muda se {@code newCpf} vier. Devolve {@code true} se algo mudou.
+     */
+    public boolean applyEdit(StudentData data, ProtectedCpf newCpf, Instant now) {
+        Guardian guardian = data.guardian();
+        String newName = data.name().value();
+        LocalDate newBirth = data.birthDate().value();
+        String newInstrument = data.instrument() == null ? null : data.instrument().value();
+        String newGuardianName = guardian == null ? null : guardian.name().value();
+        String newPhone =
+                guardian == null || guardian.phone() == null ? null : guardian.phone().digits();
+        String newEmail =
+                guardian == null || guardian.email() == null ? null : guardian.email().value();
+        boolean changed =
+                newCpf != null
+                        || !name.equals(newName)
+                        || !birthDate.equals(newBirth)
+                        || !Objects.equals(instrument, newInstrument)
+                        || !Objects.equals(guardianName, newGuardianName)
+                        || !Objects.equals(guardianPhone, newPhone)
+                        || !Objects.equals(guardianEmail, newEmail);
+        if (!changed) {
+            return false;
+        }
+        name = newName;
+        birthDate = newBirth;
+        instrument = newInstrument;
+        guardianName = newGuardianName;
+        guardianPhone = newPhone;
+        guardianEmail = newEmail;
+        if (newCpf != null) {
+            encryptedCpf = newCpf.encrypted();
+            cpfHash = newCpf.hash();
+        }
+        updatedAt = Objects.requireNonNull(now);
         return true;
     }
 

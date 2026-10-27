@@ -151,4 +151,14 @@ interface ChannelActionJpa extends JpaRepository<ChannelActionEntity, String> {
             "select count(a) from ChannelActionEntity a where a.state = 'DELIVERED'"
                     + " and a.deliveredAt < :limit")
     long countDeliveredSince(Instant limit);
+
+    /** Fim do vínculo: descarta só as PENDING do chat; as demais não mudam. */
+    @Modifying
+    @Query(
+            value =
+                    "update channel_action set state = 'DISCARDED', reason_code = :code,"
+                            + " finalized_at = :now, next_attempt_at = null, version = version + 1"
+                            + " where chat_id = :chatId and state = 'PENDING'",
+            nativeQuery = true)
+    int discardPendingByChat(long chatId, Instant now, String code);
 }
