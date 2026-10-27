@@ -1,6 +1,7 @@
 package br.com.felipeblaft.reports.outbound.persistence;
 
 import br.com.felipeblaft.reports.inbound.telegram.TelegramUpdateRecords;
+import br.com.felipeblaft.reports.port.AdministratorSessionRepository;
 import br.com.felipeblaft.reports.port.ClockPort;
 import br.com.felipeblaft.reports.port.WebSessionRepository;
 import java.time.Duration;
@@ -11,7 +12,10 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-/** Varredura diária: sessões vencidas e updates do Telegram com mais de 7 dias. */
+/**
+ * Varredura diária: sessões vencidas do professor e do administrador e updates do Telegram com mais
+ * de 7 dias.
+ */
 @Component
 @Profile("!seed")
 class AccessSweepTask {
@@ -20,11 +24,17 @@ class AccessSweepTask {
     static final Duration RETENTION_UPDATES = Duration.ofDays(7);
 
     private final WebSessionRepository sessions;
+    private final AdministratorSessionRepository administratorSessions;
     private final TelegramUpdateRecords updates;
     private final ClockPort clock;
 
-    AccessSweepTask(WebSessionRepository sessions, TelegramUpdateRecords updates, ClockPort clock) {
+    AccessSweepTask(
+            WebSessionRepository sessions,
+            AdministratorSessionRepository administratorSessions,
+            TelegramUpdateRecords updates,
+            ClockPort clock) {
         this.sessions = sessions;
+        this.administratorSessions = administratorSessions;
         this.updates = updates;
         this.clock = clock;
     }
@@ -33,7 +43,12 @@ class AccessSweepTask {
     void scan() {
         Instant now = clock.now();
         int removedSessions = sessions.removeExpired(now);
+        int removedAdministratorSessions = administratorSessions.removeExpired(now);
         int updatesRemoved = updates.removeOld(now.minus(RETENTION_UPDATES));
-        LOG.info("access-sweep sessions={} updates={}", removedSessions, updatesRemoved);
+        LOG.info(
+                "access-sweep sessions={} administratorSessions={} updates={}",
+                removedSessions,
+                removedAdministratorSessions,
+                updatesRemoved);
     }
 }

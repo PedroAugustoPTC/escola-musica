@@ -21,7 +21,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-/** Massa de demonstração do ambiente local (local.sh up --demo-data=true). */
+/**
+ * Massa de demonstração do ambiente local (local.sh up --demo-data=true), montada pela carga
+ * inicial que orquestra os casos de uso reais da administração.
+ */
 class DemoDataIT extends IntegrationBase {
 
     private static final List<String> ARGUMENTS =

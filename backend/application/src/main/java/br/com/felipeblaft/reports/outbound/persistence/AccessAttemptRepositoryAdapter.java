@@ -4,7 +4,7 @@ import br.com.felipeblaft.reports.domain.access.AccessAttempt;
 import br.com.felipeblaft.reports.domain.access.AttemptPolicy;
 import br.com.felipeblaft.reports.domain.access.AttemptScope;
 import br.com.felipeblaft.reports.domain.common.Channel;
-import br.com.felipeblaft.reports.outbound.PendingImplementation;
+import br.com.felipeblaft.reports.domain.common.GeneratorId;
 import br.com.felipeblaft.reports.port.AccessAttemptRepository;
 import java.time.Instant;
 import java.util.Optional;
@@ -14,7 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Tentativas de acesso gravadas numa transação independente ({@code REQUIRES_NEW}): a falha de
- * código fica registrada mesmo quando o caso de uso que a detectou é desfeito (FR-007, lição 4).
+ * código fica registrada mesmo quando o caso de uso que a detectou é desfeito (FR-007, lição 4). A
+ * contagem é atômica (FR-041, R-05): cria a linha se faltar ({@code ON CONFLICT DO NOTHING}), lê
+ * com {@code SELECT ... FOR UPDATE} e deixa a regra para o domínio; o adaptador só serializa.
  */
 @Repository
 class AccessAttemptRepositoryAdapter implements AccessAttemptRepository {
@@ -28,49 +30,45 @@ class AccessAttemptRepositoryAdapter implements AccessAttemptRepository {
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Optional<AccessAttempt> search(AttemptScope scope, Channel channel, String originHash) {
-        // a tabela ainda não tem a coluna de escopo (V10, fluxo W-F): só o código do professor
-        // existe
-        if (scope != AttemptScope.TEACHER_CODE) {
-            throw PendingImplementation.of("W-F");
-        }
-        return jpa.findByChannelAndSourceHash(channel, originHash)
-                .map(
-                        e ->
-                                new AccessAttempt(
-                                        e.getId(),
-                                        e.getChannel(),
-                                        e.getSourceHash(),
-                                        e.getFailedAttempts(),
-                                        e.getBlockedUntil(),
-                                        e.getUpdatedAt()));
+        return jpa.findByScopeAndChannelAndSourceHash(scope, channel, originHash)
+                .map(AccessAttemptEntity::toDomain);
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public AccessAttempt registerFailure(
             AttemptScope scope,
             Channel channel,
             String originHash,
             Instant now,
             AttemptPolicy policy) {
-        throw PendingImplementation.of("W-F");
-    }
-
-    @Override
-    public void confirmSuccess(
-            AttemptScope scope, Channel channel, String originHash, Instant now) {
-        throw PendingImplementation.of("W-F");
+        jpa.insertIfAbsent(GeneratorId.create(), scope.name(), channel.name(), originHash, now);
+        AccessAttemptEntity row = jpa.lockByKey(scope, channel, originHash).orElseThrow();
+        AccessAttempt attempt = row.toDomain();
+        attempt.registerFailure(now, policy);
+        row.copyStateOf(attempt);
+        return attempt;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void save(AccessAttempt t) {
-        jpa.save(
-                new AccessAttemptEntity(
-                        t.id(),
-                        t.channel(),
-                        t.originHash(),
-                        t.failedAttempts(),
-                        t.blockedUntil(),
-                        t.updatedAt()));
+    public void confirmSuccess(
+            AttemptScope scope, Channel channel, String originHash, Instant now) {
+        jpa.lockByKey(scope, channel, originHash)
+                .ifPresent(
+                        row -> {
+                            AccessAttempt attempt = row.toDomain();
+                            boolean clean =
+                                    attempt.failedAttempts() == 0 && attempt.blockedUntil() == null;
+                            if (!clean && attempt.confirmSuccess(now)) {
+                                row.copyStateOf(attempt);
+                            }
+                        });
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void save(AccessAttempt attempt) {
+        jpa.save(new AccessAttemptEntity(attempt));
     }
 }

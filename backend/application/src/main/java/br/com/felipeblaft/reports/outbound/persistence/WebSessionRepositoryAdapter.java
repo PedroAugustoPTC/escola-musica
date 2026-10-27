@@ -2,7 +2,6 @@ package br.com.felipeblaft.reports.outbound.persistence;
 
 import br.com.felipeblaft.reports.domain.access.SessionRevocationReason;
 import br.com.felipeblaft.reports.domain.access.WebSession;
-import br.com.felipeblaft.reports.outbound.PendingImplementation;
 import br.com.felipeblaft.reports.port.WebSessionRepository;
 import java.time.Instant;
 import java.util.Optional;
@@ -30,7 +29,9 @@ class WebSessionRepositoryAdapter implements WebSessionRepository {
                                         e.getTokenHash(),
                                         e.getCreatedAt(),
                                         e.getLastUsedAt(),
-                                        e.getExpiresAt()));
+                                        e.getExpiresAt(),
+                                        e.getRevokedAt(),
+                                        e.getRevocationReason()));
     }
 
     @Override
@@ -42,7 +43,9 @@ class WebSessionRepositoryAdapter implements WebSessionRepository {
                         s.tokenHash(),
                         s.createdAt(),
                         s.lastUsedAt(),
-                        s.expiresAt()));
+                        s.expiresAt(),
+                        s.revokedAt(),
+                        s.revocationReason()));
     }
 
     @Override
@@ -51,8 +54,9 @@ class WebSessionRepositoryAdapter implements WebSessionRepository {
     }
 
     @Override
+    @Transactional
     public int revokeAllOf(UUID teacherId, SessionRevocationReason reason, Instant now) {
-        throw PendingImplementation.of("W-E");
+        return jpa.revokeAllOf(teacherId, reason.name(), now);
     }
 
     @Override

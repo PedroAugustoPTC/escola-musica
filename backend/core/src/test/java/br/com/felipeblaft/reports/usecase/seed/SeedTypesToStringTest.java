@@ -16,19 +16,37 @@ class SeedTypesToStringTest {
     private static final String GUARDIAN = "Helena Souza";
     private static final String TEACHER = "Clara Dias";
     private static final String EMAIL = "clara@example.test";
+    private static final String PHONE = "(11) 91234-5678";
+    private static final String GUARDIAN_EMAIL = "guardian@example.test";
 
     @Test
     void seedFileAndItsEntriesNeverRevealPersonalData() {
         SeedFile.SeedTeacher teacher = new SeedFile.SeedTeacher(EMAIL, TEACHER, true);
         SeedFile.SeedStudent student =
                 new SeedFile.SeedStudent(
-                        MASKED_CPF, STUDENT, "2014-05-10", GUARDIAN, "Violão", List.of(EMAIL));
+                        MASKED_CPF,
+                        STUDENT,
+                        "2014-05-10",
+                        GUARDIAN,
+                        PHONE,
+                        GUARDIAN_EMAIL,
+                        "Violão",
+                        List.of(EMAIL));
         SeedFile file = new SeedFile(List.of(teacher), List.of(student));
 
         for (String text : List.of(teacher.toString(), student.toString(), file.toString())) {
             assertThat(text)
                     .doesNotContain(
-                            CPF, MASKED_CPF, STUDENT, GUARDIAN, TEACHER, EMAIL, "2014-05-10");
+                            CPF,
+                            MASKED_CPF,
+                            STUDENT,
+                            GUARDIAN,
+                            TEACHER,
+                            EMAIL,
+                            "2014-05-10",
+                            PHONE,
+                            "91234-5678",
+                            GUARDIAN_EMAIL);
         }
         assertThat(file.toString()).contains("teachers=1", "students=1");
     }

@@ -89,23 +89,33 @@ class StudentAccessServiceTest {
     }
 
     @Test
-    void systemActorHasNoScopeAndIsDeniedAsNotFound() {
-        // negar por padrão: o ator de sistema não consulta aluno por este serviço
-        for (ActionOrigin origin :
-                List.of(ActionOrigin.INITIAL_LOAD, ActionOrigin.SYSTEM_STARTUP)) {
-            Actor system = Actor.system(origin);
-            assertThatThrownBy(() -> service.scopeOf(system))
-                    .isInstanceOf(DomainException.class)
-                    .satisfies(
-                            e ->
-                                    assertThat(((DomainException) e).code())
-                                            .isEqualTo(ErrorCode.RESOURCE_NOT_FOUND));
-            assertThatThrownBy(() -> service.findVisible(system, UUID.randomUUID()))
-                    .isInstanceOf(DomainException.class);
-            assertThatThrownBy(() -> service.list(system, StudentStatusFilter.ALL))
-                    .isInstanceOf(DomainException.class);
-        }
+    void startupSystemActorHasNoScopeAndIsDeniedAsNotFound() {
+        // negar por padrão: só a carga inicial tem escopo total; a inicialização não consulta aluno
+        Actor system = Actor.system(ActionOrigin.SYSTEM_STARTUP);
+        assertThatThrownBy(() -> service.scopeOf(system))
+                .isInstanceOf(DomainException.class)
+                .satisfies(
+                        e ->
+                                assertThat(((DomainException) e).code())
+                                        .isEqualTo(ErrorCode.RESOURCE_NOT_FOUND));
+        assertThatThrownBy(() -> service.findVisible(system, UUID.randomUUID()))
+                .isInstanceOf(DomainException.class);
+        assertThatThrownBy(() -> service.list(system, StudentStatusFilter.ALL))
+                .isInstanceOf(DomainException.class);
         assertThat(students.scopes).isEmpty();
+    }
+
+    @Test
+    void initialLoadActorSeesTheWholeSchool() {
+        Actor load = Actor.system(ActionOrigin.INITIAL_LOAD);
+        students.visible = Optional.of(student);
+        students.listed = List.of(student);
+
+        assertThat(service.scopeOf(load)).isEqualTo(StudentScope.all());
+        assertThat(service.findVisible(load, student.id())).isSameAs(student);
+        assertThat(service.list(load, StudentStatusFilter.ALL)).containsExactly(student);
+
+        assertThat(students.scopes).containsOnly(StudentScope.all());
     }
 
     @Test

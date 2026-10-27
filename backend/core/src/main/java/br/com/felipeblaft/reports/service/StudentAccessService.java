@@ -1,5 +1,6 @@
 package br.com.felipeblaft.reports.service;
 
+import br.com.felipeblaft.reports.domain.access.ActionOrigin;
 import br.com.felipeblaft.reports.domain.access.Actor;
 import br.com.felipeblaft.reports.domain.access.Role;
 import br.com.felipeblaft.reports.domain.common.DomainException;
@@ -14,11 +15,12 @@ import java.util.UUID;
 
 /**
  * Escopo de alunos por ator (R-14): o administrador enxerga a escola inteira; o professor, só os
- * alunos associados. O ator de sistema (sem papel) não tem escopo: por padrão é negado com {@code
- * RESOURCE_NOT_FOUND}, o mesmo erro do aluno inexistente; a carga inicial e a inicialização gravam
- * por seus próprios casos de uso e portas, nunca por esta consulta. O escopo vai na própria
- * consulta ({@code findVisible}, uma só leitura); nunca se carrega o aluno para depois comparar.
- * Aluno alheio, sem professor ou inexistente produzem o mesmo erro, sem nenhum dado.
+ * alunos associados. O ator de sistema (sem papel) é negado por padrão com {@code
+ * RESOURCE_NOT_FOUND}, o mesmo erro do aluno inexistente; a única exceção é a carga inicial ({@link
+ * ActionOrigin#INITIAL_LOAD}), que orquestra os casos de uso de cadastro e precisa do escopo total.
+ * A inicialização ({@code SYSTEM_STARTUP}) segue negada. O escopo vai na própria consulta ({@code
+ * findVisible}, uma só leitura); nunca se carrega o aluno para depois comparar. Aluno alheio, sem
+ * professor ou inexistente produzem o mesmo erro, sem nenhum dado.
  */
 public class StudentAccessService {
 
@@ -35,6 +37,9 @@ public class StudentAccessService {
     public StudentScope scopeOf(Actor actor) {
         Role role = actor.role();
         if (role == null) {
+            if (actor.origin() == ActionOrigin.INITIAL_LOAD) {
+                return StudentScope.all();
+            }
             throw new DomainException(ErrorCode.RESOURCE_NOT_FOUND);
         }
         return switch (role) {

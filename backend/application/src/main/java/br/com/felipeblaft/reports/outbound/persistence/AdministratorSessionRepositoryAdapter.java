@@ -2,42 +2,63 @@ package br.com.felipeblaft.reports.outbound.persistence;
 
 import br.com.felipeblaft.reports.domain.access.AdministratorSession;
 import br.com.felipeblaft.reports.domain.access.SessionRevocationReason;
-import br.com.felipeblaft.reports.outbound.PendingImplementation;
 import br.com.felipeblaft.reports.port.AdministratorSessionRepository;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Sessões do administrador no PostgreSQL. Stub da Fundação (feature 005): a tabela e o adaptador
- * real chegam com o fluxo W-E.
+ * Sessões do administrador no PostgreSQL (feature 005, migração V9). A consulta por token traz a
+ * conta na mesma leitura, para decidir a validade a cada requisição, sem cache de autorização
+ * (FR-047). A revogação marca a sessão e nunca a remove.
  */
 @Repository
 class AdministratorSessionRepositoryAdapter implements AdministratorSessionRepository {
 
+    private final AdministratorSessionJpa jpa;
+
+    AdministratorSessionRepositoryAdapter(AdministratorSessionJpa jpa) {
+        this.jpa = jpa;
+    }
+
     @Override
+    @Transactional(readOnly = true)
     public Optional<Found> searchByTokenHash(String tokenHash) {
-        throw PendingImplementation.of("W-E");
+        List<Object[]> rows = jpa.findWithAccountByTokenHash(tokenHash);
+        if (rows.isEmpty()) {
+            return Optional.empty();
+        }
+        Object[] row = rows.getFirst();
+        return Optional.of(
+                new Found(
+                        AdministratorMapper.toDomain((AdministratorSessionEntity) row[0]),
+                        AdministratorMapper.toDomain((AdministratorEntity) row[1])));
     }
 
     @Override
+    @Transactional
     public void save(AdministratorSession session) {
-        throw PendingImplementation.of("W-E");
+        jpa.saveAndFlush(AdministratorMapper.toEntity(session));
     }
 
     @Override
+    @Transactional
     public void remove(UUID id) {
-        throw PendingImplementation.of("W-E");
+        jpa.deleteById(id);
     }
 
     @Override
+    @Transactional
     public int revokeAllOf(UUID administratorId, SessionRevocationReason reason, Instant now) {
-        throw PendingImplementation.of("W-E");
+        return jpa.revokeAllOf(administratorId, reason.name(), now);
     }
 
     @Override
+    @Transactional
     public int removeExpired(Instant now) {
-        throw PendingImplementation.of("W-E");
+        return jpa.removeExpired(now);
     }
 }

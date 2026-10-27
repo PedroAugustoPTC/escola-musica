@@ -1,30 +1,116 @@
 package br.com.felipeblaft.reports.usecase.registry;
 
 import br.com.felipeblaft.reports.domain.access.Actor;
+import br.com.felipeblaft.reports.domain.access.Operation;
+import br.com.felipeblaft.reports.domain.access.Role;
+import br.com.felipeblaft.reports.domain.registry.Student;
+import br.com.felipeblaft.reports.domain.registry.StudentSearch;
+import br.com.felipeblaft.reports.domain.registry.Teacher;
 import br.com.felipeblaft.reports.port.AssignmentRepository;
 import br.com.felipeblaft.reports.port.ClockPort;
 import br.com.felipeblaft.reports.port.TeacherRepository;
 import br.com.felipeblaft.reports.service.ActorAuthorizationService;
+import br.com.felipeblaft.reports.service.AuthorshipService;
 import br.com.felipeblaft.reports.service.StudentAccessService;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
  * Abre um aluno ({@code STUDENT_GET}). Aluno alheio, sem professor ou inexistente é {@code
- * RESOURCE_NOT_FOUND}, pelo mesmo caminho e com uma só consulta. Esqueleto da Fundação; a regra é
- * do fluxo W-C1.
+ * RESOURCE_NOT_FOUND}, pelo mesmo caminho e com uma só consulta (R-14); para o professor a negativa
+ * deixa um registro {@code AUTHORIZATION_DENIED} com o identificador de correlação (FR-040). A
+ * leitura autorizada não gera registro.
  */
 public class GetStudentUseCase {
 
     public record Command(UUID studentId, String correlationId) {}
+
+    private final ActorAuthorizationService authorization;
+    private final StudentAccessService access;
+    private final AuthorshipService authorship;
+    private final Views views;
 
     public GetStudentUseCase(
             ActorAuthorizationService authorization,
             StudentAccessService access,
             AssignmentRepository assignments,
             TeacherRepository teachers,
-            ClockPort clock) {}
+            AuthorshipService authorship,
+            ClockPort clock) {
+        this.authorization = Objects.requireNonNull(authorization);
+        this.access = Objects.requireNonNull(access);
+        this.authorship = Objects.requireNonNull(authorship);
+        this.views = new Views(assignments, teachers, clock);
+    }
 
     public StudentView run(Actor actor, Command command) {
-        throw new UnsupportedOperationException("GetStudentUseCase: fluxo W-C1");
+        authorization.require(actor, Operation.STUDENT_GET);
+        Student student =
+                RegistrySupport.findVisibleOrRecordDenial(
+                        access, authorship, actor, command.studentId(), command.correlationId());
+        return views.of(student, actor.role() == Role.TEACHER);
+    }
+
+    /**
+     * Monta o {@link StudentView} dos casos de uso de aluno: nunca traz CPF; o administrador vê os
+     * professores associados, o professor vê se pode inativar (FR-026).
+     */
+    static final class Views {
+
+        private final AssignmentRepository assignments;
+        private final TeacherRepository teachers;
+        private final ClockPort clock;
+
+        Views(AssignmentRepository assignments, TeacherRepository teachers, ClockPort clock) {
+            this.assignments = Objects.requireNonNull(assignments);
+            this.teachers = Objects.requireNonNull(teachers);
+            this.clock = Objects.requireNonNull(clock);
+        }
+
+        StudentView of(Student student, boolean forTeacher) {
+            StudentView.GuardianView guardian =
+                    hasGuardian(student)
+                            ? new StudentView.GuardianView(
+                                    student.guardianName(),
+                                    student.guardianPhone(),
+                                    student.guardianEmail())
+                            : null;
+            List<StudentView.TeacherRef> refs = forTeacher ? List.of() : teachersOf(student);
+            Boolean canInactivate =
+                    forTeacher ? assignments.countActiveTeachers(student.id()) <= 1 : null;
+            return new StudentView(
+                    student.id(),
+                    student.name(),
+                    student.birthDate(),
+                    student.ageAt(clock.todayInSchoolTimezone()),
+                    student.instrument(),
+                    student.active(),
+                    guardian,
+                    refs,
+                    canInactivate);
+        }
+
+        private static boolean hasGuardian(Student student) {
+            return student.guardianName() != null
+                    || student.guardianPhone() != null
+                    || student.guardianEmail() != null;
+        }
+
+        private List<StudentView.TeacherRef> teachersOf(Student student) {
+            return assignments.listTeachersOfStudent(student.id()).stream()
+                    .map(teachers::searchById)
+                    .flatMap(Optional::stream)
+                    .sorted(
+                            Comparator.comparing(
+                                    (Teacher teacher) -> StudentSearch.normalize(teacher.name())))
+                    .map(
+                            teacher ->
+                                    new StudentView.TeacherRef(
+                                            teacher.id(), teacher.name(), teacher.active()))
+                    .toList();
+        }
     }
 }

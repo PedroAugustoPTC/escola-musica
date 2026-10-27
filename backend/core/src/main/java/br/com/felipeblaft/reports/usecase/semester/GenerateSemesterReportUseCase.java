@@ -11,6 +11,7 @@ import br.com.felipeblaft.reports.domain.job.ProcessingJob;
 import br.com.felipeblaft.reports.port.ClockPort;
 import br.com.felipeblaft.reports.port.ConcurrencyConflictException;
 import br.com.felipeblaft.reports.port.JobQueuePort;
+import br.com.felipeblaft.reports.service.ReportEligibilityService;
 import br.com.felipeblaft.reports.usecase.semester.GetSemesterPreviewUseCase.Preview;
 import java.util.Map;
 import java.util.Objects;
@@ -25,9 +26,23 @@ public class GenerateSemesterReportUseCase {
     private final GetSemesterPreviewUseCase preview;
     private final JobQueuePort queue;
     private final ClockPort clock;
+    private final ReportEligibilityService eligibility;
 
+    /**
+     * Sem verificação de situação do professor e do aluno: só para os cenários da 001, que ainda
+     * não conhecem a situação. A montagem de produção usa o construtor completo.
+     */
     public GenerateSemesterReportUseCase(
             GetSemesterPreviewUseCase preview, JobQueuePort queue, ClockPort clock) {
+        this(preview, queue, clock, null);
+    }
+
+    public GenerateSemesterReportUseCase(
+            GetSemesterPreviewUseCase preview,
+            JobQueuePort queue,
+            ClockPort clock,
+            ReportEligibilityService eligibility) {
+        this.eligibility = eligibility;
         this.preview = Objects.requireNonNull(preview);
         this.queue = Objects.requireNonNull(queue);
         this.clock = Objects.requireNonNull(clock);
@@ -39,7 +54,13 @@ public class GenerateSemesterReportUseCase {
             String periodKey,
             boolean confirmEvenWithOpen,
             Channel channel) {
+        if (eligibility != null) {
+            eligibility.requireActiveTeacher(teacherId);
+        }
         Preview current = preview.run(teacherId, studentId, periodKey);
+        if (eligibility != null) {
+            eligibility.requireActiveStudent(studentId);
+        }
         requireCanGenerate(current, confirmEvenWithOpen);
         ProcessingJob job =
                 ProcessingJob.create(

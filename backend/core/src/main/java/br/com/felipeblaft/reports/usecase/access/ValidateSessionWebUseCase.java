@@ -1,5 +1,6 @@
 package br.com.felipeblaft.reports.usecase.access;
 
+import br.com.felipeblaft.reports.domain.access.SessionRevocationReason;
 import br.com.felipeblaft.reports.domain.access.WebSession;
 import br.com.felipeblaft.reports.domain.common.BusinessParameters;
 import br.com.felipeblaft.reports.domain.common.DomainException;
@@ -15,7 +16,9 @@ import java.util.Objects;
 
 /**
  * Valida a sessão da Web a cada requisição (FR-008): expiração deslizante e revogação real no
- * servidor. Cada uso renova a sessão e a validade do código (FR-005).
+ * servidor. Sessão revogada por inativação ou professor inativo é {@code ACCESS_ENDED}; revogada
+ * por reemissão do código, vencida ou desconhecida é {@code SESSION_EXPIRED}. Cada uso renova a
+ * sessão e a validade do código (FR-005).
  */
 public class ValidateSessionWebUseCase {
 
@@ -51,6 +54,13 @@ public class ValidateSessionWebUseCase {
         WebSession session =
                 sessions.searchByTokenHash(protection.sessionTokenHash(token))
                         .orElseThrow(() -> new DomainException(ErrorCode.SESSION_EXPIRED));
+        if (session.revoked()) {
+            // a sessão revogada fica marcada, não removida: a resposta certa se repete (R-08)
+            throw new DomainException(
+                    session.revocationReason() == SessionRevocationReason.ACCOUNT_INACTIVATED
+                            ? ErrorCode.ACCESS_ENDED
+                            : ErrorCode.SESSION_EXPIRED);
+        }
         if (!session.validAt(now)) {
             sessions.remove(session.id());
             throw new DomainException(ErrorCode.SESSION_EXPIRED);
@@ -58,8 +68,8 @@ public class ValidateSessionWebUseCase {
         Teacher teacher =
                 teachers.searchById(session.teacherId()).filter(Teacher::active).orElse(null);
         if (teacher == null) {
-            sessions.remove(session.id());
-            throw new DomainException(ErrorCode.SESSION_EXPIRED);
+            // quem já tinha acesso e o perdeu vê "acesso encerrado", não "sessão expirada"
+            throw new DomainException(ErrorCode.ACCESS_ENDED);
         }
         if (session.registerUse(now, parameters.webSessionInactivity())) {
             sessions.save(session);

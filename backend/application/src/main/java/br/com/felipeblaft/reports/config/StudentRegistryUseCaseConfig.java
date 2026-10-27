@@ -2,6 +2,7 @@ package br.com.felipeblaft.reports.config;
 
 import br.com.felipeblaft.reports.port.AssignmentRepository;
 import br.com.felipeblaft.reports.port.ClockPort;
+import br.com.felipeblaft.reports.port.CpfDecryptionPort;
 import br.com.felipeblaft.reports.port.CpfKeyRotationPort;
 import br.com.felipeblaft.reports.port.DataProtectionPort;
 import br.com.felipeblaft.reports.port.OpenReportsQueryPort;
@@ -49,8 +50,12 @@ public class StudentRegistryUseCaseConfig {
 
     @Bean
     ListStudentsUseCase listStudentsUseCase(
-            ActorAuthorizationService authorization, StudentAccessService access) {
-        return new ListStudentsUseCase(authorization, access);
+            ActorAuthorizationService authorization,
+            StudentAccessService access,
+            AssignmentRepository assignments,
+            TeacherRepository teachers,
+            ClockPort clock) {
+        return new ListStudentsUseCase(authorization, access, assignments, teachers, clock);
     }
 
     @Bean
@@ -59,8 +64,10 @@ public class StudentRegistryUseCaseConfig {
             StudentAccessService access,
             AssignmentRepository assignments,
             TeacherRepository teachers,
+            AuthorshipService authorship,
             ClockPort clock) {
-        return new GetStudentUseCase(authorization, access, assignments, teachers, clock);
+        return new GetStudentUseCase(
+                authorization, access, assignments, teachers, authorship, clock);
     }
 
     @Bean
@@ -86,16 +93,27 @@ public class StudentRegistryUseCaseConfig {
     }
 
     @Bean
+    @SuppressWarnings("java:S107")
     UpdateStudentUseCase updateStudentUseCase(
             ActorAuthorizationService authorization,
             StudentAccessService access,
             StudentRepository students,
+            AssignmentRepository assignments,
+            TeacherRepository teachers,
             DataProtectionPort protection,
             AccessAttemptsControlService attempts,
             AuthorshipService authorship,
             ClockPort clock) {
         return new UpdateStudentUseCase(
-                authorization, access, students, protection, attempts, authorship, clock);
+                authorization,
+                access,
+                students,
+                assignments,
+                teachers,
+                protection,
+                attempts,
+                authorship,
+                clock);
     }
 
     @Bean
@@ -103,11 +121,12 @@ public class StudentRegistryUseCaseConfig {
             ActorAuthorizationService authorization,
             StudentAccessService access,
             StudentRepository students,
+            TeacherRepository teachers,
             AssignmentRepository assignments,
             AuthorshipService authorship,
             ClockPort clock) {
         return new InactivateStudentUseCase(
-                authorization, access, students, assignments, authorship, clock);
+                authorization, access, students, teachers, assignments, authorship, clock);
     }
 
     @Bean
@@ -115,11 +134,12 @@ public class StudentRegistryUseCaseConfig {
             ActorAuthorizationService authorization,
             StudentAccessService access,
             StudentRepository students,
+            TeacherRepository teachers,
             AssignmentRepository assignments,
             AuthorshipService authorship,
             ClockPort clock) {
         return new ReactivateStudentUseCase(
-                authorization, access, students, assignments, authorship, clock);
+                authorization, access, students, teachers, assignments, authorship, clock);
     }
 
     // ---- Associações
@@ -127,22 +147,21 @@ public class StudentRegistryUseCaseConfig {
     @Bean
     AssignTeacherToStudentUseCase assignTeacherToStudentUseCase(
             ActorAuthorizationService authorization,
-            StudentRepository students,
+            StudentAccessService access,
             TeacherRepository teachers,
             AssignmentRepository assignments,
             AuthorshipService authorship,
             ClockPort clock) {
         return new AssignTeacherToStudentUseCase(
-                authorization, students, teachers, assignments, authorship, clock);
+                authorization, access, teachers, assignments, authorship, clock);
     }
 
     @Bean
     RemoveTeacherFromStudentUseCase removeTeacherFromStudentUseCase(
             ActorAuthorizationService authorization,
             AssignmentRepository assignments,
-            AuthorshipService authorship,
-            ClockPort clock) {
-        return new RemoveTeacherFromStudentUseCase(authorization, assignments, authorship, clock);
+            AuthorshipService authorship) {
+        return new RemoveTeacherFromStudentUseCase(authorization, assignments, authorship);
     }
 
     @Bean
@@ -171,6 +190,8 @@ public class StudentRegistryUseCaseConfig {
     CollectStudentRegistrationFieldUseCase collectStudentRegistrationFieldUseCase(
             ActorAuthorizationService authorization,
             StudentRegistrationDraftRepository drafts,
+            StudentRepository students,
+            AssignmentRepository assignments,
             DataProtectionPort protection,
             AccessAttemptsControlService attempts,
             AuthorshipService authorship,
@@ -179,6 +200,8 @@ public class StudentRegistryUseCaseConfig {
         return new CollectStudentRegistrationFieldUseCase(
                 authorization,
                 drafts,
+                students,
+                assignments,
                 protection,
                 attempts,
                 authorship,
@@ -194,6 +217,7 @@ public class StudentRegistryUseCaseConfig {
             UpdateStudentUseCase update,
             InactivateStudentUseCase inactivate,
             ReactivateStudentUseCase reactivate,
+            CpfDecryptionPort cpfDecryption,
             TransactionPort transaction,
             ClockPort clock) {
         return new ConfirmStudentRegistrationUseCase(
@@ -203,6 +227,7 @@ public class StudentRegistryUseCaseConfig {
                 update,
                 inactivate,
                 reactivate,
+                cpfDecryption,
                 transaction,
                 clock);
     }

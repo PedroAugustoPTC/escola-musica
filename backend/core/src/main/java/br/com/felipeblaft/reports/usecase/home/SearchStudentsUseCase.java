@@ -4,6 +4,7 @@ import br.com.felipeblaft.reports.domain.registry.Student;
 import br.com.felipeblaft.reports.domain.registry.StudentSearch;
 import br.com.felipeblaft.reports.port.OpenReportsQueryPort;
 import br.com.felipeblaft.reports.port.StudentRepository;
+import br.com.felipeblaft.reports.service.ReportEligibilityService;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -20,22 +21,36 @@ public class SearchStudentsUseCase {
     private final StudentRepository students;
     private final OpenReportsQueryPort query;
 
-    public SearchStudentsUseCase(StudentRepository students, OpenReportsQueryPort query) {
+    private final ReportEligibilityService eligibility;
+
+    public SearchStudentsUseCase(
+            StudentRepository students,
+            OpenReportsQueryPort query,
+            ReportEligibilityService eligibility) {
+        this.eligibility = Objects.requireNonNull(eligibility);
         this.students = Objects.requireNonNull(students);
         this.query = Objects.requireNonNull(query);
     }
 
+    /** Só alunos ativos entram na busca (listas padrão); professor inativo é recusado. */
     public Result run(UUID teacherId, String search) {
-        List<Student> all = students.listByTeacher(teacherId);
+        eligibility.requireActiveTeacher(teacherId);
+        List<Student> associated = students.listByTeacher(teacherId);
+        List<Student> all = associated.stream().filter(Student::active).toList();
         StudentSearch.Result result = StudentSearch.search(all, search);
         StudentSummaries summaries =
-                StudentSummaries.load(query, teacherId, query.listByTeacher(teacherId));
+                StudentSummaries.load(
+                        query,
+                        teacherId,
+                        StudentSummaries.ofAssociated(query.listByTeacher(teacherId), associated));
         return new Result(result.type(), summaries.summaries(result.students()));
     }
 
     /** Correspondência exata a um único aluno (usada pelo bot durante a conferência). */
     public Optional<StudentSummary> exactMatch(UUID teacherId, String text) {
-        List<Student> all = students.listByTeacher(teacherId);
+        eligibility.requireActiveTeacher(teacherId);
+        List<Student> all =
+                students.listByTeacher(teacherId).stream().filter(Student::active).toList();
         return StudentSearch.exactMatch(all, text)
                 .map(
                         student ->
