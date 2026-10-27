@@ -14,7 +14,8 @@ import org.junit.jupiter.api.Test;
 /**
  * Feature 005, {@code V15__channel_action_delete_message.sql}: antes da migração o banco recusa o
  * tipo {@code DELETE_MESSAGE}; depois aceita, sem mexer nas linhas existentes, no nome da restrição
- * nem nos tipos anteriores.
+ * nem nos tipos anteriores. Prova as duas rotas: banco parado na {@code V14} (a versão anterior da
+ * {@code main}) e banco novo, migrado de uma só vez da {@code V1} à última.
  */
 class MigrationV15IT {
 
@@ -23,9 +24,9 @@ class MigrationV15IT {
     private final MigrationTestSupport db = new MigrationTestSupport(SCHEMA);
 
     @BeforeEach
-    void startAtV8() throws Exception {
+    void startAtV14() throws Exception {
         db.dropSchema();
-        db.flyway("8").migrate();
+        db.flyway("14").migrate();
     }
 
     @AfterEach
@@ -60,6 +61,19 @@ class MigrationV15IT {
         for (String type : new String[] {"MESSAGE", "EDIT", "DOCUMENT", "CALLBACK_REPLY"}) {
             assertThat(channelAction(type)).as(type).isEqualTo(1);
         }
+        assertThatThrownBy(() -> channelAction("DELETE_CHAT"))
+                .hasMessageContaining("ck_channel_action_type");
+    }
+
+    @Test
+    void aNewDatabaseMigratesFromScratchAndAcceptsTheNewType() throws Exception {
+        db.dropSchema();
+
+        db.flyway(null).migrate();
+
+        assertThat(db.single("select max(version::int) from flyway_schema_history"))
+                .isEqualTo("15");
+        assertThat(channelAction("DELETE_MESSAGE")).isEqualTo(1);
         assertThatThrownBy(() -> channelAction("DELETE_CHAT"))
                 .hasMessageContaining("ck_channel_action_type");
     }
