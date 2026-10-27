@@ -27,6 +27,9 @@
 
 - **Web e Telegram** são canais de entrada e saída **equivalentes**: acesso, registro de aula, perguntas, conferência, alteração, aprovação, cancelamento, retomada, relatório semestral e histórico ficam disponíveis nos dois.
 - O **acesso do professor** e o **controle de acesso por aluno** fazem parte desta feature. Cadastros e funções da secretaria ficam para uma feature própria, também com paridade entre os canais. Até lá, professores, alunos e associações entram por carga inicial.
+
+  > **Nota (feature 005)**: a "secretaria" deste trecho foi substituída pelo papel **administrador**, somente na Web, e o professor passou a cadastrar os próprios alunos na Web e no Telegram. Ver [`005-admin-registrations-access/spec.md`](../005-admin-registrations-access/spec.md).
+
 - O relatório semestral consolida **somente as aulas aprovadas do professor que gera o relatório**.
 
 ## Clarifications
@@ -96,6 +99,8 @@ A professora Clara termina a aula de Matteo e registra o relatório pelo canal q
 
 O professor recebe da secretaria um código de acesso. Com ele, entra no portal e vincula a conta do Telegram. Em qualquer canal, vê uma saudação, os relatórios em aberto e os seus alunos, e escolhe o que fazer: registrar aula, gerar semestral ou consultar o histórico. Quando quiser, encerra o acesso.
 
+> **Nota (feature 005)**: quem entrega o código ao professor passou a ser o **administrador** (e não a "secretaria"), que o emite e reemite pela área administrativa; reemitir o código ou inativar o professor encerra o acesso na hora. A entrada com código vencido, inexistente ou substituído tem mensagem única (`INVALID_CODE`; o `EXPIRED_CODE` deixou de existir). Ver [`005-admin-registrations-access/spec.md`](../005-admin-registrations-access/spec.md) e [`contracts/messages.md`](../005-admin-registrations-access/contracts/messages.md).
+
 **Why this priority**: sem acesso não há registro; a tela ou mensagem inicial é o ponto de partida de todas as outras histórias nos dois canais.
 
 **Independent Test**: com um professor na carga inicial, entrar no portal com o código, vincular uma conta de teste do Telegram com o mesmo código, abrir o início nos dois canais e comparar as informações; errar o código 5 vezes em cada canal e verificar o bloqueio; encerrar o acesso nos dois canais.
@@ -105,6 +110,9 @@ O professor recebe da secretaria um código de acesso. Com ele, entra no portal 
 1. **Given** um professor ativo com código válido, **When** ele informa o código na tela "Entrar" da Web, **Then** vê o Painel com "Olá, {nome}", os relatórios em aberto, o total de alunos associados e os primeiros alunos.
 2. **Given** uma conta do Telegram não vinculada, **When** o usuário envia o código válido de um professor ativo que ainda não tem Telegram vinculado, **Then** a conta é vinculada e o bot responde "Conta vinculada com sucesso, {nome}!" seguido das mesmas informações do Painel e das ações disponíveis.
 3. **Given** uma conta do Telegram não vinculada, **When** o usuário envia qualquer mensagem que não seja um código válido, **Then** o bot pede o código de acesso fornecido pela secretaria.
+
+   > **Nota (feature 005)**: o bot pede o código de acesso recebido do **administrador da escola** (texto `CODE_REQUIRED` atualizado). Ver [`contracts/messages.md`](../005-admin-registrations-access/contracts/messages.md).
+
 4. **Given** um professor vinculado no Telegram, **When** ele envia "início" ou "menu", **Then** recebe as mesmas informações do Painel da Web e as ações "Registrar aula", "Relatório semestral" e "Histórico".
 5. **Given** um texto que corresponde a exatamente um aluno associado (ignorando maiúsculas, minúsculas e acentos, aceitando parte do nome), **When** o professor o envia no Telegram ou o digita na busca da Web, **Then** o aluno é encontrado; com várias correspondências, as opções são listadas; sem nenhuma, o canal informa `Nenhum aluno encontrado para "{busca}".` e mostra os alunos do professor.
 6. **Given** 5 códigos incorretos seguidos de uma mesma origem (Web) ou conta (Telegram), **When** há nova tentativa, mesmo com o código correto, **Then** o canal recusa com "Acesso bloqueado temporariamente..." e o tempo restante.
@@ -187,6 +195,9 @@ O professor consulta o histórico de um aluno, no portal ou no Telegram, vê os 
 - **Conta do Telegram já vinculada a outro professor, ou professor já vinculado a outra conta do Telegram**: vinculação recusada com mensagem específica, orientando procurar a secretaria.
 - **Código vencido após 7 dias sem uso**: o acesso com ele é recusado com mensagem própria, orientando pedir um novo código à secretaria (reemitido pela carga inicial nesta feature).
 - **Professor sem alunos associados**: o início de qualquer canal mostra "Você ainda não tem alunos associados. Fale com a secretaria da escola."
+
+  > **Nota (feature 005)**: nos três casos acima a orientação passa a ser procurar o **administrador**, e dois deles mudam: o código vencido **não tem mais mensagem própria** (`EXPIRED_CODE` removido; cai na mensagem única `INVALID_CODE`) e o professor sem alunos vê a orientação de cadastrar o primeiro em "Meus alunos" (`NO_STUDENTS`). Textos em [`contracts/messages.md`](../005-admin-registrations-access/contracts/messages.md) (`TELEGRAM_ALREADY_LINKED`, `TEACHER_ALREADY_LINKED`, `NO_STUDENTS`).
+
 - **Aula registrada perto da meia-noite**: a data da aula é sempre a de hoje no fuso da escola, nunca a do servidor.
 - **Semestre corrente em andamento**: pode ser gerado com as aulas aprovadas até o momento; a lista indica "em andamento".
 - **Arquivo de vídeo (ex.: .mp4 gravado no celular)**: aceito nos dois canais, e apenas a trilha de áudio é usada.
@@ -215,6 +226,8 @@ O professor consulta o histórico de um aluno, no portal ou no Telegram, vê os 
 - **FR-009**: O professor DEVE ver, gerar, conferir, alterar, aprovar e cancelar relatórios somente de alunos associados a ele. Aluno não associado DEVE resultar em acesso negado. Relatório de outro professor DEVE ser tratado como inexistente. A identidade do professor DEVE vir sempre da sessão (Web) ou do vínculo (Telegram), nunca de dados enviados pelo cliente.
 - **FR-010**: O vínculo do Telegram DEVE apenas identificar o professor no canal; a autorização de cada ação DEVE ser decidida pelo sistema com as mesmas regras aplicadas à Web.
 - **FR-011**: Professores, alunos (nome, data de nascimento, CPF, nome do responsável quando menor de idade, instrumento opcional) e associações professor–aluno DEVEM poder ser carregados por um procedimento operacional de carga inicial, com CPF armazenado cifrado e nunca exibido. O mesmo procedimento DEVE emitir e reemitir códigos de acesso até que a feature da secretaria exista.
+
+  > **Nota (feature 005)**: a área administrativa (somente Web) agora cadastra professores, alunos e associações e emite e reemite códigos; a carga inicial deixa de ter regra própria e chama os mesmos casos de uso (FR-044 da 005), e o `issue-code` virou comando de emergência que também encerra as sessões Web do professor. O "acesso negado" do FR-009 para aluno não associado passou a `404 RESOURCE_NOT_FOUND`, igual ao de aluno inexistente (FR-050 da 005). Ver [`005-admin-registrations-access/spec.md`](../005-admin-registrations-access/spec.md) e [`contracts/initial-load.md`](../005-admin-registrations-access/contracts/initial-load.md).
 
 **Início e navegação**
 
@@ -332,6 +345,8 @@ O professor consulta o histórico de um aluno, no portal ou no Telegram, vê os 
 - A forma de manter o acesso é própria de cada meio: sessão com expiração por inatividade na Web e vínculo permanente até "sair" no Telegram. As duas seguem as mesmas regras de código, bloqueio e autorização.
 - O mesmo código de acesso serve para a Web e para o Telegram, e nenhum dos canais o consome (resolve a RN-09 do handoff). Revogar acessos ao reemitir o código fica para a feature da secretaria.
 - O histórico do professor mostra apenas relatórios de sua autoria, coerente com a decisão de que o semestral consolida apenas as aulas do próprio professor. A visão da escola com todos os professores fica para a secretaria.
+
+  > **Nota (feature 005)**: a feature da "secretaria" foi entregue como a **área administrativa** (papel administrador, somente Web): cadastros, associações e emissão e reemissão de código. O link da tela de entrada passou a ser "É administrador? Acesse a área administrativa." e **é exibido agora** (FR-043 da 005), levando a `/admin/sign-in`. Reemitir o código, inativar o professor ou retirar a associação **revoga o acesso na hora** (o que este item adiava). Relatórios não fazem parte da área administrativa. Ver [`005-admin-registrations-access/spec.md`](../005-admin-registrations-access/spec.md).
 - A data da aula não é editável nesta feature (sempre hoje, no fuso da escola). Edição manual direta dos campos também fica fora: ajustes são feitos por alteração em linguagem natural.
 - O relatório aprovado não é enviado automaticamente às famílias nesta feature; o texto do diálogo de aprovação ("documento oficial entregue à família") descreve o uso previsto do PDF.
 - O texto dos diálogos de descarte e cancelamento no protótipo ("será excluído", "serão descartados") descreve a perspectiva do professor: o relatório some para ele e não pode ser recuperado. Internamente o registro é mantido como cancelado (RN-24).
