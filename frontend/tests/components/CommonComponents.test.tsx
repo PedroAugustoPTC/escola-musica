@@ -116,9 +116,7 @@ describe('Estados', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('Não foi possível entrar agora.');
     await userEvent.click(screen.getByRole('button', { name: 'Tentar novamente' }));
     expect(retry).toHaveBeenCalled();
-    expect(errorText(new Error('stack interno'))).toBe(
-      'Ocorreu um erro inesperado. Tente novamente mais tarde.',
-    );
+    expect(errorText(new Error('stack interno'))).toBe('Algo deu errado.');
   });
 
   it('carregando anuncia ocupado', () => {
@@ -163,7 +161,8 @@ describe('Cabecalho', () => {
         status: 500,
         body: {
           code: 'INTERNAL_ERROR',
-          message: 'Ocorreu um erro inesperado. Tente novamente mais tarde.',
+          message: 'Algo deu errado. Informe o código de referência K7M2QX ao suporte.',
+          reference: 'K7M2QX',
         },
       },
     });
@@ -171,7 +170,9 @@ describe('Cabecalho', () => {
     const { router } = renderWithProviders(<Header />, '/students');
     await user.click(screen.getByRole('button', { name: 'Menu' }));
     await user.click(screen.getByRole('menuitem', { name: 'Encerrar sessão' }));
-    await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('Ocorreu um erro inesperado'));
+    await waitFor(() =>
+      expect(screen.getByRole('alert')).toHaveTextContent('Informe o código de referência K7M2QX'),
+    );
     expect(router.state.location.pathname).toBe('/students');
   });
 

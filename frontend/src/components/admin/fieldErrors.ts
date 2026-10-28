@@ -43,5 +43,5 @@ export function apiErrorText(error: unknown): string {
   if (error.code === 'DUPLICATE_EMAIL' || error.code === 'DUPLICATE_CPF') {
     return msg(error.code, { name: duplicateName(error) });
   }
-  return hasMessage(error.code) ? msg(error.code) : error.message;
+  return hasMessage(error.code) ? msg(error.code, { reference: error.reference }) : error.message;
 }

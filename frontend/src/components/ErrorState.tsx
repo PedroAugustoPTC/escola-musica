@@ -14,7 +14,7 @@ export function errorText(error: unknown): string {
  * tela não deve mostrar). Código fora do catálogo vira `INTERNAL_ERROR`.
  */
 export function catalogErrorText(error: unknown): string {
-  if (error instanceof ApiError) return msg(error.code);
+  if (error instanceof ApiError) return msg(error.code, { reference: error.reference });
   return msg('INTERNAL_ERROR');
 }
 

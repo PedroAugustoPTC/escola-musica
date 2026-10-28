@@ -184,7 +184,7 @@ describe('AdminSignInScreen (A01)', () => {
       'POST /api/v1/admin/session': () => {
         attempt += 1;
         if (attempt === 1) throw new TypeError('Failed to fetch');
-        return { status: 500, body: { code: 'INTERNAL_ERROR', message: 'Ocorreu um erro inesperado.' } };
+        return { status: 500, body: { code: 'INTERNAL_ERROR', message: 'Falhou.', reference: 'K7M2QX' } };
       },
     });
     const user = userEvent.setup();
@@ -197,11 +197,7 @@ describe('AdminSignInScreen (A01)', () => {
 
     await user.type(screen.getByLabelText('Senha'), 'any-password-123');
     await user.click(screen.getByRole('button', { name: 'Entrar' }));
-    await waitFor(() =>
-      expect(screen.getByRole('alert')).toHaveTextContent(
-        'Ocorreu um erro inesperado. Tente novamente mais tarde.',
-      ),
-    );
+    await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('Algo deu errado.'));
   });
 
   it('avisa que o acesso foi encerrado quando o motivo vem na URL', async () => {
@@ -223,9 +219,7 @@ describe('AdminSignInScreen (A01)', () => {
     await screen.findByLabelText('E-mail');
     await fillAndSend(user, 'alguem@example.test', 'any-password-123');
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Ocorreu um erro inesperado. Tente novamente mais tarde.',
-    );
+    expect(await screen.findByRole('alert')).toHaveTextContent('Algo deu errado.');
     expect(screen.queryByText(WRONG_CREDENTIALS)).not.toBeInTheDocument();
     expect(document.body.textContent).not.toContain('texto cru do servidor');
   });

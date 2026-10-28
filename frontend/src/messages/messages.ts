@@ -11,10 +11,21 @@ export function msg(code: MessageCode | string, params: MessageParams = {}): str
   if (model === undefined) {
     return (catalog as Record<string, string>).INTERNAL_ERROR ?? '';
   }
-  return model.replace(/\{([A-Za-z]+)\}/g, (_, key: string) => {
+  // Sem o parâmetro que a frase exige (hoje só o `{reference}` da falha interna), a frase inteira sai do texto:
+  // nunca aparece "{reference}" literal nem uma lacuna entre as palavras.
+  const text = dropSentencesWithMissingParam(model, params);
+  return text.replace(/\{([A-Za-z]+)\}/g, (_, key: string) => {
     const value = params[key];
     return value === null || value === undefined ? '' : String(value);
   });
+}
+
+const REFERENCE_SENTENCE = /\s*[^.!?]*\{reference\}[^.!?]*[.!?]/;
+
+function dropSentencesWithMissingParam(model: string, params: MessageParams): string {
+  const reference = params.reference;
+  if (reference !== null && reference !== undefined && reference !== '') return model;
+  return model.replace(REFERENCE_SENTENCE, '').trim();
 }
 
 export function hasMessage(code: string): boolean {

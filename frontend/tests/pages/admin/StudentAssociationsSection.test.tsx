@@ -121,13 +121,13 @@ describe('StudentAssociationsSection', () => {
     open({
       [`GET ${ASSOCIATION}/removal-preview`]: {
         status: 500,
-        body: { code: 'INTERNAL_ERROR', message: 'Falhou.' },
+        body: { code: 'INTERNAL_ERROR', message: 'Falhou.', reference: 'K7M2QX' },
       },
     });
     const user = userEvent.setup();
     await user.click(await screen.findByRole('button', { name: 'Retirar Clara Souza' }));
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Ocorreu um erro inesperado. Tente novamente mais tarde.',
+      'Algo deu errado. Informe o código de referência K7M2QX ao suporte.',
     );
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });

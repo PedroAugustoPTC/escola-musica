@@ -26,7 +26,8 @@ describe('SessionClock', () => {
     expect(screen.getAllByRole('alert')).toHaveLength(1);
     expect(screen.getByRole('alert')).toHaveTextContent('termina em 5 minuto(s)');
     expect(document.body.textContent).not.toContain('{minutes}');
-  });
+    // relógio real (≈ 3,5 s a 7 s): o limite padrão de 5 s estoura com a máquina carregada
+  }, 15_000);
 
   it('já abre com o aviso quando restam menos de 5 minutos', () => {
     const expiresAt = new Date(Date.now() + 2 * MINUTE + 30_000).toISOString();

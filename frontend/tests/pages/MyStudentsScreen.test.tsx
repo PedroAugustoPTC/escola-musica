@@ -247,10 +247,12 @@ describe('P01 Meus alunos', () => {
     renderAsTeacher(routes, '/my-students', {
       'GET /api/v1/my-students': () =>
         fail
-          ? { status: 500, body: { code: 'INTERNAL_ERROR', message: 'Ocorreu um erro inesperado.' } }
+          ? { status: 500, body: { code: 'INTERNAL_ERROR', message: 'Falhou.', reference: 'K7M2QX' } }
           : { body: myStudentsPage([MY_STUDENT_ACTIVE]) },
     });
-    expect(await screen.findByRole('alert')).toHaveTextContent('Ocorreu um erro inesperado.');
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Informe o código de referência K7M2QX ao suporte.',
+    );
     fail = false;
     await user.click(screen.getByRole('button', { name: 'Tentar novamente' }));
     expect(await screen.findByRole('link', { name: 'Olavo Torrente' })).toBeInTheDocument();
