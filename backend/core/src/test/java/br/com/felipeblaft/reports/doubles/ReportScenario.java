@@ -101,13 +101,13 @@ public class ReportScenario extends AccessScenario {
                     versions,
                     pdfDocuments,
                     queue);
-    public final QueryJobUseCase queryJob = new QueryJobUseCase(queue, clock);
+    public final QueryJobUseCase queryJob = new QueryJobUseCase(authorization, queue, clock);
     public final br.com.felipeblaft.reports.usecase.lesson.GetOpenReportUseCase getOpen =
             new br.com.felipeblaft.reports.usecase.lesson.GetOpenReportUseCase(authorization, open);
     public final br.com.felipeblaft.reports.usecase.job.DiscardRegistrationInProcessingUseCase
             discardRegistration =
                     new br.com.felipeblaft.reports.usecase.job
-                            .DiscardRegistrationInProcessingUseCase(queue, audio, clock);
+                            .DiscardRegistrationInProcessingUseCase(authorization, queue, audio, clock);
     public final GetReportDocumentUseCase getDocument =
             new GetReportDocumentUseCase(access, reports, versions, pdfDocuments, documents);
 

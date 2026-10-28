@@ -467,8 +467,9 @@ public class UseCaseConfig {
     }
 
     @Bean
-    QueryJobUseCase queryJobUseCase(JobQueuePort queue, ClockPort clock) {
-        return new QueryJobUseCase(queue, clock);
+    QueryJobUseCase queryJobUseCase(
+            AuthorizationService authorization, JobQueuePort queue, ClockPort clock) {
+        return new QueryJobUseCase(authorization, queue, clock);
     }
 
     @Bean
@@ -491,8 +492,11 @@ public class UseCaseConfig {
 
     @Bean
     DiscardRegistrationInProcessingUseCase discardRegistrationInProcessingUseCase(
-            JobQueuePort queue, TemporaryAudioService audio, ClockPort clock) {
-        return new DiscardRegistrationInProcessingUseCase(queue, audio, clock);
+            AuthorizationService authorization,
+            JobQueuePort queue,
+            TemporaryAudioService audio,
+            ClockPort clock) {
+        return new DiscardRegistrationInProcessingUseCase(authorization, queue, audio, clock);
     }
 
     // ---- Relatório semestral (US4)
