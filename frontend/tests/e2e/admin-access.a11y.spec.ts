@@ -65,7 +65,7 @@ test.describe('A01 — entrar na área administrativa', () => {
     await expectNoSeriousViolations(page, { name: 'A01 campos vazios', viewports: [390] });
 
     await email.fill(administratorCredentialsFromEnvironment().email);
-    await page.getByLabel('Senha', { exact: true }).fill('senha-errada-123456');
+    await page.getByLabel('Senha', { exact: true }).fill('wrong-password-123456');
     await page.getByRole('button', { name: 'Entrar' }).click();
     // mensagem única para qualquer falha, num alerta que o leitor de tela anuncia
     await expect(page.getByRole('alert')).toContainText('E-mail ou senha incorretos.');
@@ -116,7 +116,7 @@ test.describe('A04 — início e moldura da área administrativa', () => {
     await expect(page.locator('html')).toHaveAttribute('lang', 'pt-BR');
     await expect(page.getByRole('heading', { level: 1, name: 'Início' })).toBeVisible();
     await expect(page.getByText(/^Sua sessão expira às \d{2}:\d{2}\.$/)).toBeVisible();
-    await expect(page.getByText('ativo(s)').first()).toBeVisible();
+    await expect(page.locator('.admin-shortcuts__count').first()).toBeVisible();
     await expectNoSeriousViolations(page, { name: 'A04 início' });
   });
 

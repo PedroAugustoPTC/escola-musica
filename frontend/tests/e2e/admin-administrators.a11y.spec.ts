@@ -154,7 +154,7 @@ test.describe('A02 — definir a senha com o código de ativação', () => {
       await expect(page.getByRole('alert')).toContainText('Informe o código de ativação.');
       await expectNoSeriousViolations(page, { name: 'A02 campos vazios' });
       const password = randomPassword();
-      await page.getByLabel('E-mail').fill('ninguem@example.test');
+      await page.getByLabel('E-mail').fill('nobody@example.test');
       await page.getByLabel('Código de ativação').fill('ABCD2345');
       await page.getByLabel('Nova senha', { exact: true }).fill(password);
       await page.getByLabel('Confirme a nova senha').fill(password);

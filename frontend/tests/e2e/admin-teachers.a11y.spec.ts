@@ -56,7 +56,7 @@ test.describe('A05 — lista de professores', () => {
     await expect(page.getByRole('link', { name: 'Bruno Lima' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Clara Souza' })).toHaveCount(0);
 
-    await page.getByRole('searchbox').fill('inexistente');
+    await page.getByRole('searchbox').fill('missing');
     await page.keyboard.press('Enter');
     await expect(page.getByText(/Nenhum professor encontrado/)).toBeVisible();
     await expectNoSeriousViolations(page, { name: 'A05 busca sem resultado' });
