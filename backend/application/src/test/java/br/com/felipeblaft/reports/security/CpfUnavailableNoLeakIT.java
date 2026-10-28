@@ -35,7 +35,7 @@ class CpfUnavailableNoLeakIT extends SecurityBase {
     private static final String OWN_STUDENT_TEXT = "Este aluno já está entre os seus.";
 
     private static final String BLOCKED_TEXT =
-            "Esta operação está indisponível no momento\. Tente novamente em \d+ minuto\(s\)\.";
+            "Esta operação está indisponível no momento[.] Tente novamente em [0-9]+ minuto[(]s[)][.]";
     private static final String OTHER_STUDENT_NAME = "Joana Cantora";
     private static final String OTHER_TEACHER_NAME = "Bruno Lima";
     private static final String OTHER_TEACHER_EMAIL = "bruno@example.test";

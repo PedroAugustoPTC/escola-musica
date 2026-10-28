@@ -21,7 +21,7 @@ import tools.jackson.databind.JsonNode;
  */
 class StudentConcurrencyIT extends SecurityBase {
 
-    private static final int ROUNDS = 8;
+    private static final int ROUNDS = 4; // 5 recusas bloqueariam o perdedor
 
     private Cookie claraSession;
     private Cookie brunoSession;
