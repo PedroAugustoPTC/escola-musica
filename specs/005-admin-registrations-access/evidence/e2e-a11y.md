@@ -11,11 +11,19 @@ violação **séria ou crítica** e em rolagem horizontal.
 
 | Item | Resultado |
 |---|---|
-| Corrida completa (Chromium, 1 worker) | **88 passaram, 0 falharam, 0 instáveis**, em 6,0 min |
+| Corrida completa (Chromium, 1 worker) | **90 passaram, 0 falharam**, em 7,1 min (88 testes anteriores + 2 de `icons-render.spec.ts`) |
 | Violações sérias/críticas de axe (A01 a A12, P01 a P03, claro/escuro, 390/1440 px) | **Nenhuma** |
 | Rolagem horizontal a 390 px | **Nenhuma** (as 32 falhas da corrida anterior sumiram com a fonte nova) |
-| SC-001 (administrador cadastra professor, copia o código e cadastra aluno associado) | **6,2 s e 18 interações** (limites: 180 s e 25), digitação a 40 ms por tecla |
-| SC-002 (professora cadastra o primeiro aluno, do acesso ao detalhe) | **2,4 s** (limite: 180 s), CPF fora da URL e do armazenamento |
+| SC-001 (administrador cadastra professor, copia o código e cadastra aluno associado) | **6,4 s e 18 interações** (limites: 180 s e 25), digitação a 40 ms por tecla |
+| SC-002 (professora cadastra o primeiro aluno, do acesso ao detalhe) | **2,5 s** (limite: 180 s), CPF fora da URL e do armazenamento |
+| Glifos da fonte de ícones (`icons-render.spec.ts`) | Os 59 nomes de `included-icons.txt` têm largura de cerca de 1em com a fonte carregada; o controle negativo (nome sem glifo) é largo |
+
+Ajustes da revisão pré-PR nesta corrida: `test.setTimeout` de 240 s em SC-001 e SC-002 (o limite padrão de 90 s matava o teste
+antes da asserção de 180 s), datas de "menor de idade" relativas a hoje (`minorBirthDate()`) e foco do diálogo de retirada
+devolvido sem temporizador. A régua do axe continua sendo "sem violação séria ou crítica" (SC-012), como diz o cabeçalho de
+`support.ts`. Uma primeira corrida desta rodada teve 89 passes e 1 falha em `accessibility.spec.ts` (390 px, tema claro): o
+job simulado ainda processava quando a espera de 20 s acabou, com o backend de testes rodando em paralelo na mesma máquina; a
+segunda corrida completa passou inteira, sem alteração de código entre as duas.
 
 ## Defeito de ícones: corrigido
 

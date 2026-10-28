@@ -8,24 +8,37 @@ export type MessageParams = Record<string, string | number | null | undefined>;
 /** Texto do catálogo com os placeholders {nome} substituídos (ausentes ficam vazios). */
 export function msg(code: MessageCode | string, params: MessageParams = {}): string {
   const model = (catalog as Record<string, string>)[code];
-  if (model === undefined) {
-    return (catalog as Record<string, string>).INTERNAL_ERROR ?? '';
-  }
-  // Sem o parâmetro que a frase exige (hoje só o `{reference}` da falha interna), a frase inteira sai do texto:
-  // nunca aparece "{reference}" literal nem uma lacuna entre as palavras.
-  const text = dropSentencesWithMissingParam(model, params);
+  // código fora do catálogo cai em INTERNAL_ERROR, que também passa pelo preenchimento (nunca "{reference}" cru)
+  return renderMessage(model ?? (catalog as Record<string, string>).INTERNAL_ERROR ?? '', params);
+}
+
+/**
+ * Preenche o modelo. Sem o parâmetro que a frase exige (hoje só o `{reference}` da falha interna), a frase
+ * inteira sai do texto: nunca aparece "{reference}" literal nem uma lacuna entre as palavras, termine ou não
+ * a frase em pontuação, esteja ela no começo, no meio ou no fim do texto.
+ */
+export function renderMessage(model: string, params: MessageParams = {}): string {
+  const text = dropSentencesWithMissingReference(model, params);
   return text.replace(/\{([A-Za-z]+)\}/g, (_, key: string) => {
     const value = params[key];
     return value === null || value === undefined ? '' : String(value);
   });
 }
 
-const REFERENCE_SENTENCE = /\s*[^.!?]*\{reference\}[^.!?]*[.!?]/;
+// Uma frase vai até a pontuação final (ou até o fim do texto, se não houver) e leva os espaços que a seguem.
+const SENTENCE = /[^.!?]+(?:[.!?]+|$)\s*/g;
+const REFERENCE_PLACEHOLDER = '{reference}';
 
-function dropSentencesWithMissingParam(model: string, params: MessageParams): string {
+function dropSentencesWithMissingReference(model: string, params: MessageParams): string {
   const reference = params.reference;
   if (reference !== null && reference !== undefined && reference !== '') return model;
-  return model.replace(REFERENCE_SENTENCE, '').trim();
+  if (!model.includes(REFERENCE_PLACEHOLDER)) return model;
+  const kept = (model.match(SENTENCE) ?? [])
+    .filter((sentence) => !sentence.includes(REFERENCE_PLACEHOLDER))
+    .join('')
+    .trim();
+  // texto que só existe em torno da referência: melhor o que sobra dele do que uma mensagem vazia
+  return kept !== '' ? kept : model.split(REFERENCE_PLACEHOLDER).join('').replace(/\s+/g, ' ').trim();
 }
 
 export function hasMessage(code: string): boolean {

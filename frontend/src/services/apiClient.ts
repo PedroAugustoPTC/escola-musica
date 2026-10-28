@@ -1,12 +1,14 @@
 import type { components } from './api-types';
+import type { components as administrationComponents } from './administration-api-types';
 import { msg } from '../messages/messages';
 
 /** Tipos do contrato da API (gerados de contracts/api-portal.openapi.yaml). */
 export type Schemas = components['schemas'];
-export type ContractError = Schemas['Error'] & {
-  /** Referência da falha interna; vem em toda resposta de erro do servidor (contrato da administração). */
-  reference?: string;
-};
+/**
+ * Corpo de erro do servidor. Vem do contrato da administração, que é o que define `reference` (código da falha
+ * interna, em toda resposta de erro); o contrato 001 é histórico e não o declara.
+ */
+export type ContractError = administrationComponents['schemas']['Error'];
 
 export const BASE_API = '/api/v1';
 export const SESSION_EXPIRED_EVENT = 'reports:session-expired';

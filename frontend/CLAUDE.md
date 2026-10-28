@@ -52,7 +52,13 @@ Rotas da SPA em inglês: `/sign-in`, `/students…`, `/my-students…`, `/jobs/:
   tiver forma de CPF, limpa a URL com `replace`, devolve termo vazio e mostra o aviso de recusa). Defesa em profundidade nos
   serviços (`tests/services/cpfSearchGuard.test.tsx`). O campo do CPF usa `autocomplete="off"`.
 - Identidade visual do Instituto (referência em `portal-do-professor-design-system/`), WCAG 2.1 AA e
-  mobile-first são obrigatórios (Princípio IX); o e2e valida acessibilidade com axe, em claro e escuro, a 390 e 1440 px. O login
+  mobile-first são obrigatórios (Princípio IX); o e2e valida acessibilidade com axe, em claro e escuro, a 390 e 1440 px.
+  **Régua do axe**: a área administrativa e "Meus alunos" reprovam só impacto `serious`/`critical` (SC-012 diz "sem violação
+  séria ou crítica"; `moderate`/`minor` são boas práticas, não critério WCAG e não derrubam o build); `accessibility.spec.ts`
+  (telas do professor, SC-011) reprova qualquer violação. `tests/e2e/icons-render.spec.ts` prova no navegador que cada nome de
+  `included-icons.txt` tem glifo na fonte (largura de 1em). Orçamentos de tempo (SC-001/SC-002) usam `test.setTimeout` maior que
+  o orçamento, senão o timeout padrão de 90 s mataria o teste antes da asserção de 180 s. Datas de "menor de idade" nos testes
+  vêm de `minorBirthDate()` (relativas a hoje), nunca fixas. O login
   do administrador de teste usa `E2E_ADMIN_EMAIL` e `E2E_ADMIN_PASSWORD` (`tests/e2e/support.ts`); a senha nunca fica no código.
 - Idioma (Princípio VI): nomes de arquivos, componentes, funções, rotas, parâmetros de consulta e classes CSS em
   **inglês**; texto mostrado ao usuário em **português do Brasil acentuado**. Nome de campo do JSON da API

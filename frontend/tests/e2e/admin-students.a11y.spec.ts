@@ -1,10 +1,13 @@
 import { expect, test } from '@playwright/test';
 import {
+  CPF_MATTEO,
+  CPF_OLAVO,
   expectFocusOrder,
   expectModalDialogBehavior,
   expectNoSeriousViolations,
   expectValueAbsentFromUrlAndStorage,
   maskedCpf,
+  minorBirthDate,
   seed,
   signInAsAdministrator,
   syntheticCpf,
@@ -49,19 +52,26 @@ test.describe('A10 — alunos da escola', () => {
     await expectNoSeriousViolations(page, { name: 'A10 busca sem resultado' });
   });
 
-  test('não existe busca por CPF: o termo é recusado e não vai à URL nem ao armazenamento', async ({ page }) => {
+  test('não existe busca por CPF: o termo é recusado e não vai à URL nem ao armazenamento', async ({
+    page,
+  }) => {
     await page.goto('/admin/students');
-    const cpf = '52998224725';
+    const cpf = CPF_MATTEO;
     await page.getByRole('searchbox').fill(maskedCpf(cpf));
     await page.keyboard.press('Enter');
-    await expect(page.getByText('Não há busca por CPF. Procure pelo nome ou pelo instrumento.')).toBeVisible();
+    await expect(
+      page.getByText('Não há busca por CPF. Procure pelo nome ou pelo instrumento.'),
+    ).toBeVisible();
     await expect(page.getByRole('searchbox')).toHaveAttribute('aria-invalid', 'true');
     await expectValueAbsentFromUrlAndStorage(page, cpf);
     await expectNoSeriousViolations(page, { name: 'A10 busca por CPF recusada' });
   });
 
   test('o estado vazio oferece a ação que resolve', async ({ page }) => {
-    await page.getByRole('navigation', { name: 'Área administrativa' }).getByRole('link', { name: 'Alunos' }).click();
+    await page
+      .getByRole('navigation', { name: 'Área administrativa' })
+      .getByRole('link', { name: 'Alunos' })
+      .click();
     await page.getByRole('group', { name: 'Situação' }).getByRole('button', { name: 'Inativos' }).click();
     await expect(page.getByText(/Nenhum aluno encontrado/)).toBeVisible();
     await expect(page.getByRole('button', { name: 'Limpar busca' })).toBeVisible();
@@ -116,18 +126,18 @@ test.describe('A11 — cadastrar aluno', () => {
     await expectNoSeriousViolations(page, { name: 'A11 CPF inválido' });
 
     // CPF de outro aluno: a duplicidade indica o NOME do aluno, nunca o CPF
-    await cpf.fill(maskedCpf('52998224725'));
+    await cpf.fill(maskedCpf(CPF_MATTEO));
     await page.getByRole('button', { name: 'Cadastrar aluno' }).click();
     const refusal = page.getByRole('alert').filter({ hasText: 'Matteo Mafra' });
     await expect(refusal).toContainText('Este CPF já pertence ao aluno Matteo Mafra.');
-    await expect(page.locator('body')).not.toContainText('52998224725');
-    await expectValueAbsentFromUrlAndStorage(page, '52998224725');
+    await expect(page.locator('body')).not.toContainText(CPF_MATTEO);
+    await expectValueAbsentFromUrlAndStorage(page, CPF_MATTEO);
   });
 
   test('menor sem responsável é recusado com o erro no grupo do responsável', async ({ page }) => {
     await page.goto('/admin/students/new');
     await page.getByLabel('Nome do aluno').fill('Criança de Teste');
-    await page.getByLabel('Data de nascimento').fill('2017-02-10');
+    await page.getByLabel('Data de nascimento').fill(minorBirthDate());
     await page.getByLabel('CPF').fill(syntheticCpf('135792468'));
     await page.getByLabel('Instrumento').fill('Piano');
     await page.getByRole('button', { name: 'Cadastrar aluno' }).click();
@@ -178,7 +188,7 @@ test.describe('A12 — aluno', () => {
     await page.getByRole('button', { name: 'Salvar alterações' }).click();
     await expect(page.getByRole('status').filter({ hasText: 'Dados salvos.' })).toBeVisible();
     await expect(page.getByLabel('CPF')).toHaveValue('');
-    await expectValueAbsentFromUrlAndStorage(page, '12345678909');
+    await expectValueAbsentFromUrlAndStorage(page, CPF_OLAVO);
   });
 
   test('o diálogo de inativar prende o foco, Esc cancela e o foco volta ao botão', async ({ page }) => {

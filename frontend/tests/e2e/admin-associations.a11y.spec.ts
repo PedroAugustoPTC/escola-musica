@@ -31,7 +31,9 @@ test('a seção lista os professores e oferece incluir só quem ainda não está
   await expectNoSeriousViolations(page, { name: 'A12 professores do aluno' });
 });
 
-test('o diálogo de retirada prende o foco, Esc cancela sem gravar e o aviso é anunciado', async ({ page }) => {
+test('o diálogo de retirada prende o foco, Esc cancela sem gravar e o aviso é anunciado', async ({
+  page,
+}) => {
   await page.goto(`/admin/students/${data.students.matteo}`);
   const trigger = page.getByRole('button', { name: 'Retirar Clara Souza' });
   await trigger.focus();
@@ -47,12 +49,23 @@ test('o diálogo de retirada prende o foco, Esc cancela sem gravar e o aviso é 
   await expectModalDialogBehavior(page, dialog, trigger);
 
   // cancelar não grava
-  await expect(page.getByRole('region', { name: 'Professores do aluno' }).getByText('Clara Souza')).toBeVisible();
-  const list = await page.request.get(`/api/v1/admin/students/${data.students.matteo}`);
-  expect(list.status()).toBe(200);
+  await expect(
+    page.getByRole('region', { name: 'Professores do aluno' }).getByText('Clara Souza'),
+  ).toBeVisible();
+  const response = await page.request.get(`/api/v1/admin/students/${data.students.matteo}`);
+  expect(response.status()).toBe(200);
+  const student = (await response.json()) as { teachers: { id: string; active: boolean }[] };
+  expect(
+    student.teachers.map((teacher) => teacher.id),
+    'a professora continua associada',
+  ).toContain(data.clara);
 });
 
-test('retirar com relatório em aberto avisa quantos congelam e não bloqueia', async ({ page, browser, baseURL }) => {
+test('retirar com relatório em aberto avisa quantos congelam e não bloqueia', async ({
+  page,
+  browser,
+  baseURL,
+}) => {
   // a professora Clara abre um relatório (áudio enviado e perguntas pendentes) para o Matteo
   const teacherContext = await browser.newContext({ ignoreHTTPSErrors: true, locale: 'pt-BR', baseURL });
   try {

@@ -33,7 +33,9 @@ test('axe sem violação séria nos dois temas e larguras', async ({ page }) => 
   await expectNoSeriousViolations(page, { name: 'A03 trocar senha' });
 });
 
-test('os campos têm rótulo, autocompletar de senha nova e a regra visível antes do envio', async ({ page }) => {
+test('os campos têm rótulo, autocompletar de senha nova e a regra visível antes do envio', async ({
+  page,
+}) => {
   const newPassword = page.getByLabel('Nova senha', { exact: true });
   const confirmation = page.getByLabel('Confirme a nova senha');
   await expect(newPassword).toHaveAttribute('type', 'password');
@@ -66,7 +68,9 @@ test('erros de forma são anunciados, ligados aos campos e levam o foco ao resum
   await page.getByLabel('Confirme a nova senha').fill(randomPassword());
   await page.getByRole('button', { name: 'Trocar senha' }).click();
   await expect(page.getByRole('alert')).toContainText('As senhas não são iguais.');
-  await expect(page.getByLabel('Confirme a nova senha')).toHaveAccessibleDescription('As senhas não são iguais.');
+  await expect(page.getByLabel('Confirme a nova senha')).toHaveAccessibleDescription(
+    'As senhas não são iguais.',
+  );
 });
 
 test('senha curta é recusada pelo servidor e o erro é anunciado', async ({ page }) => {
@@ -82,7 +86,10 @@ test('senha curta é recusada pelo servidor e o erro é anunciado', async ({ pag
   await expectNoSeriousViolations(page, { name: 'A03 senha recusada' });
 });
 
-test('troca a senha só pelo teclado; a provisória deixa de valer e a nova entra', async ({ page, context }) => {
+test('troca a senha só pelo teclado; a provisória deixa de valer e a nova entra', async ({
+  page,
+  browser,
+}) => {
   const credentials = administratorCredentialsFromEnvironment();
   const fresh = randomPassword();
   await tabUntilFocused(page, page.getByLabel('Nova senha', { exact: true }));
@@ -94,10 +101,9 @@ test('troca a senha só pelo teclado; a provisória deixa de valer e a nova entr
   await expect(page.getByRole('heading', { level: 1, name: 'Início' })).toBeVisible();
   await expect(page.getByRole('navigation', { name: 'Área administrativa' })).toBeVisible();
 
-  const other = await context.browser()!.newContext({ ignoreHTTPSErrors: true, locale: 'pt-BR' });
+  const other = await browser.newContext({ ignoreHTTPSErrors: true, locale: 'pt-BR' });
   try {
     const anonymous = await other.newPage();
-    await anonymous.goto('/admin/sign-in');
     await signInAsAdministrator(anonymous, { email: credentials.email, password: fresh });
     await expect(anonymous).toHaveURL(/\/admin$/);
   } finally {

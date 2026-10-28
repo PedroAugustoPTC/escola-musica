@@ -1,4 +1,4 @@
-import { useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Button } from '../../components/Button';
 import { ConfirmationDialog } from '../../components/ConfirmationDialog';
 import { Icon } from '../../components/Icon';
@@ -43,6 +43,18 @@ export function StudentAssociationsSection({ student }: { student: AdminStudent 
 
   // o botão fica desabilitado enquanto a prévia carrega e perde o foco: o diálogo não teria a quem devolvê-lo
   const trigger = useRef<HTMLElement | null>(null);
+  // para onde o foco vai quando o diálogo fecha: o botão que o abriu (cancelar) ou o título (retirada gravada)
+  const focusAfterClose = useRef<'trigger' | 'heading' | null>(null);
+
+  // Roda depois que o diálogo desmonta (o efeito do filho limpa primeiro e tenta devolver o foco ao elemento ativo de
+  // antes, que era o <body>, porque o botão fica desabilitado durante a prévia): a devolução é determinística,
+  // sem temporizador, e o foco chega ao destino certo (WCAG 2.4.3).
+  useEffect(() => {
+    if (removal !== null || focusAfterClose.current === null) return;
+    const target = focusAfterClose.current === 'heading' ? heading.current : trigger.current;
+    focusAfterClose.current = null;
+    target?.focus();
+  }, [removal]);
 
   const askRemoval = (teacherId: string, teacherName: string, button: HTMLElement) => {
     trigger.current = button;
@@ -54,9 +66,8 @@ export function StudentAssociationsSection({ student }: { student: AdminStudent 
 
   const closeRemoval = () => {
     remove.reset();
+    focusAfterClose.current = 'trigger';
     setRemoval(null);
-    // depois que o diálogo fecha, o foco volta ao botão que o abriu (WCAG 2.4.3)
-    window.setTimeout(() => trigger.current?.focus(), 0);
   };
 
   return (
@@ -176,10 +187,10 @@ export function StudentAssociationsSection({ student }: { student: AdminStudent 
           if (!removal) return;
           remove.mutate(removal.teacherId, {
             onSuccess: () => {
+              // o botão da linha some: o foco vai para o título da seção
+              focusAfterClose.current = 'heading';
               setRemoval(null);
               setNotice('Professor retirado do aluno.');
-              // o botão da linha some: o foco vai para o título da seção
-              window.setTimeout(() => heading.current?.focus(), 0);
             },
           });
         }}

@@ -16,6 +16,8 @@ import {
 const BUDGET_MS = 180_000;
 const MAX_INTERACTIONS = 25;
 const KEY_DELAY_MS = 40;
+/** Folga sobre o orçamento: o teste só pode morrer por timeout depois de a asserção de 180 s ter a chance de falar. */
+const TEST_TIMEOUT_MS = BUDGET_MS + 60_000;
 
 test.beforeEach(async () => {
   await seed();
@@ -27,11 +29,13 @@ test('o administrador cadastra um professor, copia o código e cadastra um aluno
   context,
   baseURL,
 }) => {
+  // o timeout padrão do Playwright (90 s) mataria o roteiro antes do orçamento de 180 s
+  test.setTimeout(TEST_TIMEOUT_MS);
   await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: baseURL });
   const credentials = administratorCredentialsFromEnvironment();
   const studentCpf = syntheticCpf('357951246');
   let interactions = 0;
-  const step = <T,>(action: Promise<T>): Promise<T> => {
+  const step = <T>(action: Promise<T>): Promise<T> => {
     interactions += 1;
     return action;
   };
@@ -72,7 +76,10 @@ test('o administrador cadastra um professor, copia o código e cadastra um aluno
   await step(page.getByRole('button', { name: 'Cadastrar aluno' }).click());
   await expect(page.getByRole('heading', { level: 1, name: 'Beatriz Nogueira' })).toBeVisible();
   await expect(
-    page.getByRole('region', { name: 'Professores do aluno' }).getByRole('listitem').filter({ hasText: 'Rafael Monteiro' }),
+    page
+      .getByRole('region', { name: 'Professores do aluno' })
+      .getByRole('listitem')
+      .filter({ hasText: 'Rafael Monteiro' }),
   ).toBeVisible();
 
   const elapsed = Date.now() - started;

@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import {
+  CODE_CLARA,
   expectFocusOrder,
   expectModalDialogBehavior,
   expectNoSeriousViolations,
@@ -41,10 +42,9 @@ test.describe('A05 — lista de professores', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Professores' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Clara Souza' })).toBeVisible();
     await expect(page.getByRole('search')).toBeVisible();
-    await expect(page.getByRole('group', { name: 'Situação' }).getByRole('button', { name: 'Todos' })).toHaveAttribute(
-      'aria-pressed',
-      'true',
-    );
+    await expect(
+      page.getByRole('group', { name: 'Situação' }).getByRole('button', { name: 'Todos' }),
+    ).toHaveAttribute('aria-pressed', 'true');
     await expectNoSeriousViolations(page, { name: 'A05 professores' });
   });
 
@@ -61,12 +61,14 @@ test.describe('A05 — lista de professores', () => {
     await expect(page.getByText(/Nenhum professor encontrado/)).toBeVisible();
     await expectNoSeriousViolations(page, { name: 'A05 busca sem resultado' });
 
-    await tabUntilFocused(page, page.getByRole('group', { name: 'Situação' }).getByRole('button', { name: 'Inativos' }));
-    await page.keyboard.press('Space');
-    await expect(page.getByRole('group', { name: 'Situação' }).getByRole('button', { name: 'Inativos' })).toHaveAttribute(
-      'aria-pressed',
-      'true',
+    await tabUntilFocused(
+      page,
+      page.getByRole('group', { name: 'Situação' }).getByRole('button', { name: 'Inativos' }),
     );
+    await page.keyboard.press('Space');
+    await expect(
+      page.getByRole('group', { name: 'Situação' }).getByRole('button', { name: 'Inativos' }),
+    ).toHaveAttribute('aria-pressed', 'true');
   });
 
   test('a linha mostra a situação com texto e ícone e nunca mostra o código', async ({ page }) => {
@@ -74,7 +76,7 @@ test.describe('A05 — lista de professores', () => {
     const row = page.getByRole('listitem').filter({ hasText: 'Clara Souza' });
     await expect(row).toContainText('Ativo');
     await expect(row).toContainText('clara@example.test');
-    await expect(page.locator('body')).not.toContainText('K7QM2XPA');
+    await expect(page.locator('body')).not.toContainText(CODE_CLARA);
   });
 });
 
@@ -163,7 +165,9 @@ test.describe('A08 — professor', () => {
     await expectNoSeriousViolations(page, { name: 'A08 professor' });
   });
 
-  test('o diálogo de inativar prende o foco, Esc cancela sem gravar e o foco volta ao botão', async ({ page }) => {
+  test('o diálogo de inativar prende o foco, Esc cancela sem gravar e o foco volta ao botão', async ({
+    page,
+  }) => {
     await page.goto(`/admin/teachers/${data.clara}`);
     const trigger = page.getByRole('button', { name: 'Inativar' });
     await trigger.focus();
@@ -179,7 +183,10 @@ test.describe('A08 — professor', () => {
   test('inativar e reativar: a reativação mostra o código novo uma única vez', async ({ page }) => {
     await page.goto(`/admin/teachers/${data.bruno}`);
     await page.getByRole('button', { name: 'Inativar' }).click();
-    await page.getByRole('dialog', { name: 'Inativar professor' }).getByRole('button', { name: 'Inativar' }).click();
+    await page
+      .getByRole('dialog', { name: 'Inativar professor' })
+      .getByRole('button', { name: 'Inativar' })
+      .click();
     await expect(page.getByText('Este professor está inativo.')).toBeVisible();
     // a ação de situação troca os botões: o foco volta ao título
     await expect(page.getByRole('heading', { level: 1, name: 'Bruno Lima' })).toBeFocused();

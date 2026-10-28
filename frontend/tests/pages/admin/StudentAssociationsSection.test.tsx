@@ -92,6 +92,8 @@ describe('StudentAssociationsSection', () => {
     await user.click(within(dialog).getByRole('button', { name: 'Retirar' }));
 
     expect(await screen.findByText('Professor retirado do aluno.')).toBeInTheDocument();
+    // o botão da linha some com a associação: o foco vai ao título da seção, sem esperar temporizador
+    expect(screen.getByRole('heading', { name: 'Professores do aluno' })).toHaveFocus();
     expect(api.calls.some((call) => call.method === 'DELETE' && call.url.endsWith(ASSOCIATION))).toBe(true);
     await waitFor(() =>
       expect(screen.queryByRole('button', { name: 'Retirar Clara Souza' })).not.toBeInTheDocument(),
@@ -103,17 +105,19 @@ describe('StudentAssociationsSection', () => {
 
   it('cancelar (Voltar ou Esc) não grava e devolve o foco', async () => {
     const api = open();
-    const user = userEvent.setup();
+    // sem atraso entre as ações: nenhum temporizador "escondido" no userEvent pode mascarar o foco tardio
+    const user = userEvent.setup({ delay: null });
     const trigger = await screen.findByRole('button', { name: 'Retirar Clara Souza' });
     await openRemoval(user);
     await user.click(screen.getByRole('button', { name: 'Voltar' }));
-    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    // o foco volta no mesmo quadro em que o diálogo fecha, sem esperar temporizador
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(trigger).toHaveFocus();
 
     await openRemoval(user);
     await user.keyboard('{Escape}');
-    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
-    await waitFor(() => expect(trigger).toHaveFocus());
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
     expect(api.calls.some((call) => call.method === 'DELETE')).toBe(false);
   });
 

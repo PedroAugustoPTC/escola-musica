@@ -3,6 +3,7 @@ import {
   addTeacherWithoutStudents,
   expectValueAbsentFromUrlAndStorage,
   maskedCpf,
+  minorBirthDate,
   seed,
   signInAsTeacher,
   syntheticCpf,
@@ -11,6 +12,8 @@ import {
 /** SC-002: a professora cadastra um aluno completo em até 3 minutos de uso, sem deixar o CPF no navegador. */
 const BUDGET_MS = 180_000;
 const KEY_DELAY_MS = 40;
+/** Folga sobre o orçamento: o teste só pode morrer por timeout depois de a asserção de 180 s ter a chance de falar. */
+const TEST_TIMEOUT_MS = BUDGET_MS + 60_000;
 
 test.beforeEach(async () => {
   await seed();
@@ -19,6 +22,8 @@ test.beforeEach(async () => {
 test('cadastro completo do primeiro aluno em até 3 minutos, sem o CPF na URL nem no armazenamento (SC-002)', async ({
   page,
 }) => {
+  // o timeout padrão do Playwright (90 s) mataria o roteiro antes do orçamento de 180 s
+  test.setTimeout(TEST_TIMEOUT_MS);
   const teacher = await addTeacherWithoutStudents();
   const cpf = syntheticCpf('975318642');
   const started = Date.now();
@@ -56,7 +61,7 @@ test('menor de idade com responsável: o cadastro fecha com os dados do respons�
   await signInAsTeacher(page, teacher.code);
   await page.goto('/my-students/new');
   await page.getByLabel('Nome do aluno').fill('Pedro Henrique Lopes');
-  await page.getByLabel('Data de nascimento').fill('2016-06-02');
+  await page.getByLabel('Data de nascimento').fill(minorBirthDate());
   await page.getByLabel('CPF').fill(syntheticCpf('112358132'));
   await page.getByLabel('Instrumento').fill('Violino');
   await page.getByLabel('Nome do responsável').fill('Sandra Lopes');

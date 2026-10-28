@@ -1,11 +1,13 @@
 import { expect, test } from '@playwright/test';
 import {
+  CODE_CLARA,
   expectModalDialogBehavior,
   expectNoSeriousViolations,
   expectValueAbsentFromUrlAndStorage,
   linkTelegram,
   seed,
   signInAsAdministrator,
+  signInAsTeacher,
   tabUntilFocused,
   type Seeding,
 } from './support';
@@ -24,7 +26,9 @@ test.beforeEach(async ({ page }) => {
   await expect(page.getByText('Telegram vinculado')).toBeVisible();
 });
 
-test('a tela do professor com Telegram vinculado oferece reemitir, desvincular e inativar', async ({ page }) => {
+test('a tela do professor com Telegram vinculado oferece reemitir, desvincular e inativar', async ({
+  page,
+}) => {
   await expect(page.getByRole('button', { name: 'Reemitir código' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Desvincular Telegram' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Inativar' })).toBeVisible();
@@ -33,25 +37,40 @@ test('a tela do professor com Telegram vinculado oferece reemitir, desvincular e
 
 test('reemissão: foco preso, Esc cancela, a caixa do Telegram é rotulada e a descrição é anunciada', async ({
   page,
+  browser,
+  baseURL,
 }) => {
   const trigger = page.getByRole('button', { name: 'Reemitir código' });
   await trigger.focus();
   await page.keyboard.press('Enter');
   const dialog = page.getByRole('dialog', { name: 'Reemitir código de acesso' });
-  await expect(dialog).toHaveAccessibleDescription(/Reemitir o código de Clara Souza\?.*sessões da Web são encerradas/);
+  await expect(dialog).toHaveAccessibleDescription(
+    /Reemitir o código de Clara Souza\?.*sessões da Web são encerradas/,
+  );
   const endLink = dialog.getByRole('checkbox', { name: 'Também encerrar o vínculo do Telegram' });
   await expect(endLink).not.toBeChecked();
   await expectNoSeriousViolations(page, { name: 'A08 diálogo de reemissão' });
   await expectModalDialogBehavior(page, dialog, trigger);
-  // cancelar não reemite: o código antigo segue valendo
+  // cancelar não reemite: nenhum código novo na tela e o código antigo segue valendo (a professora entra com ele)
   await expect(page.getByRole('region', { name: /Código de acesso de/ })).toHaveCount(0);
+  const teacherContext = await browser.newContext({ ignoreHTTPSErrors: true, locale: 'pt-BR', baseURL });
+  try {
+    await signInAsTeacher(await teacherContext.newPage(), CODE_CLARA);
+  } finally {
+    await teacherContext.close();
+  }
 });
 
-test('reemissão só pelo teclado: marca a caixa, confirma e o código novo aparece uma única vez', async ({ page }) => {
+test('reemissão só pelo teclado: marca a caixa, confirma e o código novo aparece uma única vez', async ({
+  page,
+}) => {
   await page.getByRole('button', { name: 'Reemitir código' }).focus();
   await page.keyboard.press('Enter');
   const dialog = page.getByRole('dialog', { name: 'Reemitir código de acesso' });
-  await tabUntilFocused(page, dialog.getByRole('checkbox', { name: 'Também encerrar o vínculo do Telegram' }));
+  await tabUntilFocused(
+    page,
+    dialog.getByRole('checkbox', { name: 'Também encerrar o vínculo do Telegram' }),
+  );
   await page.keyboard.press('Space');
   await expect(dialog.getByRole('checkbox')).toBeChecked();
   await tabUntilFocused(page, dialog.getByRole('button', { name: 'Reemitir' }));

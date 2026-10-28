@@ -7,6 +7,12 @@ import pg from 'pg';
  * Apoio aos testes ponta a ponta: semeia professores e alunos fictícios direto no banco da pilha de
  * testes (mesmo HMAC e mesma cifra do backend, com os segredos de testes de compose.test.yaml) e
  * oferece os passos comuns da interface.
+ *
+ * Régua do axe (SC-012): a spec pede "sem violação séria ou crítica", então `expectNoSeriousViolations` reprova
+ * só os impactos `serious` e `critical` (tags WCAG 2.0/2.1/2.2 A e AA). Violações `moderate` e `minor` não
+ * derrubam o build: são sugestões de boa prática, muitas sem critério de sucesso WCAG, e tratá-las como falha
+ * trocaria a régua que a spec definiu. As specs antigas do professor (`accessibility.spec.ts`) usam régua mais
+ * estrita (qualquer violação) e continuam assim.
  */
 
 const DATABASE_URL = process.env.E2E_DATABASE_URL ?? 'postgres://reports:e2e@localhost:5432/reports';
@@ -15,6 +21,29 @@ const HMAC_SECRET = process.env.E2E_HMAC_SECRET ?? 'hmac-secret-for-e2e-tests-wi
 
 export const CODE_CLARA = 'K7QM2XPA';
 export const CODE_BRUNO = 'BRUN2XPA';
+
+// CPFs sintéticos: dígitos verificadores válidos, mas de exemplo público de geradores de teste
+// (e o CPF canário da feature 005, 11144477735); nenhum pertence a uma pessoa real.
+export const CPF_MATTEO = '52998224725';
+export const CPF_OLAVO = '12345678909';
+export const CPF_MIGUEL = '11144477735';
+export const CPF_HELENA = '39053344705';
+
+/**
+ * Data de nascimento (`AAAA-MM-DD`) de quem tem hoje `years` anos completos (menos um dia de folga, para
+ * o aniversário não cair no limite). Os testes de "menor de idade" não podem fixar uma data: com o tempo
+ * ela deixaria de ser de menor e o teste passaria a quebrar sem que nada tivesse mudado.
+ */
+export function birthDateYearsAgo(years: number, today: Date = new Date()): string {
+  const date = new Date(today.getFullYear() - years, today.getMonth(), today.getDate() - 1);
+  const pad = (value: number) => String(value).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+/** Data de nascimento de um menor de idade (10 anos), sempre relativa a hoje. */
+export function minorBirthDate(): string {
+  return birthDateYearsAgo(10);
+}
 
 export interface Seeding {
   clara: string;
@@ -67,7 +96,14 @@ export const CODE_DIANA = 'DRAN2XPA';
 export async function addTeacherWithoutStudents(): Promise<{ id: string; code: string }> {
   const now = new Date();
   const id = await withDatabase((database) =>
-    insertTeacher(database, 'Diana Rocha', 'diana@example.test', CODE_DIANA, now, new Date(now.getTime() + 7 * 24 * 3600 * 1000)),
+    insertTeacher(
+      database,
+      'Diana Rocha',
+      'diana@example.test',
+      CODE_DIANA,
+      now,
+      new Date(now.getTime() + 7 * 24 * 3600 * 1000),
+    ),
   );
   return { id, code: CODE_DIANA };
 }
@@ -76,7 +112,9 @@ export async function addTeacherWithoutStudents(): Promise<{ id: string; code: s
 export function syntheticCpf(base: string): string {
   const digits = base.split('').map(Number);
   const verifier = (length: number) => {
-    const sum = digits.slice(0, length).reduce((total, digit, index) => total + digit * (length + 1 - index), 0);
+    const sum = digits
+      .slice(0, length)
+      .reduce((total, digit, index) => total + digit * (length + 1 - index), 0);
     const rest = (sum * 10) % 11;
     return rest === 10 ? 0 : rest;
   };
@@ -151,6 +189,8 @@ export async function seed(options: SeedOptions = {}): Promise<Seeding> {
 
     const now = new Date();
     const validity = new Date(now.getTime() + 7 * 24 * 3600 * 1000);
+    // alunos semeados são menores (14 anos), sempre relativos a hoje
+    const seededBirthDate = birthDateYearsAgo(14);
     const credentials = administratorCredentialsFromEnvironment();
     const administrator = randomUUID();
     const provisional = options.provisionalAdministrator === true;
@@ -174,8 +214,8 @@ export async function seed(options: SeedOptions = {}): Promise<Seeding> {
       const id = randomUUID();
       await database.query(
         `insert into student (id, name, birth_date, cpf_encrypted, cpf_hash, guardian_name, instrument,
-           active, created_at, updated_at) values ($1, $2, '2012-05-10', $3, $4, null, $5, true, $6, $6)`,
-        [id, name, encryptCpf(cpf), hmac(`cpf:${cpf}`), instrument, now],
+           active, created_at, updated_at) values ($1, $2, $7, $3, $4, null, $5, true, $6, $6)`,
+        [id, name, encryptCpf(cpf), hmac(`cpf:${cpf}`), instrument, now, seededBirthDate],
       );
       await database.query(
         'insert into teacher_student_assignment (id, teacher_id, student_id, created_at) values ($1, $2, $3, $4)',
@@ -184,8 +224,6 @@ export async function seed(options: SeedOptions = {}): Promise<Seeding> {
       return id;
     };
 
-    // CPFs sintéticos: dígitos verificadores válidos, mas de exemplo público de geradores de teste
-    // (e o CPF canário da feature 005, 11144477735); nenhum pertence a uma pessoa real.
     const clara = await teacher('Clara Souza', 'clara@example.test', CODE_CLARA);
     const bruno = await teacher('Bruno Lima', 'bruno@example.test', CODE_BRUNO);
     return {
@@ -193,10 +231,10 @@ export async function seed(options: SeedOptions = {}): Promise<Seeding> {
       bruno,
       administrator,
       students: {
-        matteo: await student(clara, 'Matteo Mafra', '52998224725', 'Piano'),
-        olavo: await student(clara, 'Olavo Torrente', '12345678909', 'Violão'),
-        miguel: await student(clara, 'Miguel de Castro Torrente', '11144477735', 'Violino'),
-        helena: await student(bruno, 'Helena Prado', '39053344705', 'Flauta'),
+        matteo: await student(clara, 'Matteo Mafra', CPF_MATTEO, 'Piano'),
+        olavo: await student(clara, 'Olavo Torrente', CPF_OLAVO, 'Violão'),
+        miguel: await student(clara, 'Miguel de Castro Torrente', CPF_MIGUEL, 'Violino'),
+        helena: await student(bruno, 'Helena Prado', CPF_HELENA, 'Flauta'),
       },
     };
   });
@@ -342,7 +380,7 @@ export async function tabUntilFocused(page: Page, target: Locator, limit = 60): 
   for (let presses = 0; presses <= limit; presses++) {
     const focused = await target
       .first()
-      .evaluate((element) => element === document.activeElement)
+      .evaluate((element) => element === document.activeElement, undefined, { timeout: 1_000 })
       .catch(() => false);
     if (focused) return presses;
     await page.keyboard.press('Tab');
@@ -359,7 +397,11 @@ export async function expectFocusOrder(page: Page, targets: readonly Locator[], 
  * Diálogo modal acessível: tem nome e descrição, o foco entra nele, Tab e Shift+Tab ficam presos dentro
  * dele, Esc o fecha e o foco volta ao disparador.
  */
-export async function expectModalDialogBehavior(page: Page, dialog: Locator, trigger: Locator): Promise<void> {
+export async function expectModalDialogBehavior(
+  page: Page,
+  dialog: Locator,
+  trigger: Locator,
+): Promise<void> {
   await expect(dialog).toBeVisible();
   await expect(dialog).toHaveAttribute('aria-modal', 'true');
   await expect(dialog).toHaveAccessibleName(/\S/);

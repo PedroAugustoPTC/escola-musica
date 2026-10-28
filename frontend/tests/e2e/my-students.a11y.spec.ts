@@ -1,11 +1,14 @@
 import { expect, test, type Page } from '@playwright/test';
 import {
   addTeacherWithoutStudents,
+  CPF_HELENA,
+  CPF_MATTEO,
   expectFocusOrder,
   expectModalDialogBehavior,
   expectNoSeriousViolations,
   expectValueAbsentFromUrlAndStorage,
   maskedCpf,
+  minorBirthDate,
   seed,
   signInAsTeacher,
   syntheticCpf,
@@ -59,11 +62,14 @@ test.describe('P01 — meus alunos', () => {
     await expect(page.getByText('Nenhum aluno encontrado para “Zzz inexistente”.')).toBeVisible();
     await expectNoSeriousViolations(page, { name: 'P01 busca sem resultado' });
 
-    const cpf = '52998224725';
+    const cpf = CPF_MATTEO;
     await page.getByRole('searchbox', { name: 'Buscar entre os meus alunos' }).fill(maskedCpf(cpf));
     await page.keyboard.press('Enter');
     await expect(page.getByRole('alert')).toContainText('A busca por CPF não existe.');
-    await expect(page.getByRole('searchbox', { name: 'Buscar entre os meus alunos' })).toHaveAttribute('aria-invalid', 'true');
+    await expect(page.getByRole('searchbox', { name: 'Buscar entre os meus alunos' })).toHaveAttribute(
+      'aria-invalid',
+      'true',
+    );
     await expectValueAbsentFromUrlAndStorage(page, cpf);
   });
 
@@ -105,7 +111,9 @@ test.describe('P02 — cadastrar aluno', () => {
 
   test('axe, ordem de foco e a seção do responsável sempre visível, sem professores', async ({ page }) => {
     await expect(page.getByRole('heading', { level: 1, name: 'Cadastrar aluno' })).toBeVisible();
-    await expect(page.getByRole('group', { name: 'Responsável (obrigatório para menores de 18 anos)' })).toBeVisible();
+    await expect(
+      page.getByRole('group', { name: 'Responsável (obrigatório para menores de 18 anos)' }),
+    ).toBeVisible();
     await expect(page.getByRole('group', { name: 'Professores' })).toHaveCount(0);
     await expectNoSeriousViolations(page, { name: 'P02 cadastrar aluno' });
     await page.setViewportSize({ width: 1440, height: 900 });
@@ -124,7 +132,7 @@ test.describe('P02 — cadastrar aluno', () => {
 
   test('erros por campo anunciados: CPF inválido e menor sem responsável', async ({ page }) => {
     await page.getByLabel('Nome do aluno').fill('Criança de Teste');
-    await page.getByLabel('Data de nascimento').fill('2017-02-10');
+    await page.getByLabel('Data de nascimento').fill(minorBirthDate());
     await page.getByLabel('CPF').fill('123.456.789-00');
     await page.getByLabel('Instrumento').fill('Piano');
     await page.getByRole('button', { name: 'Cadastrar aluno' }).click();
@@ -139,7 +147,7 @@ test.describe('P02 — cadastrar aluno', () => {
   test('CPF de aluno de outro professor: mensagem neutra, sem nome nem professor', async ({ page }) => {
     await page.getByLabel('Nome do aluno').fill('Aluno Alheio');
     await page.getByLabel('Data de nascimento').fill('1992-01-01');
-    await page.getByLabel('CPF').fill('39053344705');
+    await page.getByLabel('CPF').fill(CPF_HELENA);
     await page.getByLabel('Instrumento').fill('Flauta');
     await page.getByRole('button', { name: 'Cadastrar aluno' }).click();
     await expect(page.getByLabel('CPF')).toHaveAccessibleDescription(
@@ -147,7 +155,7 @@ test.describe('P02 — cadastrar aluno', () => {
     );
     await expect(page.locator('body')).not.toContainText('Helena Prado');
     await expect(page.locator('body')).not.toContainText('Bruno Lima');
-    await expectValueAbsentFromUrlAndStorage(page, '39053344705');
+    await expectValueAbsentFromUrlAndStorage(page, CPF_HELENA);
     await expectNoSeriousViolations(page, { name: 'P02 CPF indisponível' });
   });
 });
@@ -161,7 +169,9 @@ test.describe('P03 — aluno', () => {
     await page.goto(`/my-students/${data.students.matteo}`);
     await expect(page.getByRole('heading', { level: 1, name: 'Matteo Mafra' })).toBeVisible();
     await expect(page.getByLabel('CPF')).toHaveValue('');
-    await expect(page.getByLabel('CPF')).toHaveAccessibleDescription('Deixe em branco para manter o CPF atual.');
+    await expect(page.getByLabel('CPF')).toHaveAccessibleDescription(
+      'Deixe em branco para manter o CPF atual.',
+    );
     await expectNoSeriousViolations(page, { name: 'P03 aluno' });
   });
 
