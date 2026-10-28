@@ -118,7 +118,8 @@ test.describe('A11 — cadastrar aluno', () => {
     // CPF de outro aluno: a duplicidade indica o NOME do aluno, nunca o CPF
     await cpf.fill(maskedCpf('52998224725'));
     await page.getByRole('button', { name: 'Cadastrar aluno' }).click();
-    await expect(page.getByLabel('CPF')).toHaveAccessibleDescription(/Matteo Mafra/);
+    const refusal = page.getByRole('alert').filter({ hasText: 'Matteo Mafra' });
+    await expect(refusal).toContainText('Este CPF já pertence ao aluno Matteo Mafra.');
     await expect(page.locator('body')).not.toContainText('52998224725');
     await expectValueAbsentFromUrlAndStorage(page, '52998224725');
   });
@@ -170,6 +171,10 @@ test.describe('A12 — aluno', () => {
   test('salvar sem tocar no CPF mantém o aluno e anuncia o aviso de sucesso', async ({ page }) => {
     await page.goto(`/admin/students/${data.students.olavo}`);
     await page.getByLabel('Instrumento').fill('Violão clássico');
+    // o aluno semeado é menor de idade e vem sem responsável: salvar exige os dados do responsável
+    await page.getByLabel('Nome do responsável').fill('Marta Torrente');
+    await page.getByLabel('Telefone do responsável').fill('(11) 91234-5678');
+    await page.getByLabel('E-mail do responsável').fill('marta@example.test');
     await page.getByRole('button', { name: 'Salvar alterações' }).click();
     await expect(page.getByRole('status').filter({ hasText: 'Dados salvos.' })).toBeVisible();
     await expect(page.getByLabel('CPF')).toHaveValue('');

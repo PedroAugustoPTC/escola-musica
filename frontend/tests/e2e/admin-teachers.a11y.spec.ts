@@ -173,7 +173,7 @@ test.describe('A08 — professor', () => {
     await expectNoSeriousViolations(page, { name: 'A08 diálogo inativar' });
     await expectModalDialogBehavior(page, dialog, trigger);
     // cancelar não grava
-    await expect(page.getByText('Ativo', { exact: true })).toBeVisible();
+    await expect(page.locator('.status-badge--active')).toBeVisible();
   });
 
   test('inativar e reativar: a reativação mostra o código novo uma única vez', async ({ page }) => {

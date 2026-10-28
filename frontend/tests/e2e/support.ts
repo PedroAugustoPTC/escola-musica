@@ -61,7 +61,7 @@ async function insertTeacher(
   return id;
 }
 
-export const CODE_DIANA = 'DIAN2XPA';
+export const CODE_DIANA = 'DRAN2XPA';
 
 /** Professora sem alunos (estado vazio de "Meus alunos"), acrescentada depois da semeadura. */
 export async function addTeacherWithoutStudents(): Promise<{ id: string; code: string }> {
@@ -362,8 +362,8 @@ export async function expectFocusOrder(page: Page, targets: readonly Locator[], 
 export async function expectModalDialogBehavior(page: Page, dialog: Locator, trigger: Locator): Promise<void> {
   await expect(dialog).toBeVisible();
   await expect(dialog).toHaveAttribute('aria-modal', 'true');
-  await expect(dialog).toHaveAccessibleName(/S/);
-  await expect(dialog).toHaveAccessibleDescription(/S/);
+  await expect(dialog).toHaveAccessibleName(/\S/);
+  await expect(dialog).toHaveAccessibleDescription(/\S/);
   const insideDialog = () => dialog.evaluate((box) => box.contains(document.activeElement));
   expect(await insideDialog(), 'o foco entra no diálogo ao abrir').toBe(true);
   for (const key of ['Tab', 'Tab', 'Tab', 'Tab', 'Tab', 'Shift+Tab', 'Shift+Tab', 'Shift+Tab']) {

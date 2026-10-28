@@ -24,7 +24,7 @@ test('cadastro completo do primeiro aluno em até 3 minutos, sem o CPF na URL ne
   const started = Date.now();
 
   await signInAsTeacher(page, teacher.code);
-  await page.getByRole('link', { name: /Meus alunos/ }).first().click();
+  await page.getByRole('button', { name: 'Meus alunos' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Meus alunos' })).toBeVisible();
   await page.getByRole('button', { name: 'Cadastrar o primeiro aluno' }).click();
 

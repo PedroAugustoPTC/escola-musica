@@ -41,7 +41,11 @@ export function StudentAssociationsSection({ student }: { student: AdminStudent 
     (teacher) => teacher.active && !associated.has(teacher.id),
   );
 
-  const askRemoval = (teacherId: string, teacherName: string) => {
+  // o botão fica desabilitado enquanto a prévia carrega e perde o foco: o diálogo não teria a quem devolvê-lo
+  const trigger = useRef<HTMLElement | null>(null);
+
+  const askRemoval = (teacherId: string, teacherName: string, button: HTMLElement) => {
+    trigger.current = button;
     setNotice('');
     preview.mutate(teacherId, {
       onSuccess: (result) => setRemoval({ teacherId, teacherName, frozenReports: result.frozenReports }),
@@ -51,6 +55,8 @@ export function StudentAssociationsSection({ student }: { student: AdminStudent 
   const closeRemoval = () => {
     remove.reset();
     setRemoval(null);
+    // depois que o diálogo fecha, o foco volta ao botão que o abriu (WCAG 2.4.3)
+    window.setTimeout(() => trigger.current?.focus(), 0);
   };
 
   return (
@@ -76,7 +82,7 @@ export function StudentAssociationsSection({ student }: { student: AdminStudent 
                 size="compact"
                 aria-label={`Retirar ${teacher.name}`}
                 loading={preview.isPending && preview.variables === teacher.id}
-                onClick={() => askRemoval(teacher.id, teacher.name)}
+                onClick={(event) => askRemoval(teacher.id, teacher.name, event.currentTarget)}
               >
                 Retirar
               </Button>

@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import {
   addTeacherWithoutStudents,
   expectFocusOrder,
@@ -19,6 +19,13 @@ import {
  */
 let data: Seeding;
 
+/** O aluno semeado é menor de idade e vem sem responsável: salvar a edição exige os dados do responsável. */
+async function fillGuardian(page: Page): Promise<void> {
+  await page.getByLabel('Nome do responsável').fill('Marta Torrente');
+  await page.getByLabel('Telefone do responsável').fill('(11) 91234-5678');
+  await page.getByLabel('E-mail do responsável').fill('marta@example.test');
+}
+
 test.beforeEach(async () => {
   data = await seed();
 });
@@ -29,7 +36,7 @@ test.describe('P01 — meus alunos', () => {
   });
 
   test('axe, contagem e lista só com os alunos da professora; o painel tem o atalho', async ({ page }) => {
-    await expect(page.getByRole('link', { name: /Meus alunos/ }).first()).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Meus alunos' })).toBeVisible();
     await page.goto('/my-students');
     await expect(page.locator('html')).toHaveAttribute('lang', 'pt-BR');
     await expect(page.getByRole('heading', { level: 1, name: 'Meus alunos' })).toBeVisible();
@@ -41,22 +48,22 @@ test.describe('P01 — meus alunos', () => {
 
   test('busca e filtro de situação pelo teclado; busca por CPF é recusada e anunciada', async ({ page }) => {
     await page.goto('/my-students');
-    await tabUntilFocused(page, page.getByRole('searchbox'));
+    await tabUntilFocused(page, page.getByRole('searchbox', { name: 'Buscar entre os meus alunos' }));
     await page.keyboard.type('Violino');
     await page.keyboard.press('Enter');
     await expect(page.getByText('Miguel de Castro Torrente')).toBeVisible();
     await expect(page.getByText('Matteo Mafra')).toHaveCount(0);
 
-    await page.getByRole('searchbox').fill('Zzz inexistente');
+    await page.getByRole('searchbox', { name: 'Buscar entre os meus alunos' }).fill('Zzz inexistente');
     await page.keyboard.press('Enter');
     await expect(page.getByText('Nenhum aluno encontrado para “Zzz inexistente”.')).toBeVisible();
     await expectNoSeriousViolations(page, { name: 'P01 busca sem resultado' });
 
     const cpf = '52998224725';
-    await page.getByRole('searchbox').fill(maskedCpf(cpf));
+    await page.getByRole('searchbox', { name: 'Buscar entre os meus alunos' }).fill(maskedCpf(cpf));
     await page.keyboard.press('Enter');
     await expect(page.getByRole('alert')).toContainText('A busca por CPF não existe.');
-    await expect(page.getByRole('searchbox')).toHaveAttribute('aria-invalid', 'true');
+    await expect(page.getByRole('searchbox', { name: 'Buscar entre os meus alunos' })).toHaveAttribute('aria-invalid', 'true');
     await expectValueAbsentFromUrlAndStorage(page, cpf);
   });
 
@@ -72,7 +79,7 @@ test.describe('P01 — meus alunos', () => {
     await page.goto('/my-students');
     await expectFocusOrder(page, [
       page.getByRole('button', { name: 'Cadastrar aluno' }),
-      page.getByRole('searchbox'),
+      page.getByRole('searchbox', { name: 'Buscar entre os meus alunos' }),
       page.getByRole('button', { name: 'Ativos' }),
       page.getByRole('link', { name: /Matteo Mafra/ }),
     ]);
@@ -179,6 +186,7 @@ test.describe('P03 — aluno', () => {
   test('o CPF novo usado na edição não fica na URL nem no armazenamento', async ({ page }) => {
     const cpf = syntheticCpf('864209753');
     await page.goto(`/my-students/${data.students.olavo}`);
+    await fillGuardian(page);
     await page.getByLabel('CPF').fill(maskedCpf(cpf));
     await page.getByRole('button', { name: 'Salvar alterações' }).click();
     await expect(page.getByRole('status').filter({ hasText: /Olavo Torrente/ })).toBeVisible();
