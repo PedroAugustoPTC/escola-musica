@@ -37,7 +37,8 @@ class DockerEntrypointRoutingTest {
 
     /** Alternativas da primeira cláusula do {@code case} (as que ativam o perfil operacional). */
     private static List<String> routedCommands(String script) {
-        Matcher clause = Pattern.compile("(?m)^\\s*([a-z-]+(?:\\|[a-z-]+)*)\\)\\s*$").matcher(script);
+        Matcher clause =
+                Pattern.compile("(?m)^\\s*([a-z-]+(?:\\|[a-z-]+)*)\\)\\s*$").matcher(script);
         assertThat(clause.find()).as("cláusula de comandos no case").isTrue();
         return new ArrayList<>(List.of(clause.group(1).split("\\|")));
     }
@@ -49,7 +50,8 @@ class DockerEntrypointRoutingTest {
 
     @Test
     void theHeaderCommentNamesEveryCommand() throws IOException {
-        String comment = script().lines().filter(line -> line.startsWith("#")).reduce("", String::concat);
+        String comment =
+                script().lines().filter(line -> line.startsWith("#")).reduce("", String::concat);
 
         for (String command : COMMANDS) {
             assertThat(comment).as("comentário cita " + command).contains(command);

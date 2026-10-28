@@ -160,7 +160,11 @@ public class TelegramConversationInterpreter {
             return;
         }
         LinkTelegramUseCase.Result result =
-                linkUseCase.run(context.userId(), context.chatId(), text);
+                linkUseCase.run(
+                        context.userId(),
+                        context.chatId(),
+                        text,
+                        Long.toString(context.updateId()));
         identify.run(context.userId()).ifPresent(context::identify);
         String prefix =
                 presenter.text("LINK_CREATED", Map.of("name", result.teacher().firstName()));
