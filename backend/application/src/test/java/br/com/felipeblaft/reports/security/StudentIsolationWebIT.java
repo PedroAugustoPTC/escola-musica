@@ -40,7 +40,12 @@ class StudentIsolationWebIT extends SecurityBase {
 
     /** Uma tentativa da professora A: o caminho usa {@code {id}} para o recurso alvo. */
     private record Attempt(
-            String label, HttpMethod method, String path, String body, boolean audio, boolean recorded) {
+            String label,
+            HttpMethod method,
+            String path,
+            String body,
+            boolean audio,
+            boolean recorded) {
 
         static Attempt of(String label, HttpMethod method, String path, String body) {
             return new Attempt(label, method, path, body, false, false);
@@ -87,7 +92,11 @@ class StudentIsolationWebIT extends SecurityBase {
                 Attempt.registry(
                         "reactivate", HttpMethod.POST, "/my-students/{id}/reactivation", null),
                 Attempt.of("001: aluno", HttpMethod.GET, "/students/{id}", null),
-                Attempt.of("001: relatório em aberto", HttpMethod.GET, "/students/{id}/open-report", null),
+                Attempt.of(
+                        "001: relatório em aberto",
+                        HttpMethod.GET,
+                        "/students/{id}/open-report",
+                        null),
                 Attempt.upload("001: registrar aula", "/students/{id}/lesson-reports"),
                 Attempt.of("001: semestres", HttpMethod.GET, "/students/{id}/semesters", null),
                 Attempt.of(
@@ -117,7 +126,10 @@ class StudentIsolationWebIT extends SecurityBase {
                         "/lesson-reports/" + lesson + "/changes",
                         "{\"text\":\"Mude.\",\"baseVersion\":1}"),
                 Attempt.of(
-                        "001: tentar de novo", HttpMethod.POST, "/lesson-reports/" + lesson + "/retry", null),
+                        "001: tentar de novo",
+                        HttpMethod.POST,
+                        "/lesson-reports/" + lesson + "/retry",
+                        null),
                 Attempt.of(
                         "001: aprovar aula",
                         HttpMethod.POST,
@@ -165,7 +177,11 @@ class StudentIsolationWebIT extends SecurityBase {
                         "/semester-reports/" + semester + "/official-pdf",
                         null),
                 Attempt.of("001: trabalho", HttpMethod.GET, "/jobs/" + job, null),
-                Attempt.of("001: descartar trabalho", HttpMethod.POST, "/jobs/" + job + "/discard", null));
+                Attempt.of(
+                        "001: descartar trabalho",
+                        HttpMethod.POST,
+                        "/jobs/" + job + "/discard",
+                        null));
     }
 
     private MvcResult perform(Attempt attempt, UUID id) throws Exception {
@@ -222,7 +238,9 @@ class StudentIsolationWebIT extends SecurityBase {
             }
             if (!bodyOf(foreign).equals(bodyOf(absent))
                     || foreign.getResponse().getStatus() != absent.getResponse().getStatus()) {
-                failures.add(attempt.label() + ": a resposta ao relatório alheio difere da do inexistente");
+                failures.add(
+                        attempt.label()
+                                + ": a resposta ao relatório alheio difere da do inexistente");
             }
             if (bodyOf(foreign).contains("Helena") || bodyOf(foreign).contains(BRUNO_DATA)) {
                 failures.add(attempt.label() + ": revelou dado do aluno de outro professor");
@@ -241,7 +259,12 @@ class StudentIsolationWebIT extends SecurityBase {
                         .replace(brunoReports.semester().toString(), ABSENT.toString())
                         .replace(brunoReports.job().toString(), ABSENT.toString());
         return new Attempt(
-                attempt.label(), attempt.method(), path, attempt.body(), attempt.audio(), attempt.recorded());
+                attempt.label(),
+                attempt.method(),
+                path,
+                attempt.body(),
+                attempt.audio(),
+                attempt.recorded());
     }
 
     private void check(Attempt attempt, UUID foreignId, UUID absentId, List<String> failures)
@@ -254,7 +277,8 @@ class StudentIsolationWebIT extends SecurityBase {
         int absentDenials = denials() - deniedBefore;
 
         String label = attempt.label() + " (" + foreignId + ")";
-        if (foreign.getResponse().getStatus() != 404 || !errorCode(foreign).equals("RESOURCE_NOT_FOUND")) {
+        if (foreign.getResponse().getStatus() != 404
+                || !errorCode(foreign).equals("RESOURCE_NOT_FOUND")) {
             failures.add(
                     label
                             + ": esperado 404 RESOURCE_NOT_FOUND e veio "

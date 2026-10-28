@@ -56,19 +56,19 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 /**
- * Autorização no núcleo (FR-002, FR-048, SC-005): cada caso de uso de {@code usecase.administrator},
- * {@code usecase.teacher} e {@code usecase.registry} é chamado com cada ator (administrador na Web,
- * professor na Web, professor no Telegram e o sistema nas duas origens) e a matriz decide, sem a
- * cadeia de segurança da Web. Onde a matriz de {@code contracts/permission-matrix.json} diz {@code
- * DENY}, o resultado é {@code RESOURCE_NOT_FOUND}, nenhuma porta é tocada (repositório, hash,
- * transação, fila) e o único registro de autoria admissível é {@code AUTHORIZATION_DENIED}. Onde a
- * matriz permite, o caso de uso passa pela decisão (o resto da execução roda contra portas vazias e
- * não interessa aqui).
+ * Autorização no núcleo (FR-002, FR-048, SC-005): cada caso de uso de {@code
+ * usecase.administrator}, {@code usecase.teacher} e {@code usecase.registry} é chamado com cada
+ * ator (administrador na Web, professor na Web, professor no Telegram e o sistema nas duas origens)
+ * e a matriz decide, sem a cadeia de segurança da Web. Onde a matriz de {@code
+ * contracts/permission-matrix.json} diz {@code DENY}, o resultado é {@code RESOURCE_NOT_FOUND},
+ * nenhuma porta é tocada (repositório, hash, transação, fila) e o único registro de autoria
+ * admissível é {@code AUTHORIZATION_DENIED}. Onde a matriz permite, o caso de uso passa pela
+ * decisão (o resto da execução roda contra portas vazias e não interessa aqui).
  *
  * <p>A matriz esperada é lida direto do arquivo do contrato (sem biblioteca de JSON no núcleo, por
- * expressão regular), de modo que o teste compara o <b>código</b> com o <b>contrato</b>, e não com a
- * própria {@link PermissionMatrix}. Caso de uso sem operação mapeada reprova, e operação da matriz
- * sem caso de uso também.
+ * expressão regular), de modo que o teste compara o <b>código</b> com o <b>contrato</b>, e não com
+ * a própria {@link PermissionMatrix}. Caso de uso sem operação mapeada reprova, e operação da
+ * matriz sem caso de uso também.
  */
 class UseCasePermissionMatrixTest {
 
@@ -85,11 +85,13 @@ class UseCasePermissionMatrixTest {
     /** Operações da matriz que não têm caso de uso nestes pacotes, e onde moram. */
     private static final Map<Operation, String> OPERATIONS_ELSEWHERE =
             Map.of(
-                    Operation.TEACHER_SIGN_IN, "usecase.access.SignInPortalUseCase (entrada pública)",
+                    Operation.TEACHER_SIGN_IN,
+                            "usecase.access.SignInPortalUseCase (entrada pública)",
                     Operation.LESSON_AND_SEMESTER_REPORTS,
                             "usecase.lesson, semester, history, home, job e document (feature 001)");
 
-    // ------------------------------------------------------------------ mapa caso de uso → operação
+    // ------------------------------------------------------------------ mapa caso de uso →
+    // operação
 
     /** Como o caso de uso se liga à matriz. */
     private sealed interface Binding permits Single, Draft, PublicEntry, Infrastructure {}
@@ -120,7 +122,9 @@ class UseCasePermissionMatrixTest {
 
     private static Map<String, Binding> bindings() {
         Map<String, Binding> map = new java.util.TreeMap<>();
-        map.put("administrator.ActivateAdministratorUseCase", new PublicEntry(Operation.ADMIN_ACTIVATE));
+        map.put(
+                "administrator.ActivateAdministratorUseCase",
+                new PublicEntry(Operation.ADMIN_ACTIVATE));
         map.put(
                 "administrator.BootstrapFirstAdministratorUseCase",
                 new Single(Operation.FIRST_ADMINISTRATOR_BOOTSTRAP));
@@ -142,7 +146,9 @@ class UseCasePermissionMatrixTest {
         map.put(
                 "administrator.ReactivateAdministratorUseCase",
                 new Single(Operation.ADMINISTRATOR_REACTIVATE));
-        map.put("administrator.SignInAdministratorUseCase", new PublicEntry(Operation.ADMIN_SIGN_IN));
+        map.put(
+                "administrator.SignInAdministratorUseCase",
+                new PublicEntry(Operation.ADMIN_SIGN_IN));
         map.put("administrator.SignOutAdministratorUseCase", new Single(Operation.ADMIN_SIGN_OUT));
         map.put(
                 "administrator.ValidateAdministratorSessionUseCase",
@@ -245,9 +251,15 @@ class UseCasePermissionMatrixTest {
 
     private static List<Caller> callers() {
         return List.of(
-                new Caller("administrador na Web", ActorFixtures.administratorWeb(), Line::administratorWeb),
+                new Caller(
+                        "administrador na Web",
+                        ActorFixtures.administratorWeb(),
+                        Line::administratorWeb),
                 new Caller("professor na Web", ActorFixtures.teacherWeb(), Line::teacherWeb),
-                new Caller("professor no Telegram", ActorFixtures.teacherTelegram(), Line::teacherTelegram),
+                new Caller(
+                        "professor no Telegram",
+                        ActorFixtures.teacherTelegram(),
+                        Line::teacherTelegram),
                 new Caller(
                         "sistema na inicialização",
                         ActorFixtures.bootstrap(),
@@ -266,7 +278,8 @@ class UseCasePermissionMatrixTest {
 
     private static List<Class<?>> useCases() {
         List<Class<?>> classes = new ArrayList<>();
-        for (JavaClass type : new ClassFileImporter().importPackages(PACKAGES.toArray(String[]::new))) {
+        for (JavaClass type :
+                new ClassFileImporter().importPackages(PACKAGES.toArray(String[]::new))) {
             if (type.getSimpleName().endsWith("UseCase") && !type.isNestedClass()) {
                 classes.add(type.reflect());
             }
@@ -373,12 +386,16 @@ class UseCasePermissionMatrixTest {
                 assertThat(thrown)
                         .as("%s.%s para %s", useCase.getSimpleName(), method.getName(), caller)
                         .isInstanceOf(DomainException.class);
-                assertThat(((DomainException) thrown).code()).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND);
+                assertThat(((DomainException) thrown).code())
+                        .isEqualTo(ErrorCode.RESOURCE_NOT_FOUND);
             } else if (binding instanceof Single single) {
                 assertThat(harness.authorization.granted)
                         .as(
                                 "%s.%s para %s deveria passar pela matriz em %s",
-                                useCase.getSimpleName(), method.getName(), caller, single.operation())
+                                useCase.getSimpleName(),
+                                method.getName(),
+                                caller,
+                                single.operation())
                         .contains(single.operation());
                 assertThat(harness.authorization.denied).isEmpty();
             } else {
@@ -490,8 +507,13 @@ class UseCasePermissionMatrixTest {
         if (type.isRecord()) {
             RecordComponent[] components = type.getRecordComponents();
             Class<?>[] parameterTypes =
-                    Arrays.stream(components).map(RecordComponent::getType).toArray(Class<?>[]::new);
-            Object[] values = Arrays.stream(parameterTypes).map(UseCasePermissionMatrixTest::defaultValue).toArray();
+                    Arrays.stream(components)
+                            .map(RecordComponent::getType)
+                            .toArray(Class<?>[]::new);
+            Object[] values =
+                    Arrays.stream(parameterTypes)
+                            .map(UseCasePermissionMatrixTest::defaultValue)
+                            .toArray();
             try {
                 Constructor<?> canonical = type.getDeclaredConstructor(parameterTypes);
                 canonical.setAccessible(true);
@@ -602,7 +624,9 @@ class UseCasePermissionMatrixTest {
                     new Class<?>[] {port},
                     (proxy, method, arguments) -> {
                         if (method.getDeclaringClass() == Object.class) {
-                            return method.getName().equals("toString") ? port.getSimpleName() : null;
+                            return method.getName().equals("toString")
+                                    ? port.getSimpleName()
+                                    : null;
                         }
                         touchedPorts.add(port.getSimpleName() + "." + method.getName());
                         return emptyValue(method.getReturnType());

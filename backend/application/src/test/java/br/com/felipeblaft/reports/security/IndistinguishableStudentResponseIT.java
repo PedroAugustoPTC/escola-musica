@@ -22,9 +22,9 @@ import org.springframework.test.web.servlet.MvcResult;
 
 /**
  * Indistinguibilidade do aluno alheio e do aluno inexistente (T138, SC-006, R-14): para o mesmo
- * pedido da professora A, o aluno de B e um identificador que não existe têm o mesmo status, o mesmo
- * corpo e os mesmos cabeçalhos relevantes na Web (inclusive as rotas da 001 por aluno), e o mesmo
- * texto e os mesmos botões no Telegram. O tempo também não pode distinguir os dois casos: 50
+ * pedido da professora A, o aluno de B e um identificador que não existe têm o mesmo status, o
+ * mesmo corpo e os mesmos cabeçalhos relevantes na Web (inclusive as rotas da 001 por aluno), e o
+ * mesmo texto e os mesmos botões no Telegram. O tempo também não pode distinguir os dois casos: 50
  * medições de aquecimento e 200 medições alternadas de cada caso, com a ordem sorteada por uma
  * semente fixa; passa se a razão das medianas (alheio ÷ inexistente) ficar em [0,5; 2,0] e a dos
  * p95 em [0,5; 3,0]. O teste imprime as razões.
@@ -82,7 +82,10 @@ class IndistinguishableStudentResponseIT extends SecurityBase {
                 new Route("001: em aberto", HttpMethod.GET, "/students/{id}/open-report", null),
                 new Route("001: semestres", HttpMethod.GET, "/students/{id}/semesters", null),
                 new Route(
-                        "001: prévia", HttpMethod.GET, "/students/{id}/semesters/2026-1/preview", null),
+                        "001: prévia",
+                        HttpMethod.GET,
+                        "/students/{id}/semesters/2026-1/preview",
+                        null),
                 new Route(
                         "001: gerar semestral",
                         HttpMethod.POST,
@@ -175,7 +178,10 @@ class IndistinguishableStudentResponseIT extends SecurityBase {
     @Test
     void theBotAnswersTheSameTextAndButtonsForAnotherTeachersStudentAndOneThatDoesNotExist()
             throws Exception {
-        String absent = say(USER_CLARA, "Zacarias Inexistente").fingerprint().replace("Zacarias Inexistente", "§");
+        String absent =
+                say(USER_CLARA, "Zacarias Inexistente")
+                        .fingerprint()
+                        .replace("Zacarias Inexistente", "§");
         for (String typed : List.of("Helena Prado", "Helena", "Prado")) {
             assertThat(say(USER_CLARA, typed).fingerprint().replace(typed, "§"))
                     .as(typed)
@@ -290,9 +296,7 @@ class IndistinguishableStudentResponseIT extends SecurityBase {
         List<Long> sorted = new ArrayList<>(times);
         Collections.sort(sorted);
         int n = sorted.size();
-        return n % 2 == 1
-                ? sorted.get(n / 2)
-                : (sorted.get(n / 2 - 1) + sorted.get(n / 2)) / 2.0;
+        return n % 2 == 1 ? sorted.get(n / 2) : (sorted.get(n / 2 - 1) + sorted.get(n / 2)) / 2.0;
     }
 
     private static double percentile95(List<Long> times) {

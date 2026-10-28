@@ -64,7 +64,7 @@ class StudentRegistryParityScriptIT extends AdministrationStackBase {
     private ParityScript script(String code) {
         ParityScript script =
                 new ParityScript()
-                        .step("entrar", c -> c.signIn(code))
+                        .step("sign-in", c -> c.signIn(code))
                         .step("lista inicial", c -> c.listStudents("ACTIVE"))
                         .step(
                                 "cadastrar adulto",
@@ -83,16 +83,16 @@ class StudentRegistryParityScriptIT extends AdministrationStackBase {
                                                                 "(11) 98888-7777",
                                                                 "marta.lima@example.test"))))
                         .step("lista com os novos", c -> c.listStudents("ACTIVE"))
-                        .step("buscar", c -> c.searchStudents("ana"))
+                        .step("search", c -> c.searchStudents("ana"))
                         .step("abrir o menor", c -> c.openStudent("Davi Lima"))
                         .step(
                                 "editar o instrumento",
                                 c -> c.changeInstrument("Ana Souza", "Violão"))
                         .step("abrir o editado", c -> c.openStudent("Ana Souza"))
-                        .step("inativar", c -> c.inactivateStudent("Ana Souza"))
+                        .step("inactivate", c -> c.inactivateStudent("Ana Souza"))
                         .step("lista dos ativos", c -> c.listStudents("ACTIVE"))
                         .step("lista dos inativos", c -> c.listStudents("INACTIVE"))
-                        .step("reativar", c -> c.reactivateStudent("Ana Souza"))
+                        .step("reactivate", c -> c.reactivateStudent("Ana Souza"))
                         .step(
                                 "aluno compartilhado negado",
                                 c -> c.inactivateStudent("Matteo Mafra"))
@@ -131,19 +131,19 @@ class StudentRegistryParityScriptIT extends AdministrationStackBase {
         assertThat(bot).containsExactlyElementsOf(web);
         assertThat(web)
                 .contains(
-                        "entrar = SUCCESS",
+                        "sign-in = SUCCESS",
                         "lista inicial = [Matteo Mafra]",
                         "cadastrar adulto = SUCCESS",
                         "cadastrar menor = SUCCESS",
                         "lista com os novos = [Ana Souza, Davi Lima, Matteo Mafra]",
-                        "buscar = [Ana Souza]",
+                        "search = [Ana Souza]",
                         "abrir o menor = Davi Lima|10|Violão|ACTIVE",
                         "editar o instrumento = SUCCESS",
                         "abrir o editado = Ana Souza|36|Violão|ACTIVE",
-                        "inativar = SUCCESS",
+                        "inactivate = SUCCESS",
                         "lista dos ativos = [Davi Lima, Matteo Mafra]",
                         "lista dos inativos = [Ana Souza]",
-                        "reativar = SUCCESS",
+                        "reactivate = SUCCESS",
                         "aluno compartilhado negado = SHARED_STUDENT_ACTION_DENIED",
                         "CPF de aluno meu = STUDENT_ALREADY_YOURS",
                         "CPF indisponível = CPF_UNAVAILABLE",

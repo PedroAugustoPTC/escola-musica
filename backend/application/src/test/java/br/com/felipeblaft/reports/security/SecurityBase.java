@@ -12,8 +12,8 @@ import br.com.felipeblaft.reports.domain.registry.Teacher;
 import br.com.felipeblaft.reports.port.AdministratorRepository;
 import br.com.felipeblaft.reports.port.PasswordHashPort;
 import br.com.felipeblaft.reports.port.StudentRepository;
-import br.com.felipeblaft.reports.support.AudioNormalizationTest;
 import br.com.felipeblaft.reports.support.AdministratorFixture;
+import br.com.felipeblaft.reports.support.AudioNormalizationTest;
 import br.com.felipeblaft.reports.support.TelegramConversationBase;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import jakarta.servlet.http.Cookie;
@@ -143,7 +143,10 @@ abstract class SecurityBase extends TelegramConversationBase {
 
     /** O que o bot fez em resposta a um update: textos, botões e métodos chamados. */
     protected record Reply(
-            List<String> texts, List<String> buttonData, List<String> labels, List<String> methods) {
+            List<String> texts,
+            List<String> buttonData,
+            List<String> labels,
+            List<String> methods) {
 
         /** Todos os textos e rótulos de botão juntos. */
         public String plain() {
@@ -214,7 +217,9 @@ abstract class SecurityBase extends TelegramConversationBase {
 
     @Autowired protected StudentRepository studentRepository;
 
-    /** Relatórios de um aluno, prontos para as tentativas de acesso: ids de aula, semestral e job. */
+    /**
+     * Relatórios de um aluno, prontos para as tentativas de acesso: ids de aula, semestral e job.
+     */
     protected record Reports(UUID approvedLesson, UUID openLesson, UUID semester, UUID job) {}
 
     /**

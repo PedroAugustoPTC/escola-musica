@@ -312,8 +312,8 @@ public abstract class AdministrationStackBase extends TelegramConversationBase {
     /** Confere papel, canal e resultado de um registro. */
     protected static void assertRecord(
             Map<String, Object> row, String role, String origin, String result) {
-        assertThat(row.get("author_role")).as("papel").isEqualTo(role);
-        assertThat(row.get("origin")).as("canal").isEqualTo(origin);
-        assertThat(row.get("result")).as("resultado").isEqualTo(result);
+        assertThat(row.get("author_role")).as("role").isEqualTo(role);
+        assertThat(row.get("origin")).as("channel").isEqualTo(origin);
+        assertThat(row.get("result")).as("result").isEqualTo(result);
     }
 }

@@ -19,8 +19,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
  */
 class AuthorshipAdministratorOperationsIT extends AdministrationStackBase {
 
-    private static final String NEW_EMAIL = "novo.admin@example.test";
-    private static final String NEW_PASSWORD = "senha-nova-bem-longa-9";
+    private static final String NEW_EMAIL = "new.admin@example.test";
+    private static final String NEW_PASSWORD = "new-password-very-long-9";
     private static final String ORIGIN = "198.51.100.70";
     private static final String HEX64 = "[0-9a-f]{64}";
 

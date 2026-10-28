@@ -143,8 +143,8 @@ class AdministrationContractDriftIT extends AdministrationStackBase {
                 Actor.system(ActionOrigin.SYSTEM_STARTUP),
                 new BootstrapFirstAdministratorUseCase.Command(
                         "Primeiro Administrador",
-                        "primeiro.admin@example.test",
-                        new Secret("senha-provisoria-longa-1")));
+                        "first.admin@example.test",
+                        new Secret("provisional-password-long-1")));
         MockHttpServletResponse signedIn =
                 exchange(
                         HttpMethod.POST,
@@ -153,9 +153,9 @@ class AdministrationContractDriftIT extends AdministrationStackBase {
                         anonymous,
                         Map.of(
                                 "email",
-                                "primeiro.admin@example.test",
+                                "first.admin@example.test",
                                 "password",
-                                "senha-provisoria-longa-1"),
+                                "provisional-password-long-1"),
                         200);
         Cookie restricted = new Cookie(ADMIN_COOKIE, signedIn.getCookie(ADMIN_COOKIE).getValue());
         exchange(
@@ -163,7 +163,7 @@ class AdministrationContractDriftIT extends AdministrationStackBase {
                 "/admin/password",
                 "/admin/password",
                 restricted,
-                Map.of("newPassword", "senha-provisoria-longa-1"),
+                Map.of("newPassword", "provisional-password-long-1"),
                 400);
         MockHttpServletResponse changed =
                 exchange(
@@ -171,7 +171,7 @@ class AdministrationContractDriftIT extends AdministrationStackBase {
                         "/admin/password",
                         "/admin/password",
                         restricted,
-                        Map.of("newPassword", "senha-definitiva-longa-2"),
+                        Map.of("newPassword", "definitive-password-long-2"),
                         200);
         Cookie admin = new Cookie(ADMIN_COOKIE, changed.getCookie(ADMIN_COOKIE).getValue());
         exchange(HttpMethod.GET, "/admin/session", "/admin/session", admin, null, 200);
@@ -180,7 +180,7 @@ class AdministrationContractDriftIT extends AdministrationStackBase {
                 "/admin/session",
                 "/admin/session",
                 anonymous,
-                Map.of("email", "primeiro.admin@example.test", "password", "senha-errada-qualquer"),
+                Map.of("email", "first.admin@example.test", "password", "wrong-password-any"),
                 401);
 
         // professores
@@ -269,7 +269,7 @@ class AdministrationContractDriftIT extends AdministrationStackBase {
                         "/admin/administrators",
                         "/admin/administrators",
                         admin,
-                        Map.of("name", "Segundo Administrador", "email", "segundo@example.test"),
+                        Map.of("name", "Segundo Administrador", "email", "second@example.test"),
                         201);
         UUID second =
                 UUID.fromString(body(createdAdmin).path("administrator").path("id").asString());
@@ -282,11 +282,11 @@ class AdministrationContractDriftIT extends AdministrationStackBase {
                 anonymous,
                 Map.of(
                         "email",
-                        "segundo@example.test",
+                        "second@example.test",
                         "activationCode",
                         "ZZZZZZZZZZZZ",
                         "newPassword",
-                        "senha-do-segundo-longa-3"),
+                        "second-password-long-3"),
                 401);
         exchange(
                 HttpMethod.POST,
@@ -295,11 +295,11 @@ class AdministrationContractDriftIT extends AdministrationStackBase {
                 anonymous,
                 Map.of(
                         "email",
-                        "segundo@example.test",
+                        "second@example.test",
                         "activationCode",
                         body(createdAdmin).path("activationCode").asString(),
                         "newPassword",
-                        "senha-do-segundo-longa-3"),
+                        "second-password-long-3"),
                 204);
         exchange(
                 HttpMethod.POST,

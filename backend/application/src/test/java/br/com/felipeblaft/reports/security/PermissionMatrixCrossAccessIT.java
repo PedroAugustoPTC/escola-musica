@@ -37,8 +37,8 @@ import org.springframework.test.web.servlet.MvcResult;
  *
  * <p><b>Regra do Fecho: zero linhas puladas.</b> Toda rota da matriz precisa de sonda (e a que não
  * tem, reprova), toda operação permitida a um ator precisa de rota no espaço dele ({@code /admin}
- * para o administrador, o restante para o professor) e toda operação do Telegram precisa de comando.
- * Uma rota da matriz sem sonda mapeada aqui não é pulada: é falha.
+ * para o administrador, o restante para o professor) e toda operação do Telegram precisa de
+ * comando. Uma rota da matriz sem sonda mapeada aqui não é pulada: é falha.
  */
 class PermissionMatrixCrossAccessIT extends SecurityBase {
 
@@ -71,9 +71,12 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
             Map.ofEntries(
                     Map.entry(Operation.ADMIN_SIGN_IN, List.of("entrar como administrador")),
                     Map.entry(Operation.ADMIN_ACTIVATE, List.of("ativar conta de administrador")),
-                    Map.entry(Operation.ADMIN_GET_SESSION, List.of("ver minha sessão administrativa")),
+                    Map.entry(
+                            Operation.ADMIN_GET_SESSION,
+                            List.of("ver minha sessão administrativa")),
                     Map.entry(Operation.ADMIN_SIGN_OUT, List.of("encerrar sessão administrativa")),
-                    Map.entry(Operation.ADMIN_CHANGE_PASSWORD, List.of("trocar a senha provisória")),
+                    Map.entry(
+                            Operation.ADMIN_CHANGE_PASSWORD, List.of("trocar a senha provisória")),
                     Map.entry(Operation.TEACHER_SIGN_IN, List.of(CODE_DORA)),
                     Map.entry(Operation.TEACHER_LIST, List.of("listar professores")),
                     Map.entry(Operation.TEACHER_GET, List.of("ver o professor Bruno Lima")),
@@ -87,8 +90,10 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
                             List.of("desvincular o telegram de um professor")),
                     Map.entry(Operation.ADMINISTRATOR_LIST, List.of("listar administradores")),
                     Map.entry(Operation.ADMINISTRATOR_CREATE, List.of("criar administrador")),
-                    Map.entry(Operation.ADMINISTRATOR_INACTIVATE, List.of("inativar administrador")),
-                    Map.entry(Operation.ADMINISTRATOR_REACTIVATE, List.of("reativar administrador")),
+                    Map.entry(
+                            Operation.ADMINISTRATOR_INACTIVATE, List.of("inativar administrador")),
+                    Map.entry(
+                            Operation.ADMINISTRATOR_REACTIVATE, List.of("reativar administrador")),
                     Map.entry(
                             Operation.FIRST_ADMINISTRATOR_BOOTSTRAP,
                             List.of("criar o primeiro administrador")),
@@ -130,7 +135,9 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
     @Test
     void theMatrixOfTheContractIsTheMatrixOfTheCore() {
         PermissionMatrix core = PermissionMatrix.standard();
-        assertThat(MATRIX.rows()).extracting(Row::operation).containsExactlyInAnyOrder(Operation.values());
+        assertThat(MATRIX.rows())
+                .extracting(Row::operation)
+                .containsExactlyInAnyOrder(Operation.values());
         assertThat(core.rules().keySet()).containsExactlyInAnyOrder(Operation.values());
     }
 
@@ -150,8 +157,7 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
                     unmapped.add(row.operation() + " " + route.path());
                 }
             }
-            boolean allowedOnWeb =
-                    row.administratorWeb().allowed() || row.teacherWeb().allowed();
+            boolean allowedOnWeb = row.administratorWeb().allowed() || row.teacherWeb().allowed();
             if (allowedOnWeb && row.webRoutes().isEmpty()) {
                 unmapped.add(row.operation() + " permitida na Web e sem rota");
             }
@@ -176,7 +182,8 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
         webChecks(row, fx, false, failures);
         telegramChecks(row, fx, false, failures);
         assertThat(snapshot()).as("a negativa não altera dado algum").isEqualTo(before);
-        // o Telegram antes da Web: os roteiros param antes de confirmar, e a Web muda a situação do aluno
+        // o Telegram antes da Web: os roteiros param antes de confirmar, e a Web muda a situação do
+        // aluno
         telegramChecks(row, fx, true, failures);
         webChecks(row, fx, true, failures);
 
@@ -218,9 +225,7 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
                     second.administrator().id());
         }
         if (operation == Operation.STUDENT_REACTIVATE) {
-            jdbc.update(
-                    "update student set active = false where id = ?",
-                    claraStudent.id());
+            jdbc.update("update student set active = false where id = ?", claraStudent.id());
         }
         if (operation == Operation.LESSON_AND_SEMESTER_REPORTS) {
             variables.put(
@@ -241,7 +246,8 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
             variables.put("jobId", jsonOf(generation).path("jobId").asString());
             scenario.processQueue();
             variables.put(
-                    "semesterId", jdbc.queryForObject("select id from semester_report", String.class));
+                    "semesterId",
+                    jdbc.queryForObject("select id from semester_report", String.class));
         }
         API_BOTS.resetRequests();
         return new Fx(administrator, claraCookie, variables, bruno, claraStudent);
@@ -259,8 +265,14 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
                         "semester_report")) {
             counts.put(table, count(table));
         }
-        counts.put("inactive students", jdbc.queryForObject("select count(*) from student where not active", Integer.class));
-        counts.put("inactive teachers", jdbc.queryForObject("select count(*) from teacher where not active", Integer.class));
+        counts.put(
+                "inactive students",
+                jdbc.queryForObject(
+                        "select count(*) from student where not active", Integer.class));
+        counts.put(
+                "inactive teachers",
+                jdbc.queryForObject(
+                        "select count(*) from teacher where not active", Integer.class));
         return counts;
     }
 
@@ -271,7 +283,11 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
     }
 
     private void requireRouteFor(
-            String actor, Permission permission, Row row, boolean administrator, List<String> failures) {
+            String actor,
+            Permission permission,
+            Row row,
+            boolean administrator,
+            List<String> failures) {
         if (permission == Permission.DENY || permission == Permission.PUBLIC) {
             return;
         }
@@ -295,17 +311,46 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
                 String body = body(probe);
                 boolean administratorSpace = isAdministratorRoute(declared);
 
-                checkWeb(row, "administrator", row.administratorWeb(), administratorSpace, probe, path, body, fx.administrator(), reaching, failures);
-                checkWeb(row, "teacher", row.teacherWeb(), !administratorSpace, probe, path, body, fx.clara(), reaching, failures);
+                checkWeb(
+                        row,
+                        "administrator",
+                        row.administratorWeb(),
+                        administratorSpace,
+                        probe,
+                        path,
+                        body,
+                        fx.administrator(),
+                        reaching,
+                        failures);
+                checkWeb(
+                        row,
+                        "teacher",
+                        row.teacherWeb(),
+                        !administratorSpace,
+                        probe,
+                        path,
+                        body,
+                        fx.clara(),
+                        reaching,
+                        failures);
                 // sem credencial: só a operação pública responde; o resto é 401
-                boolean publicOperation = row.administratorWeb() == Permission.PUBLIC || row.teacherWeb() == Permission.PUBLIC;
+                boolean publicOperation =
+                        row.administratorWeb() == Permission.PUBLIC
+                                || row.teacherWeb() == Permission.PUBLIC;
                 Outcome expected = publicOperation ? Outcome.REACHED : Outcome.DENIED_401;
                 if ((expected == Outcome.REACHED) == reaching) {
                     MvcResult result = call(HttpMethod.valueOf(probe.method()), path, body);
                     Outcome actual = classify(result);
                     if (actual != expected) {
                         failures.add(
-                                describe(row, "sem credencial", probe, path, expected, actual, result));
+                                describe(
+                                        row,
+                                        "sem credencial",
+                                        probe,
+                                        path,
+                                        expected,
+                                        actual,
+                                        result));
                     }
                 }
             }
@@ -331,7 +376,8 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
         } else if (permission.allowed() && ownSpace) {
             expected = Outcome.REACHED;
         } else {
-            // credencial de um papel na rota do outro, ou operação negada ao papel: rota inexistente
+            // credencial de um papel na rota do outro, ou operação negada ao papel: rota
+            // inexistente
             expected = Outcome.DENIED_404;
         }
         if ((expected == Outcome.REACHED) != reaching) {
@@ -344,7 +390,10 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
             return;
         }
         if (expected == Outcome.DENIED_404) {
-            String baseline = path.startsWith(API + "/admin") ? API + "/admin/missing-route" : API + "/missing-route";
+            String baseline =
+                    path.startsWith(API + "/admin")
+                            ? API + "/admin/missing-route"
+                            : API + "/missing-route";
             MvcResult unknown = call(HttpMethod.GET, baseline, null, cookie);
             if (!bodyOf(result).equals(bodyOf(unknown))
                     || !String.valueOf(result.getResponse().getContentType())

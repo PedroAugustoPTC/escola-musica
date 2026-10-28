@@ -12,9 +12,9 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Isolamento entre professores no Telegram (T137, SC-006): a professora A digita o nome do aluno do
- * professor B, usa a busca da lista e toca botões com {@code callback_data} adulterado (posição fora
- * da lista persistida, identificador do aluno de B no lugar da posição, token de confirmação de B).
- * A resposta é sempre a de "não encontramos" do aluno que não existe e nada de B muda. O
+ * professor B, usa a busca da lista e toca botões com {@code callback_data} adulterado (posição
+ * fora da lista persistida, identificador do aluno de B no lugar da posição, token de confirmação
+ * de B). A resposta é sempre a de "não encontramos" do aluno que não existe e nada de B muda. O
  * {@code callback_data} nunca leva identificador de aluno: leva a posição na lista persistida.
  */
 class StudentIsolationTelegramIT extends SecurityBase {
@@ -50,7 +50,8 @@ class StudentIsolationTelegramIT extends SecurityBase {
         String absent = withoutEcho(say(USER_CLARA, NONEXISTENT), NONEXISTENT);
         assertThat(absent).contains("Nenhum aluno encontrado para \"§\".");
 
-        for (String typed : List.of("Helena Prado", "Helena", "Prado", "Ivo Bastos", "helena prado")) {
+        for (String typed :
+                List.of("Helena Prado", "Helena", "Prado", "Ivo Bastos", "helena prado")) {
             Reply reply = say(USER_CLARA, typed);
 
             assertThat(withoutEcho(reply, typed)).as(typed).isEqualTo(absent);
@@ -74,7 +75,9 @@ class StudentIsolationTelegramIT extends SecurityBase {
                 tap(USER_CLARA, "v1:reg-filter:" + filter);
                 Reply reply = say(USER_CLARA, typed);
 
-                assertThat(withoutEcho(reply, typed)).as("%s em %s", typed, filter).isEqualTo(absentInFilter);
+                assertThat(withoutEcho(reply, typed))
+                        .as("%s em %s", typed, filter)
+                        .isEqualTo(absentInFilter);
                 assertThat(reply.plain()).doesNotContain("Helena", "Ivo");
             }
         }
@@ -110,7 +113,8 @@ class StudentIsolationTelegramIT extends SecurityBase {
 
         // a mesma resposta de um aluno que existia na lista e deixou de existir
         say(USER_CLARA, "meus alunos");
-        jdbc.update("delete from teacher_student_assignment where student_id = ?", claraStudent.id());
+        jdbc.update(
+                "delete from teacher_student_assignment where student_id = ?", claraStudent.id());
         jdbc.update("delete from student where id = ?", claraStudent.id());
         Reply stale = tap(USER_CLARA, "v1:reg-open:0");
         assertThat(fingerprints.getFirst()).isEqualTo(stale.fingerprint());
@@ -149,9 +153,7 @@ class StudentIsolationTelegramIT extends SecurityBase {
                                 claraStudent.id()))
                 .as("a confirmação adulterada também não executa a inativação da própria A")
                 .isTrue();
-        assertThat(businessDataDigest())
-                .as("nada mudou além do rascunho de A")
-                .isEqualTo(before);
+        assertThat(businessDataDigest()).as("nada mudou além do rascunho de A").isEqualTo(before);
 
         // o rascunho de B segue intacto: o token dele ainda vale
         Reply done = tap(USER_BRUNO, "v1:reg-confirm:" + tokenOfBruno);
@@ -169,6 +171,7 @@ class StudentIsolationTelegramIT extends SecurityBase {
                 .filter(data -> data.startsWith("v1:reg-confirm:"))
                 .map(data -> data.substring("v1:reg-confirm:".length()))
                 .findFirst()
-                .orElseThrow(() -> new AssertionError("sem botão de confirmação: " + reply.plain()));
+                .orElseThrow(
+                        () -> new AssertionError("sem botão de confirmação: " + reply.plain()));
     }
 }

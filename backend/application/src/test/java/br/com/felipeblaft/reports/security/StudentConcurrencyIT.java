@@ -60,7 +60,10 @@ class StudentConcurrencyIT extends SecurityBase {
                                     registration(brunoSession, "Aluno do Bruno " + round, cpf)));
 
             List<Integer> statuses =
-                    results.stream().map(result -> result.getResponse().getStatus()).sorted().toList();
+                    results.stream()
+                            .map(result -> result.getResponse().getStatus())
+                            .sorted()
+                            .toList();
             assertThat(statuses).as("rodada %d", round).containsExactly(201, 409);
             MvcResult refused =
                     results.stream()

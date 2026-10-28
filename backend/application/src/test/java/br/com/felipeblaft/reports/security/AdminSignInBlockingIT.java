@@ -22,7 +22,7 @@ class AdminSignInBlockingIT extends AdministrationStackBase {
 
     private static final String ORIGIN = "198.51.100.20";
     private static final String OTHER_ORIGIN = "198.51.100.21";
-    private static final String WRONG = "senha-errada-";
+    private static final String WRONG = "wrong-password-";
 
     private AdministratorFixture administrator;
 
@@ -70,7 +70,7 @@ class AdminSignInBlockingIT extends AdministrationStackBase {
         assertThat(body(inside).path("retryAfterSeconds").asInt()).isEqualTo(300);
 
         // falha dentro do bloqueio não conta nem prorroga
-        assertThat(attempt(WRONG + "dentro", ORIGIN).getStatus()).isEqualTo(429);
+        assertThat(attempt(WRONG + "inside", ORIGIN).getStatus()).isEqualTo(429);
         clock.advance(Duration.ofSeconds(299));
         MockHttpServletResponse lastSecond = rightPassword(ORIGIN);
         assertThat(lastSecond.getStatus()).isEqualTo(429);
@@ -87,14 +87,14 @@ class AdminSignInBlockingIT extends AdministrationStackBase {
 
         // quatro erros novos não bloqueiam: a contagem recomeçou do zero
         for (int i = 1; i <= 4; i++) {
-            assertThat(attempt(WRONG + "novo-" + i, ORIGIN).getStatus()).isEqualTo(401);
+            assertThat(attempt(WRONG + "new-" + i, ORIGIN).getStatus()).isEqualTo(401);
         }
         MockHttpServletResponse right = rightPassword(ORIGIN);
         assertThat(right.getStatus()).isEqualTo(200);
 
         // o sucesso zerou: mais quatro erros ainda não bloqueiam
         for (int i = 1; i <= 4; i++) {
-            assertThat(attempt(WRONG + "depois-" + i, ORIGIN).getStatus()).isEqualTo(401);
+            assertThat(attempt(WRONG + "after-" + i, ORIGIN).getStatus()).isEqualTo(401);
         }
         assertThat(rightPassword(ORIGIN).getStatus()).isEqualTo(200);
     }

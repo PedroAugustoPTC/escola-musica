@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import br.com.felipeblaft.reports.domain.access.Role;
 import br.com.felipeblaft.reports.inbound.telegram.TelegramKeywords;
 import br.com.felipeblaft.reports.support.ScenarioIT;
+import jakarta.servlet.http.Cookie;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -18,7 +19,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -29,14 +29,16 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 
 /**
  * Aluno e responsável não são usuários (SC-007, FR-001): o sistema tem dois papéis; nenhuma rota do
- * Spring, caminho do OpenAPI, comando do Telegram ou tabela de credencial trata aluno ou responsável
- * como quem entra; e uma requisição que se diz de aluno ou de responsável é tratada como não
- * autenticada. O aluno continua existindo como <b>recurso</b> ({@code /students/{id}}), nunca como
- * identidade.
+ * Spring, caminho do OpenAPI, comando do Telegram ou tabela de credencial trata aluno ou
+ * responsável como quem entra; e uma requisição que se diz de aluno ou de responsável é tratada
+ * como não autenticada. O aluno continua existindo como <b>recurso</b> ({@code /students/{id}}),
+ * nunca como identidade.
  */
 class StudentGuardianAccessAbsenceIT extends SecurityBase {
 
-    /** Responsável sempre é proibido como segmento; aluno só quando seguido de palavra de entrada. */
+    /**
+     * Responsável sempre é proibido como segmento; aluno só quando seguido de palavra de entrada.
+     */
     private static final Pattern GUARDIAN_AS_USER =
             Pattern.compile("guardian|responsible|parent", Pattern.CASE_INSENSITIVE);
 
@@ -47,7 +49,8 @@ class StudentGuardianAccessAbsenceIT extends SecurityBase {
                     Pattern.CASE_INSENSITIVE);
 
     private static final Pattern AUTHENTICATION_WORDS =
-            Pattern.compile("(^|/)(session|activation|password|login|sign-?in|credential|token)(/|$)");
+            Pattern.compile(
+                    "(^|/)(session|activation|password|login|sign-?in|credential|token)(/|$)");
 
     private static final Set<String> ALLOWED_SECURITY_SCHEMES = Set.of("adminSession", "session");
 
@@ -67,14 +70,19 @@ class StudentGuardianAccessAbsenceIT extends SecurityBase {
         List<String> routes = springRoutes();
 
         assertThat(routes).as("rotas lidas do Spring").isNotEmpty();
-        assertThat(routes).noneMatch(StudentGuardianAccessAbsenceIT::refersToStudentOrGuardianAsUser);
+        assertThat(routes)
+                .noneMatch(StudentGuardianAccessAbsenceIT::refersToStudentOrGuardianAsUser);
     }
 
     @Test
     void theOnlyAuthenticationRoutesAreTheTeacherAndAdministratorOnes() {
         List<String> authenticationRoutes =
                 springRoutes().stream()
-                        .filter(route -> AUTHENTICATION_WORDS.matcher(route.toLowerCase(Locale.ROOT)).find())
+                        .filter(
+                                route ->
+                                        AUTHENTICATION_WORDS
+                                                .matcher(route.toLowerCase(Locale.ROOT))
+                                                .find())
                         .filter(route -> !route.startsWith("/actuator"))
                         .toList();
 
@@ -125,7 +133,9 @@ class StudentGuardianAccessAbsenceIT extends SecurityBase {
                     schemes.add(name.group(1));
                 }
             }
-            assertThat(schemes).as("esquemas de segurança de %s", contract).isSubsetOf(ALLOWED_SECURITY_SCHEMES);
+            assertThat(schemes)
+                    .as("esquemas de segurança de %s", contract)
+                    .isSubsetOf(ALLOWED_SECURITY_SCHEMES);
         }
     }
 
@@ -161,9 +171,11 @@ class StudentGuardianAccessAbsenceIT extends SecurityBase {
             // vinculado ou não, é um texto qualquer: nenhum vínculo novo nem papel novo
             Reply linked = say(USER_CLARA, claim);
             assertThat(linked.plain()).contains("Nenhum aluno encontrado");
-            // sem vínculo, o texto é tratado como um código de acesso e recusado (usuário novo a cada vez)
+            // sem vínculo, o texto é tratado como um código de acesso e recusado (usuário novo a
+            // cada vez)
             Reply unlinked = say(7050L + claims.indexOf(claim), claim);
-            assertThat(unlinked.plain()).containsAnyOf("envie o código de acesso", "Código inválido");
+            assertThat(unlinked.plain())
+                    .containsAnyOf("envie o código de acesso", "Código inválido");
         }
         assertThat(count("telegram_link")).isEqualTo(links);
     }
@@ -189,7 +201,10 @@ class StudentGuardianAccessAbsenceIT extends SecurityBase {
                         String.class);
         assertThat(allTables)
                 .noneMatch(name -> name.matches("(?i).*(guardian|responsible|parent).*"))
-                .noneMatch(name -> name.matches("(?i)student_(session|credential|login|account|access).*"));
+                .noneMatch(
+                        name ->
+                                name.matches(
+                                        "(?i)student_(session|credential|login|account|access).*"));
 
         // as sessões e os vínculos apontam só para professor ou administrador
         List<String> sessionColumns =
@@ -226,8 +241,8 @@ class StudentGuardianAccessAbsenceIT extends SecurityBase {
             }
             MvcResult withHeaders =
                     mvc.perform(
-                                    org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-                                            .get(route)
+                                    org.springframework.test.web.servlet.request
+                                            .MockMvcRequestBuilders.get(route)
                                             .header("X-Role", "STUDENT")
                                             .header("X-User-Type", "guardian")
                                             .header("Authorization", "Bearer student-token")

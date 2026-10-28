@@ -20,12 +20,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.test.web.servlet.MvcResult;
 
 /**
- * CPF indisponível sem vazamento (T139, FR-024): o CPF de um aluno de outro professor é recusado
- * no cadastro e na edição, na Web e no Telegram, sem nome do aluno, nome ou e-mail do professor
- * dono, nem dado algum na resposta, no texto do bot, no log e na autoria; o CPF de um aluno do
- * próprio professor responde "já está entre os seus". Os limites contra sondagem (5 recusas em 15
- * minutos; 30 consultas em 60 minutos) bloqueiam só as operações que informam CPF e dizem o tempo
- * restante sem dizer o motivo.
+ * CPF indisponível sem vazamento (T139, FR-024): o CPF de um aluno de outro professor é recusado no
+ * cadastro e na edição, na Web e no Telegram, sem nome do aluno, nome ou e-mail do professor dono,
+ * nem dado algum na resposta, no texto do bot, no log e na autoria; o CPF de um aluno do próprio
+ * professor responde "já está entre os seus". Os limites contra sondagem (5 recusas em 15 minutos;
+ * 30 consultas em 60 minutos) bloqueiam só as operações que informam CPF e dizem o tempo restante
+ * sem dizer o motivo.
  */
 class CpfUnavailableNoLeakIT extends SecurityBase {
 
@@ -98,18 +98,21 @@ class CpfUnavailableNoLeakIT extends SecurityBase {
     }
 
     private String cpfHashOf(UUID student) {
-        return jdbc.queryForObject("select cpf_hash from student where id = ?", String.class, student);
+        return jdbc.queryForObject(
+                "select cpf_hash from student where id = ?", String.class, student);
     }
 
     // ------------------------------------------------------------------ recusa sem vazamento
 
     @Test
-    void duplicateCpfOfAnotherTeachersStudentIsRefusedOnTheWebWithoutAnyDataOnResponseLogOrAuthorship()
-            throws Exception {
+    void
+            duplicateCpfOfAnotherTeachersStudentIsRefusedOnTheWebWithoutAnyDataOnResponseLogOrAuthorship()
+                    throws Exception {
         String hashBefore = cpfHashOf(claraStudentId);
         int studentsBefore = count("student");
         try (LogCapture log = LogCapture.start()) {
-            MvcResult registration = register(claraSession, "Outra Pessoa", CanaryCpf.MASKED, "1985-01-02");
+            MvcResult registration =
+                    register(claraSession, "Outra Pessoa", CanaryCpf.MASKED, "1985-01-02");
             MvcResult edition = editCpf(claraSession, claraStudentId, CanaryCpf.DIGITS);
 
             for (MvcResult refused : List.of(registration, edition)) {
@@ -153,8 +156,7 @@ class CpfUnavailableNoLeakIT extends SecurityBase {
         return String.join(
                 "\n",
                 jdbc.query(
-                        "select t::text from authorship_record t",
-                        (rs, row) -> rs.getString(1)));
+                        "select t::text from authorship_record t", (rs, row) -> rs.getString(1)));
     }
 
     @Test
@@ -179,12 +181,17 @@ class CpfUnavailableNoLeakIT extends SecurityBase {
     }
 
     @Test
-    void duplicateCpfIsRefusedOnTheBotWithoutAnyDataOnTheTextTheLogOrTheAuthorship() throws Exception {
+    void duplicateCpfIsRefusedOnTheBotWithoutAnyDataOnTheTextTheLogOrTheAuthorship()
+            throws Exception {
         try (LogCapture log = LogCapture.start()) {
             // cadastro com o CPF do aluno de Bruno
             Reply registration = startRegistrationAndTypeCpf(CanaryCpf.MASKED);
             assertThat(registration.plain()).contains(UNAVAILABLE);
-            assertThat(sweeper().sweepText(Place.BODY, registration.plain() + registration.buttonData()))
+            assertThat(
+                            sweeper()
+                                    .sweepText(
+                                            Place.BODY,
+                                            registration.plain() + registration.buttonData()))
                     .isEmpty();
             say(USER_CLARA, "cancelar");
 
@@ -232,7 +239,8 @@ class CpfUnavailableNoLeakIT extends SecurityBase {
     void fiveRefusalsBlockOnlyTheOperationsWithCpfAndTellTheRemainingTimeWithoutTheReason()
             throws Exception {
         for (int attempt = 1; attempt <= 5; attempt++) {
-            MvcResult refused = register(claraSession, "Tentativa " + attempt, CanaryCpf.MASKED, "1985-01-02");
+            MvcResult refused =
+                    register(claraSession, "Tentativa " + attempt, CanaryCpf.MASKED, "1985-01-02");
             assertThat(errorCode(refused)).as("tentativa %d", attempt).isEqualTo("CPF_UNAVAILABLE");
         }
 
@@ -307,7 +315,13 @@ class CpfUnavailableNoLeakIT extends SecurityBase {
                 .isEqualTo(200);
 
         clock.advance(Duration.ofMinutes(30));
-        assertThat(errorCode(register(claraSession, "Ainda Bloqueado", validCpf(2001), "1990-01-01")))
+        assertThat(
+                        errorCode(
+                                register(
+                                        claraSession,
+                                        "Ainda Bloqueado",
+                                        validCpf(2001),
+                                        "1990-01-01")))
                 .isEqualTo("OPERATION_TEMPORARILY_BLOCKED");
         clock.advance(Duration.ofMinutes(31));
         assertThat(
@@ -325,8 +339,8 @@ class CpfUnavailableNoLeakIT extends SecurityBase {
         assertThat(message).matches(BLOCKED_TEXT);
         int retryAfter = jsonOf(blocked).path("retryAfterSeconds").asInt();
         assertThat(retryAfter).isBetween(1, minutes * 60);
-        assertThat(blocked.getResponse().getHeader("Retry-After")).isEqualTo(String.valueOf(retryAfter));
+        assertThat(blocked.getResponse().getHeader("Retry-After"))
+                .isEqualTo(String.valueOf(retryAfter));
         sweeper().assertClean(blocked);
     }
-
 }

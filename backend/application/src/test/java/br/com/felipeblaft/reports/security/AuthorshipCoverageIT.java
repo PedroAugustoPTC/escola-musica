@@ -38,11 +38,11 @@ class AuthorshipCoverageIT extends AdministrationStackBase {
 
     private static final String ADMIN_ROLE = "ADMINISTRATOR";
     private static final String TEACHER_ROLE = "TEACHER";
-    private static final String BOOTSTRAP_EMAIL = "primeiro.admin@example.test";
-    private static final String BOOTSTRAP_PASSWORD = "senha-provisoria-longa-1";
-    private static final String NEW_PASSWORD = "senha-definitiva-longa-2";
-    private static final String SECOND_EMAIL = "segundo.admin@example.test";
-    private static final String SECOND_PASSWORD = "senha-do-segundo-longa-3";
+    private static final String BOOTSTRAP_EMAIL = "first.admin@example.test";
+    private static final String BOOTSTRAP_PASSWORD = "provisional-password-long-1";
+    private static final String NEW_PASSWORD = "definitive-password-long-2";
+    private static final String SECOND_EMAIL = "second.admin@example.test";
+    private static final String SECOND_PASSWORD = "second-password-long-3";
 
     /** Operação, papel, canal e resultado esperados do registro. */
     private record Expectation(String role, String origin, String result) {}

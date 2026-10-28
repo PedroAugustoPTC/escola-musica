@@ -62,7 +62,8 @@ class DiscardRegistrationInProcessingUseCaseTest {
                 .isInstanceOfSatisfying(
                         DomainException.class,
                         e -> assertThat(e.code()).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND));
-        assertThat(c.queue.searchById(job.id()).orElseThrow().status()).isEqualTo(JobStatus.PENDING);
+        assertThat(c.queue.searchById(job.id()).orElseThrow().status())
+                .isEqualTo(JobStatus.PENDING);
     }
 
     @Test

@@ -107,7 +107,8 @@ public class ReportScenario extends AccessScenario {
     public final br.com.felipeblaft.reports.usecase.job.DiscardRegistrationInProcessingUseCase
             discardRegistration =
                     new br.com.felipeblaft.reports.usecase.job
-                            .DiscardRegistrationInProcessingUseCase(authorization, queue, audio, clock);
+                            .DiscardRegistrationInProcessingUseCase(
+                            authorization, queue, audio, clock);
     public final GetReportDocumentUseCase getDocument =
             new GetReportDocumentUseCase(access, reports, versions, pdfDocuments, documents);
 

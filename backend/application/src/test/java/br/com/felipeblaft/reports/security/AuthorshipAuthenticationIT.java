@@ -23,7 +23,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 class AuthorshipAuthenticationIT extends AdministrationStackBase {
 
     private static final String ORIGIN = "198.51.100.40";
-    private static final String UNKNOWN_EMAIL = "fantasma.inexistente@example.test";
+    private static final String UNKNOWN_EMAIL = "ghost.missing@example.test";
     private static final String HEX64 = "[0-9a-f]{64}";
 
     private AdministratorFixture administrator;
@@ -49,20 +49,20 @@ class AuthorshipAuthenticationIT extends AdministrationStackBase {
     @Test
     void wrongPasswordOfAKnownAccountIsRecordedAsFailureOfThatAdministrator() throws Exception {
         MockHttpServletResponse response =
-                signInAdministratorRaw(administrator.email(), "senha-incorreta-123", ORIGIN);
+                signInAdministratorRaw(administrator.email(), "password-failed-123", ORIGIN);
 
         assertThat(response.getStatus()).isEqualTo(401);
         Map<String, Object> record = onlyAuthorship("ADMIN_SIGN_IN");
         assertRecord(record, "ADMINISTRATOR", "WEB", "FAILURE");
         assertThat(record.get("author_id")).isEqualTo(administrator.administrator().id());
         assertThat(record.get("error_code")).isEqualTo("INVALID_CREDENTIALS");
-        assertThat(authorshipDump()).doesNotContain("senha-incorreta-123");
+        assertThat(authorshipDump()).doesNotContain("password-failed-123");
     }
 
     @Test
     void unknownEmailRecordsUnknownEmailAndTheOriginNeverTheTypedAddress() throws Exception {
         MockHttpServletResponse response =
-                signInAdministratorRaw(UNKNOWN_EMAIL, "qualquer-senha-123", ORIGIN);
+                signInAdministratorRaw(UNKNOWN_EMAIL, "any-password-123", ORIGIN);
 
         assertThat(response.getStatus()).isEqualTo(401);
         assertThat(errorCode(response)).isEqualTo("INVALID_CREDENTIALS");
@@ -74,15 +74,15 @@ class AuthorshipAuthenticationIT extends AdministrationStackBase {
         String dump = authorshipDump();
         assertThat(dump)
                 .doesNotContain(UNKNOWN_EMAIL)
-                .doesNotContain("fantasma")
-                .doesNotContain("qualquer-senha")
+                .doesNotContain("ghost")
+                .doesNotContain("any-password")
                 .doesNotContain(ORIGIN);
     }
 
     @Test
     void attemptsRefusedByTheBlockAreRecordedAsBlockedWithoutRole() throws Exception {
         for (int i = 0; i < 5; i++) {
-            signInAdministratorRaw(administrator.email(), "errada-" + i + "-senha", ORIGIN);
+            signInAdministratorRaw(administrator.email(), "errada-" + i + "-password", ORIGIN);
         }
 
         MockHttpServletResponse blocked =

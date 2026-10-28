@@ -99,7 +99,7 @@ class AuthorshipTeacherOperationsIT extends AdministrationStackBase {
                         HttpMethod.POST,
                         ADMIN + "/teachers",
                         session,
-                        Map.of("name", "Sem Email", "email", "isto-nao-e-email"));
+                        Map.of("name", "Sem Email", "email", "this-is-not-email"));
         MockHttpServletResponse missing =
                 call(
                         HttpMethod.POST,

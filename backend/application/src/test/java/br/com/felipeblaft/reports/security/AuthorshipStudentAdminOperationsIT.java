@@ -71,7 +71,7 @@ class AuthorshipStudentAdminOperationsIT extends AdministrationStackBase {
                                         "phone",
                                         "(21) 97654-3210",
                                         "email",
-                                        "outro.responsavel@example.test")));
+                                        "other.guardian@example.test")));
         assertThat(update.getStatus()).isEqualTo(200);
         assertThat(
                         call(
@@ -100,7 +100,7 @@ class AuthorshipStudentAdminOperationsIT extends AdministrationStackBase {
         assertThat(authorshipDump())
                 .doesNotContain("Responsável Fictício")
                 .doesNotContain("97654")
-                .doesNotContain("outro.responsavel");
+                .doesNotContain("other.guardian");
     }
 
     @Test
