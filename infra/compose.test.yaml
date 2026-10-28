@@ -139,6 +139,9 @@ services:
       # Os mesmos segredos de testes do backend-e2e: a semeadura grava o HMAC e o CPF cifrado.
       E2E_CPF_KEY: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
       E2E_HMAC_SECRET: hmac-secret-for-e2e-tests-with-more-than-32-bytes
+      # O administrador de teste não vem de variável nem de arquivo: a semeadura (frontend/tests/e2e/support.ts) o grava já
+      # ativado, com hash Argon2id de uma senha aleatória gerada a cada execução do Playwright. Quem quiser fixar as
+      # credenciais passa E2E_ADMIN_EMAIL e E2E_ADMIN_PASSWORD pelo ambiente (nunca no repositório).
     volumes:
       - ..:/work
       - node-modules-e2e:/work/frontend/node_modules

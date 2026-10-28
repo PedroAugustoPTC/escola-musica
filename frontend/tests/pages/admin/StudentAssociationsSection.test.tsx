@@ -113,6 +113,7 @@ describe('StudentAssociationsSection', () => {
     await openRemoval(user);
     await user.keyboard('{Escape}');
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    await waitFor(() => expect(trigger).toHaveFocus());
     expect(api.calls.some((call) => call.method === 'DELETE')).toBe(false);
   });
 
