@@ -83,7 +83,8 @@ public class SecurityConfig {
                                                         crossCredential.writeNotFound(response);
                                                         return;
                                                     }
-                                                    if (code == ErrorCode.SESSION_EXPIRED) {
+                                                    if (code == ErrorCode.SESSION_EXPIRED
+                                                            || code == ErrorCode.ACCESS_ENDED) {
                                                         response.addHeader(
                                                                 SessionCookie.header(),
                                                                 cookieSession.remove());

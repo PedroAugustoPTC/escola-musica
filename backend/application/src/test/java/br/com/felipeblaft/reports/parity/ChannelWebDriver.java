@@ -4,10 +4,16 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
 
 import jakarta.servlet.http.Cookie;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
@@ -95,5 +101,110 @@ public class ChannelWebDriver implements ChannelDriver {
                         .getResponse()
                         .getStatus();
         return status == 401 ? "ENDED" : "ACTIVE";
+    }
+
+    // ---- "Meus alunos"
+
+    private MockHttpServletResponse mine(HttpMethod method, String path, Object body)
+            throws Exception {
+        var builder =
+                request(method, "/api/v1/my-students" + path)
+                        .cookie(session)
+                        .with(csrf().asHeader());
+        if (body != null) {
+            builder.contentType(MediaType.APPLICATION_JSON).content(JSON.writeValueAsString(body));
+        }
+        return mvc.perform(builder).andReturn().getResponse();
+    }
+
+    private String outcome(MockHttpServletResponse response) throws Exception {
+        if (response.getStatus() / 100 == 2) {
+            return "SUCCESS";
+        }
+        return JSON.readTree(response.getContentAsString()).get("code").asString();
+    }
+
+    /** Item da lista (todas as situações) com o nome dado. */
+    private JsonNode itemNamed(String name) throws Exception {
+        MockHttpServletResponse response = mine(HttpMethod.GET, "?status=ALL&size=100", null);
+        for (JsonNode item : JSON.readTree(response.getContentAsString()).get("items")) {
+            if (item.get("name").asString().equals(name)) {
+                return item;
+            }
+        }
+        throw new IllegalStateException("aluno fora da lista: " + name);
+    }
+
+    @Override
+    public String registerStudent(NewStudent student) throws Exception {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("name", student.name());
+        body.put(
+                "birthDate",
+                LocalDate.parse(student.birthDate(), DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                        .toString());
+        body.put("cpf", student.cpf());
+        if (student.instrument() != null) {
+            body.put("instrument", student.instrument());
+        }
+        if (student.guardian() != null) {
+            body.put(
+                    "guardian",
+                    Map.of(
+                            "name", student.guardian().name(),
+                            "phone", student.guardian().phone(),
+                            "email", student.guardian().email()));
+        }
+        return outcome(mine(HttpMethod.POST, "", body));
+    }
+
+    private List<String> names(String query) throws Exception {
+        MockHttpServletResponse response = mine(HttpMethod.GET, query, null);
+        List<String> names = new ArrayList<>();
+        JSON.readTree(response.getContentAsString())
+                .get("items")
+                .forEach(item -> names.add(item.get("name").asString()));
+        return names;
+    }
+
+    @Override
+    public List<String> listStudents(String status) throws Exception {
+        return names("?status=" + status);
+    }
+
+    @Override
+    public List<String> searchStudents(String text) throws Exception {
+        return names("?search=" + text);
+    }
+
+    @Override
+    public String openStudent(String name) throws Exception {
+        String id = itemNamed(name).get("id").asString();
+        JsonNode card = JSON.readTree(mine(HttpMethod.GET, "/" + id, null).getContentAsString());
+        return card.get("name").asString()
+                + "|"
+                + card.get("age").asInt()
+                + "|"
+                + (card.hasNonNull("instrument") ? card.get("instrument").asString() : "-")
+                + "|"
+                + (card.get("active").asBoolean() ? "ACTIVE" : "INACTIVE");
+    }
+
+    @Override
+    public String changeInstrument(String name, String instrument) throws Exception {
+        String id = itemNamed(name).get("id").asString();
+        return outcome(mine(HttpMethod.PATCH, "/" + id, Map.of("instrument", instrument)));
+    }
+
+    @Override
+    public String inactivateStudent(String name) throws Exception {
+        String id = itemNamed(name).get("id").asString();
+        return outcome(mine(HttpMethod.POST, "/" + id + "/inactivation", null));
+    }
+
+    @Override
+    public String reactivateStudent(String name) throws Exception {
+        String id = itemNamed(name).get("id").asString();
+        return outcome(mine(HttpMethod.POST, "/" + id + "/reactivation", null));
     }
 }

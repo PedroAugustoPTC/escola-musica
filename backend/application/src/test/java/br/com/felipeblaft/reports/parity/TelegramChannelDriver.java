@@ -23,7 +23,13 @@ public class TelegramChannelDriver implements ChannelDriver {
     private static final Pattern STUDENT =
             Pattern.compile("^• ([^·\\n]+?)(?: ·.*)?$", Pattern.MULTILINE);
 
+    /** Toca num botão como o professor e devolve as mensagens do bot produzidas por ele. */
+    public interface Taps {
+        List<JsonNode> tap(String data) throws Exception;
+    }
+
     private final Conversation conversation;
+    private Taps taps;
     private final MessageCatalog catalog;
     private final Supplier<Long> links;
 
@@ -32,6 +38,12 @@ public class TelegramChannelDriver implements ChannelDriver {
         this.conversation = conversation;
         this.catalog = catalog;
         this.links = links;
+    }
+
+    /** Habilita as operações de "Meus alunos", que usam botões. */
+    public TelegramChannelDriver withTaps(Taps taps) {
+        this.taps = taps;
+        return this;
     }
 
     @Override
@@ -111,5 +123,155 @@ public class TelegramChannelDriver implements ChannelDriver {
         conversation.send("sair");
         conversation.send("sim");
         return links.get() == 0 ? "ENDED" : "ACTIVE";
+    }
+
+    // ---- "Meus alunos"
+
+    private JsonNode say(String text) throws Exception {
+        return conversation.send(text).getLast();
+    }
+
+    private JsonNode press(String data) throws Exception {
+        return taps.tap(data).getLast();
+    }
+
+    private static List<JsonNode> buttonsOf(JsonNode message) {
+        List<JsonNode> buttons = new ArrayList<>();
+        message.path("reply_markup")
+                .path("inline_keyboard")
+                .forEach(line -> line.forEach(buttons::add));
+        return buttons;
+    }
+
+    private static String buttonDataNamed(JsonNode message, String name) {
+        for (JsonNode button : buttonsOf(message)) {
+            String data = button.get("callback_data").asString();
+            if (data.startsWith("v1:reg-open:") && button.get("text").asString().equals(name)) {
+                return data;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Código do erro do catálogo que o bot mostrou, ou {@code null} se é uma pergunta/etapa normal.
+     */
+    private String errorCodeOf(JsonNode message) {
+        String code = textCode(message.get("text").asString());
+        return code == null || code.startsWith("REGISTRY_") || code.startsWith("CONFIRM_")
+                ? null
+                : code;
+    }
+
+    @Override
+    public String registerStudent(NewStudent student) throws Exception {
+        say("cadastrar aluno");
+        say(student.name());
+        say(student.birthDate());
+        JsonNode reply = say(student.cpf());
+        String error = errorCodeOf(reply);
+        if (error != null) {
+            say("cancelar");
+            return error;
+        }
+        if (student.guardian() != null) {
+            say(student.guardian().name());
+            say(student.guardian().phone());
+            reply = say(student.guardian().email());
+        }
+        say(student.instrument() == null ? "pular" : student.instrument());
+        reply = say("sim");
+        return "REGISTRY_SAVED".equals(textCode(reply.get("text").asString()))
+                ? "SUCCESS"
+                : String.valueOf(textCode(reply.get("text").asString()));
+    }
+
+    private List<String> openButtonNames(JsonNode message) {
+        List<String> names = new ArrayList<>();
+        for (JsonNode button : buttonsOf(message)) {
+            if (button.get("callback_data").asString().startsWith("v1:reg-open:")) {
+                names.add(button.get("text").asString());
+            }
+        }
+        return names;
+    }
+
+    @Override
+    public List<String> listStudents(String status) throws Exception {
+        JsonNode list = say("meus alunos");
+        if ("INACTIVE".equals(status)) {
+            list = press("v1:reg-filter:INACTIVE");
+        }
+        return openButtonNames(list);
+    }
+
+    @Override
+    public List<String> searchStudents(String text) throws Exception {
+        say("meus alunos");
+        return openButtonNames(say(text));
+    }
+
+    /** Abre o cartão do aluno, procurando entre os ativos e depois entre os inativos. */
+    private JsonNode card(String name) throws Exception {
+        JsonNode list = say("meus alunos");
+        String data = buttonDataNamed(list, name);
+        if (data == null) {
+            list = press("v1:reg-filter:INACTIVE");
+            data = buttonDataNamed(list, name);
+        }
+        if (data == null) {
+            throw new IllegalStateException("aluno fora da lista: " + name);
+        }
+        return press(data);
+    }
+
+    @Override
+    public String openStudent(String name) throws Exception {
+        String[] lines = card(name).get("text").asString().split("\n");
+        String[] age = lines[1].split(" anos · ", 2);
+        return lines[0]
+                + "|"
+                + age[0]
+                + "|"
+                + age[1]
+                + "|"
+                + (lines[2].contains("Inativ") ? "INACTIVE" : "ACTIVE");
+    }
+
+    @Override
+    public String changeInstrument(String name, String instrument) throws Exception {
+        card(name);
+        press("v1:reg-edit:");
+        press("v1:reg-edit:instrument");
+        say(instrument);
+        JsonNode reply = say("sim");
+        return "REGISTRY_UPDATED".equals(textCode(reply.get("text").asString()))
+                ? "SUCCESS"
+                : String.valueOf(textCode(reply.get("text").asString()));
+    }
+
+    private String changeStatus(String name, String button, String doneText) throws Exception {
+        card(name);
+        JsonNode confirmation = press(button);
+        for (JsonNode candidate : buttonsOf(confirmation)) {
+            String data = candidate.get("callback_data").asString();
+            if (data.startsWith("v1:reg-confirm:")) {
+                JsonNode reply = press(data);
+                return reply.get("text").asString().contains(doneText)
+                        ? "SUCCESS"
+                        : String.valueOf(textCode(reply.get("text").asString()));
+            }
+        }
+        return String.valueOf(textCode(confirmation.get("text").asString()));
+    }
+
+    @Override
+    public String inactivateStudent(String name) throws Exception {
+        return changeStatus(name, "v1:reg-inactivate:", "foi inativado");
+    }
+
+    @Override
+    public String reactivateStudent(String name) throws Exception {
+        return changeStatus(name, "v1:reg-reactivate:", "foi reativado");
     }
 }

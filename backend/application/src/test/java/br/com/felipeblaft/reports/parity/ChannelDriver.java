@@ -22,6 +22,44 @@ public interface ChannelDriver {
     /** Encerra o acesso e confirma que ele deixou de valer. */
     String end() throws Exception;
 
+    // ---- "Meus alunos" (feature 005): resultado neutro, "SUCCESS" ou o código de erro
+
+    /** Data de nascimento no formato digitado, {@code dd/MM/aaaa}; responsável só para menor. */
+    record NewStudent(
+            String name, String birthDate, String cpf, String instrument, Guardian guardian) {}
+
+    record Guardian(String name, String phone, String email) {}
+
+    default String registerStudent(NewStudent student) throws Exception {
+        throw new UnsupportedOperationException(name() + " não cadastra aluno");
+    }
+
+    /** Nomes da lista de alunos {@code ACTIVE} ou {@code INACTIVE}, na ordem da lista. */
+    default List<String> listStudents(String status) throws Exception {
+        throw new UnsupportedOperationException(name() + " não lista aluno");
+    }
+
+    default List<String> searchStudents(String text) throws Exception {
+        throw new UnsupportedOperationException(name() + " não busca aluno");
+    }
+
+    /** Cartão do aluno em forma neutra: {@code nome|idade|instrumento|situação}. */
+    default String openStudent(String name) throws Exception {
+        throw new UnsupportedOperationException(name() + " não abre aluno");
+    }
+
+    default String changeInstrument(String name, String instrument) throws Exception {
+        throw new UnsupportedOperationException(name() + " não edita aluno");
+    }
+
+    default String inactivateStudent(String name) throws Exception {
+        throw new UnsupportedOperationException(name() + " não inativa aluno");
+    }
+
+    default String reactivateStudent(String name) throws Exception {
+        throw new UnsupportedOperationException(name() + " não reativa aluno");
+    }
+
     record HomeSummary(int totalStudents, List<String> students) {}
 
     record SearchResult(String type, List<String> students) {}
