@@ -4,6 +4,7 @@ import br.com.felipeblaft.reports.config.log.ErrorReference;
 import br.com.felipeblaft.reports.domain.common.Channel;
 import br.com.felipeblaft.reports.domain.common.ErrorCode;
 import br.com.felipeblaft.reports.domain.common.ReportType;
+import br.com.felipeblaft.reports.domain.semester.SemesterPeriod;
 import br.com.felipeblaft.reports.port.ClockPort;
 import br.com.felipeblaft.reports.usecase.history.QueryStudentHistoryUseCase.HistoryItem;
 import java.time.Instant;
@@ -49,15 +50,16 @@ public class MessageFormatting {
 
     /** "Aula de dd/mm/aaaa" ou "Semestral (dd/mm/aaaa a dd/mm/aaaa)" — iguais nos dois canais. */
     public String historyLabel(HistoryItem item) {
-        return item.type() == ReportType.LESSON
-                ? catalog.text("LESSON_LABEL", Map.of("data", data(item.lessonDate())))
+        return historyLabel(item.type(), item.lessonDate(), item.period());
+    }
+
+    /** O mesmo rótulo a partir do tipo, da data da aula ou do período (visão da escola). */
+    public String historyLabel(ReportType type, LocalDate lessonDate, SemesterPeriod period) {
+        return type == ReportType.LESSON
+                ? catalog.text("LESSON_LABEL", Map.of("data", data(lessonDate)))
                 : catalog.text(
                         "SEMESTER_LABEL",
-                        Map.of(
-                                "start",
-                                data(item.period().start()),
-                                "end",
-                                data(item.period().end())));
+                        Map.of("start", data(period.start()), "end", data(period.end())));
     }
 
     /** "Aprovado em dd/mm/aaaa às hh:mm" no fuso da escola. */

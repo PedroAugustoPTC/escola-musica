@@ -54,7 +54,7 @@ class MigrationV15IT {
     void afterV15TheNewTypeIsAcceptedAndExistingRowsSurvive() throws Exception {
         assertThat(channelAction("STEP_MESSAGE")).isEqualTo(1);
 
-        db.flyway(null).migrate();
+        db.flyway("15").migrate();
 
         assertThat(db.single("select count(*) from channel_action")).isEqualTo("1");
         assertThat(channelAction("DELETE_MESSAGE")).isEqualTo(1);
@@ -69,7 +69,7 @@ class MigrationV15IT {
     void aNewDatabaseMigratesFromScratchAndAcceptsTheNewType() throws Exception {
         db.dropSchema();
 
-        db.flyway(null).migrate();
+        db.flyway("15").migrate();
 
         assertThat(db.single("select max(version::int) from flyway_schema_history"))
                 .isEqualTo("15");
@@ -82,7 +82,7 @@ class MigrationV15IT {
     void v15OnlyReplacesTheTypeConstraintKeepingItsName() throws Exception {
         MigrationTestSupport.Catalog before = db.catalog();
 
-        db.flyway(null).migrate();
+        db.flyway("15").migrate();
 
         MigrationTestSupport.Catalog after = db.catalog();
         assertThat(after.columns()).isEqualTo(before.columns());

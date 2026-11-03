@@ -70,6 +70,12 @@ export function StudentDetailScreen() {
           {data.age !== undefined ? <span className="admin-list__meta-item">{data.age} anos</span> : null}
           {data.instrument ? <span className="admin-list__meta-item">{data.instrument}</span> : null}
         </div>
+        <div className="admin-actions">
+          <Link to={`/admin/history?studentId=${data.id}`} className="button button--secondary">
+            <Icon name="history" size="medium" />
+            {msg('SCHOOL_HISTORY_STUDENT_SHORTCUT')}
+          </Link>
+        </div>
       </div>
 
       <div role="status" className={notice ? 'alert alert--ok' : undefined}>

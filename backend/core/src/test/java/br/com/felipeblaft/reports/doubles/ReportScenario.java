@@ -110,7 +110,14 @@ public class ReportScenario extends AccessScenario {
                             .DiscardRegistrationInProcessingUseCase(
                             authorization, queue, audio, clock);
     public final GetReportDocumentUseCase getDocument =
-            new GetReportDocumentUseCase(access, reports, versions, pdfDocuments, documents);
+            new GetReportDocumentUseCase(
+                    access,
+                    reports,
+                    versions,
+                    pdfDocuments,
+                    documents,
+                    new br.com.felipeblaft.reports.service.OfficialDocumentService(
+                            versions, pdfDocuments, documents));
 
     // ---- Semestral (US4)
     public final ProcessingDoubles.InMemorySemesterReportRepository semester =

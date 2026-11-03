@@ -16,6 +16,8 @@ import java.util.regex.Pattern;
  *     código desconhecido
  * @param authorRole papel do autor; {@code null} para sistema e desconhecido
  * @param operation nome de {@link Operation} ou de um dos eventos de autenticação abaixo
+ * @param readDetail filtros, página ou versão do PDF das leituras da visão da escola (feature 006);
+ *     só nas operações de {@link #READ_DETAIL_OPERATIONS}, nulo nas demais
  * @param errorCode ex.: {@code CPF_UNAVAILABLE}, {@code UNKNOWN_EMAIL}
  * @param originHash resumo com chave da origem; só em eventos de autenticação e bloqueio
  * @param correlationId id da requisição (Web, UUID) ou {@code update_id} (Telegram, 1 a 10
@@ -38,7 +40,8 @@ public record AuthorshipRecord(
         AuthorshipResult result,
         String errorCode,
         String originHash,
-        String correlationId) {
+        String correlationId,
+        AuthorshipReadDetail readDetail) {
 
     /** Eventos que não são {@link Operation} (data-model.md §6). */
     public static final String TEACHER_LINK_TELEGRAM = "TEACHER_LINK_TELEGRAM";
@@ -46,6 +49,16 @@ public record AuthorshipRecord(
     public static final String ATTEMPT_BLOCKED = "ATTEMPT_BLOCKED";
     public static final String AUTHORIZATION_DENIED = "AUTHORIZATION_DENIED";
     public static final String CPF_REFUSED_OTHER_STUDENT = "CPF_REFUSED_OTHER_STUDENT";
+
+    /**
+     * Operações que podem levar o {@link AuthorshipReadDetail}; espelha, e o teste compara, o CHECK
+     * da V16.
+     */
+    public static final Set<String> READ_DETAIL_OPERATIONS =
+            Set.of(
+                    Operation.SCHOOL_HISTORY_QUERY.name(),
+                    Operation.SCHOOL_REPORT_DOCUMENT_OPEN.name(),
+                    Operation.SCHOOL_REPORT_DOCUMENT_DOWNLOAD.name());
 
     /**
      * Operações e eventos que podem levar o resumo da origem; espelha, e o teste compara, o CHECK
@@ -98,6 +111,39 @@ public record AuthorshipRecord(
         if (!validCorrelation(correlationId)) {
             throw new IllegalArgumentException("identificador de correlação fora do formato");
         }
+        if (readDetail != null && !READ_DETAIL_OPERATIONS.contains(operation)) {
+            throw new IllegalArgumentException("operação não pode levar detalhe de leitura");
+        }
+    }
+
+    /** Registro sem detalhe de leitura (todas as operações anteriores à feature 006). */
+    public AuthorshipRecord(
+            UUID id,
+            Instant occurredAt,
+            UUID authorId,
+            Role authorRole,
+            ActionOrigin origin,
+            String operation,
+            AuthorshipTargetType targetType,
+            UUID targetId,
+            AuthorshipResult result,
+            String errorCode,
+            String originHash,
+            String correlationId) {
+        this(
+                id,
+                occurredAt,
+                authorId,
+                authorRole,
+                origin,
+                operation,
+                targetType,
+                targetId,
+                result,
+                errorCode,
+                originHash,
+                correlationId,
+                null);
     }
 
     private static boolean validCorrelation(String value) {

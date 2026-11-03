@@ -2,9 +2,11 @@ package br.com.felipeblaft.reports.outbound.persistence;
 
 import br.com.felipeblaft.reports.domain.access.ActionOrigin;
 import br.com.felipeblaft.reports.domain.access.AuthorshipRecord;
+import br.com.felipeblaft.reports.domain.access.AuthorshipReadDetail;
 import br.com.felipeblaft.reports.domain.access.AuthorshipResult;
 import br.com.felipeblaft.reports.domain.access.AuthorshipTargetType;
 import br.com.felipeblaft.reports.domain.access.Role;
+import br.com.felipeblaft.reports.domain.common.ReportType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,6 +15,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.UUID;
 import org.springframework.data.domain.Persistable;
 
@@ -64,6 +67,26 @@ public class AuthorshipRecordEntity implements Persistable<UUID> {
     @Column(name = "correlation_id", nullable = false)
     private String correlationId;
 
+    // detalhe das leituras da visão da escola (V16): só identificadores, tipo, datas e números
+    @Column(name = "filter_teacher_id")
+    private UUID filterTeacherId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "filter_report_type")
+    private ReportType filterReportType;
+
+    @Column(name = "filter_period_start")
+    private LocalDate filterPeriodStart;
+
+    @Column(name = "filter_period_end")
+    private LocalDate filterPeriodEnd;
+
+    @Column(name = "page_number")
+    private Integer pageNumber;
+
+    @Column(name = "document_version")
+    private Integer documentVersion;
+
     @Transient private boolean inserted = true;
 
     protected AuthorshipRecordEntity() {}
@@ -81,6 +104,15 @@ public class AuthorshipRecordEntity implements Persistable<UUID> {
         this.errorCode = record.errorCode();
         this.originHash = record.originHash();
         this.correlationId = record.correlationId();
+        AuthorshipReadDetail detail = record.readDetail();
+        if (detail != null) {
+            this.filterTeacherId = detail.filterTeacherId();
+            this.filterReportType = detail.filterReportType();
+            this.filterPeriodStart = detail.filterPeriodStart();
+            this.filterPeriodEnd = detail.filterPeriodEnd();
+            this.pageNumber = detail.pageNumber();
+            this.documentVersion = detail.documentVersion();
+        }
     }
 
     @Override

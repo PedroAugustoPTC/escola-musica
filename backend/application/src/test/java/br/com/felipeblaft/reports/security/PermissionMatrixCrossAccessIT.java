@@ -111,7 +111,16 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
                     Map.entry(Operation.STUDENT_REACTIVATE, List.of("meus alunos")),
                     Map.entry(
                             Operation.LESSON_AND_SEMESTER_REPORTS,
-                            List.of("histórico", "relatório semestral")));
+                            List.of("histórico", "relatório semestral")),
+                    // feature 006: a visão da escola é só da Web; o bot a trata como texto
+                    // não reconhecido
+                    Map.entry(Operation.SCHOOL_HISTORY_QUERY, List.of("histórico da escola")),
+                    Map.entry(
+                            Operation.SCHOOL_REPORT_DOCUMENT_OPEN,
+                            List.of("abrir o pdf de qualquer aluno da escola")),
+                    Map.entry(
+                            Operation.SCHOOL_REPORT_DOCUMENT_DOWNLOAD,
+                            List.of("baixar o pdf de qualquer aluno da escola")));
 
     private enum Outcome {
         REACHED,
@@ -249,6 +258,34 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
                     "semesterId",
                     jdbc.queryForObject("select id from semester_report", String.class));
         }
+        if (operation == Operation.SCHOOL_REPORT_DOCUMENT_OPEN
+                || operation == Operation.SCHOOL_REPORT_DOCUMENT_DOWNLOAD) {
+            // relatório aprovado com PDF oficial: o administrador alcança a rota de verdade
+            variables.put(
+                    "reportId",
+                    scenario.approvedLesson(
+                                    clara,
+                                    claraStudent,
+                                    LocalDate.of(2026, 3, 10),
+                                    "Sopro com apoio diafragmático")
+                            .id()
+                            .toString());
+            // a rota do semestral usa o mesmo {reportId}: o semestral aprovado entra à parte
+            call(
+                    HttpMethod.POST,
+                    API + "/students/" + claraStudent.id() + "/semester-reports",
+                    "{\"periodKey\":\"2026-1\"}",
+                    claraCookie);
+            scenario.processQueue();
+            String semesterId =
+                    jdbc.queryForObject("select id from semester_report", String.class);
+            call(
+                    HttpMethod.POST,
+                    API + "/semester-reports/" + semesterId + "/approval",
+                    "{\"confirmedVersion\":1}",
+                    claraCookie);
+            variables.put("semesterReportId", semesterId);
+        }
         API_BOTS.resetRequests();
         return new Fx(administrator, claraCookie, variables, bruno, claraStudent);
     }
@@ -303,11 +340,26 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
         }
     }
 
+    /**
+     * As rotas do semestral da visão da escola repetem {@code {reportId}}; o semestral aprovado do
+     * cenário tem identificador próprio, trocado aqui.
+     */
+    private static Map<String, String> variablesFor(Route probe, Map<String, String> variables) {
+        if (probe.path().contains("/semester-reports/")
+                && probe.path().contains("{reportId}")
+                && variables.containsKey("semesterReportId")) {
+            Map<String, String> adjusted = new HashMap<>(variables);
+            adjusted.put("reportId", variables.get("semesterReportId"));
+            return adjusted;
+        }
+        return variables;
+    }
+
     private void webChecks(Row row, Fx fx, boolean reaching, List<String> failures)
             throws Exception {
         for (Route declared : row.webRoutes()) {
             for (Route probe : expand(declared, failures)) {
-                String path = API + probe.pathWith(fx.variables());
+                String path = API + probe.pathWith(variablesFor(probe, fx.variables()));
                 String body = body(probe);
                 boolean administratorSpace = isAdministratorRoute(declared);
 

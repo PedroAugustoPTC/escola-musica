@@ -29,6 +29,14 @@ describe('StudentDetailScreen (A12)', () => {
     expect(screen.getByRole('button', { name: 'Inativar' })).toBeInTheDocument();
   });
 
+  it('oferece "Ver histórico", que abre o histórico da escola só com o identificador do aluno', async () => {
+    open();
+    expect(await screen.findByRole('link', { name: 'Ver histórico' })).toHaveAttribute(
+      'href',
+      `/admin/history?studentId=${STUDENT.id}`,
+    );
+  });
+
   it('edita sem reenviar o CPF (em branco mantém o atual) e confirma em role="status"', async () => {
     const api = open({ [`PATCH ${PATH}`]: { body: { ...STUDENT, instrument: 'Violão' } } });
     const user = userEvent.setup();

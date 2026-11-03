@@ -5,13 +5,16 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import br.com.felipeblaft.reports.domain.access.ActionOrigin;
+import br.com.felipeblaft.reports.domain.access.AuthorshipReadDetail;
 import br.com.felipeblaft.reports.domain.access.AuthorshipRecord;
 import br.com.felipeblaft.reports.domain.access.AuthorshipResult;
 import br.com.felipeblaft.reports.domain.access.AuthorshipTargetType;
 import br.com.felipeblaft.reports.domain.access.Role;
+import br.com.felipeblaft.reports.domain.common.ReportType;
 import br.com.felipeblaft.reports.port.AuthorshipRecorderPort;
 import br.com.felipeblaft.reports.support.IntegrationBase;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -110,6 +113,121 @@ class AuthorshipRecordAdapterIT extends IntegrationBase {
                 .containsEntry("result", "FAILURE");
         assertThat(row.get("author_id")).isNull();
         assertThat(row.get("author_role")).isNull();
+    }
+
+    private AuthorshipRecord read(
+            String operation,
+            AuthorshipTargetType targetType,
+            UUID targetId,
+            AuthorshipReadDetail detail) {
+        return new AuthorshipRecord(
+                UUID.randomUUID(),
+                Instant.parse("2026-11-03T13:00:00Z"),
+                UUID.randomUUID(),
+                Role.ADMINISTRATOR,
+                ActionOrigin.WEB,
+                operation,
+                targetType,
+                targetId,
+                AuthorshipResult.SUCCESS,
+                null,
+                null,
+                "req-ab12cd",
+                detail);
+    }
+
+    @Test
+    void queryDetailIsPersistedAndReadBack() {
+        UUID teacherId = UUID.randomUUID();
+        UUID studentId = UUID.randomUUID();
+        AuthorshipReadDetail detail =
+                AuthorshipReadDetail.ofQuery(
+                        teacherId,
+                        ReportType.SEMESTER,
+                        LocalDate.of(2026, 1, 1),
+                        LocalDate.of(2026, 6, 30),
+                        4);
+        AuthorshipRecord record =
+                read("SCHOOL_HISTORY_QUERY", AuthorshipTargetType.STUDENT, studentId, detail);
+
+        recorder.record(record);
+
+        Map<String, Object> row =
+                jdbc.queryForMap("select * from authorship_record where id = ?", record.id());
+        assertThat(row)
+                .containsEntry("operation", "SCHOOL_HISTORY_QUERY")
+                .containsEntry("target_type", "STUDENT")
+                .containsEntry("target_id", studentId)
+                .containsEntry("filter_teacher_id", teacherId)
+                .containsEntry("filter_report_type", "SEMESTER")
+                .containsEntry("page_number", 4);
+        assertThat(row.get("filter_period_start").toString()).isEqualTo("2026-01-01");
+        assertThat(row.get("filter_period_end").toString()).isEqualTo("2026-06-30");
+        assertThat(row.get("document_version")).isNull();
+    }
+
+    @Test
+    void documentDetailIsPersistedForBothReportTargets() {
+        for (AuthorshipTargetType target :
+                List.of(AuthorshipTargetType.LESSON_REPORT, AuthorshipTargetType.SEMESTER_REPORT)) {
+            UUID reportId = UUID.randomUUID();
+            AuthorshipRecord record =
+                    read(
+                            "SCHOOL_REPORT_DOCUMENT_DOWNLOAD",
+                            target,
+                            reportId,
+                            AuthorshipReadDetail.ofDocument(3));
+
+            recorder.record(record);
+
+            Map<String, Object> row =
+                    jdbc.queryForMap("select * from authorship_record where id = ?", record.id());
+            assertThat(row)
+                    .containsEntry("target_type", target.name())
+                    .containsEntry("target_id", reportId)
+                    .containsEntry("document_version", 3);
+            assertThat(row.get("page_number")).isNull();
+            assertThat(row.get("filter_report_type")).isNull();
+        }
+    }
+
+    @Test
+    void recordWithoutDetailKeepsTheDetailColumnsNull() {
+        AuthorshipRecord record = success("TEACHER_REGISTER");
+
+        recorder.record(record);
+
+        Map<String, Object> row =
+                jdbc.queryForMap("select * from authorship_record where id = ?", record.id());
+        for (String column :
+                List.of(
+                        "filter_teacher_id",
+                        "filter_report_type",
+                        "filter_period_start",
+                        "filter_period_end",
+                        "page_number",
+                        "document_version")) {
+            assertThat(row.get(column)).as(column).isNull();
+        }
+    }
+
+    @Test
+    void readRecordWithoutFiltersIsPersistedWithAnEmptyTarget() {
+        AuthorshipRecord record =
+                read(
+                        "SCHOOL_HISTORY_QUERY",
+                        null,
+                        null,
+                        AuthorshipReadDetail.ofQuery(null, null, null, null, 0));
+
+        recorder.record(record);
+
+        Map<String, Object> row =
+                jdbc.queryForMap("select * from authorship_record where id = ?", record.id());
+        assertThat(row).containsEntry("page_number", 0);
+        assertThat(row.get("target_type")).isNull();
+        assertThat(row.get("target_id")).isNull();
+        assertThat(row.get("filter_teacher_id")).isNull();
     }
 
     @Test

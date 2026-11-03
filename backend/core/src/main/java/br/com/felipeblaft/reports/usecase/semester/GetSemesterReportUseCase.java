@@ -14,6 +14,7 @@ import br.com.felipeblaft.reports.port.PdfDocumentRepository;
 import br.com.felipeblaft.reports.port.ReportInteractionRepository;
 import br.com.felipeblaft.reports.port.ReportVersionRepository;
 import br.com.felipeblaft.reports.service.DocumentGenerationService;
+import br.com.felipeblaft.reports.service.OfficialDocumentService;
 import br.com.felipeblaft.reports.service.SemesterAccessService;
 import br.com.felipeblaft.reports.usecase.document.GetReportDocumentUseCase.DocumentSource;
 import br.com.felipeblaft.reports.usecase.document.GetReportDocumentUseCase.ObtainedDocument;
@@ -38,6 +39,7 @@ public class GetSemesterReportUseCase implements DocumentSource {
     private final ReportVersionRepository versions;
     private final PdfDocumentRepository documents;
     private final DocumentGenerationService generation;
+    private final OfficialDocumentService officialDocument;
     private final JobQueuePort queue;
 
     public GetSemesterReportUseCase(
@@ -46,12 +48,14 @@ public class GetSemesterReportUseCase implements DocumentSource {
             ReportVersionRepository versions,
             PdfDocumentRepository documents,
             DocumentGenerationService generation,
-            JobQueuePort queue) {
+            JobQueuePort queue,
+            OfficialDocumentService officialDocument) {
         this.access = Objects.requireNonNull(access);
         this.interactions = Objects.requireNonNull(interactions);
         this.versions = Objects.requireNonNull(versions);
         this.documents = Objects.requireNonNull(documents);
         this.generation = Objects.requireNonNull(generation);
+        this.officialDocument = Objects.requireNonNull(officialDocument);
         this.queue = Objects.requireNonNull(queue);
     }
 
@@ -83,7 +87,12 @@ public class GetSemesterReportUseCase implements DocumentSource {
         if (report.status() != ReportStatus.APPROVED) {
             throw notFound();
         }
-        return read(report.id(), report.approvedVersion(), DocumentType.OFFICIAL, name(report, ""));
+        byte[] bytes =
+                officialDocument
+                        .readOfficial(ReportType.SEMESTER, report.id(), report.approvedVersion())
+                        .orElseThrow(GetSemesterReportUseCase::notFound);
+        return new ObtainedDocument(
+                bytes, OfficialDocumentService.semesterFileName(report.period().key()));
     }
 
     private static String name(SemesterReport report, String suffix) {

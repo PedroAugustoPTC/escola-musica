@@ -6,6 +6,7 @@ import br.com.felipeblaft.reports.domain.channel.RetryPolicy;
 import br.com.felipeblaft.reports.domain.common.BusinessParameters;
 import br.com.felipeblaft.reports.port.AccessAttemptRepository;
 import br.com.felipeblaft.reports.port.AccessCodeGeneratorPort;
+import br.com.felipeblaft.reports.port.ApprovedReportQueryPort;
 import br.com.felipeblaft.reports.port.AssignmentRepository;
 import br.com.felipeblaft.reports.port.AudioNormalizationPort;
 import br.com.felipeblaft.reports.port.ChannelActionRepository;
@@ -41,6 +42,7 @@ import br.com.felipeblaft.reports.service.AuthorshipService;
 import br.com.felipeblaft.reports.service.CodeAuthenticationService;
 import br.com.felipeblaft.reports.service.DocumentGenerationService;
 import br.com.felipeblaft.reports.service.JobProcessorService;
+import br.com.felipeblaft.reports.service.OfficialDocumentService;
 import br.com.felipeblaft.reports.service.ReportAccessService;
 import br.com.felipeblaft.reports.service.ReportEligibilityService;
 import br.com.felipeblaft.reports.service.SemesterAccessService;
@@ -478,8 +480,10 @@ public class UseCaseConfig {
             LessonReportRepository reports,
             ReportVersionRepository versions,
             PdfDocumentRepository documents,
-            DocumentGenerationService generation) {
-        return new GetReportDocumentUseCase(access, reports, versions, documents, generation);
+            DocumentGenerationService generation,
+            OfficialDocumentService officialDocument) {
+        return new GetReportDocumentUseCase(
+                access, reports, versions, documents, generation, officialDocument);
     }
 
     // ---- Retomada entre canais (US3)
@@ -605,10 +609,17 @@ public class UseCaseConfig {
             PdfDocumentRepository documents,
             DocumentGenerationService generation,
             JobQueuePort queue,
-            GetReportDocumentUseCase getDocument) {
+            GetReportDocumentUseCase getDocument,
+            OfficialDocumentService officialDocument) {
         GetSemesterReportUseCase get =
                 new GetSemesterReportUseCase(
-                        access, interactions, versions, documents, generation, queue);
+                        access,
+                        interactions,
+                        versions,
+                        documents,
+                        generation,
+                        queue,
+                        officialDocument);
         getDocument.registerSemesterSource(get);
         return get;
     }
@@ -707,9 +718,7 @@ public class UseCaseConfig {
 
     @Bean
     QueryStudentHistoryUseCase queryStudentHistoryUseCase(
-            GetStudentSummaryUseCase studentSummary,
-            LessonReportRepository lessons,
-            SemesterReportRepository semesterReports) {
-        return new QueryStudentHistoryUseCase(studentSummary, lessons, semesterReports);
+            GetStudentSummaryUseCase studentSummary, ApprovedReportQueryPort approvedReports) {
+        return new QueryStudentHistoryUseCase(studentSummary, approvedReports);
     }
 }

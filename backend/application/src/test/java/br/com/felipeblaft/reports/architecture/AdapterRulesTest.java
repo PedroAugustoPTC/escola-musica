@@ -198,7 +198,16 @@ class AdapterRulesTest {
                     Map.entry("StartStudentRegistrationUseCase", Operation.STUDENT_REGISTER),
                     Map.entry("CollectStudentRegistrationFieldUseCase", Operation.STUDENT_REGISTER),
                     Map.entry("ConfirmStudentRegistrationUseCase", Operation.STUDENT_REGISTER),
-                    Map.entry("CancelStudentRegistrationUseCase", Operation.STUDENT_REGISTER));
+                    Map.entry("CancelStudentRegistrationUseCase", Operation.STUDENT_REGISTER),
+                    // feature 006: visão da escola, só do administrador na Web
+                    Map.entry("QuerySchoolHistoryUseCase", Operation.SCHOOL_HISTORY_QUERY),
+                    Map.entry(
+                            "GetSchoolReportDocumentUseCase",
+                            Operation.SCHOOL_REPORT_DOCUMENT_OPEN));
+
+    /** Casos de uso da visão da escola (feature 006), fora dos pacotes de administração. */
+    private static final Set<String> SCHOOL_USE_CASES =
+            Set.of("QuerySchoolHistoryUseCase", "GetSchoolReportDocumentUseCase");
 
     /**
      * Casos de uso desses pacotes sem operação na matriz: validam a credencial do administrador.
@@ -297,6 +306,36 @@ class AdapterRulesTest {
     }
 
     @Test
+    void schoolUseCasesAreForbiddenForTheTeacherSurfaces() {
+        assertThat(forbiddenForTeacherSurfaces())
+                .contains(
+                        BASE + ".usecase.history.QuerySchoolHistoryUseCase",
+                        BASE + ".usecase.document.GetSchoolReportDocumentUseCase");
+    }
+
+    /** O Telegram não ganhou acesso à visão da escola (feature 006): nem pela consulta nem pelo PDF. */
+    @Test
+    void telegramDoesNotDependOnTheSchoolHistoryPortsNorTheOfficialDocumentService() {
+        noClasses()
+                .that()
+                .resideInAPackage(BASE + ".inbound.telegram..")
+                .should()
+                .dependOnClassesThat()
+                .haveFullyQualifiedName(BASE + ".port.ApprovedReportQueryPort")
+                .orShould()
+                .dependOnClassesThat()
+                .haveFullyQualifiedName(BASE + ".service.OfficialDocumentService")
+                .orShould()
+                .dependOnClassesThat()
+                .haveFullyQualifiedName(BASE + ".usecase.history.QuerySchoolHistoryUseCase")
+                .orShould()
+                .dependOnClassesThat()
+                .haveFullyQualifiedName(BASE + ".usecase.document.GetSchoolReportDocumentUseCase")
+                .allowEmptyShould(true)
+                .check(withCore);
+    }
+
+    @Test
     void teacherSurfaceReachingAdministratorCodeIsCaught() {
         assertThat(
                         teacherSurfaceRule(
@@ -367,11 +406,12 @@ class AdapterRulesTest {
         List<String> packages = List.of(".administrator", ".teacher", ".registry");
         return javaClass.isTopLevelClass()
                 && javaClass.getSimpleName().endsWith("UseCase")
-                && packages.stream()
-                        .anyMatch(
-                                suffix ->
-                                        javaClass
-                                                .getPackageName()
-                                                .startsWith(BASE + ".usecase" + suffix));
+                && (SCHOOL_USE_CASES.contains(javaClass.getSimpleName())
+                        || packages.stream()
+                                .anyMatch(
+                                        suffix ->
+                                                javaClass
+                                                        .getPackageName()
+                                                        .startsWith(BASE + ".usecase" + suffix)));
     }
 }

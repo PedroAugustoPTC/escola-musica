@@ -343,7 +343,8 @@ Fonte única de autorização desta feature (FR-048). "Só os seus" = alunos ass
 | Listar, buscar, abrir e editar alunos | qualquer aluno | só os seus | só os seus | não |
 | Cadastrar aluno | sim, com os professores escolhidos | sim, associado só a ele | sim, associado só a ele | não |
 | Inativar e reativar aluno | qualquer aluno | só os seus, e só se for o único professor ativo associado (FR-026) | idem | não |
-| Relatórios de aula e semestrais (spec 001) | não (Princípio III) | só dos seus alunos | só dos seus alunos | não |
+| Relatórios de aula e semestrais (spec 001) | não (Princípio III); **exceção, feature 006**: lê o histórico aprovado da escola e o PDF oficial, somente leitura e somente na Web | só dos seus alunos | só dos seus alunos | não |
+| | > **Nota (feature 006)**: as operações `SCHOOL_HISTORY_QUERY`, `SCHOOL_REPORT_DOCUMENT_OPEN` e `SCHOOL_REPORT_DOCUMENT_DOWNLOAD` são só do administrador na Web; ver [`006-admin-report-history`](../006-admin-report-history/contracts/permission-matrix-additions.md). | | | |
 
 ### Key Entities *(include if feature involves data)*
 
@@ -418,7 +419,8 @@ D2, D4, D5 e D9 foram fechadas por pergunta ao dono do produto em 2026-10-20 (ve
 - **Segundo fator de autenticação do administrador: fora desta versão, risco aceito.** Um administrador comprometido enxerga todos os alunos; o risco é mitigado pela sessão fixa de 2 horas (FR-005), pelo bloqueio por tentativas (FR-006), pela confirmação das ações destrutivas (FR-009) e pelo registro de autoria (FR-040). Candidato a feature futura.
 - **Reautenticação em ação sensível: não exigida.** Para inativar, retirar associação, reemitir código ou desvincular, basta a confirmação em diálogo (FR-009); a sessão curta e fixa já limita a exposição.
 - Unicidade de e-mail é por papel: o mesmo e-mail PODE existir como professor e como administrador, pois são contas e credenciais separadas.
-- Aluno inativo permanece no sistema, sem ser apagado; o que ele significa para a consulta de histórico é decisão da feature 006. Nesta feature ele só deixa de ser oferecido para novos relatórios e de constar das listas padrão dos professores.
+- Aluno inativo permanece no sistema, sem ser apagado; o que ele significa para a consulta de histórico é decisão da feature 006.
+  > **Nota (feature 006)**: o aluno inativo continua consultável no histórico do administrador, marcado como "Inativo"; ver [`006-admin-report-history`](../006-admin-report-history/spec.md). Nesta feature ele só deixa de ser oferecido para novos relatórios e de constar das listas padrão dos professores.
 - O CPF é validado só quanto ao formato e aos dígitos verificadores; não há consulta a base externa.
 - A recusa de CPF alheio ao professor revela, por necessidade, que aquele CPF não pode ser usado por ele. Esse sinal residual é aceito e mitigado pelo registro de autoria de cada recusa (FR-040), que permite à feature 007 detectar sondagem; os limites de 5 recusas em 15 minutos e de 30 consultas em 60 minutos (FR-024) dificultam a varredura em massa, e o risco residual (até cerca de 720 CPFs consultados por dia por professor, dos quais só os que baterem revelam algo) é aceito.
 - Mensagens e telas novas seguem a regra de idioma (Princípio VI): textos mostrados e logs em português do Brasil acentuado; código em inglês; termos novos entram no `glossary.json` antes do uso.

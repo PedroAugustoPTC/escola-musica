@@ -1,0 +1,273 @@
+openapi: 3.1.0
+info:
+  title: API da visão da escola (histórico de relatórios aprovados) — Relatórios Pedagógicos por Voz
+  version: 1.0.0
+  description: |
+    Contrato da feature 006-admin-report-history, no mesmo estilo do contrato da 005
+    (`specs/005-admin-registrations-access/contracts/api-administration.openapi.yaml`, que **não muda**).
+    Somente leitura e **somente Web**: não há rota de escrita sobre relatórios nem equivalente no Telegram.
+
+    Regras comuns:
+
+    - Credencial: cookie `admin_session` da 005 (HttpOnly, Secure, SameSite=Strict, `Path=/api/v1/admin`,
+      sessão fixa de 2 h, validada em toda requisição). Sem credencial: 401 `NOT_AUTHENTICATED` (ou
+      `SESSION_EXPIRED`/`ACCESS_ENDED`). Credencial de professor, rota inexistente, relatório inexistente e
+      relatório não aprovado recebem **a mesma** resposta 404 `RESOURCE_NOT_FOUND`, mesmo corpo e cabeçalhos
+      (FR-003, FR-018). Senha provisória: 403 `PASSWORD_CHANGE_REQUIRED`.
+    - Só relatórios com estado aprovado existem para estas rotas (FR-005). Não existe rota por número de versão:
+      o PDF entregue é sempre o oficial da versão aprovada (FR-016).
+    - Todas as respostas levam `Cache-Control: no-store, private` (FR-019).
+    - Cada resposta 200 e cada PDF negado geram registro de autoria (FR-020 a FR-023; ver
+      `contracts/authorship-events.md`). Se o registro de sucesso não puder ser gravado, a resposta é 500
+      `INTERNAL_ERROR` com `reference`, e nada é entregue.
+    - Parâmetros de consulta só levam identificadores, enumerações, datas e números (FR-015): nunca nome ou CPF.
+    - Erros seguem o schema `Error` (o mesmo da 001 e da 005); violações de campo vêm em `details.fields`.
+    - Matriz de permissões: `contracts/permission-matrix-additions.md` (três operações novas, só administrador).
+servers:
+  - url: /api/v1
+tags:
+  - name: AdminSchoolHistory
+
+paths:
+  /admin/school-history:
+    get:
+      tags: [AdminSchoolHistory]
+      operationId: querySchoolHistory
+      summary: Relatórios aprovados da escola, filtrados e paginados (FR-005 a FR-014; operação SCHOOL_HISTORY_QUERY)
+      description: |
+        Lista relatórios de aula e semestrais **aprovados**, de qualquer professor e aluno, do mais recente ao mais
+        antigo pela data de referência (aula: data da aula; semestral: início do período), depois pela aprovação
+        (mais recente primeiro) e pelo identificador (FR-007). Filtros combinados com E. O período compara a data de
+        referência, datas inclusive (FR-012). `studentId` ou `teacherId` inexistentes devolvem página vazia, sem
+        `student` (FR-014).
+      security: [{ adminSession: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/StudentFilter" }
+        - { $ref: "#/components/parameters/TeacherFilter" }
+        - { $ref: "#/components/parameters/ReportTypeFilter" }
+        - { $ref: "#/components/parameters/From" }
+        - { $ref: "#/components/parameters/To" }
+        - { $ref: "#/components/parameters/Page" }
+        - { $ref: "#/components/parameters/Size" }
+      responses:
+        "200":
+          description: Página da lista (pode ser vazia).
+          headers:
+            Cache-Control: { $ref: "#/components/headers/NoStore" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SchoolHistoryPage" }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "403": { $ref: "#/components/responses/PasswordChangeRequired" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalError" }
+
+  /admin/school-history/lesson-reports/{reportId}/pdf:
+    get:
+      tags: [AdminSchoolHistory]
+      operationId: openSchoolLessonReportPdf
+      summary: Abrir o PDF oficial de um relatório de aula aprovado (FR-016 a FR-019; SCHOOL_REPORT_DOCUMENT_OPEN)
+      security: [{ adminSession: [] }]
+      parameters: [{ $ref: "#/components/parameters/ReportId" }]
+      responses:
+        "200": { $ref: "#/components/responses/PdfInline" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "403": { $ref: "#/components/responses/PasswordChangeRequired" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalError" }
+
+  /admin/school-history/lesson-reports/{reportId}/pdf/download:
+    get:
+      tags: [AdminSchoolHistory]
+      operationId: downloadSchoolLessonReportPdf
+      summary: Baixar o PDF oficial de um relatório de aula aprovado (SCHOOL_REPORT_DOCUMENT_DOWNLOAD)
+      security: [{ adminSession: [] }]
+      parameters: [{ $ref: "#/components/parameters/ReportId" }]
+      responses:
+        "200": { $ref: "#/components/responses/PdfAttachment" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "403": { $ref: "#/components/responses/PasswordChangeRequired" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalError" }
+
+  /admin/school-history/semester-reports/{reportId}/pdf:
+    get:
+      tags: [AdminSchoolHistory]
+      operationId: openSchoolSemesterReportPdf
+      summary: Abrir o PDF oficial de um relatório semestral aprovado (SCHOOL_REPORT_DOCUMENT_OPEN)
+      security: [{ adminSession: [] }]
+      parameters: [{ $ref: "#/components/parameters/ReportId" }]
+      responses:
+        "200": { $ref: "#/components/responses/PdfInline" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "403": { $ref: "#/components/responses/PasswordChangeRequired" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalError" }
+
+  /admin/school-history/semester-reports/{reportId}/pdf/download:
+    get:
+      tags: [AdminSchoolHistory]
+      operationId: downloadSchoolSemesterReportPdf
+      summary: Baixar o PDF oficial de um relatório semestral aprovado (SCHOOL_REPORT_DOCUMENT_DOWNLOAD)
+      security: [{ adminSession: [] }]
+      parameters: [{ $ref: "#/components/parameters/ReportId" }]
+      responses:
+        "200": { $ref: "#/components/responses/PdfAttachment" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "403": { $ref: "#/components/responses/PasswordChangeRequired" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalError" }
+
+components:
+  securitySchemes:
+    adminSession:
+      type: apiKey
+      in: cookie
+      name: admin_session
+
+  parameters:
+    ReportId:
+      name: reportId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    StudentFilter:
+      name: studentId
+      in: query
+      required: false
+      schema: { type: string, format: uuid }
+    TeacherFilter:
+      name: teacherId
+      in: query
+      required: false
+      schema: { type: string, format: uuid }
+    ReportTypeFilter:
+      name: type
+      in: query
+      required: false
+      description: Ausente = aula e semestral. Valor desconhecido → `VALIDATION_FAILED` no campo `type` (`INVALID_REPORT_TYPE`).
+      schema: { type: string, enum: [LESSON, SEMESTER] }
+    From:
+      name: from
+      in: query
+      required: false
+      description: "Data inicial, inclusive, `AAAA-MM-DD`. Inválida → `INVALID_DATE` no campo `from`; posterior a `to` → `PERIOD_START_AFTER_END` no campo `from`."
+      schema: { type: string, format: date }
+    To:
+      name: to
+      in: query
+      required: false
+      description: "Data final, inclusive, `AAAA-MM-DD`. Inválida → `INVALID_DATE` no campo `to`."
+      schema: { type: string, format: date }
+    Page:
+      name: page
+      in: query
+      required: false
+      schema: { type: integer, minimum: 0, default: 0 }
+    Size:
+      name: size
+      in: query
+      required: false
+      schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+
+  headers:
+    NoStore:
+      schema: { type: string, example: "no-store, private" }
+
+  responses:
+    PdfInline:
+      description: PDF oficial da versão aprovada, para exibir no navegador.
+      headers:
+        Cache-Control: { $ref: "#/components/headers/NoStore" }
+        Content-Disposition:
+          description: '`inline; filename="relatorio-aula-AAAA-MM-DD.pdf"` ou `relatorio-semestral-<período>.pdf` — o mesmo nome do portal do professor.'
+          schema: { type: string }
+      content:
+        application/pdf:
+          schema: { type: string, format: binary }
+    PdfAttachment:
+      description: O mesmo PDF, para baixar.
+      headers:
+        Cache-Control: { $ref: "#/components/headers/NoStore" }
+        Content-Disposition:
+          description: '`attachment; filename="…"`, com o mesmo nome sugerido.'
+          schema: { type: string }
+      content:
+        application/pdf:
+          schema: { type: string, format: binary }
+    ValidationFailed:
+      description: "`VALIDATION_FAILED` com `details.fields[]` (`from`, `to`, `type`, `page`, `size`)"
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    NotAuthenticated:
+      description: "`NOT_AUTHENTICATED`, `SESSION_EXPIRED` ou `ACCESS_ENDED`; o portal leva à entrada do administrador"
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    PasswordChangeRequired:
+      description: "`PASSWORD_CHANGE_REQUIRED` — senha provisória"
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    NotFound:
+      description: "`RESOURCE_NOT_FOUND` — relatório inexistente ou não aprovado, rota inexistente ou credencial de professor: corpo e cabeçalhos idênticos"
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    InternalError:
+      description: "`INTERNAL_ERROR` com `reference` — inclusive quando o registro de autoria não pôde ser gravado ou o PDF aprovado está indisponível"
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  schemas:
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string }
+        message: { type: string, description: Texto em português do catálogo. }
+        retryAfterSeconds: { type: integer }
+        reference: { type: string, description: "Código de referência da falha interna." }
+        details:
+          type: object
+          additionalProperties: true
+          properties:
+            fields:
+              type: array
+              items:
+                type: object
+                required: [field, code]
+                properties:
+                  field: { type: string, example: from }
+                  code: { type: string, example: PERIOD_START_AFTER_END }
+
+    SchoolHistoryPage:
+      type: object
+      required: [items, page, size, total]
+      properties:
+        student:
+          $ref: "#/components/schemas/PersonSummary"
+          description: Presente só quando `studentId` aponta para um aluno existente.
+        items: { type: array, items: { $ref: "#/components/schemas/SchoolHistoryItem" } }
+        page: { type: integer, minimum: 0 }
+        size: { type: integer, minimum: 1, maximum: 100 }
+        total: { type: integer, minimum: 0 }
+
+    SchoolHistoryItem:
+      type: object
+      required: [type, reportId, label, student, teacher, approvedAt, approvedVersion]
+      properties:
+        type: { type: string, enum: [LESSON, SEMESTER] }
+        reportId: { type: string, format: uuid }
+        label:
+          type: string
+          description: '"Aula de dd/mm/aaaa" ou "Semestral (dd/mm/aaaa a dd/mm/aaaa)" — o mesmo rótulo do histórico do professor.'
+        lessonDate: { type: string, format: date, description: Só na aula. }
+        periodStart: { type: string, format: date, description: Só no semestral. }
+        periodEnd: { type: string, format: date, description: Só no semestral. }
+        student: { $ref: "#/components/schemas/PersonSummary" }
+        teacher: { $ref: "#/components/schemas/PersonSummary" }
+        approvedAt: { type: string, format: date-time }
+        approvedVersion: { type: integer, minimum: 1 }
+
+    PersonSummary:
+      type: object
+      description: Aluno ou professor; nunca CPF, nascimento, e-mail ou responsável.
+      required: [id, name, active]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        active: { type: boolean }

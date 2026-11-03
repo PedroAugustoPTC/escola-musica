@@ -41,8 +41,11 @@ Rotas da SPA em inglês: `/sign-in`, `/students…`, `/my-students…`, `/jobs/:
   `specs/001-fluxo-relatorios/contracts/`), `src/services/administration-api-types.ts` (vem do segundo OpenAPI, em
   `specs/005-admin-registrations-access/contracts/api-administration.openapi.yaml`, pelo `generate:administration-api`) e
   `src/messages/messages.json` (vem do catálogo `backend/application/src/main/resources/messages/messages_pt_BR.properties`).
-  Não edite; altere a fonte e rode `npm run generate` (ou `generate:api` / `generate:administration-api` / `generate:messages`).
-  Os dois geradores de tipos são independentes: a área do professor lê `api-types.ts`; a administrativa e "Meus alunos", o outro.
+  `src/services/school-history-api-types.ts` (terceiro OpenAPI, em
+  `specs/006-admin-report-history/contracts/api-school-history.openapi.yaml`, pelo `generate:school-history-api`; usado só pela
+  tela `/admin/history`, histórico da escola).
+  Não edite; altere a fonte e rode `npm run generate` (ou `generate:api` / `generate:administration-api` / `generate:school-history-api` / `generate:messages`).
+  Os geradores de tipos são independentes: a área do professor lê `api-types.ts`; a administrativa e "Meus alunos", o segundo; o histórico da escola, o terceiro.
 - Sem regra de negócio no frontend: ela vive no backend. As conferências de formulário são só de forma (campo vazio, confirmação
   igual); CPF, data, responsável de menor, unicidade e tamanho da senha vêm do servidor em `details.fields`.
 - **Privacidade do CPF** (Princípios III e IV): o CPF só trafega no corpo do cadastro e da edição (`POST`/`PATCH`), nunca volta da

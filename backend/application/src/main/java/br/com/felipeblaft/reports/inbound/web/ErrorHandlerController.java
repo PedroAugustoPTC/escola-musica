@@ -132,6 +132,13 @@ public class ErrorHandlerController {
      */
     @ExceptionHandler(DomainException.class)
     public ResponseEntity<ErrorResponse> domain(DomainException error, HttpServletRequest request) {
+        if (error.code() == ErrorCode.INTERNAL_ERROR) {
+            // falha interna declarada pelo núcleo (ex.: PDF aprovado indisponível): leva o código
+            // de referência, como as falhas inesperadas, e nenhum detalhe técnico
+            String reference = ErrorReference.newReference();
+            LOG.error("internal-error reference={} source=domain", reference);
+            return response(ErrorCode.INTERNAL_ERROR, Map.of(), reference);
+        }
         if (!isAdministrativeRoute(request)) {
             if (error.code() == ErrorCode.DUPLICATE_CPF) {
                 return response(ErrorCode.CPF_UNAVAILABLE, Map.of());

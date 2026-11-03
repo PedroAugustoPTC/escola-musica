@@ -11,6 +11,7 @@ import br.com.felipeblaft.reports.port.LessonReportRepository;
 import br.com.felipeblaft.reports.port.PdfDocumentRepository;
 import br.com.felipeblaft.reports.port.ReportVersionRepository;
 import br.com.felipeblaft.reports.service.DocumentGenerationService;
+import br.com.felipeblaft.reports.service.OfficialDocumentService;
 import br.com.felipeblaft.reports.service.ReportAccessService;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -39,6 +40,7 @@ public class GetReportDocumentUseCase {
     private final ReportVersionRepository versions;
     private final PdfDocumentRepository documents;
     private final DocumentGenerationService generation;
+    private final OfficialDocumentService officialDocument;
     private DocumentSource semester;
 
     public GetReportDocumentUseCase(
@@ -46,12 +48,14 @@ public class GetReportDocumentUseCase {
             LessonReportRepository reports,
             ReportVersionRepository versions,
             PdfDocumentRepository documents,
-            DocumentGenerationService generation) {
+            DocumentGenerationService generation,
+            OfficialDocumentService officialDocument) {
         this.access = Objects.requireNonNull(access);
         this.reports = Objects.requireNonNull(reports);
         this.versions = Objects.requireNonNull(versions);
         this.documents = Objects.requireNonNull(documents);
         this.generation = Objects.requireNonNull(generation);
+        this.officialDocument = Objects.requireNonNull(officialDocument);
     }
 
     public void registerSemesterSource(DocumentSource font) {
@@ -75,11 +79,12 @@ public class GetReportDocumentUseCase {
         if (report.status() != ReportStatus.APPROVED) {
             throw notFound();
         }
-        return read(
-                report.id(),
-                report.approvedVersion(),
-                DocumentType.OFFICIAL,
-                lessonName(report, ""));
+        LocalDate lessonDate = reports.searchLesson(report.lessonId()).orElseThrow().lessonDate();
+        byte[] bytes =
+                officialDocument
+                        .readOfficial(ReportType.LESSON, report.id(), report.approvedVersion())
+                        .orElseThrow(GetReportDocumentUseCase::notFound);
+        return new ObtainedDocument(bytes, OfficialDocumentService.lessonFileName(lessonDate));
     }
 
     private String lessonName(LessonReport report, String suffix) {

@@ -21,6 +21,8 @@ import br.com.felipeblaft.reports.usecase.administrator.ReactivateAdministratorU
 import br.com.felipeblaft.reports.usecase.administrator.SignInAdministratorUseCase;
 import br.com.felipeblaft.reports.usecase.administrator.SignOutAdministratorUseCase;
 import br.com.felipeblaft.reports.usecase.administrator.ValidateAdministratorSessionUseCase;
+import br.com.felipeblaft.reports.usecase.document.GetSchoolReportDocumentUseCase;
+import br.com.felipeblaft.reports.usecase.history.QuerySchoolHistoryUseCase;
 import br.com.felipeblaft.reports.usecase.registry.AssignTeacherToStudentUseCase;
 import br.com.felipeblaft.reports.usecase.registry.GetStudentUseCase;
 import br.com.felipeblaft.reports.usecase.registry.InactivateStudentUseCase;
@@ -70,9 +72,13 @@ public abstract class AdminWebBase extends IntegrationBase {
             "specs/005-admin-registrations-access/contracts/api-administration.openapi.yaml";
     public static final String ADMIN_COOKIE = "admin_session";
     public static final String ADMIN_TOKEN = "admin-token-1";
+    public static final String SCHOOL_HISTORY_CONTRACT_RELATIVE =
+            "specs/006-admin-report-history/contracts/api-school-history.openapi.yaml";
     public static final String BASE = "/api/v1/admin";
 
     private static final OpenApiInteractionValidator VALIDATOR = createValidator();
+    private static final OpenApiInteractionValidator SCHOOL_HISTORY_VALIDATOR =
+            createSchoolHistoryValidator();
 
     @Autowired protected MockMvc mvc;
     @Autowired protected ScenarioIT scenario;
@@ -106,6 +112,10 @@ public abstract class AdminWebBase extends IntegrationBase {
     @MockitoBean protected AssignTeacherToStudentUseCase assignTeacher;
     @MockitoBean protected RemoveTeacherFromStudentUseCase removeTeacher;
     @MockitoBean protected PreviewAssignmentRemovalUseCase previewRemoval;
+
+    // feature 006: visão da escola
+    @MockitoBean protected QuerySchoolHistoryUseCase querySchoolHistory;
+    @MockitoBean protected GetSchoolReportDocumentUseCase getSchoolReportDocument;
 
     protected final UUID administratorId = UUID.fromString("00000000-0000-4000-8000-0000000000a1");
     protected Instant sessionExpiry;
@@ -144,6 +154,34 @@ public abstract class AdminWebBase extends IntegrationBase {
 
     protected static ResultMatcher followsContract() {
         return OpenApiValidationMatchers.openApi().isValid(VALIDATOR);
+    }
+
+    /** Valida contra o contrato da visão da escola (feature 006). */
+    protected static ResultMatcher followsSchoolHistoryContract() {
+        return OpenApiValidationMatchers.openApi().isValid(SCHOOL_HISTORY_VALIDATOR);
+    }
+
+    private static OpenApiInteractionValidator createSchoolHistoryValidator() {
+        Path path = Path.of("../..", SCHOOL_HISTORY_CONTRACT_RELATIVE).toAbsolutePath().normalize();
+        String configured = System.getenv("CONTRACT_SCHOOL_HISTORY_API");
+        if (configured != null && Files.exists(Path.of(configured))) {
+            path = Path.of(configured);
+        }
+        return OpenApiInteractionValidator.createForSpecificationUrl(path.toUri().toString())
+                .withLevelResolver(
+                        LevelResolver.create()
+                                // os testes de recusa enviam de propósito parâmetros fora do contrato
+                                .withLevel(
+                                        "validation.request.parameter.schema",
+                                        ValidationReport.Level.IGNORE)
+                                .withLevel(
+                                        "validation.request.security.missing",
+                                        ValidationReport.Level.IGNORE)
+                                .withLevel(
+                                        "validation.request.parameter.header.missing",
+                                        ValidationReport.Level.IGNORE)
+                                .build())
+                .build();
     }
 
     private static OpenApiInteractionValidator createValidator() {

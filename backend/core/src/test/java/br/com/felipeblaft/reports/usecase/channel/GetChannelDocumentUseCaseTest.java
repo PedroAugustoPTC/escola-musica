@@ -32,7 +32,9 @@ class GetChannelDocumentUseCaseTest {
                     scenario.reports,
                     scenario.versions,
                     scenario.pdfDocuments,
-                    scenario.documents) {
+                    scenario.documents,
+                    new br.com.felipeblaft.reports.service.OfficialDocumentService(
+                            scenario.versions, scenario.pdfDocuments, scenario.documents)) {
                 @Override
                 public ObtainedDocument review(
                         UUID teacherId, ReportType type, UUID reportId, int number) {

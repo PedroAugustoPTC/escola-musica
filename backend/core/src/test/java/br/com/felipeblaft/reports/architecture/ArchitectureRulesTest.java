@@ -212,7 +212,16 @@ class ArchitectureRulesTest {
                     Map.entry("StartStudentRegistrationUseCase", Operation.STUDENT_REGISTER),
                     Map.entry("CollectStudentRegistrationFieldUseCase", Operation.STUDENT_REGISTER),
                     Map.entry("ConfirmStudentRegistrationUseCase", Operation.STUDENT_REGISTER),
-                    Map.entry("CancelStudentRegistrationUseCase", Operation.STUDENT_REGISTER));
+                    Map.entry("CancelStudentRegistrationUseCase", Operation.STUDENT_REGISTER),
+                    // feature 006: visão da escola, só do administrador na Web
+                    Map.entry("QuerySchoolHistoryUseCase", Operation.SCHOOL_HISTORY_QUERY),
+                    Map.entry(
+                            "GetSchoolReportDocumentUseCase",
+                            Operation.SCHOOL_REPORT_DOCUMENT_OPEN));
+
+    /** Casos de uso da visão da escola (feature 006), fora dos pacotes de administração. */
+    private static final Set<String> SCHOOL_USE_CASES =
+            Set.of("QuerySchoolHistoryUseCase", "GetSchoolReportDocumentUseCase");
 
     /** Casos de uso desses pacotes sem operação na matriz (validam a credencial, não um ator). */
     private static final Set<String> WITHOUT_OPERATION =
@@ -233,7 +242,9 @@ class ArchitectureRulesTest {
                                     && javaClass.getSimpleName().endsWith("UseCase")
                                     && (inPackage(javaClass, ".administrator")
                                             || inPackage(javaClass, ".teacher")
-                                            || inPackage(javaClass, ".registry")));
+                                            || inPackage(javaClass, ".registry")
+                                            || SCHOOL_USE_CASES.contains(
+                                                    javaClass.getSimpleName())));
 
     private static boolean inPackage(JavaClass javaClass, String suffix) {
         return javaClass.getPackageName().startsWith(USE_CASE_PACKAGE + suffix);
