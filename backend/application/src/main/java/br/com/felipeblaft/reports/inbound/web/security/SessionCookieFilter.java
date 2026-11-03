@@ -50,7 +50,14 @@ public class SessionCookieFilter extends OncePerRequestFilter {
                                 principal, null, List.of(new SimpleGrantedAuthority("TEACHER")));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (DomainException error) {
-                request.setAttribute(CODE_ATTRIBUTE, ErrorCode.SESSION_EXPIRED);
+                // conta inativada: o professor vê "acesso encerrado" (orienta procurar o
+                // administrador),
+                // não "sessão expirada" (data-model.md 3.3)
+                request.setAttribute(
+                        CODE_ATTRIBUTE,
+                        error.code() == ErrorCode.ACCESS_ENDED
+                                ? ErrorCode.ACCESS_ENDED
+                                : ErrorCode.SESSION_EXPIRED);
             }
         }
         // o contexto é limpo pelo SecurityContextHolderFilter ao fim da requisição; limpar aqui

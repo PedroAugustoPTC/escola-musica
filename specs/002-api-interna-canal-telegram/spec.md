@@ -5,6 +5,8 @@
 > histórico, sem reescrita. Para o nome atual de cada termo, consulte o glossário em
 > [`.specify/memory/glossary.json`](../../.specify/memory/glossary.json) e o Princípio VI da constituição.
 
+> **Nota (feature 005)**: o contrato `actions-v1` ganhou, de forma compatível, a ação **`DELETE_MESSAGE`** (apaga uma mensagem do chat, usada para remover a mensagem em que o professor digitou o CPF). É só transporte: carrega `chatId` e `messageId`, sem texto; a recusa do Telegram vira `FAILED` `MESSAGE_NOT_DELETABLE` e a compensação (avisar o professor) é do backend. Os cinco tipos anteriores seguem iguais. Ver [`005-admin-registrations-access/contracts/telegram-student-registry.md`](../005-admin-registrations-access/contracts/telegram-student-registry.md) (seção 4) e [`contracts/actions-v1.schema.json`](./contracts/actions-v1.schema.json).
+
 **Feature Branch**: `002-api-interna-canal-telegram`
 
 **Created**: 2026-10-02

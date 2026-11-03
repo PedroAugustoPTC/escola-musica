@@ -8,6 +8,7 @@ import br.com.felipeblaft.reports.domain.job.ProcessingJob;
 import br.com.felipeblaft.reports.port.ClockPort;
 import br.com.felipeblaft.reports.port.JobQueuePort;
 import br.com.felipeblaft.reports.port.TemporaryFile;
+import br.com.felipeblaft.reports.service.AuthorizationService;
 import br.com.felipeblaft.reports.service.TemporaryAudioService;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -21,12 +22,17 @@ import java.util.UUID;
  */
 public class DiscardRegistrationInProcessingUseCase {
 
+    private final AuthorizationService authorization;
     private final JobQueuePort queue;
     private final TemporaryAudioService audio;
     private final ClockPort clock;
 
     public DiscardRegistrationInProcessingUseCase(
-            JobQueuePort queue, TemporaryAudioService audio, ClockPort clock) {
+            AuthorizationService authorization,
+            JobQueuePort queue,
+            TemporaryAudioService audio,
+            ClockPort clock) {
+        this.authorization = Objects.requireNonNull(authorization);
         this.queue = Objects.requireNonNull(queue);
         this.audio = Objects.requireNonNull(audio);
         this.clock = Objects.requireNonNull(clock);
@@ -37,6 +43,8 @@ public class DiscardRegistrationInProcessingUseCase {
                 queue.searchById(jobId)
                         .filter(t -> t.teacherId().equals(teacherId))
                         .orElseThrow(() -> new DomainException(ErrorCode.RESOURCE_NOT_FOUND));
+        // sem associação ao aluno o trabalho é inexistente (FR-050)
+        authorization.requireAssignment(teacherId, job.studentId());
         boolean registrationOrConsolidation =
                 job.type() == JobType.LESSON_REGISTRATION
                         || job.type() == JobType.SEMESTER_CONSOLIDATION;

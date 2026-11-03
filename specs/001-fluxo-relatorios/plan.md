@@ -100,6 +100,8 @@ Constituição v1.3.0. Avaliação **antes** da pesquisa e **refeita depois** do
 | **Restrições: stack, provedores, contêineres, VPS genérica, MVP só leitura** | Stack registrada e justificada (R-01 a R-03); IA por configuração (R-08); 4 serviços em contêiner, um comando local, mesmas imagens, testes em contêiner, implantação na VPS (R-15); MVP usado só como referência. | ✅ | ✅ |
 | **Quality gate: paridade** | Nenhuma funcionalidade fica restrita a um canal; nenhum desvio a justificar. | ✅ | ✅ |
 
+> **Nota (feature 005)**: o item de roadmap "secretaria" (Princípio VII) foi entregue pela feature 005 como a área administrativa, e a paridade entre canais (Princípio I e "Quality gate: paridade") passou a valer **para o professor**: as funções do administrador existem somente na Web (constituição v2.2.0). Ver [`005-admin-registrations-access/plan.md`](../005-admin-registrations-access/plan.md).
+
 **Resultado**: aprovado antes e depois do desenho, sem violações. A pendência registrada no Sync
 Impact Report da constituição (spec restringindo semestral e histórico à Web) já foi resolvida na
 revisão da spec de 2026-09-30.

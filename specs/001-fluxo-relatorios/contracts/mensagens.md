@@ -14,6 +14,16 @@
 - Os textos finais passam por revisão de UX (tom institucional) na implementação, **sem mudar os
   códigos**.
 
+> **Nota (feature 005)**: este catálogo é histórico nos pontos abaixo; o texto vigente está em [`005-admin-registrations-access/contracts/messages.md`](../../005-admin-registrations-access/contracts/messages.md) (seções 1 e 3) e no `messages_pt_BR.properties`. Nenhum texto do professor cita mais a "secretaria", e o teste do catálogo reprova a palavra.
+>
+> - `CODE_REQUIRED`: "…o código de acesso que você recebeu do administrador da escola."
+> - `INVALID_CODE`: "Código inválido ou vencido. Procure o administrador." (mensagem única para código inexistente, errado, vencido ou substituído)
+> - `EXPIRED_CODE`: **removido** (código vencido passa a `INVALID_CODE`, FR-042).
+> - `STUDENT_NOT_ASSIGNED`: **removido** (aluno não associado passa a `RESOURCE_NOT_FOUND`, igual ao inexistente, FR-050).
+> - `ACCESS_ENDED` (novo): "Seu acesso foi encerrado. Procure o administrador." (acesso encerrado por inativação).
+> - `TELEGRAM_ALREADY_LINKED` e `TEACHER_ALREADY_LINKED`: terminam em "Procure o administrador."
+> - `NO_STUDENTS`: "Você ainda não tem alunos. Cadastre o primeiro em “Meus alunos”."
+
 ## Acesso
 
 | Código | HTTP | Texto |

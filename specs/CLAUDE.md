@@ -24,7 +24,14 @@ Regras:
   trazem uma nota no topo remetendo ao glossário (`.specify/memory/glossary.json`). Não as reescreva.
   A pasta de cada feature mantém o nome em português (`001-fluxo-relatorios`).
 - Os `contracts/` são fonte de verdade: o backend os implementa e o frontend gera tipos a partir deles
-  (`001-fluxo-relatorios/contracts/api-portal.openapi.yaml`). Mudança de API começa pelo contrato.
+  (`001-fluxo-relatorios/contracts/api-portal.openapi.yaml` e
+  `005-admin-registrations-access/contracts/api-administration.openapi.yaml`). Mudança de API começa pelo contrato.
+- A feature 005 **emenda** as 001 e 002 sem reescrevê-las: os trechos afetados (secretaria, `EXPIRED_CODE`, `STUDENT_NOT_ASSIGNED`,
+  carga inicial, ação `DELETE_MESSAGE`) trazem uma `> **Nota (feature 005)**: …` com link relativo para o contrato vigente em
+  `005-admin-registrations-access/contracts/` (`messages.md`, `initial-load.md`, `telegram-student-registry.md`). Em divergência,
+  vale o contrato da 005. Use o mesmo formato de nota ao emendar uma spec anterior.
+- `evidence/` (dentro da pasta da feature) guarda o que prova uma verificação feita (linha de base, conferências, relatórios de
+  revisão e de acessibilidade); texto curto, sem dado pessoal.
 - Specs descrevem comportamento de negócio, sem fixar stack; a stack é decidida e justificada no `plan.md`.
 - Desvios da constituição entram na seção de complexidade do plano, com justificativa.
 - Cada feature nova usa branch própria criada a partir da `main` atualizada (ver `CLAUDE.md` da raiz).

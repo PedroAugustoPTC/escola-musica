@@ -23,6 +23,12 @@ workflows versionados como código.
   mora em `specs/004-n8n-telegram-transport/contracts/n8n-workflows.md`.
 - **Só transporte**: `If` e `Switch` leem apenas tipo e estado da ação, status HTTP, resultado e o token de entrega; nós
   `Code` são funções puras (sem `$env`, rede ou módulo); destinos só o backend e o servidor local da API de bots; nunca `getFile`.
+- **Ações que o `execute-actions` despacha por `type`**: `MESSAGE`, `EDIT`, `DOCUMENT`, `CALLBACK_REPLY`, `STEP_MESSAGE` e
+  `DELETE_MESSAGE` (feature 005); qualquer outro valor vira `FAILED` `ACTION_NOT_SUPPORTED` sem chamada externa. A
+  `DELETE_MESSAGE` chama `deleteMessage` com `chat_id` e `message_id` (é como o backend apaga a mensagem em que o professor digitou
+  o CPF) e **não tem texto** nem `messageId` na confirmação. Se o Telegram recusar (mensagem inexistente, já apagada ou que não pode
+  ser apagada), o resultado é `FAILED` `MESSAGE_NOT_DELETABLE`: quem decide a compensação (avisar o professor) é o **backend**; o n8n
+  não cria ação nem texto. Continua só transporte: o n8n não lê, não guarda e não registra o conteúdo da mensagem.
 - Os guardiões `WorkflowGuardTest`, `WorkflowSecretScanTest` e `ComposeGuardTest` (em `tests-backend`) reprovam o build
   se alguma regra for quebrada; leia a mensagem (arquivo, nó e caminho JSON; nunca o valor).
 - Um único receptor de updates do Telegram em todo o conjunto: o `Webhook` `telegram-update` do `telegram-inbound`.

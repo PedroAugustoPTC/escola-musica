@@ -865,8 +865,12 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
         return context.link().id();
     }
 
+    /**
+     * A correlação do Telegram é o {@code update_id} (1 a 10 dígitos): é o único formato de canal
+     * que o registro de autoria aceita; qualquer prefixo faz o núcleo recusar a gravação.
+     */
     private static String correlation(TelegramContext context) {
-        return "telegram-" + context.updateId();
+        return Long.toString(context.updateId());
     }
 
     private static Integer number(String argument) {

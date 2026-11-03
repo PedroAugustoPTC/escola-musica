@@ -119,7 +119,8 @@ sh infra/scripts/local.sh seed
 
 Para carregar outro arquivo, coloque-o em `infra/seed/` (cargas reais nunca vão para o Git) e
 passe o caminho: `sh infra/scripts/local.sh seed infra/seed/my-data.json`. O formato está em
-[`contracts/carga-inicial.md`](../../specs/001-fluxo-relatorios/contracts/carga-inicial.md).
+[`initial-load.md`](../../specs/005-admin-registrations-access/contracts/initial-load.md) (versão vigente da feature 005; a
+[`carga-inicial.md`](../../specs/001-fluxo-relatorios/contracts/carga-inicial.md) da 001 é histórico).
 
 ### 5. Abra o portal
 
@@ -127,6 +128,9 @@ passe o caminho: `sh infra/scripts/local.sh seed infra/seed/my-data.json`. O for
 2. Na primeira vez o navegador avisa que o certificado não é confiável, porque é emitido pela CA
    interna do Caddy. Clique em **Avançado → Continuar para localhost**.
 3. Entre com o código da Clara.
+   Para a **área administrativa**, acesse **https://localhost/admin/sign-in** (ou o link "É administrador? Acesse a área
+   administrativa." da tela de entrada) com `admin@example.test` e a senha provisória que o `up` imprimiu (veja
+   [Credenciais locais](#credenciais-locais-código-de-emergência-e-rotação-das-chaves)).
 4. Escolha um aluno (com a massa, Lucas ou Sofia não têm aulas ainda) → **Registrar aula** → envie um arquivo de áudio (MP3, M4A, OGG, WAV, WebM ou
    vídeo MP4, até 50 MB) ou grave pelo microfone.
 
@@ -170,6 +174,21 @@ O `local.sh up` cuida de duas coisas no `infra/.env` (que nunca vai para o Git):
   no primeiro acesso e **esvazie `ADMIN_BOOTSTRAP_PASSWORD` no `infra/.env`** em seguida, para que
   a senha provisória não fique guardada em disco.
 
+Todas as variáveis da administração (padrões e função) estão na tabela de
+[`infra/README.md`](../README.md#variáveis-da-administração-feature-005).
+
+**Atenção ao zerar os dados.** Os cadastros e o administrador vivem no banco. Se você esvaziou só a senha (`ADMIN_BOOTSTRAP_PASSWORD`)
+e depois roda `up --demo-data=true|false`, o banco volta vazio mas `ADMIN_BOOTSTRAP_NAME` e `ADMIN_BOOTSTRAP_EMAIL` continuam
+preenchidos: o backend recusa subir (variável incompleta). Antes de zerar, **esvazie também** `ADMIN_BOOTSTRAP_NAME` e
+`ADMIN_BOOTSTRAP_EMAIL`; o `up` gera um administrador fictício novo e imprime a nova senha provisória.
+
+**Recuperação local** (esqueceu a senha do administrador): não há redefinição. Pare o backend
+(`docker compose -f infra/compose.yaml -f infra/compose.dev.yaml stop backend`), apague os administradores
+(`echo "DELETE FROM administrator;" | sh infra/scripts/local.sh database`), esvazie as três `ADMIN_BOOTSTRAP_*` no `infra/.env` e
+rode `sh infra/scripts/local.sh up`, que gera um administrador fictício novo e imprime a senha provisória uma única vez. Troque a
+senha no primeiro acesso e esvazie `ADMIN_BOOTSTRAP_PASSWORD` de novo. O procedimento de produção está em
+[`infra/README.md`](../README.md#recuperação-nenhum-administrador-consegue-entrar).
+
 ### Carga inicial: `seed [file] [--simulate]`
 
 ```bash
@@ -178,8 +197,11 @@ sh infra/scripts/local.sh seed infra/seed/my-data.json          # outro arquivo 
 sh infra/scripts/local.sh seed infra/seed/my-data.json --simulate   # valida tudo e desfaz: nada é gravado
 ```
 
-A carga é idempotente (rodar de novo não duplica cadastros) e imprime os códigos de acesso uma
-única vez.
+A carga é idempotente (professor por e-mail, aluno pelo resumo do CPF; rodar de novo não duplica nem apaga cadastros), é
+tudo ou nada e imprime os códigos de acesso uma única vez. Ela não tem regra própria: cada linha chama os mesmos casos de uso
+do administrador, com o ator de sistema da carga inicial. `--simulate` executa tudo e desfaz a transação, com as mesmas contagens
+e os mesmos erros da execução real. Os erros citam seção, índice e campo, nunca o CPF. O cadastro do dia a dia é feito na área
+administrativa.
 
 ### Reemitir o código de um professor: `issue-code`
 
@@ -188,7 +210,8 @@ sh infra/scripts/local.sh issue-code clara@example.test
 ```
 
 É um comando de **emergência**: o caminho normal é o administrador reemitir o código na área
-administrativa. O nome antigo, `code`, continua funcionando como alias, mas está **obsoleto**.
+administrativa. O código anterior deixa de valer na hora e as **sessões Web do professor são encerradas**; o vínculo do
+Telegram não é encerrado. O nome antigo, `code`, continua funcionando como alias, mas está **obsoleto**.
 
 ### Rotacionar as chaves do CPF: `rotate-cpf-key`
 
@@ -217,7 +240,17 @@ unset ROTATE_NEW_CPF_ENCRYPTION_KEY ROTATE_NEW_HMAC_SECRET ROTATE_OLD_CPF_ENCRYP
 O comando valida as variáveis e a confirmação **antes** de parar o portal e a API; se a rotação
 falhar depois disso, nada foi gravado e a mensagem diz como religar o ambiente (`up`). Tenha uma
 cópia de segurança recente do banco (ela não inclui as chaves). Termine sempre com o `unset` das
-variáveis.
+variáveis. Na VPS (sem `local.sh`), o mesmo comando roda por `docker compose ... run --rm -e ROTATE_NEW_CPF_ENCRYPTION_KEY
+backend rotate-cpf-key`: veja [`infra/README.md`](../README.md#rotação-das-chaves-do-cpf).
+
+## Privacidade do CPF no ambiente local e na operação
+
+- **O n8n não guarda execuções**: o update em que o professor digita o CPF no cadastro pelo Telegram passa por ele, e o backend
+  manda apagar a mensagem no chat. O banco do n8n e o `binaryData` ficam em `tmpfs`; reiniciar o contêiner zera tudo, e o usuário
+  do editor local é recriado. Não ligue persistência de execuções.
+- **O proxy não deve registrar a query string**: a busca usa `?search=` (nome ou instrumento). O `Caddyfile` não habilita registro
+  de acesso; se habilitar, descarte a query do URI.
+- Nunca ponha CPF real em `infra/seed/` versionada, em log, em `echo` nem em argumento de comando.
 
 ## Massa de demonstração
 
@@ -414,7 +447,10 @@ pilha local.
 | `port is already allocated` (80 ou 443) | Outro programa usa a porta (IIS, Skype, outro Docker). Feche-o ou rode `docker ps` para achar o contêiner. |
 | Navegador recusa o certificado | Normal no ambiente local: **Avançado → Continuar para localhost**. |
 | Entro com o código e volto para a tela de entrada | Acesse por `https://` (o cookie de sessão exige HTTPS). |
-| "Acesso bloqueado temporariamente" | 5 códigos errados seguidos: espere 15 minutos ou gere um código novo. |
+| "Acesso bloqueado temporariamente" | 5 códigos errados seguidos: espere 15 minutos ou gere um código novo. Na área administrativa a regra é a mesma (5 falhas em 15 minutos por origem). |
+| O backend não sobe e o log cita `AUTH_HMAC_SECRET` | Ele precisa ter ao menos 32 bytes e ser diferente do `HMAC_SECRET`. No ambiente local, esvazie-o e rode `up`, que gera um novo. |
+| O backend não sobe e o log cita `ADMIN_BOOTSTRAP_…` | Nenhum administrador existe e uma das três variáveis está vazia ou inválida (a mensagem cita a variável, nunca o valor). Preencha as três ou esvazie as três (veja "Atenção ao zerar os dados"). |
+| Perdi a senha do administrador | Não há redefinição; siga a "Recuperação local" acima. |
 | A carga diz que não leu o arquivo | O arquivo precisa estar em `infra/seed/` e ser JSON válido. |
 | Os serviços sumiram depois de reiniciar o PC | Na pilha local eles não reiniciam sozinhos: rode `up` (os dados continuam lá). |
 | Quero começar do zero | `sh infra/scripts/local.sh up --demo-data=false` (ou `--demo-data=true` para já ter dados). |

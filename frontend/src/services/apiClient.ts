@@ -1,9 +1,14 @@
 import type { components } from './api-types';
+import type { components as administrationComponents } from './administration-api-types';
 import { msg } from '../messages/messages';
 
 /** Tipos do contrato da API (gerados de contracts/api-portal.openapi.yaml). */
 export type Schemas = components['schemas'];
-export type ContractError = Schemas['Error'];
+/**
+ * Corpo de erro do servidor. Vem do contrato da administração, que é o que define `reference` (código da falha
+ * interna, em toda resposta de erro); o contrato 001 é histórico e não o declara.
+ */
+export type ContractError = administrationComponents['schemas']['Error'];
 
 export const BASE_API = '/api/v1';
 export const SESSION_EXPIRED_EVENT = 'reports:session-expired';
@@ -25,13 +30,17 @@ export class ApiError extends Error {
   readonly code: string;
   readonly details: Record<string, unknown>;
   readonly retryAfterSeconds?: number;
+  /** Código de referência da falha interna (`INTERNAL_ERROR`), para o suporte localizar o registro. */
+  readonly reference?: string;
 
   constructor(status: number, body: Partial<ContractError> | null, retryAfterHeader?: string | null) {
     const code = body?.code ?? (status === 0 ? 'NO_CONNECTION' : 'INTERNAL_ERROR');
-    super(body?.message ?? msg(code));
+    const reference = typeof body?.reference === 'string' && body.reference ? body.reference : undefined;
+    super(body?.message ?? msg(code, { reference }));
     this.name = 'ApiError';
     this.status = status;
     this.code = code;
+    this.reference = reference;
     this.details = (body?.details as Record<string, unknown> | undefined) ?? {};
     this.retryAfterSeconds = body?.retryAfterSeconds ?? parseSeconds(retryAfterHeader);
   }

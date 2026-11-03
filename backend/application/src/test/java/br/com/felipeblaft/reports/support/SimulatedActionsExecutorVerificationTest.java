@@ -112,6 +112,46 @@ class SimulatedActionsExecutorVerificationTest {
     }
 
     @Test
+    void deleteMessageCallsTheBotApiAndConfirmsExecuted() throws Exception {
+        apiBots.stubFor(
+                post(urlPathEqualTo("/botT/deleteMessage"))
+                        .willReturn(
+                                aResponse()
+                                        .withHeader("Content-Type", "application/json")
+                                        .withBody("{\"ok\":true,\"result\":true}")));
+
+        executor.run(
+                actions(
+                        """
+                        [{"actionId":"u2-0","type":"DELETE_MESSAGE","chatId":5,"messageId":89}]
+                        """));
+
+        assertThat(executor.informed).containsExactly(new Result("u2-0", "EXECUTED", null, null));
+        apiBots.verify(
+                1,
+                postRequestedFor(urlPathEqualTo("/botT/deleteMessage"))
+                        .withRequestBody(
+                                equalToJson("{\"chat_id\":5,\"message_id\":89}", true, true)));
+    }
+
+    @Test
+    void deleteMessageRefusedByTelegramIsInformedAsNotDeletable() throws Exception {
+        telegramError("deleteMessage", 400, "Bad Request: message can't be deleted");
+
+        executor.run(
+                actions(
+                        """
+                        [{"actionId":"u3-0","type":"DELETE_MESSAGE","chatId":5,"messageId":89},
+                         {"actionId":"u3-1","type":"MESSAGE","chatId":5,"text":"b"}]
+                        """));
+
+        assertThat(executor.informed)
+                .containsExactly(
+                        new Result("u3-0", "FAILED", "MESSAGE_NOT_DELETABLE", null),
+                        new Result("u3-1", "EXECUTED", null, 77L));
+    }
+
+    @Test
     void doesNotStopAtFirstFailure() throws Exception {
         telegramError("editMessageText", 403, "Forbidden: bot was blocked by the user");
         executor.run(

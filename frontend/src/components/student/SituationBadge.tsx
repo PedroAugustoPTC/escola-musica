@@ -4,7 +4,7 @@ import { Icon } from '../Icon';
 export function SituationBadge({ active }: { active: boolean }) {
   return (
     <span className={`chip situation-badge situation-badge--${active ? 'active' : 'inactive'}`}>
-      <Icon name={active ? 'check_circle' : 'pause_circle'} size="small" />
+      <Icon name={active ? 'check_circle' : 'pause'} size="small" />
       {active ? 'Ativo' : 'Inativo'}
     </span>
   );
