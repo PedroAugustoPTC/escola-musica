@@ -35,6 +35,6 @@ ALTER TABLE authorship_record
 -- Índices parciais dos relatórios aprovados, para a lista da escola por aluno, por professor e por período.
 CREATE INDEX ix_lesson_report_approved_student ON lesson_report (student_id) WHERE status = 'APPROVED';
 CREATE INDEX ix_lesson_report_approved_teacher ON lesson_report (teacher_id) WHERE status = 'APPROVED';
-CREATE INDEX ix_semester_report_approved_studentON semester_report (student_id) WHERE status = 'APPROVED';
+CREATE INDEX ix_semester_report_approved_student ON semester_report (student_id) WHERE status = 'APPROVED';
 CREATE INDEX ix_semester_report_approved_teacher ON semester_report (teacher_id) WHERE status = 'APPROVED';
 CREATE INDEX ix_semester_report_approved_period ON semester_report (period_start) WHERE status = 'APPROVED';
