@@ -177,7 +177,7 @@ export async function requestNamedBlob(
   const response = await run(path, { signal });
   const disposition = response.headers.get('Content-Disposition') ?? '';
   const match = /filename="?([^";]+)"?/i.exec(disposition);
-  return { blob: await response.blob(), fileName: match ? match[1] : null };
+  return { blob: await response.blob(), fileName: match?.[1] ?? null };
 }
 
 export const api = {

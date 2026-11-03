@@ -162,7 +162,14 @@ public class ReportScenario extends AccessScenario {
                             semesterAccess, semester, queue, clock);
     public final br.com.felipeblaft.reports.usecase.semester.GetSemesterReportUseCase getSemester =
             new br.com.felipeblaft.reports.usecase.semester.GetSemesterReportUseCase(
-                    semesterAccess, interactions, versions, pdfDocuments, documents, queue);
+                    semesterAccess,
+                    interactions,
+                    versions,
+                    pdfDocuments,
+                    documents,
+                    queue,
+                    new br.com.felipeblaft.reports.service.OfficialDocumentService(
+                            versions, pdfDocuments, documents));
 
     {
         processor.registerComplement(semesterProcessor);
