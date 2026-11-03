@@ -229,7 +229,7 @@ Pré-condição de todos os fluxos `W-*`, `X-1` e `X-2`: **S1 (Fundação, T004 
 - [x] T054 [P] [US1] **W-J** Testes `APP_T/inbound/telegram/AdminOperationDeniedConversationIT.java` (conta vinculada e não vinculada enviando "criar professor", "reemitir código", e-mail e senha: resposta de texto não reconhecido + menu do professor, **sem** citar Web, administrador ou área administrativa; conta sem vínculo recebe só `CODE_REQUIRED`) e `PrivateChatOnlyIT.java` (**callbacks**, e não só mensagens, também são recusados fora de conversa privada — verificação 6 do plano).
 - [x] T055 [P] [US1] **W-M** Testes Vitest `FE_T/pages/admin/AdminSignInScreen.test.tsx` (mensagem única para qualquer falha; bloqueio com contagem regressiva em `aria-live="polite"` e envio desabilitado; link "Tenho um código de ativação"; `autocomplete` correto) e `FE_T/app/AdminSessionGuard.test.tsx` (independente do `SessionGuard`; evento de sessão expirada do administrador limpa só o cache dele e leva a `/admin/sign-in` guardando o destino).
 - [x] T056 [P] [US1] **W-M** Testes Vitest `FE_T/components/admin/AdminLayout.test.tsx` e `SessionClock.test.tsx`: selo "Área administrativa", navegação Professores · Alunos · Administradores, aviso `role="alert"` **uma vez** 5 minutos antes de expirar, "Sua sessão expira às HH:MM", dados digitados não mantidos ao expirar.
-- [ ] T057 [P] [US1] **X-2** Teste e2e de acessibilidade `FE_T/e2e/admin-access.a11y.spec.ts` (A01, A04 e o layout): axe sem violação séria/crítica em claro e escuro, 390 e 1440 px; navegação só por teclado; ordem de foco; `lang="pt-BR"`; contagem regressiva anunciada.
+- [x] T057 [P] [US1] **X-2** Teste e2e de acessibilidade `FE_T/e2e/admin-access.a11y.spec.ts` (A01, A04 e o layout): axe sem violação séria/crítica em claro e escuro, 390 e 1440 px; navegação só por teclado; ordem de foco; `lang="pt-BR"`; contagem regressiva anunciada.
 
 ### Implementação da US1
 
@@ -280,7 +280,7 @@ Pré-condição de todos os fluxos `W-*`, `X-1` e `X-2`: **S1 (Fundação, T004 
 - [x] T089 [P] [US2] **X-1** Teste `APP_T/security/AuthorshipTeacherOperationsIT.java` (SC-014): `TEACHER_REGISTER/UPDATE/INACTIVATE/REACTIVATE` deixam registro com papel `ADMINISTRATOR`, canal `WEB`, alvo e resultado, sem código de acesso.
 - [x] T090 [P] [US2] **W-M** Teste Vitest `FE_T/components/admin/OneTimeSecretPanel.test.tsx`: valor só em `useState` (nunca em cache de consulta, `localStorage`, URL ou `title`), "Copiar" com anúncio `role="status"`, aviso `ADMIN_SECRET_SHOWN_ONCE`, "Já anotei o código" limpa o valor e libera a navegação.
 - [x] T091 [P] [US2] **W-M** Testes Vitest `FE_T/pages/admin/TeachersScreen.test.tsx`, `TeacherFormScreen.test.tsx` e `TeacherDetailScreen.test.tsx`: lista com busca (`<form role="search">`), situação com ícone e texto, "Telegram vinculado"; código mostrado uma vez após criar/reativar; diálogo de confirmação para inativar nomeando ação e alvo (Esc cancela, foco volta); e-mail repetido mostra o nome do professor existente; estados vazio/sem resultado/erro/carregando.
-- [ ] T092 [P] [US2] **X-2** Teste e2e `FE_T/e2e/admin-teachers.a11y.spec.ts` (A05 a A08): axe nos dois temas e nas duas larguras, foco preso nos diálogos, `OneTimeSecretPanel` acessível por teclado.
+- [x] T092 [P] [US2] **X-2** Teste e2e `FE_T/e2e/admin-teachers.a11y.spec.ts` (A05 a A08): axe nos dois temas e nas duas larguras, foco preso nos diálogos, `OneTimeSecretPanel` acessível por teclado.
 
 ### Implementação da US2
 
@@ -321,7 +321,7 @@ Pré-condição de todos os fluxos `W-*`, `X-1` e `X-2`: **S1 (Fundação, T004 
 - [x] T114 [P] [US3] **X-1** Teste `APP_T/security/AuthorshipStudentAdminOperationsIT.java` (SC-014): `STUDENT_REGISTER/UPDATE/INACTIVATE/REACTIVATE` feitos pelo administrador deixam registro com papel, canal `WEB`, alvo e resultado, sem CPF nem dado do responsável.
 - [x] T115 [P] [US3] **W-N** Testes Vitest `FE_T/components/student/StudentForm.test.tsx` (CPF com `inputmode="numeric"`, `autocomplete="off"`, `autocapitalize="off"`, `spellcheck="false"`, sem máscara que vaze para a URL; na edição o CPF vem **em branco** com a dica `MY_STUDENTS_CPF_KEEP`; erros por campo de `details.fields` ligados por `aria-describedby`; resumo de erros no topo recebe o foco no envio; seção "Responsável" com telefone `type="tel"`), `StudentList.test.tsx` e `SituationBadge.test.tsx` (ícone e texto, nunca só cor).
 - [x] T116 [P] [US3] **W-M** Testes Vitest `FE_T/pages/admin/StudentsScreen.test.tsx` (A10: busca, situação, paginação, professores associados, vazio; termo com forma de CPF recusado no cliente, sem ir à URL nem ao cache de consulta), `StudentFormScreen.test.tsx` (A11/A12: multisseleção de professores ativos, erros por campo, CPF em branco na edição) e `StudentDetailScreen.test.tsx` (inativar com confirmação).
-- [ ] T117 [P] [US3] **X-2** Teste e2e `FE_T/e2e/admin-students.a11y.spec.ts` (A10 a A12): axe nos dois temas e larguras; a URL final e o armazenamento do navegador não contêm o CPF digitado.
+- [x] T117 [P] [US3] **X-2** Teste e2e `FE_T/e2e/admin-students.a11y.spec.ts` (A10 a A12): axe nos dois temas e larguras; a URL final e o armazenamento do navegador não contêm o CPF digitado.
 
 ### Implementação da US3
 
@@ -380,8 +380,8 @@ Pré-condição de todos os fluxos `W-*`, `X-1` e `X-2`: **S1 (Fundação, T004 
 
 - [x] T144 [P] [US4] **W-N** Testes Vitest `FE_T/pages/MyStudentsScreen.test.tsx` (P01: lista paginada, busca (termo com forma de CPF recusado no cliente, sem ir à URL nem ao cache), filtro Ativos/Inativos/Todos, vazio → `MY_STUDENTS_EMPTY` com "Cadastrar o primeiro aluno"), `MyStudentFormScreen.test.tsx` (P02: seção Responsável sempre visível; `CPF_UNAVAILABLE` no campo sem nome nem professor; `OPERATION_TEMPORARILY_BLOCKED` desabilita só o envio e mostra o tempo restante) e `MyStudentDetailScreen.test.tsx` (P03: inativar com confirmação `MY_STUDENTS_CONFIRM_INACTIVATE`; aluno compartilhado → botões desabilitados com orientação, `canInactivate = false`).
 - [x] T145 [P] [US4] **W-N** Atualizar `FE_T/pages/SignInScreen.test.tsx` (link **"É administrador? Acesse a área administrativa."** levando a `/admin/sign-in`, exibido agora; nenhuma ocorrência de "secretaria") e `FE_T/pages/DashboardScreen.test.tsx` (atalho "Meus alunos"; professor sem alunos vê a orientação de cadastrar o primeiro) e `FE_T/pages/StudentsScreen.test.tsx` (a escolha de aluno para aula mostra só ativos).
-- [ ] T146 [P] [US4] **X-2** Testes e2e `FE_T/e2e/my-students.a11y.spec.ts` (P01 a P03, axe nos dois temas e larguras, teclado) e `FE_T/e2e/my-students.spec.ts` (cadastro completo em ≤ 3 min de uso, SC-002; a URL final e o armazenamento do navegador **não** contêm o CPF digitado).
-- [ ] T147 [P] [US4] **X-2** Teste e2e `FE_T/e2e/admin-register-flow.spec.ts` (SC-001): o administrador cadastra um professor, copia o código e cadastra um aluno associado a ele. Roteiro com digitação a 40 ms/tecla e ≤ 25 interações; falha se o total passar de 180 s.
+- [x] T146 [P] [US4] **X-2** Testes e2e `FE_T/e2e/my-students.a11y.spec.ts` (P01 a P03, axe nos dois temas e larguras, teclado) e `FE_T/e2e/my-students.spec.ts` (cadastro completo em ≤ 3 min de uso, SC-002; a URL final e o armazenamento do navegador **não** contêm o CPF digitado).
+- [x] T147 [P] [US4] **X-2** Teste e2e `FE_T/e2e/admin-register-flow.spec.ts` (SC-001): o administrador cadastra um professor, copia o código e cadastra um aluno associado a ele. Roteiro com digitação a 40 ms/tecla e ≤ 25 interações; falha se o total passar de 180 s.
 - [x] T148 [P] [US4] **X-1** Teste `APP_T/parity/StudentRegistryTelegramTimingIT.java` (SC-002): cadastro de aluno adulto no simulador do Telegram, com 3 s de resposta simulada por mensagem; falha se passar de 180 s ou de 8 interações.
 
 ### Implementação da US4
@@ -416,7 +416,7 @@ Pré-condição de todos os fluxos `W-*`, `X-1` e `X-2`: **S1 (Fundação, T004 
 - [x] T163 [P] [US5] **X-1** Teste `APP_T/security/AssignmentRemovalAccessIT.java` (SC-006 e SC-013): após retirar a associação, o professor perde o aluno e o relatório na Web **e** no Telegram (resposta idêntica à de inexistente), nenhum relatório é criado/alterado/aprovado/cancelado, e a reassociação devolve o relatório; autoria `ASSIGNMENT_*` sem dado do aluno.
 - [x] T164 [P] [US5] **W-J** Teste `APP_T/inbound/telegram/AssignmentRemovalConversationIT.java`: depois da retirada, o aluno some da lista do professor e o `callback_data` antigo responde como inexistente; com um rascunho de edição, inativação ou reativação já aberto, a retirada entre iniciar e confirmar faz a confirmação responder como aluno inexistente, sem gravar.
 - [x] T165 [P] [US5] **W-M** Teste Vitest `FE_T/pages/admin/StudentAssociationsSection.test.tsx`: aviso de quantos relatórios ficam congelados vindo de `removal-preview`, confirmação que **não bloqueia**, cancelar não grava, só professores ativos podem ser incluídos.
-- [ ] T166 [P] [US5] **X-2** Teste e2e `FE_T/e2e/admin-associations.a11y.spec.ts`: diálogo de retirada acessível (foco preso, `Esc`, aviso anunciado) nos dois temas e larguras.
+- [x] T166 [P] [US5] **X-2** Teste e2e `FE_T/e2e/admin-associations.a11y.spec.ts`: diálogo de retirada acessível (foco preso, `Esc`, aviso anunciado) nos dois temas e larguras.
 
 ### Implementação da US5
 
@@ -444,7 +444,7 @@ Pré-condição de todos os fluxos `W-*`, `X-1` e `X-2`: **S1 (Fundação, T004 
 - [x] T175 [P] [US6] **X-1** Teste `APP_T/security/RevocationImmediacyReissueUnlinkIT.java` (SC-010, Postgres real): efeito imediato da reemissão (Web) e da desvinculação (Web e Telegram); ações `PENDING` do chat descartadas; nenhuma requisição posterior aceita.
 - [x] T176 [P] [US6] **X-1** Teste `APP_T/security/AuthorshipAccessOperationsIT.java` (SC-014): `TEACHER_REISSUE_ACCESS_CODE` e `TEACHER_UNLINK_TELEGRAM` deixam registro sem o código.
 - [x] T177 [P] [US6] **W-M** Teste Vitest `FE_T/pages/admin/TeacherAccessActions.test.tsx`: diálogo de reemissão nomeia ação e professor e oferece a caixa "Também encerrar o vínculo do Telegram"; diálogo de desvinculação; o código novo vai ao `OneTimeSecretPanel`; cancelar não grava; professor inativo mostra a orientação de reativar.
-- [ ] T178 [P] [US6] **X-2** Teste e2e `FE_T/e2e/admin-teacher-access.a11y.spec.ts`: os diálogos de reemissão e desvinculação acessíveis nos dois temas e larguras.
+- [x] T178 [P] [US6] **X-2** Teste e2e `FE_T/e2e/admin-teacher-access.a11y.spec.ts`: os diálogos de reemissão e desvinculação acessíveis nos dois temas e larguras.
 
 ### Implementação da US6
 
@@ -475,7 +475,7 @@ Pré-condição de todos os fluxos `W-*`, `X-1` e `X-2`: **S1 (Fundação, T004 
 - [x] T190 [P] [US7] **X-1** Teste `APP_T/security/AuthorshipAdministratorOperationsIT.java` (SC-014): `ADMINISTRATOR_CREATE/INACTIVATE/REACTIVATE` e `ADMIN_ACTIVATE` deixam registro sem código nem senha.
 - [x] T191 [P] [US7] **W-J** Teste `APP_T/inbound/telegram/ActivationCodeNotAcceptedByBotIT.java`: código de ativação ou senha de administrador enviados ao bot **não** vinculam nada (só o código de acesso do professor é aceito: `INVALID_CODE`).
 - [x] T192 [P] [US7] **W-M** Testes Vitest `FE_T/pages/admin/AdministratorsScreen.test.tsx` (lista com "ativação pendente"/"ativado em"; criar → painel do código; inativar com confirmação; o último administrador mostra `LAST_ADMINISTRATOR`) e `FE_T/pages/admin/ActivateScreen.test.tsx` (A02: e-mail, código em maiúsculas com `autocomplete="off"`, nova senha e confirmação com `autocomplete="new-password"`, regra "12 a 128 caracteres" visível, sem medidor de força).
-- [ ] T193 [P] [US7] **X-2** Teste e2e `FE_T/e2e/admin-administrators.a11y.spec.ts` (A09 e A02) nos dois temas e larguras.
+- [x] T193 [P] [US7] **X-2** Teste e2e `FE_T/e2e/admin-administrators.a11y.spec.ts` (A09 e A02) nos dois temas e larguras.
 
 ### Implementação da US7
 
@@ -503,7 +503,7 @@ Pré-condição de todos os fluxos `W-*`, `X-1` e `X-2`: **S1 (Fundação, T004 
 - [x] T202 [P] [US8] **W-H** Testes `APP_T/inbound/web/admin/ProvisionalPasswordRestrictionIT.java` (enquanto provisória, toda outra rota administrativa → `403 PASSWORD_CHANGE_REQUIRED`; uma segunda sessão aberta com a provisória é revogada quando a troca acontece, e não ganha acesso total) e contrato de `PUT /admin/password` em `AdminSessionContractIT`-irmão `AdminPasswordContractIT.java`.
 - [x] T203 [P] [US8] **X-1** Teste `APP_T/security/NoDefaultCredentialsTest.java`: nenhum arquivo versionado contém senha, hash ou segredo de administrador; as variáveis `ADMIN_BOOTSTRAP_*` do `infra/.env.example` estão vazias; a senha provisória e o hash nunca aparecem em log nem em `authorship_record`.
 - [x] T204 [P] [US8] **W-M** Teste Vitest `FE_T/pages/admin/ChangePasswordScreen.test.tsx` (A03: só a nova senha e a confirmação; enquanto `mustChangePassword`, qualquer outra rota administrativa redireciona para cá).
-- [ ] T205 [P] [US8] **X-2** Teste e2e `FE_T/e2e/admin-change-password.a11y.spec.ts` (A03) nos dois temas e nas duas larguras, navegação por teclado e erro de senha anunciado.
+- [x] T205 [P] [US8] **X-2** Teste e2e `FE_T/e2e/admin-change-password.a11y.spec.ts` (A03) nos dois temas e nas duas larguras, navegação por teclado e erro de senha anunciado.
 
 ### Implementação da US8
 
@@ -546,7 +546,7 @@ Pré-condição de todos os fluxos `W-*`, `X-1` e `X-2`: **S1 (Fundação, T004 
 - [x] T219 [P] **X-1** Criar `APP_T/security/AuthorshipCoverageIT.java` (SC-014): enumera a lista de operações do FR-040 (`SPEC/data-model.md` §6) e exige que cada uma, ao ser executada, deixe um registro com papel, canal e resultado corretos e sem CPF nem dado do responsável; leituras e expiração de sessão **não** geram registro.
 - [x] T220 [P] **X-1** Criar `APP_T/inbound/web/AdministrationContractDriftIT.java`: valida **toda** resposta real contra `api-administration.openapi.yaml` e confirma que nenhuma propriedade se chama `cpf`.
 - [x] T221 [P] **X-1** Rodar e consolidar `APP_T/privacy/*` e `APP_T/security/*` desta feature com `CanaryCpf` e `CanaryStudent` em todo o conjunto (SC-004), incluindo mensagens de exceção e rastros de pilha, e a varredura de logs (`LogWithoutSensitiveDataIT`, estender o existente só se faltar cobertura).
-- [ ] T222 [P] **X-2** Rodar `sh infra/scripts/local.sh tests e2e`: as 15 telas (A01 a A12, P01 a P03) em claro/escuro e 390/1440 px sem violação séria/crítica (SC-012); registrar o resultado em `SPEC/evidence/e2e-a11y.md`.
+- [x] T222 [P] **X-2** Rodar `sh infra/scripts/local.sh tests e2e`: as 15 telas (A01 a A12, P01 a P03) em claro/escuro e 390/1440 px sem violação séria/crítica (SC-012); registrar o resultado em `SPEC/evidence/e2e-a11y.md`.
 - [x] T236 [P] **X-1** Teste de autorização no núcleo `CORE_T/usecase/UseCasePermissionMatrixTest.java` (FR-002, FR-048, SC-005), parametrizado pela `PermissionMatrix` (lida com o `MatrixLoader`): cada `*UseCase` de `usecase.administrator`, `usecase.teacher` e `usecase.registry` é chamado com cada `Actor` (administrador Web, professor Web, professor Telegram, sistema) e, onde a matriz diz `DENY`, o resultado é `RESOURCE_NOT_FOUND` sem gravar dado de negócio (só o registro de autoria `AUTHORIZATION_DENIED` da negativa) nem tocar repositório de negócio; caso de uso sem `Operation` mapeada reprova; operações `PUBLIC` e de sistema vêm da própria matriz. Prova que a autorização é do núcleo e não depende da cadeia de segurança da Web. Fica vermelho até cada fluxo implementar seus casos de uso; fecha no Fecho (não entra no gate T034, cujos esqueletos lançam `UnsupportedOperationException`).
 - [x] T237 [P] **X-1** Teste de privacidade `APP_T/privacy/StudentDataNotSentToAiIT.java` (FR-017, Princípio IV): com um dublê da porta de IA que captura a entrada e com o `CanaryStudent` e o `CanaryCpf` num aluno, percorre a geração do relatório de aula e do semestral; falha se a entrada enviada à IA, o prompt ou o relatório contiver CPF ou qualquer dado do responsável, ou campo de aluno além do que o contrato da 001 já autoriza enviar.
 
@@ -565,9 +565,9 @@ Pré-condição de todos os fluxos `W-*`, `X-1` e `X-2`: **S1 (Fundação, T004 
 
 ### Revisão e fechamento (X-4)
 
-- [ ] T233 **X-4** Rodar a skill `pre-pr-review` sobre o diff de cada fatia: `backend-reviewer`, `frontend-reviewer`, `infra-security-auditor`, `contract-drift-checker`, `privacy-auditor`, `ai-pipeline-reviewer` (se tocar prompts ou IA; esperado: nada) e, por último, `constitution-auditor`; consolidar um relatório único em `SPEC/evidence/review.md`. Confirmar que `.github/workflows/ci.yml` continua cobrindo as suítes novas (`tests-backend`, `tests-frontend`, `tests-e2e`, `tests-n8n`) sem alteração; se algum teste novo precisar de serviço extra no `infra/compose.test.yaml`, registrar em `SPEC/evidence/review.md`. (após T218 a T232, T236, T237)
+- [x] T233 **X-4** Rodar a skill `pre-pr-review` sobre o diff de cada fatia: `backend-reviewer`, `frontend-reviewer`, `infra-security-auditor`, `contract-drift-checker`, `privacy-auditor`, `ai-pipeline-reviewer` (se tocar prompts ou IA; esperado: nada) e, por último, `constitution-auditor`; consolidar um relatório único em `SPEC/evidence/review.md`. Confirmar que `.github/workflows/ci.yml` continua cobrindo as suítes novas (`tests-backend`, `tests-frontend`, `tests-e2e`, `tests-n8n`) sem alteração; se algum teste novo precisar de serviço extra no `infra/compose.test.yaml`, registrar em `SPEC/evidence/review.md`. (após T218 a T232, T236, T237)
 - [ ] T234 **COORD** Validar `SPEC/quickstart.md` por inteiro (cenários 1 a 17 e as suítes da §4: `tests backend`, `tests frontend`, `tests e2e`, `tests n8n`, `tests all`) e `GUARD_REPORT=1` sem pendência. (após T233)
-- [ ] T235 **COORD** Abrir o PR de cada fatia ao concluí-la, **sem esperar nova solicitação** (`/open-pr`), nunca mesclar nem habilitar merge automático, e rodar `code-review-graph build` depois de **cada** PR (Princípio VIII). (após T234)
+- [x] T235 **COORD** Abrir o PR de cada fatia ao concluí-la, **sem esperar nova solicitação** (`/open-pr`), nunca mesclar nem habilitar merge automático, e rodar `code-review-graph build` depois de **cada** PR (Princípio VIII). (após T234)
 
 ---
 
