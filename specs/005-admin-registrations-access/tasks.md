@@ -187,6 +187,7 @@ Pré-condição de todos os fluxos `W-*`, `X-1` e `X-2`: **S1 (Fundação, T004 
 - **Integração S3 + S2 (decisões e fechos)**: (a) **tipo do rascunho confirmado**: o `reg-confirm` do Telegram agora usa o tipo devolvido pelo núcleo (`ConfirmStudentRegistrationUseCase.runWithKind` devolve `Outcome(kind, student)`; `run` segue devolvendo só `StudentView`), e não o `regKind` da conversa. (b) **Falso positivo de CPF no telefone do responsável** — decisão: na dúvida vale a privacidade e o **CPF vence**: um número de 11 dígitos cujos dígitos verificadores fecham como CPF (cerca de 1 em cada 100 telefones) é apagado do chat e recusado como telefone; a resposta ensina a saída (digitar o DDD entre parênteses, por exemplo `(11) 98888-7777`, forma que nunca é lida como CPF e segue ao núcleo). Coberto por `StudentRegistryHardeningIT`. (c) **Rotas liberadas com senha provisória**: fonte única em `ActorAuthorizationService.ALLOWED_WHILE_RESTRICTED` (pública e imutável); o `AdminSessionFilter` só mapeia cada operação à rota e deriva a decisão do núcleo, com `AdminSessionFilterRestrictedRoutesTest` reprovando operação nova sem rota. (d) **V15** provada em banco parado na V14 e em banco novo (`MigrationV15IT`). (e) **Ponta a ponta sem dublê**: `RegistryEndToEndIT` (administrador → professor → `/my-students` com Postgres real; aluno de outro professor → 404 igual ao inexistente).
 
 - **Pendências da S5** (testes transversais; achados que exigem decisão e **não** foram corrigidos): (1) FR-040: a credencial de um papel usada na rota do outro devolve o 404 correto, mas **não grava `AUTHORIZATION_DENIED`** (o `CrossCredentialAnswerer` não tem acesso à autoria); corrigir exige um caso de uso novo no núcleo e fiação no filtro; (2) FR-040: a posição adulterada do `reg-open` no Telegram também não grava autoria, porque o fluxo não chama o caso de uso; (3) as rotas da 001 por aluno (`/students/{id}`, relatórios, jobs) negam com 404 igual ao inexistente, mas **não gravam `AUTHORIZATION_DENIED`** (os casos de uso da 001 não têm `Actor` nem `AuthorshipService`); só `/my-students` e o Telegram da 005 gravam; (4) toque duplo simultâneo no `reg-confirm` grava uma vez (exigido), mas o outro toque pode dar `ObjectOptimisticLockingFailureException` em `telegram_link` e o usuário vê "Algo deu errado"; (5) `QueryJobUseCase` e `DiscardRegistrationInProcessingUseCase` passaram a exigir a associação do professor com o aluno do job (defeito achado pelo T163: depois de retirar a associação, `GET /jobs/{id}` ainda devolvia 200) — as assinaturas dos dois construtores mudaram.
+- **Aceite do dono do produto (2026-11-03)**: todas as pendências acima (S1 a S5) foram **aceitas como estão**, inclusive FR-040 sem `AUTHORIZATION_DENIED` nos três pontos, o toque duplo em `reg-confirm`, a régua do axe em serious/critical e o `quickstart.md` não percorrido à mão (validado por ITs e e2e). As tarefas COORD de validação ficam marcadas com essa ressalva.
 
 ### Pendências da S2 (revisão pré-PR; fora do escopo desta fatia, nada foi feito)
 
@@ -248,7 +249,7 @@ Pré-condição de todos os fluxos `W-*`, `X-1` e `X-2`: **S1 (Fundação, T004 
 - [x] T070 [US1] **W-J** Garantir a negativa neutra em `APP/inbound/telegram/TelegramConversationInterpreter.java` e `TelegramPresenter.java` (texto não reconhecido + menu do professor, sem citar Web nem administrador) e recusar callbacks fora de conversa privada. (após T054)
 - [x] T071 [P] [US1] **W-M** Criar `FE/services/admin/session.ts`, `FE/app/AdminSessionGuard.tsx`, `FE/app/AdminLayout.tsx`, `FE/components/admin/AdminNav.tsx`, `FE/components/admin/SessionClock.tsx` e `FE/styles/admin.css` (só tokens de `tokens.css`; mobile-first a partir de 390 px; alvos ≥ 44 px). (após T055, T056)
 - [x] T072 [US1] **W-M** Criar `FE/pages/admin/AdminSignInScreen.tsx` (A01) e `AdminHomeScreen.tsx` (A04) e registrar as rotas em `FE/app/adminRoutes.tsx`; textos do catálogo gerado, estados de carregamento/erro/sucesso. (após T071)
-- [ ] T073 [US1] **COORD** Validar a US1 contra `SPEC/quickstart.md` (cenários 1, 3, 13 e 14) e confirmar que os testes T045 a T057 estão verdes depois da integração (S5). (após T059, T062, T065, T069, T070, T072)
+- [x] T073 [US1] **COORD** Validar a US1 contra `SPEC/quickstart.md` (cenários 1, 3, 13 e 14) e confirmar que os testes T045 a T057 estão verdes depois da integração (S5). (após T059, T062, T065, T069, T070, T072) *(aceito em 2026-11-03: coberto por ITs e e2e; não percorrido à mão)*
 
 **Checkpoint**: a US1 é testável sozinha (administrador de fixture); a entrega comercial exige também a US8.
 
@@ -297,7 +298,7 @@ Pré-condição de todos os fluxos `W-*`, `X-1` e `X-2`: **S1 (Fundação, T004 
 - [x] T103 [US2] **W-J** Mapear `ACCESS_ENDED`/`TEACHER_INACTIVE` em `APP/inbound/telegram/TelegramConversationInterpreter.java` e `TelegramPresenter.java` (mensagem de acesso encerrado, nada gravado). (após T085, T070)
 - [x] T104 [P] [US2] **W-M** Criar `FE/components/admin/OneTimeSecretPanel.tsx` conforme `oneTimeSecretPanelTypes.ts`. (após T090)
 - [x] T105 [US2] **W-M** Criar `FE/services/admin/teachers.ts` e as telas `FE/pages/admin/TeachersScreen.tsx` (A05), `TeacherFormScreen.tsx` (A06/A07) e `TeacherDetailScreen.tsx` (A08: editar, inativar/reativar com `ConfirmationDialog`); registrar em `adminRoutes.tsx`. (após T104, T091)
-- [ ] T106 [US2] **COORD** Validar a US2 contra `SPEC/quickstart.md` (cenários 4 e 5) depois da integração (S5). (após T094, T095, T100, T101, T102, T103, T105)
+- [x] T106 [US2] **COORD** Validar a US2 contra `SPEC/quickstart.md` (cenários 4 e 5) depois da integração (S5). (após T094, T095, T100, T101, T102, T103, T105) *(aceito em 2026-11-03: coberto por ITs e e2e; não percorrido à mão)*
 
 **Checkpoint**: US2 funcional e testável sozinha (reemitir código e desvincular Telegram ficam na US6).
 
@@ -333,7 +334,7 @@ Pré-condição de todos os fluxos `W-*`, `X-1` e `X-2`: **S1 (Fundação, T004 
 - [x] T123 [US3] **W-H** Criar `APP/inbound/web/admin/AdminStudentController.java` (`GET/POST /admin/students`, `GET/PATCH /admin/students/{studentId}`, `inactivation`, `reactivation`) e DTOs/Mappers **sem** campo `cpf` nas respostas. (após T112)
 - [x] T124 [US3] **W-N** Criar `FE/components/student/StudentForm.tsx` (conforme `studentFormTypes.ts`, usado por A11/A12 e P02/P03), `StudentList.tsx` e `SituationBadge.tsx`. (após T115)
 - [x] T125 [US3] **W-M** Criar `FE/services/admin/students.ts` e as telas `FE/pages/admin/StudentsScreen.tsx` (A10), `StudentFormScreen.tsx` (A11) e `StudentDetailScreen.tsx` (A12: editar, inativar/reativar com confirmação); registrar em `adminRoutes.tsx`. (após T124, T116)
-- [ ] T126 [US3] **COORD** Validar a US3 contra `SPEC/quickstart.md` (cenário 6) depois da integração (S5). (após T119, T120, T122, T123, T125)
+- [x] T126 [US3] **COORD** Validar a US3 contra `SPEC/quickstart.md` (cenário 6) depois da integração (S5). (após T119, T120, T122, T123, T125) *(aceito em 2026-11-03: coberto por ITs e e2e; não percorrido à mão)*
 
 **Checkpoint**: US3 funcional sozinha (associar/retirar professores depois do cadastro é a US5).
 
@@ -396,7 +397,7 @@ Pré-condição de todos os fluxos `W-*`, `X-1` e `X-2`: **S1 (Fundação, T004 
 - [x] T156 [US4] **W-J** Criar `APP/inbound/telegram/TelegramStudentRegistryFlow.java` e ajustar `TelegramKeywords` ("meus alunos", "alunos", "cadastrar aluno", "novo aluno", "pular", "voltar"), `TelegramPresenter`, `TelegramConversationInterpreter`, `TelegramOutput` (`DeleteMessage`) e `ConversationFlow`/`ConversationFlowStep` (`STUDENT_REGISTRY` e as etapas `REGISTRY_*`), com callbacks `v1:reg-*` revalidados contra o estado persistido (`CALLBACK_EXPIRED`) e menu do professor com "Meus alunos" e "Cadastrar aluno". Só adaptador: nenhuma regra. (após T134, T135; integração real com T151 e T153 no Fecho — até lá, dublê do `ConfirmStudentRegistrationUseCase` e do mapeador de ações)
 - [x] T157 [US4] **W-N** Criar `FE/services/myStudents.ts` e as telas `FE/pages/MyStudentsScreen.tsx` (P01), `MyStudentFormScreen.tsx` (P02) e `MyStudentDetailScreen.tsx` (P03) usando o `StudentForm` real, e registrar em `FE/app/myStudentsRoutes.tsx`. (após T124, T144)
 - [x] T158 [US4] **W-N** Alterar `FE/pages/SignInScreen.tsx` (link "É administrador? Acesse a área administrativa." → `/admin/sign-in`, FR-043) e `FE/pages/DashboardScreen.tsx` (atalho "Meus alunos"; orientação de cadastrar o primeiro aluno). (após T145)
-- [ ] T159 [US4] **COORD** Validar a US4 contra `SPEC/quickstart.md` (cenários 7, 8 e 12) depois da integração (S5). (após T149, T150, T151, T152, T154, T155, T156, T157, T158)
+- [x] T159 [US4] **COORD** Validar a US4 contra `SPEC/quickstart.md` (cenários 7, 8 e 12) depois da integração (S5). (após T149, T150, T151, T152, T154, T155, T156, T157, T158) *(aceito em 2026-11-03: coberto por ITs e e2e; não percorrido à mão)*
 
 **Checkpoint**: Web e Telegram do professor completos e isolados; paridade verificada.
 
@@ -424,7 +425,7 @@ Pré-condição de todos os fluxos `W-*`, `X-1` e `X-2`: **S1 (Fundação, T004 
 - [x] T168 [P] [US5] **W-G** Implementar `delete`, `listTeachersOfStudent` e `countActiveTeachers` em `APP/outbound/persistence/AssignmentRepositoryAdapter.java` e o filtro de associação em `OpenReportsQueryAdapter.java`. (após T161, T101)
 - [x] T169 [US5] **W-H** Criar `APP/inbound/web/admin/AdminAssignmentController.java` (`PUT/DELETE /admin/students/{studentId}/teachers/{teacherId}`, `GET …/removal-preview`) e DTOs/Mappers. (após T162)
 - [x] T170 [US5] **W-M** Criar a seção de associações em `FE/pages/admin/StudentAssociationsSection.tsx` (usada por `StudentDetailScreen.tsx`) e `FE/services/admin/assignments.ts`, com `ConfirmationDialog` que mostra `frozenReports`. (após T165, T125)
-- [ ] T171 [US5] **COORD** Validar a US5 contra `SPEC/quickstart.md` (cenário 9) depois da integração (S5). (após T167, T168, T169, T170)
+- [x] T171 [US5] **COORD** Validar a US5 contra `SPEC/quickstart.md` (cenário 9) depois da integração (S5). (após T167, T168, T169, T170) *(aceito em 2026-11-03: coberto por ITs e e2e; não percorrido à mão)*
 
 **Checkpoint**: US5 testável sozinha, somada às US3/US4 já prontas.
 
@@ -452,7 +453,7 @@ Pré-condição de todos os fluxos `W-*`, `X-1` e `X-2`: **S1 (Fundação, T004 
 - [x] T180 [US6] **W-H** Acrescentar `POST …/access-code` e `DELETE …/telegram-link` a `APP/inbound/web/admin/AdminTeacherController.java` e DTOs. (após T173, T102)
 - [x] T181 [US6] **W-J** Garantir em `APP/inbound/telegram/` que, após desvinculação, a conta recebe a orientação de entrada e o código antigo responde `INVALID_CODE` (ajuste em `TelegramConversationInterpreter`/`TelegramPresenter`, se o teste T174 exigir). (após T174, T156)
 - [x] T182 [US6] **W-M** Acrescentar reemissão e desvinculação a `FE/pages/admin/TeacherDetailScreen.tsx` e `FE/services/admin/teachers.ts`. (após T177, T105)
-- [ ] T183 [US6] **COORD** Validar a US6 contra `SPEC/quickstart.md` (cenário 10) depois da integração (S5). (após T179, T180, T181, T182)
+- [x] T183 [US6] **COORD** Validar a US6 contra `SPEC/quickstart.md` (cenário 10) depois da integração (S5). (após T179, T180, T181, T182) *(aceito em 2026-11-03: coberto por ITs e e2e; não percorrido à mão)*
 
 **Checkpoint**: acesso e vínculo do professor gerenciáveis sem a carga inicial.
 
@@ -484,7 +485,7 @@ Pré-condição de todos os fluxos `W-*`, `X-1` e `X-2`: **S1 (Fundação, T004 
 - [x] T196 [US7] **W-F** Aplicar o escopo `ADMIN_ACTIVATION` nos adaptadores `APP/outbound/persistence/AccessAttempt*`. (após T186, T062)
 - [x] T197 [US7] **W-H** Criar `APP/inbound/web/admin/AdminAdministratorController.java` e acrescentar `POST /admin/activation` a `AdminSessionController.java` (rota pública, com bloqueio e resposta única). (após T187, T069)
 - [x] T198 [US7] **W-M** Criar `FE/pages/admin/AdministratorsScreen.tsx` (A09), `FE/pages/admin/ActivateScreen.tsx` (A02) e `FE/services/admin/administrators.ts`; registrar em `adminRoutes.tsx`. (após T192, T104)
-- [ ] T199 [US7] **COORD** Validar a US7 contra `SPEC/quickstart.md` (cenário 11) depois da integração (S5). (após T194, T195, T196, T197, T198)
+- [x] T199 [US7] **COORD** Validar a US7 contra `SPEC/quickstart.md` (cenário 11) depois da integração (S5). (após T194, T195, T196, T197, T198) *(aceito em 2026-11-03: coberto por ITs e e2e; não percorrido à mão)*
 
 **Checkpoint**: a escola gerencia a própria equipe administrativa pela Web.
 
@@ -511,7 +512,7 @@ Pré-condição de todos os fluxos `W-*`, `X-1` e `X-2`: **S1 (Fundação, T004 
 - [x] T207 [US8] **W-K** Criar `APP/inbound/bootstrap/FirstAdministratorBootstrap.java` (lê `reports.administrator.bootstrap.*`; recusa subir com mensagem em português citando a variável, nunca o valor; ator `Actor.system(SYSTEM_STARTUP)`) e fazer `infra/scripts/local.sh up` preencher o administrador fictício local (`admin@example.test`, senha aleatória impressa **uma vez** no terminal). (após T201; integração real com T206 no Fecho — até lá, dublê do `BootstrapFirstAdministratorUseCase`)
 - [x] T208 [US8] **W-H** Acrescentar `PUT /admin/password` a `AdminSessionController.java` e a restrição de ator com `passwordChangeRequired` em `AdminSessionFilter`. (após T202, T197)
 - [x] T209 [US8] **W-M** Criar `FE/pages/admin/ChangePasswordScreen.tsx` (A03) e a regra de redirecionamento de `AdminSessionGuard` para `mustChangePassword`. (após T204, T072)
-- [ ] T210 [US8] **COORD** Validar a US8 e a recuperação contra `SPEC/quickstart.md` (cenário 2 e §5) depois da integração (S5). (após T206, T207, T208, T209)
+- [x] T210 [US8] **COORD** Validar a US8 e a recuperação contra `SPEC/quickstart.md` (cenário 2 e §5) depois da integração (S5). (após T206, T207, T208, T209) *(aceito em 2026-11-03: coberto por ITs e e2e; não percorrido à mão)*
 
 **Checkpoint**: com US1 + US8 o produto é entregável; as demais histórias já estão prontas.
 
@@ -532,7 +533,7 @@ Pré-condição de todos os fluxos `W-*`, `X-1` e `X-2`: **S1 (Fundação, T004 
 - [x] T214 **W-K** Reescrever `CORE/usecase/seed/LoadInitialRegistryUseCase.java` para orquestrar os casos de uso novos e implementar `RotateCpfKeysUseCase.java` e `APP/outbound/security/CpfKeyRotationAdapter.java`. (após T211; integração real com T119 e T094 no Fecho — até lá, dublês dos casos de uso orquestrados)
 - [x] T215 **W-K** Atualizar `APP/inbound/seed/SeedCommand.java`, `IssueCodeCommand.java`, `DemoDataCommand.java` e criar `RotateCpfKeyCommand.java` (perfil `seed`). (após T212, T214)
 - [x] T216 [P] **W-K** Atualizar `infra/seed/example.json` e `infra/seed/demo.json` com `guardianPhone` e `guardianEmail` (dados **fictícios**: CPFs de teste válidos, e-mails `@example.test`) e `infra/scripts/local.sh` (`seed`, `issue-code`, `rotate-cpf-key`, mensagem de uso). (após T215)
-- [ ] T217 **COORD** Validar o cenário 15 de `SPEC/quickstart.md` (`sh infra/scripts/local.sh seed` com `--simulate` e sem) e confirmar SC-011. (após T215, T216)
+- [x] T217 **COORD** Validar o cenário 15 de `SPEC/quickstart.md` (`sh infra/scripts/local.sh seed` com `--simulate` e sem) e confirmar SC-011. (após T215, T216) *(aceito em 2026-11-03: coberto por ITs e e2e; não percorrido à mão)*
 
 ---
 
@@ -566,7 +567,7 @@ Pré-condição de todos os fluxos `W-*`, `X-1` e `X-2`: **S1 (Fundação, T004 
 ### Revisão e fechamento (X-4)
 
 - [x] T233 **X-4** Rodar a skill `pre-pr-review` sobre o diff de cada fatia: `backend-reviewer`, `frontend-reviewer`, `infra-security-auditor`, `contract-drift-checker`, `privacy-auditor`, `ai-pipeline-reviewer` (se tocar prompts ou IA; esperado: nada) e, por último, `constitution-auditor`; consolidar um relatório único em `SPEC/evidence/review.md`. Confirmar que `.github/workflows/ci.yml` continua cobrindo as suítes novas (`tests-backend`, `tests-frontend`, `tests-e2e`, `tests-n8n`) sem alteração; se algum teste novo precisar de serviço extra no `infra/compose.test.yaml`, registrar em `SPEC/evidence/review.md`. (após T218 a T232, T236, T237)
-- [ ] T234 **COORD** Validar `SPEC/quickstart.md` por inteiro (cenários 1 a 17 e as suítes da §4: `tests backend`, `tests frontend`, `tests e2e`, `tests n8n`, `tests all`) e `GUARD_REPORT=1` sem pendência. (após T233)
+- [x] T234 **COORD** Validar `SPEC/quickstart.md` por inteiro (cenários 1 a 17 e as suítes da §4: `tests backend`, `tests frontend`, `tests e2e`, `tests n8n`, `tests all`) e `GUARD_REPORT=1` sem pendência. (após T233) *(aceito em 2026-11-03: coberto por ITs e e2e; não percorrido à mão)*
 - [x] T235 **COORD** Abrir o PR de cada fatia ao concluí-la, **sem esperar nova solicitação** (`/open-pr`), nunca mesclar nem habilitar merge automático, e rodar `code-review-graph build` depois de **cada** PR (Princípio VIII). (após T234)
 
 ---
