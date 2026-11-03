@@ -85,44 +85,21 @@ public class QuerySchoolHistoryUseCase {
     }
 
     /**
-     * Monta o pedido a partir dos valores crus da borda. A autorização vem primeiro; a forma
-     * inválida (data, tipo, página) grava a recusa na autoria (negativa, transação independente) e
-     * relança, como a ordem do período em {@link #run}.
+     * Registra a recusa de um filtro de forma inválida (data, tipo, página), conferida na borda
+     * antes do pedido existir: a autorização vem primeiro e a negativa vai à autoria em transação
+     * independente, como a ordem do período em {@link #run}.
      */
-    public Command command(
-            Actor actor,
-            UUID studentId,
-            UUID teacherId,
-            String type,
-            String from,
-            String to,
-            Integer page,
-            Integer size,
-            String correlationId) {
+    public void recordSyntaxRefusal(Actor actor, UUID studentId, String correlationId) {
         authorization.require(actor, Operation.SCHOOL_HISTORY_QUERY);
-        try {
-            SchoolHistoryFilter.Syntax syntax =
-                    SchoolHistoryFilter.parseSyntax(studentId, teacherId, type, from, to, page, size);
-            return new Command(
-                    syntax.studentId(),
-                    syntax.teacherId(),
-                    syntax.type(),
-                    syntax.from(),
-                    syntax.to(),
-                    syntax.page(),
-                    correlationId);
-        } catch (DomainException refusal) {
-            authorship.recordRead(
-                    actor,
-                    Operation.SCHOOL_HISTORY_QUERY,
-                    studentId == null ? null : AuthorshipTargetType.STUDENT,
-                    studentId,
-                    null,
-                    AuthorshipResult.FAILURE,
-                    ErrorCode.VALIDATION_FAILED.name(),
-                    correlationId);
-            throw refusal;
-        }
+        authorship.recordRead(
+                actor,
+                Operation.SCHOOL_HISTORY_QUERY,
+                studentId == null ? null : AuthorshipTargetType.STUDENT,
+                studentId,
+                null,
+                AuthorshipResult.FAILURE,
+                ErrorCode.VALIDATION_FAILED.name(),
+                correlationId);
     }
 
     public Result run(Actor actor, Command command) {

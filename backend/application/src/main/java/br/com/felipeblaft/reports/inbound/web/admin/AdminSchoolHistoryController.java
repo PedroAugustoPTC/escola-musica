@@ -1,7 +1,9 @@
 package br.com.felipeblaft.reports.inbound.web.admin;
 
 import br.com.felipeblaft.reports.config.MessageFormatting;
+import br.com.felipeblaft.reports.domain.common.DomainException;
 import br.com.felipeblaft.reports.domain.common.ReportType;
+import br.com.felipeblaft.reports.domain.history.SchoolHistoryFilter;
 import br.com.felipeblaft.reports.inbound.web.PdfResponses;
 import br.com.felipeblaft.reports.inbound.web.admin.AdminSchoolHistoryDtos.SchoolHistoryPage;
 import br.com.felipeblaft.reports.inbound.web.security.AdminSessionFilter;
@@ -57,20 +59,28 @@ public class AdminSchoolHistoryController {
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size,
             @RequestAttribute(CORRELATION) String correlationId) {
-        // forma e ordem dos filtros são do caso de uso, que também grava a recusa na autoria
+        // forma dos valores aqui (data, tipo, página); a recusa vai à autoria pelo caso de uso, que
+        // também confere a ordem do período
         var actor = admin.actor();
+        SchoolHistoryFilter.Syntax filter;
+        try {
+            filter =
+                    SchoolHistoryFilter.parseSyntax(
+                            studentId, teacherId, type, from, to, page, size);
+        } catch (DomainException refusal) {
+            query.recordSyntaxRefusal(actor, studentId, correlationId);
+            throw refusal;
+        }
         var result =
                 query.run(
                         actor,
-                        query.command(
-                                actor,
-                                studentId,
-                                teacherId,
-                                type,
-                                from,
-                                to,
-                                page,
-                                size,
+                        new QuerySchoolHistoryUseCase.Command(
+                                filter.studentId(),
+                                filter.teacherId(),
+                                filter.type(),
+                                filter.from(),
+                                filter.to(),
+                                filter.page(),
                                 correlationId));
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.noStore().cachePrivate())
