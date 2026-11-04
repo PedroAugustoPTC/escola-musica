@@ -169,6 +169,17 @@ export async function requestBlob(path: string, signal?: AbortSignal): Promise<B
   return response.blob();
 }
 
+/** Como `requestBlob`, e devolve também o nome sugerido pelo servidor (Content-Disposition), se houver. */
+export async function requestNamedBlob(
+  path: string,
+  signal?: AbortSignal,
+): Promise<{ blob: Blob; fileName: string | null }> {
+  const response = await run(path, { signal });
+  const disposition = response.headers.get('Content-Disposition') ?? '';
+  const match = /filename="?([^";]+)"?/i.exec(disposition);
+  return { blob: await response.blob(), fileName: match?.[1] ?? null };
+}
+
 export const api = {
   get: <T>(path: string, signal?: AbortSignal) => request<T>(path, { signal }),
   post: <T>(path: string, body?: unknown) => request<T>(path, { method: 'POST', body }),

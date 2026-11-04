@@ -2,6 +2,7 @@ package br.com.felipeblaft.reports.service;
 
 import br.com.felipeblaft.reports.domain.access.ActionOrigin;
 import br.com.felipeblaft.reports.domain.access.Actor;
+import br.com.felipeblaft.reports.domain.access.AuthorshipReadDetail;
 import br.com.felipeblaft.reports.domain.access.AuthorshipRecord;
 import br.com.felipeblaft.reports.domain.access.AuthorshipResult;
 import br.com.felipeblaft.reports.domain.access.AuthorshipTargetType;
@@ -78,6 +79,38 @@ public class AuthorshipService {
                         checkedErrorCode(result, errorCode),
                         null,
                         required(correlationId)));
+    }
+
+    /**
+     * Registra uma leitura da visão da escola (feature 006) com o detalhe (filtros e página, ou
+     * versão do PDF): {@code SUCCESS} na mesma transação da leitura, qualquer outro resultado em
+     * transação independente. O detalhe só é aceito nas operações de leitura da feature (validado
+     * no construtor de {@link AuthorshipRecord}).
+     */
+    public void recordRead(
+            Actor actor,
+            Operation operation,
+            AuthorshipTargetType targetType,
+            UUID targetId,
+            AuthorshipReadDetail detail,
+            AuthorshipResult result,
+            String errorCode,
+            String correlationId) {
+        write(
+                new AuthorshipRecord(
+                        GeneratorId.create(),
+                        clock.now(),
+                        actor.id(),
+                        actor.role(),
+                        actor.origin(),
+                        checkedCode(operation.name()),
+                        targetType,
+                        targetId,
+                        result,
+                        checkedErrorCode(result, errorCode),
+                        null,
+                        required(correlationId),
+                        detail));
     }
 
     /**

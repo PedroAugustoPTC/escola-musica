@@ -22,10 +22,12 @@ export interface StudentListParams {
   search: string;
   status: StudentStatus;
   page: number;
+  /** Falso mantém a consulta parada (por exemplo, a busca de aluno do histórico sem termo). */
+  enabled?: boolean;
 }
 
 /** Lista de alunos de toda a escola (FR-021). */
-export function useAdminStudents({ search, status, page }: StudentListParams) {
+export function useAdminStudents({ search, status, page, enabled = true }: StudentListParams) {
   // termo com forma de CPF nunca entra na chave de consulta nem na API (não existe busca por CPF)
   const term = searchTermOf(search);
   return useQuery<AdminStudentPage>({
@@ -42,7 +44,7 @@ export function useAdminStudents({ search, status, page }: StudentListParams) {
       ),
     placeholderData: keepPreviousData,
     // a tela já recusa o CPF; aqui a guarda é dupla: sem consulta enquanto o termo for CPF
-    enabled: !looksLikeCpf(search.trim()),
+    enabled: enabled && !looksLikeCpf(search.trim()),
   });
 }
 

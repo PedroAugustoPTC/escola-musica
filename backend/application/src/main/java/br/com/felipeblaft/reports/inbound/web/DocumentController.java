@@ -5,10 +5,6 @@ import br.com.felipeblaft.reports.inbound.web.security.AuthenticatedTeacher;
 import br.com.felipeblaft.reports.usecase.document.GetReportDocumentUseCase;
 import br.com.felipeblaft.reports.usecase.document.GetReportDocumentUseCase.ObtainedDocument;
 import java.util.UUID;
-import org.springframework.http.CacheControl;
-import org.springframework.http.ContentDisposition;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -59,15 +55,6 @@ public class DocumentController {
     }
 
     static ResponseEntity<byte[]> pdf(ObtainedDocument document) {
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_PDF)
-                .cacheControl(CacheControl.noStore().cachePrivate())
-                .header(
-                        HttpHeaders.CONTENT_DISPOSITION,
-                        ContentDisposition.inline()
-                                .filename(document.fileName())
-                                .build()
-                                .toString())
-                .body(document.content());
+        return PdfResponses.inline(document);
     }
 }

@@ -78,14 +78,18 @@ test.describe('A01 — entrar na área administrativa', () => {
     await page.goto('/admin/sign-in');
     const submit = page.getByRole('button', { name: 'Entrar' });
     let blockedAt = 0;
+    const password = page.getByLabel('Senha', { exact: true });
     for (let attempt = 1; attempt <= 8 && blockedAt === 0; attempt++) {
       await page.getByLabel('E-mail').fill(email);
-      await page.getByLabel('Senha', { exact: true }).fill(`errada-${attempt}-0123456789`);
+      await password.fill(`errada-${attempt}-0123456789`);
       const [response] = await Promise.all([
         page.waitForResponse((r) => r.url().includes('/admin/session') && r.request().method() === 'POST'),
         submit.click(),
       ]);
       if (response.status() !== 401) blockedAt = attempt;
+      // a tela limpa a senha ao tratar a resposta; sem esperar por isso, a próxima senha preenchida
+      // seria apagada e o envio seguinte sairia vazio, sem requisição
+      await expect(password).toHaveValue('');
     }
     expect(blockedAt, 'o bloqueio por tentativas incorretas ocorre em até 8 tentativas').toBeGreaterThan(0);
 

@@ -147,6 +147,10 @@ public final class PermissionMatrix {
         map.put(
                 Operation.LESSON_AND_SEMESTER_REPORTS,
                 new Rule(DENY, ALLOW_OWN_STUDENTS, ALLOW_OWN_STUDENTS, Set.of()));
+        // visão da escola (006): só o administrador, só leitura de relatórios aprovados
+        map.put(Operation.SCHOOL_HISTORY_QUERY, onlyAdministrator(Set.of()));
+        map.put(Operation.SCHOOL_REPORT_DOCUMENT_OPEN, onlyAdministrator(Set.of()));
+        map.put(Operation.SCHOOL_REPORT_DOCUMENT_DOWNLOAD, onlyAdministrator(Set.of()));
         return map;
     }
 

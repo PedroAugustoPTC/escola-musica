@@ -11,8 +11,8 @@ interface Shortcut {
   icon: string;
   title: string;
   count?: number;
-  newTo: string;
-  newLabel: string;
+  newTo?: string;
+  newLabel?: string;
 }
 
 /** A04 — Início da área administrativa: atalhos e contagens. */
@@ -37,6 +37,11 @@ export function AdminHomeScreen() {
       count: data?.activeStudents,
       newTo: '/admin/students/new',
       newLabel: 'Cadastrar aluno',
+    },
+    {
+      to: '/admin/history',
+      icon: 'history',
+      title: msg('SCHOOL_HISTORY_NAV'),
     },
     {
       to: '/admin/administrators',
@@ -73,9 +78,11 @@ export function AdminHomeScreen() {
               <Link to={shortcut.to} className="button button--secondary">
                 Ver {shortcut.title.toLowerCase()}
               </Link>
-              <Link to={shortcut.newTo} className="button button--link">
-                {shortcut.newLabel}
-              </Link>
+              {shortcut.newTo ? (
+                <Link to={shortcut.newTo} className="button button--link">
+                  {shortcut.newLabel}
+                </Link>
+              ) : null}
             </div>
           </li>
         ))}

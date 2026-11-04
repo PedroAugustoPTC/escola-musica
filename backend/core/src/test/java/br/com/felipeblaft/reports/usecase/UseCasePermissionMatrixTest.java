@@ -88,7 +88,13 @@ class UseCasePermissionMatrixTest {
                     Operation.TEACHER_SIGN_IN,
                             "usecase.access.SignInPortalUseCase (entrada pública)",
                     Operation.LESSON_AND_SEMESTER_REPORTS,
-                            "usecase.lesson, semester, history, home, job e document (feature 001)");
+                            "usecase.lesson, semester, history, home, job e document (feature 001)",
+                    Operation.SCHOOL_HISTORY_QUERY,
+                            "usecase.history.QuerySchoolHistoryUseCase (feature 006)",
+                    Operation.SCHOOL_REPORT_DOCUMENT_OPEN,
+                            "usecase.document.GetSchoolReportDocumentUseCase (feature 006)",
+                    Operation.SCHOOL_REPORT_DOCUMENT_DOWNLOAD,
+                            "usecase.document.GetSchoolReportDocumentUseCase (feature 006)");
 
     // ------------------------------------------------------------------ mapa caso de uso →
     // operação

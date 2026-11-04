@@ -211,6 +211,26 @@ class ErrorHandlerIT extends ContractApiBase {
         assertThat(validation.getBody().details()).containsKey("fields");
     }
 
+    @Test
+    void internalErrorDeclaredByTheCoreCarriesReferenceAndNoDetail() {
+        var request = requestTo("/api/v1/admin/school-history");
+
+        var response =
+                handler.domain(
+                        new DomainException(ErrorCode.INTERNAL_ERROR, Map.of("name", "Matteo Mafra")),
+                        request);
+
+        assertThat(response.getStatusCode().value()).isEqualTo(500);
+        assertThat(response.getBody().code()).isEqualTo("INTERNAL_ERROR");
+        assertThat(response.getBody().reference()).isNotBlank();
+        assertThat(response.getBody().details()).isNull();
+        assertThat(
+                        events.list.stream()
+                                .map(ILoggingEvent::getFormattedMessage)
+                                .reduce("", String::concat))
+                .doesNotContain("Matteo");
+    }
+
     // ---- duplicidade: o núcleo decide pelo papel; a rota é só a rede de segurança
 
     private static MockHttpServletRequest requestTo(String path) {

@@ -232,6 +232,10 @@ class PersonalDataToStringTest {
         if (type.isEnum()) {
             return type.getEnumConstants()[0];
         }
+        if (type.getSimpleName().equals("AuthorshipReadDetail")) {
+            // só vale em três operações; o toString dele é coberto em AuthorshipReadDetailTest
+            return null;
+        }
         if (type.isRecord() && type.getName().startsWith(BASE)) {
             return sample(type);
         }

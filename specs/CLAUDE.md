@@ -14,6 +14,7 @@ Schema, mensagens) e `checklists/`.
 | `003-migrate-code-to-english` | Migração do código existente de português para inglês (refatoração, comportamento idêntico) |
 | `004-n8n-telegram-transport` | n8n como único transporte do canal Telegram (workflows como código, registro do webhook e remoção do caminho antigo, feita após a paridade) |
 | `005-admin-registrations-access` | Administração: acesso do administrador e cadastros de professores, alunos, associações e administradores (somente Web); o professor cadastra os próprios alunos na Web e no Telegram |
+| `006-admin-report-history` | Administração: visão da escola, com histórico de relatórios aprovados de qualquer aluno e PDFs, somente leitura (somente Web) |
 
 Regras:
 
@@ -25,7 +26,8 @@ Regras:
   A pasta de cada feature mantém o nome em português (`001-fluxo-relatorios`).
 - Os `contracts/` são fonte de verdade: o backend os implementa e o frontend gera tipos a partir deles
   (`001-fluxo-relatorios/contracts/api-portal.openapi.yaml` e
-  `005-admin-registrations-access/contracts/api-administration.openapi.yaml`). Mudança de API começa pelo contrato.
+  `005-admin-registrations-access/contracts/api-administration.openapi.yaml` e
+  `006-admin-report-history/contracts/api-school-history.openapi.yaml`). Mudança de API começa pelo contrato.
 - A feature 005 **emenda** as 001 e 002 sem reescrevê-las: os trechos afetados (secretaria, `EXPIRED_CODE`, `STUDENT_NOT_ASSIGNED`,
   carga inicial, ação `DELETE_MESSAGE`) trazem uma `> **Nota (feature 005)**: …` com link relativo para o contrato vigente em
   `005-admin-registrations-access/contracts/` (`messages.md`, `initial-load.md`, `telegram-student-registry.md`). Em divergência,

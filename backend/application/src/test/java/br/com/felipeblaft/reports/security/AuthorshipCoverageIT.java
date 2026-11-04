@@ -7,6 +7,8 @@ import br.com.felipeblaft.reports.domain.access.Actor;
 import br.com.felipeblaft.reports.domain.common.Secret;
 import br.com.felipeblaft.reports.support.AdministrationStackBase;
 import br.com.felipeblaft.reports.support.CanaryCpf;
+import br.com.felipeblaft.reports.domain.registry.Student;
+import br.com.felipeblaft.reports.domain.registry.Teacher;
 import br.com.felipeblaft.reports.support.CanaryStudent;
 import br.com.felipeblaft.reports.support.ResponseSweeper;
 import br.com.felipeblaft.reports.support.ResponseSweeper.Place;
@@ -23,6 +25,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -48,6 +51,13 @@ class AuthorshipCoverageIT extends AdministrationStackBase {
     private record Expectation(String role, String origin, String result) {}
 
     private static final Map<String, Expectation> EXPECTED = expectations();
+
+    /** Operações de leitura da visão da escola (feature 006), cobertas em teste próprio. */
+    private static final List<String> SCHOOL_OPERATIONS =
+            List.of(
+                    "SCHOOL_HISTORY_QUERY",
+                    "SCHOOL_REPORT_DOCUMENT_OPEN",
+                    "SCHOOL_REPORT_DOCUMENT_DOWNLOAD");
 
     private static Map<String, Expectation> expectations() {
         Map<String, Expectation> expected = new LinkedHashMap<>();
@@ -106,7 +116,8 @@ class AuthorshipCoverageIT extends AdministrationStackBase {
     @Test
     void theScenarioCoversEveryOperationListedInTheDataModel() throws Exception {
         assertThat(operationsOfTheDataModel())
-                .containsExactlyInAnyOrderElementsOf(EXPECTED.keySet());
+                .containsExactlyInAnyOrderElementsOf(
+                        EXPECTED.keySet());
     }
 
     @Test
@@ -264,6 +275,37 @@ class AuthorshipCoverageIT extends AdministrationStackBase {
     }
 
     @Test
+    void theThreeSchoolReadOperationsEachLeaveAnAdministratorWebSuccessRecord() throws Exception {
+        Teacher clara = scenario.clara();
+        Student student = scenario.student(clara, "Matteo Mafra", "Piano");
+        UUID lesson =
+                scenario.approvedLesson(clara, student, java.time.LocalDate.of(2026, 3, 10), "x")
+                        .id();
+        Cookie admin = signInAdministrator(insertAdministrator());
+        clearAuthorship();
+        String base = ADMIN + "/school-history";
+
+        assertThat(call(HttpMethod.GET, base, admin).getStatus()).isEqualTo(200);
+        assertThat(call(HttpMethod.GET, base + "/lesson-reports/" + lesson + "/pdf", admin).getStatus())
+                .isEqualTo(200);
+        assertThat(
+                        call(
+                                        HttpMethod.GET,
+                                        base + "/lesson-reports/" + lesson + "/pdf/download",
+                                        admin)
+                                .getStatus())
+                .isEqualTo(200);
+
+        for (String operation : SCHOOL_OPERATIONS) {
+            List<Map<String, Object>> rows = authorship(operation);
+            assertThat(rows).as("registros de %s", operation).hasSize(1);
+            assertRecord(rows.getFirst(), ADMIN_ROLE, "WEB", "SUCCESS");
+        }
+        ResponseSweeper.searching(CanaryStudent.sweepValuesWithCpf())
+                .assertClean(Place.AUTHORSHIP, authorshipDump());
+    }
+
+    @Test
     void readsAndSessionExpiryLeaveNoRecord() throws Exception {
         Cookie admin = signInAdministrator(insertAdministrator());
         TeacherAccount clara = createTeacher(admin, "Clara Souza", "clara@example.test");
@@ -295,6 +337,31 @@ class AuthorshipCoverageIT extends AdministrationStackBase {
         assertThat(call(HttpMethod.GET, ADMIN + "/session", admin).getStatus()).isEqualTo(401);
 
         assertThat(authorship()).hasSize(before);
+    }
+
+    /** Feature 006: as três operações da visão da escola, com registro de sucesso do administrador. */
+    @Test
+    void schoolHistoryOperationsLeaveARecordWithRoleChannelAndResult() throws Exception {
+        var teacher = scenario.clara();
+        var student = scenario.student(teacher, "Matteo Mafra", "Piano");
+        UUID lesson =
+                scenario.approvedLesson(teacher, student, java.time.LocalDate.of(2026, 3, 10), "x")
+                        .id();
+        Cookie admin = signInAdministrator(insertAdministrator());
+        String base = ADMIN + "/school-history";
+
+        assertOk(call(HttpMethod.GET, base + "?studentId=" + student.id(), admin));
+        assertOk(call(HttpMethod.GET, base + "/lesson-reports/" + lesson + "/pdf", admin));
+        assertOk(call(HttpMethod.GET, base + "/lesson-reports/" + lesson + "/pdf/download", admin));
+
+        for (String operation :
+                List.of(
+                        "SCHOOL_HISTORY_QUERY",
+                        "SCHOOL_REPORT_DOCUMENT_OPEN",
+                        "SCHOOL_REPORT_DOCUMENT_DOWNLOAD")) {
+            assertThat(authorship(operation)).as(operation).hasSize(1);
+            assertRecord(onlyAuthorship(operation), ADMIN_ROLE, "WEB", "SUCCESS");
+        }
     }
 
     private static void assertOk(MockHttpServletResponse response) {

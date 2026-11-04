@@ -5,11 +5,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import br.com.felipeblaft.reports.domain.access.ActionOrigin;
 import br.com.felipeblaft.reports.domain.access.Actor;
+import br.com.felipeblaft.reports.domain.access.AuthorshipReadDetail;
 import br.com.felipeblaft.reports.domain.access.AuthorshipRecord;
 import br.com.felipeblaft.reports.domain.access.AuthorshipResult;
 import br.com.felipeblaft.reports.domain.access.AuthorshipTargetType;
 import br.com.felipeblaft.reports.domain.access.Operation;
 import br.com.felipeblaft.reports.domain.access.Role;
+import br.com.felipeblaft.reports.domain.common.ReportType;
 import br.com.felipeblaft.reports.doubles.FixedClock;
 import br.com.felipeblaft.reports.port.AuthorshipRecorderPort;
 import java.util.ArrayList;
@@ -332,5 +334,98 @@ class AuthorshipServiceTest {
                                         target,
                                         "req-7"))
                 .isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    void successOfAReadIsRecordedInTheSameTransactionWithTheDetail() {
+        AuthorshipReadDetail detail =
+                AuthorshipReadDetail.ofQuery(null, ReportType.LESSON, null, null, 2);
+
+        service.recordRead(
+                Actor.administrator(administratorId, false),
+                Operation.SCHOOL_HISTORY_QUERY,
+                AuthorshipTargetType.STUDENT,
+                target,
+                detail,
+                AuthorshipResult.SUCCESS,
+                null,
+                "req-9");
+
+        assertThat(recorder.independent).isEmpty();
+        AuthorshipRecord saved = recorder.sameTransaction.get(0);
+        assertThat(saved.operation()).isEqualTo("SCHOOL_HISTORY_QUERY");
+        assertThat(saved.authorId()).isEqualTo(administratorId);
+        assertThat(saved.authorRole()).isEqualTo(Role.ADMINISTRATOR);
+        assertThat(saved.origin()).isEqualTo(ActionOrigin.WEB);
+        assertThat(saved.targetType()).isEqualTo(AuthorshipTargetType.STUDENT);
+        assertThat(saved.targetId()).isEqualTo(target);
+        assertThat(saved.readDetail()).isEqualTo(detail);
+        assertThat(saved.originHash()).isNull();
+        assertThat(saved.correlationId()).isEqualTo("req-9");
+    }
+
+    @Test
+    void failureOfAReadIsRecordedIndependently() {
+        service.recordRead(
+                Actor.administrator(administratorId, false),
+                Operation.SCHOOL_REPORT_DOCUMENT_OPEN,
+                AuthorshipTargetType.LESSON_REPORT,
+                target,
+                null,
+                AuthorshipResult.FAILURE,
+                "RESOURCE_NOT_FOUND",
+                "req-10");
+
+        assertThat(recorder.sameTransaction).isEmpty();
+        AuthorshipRecord saved = recorder.independent.get(0);
+        assertThat(saved.operation()).isEqualTo("SCHOOL_REPORT_DOCUMENT_OPEN");
+        assertThat(saved.targetType()).isEqualTo(AuthorshipTargetType.LESSON_REPORT);
+        assertThat(saved.errorCode()).isEqualTo("RESOURCE_NOT_FOUND");
+        assertThat(saved.readDetail()).isNull();
+    }
+
+    @Test
+    void readRecordKeepsTheStrictFormatChecks() {
+        Actor administrator = Actor.administrator(administratorId, false);
+        AuthorshipReadDetail detail = AuthorshipReadDetail.ofDocument(1);
+
+        assertThatThrownBy(
+                        () ->
+                                service.recordRead(
+                                        administrator,
+                                        Operation.SCHOOL_REPORT_DOCUMENT_DOWNLOAD,
+                                        AuthorshipTargetType.SEMESTER_REPORT,
+                                        target,
+                                        detail,
+                                        AuthorshipResult.SUCCESS,
+                                        "RESOURCE_NOT_FOUND",
+                                        "req-11"))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(
+                        () ->
+                                service.recordRead(
+                                        administrator,
+                                        Operation.SCHOOL_REPORT_DOCUMENT_DOWNLOAD,
+                                        AuthorshipTargetType.SEMESTER_REPORT,
+                                        target,
+                                        detail,
+                                        AuthorshipResult.SUCCESS,
+                                        null,
+                                        null))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(
+                        () ->
+                                service.recordRead(
+                                        administrator,
+                                        Operation.STUDENT_LIST,
+                                        AuthorshipTargetType.STUDENT,
+                                        target,
+                                        detail,
+                                        AuthorshipResult.SUCCESS,
+                                        null,
+                                        "req-12"))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThat(recorder.sameTransaction).isEmpty();
+        assertThat(recorder.independent).isEmpty();
     }
 }

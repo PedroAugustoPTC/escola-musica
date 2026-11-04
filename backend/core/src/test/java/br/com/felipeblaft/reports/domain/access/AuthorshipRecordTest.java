@@ -1,5 +1,6 @@
 package br.com.felipeblaft.reports.domain.access;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -152,5 +153,53 @@ class AuthorshipRecordTest {
                 .hasMessageNotContaining(HASH);
         assertThatCode(() -> with("STUDENT_REGISTER", null, null, "req-1"))
                 .doesNotThrowAnyException();
+    }
+
+    private static AuthorshipRecord withDetail(String operation, AuthorshipReadDetail detail) {
+        return new AuthorshipRecord(
+                UUID.randomUUID(),
+                NOW,
+                null,
+                null,
+                ActionOrigin.WEB,
+                operation,
+                null,
+                null,
+                AuthorshipResult.SUCCESS,
+                null,
+                null,
+                "req-1",
+                detail);
+    }
+
+    @Test
+    void readDetailIsOnlyAcceptedInTheSchoolReadOperations() {
+        AuthorshipReadDetail detail = AuthorshipReadDetail.ofQuery(null, null, null, null, 0);
+        for (String operation :
+                List.of(
+                        "SCHOOL_HISTORY_QUERY",
+                        "SCHOOL_REPORT_DOCUMENT_OPEN",
+                        "SCHOOL_REPORT_DOCUMENT_DOWNLOAD")) {
+            assertThatCode(() -> withDetail(operation, detail))
+                    .as(operation)
+                    .doesNotThrowAnyException();
+        }
+        assertThat(AuthorshipRecord.READ_DETAIL_OPERATIONS)
+                .containsExactlyInAnyOrder(
+                        "SCHOOL_HISTORY_QUERY",
+                        "SCHOOL_REPORT_DOCUMENT_OPEN",
+                        "SCHOOL_REPORT_DOCUMENT_DOWNLOAD");
+        for (String operation : List.of("STUDENT_REGISTER", "ADMIN_SIGN_IN", "TEACHER_LIST")) {
+            assertThatThrownBy(() -> withDetail(operation, detail))
+                    .as(operation)
+                    .isInstanceOf(IllegalArgumentException.class);
+        }
+    }
+
+    @Test
+    void recordWithoutDetailStaysValidInAnyOperation() {
+        assertThatCode(() -> withDetail("STUDENT_REGISTER", null)).doesNotThrowAnyException();
+        assertThatCode(() -> withDetail("SCHOOL_HISTORY_QUERY", null)).doesNotThrowAnyException();
+        assertThat(with("ADMIN_SIGN_IN", null, null, "req-1").readDetail()).isNull();
     }
 }

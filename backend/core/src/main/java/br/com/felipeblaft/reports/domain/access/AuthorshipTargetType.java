@@ -5,5 +5,7 @@ public enum AuthorshipTargetType {
     TEACHER,
     ADMINISTRATOR,
     STUDENT,
-    ASSIGNMENT
+    ASSIGNMENT,
+    LESSON_REPORT,
+    SEMESTER_REPORT
 }

@@ -104,6 +104,33 @@ class PermissionMatrixTest {
     }
 
     @Test
+    void schoolHistoryOperationsAreOnlyForTheAdministratorOnTheWeb() {
+        for (Operation operation :
+                Set.of(
+                        Operation.SCHOOL_HISTORY_QUERY,
+                        Operation.SCHOOL_REPORT_DOCUMENT_OPEN,
+                        Operation.SCHOOL_REPORT_DOCUMENT_DOWNLOAD)) {
+            assertThat(matrix.decide(operation, administrator))
+                    .as(operation.name())
+                    .isEqualTo(Permission.ALLOW);
+            assertThat(matrix.decide(operation, teacherWeb))
+                    .as(operation.name())
+                    .isEqualTo(Permission.DENY);
+            assertThat(matrix.decide(operation, teacherTelegram))
+                    .as(operation.name())
+                    .isEqualTo(Permission.DENY);
+            assertThat(matrix.rules().get(operation).system()).as(operation.name()).isEmpty();
+            for (ActionOrigin origin :
+                    EnumSet.of(ActionOrigin.SYSTEM_STARTUP, ActionOrigin.INITIAL_LOAD)) {
+                assertThat(matrix.decide(operation, Actor.system(origin)))
+                        .as(operation.name())
+                        .isEqualTo(Permission.DENY);
+            }
+            assertThat(matrix.decideAnonymous(operation)).isEqualTo(Permission.DENY);
+        }
+    }
+
+    @Test
     void systemActorOnlyDoesWhatTheMatrixListsForItsOrigin() {
         Actor startup = Actor.system(ActionOrigin.SYSTEM_STARTUP);
         Actor load = Actor.system(ActionOrigin.INITIAL_LOAD);

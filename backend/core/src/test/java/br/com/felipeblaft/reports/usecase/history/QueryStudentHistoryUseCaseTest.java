@@ -9,6 +9,7 @@ import br.com.felipeblaft.reports.domain.common.ErrorCode;
 import br.com.felipeblaft.reports.domain.common.ReportType;
 import br.com.felipeblaft.reports.domain.report.LessonReport;
 import br.com.felipeblaft.reports.domain.semester.SemesterReport;
+import br.com.felipeblaft.reports.doubles.InMemoryApprovedReportQuery;
 import br.com.felipeblaft.reports.doubles.ReportScenario;
 import br.com.felipeblaft.reports.port.TaskLlm;
 import br.com.felipeblaft.reports.usecase.history.QueryStudentHistoryUseCase.History;
@@ -24,8 +25,7 @@ class QueryStudentHistoryUseCaseTest {
     private final QueryStudentHistoryUseCase history =
             new QueryStudentHistoryUseCase(
                     new GetStudentSummaryUseCase(c.students, c.open, c.authorization),
-                    c.reports,
-                    c.semester);
+                    new InMemoryApprovedReportQuery(c.reports, c.semester, c.students, c.teachers));
 
     @Test
     void onlyTeachersApprovedFromNewestToOldest() {

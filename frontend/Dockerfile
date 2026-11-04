@@ -9,6 +9,7 @@ COPY frontend/ ./
 COPY backend/application/src/main/resources/messages/ /repo/backend/application/src/main/resources/messages/
 COPY specs/001-fluxo-relatorios/contracts/api-portal.openapi.yaml /repo/specs/001-fluxo-relatorios/contracts/api-portal.openapi.yaml
 COPY specs/005-admin-registrations-access/contracts/api-administration.openapi.yaml /repo/specs/005-admin-registrations-access/contracts/api-administration.openapi.yaml
+COPY specs/006-admin-report-history/contracts/api-school-history.openapi.yaml /repo/specs/006-admin-report-history/contracts/api-school-history.openapi.yaml
 RUN npm run build
 
 FROM caddy:2

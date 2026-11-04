@@ -86,6 +86,17 @@ export function FormErrorSummary({ messages }: { messages: string[] }) {
   );
 }
 
+/** Marca "Inativo" com ícone e texto (nunca só cor); some quando a pessoa está ativa. */
+export function InactiveMark({ active }: { active: boolean }) {
+  if (active) return null;
+  return (
+    <span className="status-badge status-badge--inactive">
+      <Icon name="block" size="small" />
+      Inativo
+    </span>
+  );
+}
+
 /** Controle segmentado de filtro (botões com `aria-pressed`). */
 export function SegmentedFilter<T extends string>({
   label,

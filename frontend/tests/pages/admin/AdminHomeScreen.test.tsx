@@ -26,6 +26,19 @@ describe('AdminHomeScreen (A04)', () => {
     expect(screen.getByText('Olá, Marina Duarte.')).toBeInTheDocument();
   });
 
+  it('oferece o atalho para o histórico da escola', async () => {
+    renderAdminArea('/admin', {
+      'GET /api/v1/admin/teachers': totalOf(7),
+      'GET /api/v1/admin/students': totalOf(42),
+      'GET /api/v1/admin/administrators': totalOf(2),
+    });
+
+    expect(await screen.findByRole('link', { name: 'Ver histórico' })).toHaveAttribute(
+      'href',
+      '/admin/history',
+    );
+  });
+
   it('falha ao carregar mostra o erro com nova tentativa', async () => {
     renderAdminArea('/admin', {
       'GET /api/v1/admin/teachers': { status: 500, body: { code: 'INTERNAL_ERROR', message: 'Falhou.' } },

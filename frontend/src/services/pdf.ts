@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { requestBlob } from './apiClient';
+import { requestBlob, requestNamedBlob } from './apiClient';
 
 /**
  * Baixa o PDF por fetch autenticado e devolve uma URL `blob:` para o visualizador. A URL é revogada
@@ -46,7 +46,14 @@ export function usePdf(path: string | null) {
  */
 export async function openPdf(path: string, fileName: string): Promise<boolean> {
   const tab = window.open('', '_blank');
-  const blob = await requestBlob(path);
+  let blob: Blob;
+  let serverName: string | null;
+  try {
+    ({ blob, fileName: serverName } = await requestNamedBlob(path));
+  } catch (error) {
+    tab?.close();
+    throw error;
+  }
   const url = URL.createObjectURL(blob);
   if (tab) {
     tab.location.href = url;
@@ -55,10 +62,23 @@ export async function openPdf(path: string, fileName: string): Promise<boolean> 
   }
   const link = document.createElement('a');
   link.href = url;
-  link.download = fileName;
+  link.download = serverName ?? fileName;
   document.body.appendChild(link);
   link.click();
   link.remove();
   window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
   return false;
+}
+
+/** Baixa o PDF por fetch autenticado e o salva com o nome sugerido (sem abrir aba). */
+export async function downloadPdf(path: string, fileName: string): Promise<void> {
+  const { blob, fileName: serverName } = await requestNamedBlob(path);
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = serverName ?? fileName;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }

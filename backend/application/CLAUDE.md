@@ -18,7 +18,7 @@ Pacotes em `src/main/java/br/com/felipeblaft/reports/`:
 | `outbound/ai`, `outbound/audio`, `outbound/pdf`, `outbound/storage`, `outbound/queue`, `outbound/telegram`, `outbound/security` | `*Adapter` das portas do `core` |
 | `config` | Beans, propriedades (`reports.*`) e logging (`log/`) |
 
-Recursos em `src/main/resources`: `db/migration` (Flyway `V<n>__*.sql`; **`V1` a `V15` são imutáveis**, nunca edite
+Recursos em `src/main/resources`: `db/migration` (Flyway `V<n>__*.sql`; **`V1` a `V16` são imutáveis**, nunca edite
 migração já aplicada), `ai/schemas` (JSON Schema das saídas de IA), `ai/simulated` (respostas do provedor simulado),
 `messages` (catálogo `messages_pt_BR.properties`, texto ao usuário), `prompts` e `pdf` (modelos HTML, estilos, fontes e imagens).
 
@@ -34,7 +34,16 @@ Migrações da feature 005 (todas aditivas; não apagam dado existente):
 | `V15__channel_action_delete_message` | acrescenta `DELETE_MESSAGE` à `CHECK` do tipo de ação do canal |
 
 Não existe `V13`: a migração da ação `DELETE_MESSAGE` nasceu como `V13` e foi **renumerada para `V15`**, depois da `V14`, para
-que um banco já migrado até a `V14` não recuse a migração fora de ordem. Migração nova começa na `V16`.
+que um banco já migrado até a `V14` não recuse a migração fora de ordem.
+
+Migração da feature 006 (aditiva):
+
+| Migração | O que faz |
+|---|---|
+| `V16__authorship_read_detail` | colunas tipadas de detalhe de leitura em `authorship_record` (filtros, página, versão do documento), tipos de alvo `LESSON_REPORT`/`SEMESTER_REPORT` e índices parciais de relatórios aprovados |
+
+Migração nova começa na `V17`. A consulta de aprovados da escola (`ApprovedReportQueryAdapter`) e as rotas de leitura do
+administrador (`AdminSchoolHistoryController`) seguem `specs/006-admin-report-history/contracts/`.
 
 ## Cadeia de segurança
 
