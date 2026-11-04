@@ -913,6 +913,12 @@ components:
         cpf: { type: string, maxLength: 14, writeOnly: true, description: "Só na entrada; aceita pontos e traço." }
         guardian: { $ref: "#/components/schemas/GuardianInput" }
         instrument: { type: string, maxLength: 60 }
+        consent:
+          $ref: "../../007-privacy-retention-operations/contracts/api-privacy-operations.openapi.yaml#/components/schemas/ConsentInput"
+          description: |
+            **Nota (feature 007)**: obrigatório no cadastro de aluno menor de 18 anos e na edição que torna o aluno
+            menor (`VALIDATION_FAILED` em `consent` com `CONSENT_REQUIRED`; erros de campo em `consent.*`). Ignorado
+            para adulto. Ver `007-privacy-retention-operations/contracts/`.
 
     AdministratorStudentInput:
       allOf:
@@ -935,6 +941,9 @@ components:
         cpf: { type: string, maxLength: 14, writeOnly: true }
         guardian: { $ref: "#/components/schemas/GuardianInput" }
         instrument: { type: string, maxLength: 60 }
+        consent:
+          $ref: "../../007-privacy-retention-operations/contracts/api-privacy-operations.openapi.yaml#/components/schemas/ConsentInput"
+          description: "**Nota (feature 007)**: exigido na edição que torna o aluno menor de 18 anos."
 
     GuardianInput:
       type: object

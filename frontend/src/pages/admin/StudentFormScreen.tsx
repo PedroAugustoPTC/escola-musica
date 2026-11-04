@@ -4,12 +4,14 @@ import { LoadingState } from '../../components/LoadingState';
 import { FormErrorSummary } from '../../components/admin/ui';
 import { apiErrorText, fieldErrorsOf } from '../../components/admin/fieldErrors';
 import { StudentForm } from '../../components/student/StudentForm';
+import { useAdminConsentTerm } from '../../components/student/useConsentTerm';
 import { useRegisterAdminStudent } from '../../services/admin/students';
 import { useActiveTeacherOptions } from '../../services/admin/teachers';
 
 /** A11 — Cadastrar aluno, com os professores escolhidos (multisseleção de professores ativos). */
 export function StudentFormScreen() {
   const navigate = useNavigate();
+  const consentTerm = useAdminConsentTerm();
   const teachers = useActiveTeacherOptions();
   const register = useRegisterAdminStudent();
   const fieldErrors = fieldErrorsOf(register.error);
@@ -30,6 +32,7 @@ export function StudentFormScreen() {
             <FormErrorSummary messages={[apiErrorText(register.error)]} />
           ) : null}
           <StudentForm
+            consentTerm={consentTerm}
             variant="admin"
             mode="create"
             teacherOptions={teachers.data.items.map((teacher) => ({ id: teacher.id, name: teacher.name }))}

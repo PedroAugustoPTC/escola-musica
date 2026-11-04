@@ -8,6 +8,7 @@ import { Layout } from '../components/Layout';
 import { LoadingState } from '../components/LoadingState';
 import { SituationBadge } from '../components/student/SituationBadge';
 import { StudentForm } from '../components/student/StudentForm';
+import { useTeacherConsentTerm } from '../components/student/useConsentTerm';
 import type { StudentFormFieldError } from '../components/student/studentFormTypes';
 import { buildStudentUpdate } from '../components/student/studentPayload';
 import { useBlockedCountdown } from '../components/student/useBlockedCountdown';
@@ -27,6 +28,7 @@ export function MyStudentDetailScreen() {
   const { studentId = '' } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const consentTerm = useTeacherConsentTerm();
   const student = useMyStudent(studentId);
   const update = useUpdateMyStudent(studentId);
   const situation = useChangeMyStudentSituation(studentId);
@@ -92,6 +94,7 @@ export function MyStudentDetailScreen() {
         ) : null}
         {updateGeneralError ? <ErrorAlert error={failure.error} fromCatalog /> : null}
         <StudentForm
+          consentTerm={consentTerm}
           key={`${data.id}:${formVersion}`}
           variant="teacher"
           mode="edit"

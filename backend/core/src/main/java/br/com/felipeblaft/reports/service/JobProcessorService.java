@@ -146,6 +146,7 @@ public class JobProcessorService {
     private final TransactionPort transaction;
     private final ClockPort clock;
     private ComplementProcessor complement;
+    private ConsentGuardService consentGuard;
 
     public JobProcessorService(
             JobQueuePort queue,
@@ -172,6 +173,14 @@ public class JobProcessorService {
         this.clock = Objects.requireNonNull(clock);
     }
 
+    /**
+     * Liga a segunda barreira de consentimento (FR-034): a revogação entre enfileirar e processar
+     * encerra o trabalho com {@code CONSENT_REQUIRED}, sem chamar provedor.
+     */
+    public void useConsentGuard(ConsentGuardService guard) {
+        this.consentGuard = guard;
+    }
+
     public void registerComplement(ComplementProcessor processor) {
         this.complement = processor;
     }
@@ -182,6 +191,11 @@ public class JobProcessorService {
      */
     public void process(ProcessingJob job) {
         try {
+            if (consentGuard != null && consentGuard.blocks(job.studentId())) {
+                // revogação entre enfileirar e processar: nenhuma chamada a provedor (SC-005)
+                abandon(job, JobResult.CONSENT_REQUIRED);
+                return;
+            }
             if (complement != null && complement.serves(job)) {
                 complement.process(job, support);
                 return;
@@ -809,7 +823,8 @@ public class JobProcessorService {
 
     /** Erro inesperado: o trabalho falha e o relatório não fica preso numa etapa (FR-022). */
     private void unexpectedFailure(ProcessingJob job) {
-        JobResult result =
+        abandon(
+                job,
                 switch (job.type()) {
                     case QUESTION_ANSWER -> JobResult.ANSWER_FAILED;
                     case CHANGE -> JobResult.CHANGE_FAILED;
@@ -818,7 +833,14 @@ public class JobProcessorService {
                             job.reportId() == null
                                     ? JobResult.AUDIO_NOT_PROCESSABLE
                                     : JobResult.STRUCTURING_FAILED;
-                };
+                });
+    }
+
+    /**
+     * Encerra o trabalho sem resultado útil e solta o relatório aberto da etapa (para o relatório
+     * nunca ficar preso), com o código dado.
+     */
+    private void abandon(ProcessingJob job, JobResult result) {
         try {
             if (complement != null && complement.serves(job)) {
                 complement.failed(job);

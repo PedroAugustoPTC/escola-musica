@@ -40,6 +40,18 @@ import tools.jackson.databind.JsonNode;
  */
 public abstract class RealStackBase extends TelegramConversationBase {
 
+    /** Termo 1 publicado: os cadastros de menor desta base levam o consentimento do termo 1. */
+    @org.junit.jupiter.api.BeforeEach
+    void publishDefaultConsentTerm() {
+        jdbc.update(
+                "insert into consent_term_version (id, number, published_on, text,"
+                        + " requires_new_consent, created_by, created_at)"
+                        + " values (?, 1, date '2025-01-01', 'Institutional text', false, ?, now())"
+                        + " on conflict (number) do nothing",
+                java.util.UUID.randomUUID(),
+                java.util.UUID.randomUUID());
+    }
+
     public static final String ADMIN_COOKIE = "admin_session";
     public static final String ADMIN_BASE = "/api/v1/admin";
 
@@ -227,6 +239,13 @@ public abstract class RealStackBase extends TelegramConversationBase {
             addField(guardian, "phone", guardianPhone);
             addField(guardian, "email", guardianEmail);
             fields.add("\"guardian\":{" + String.join(",", guardian) + "}");
+        }
+        if (guardianName != null) {
+            // aluno menor: o consentimento do responsável é obrigatório (feature 007, FR-030)
+            fields.add(
+                    "\"consent\":{\"consentingName\":\"Responsável Fictício\","
+                            + "\"relationship\":\"MOTHER\",\"consentedOn\":\"2025-01-02\","
+                            + "\"termVersion\":1,\"collectionMethod\":\"SIGNED_PAPER\"}");
         }
         addField(fields, "instrument", instrument);
         if (teacherIds != null) {

@@ -219,6 +219,14 @@ class ArchitectureRulesTest {
                     // verifica)
                     Map.entry("QueryAuditTrailUseCase", Operation.AUDIT_TRAIL_QUERY),
                     Map.entry("VerifyAuditChainUseCase", Operation.AUDIT_TRAIL_VERIFY),
+                    // feature 007: consentimento do responsável
+                    Map.entry("RecordConsentUseCase", Operation.CONSENT_RECORD),
+                    Map.entry("RevokeConsentUseCase", Operation.CONSENT_REVOKE),
+                    Map.entry("PublishConsentTermUseCase", Operation.CONSENT_TERM_PUBLISH),
+                    Map.entry("GetCurrentConsentTermUseCase", Operation.CONSENT_TERM_READ),
+                    Map.entry("ListConsentTermsUseCase", Operation.CONSENT_TERM_READ),
+                    Map.entry("ListPendingConsentsUseCase", Operation.CONSENT_PENDING_READ),
+                    Map.entry("ListStudentConsentsUseCase", Operation.CONSENT_READ),
                     Map.entry(
                             "GetSchoolReportDocumentUseCase",
                             Operation.SCHOOL_REPORT_DOCUMENT_OPEN));
@@ -229,7 +237,14 @@ class ArchitectureRulesTest {
                     "QuerySchoolHistoryUseCase",
                     "GetSchoolReportDocumentUseCase",
                     "QueryAuditTrailUseCase",
-                    "VerifyAuditChainUseCase");
+                    "VerifyAuditChainUseCase",
+                    "RecordConsentUseCase",
+                    "RevokeConsentUseCase",
+                    "PublishConsentTermUseCase",
+                    "GetCurrentConsentTermUseCase",
+                    "ListConsentTermsUseCase",
+                    "ListPendingConsentsUseCase",
+                    "ListStudentConsentsUseCase");
 
     /** Casos de uso desses pacotes sem operação na matriz (validam a credencial, não um ator). */
     private static final Set<String> WITHOUT_OPERATION =
@@ -523,5 +538,46 @@ class ArchitectureRulesTest {
                                                                 + target)));
             }
         };
+    }
+
+    /**
+     * FR-034, SC-005: todo caso de uso que enfileira trabalho de IA depende da barreira de
+     * consentimento. Quem enfileira trabalho sem IA entra na lista, com o motivo.
+     */
+    private static final Set<String> ENQUEUE_WITHOUT_AI = Set.of();
+
+    @Test
+    void everyUseCaseThatEnqueuesAiWorkDependsOnTheConsentGuard() {
+        List<String> missing =
+                core.stream()
+                        .filter(c -> c.getPackageName().startsWith(BASE + ".usecase"))
+                        .filter(c -> c.isTopLevelClass() && c.getSimpleName().endsWith("UseCase"))
+                        .filter(
+                                c ->
+                                        c.getMethodCallsFromSelf().stream()
+                                                .anyMatch(
+                                                        call ->
+                                                                call.getTargetOwner()
+                                                                                .getName()
+                                                                                .equals(
+                                                                                        BASE
+                                                                                                + ".port.JobQueuePort")
+                                                                        && call.getName()
+                                                                                .equals("enqueue")))
+                        .filter(
+                                c ->
+                                        c.getDirectDependenciesFromSelf().stream()
+                                                .noneMatch(
+                                                        d ->
+                                                                d.getTargetClass()
+                                                                        .getName()
+                                                                        .equals(
+                                                                                BASE
+                                                                                        + ".service.ConsentGuardService")))
+                        .map(JavaClass::getSimpleName)
+                        .filter(name -> !ENQUEUE_WITHOUT_AI.contains(name))
+                        .sorted()
+                        .toList();
+        assertThat(missing).as("casos de uso que enfileiram IA sem a barreira").isEmpty();
     }
 }

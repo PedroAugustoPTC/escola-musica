@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import {
   addTeacherWithoutStudents,
   expectValueAbsentFromUrlAndStorage,
+  fillConsent,
   maskedCpf,
   minorBirthDate,
   seed,
@@ -67,6 +68,7 @@ test('menor de idade com responsável: o cadastro fecha com os dados do respons�
   await page.getByLabel('Nome do responsável').fill('Sandra Lopes');
   await page.getByLabel('Telefone do responsável').fill('(11) 91234-5678');
   await page.getByLabel('E-mail do responsável').fill('sandra@example.test');
+  await fillConsent(page);
   await page.getByRole('button', { name: 'Cadastrar aluno' }).click();
   await expect(page).toHaveURL(/\/my-students\/[0-9a-f-]{36}$/);
   await expect(page.getByRole('heading', { level: 1, name: 'Pedro Henrique Lopes' })).toBeVisible();

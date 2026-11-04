@@ -42,6 +42,12 @@ public class ScenarioIT {
     @org.springframework.beans.factory.annotation.Autowired
     private br.com.felipeblaft.reports.service.DocumentGenerationService documents;
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private br.com.felipeblaft.reports.port.ConsentRepository consents;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private br.com.felipeblaft.reports.port.ConsentTermRepository consentTerms;
+
     private int cpfSequence;
 
     /**
@@ -99,7 +105,57 @@ public class ScenarioIT {
         return teacher("Bruno Lima", "bruno@example.test", CODE_BRUNO);
     }
 
+    /**
+     * Aluno menor (2012) já com consentimento válido do responsável, para os testes que não tratam
+     * do consentimento (feature 007): sem ele, a IA fica bloqueada. Use {@link
+     * #studentWithoutConsent} quando o consentimento for o assunto.
+     */
     public Student student(Teacher teacher, String name, String instrument) {
+        Student student = studentWithoutConsent(teacher, name, instrument);
+        grantConsent(student);
+        return student;
+    }
+
+    /** Registra um consentimento válido (termo 1, criado se ainda não existe) para o aluno. */
+    public void grantConsent(Student student) {
+        java.util.List<br.com.felipeblaft.reports.domain.privacy.ConsentTermVersion> all =
+                consentTerms.listAll();
+        br.com.felipeblaft.reports.domain.privacy.ConsentTermVersion term =
+                all.isEmpty()
+                        ? new br.com.felipeblaft.reports.domain.privacy.ConsentTermVersion(
+                                java.util.UUID.randomUUID(),
+                                1,
+                                LocalDate.of(2025, 1, 1),
+                                "Institutional text",
+                                false,
+                                java.util.UUID.randomUUID(),
+                                clock.now())
+                        : all.getFirst();
+        if (all.isEmpty()) {
+            consentTerms.save(term);
+        }
+        consents.save(
+                new br.com.felipeblaft.reports.domain.privacy.GuardianConsent(
+                        java.util.UUID.randomUUID(),
+                        student.id(),
+                        "Responsável Fictício",
+                        br.com.felipeblaft.reports.domain.privacy.ConsentRelationship.MOTHER,
+                        LocalDate.of(2025, 1, 2),
+                        term.id(),
+                        term.number(),
+                        br.com.felipeblaft.reports.domain.privacy.ConsentCollectionMethod
+                                .SIGNED_PAPER,
+                        null,
+                        null,
+                        br.com.felipeblaft.reports.domain.access.ActionOrigin.INITIAL_LOAD,
+                        clock.now(),
+                        null,
+                        null,
+                        null));
+    }
+
+    /** Aluno menor sem nenhum consentimento: a IA fica bloqueada para ele. */
+    public Student studentWithoutConsent(Teacher teacher, String name, String instrument) {
         Cpf cpf = Cpf.of(cpfValid(++cpfSequence));
         Student student =
                 Student.create(

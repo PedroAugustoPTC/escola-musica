@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 import { ErrorAlert } from '../components/ErrorState';
 import { Layout } from '../components/Layout';
 import { StudentForm } from '../components/student/StudentForm';
+import { useTeacherConsentTerm } from '../components/student/useConsentTerm';
 import type { StudentFormFieldError } from '../components/student/studentFormTypes';
 import { buildStudentInput } from '../components/student/studentPayload';
 import { useBlockedCountdown } from '../components/student/useBlockedCountdown';
@@ -15,6 +16,7 @@ const CONTEXT = { kicker: msg('MY_STUDENTS_TITLE'), title: 'Cadastrar aluno', ba
 /** P02 — Cadastrar aluno: o aluno nasce associado ao professor da sessão. */
 export function MyStudentFormScreen() {
   const navigate = useNavigate();
+  const consentTerm = useTeacherConsentTerm();
   const register = useRegisterMyStudent();
   const countdown = useBlockedCountdown();
   // a falha é copiada para o estado da tela e a mutação é zerada: as variáveis (com o CPF) não ficam em memória
@@ -33,6 +35,7 @@ export function MyStudentFormScreen() {
         </div>
         {generalError ? <ErrorAlert error={failure.error} fromCatalog /> : null}
         <StudentForm
+          consentTerm={consentTerm}
           variant="teacher"
           mode="create"
           fieldErrors={fieldErrors}

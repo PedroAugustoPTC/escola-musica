@@ -10,6 +10,7 @@ import br.com.felipeblaft.reports.domain.report.LessonReport;
 import br.com.felipeblaft.reports.port.ClockPort;
 import br.com.felipeblaft.reports.port.JobQueuePort;
 import br.com.felipeblaft.reports.port.LessonReportRepository;
+import br.com.felipeblaft.reports.service.ConsentGuardService;
 import br.com.felipeblaft.reports.service.ReportAccessService;
 import java.util.Objects;
 import java.util.UUID;
@@ -17,6 +18,7 @@ import java.util.UUID;
 /** Tentar de novo a estruturação sem reenviar o áudio: a transcrição está guardada (FR-022). */
 public class RetryLessonReportUseCase {
 
+    private ConsentGuardService consent;
     private final ReportAccessService access;
     private final LessonReportRepository reports;
     private final JobQueuePort queue;
@@ -35,6 +37,7 @@ public class RetryLessonReportUseCase {
 
     public ProcessingJob run(UUID teacherId, UUID reportId, Channel channel) {
         LessonReport report = access.lessonReportForUpdate(teacherId, reportId);
+        requireConsent(teacherId, report.studentId());
         report.prepareNewAttempt(clock.now());
         reports.save(report);
         ProcessingJob job =
@@ -50,5 +53,20 @@ public class RetryLessonReportUseCase {
                         clock.now());
         queue.enqueue(job);
         return job;
+    }
+
+    /**
+     * Liga a barreira de consentimento (FR-034): aluno menor sem consentimento válido não chega a
+     * nenhum provedor de IA. A montagem de produção a liga; cenários anteriores à feature 007
+     * seguem sem ela.
+     */
+    public void useConsentGuard(ConsentGuardService guard) {
+        this.consent = guard;
+    }
+
+    private void requireConsent(UUID teacherId, UUID studentId) {
+        if (consent != null) {
+            consent.requireForAi(teacherId, studentId);
+        }
     }
 }

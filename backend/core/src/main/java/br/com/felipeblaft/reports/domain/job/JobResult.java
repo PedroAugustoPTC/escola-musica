@@ -13,6 +13,7 @@ public enum JobResult {
     CHANGE_FAILED(false),
     ANSWER_FAILED(false),
     CONSOLIDATION_FAILED(false),
+    CONSENT_REQUIRED(false),
     DISCARDED(false);
 
     private final boolean success;

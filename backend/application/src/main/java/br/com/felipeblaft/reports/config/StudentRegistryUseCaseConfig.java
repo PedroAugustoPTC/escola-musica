@@ -14,6 +14,7 @@ import br.com.felipeblaft.reports.port.TransactionPort;
 import br.com.felipeblaft.reports.service.AccessAttemptsControlService;
 import br.com.felipeblaft.reports.service.ActorAuthorizationService;
 import br.com.felipeblaft.reports.service.AuthorshipService;
+import br.com.felipeblaft.reports.service.ConsentRecordingService;
 import br.com.felipeblaft.reports.service.StudentAccessService;
 import br.com.felipeblaft.reports.usecase.registry.AssignTeacherToStudentUseCase;
 import br.com.felipeblaft.reports.usecase.registry.CancelStudentRegistrationUseCase;
@@ -80,7 +81,8 @@ public class StudentRegistryUseCaseConfig {
             DataProtectionPort protection,
             AccessAttemptsControlService attempts,
             AuthorshipService authorship,
-            ClockPort clock) {
+            ClockPort clock,
+            ConsentRecordingService consents) {
         return new RegisterStudentUseCase(
                 authorization,
                 students,
@@ -89,7 +91,8 @@ public class StudentRegistryUseCaseConfig {
                 protection,
                 attempts,
                 authorship,
-                clock);
+                clock,
+                consents);
     }
 
     @Bean
@@ -103,7 +106,8 @@ public class StudentRegistryUseCaseConfig {
             DataProtectionPort protection,
             AccessAttemptsControlService attempts,
             AuthorshipService authorship,
-            ClockPort clock) {
+            ClockPort clock,
+            ConsentRecordingService consents) {
         return new UpdateStudentUseCase(
                 authorization,
                 access,
@@ -113,7 +117,8 @@ public class StudentRegistryUseCaseConfig {
                 protection,
                 attempts,
                 authorship,
-                clock);
+                clock,
+                consents);
     }
 
     @Bean

@@ -178,6 +178,12 @@ public class TelegramChannelDriver implements ChannelDriver {
             say(student.guardian().name());
             say(student.guardian().phone());
             reply = say(student.guardian().email());
+            // consentimento do responsável (C1 a C5): o mesmo do corpo da Web
+            press("v1:consent-yes:");
+            say("Responsável Fictício");
+            press("v1:consent-rel:MOTHER");
+            press("v1:consent-date:today");
+            reply = press("v1:consent-method:DIGITAL");
         }
         say(student.instrument() == null ? "pular" : student.instrument());
         reply = say("sim");

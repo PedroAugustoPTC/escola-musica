@@ -20,12 +20,27 @@ export interface StudentFormValues {
   guardianEmail: string;
   /** Usado só na variante do administrador. */
   teacherIds: string[];
+  /** Consentimento do responsável (só quando a data de nascimento indica menor de 18 anos). */
+  consentingName: string;
+  consentRelationship: string;
+  consentedOn: string;
+  consentMethod: string;
+  /** Versão vigente do termo, fixada ao abrir o formulário; `null` sem termo publicado. */
+  consentTermVersion: number | null;
 }
 
 /** Erro de um campo, vindo de `details.fields` da resposta de validação. */
 export interface StudentFormFieldError {
   field: string;
   code: string;
+}
+
+/** Versão vigente do termo mostrada na seção de consentimento. */
+export interface StudentFormConsentTerm {
+  number: number;
+  publishedOn: string;
+  text: string;
+  privacyContact: { name: string; contact: string };
 }
 
 /** Professor ativo oferecido na multisseleção (variante do administrador). */
@@ -42,6 +57,8 @@ export interface StudentFormProps {
   student?: StudentView;
   /** Professores ativos para a multisseleção; só na variante do administrador. */
   teacherOptions?: StudentFormTeacherOption[];
+  /** Versão vigente do termo e contato da LGPD, para a seção de consentimento do menor. */
+  consentTerm?: StudentFormConsentTerm;
   fieldErrors: StudentFormFieldError[];
   submitting: boolean;
   /** Tempo restante do bloqueio contra sondagem de CPF; desabilita só o envio. `null` sem bloqueio. */

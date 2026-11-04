@@ -14,6 +14,7 @@ import br.com.felipeblaft.reports.port.AudioInput;
 import br.com.felipeblaft.reports.port.ClockPort;
 import br.com.felipeblaft.reports.port.JobQueuePort;
 import br.com.felipeblaft.reports.port.LessonReportRepository;
+import br.com.felipeblaft.reports.service.ConsentGuardService;
 import br.com.felipeblaft.reports.service.AudioSendingService;
 import br.com.felipeblaft.reports.service.ReportAccessService;
 import java.util.Objects;
@@ -25,6 +26,7 @@ import java.util.UUID;
  */
 public class AnswerQuestionsUseCase {
 
+    private ConsentGuardService consent;
     private final ReportAccessService access;
     private final LessonReportRepository reports;
     private final AudioSendingService audioSending;
@@ -47,6 +49,7 @@ public class AnswerQuestionsUseCase {
     public ProcessingJob answerText(UUID teacherId, UUID reportId, String text, Channel channel) {
         LessonReport report = access.lessonReportForUpdate(teacherId, reportId);
         report.requireCanAnswer();
+        requireConsent(teacherId, report.studentId());
         if (text == null || text.isBlank()) {
             throw new DomainException(ErrorCode.EMPTY_ANSWER);
         }
@@ -61,6 +64,7 @@ public class AnswerQuestionsUseCase {
         try {
             LessonReport report = access.lessonReportForUpdate(teacherId, reportId);
             report.requireCanAnswer();
+            requireConsent(teacherId, report.studentId());
             audioSending.requireWithinLimit(audio);
             ProcessingJob job =
                     start(report, channel, Medium.AUDIO, ReportStep.TRANSCRIBING_REQUEST);
@@ -89,5 +93,20 @@ public class AnswerQuestionsUseCase {
                         ? JobStep.TRANSCRIBING_REQUEST
                         : JobStep.INCORPORATING_ANSWERS,
                 clock.now());
+    }
+
+    /**
+     * Liga a barreira de consentimento (FR-034): aluno menor sem consentimento válido não chega a
+     * nenhum provedor de IA. A montagem de produção a liga; cenários anteriores à feature 007
+     * seguem sem ela.
+     */
+    public void useConsentGuard(ConsentGuardService guard) {
+        this.consent = guard;
+    }
+
+    private void requireConsent(UUID teacherId, UUID studentId) {
+        if (consent != null) {
+            consent.requireForAi(teacherId, studentId);
+        }
     }
 }

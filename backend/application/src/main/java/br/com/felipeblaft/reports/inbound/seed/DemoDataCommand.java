@@ -134,6 +134,7 @@ public class DemoDataCommand {
             output.println("Carga dos cadastros recusada: " + result.errors());
             return 1;
         }
+        registerConsents();
         Summary summary = generate(registries);
         output.println("Massa de demonstração criada (dados fictícios).");
         output.printf(
@@ -152,6 +153,29 @@ public class DemoDataCommand {
             output.println(CommandArguments.codeLine(code, formatting));
         }
         return 0;
+    }
+
+    /**
+     * Termo de consentimento 1 e um consentimento válido para cada aluno menor (dados fictícios): sem
+     * eles a IA fica bloqueada para os menores da massa de demonstração (feature 007).
+     */
+    private void registerConsents() {
+        java.util.UUID term = java.util.UUID.randomUUID();
+        jdbc.update(
+                "insert into consent_term_version (id, number, published_on, text,"
+                        + " requires_new_consent, created_by, created_at)"
+                        + " values (?, 1, current_date, ?, false, ?, now())",
+                term,
+                "Termo de consentimento de demonstração (texto fictício).",
+                java.util.UUID.randomUUID());
+        jdbc.update(
+                "insert into student_consent (id, student_id, consenting_name, relationship,"
+                        + " consented_on, term_version_id, collection_method, recorded_origin,"
+                        + " recorded_at)"
+                        + " select gen_random_uuid(), s.id, 'Responsável de Demonstração', 'MOTHER',"
+                        + " current_date, ?, 'SIGNED_PAPER', 'INITIAL_LOAD', now()"
+                        + " from student s where s.birth_date > current_date - interval '18 years'",
+                term);
     }
 
     /** Contadores do que foi criado. */

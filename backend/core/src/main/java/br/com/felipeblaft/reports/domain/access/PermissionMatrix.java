@@ -155,6 +155,14 @@ public final class PermissionMatrix {
         // retenção
         map.put(Operation.AUDIT_TRAIL_QUERY, onlyAdministrator(Set.of()));
         map.put(Operation.AUDIT_TRAIL_VERIFY, onlyAdministrator(Set.of(ActionOrigin.RETENTION)));
+        // consentimento do responsável (007): o professor registra só os próprios alunos; o termo
+        // vigente é texto institucional, legível pelos dois papéis
+        map.put(Operation.CONSENT_READ, onlyAdministrator(Set.of()));
+        map.put(Operation.CONSENT_RECORD, ownStudents(load));
+        map.put(Operation.CONSENT_REVOKE, onlyAdministrator(Set.of()));
+        map.put(Operation.CONSENT_PENDING_READ, onlyAdministrator(Set.of()));
+        map.put(Operation.CONSENT_TERM_READ, new Rule(ALLOW, ALLOW, ALLOW, Set.of()));
+        map.put(Operation.CONSENT_TERM_PUBLISH, onlyAdministrator(Set.of()));
         return map;
     }
 

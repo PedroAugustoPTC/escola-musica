@@ -94,7 +94,9 @@ class AuthorshipStudentAdminOperationsIT extends AdministrationStackBase {
                 }) {
             assertStudentRecord(onlyAuthorship(operation), student);
         }
-        assertThat(authorship()).hasSize(4);
+        // o cadastro do menor grava também o consentimento (feature 007): um evento a mais
+        assertThat(authorship()).hasSize(5);
+        assertThat(onlyAuthorship("CONSENT_RECORD").get("target_type")).isEqualTo("CONSENT");
         ResponseSweeper.searching(CanaryStudent.sweepValuesWithCpf())
                 .assertClean(Place.AUTHORSHIP, authorshipDump());
         assertThat(authorshipDump())
@@ -109,7 +111,7 @@ class AuthorshipStudentAdminOperationsIT extends AdministrationStackBase {
         clearAuthorship();
 
         MockHttpServletResponse duplicate =
-                call(HttpMethod.POST, ADMIN + "/students", session, canary());
+                call(HttpMethod.POST, ADMIN + "/students", session, withDefaultConsent(canary()));
         MockHttpServletResponse minorWithoutGuardian =
                 call(
                         HttpMethod.POST,

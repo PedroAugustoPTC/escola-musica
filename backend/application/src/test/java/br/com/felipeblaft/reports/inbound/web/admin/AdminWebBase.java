@@ -127,6 +127,14 @@ public abstract class AdminWebBase extends IntegrationBase {
     @MockitoBean protected QueryAuditTrailUseCase queryAuditTrail;
     @MockitoBean protected VerifyAuditChainUseCase verifyAuditChain;
 
+    // feature 007: consentimento do responsável
+    @MockitoBean protected br.com.felipeblaft.reports.usecase.privacy.RecordConsentUseCase recordConsent;
+    @MockitoBean protected br.com.felipeblaft.reports.usecase.privacy.RevokeConsentUseCase revokeConsent;
+    @MockitoBean protected br.com.felipeblaft.reports.usecase.privacy.PublishConsentTermUseCase publishConsentTerm;
+    @MockitoBean protected br.com.felipeblaft.reports.usecase.privacy.ListConsentTermsUseCase listConsentTerms;
+    @MockitoBean protected br.com.felipeblaft.reports.usecase.privacy.ListPendingConsentsUseCase listPendingConsents;
+    @MockitoBean protected br.com.felipeblaft.reports.usecase.privacy.ListStudentConsentsUseCase listStudentConsents;
+
     protected final UUID administratorId = UUID.fromString("00000000-0000-4000-8000-0000000000a1");
     protected Instant sessionExpiry;
 

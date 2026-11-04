@@ -23,6 +23,7 @@ class SeedCommandsExecutor implements ApplicationRunner {
     private final IssueCodeCommand issueCode;
     private final DemoDataCommand demodata;
     private final RotateCpfKeyCommand rotateCpfKey;
+    private final ConsentLoadCommand consentLoad;
     private final ApplicationContext context;
 
     SeedCommandsExecutor(
@@ -30,7 +31,9 @@ class SeedCommandsExecutor implements ApplicationRunner {
             IssueCodeCommand issueCode,
             DemoDataCommand demodata,
             RotateCpfKeyCommand rotateCpfKey,
+            ConsentLoadCommand consentLoad,
             ApplicationContext context) {
+        this.consentLoad = consentLoad;
         this.seed = seed;
         this.issueCode = issueCode;
         this.demodata = demodata;
@@ -52,11 +55,13 @@ class SeedCommandsExecutor implements ApplicationRunner {
                     case IssueCodeCommand.NAME -> issueCode.run(arguments, output);
                     case DemoDataCommand.NAME -> demodata.run(arguments, output);
                     case RotateCpfKeyCommand.NAME -> rotateCpfKey.run(arguments, output);
+                    case ConsentLoadCommand.NAME -> consentLoad.run(arguments, output);
                     default -> {
                         output.println(
                                 "Comandos: seed --file <arquivo.json> [--simulate] | issue-code --email <email>"
                                         + " | demo-data --file <cadastros.json>"
-                                        + " | rotate-cpf-key [--simulate] [--confirm-invalidate-codes]");
+                                        + " | rotate-cpf-key [--simulate] [--confirm-invalidate-codes]"
+                                        + " | consent-load --file <consentimentos.csv>");
                         yield 2;
                     }
                 };

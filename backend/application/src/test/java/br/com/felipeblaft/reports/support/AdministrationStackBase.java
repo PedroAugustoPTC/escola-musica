@@ -197,17 +197,52 @@ public abstract class AdministrationStackBase extends TelegramConversationBase {
     }
 
     /** O professor cadastra o próprio aluno pela Web (201) e devolve o identificador. */
-    protected UUID registerMyStudent(Cookie teacher, Map<String, Object> body) throws Exception {
+    protected UUID registerMyStudent(Cookie teacher, Map<String, Object> input) throws Exception {
+        Map<String, Object> body = withDefaultConsent(input);
         MockHttpServletResponse response =
                 call(HttpMethod.POST, "/api/v1/my-students", teacher, body);
         assertThat(response.getStatus()).as("cadastro pelo professor").isEqualTo(201);
         return UUID.fromString(body(response).path("id").asString());
     }
 
+    /**
+     * Aluno menor sem consentimento no corpo recebe um consentimento válido do termo 1 (feature 007,
+     * FR-030), criando o termo se ainda não existe; adulto e corpo que já traz o consentimento passam
+     * como vieram.
+     */
+    protected Map<String, Object> withDefaultConsent(Map<String, Object> body) {
+        if (body.containsKey("consent") || !(body.get("birthDate") instanceof String text)) {
+            return body;
+        }
+        java.time.LocalDate today =
+                java.time.LocalDate.ofInstant(
+                        clock.now(), java.time.ZoneId.of("America/Sao_Paulo"));
+        if (java.time.Period.between(java.time.LocalDate.parse(text), today).getYears() >= 18) {
+            return body;
+        }
+        jdbc.update(
+                "insert into consent_term_version (id, number, published_on, text,"
+                        + " requires_new_consent, created_by, created_at)"
+                        + " values (?, 1, date '2025-01-01', 'Institutional text', false, ?, now())"
+                        + " on conflict (number) do nothing",
+                java.util.UUID.randomUUID(),
+                java.util.UUID.randomUUID());
+        Map<String, Object> copy = new LinkedHashMap<>(body);
+        copy.put(
+                "consent",
+                Map.of(
+                        "consentingName", "Responsável Fictício",
+                        "relationship", "MOTHER",
+                        "consentedOn", "2025-01-02",
+                        "termVersion", 1,
+                        "collectionMethod", "SIGNED_PAPER"));
+        return copy;
+    }
+
     /** O administrador cadastra o aluno (201), associado aos professores dados. */
     protected UUID registerStudentAsAdministrator(
             Cookie administrator, Map<String, Object> body, UUID... teacherIds) throws Exception {
-        Map<String, Object> complete = new LinkedHashMap<>(body);
+        Map<String, Object> complete = new LinkedHashMap<>(withDefaultConsent(body));
         complete.put("teacherIds", List.of(teacherIds));
         MockHttpServletResponse response =
                 call(HttpMethod.POST, ADMIN + "/students", administrator, complete);

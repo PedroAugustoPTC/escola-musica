@@ -431,6 +431,8 @@ class StudentRegistrationDraftTest {
         draft = draft.withCpf(new byte[] {1}, "h", T0, VALIDITY);
         assertThat(draft.nextField(TODAY)).isEqualTo(Field.GUARDIAN);
         draft = withGuardian(draft);
+        assertThat(draft.nextField(TODAY)).isEqualTo(Field.CONSENT);
+        draft = draft.withConsent(completeConsent(), T0, VALIDITY);
         assertThat(draft.nextField(TODAY)).isEqualTo(Field.INSTRUMENT);
         assertThat(draft.readyToConfirm(TODAY)).isFalse();
         draft = draft.withInstrument("Violão", T0, VALIDITY);
@@ -463,8 +465,17 @@ class StudentRegistrationDraftTest {
         assertThat(draft.readyToConfirm(TODAY)).isFalse();
 
         draft = withGuardian(draft);
+        assertThat(draft.nextField(TODAY)).isEqualTo(Field.CONSENT);
+        assertThat(draft.readyToConfirm(TODAY)).isFalse();
+
+        draft = draft.withConsent(completeConsent(), T0, VALIDITY);
         assertThat(draft.nextField(TODAY)).isNull();
         assertThat(draft.readyToConfirm(TODAY)).isTrue();
+    }
+
+    private static br.com.felipeblaft.reports.domain.telegram.ConsentDraft completeConsent() {
+        return new br.com.felipeblaft.reports.domain.telegram.ConsentDraft(
+                1, "Maria Guardian", "MOTHER", "2026-09-01", "DIGITAL");
     }
 
     @Test

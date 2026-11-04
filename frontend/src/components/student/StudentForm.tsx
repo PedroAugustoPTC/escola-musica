@@ -14,7 +14,13 @@ type FieldKey =
   | 'guardian.name'
   | 'guardian.phone'
   | 'guardian.email'
-  | 'teacherIds';
+  | 'teacherIds'
+  | 'consent'
+  | 'consent.consentingName'
+  | 'consent.relationship'
+  | 'consent.consentedOn'
+  | 'consent.collectionMethod'
+  | 'consent.termVersion';
 
 const FIELD_ALIASES: Record<string, FieldKey> = {
   name: 'name',
@@ -29,6 +35,12 @@ const FIELD_ALIASES: Record<string, FieldKey> = {
   'guardian.email': 'guardian.email',
   guardianEmail: 'guardian.email',
   teacherIds: 'teacherIds',
+  consent: 'consent',
+  'consent.consentingName': 'consent.consentingName',
+  'consent.relationship': 'consent.relationship',
+  'consent.consentedOn': 'consent.consentedOn',
+  'consent.collectionMethod': 'consent.collectionMethod',
+  'consent.termVersion': 'consent.termVersion',
 };
 
 const FIELD_LABELS: Record<FieldKey, string> = {
@@ -41,11 +53,29 @@ const FIELD_LABELS: Record<FieldKey, string> = {
   'guardian.phone': 'Telefone do responsável',
   'guardian.email': 'E-mail do responsável',
   teacherIds: 'Professores',
+  consent: 'Consentimento do responsável',
+  'consent.consentingName': 'Nome de quem consentiu',
+  'consent.relationship': 'Relação com o aluno',
+  'consent.consentedOn': 'Data do consentimento',
+  'consent.collectionMethod': 'Forma de coleta',
+  'consent.termVersion': 'Versão do termo',
 };
 
 /** Texto do catálogo para o código do erro; código desconhecido cai na mensagem geral de validação. */
 function errorText(code: string): string {
   return hasMessage(code) ? msg(code) : msg('VALIDATION_FAILED');
+}
+
+/** Só apresentação: a data indica menor de 18 anos hoje? A regra de verdade é do servidor. */
+function isMinorDate(birthDate: string): boolean {
+  if (!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(birthDate)) return false;
+  const today = new Date();
+  const eighteen = new Date(
+    Number(birthDate.slice(0, 4)) + 18,
+    Number(birthDate.slice(5, 7)) - 1,
+    Number(birthDate.slice(8, 10)),
+  );
+  return eighteen.getTime() > today.getTime();
 }
 
 function initialValues(props: StudentFormProps): StudentFormValues {
@@ -60,6 +90,11 @@ function initialValues(props: StudentFormProps): StudentFormValues {
     guardianPhone: student?.guardian?.phone ?? '',
     guardianEmail: student?.guardian?.email ?? '',
     teacherIds: student?.teachers?.map((teacher) => teacher.id) ?? [],
+    consentingName: '',
+    consentRelationship: '',
+    consentedOn: '',
+    consentMethod: '',
+    consentTermVersion: props.consentTerm?.number ?? null,
   };
 }
 
@@ -101,7 +136,7 @@ export function StudentForm(props: StudentFormProps) {
     event.preventDefault();
     if (submitting || blocked) return;
     setAttempt((count) => count + 1);
-    onSubmit(values);
+    onSubmit({ ...values, consentTermVersion: props.consentTerm?.number ?? null });
   };
 
   const focusField = (key: FieldKey) => (event: MouseEvent) => {
@@ -169,6 +204,8 @@ export function StudentForm(props: StudentFormProps) {
   };
 
   const cpfHintId = id('cpf-hint');
+  // só decide se a seção aparece; a exigência e a validade são do servidor
+  const showConsent = isMinorDate(values.birthDate);
   const guardianGroupErrors = errorsByKey.get('guardian') ?? [];
   const guardianDescribedBy = errorIds('guardian').join(' ') || undefined;
 
@@ -254,6 +291,87 @@ export function StudentForm(props: StudentFormProps) {
           maxLength: 254,
         })}
       </fieldset>
+
+      {showConsent ? (
+        <fieldset className="student-form__section" aria-describedby={errorIds('consent').join(' ') || undefined}>
+          <legend className="student-form__legend">{msg('CONSENT_SECTION')}</legend>
+          {fieldErrorsFor('consent')}
+          {props.consentTerm ? (
+            <div className="field__help" id={id('consent-term')}>
+              {msg('CONSENT_TERM_CURRENT', {
+                number: props.consentTerm.number,
+                date: props.consentTerm.publishedOn.split('-').reverse().join('/'),
+              })}{' '}
+              <details>
+                <summary>{msg('CONSENT_TERM_READ')}</summary>
+                <p className="student-form__term">{props.consentTerm.text}</p>
+              </details>
+              {props.consentTerm.privacyContact.contact ? (
+                <span>
+                  {msg('CONSENT_PRIVACY_CONTACT', {
+                    name: props.consentTerm.privacyContact.name,
+                    contact: props.consentTerm.privacyContact.contact,
+                  })}
+                </span>
+              ) : null}
+            </div>
+          ) : (
+            <div className="field__help">{msg('CONSENT_TERM_MISSING')}</div>
+          )}
+          {fieldErrorsFor('consent.termVersion')}
+          {textField({
+            key: 'consent.consentingName',
+            value: values.consentingName,
+            onChange: (v) => set('consentingName', v),
+            maxLength: 120,
+          })}
+          <div className="field">
+            <label htmlFor={id('consent.relationship')} className="field__label">
+              {FIELD_LABELS['consent.relationship']}
+            </label>
+            <select
+              id={id('consent.relationship')}
+              className="input"
+              value={values.consentRelationship}
+              onChange={(event) => set('consentRelationship', event.target.value)}
+              aria-invalid={(errorsByKey.get('consent.relationship') ?? []).length > 0 ? true : undefined}
+              aria-describedby={errorIds('consent.relationship').join(' ') || undefined}
+            >
+              <option value="">Selecione</option>
+              <option value="MOTHER">Mãe</option>
+              <option value="FATHER">Pai</option>
+              <option value="LEGAL_GUARDIAN">Responsável legal</option>
+              <option value="OTHER">Outra relação</option>
+            </select>
+            {fieldErrorsFor('consent.relationship')}
+          </div>
+          {textField({
+            key: 'consent.consentedOn',
+            value: values.consentedOn,
+            onChange: (v) => set('consentedOn', v),
+            type: 'date',
+          })}
+          <div className="field">
+            <label htmlFor={id('consent.collectionMethod')} className="field__label">
+              {FIELD_LABELS['consent.collectionMethod']}
+            </label>
+            <select
+              id={id('consent.collectionMethod')}
+              className="input"
+              value={values.consentMethod}
+              onChange={(event) => set('consentMethod', event.target.value)}
+              aria-invalid={(errorsByKey.get('consent.collectionMethod') ?? []).length > 0 ? true : undefined}
+              aria-describedby={errorIds('consent.collectionMethod').join(' ') || undefined}
+            >
+              <option value="">Selecione</option>
+              <option value="SIGNED_PAPER">Papel assinado</option>
+              <option value="DIGITAL">Digital</option>
+              <option value="OTHER">Outra forma</option>
+            </select>
+            {fieldErrorsFor('consent.collectionMethod')}
+          </div>
+        </fieldset>
+      ) : null}
 
       {variant === 'admin' ? (
         <fieldset

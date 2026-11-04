@@ -154,6 +154,14 @@ public class ChannelWebDriver implements ChannelDriver {
                             "name", student.guardian().name(),
                             "phone", student.guardian().phone(),
                             "email", student.guardian().email()));
+            body.put(
+                    "consent",
+                    Map.of(
+                            "consentingName", "Responsável Fictício",
+                            "relationship", "MOTHER",
+                            "consentedOn", "2025-01-02",
+                            "termVersion", 1,
+                            "collectionMethod", "DIGITAL"));
         }
         return outcome(mine(HttpMethod.POST, "", body));
     }

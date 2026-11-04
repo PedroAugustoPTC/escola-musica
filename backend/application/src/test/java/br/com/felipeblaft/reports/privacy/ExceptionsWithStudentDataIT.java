@@ -109,6 +109,11 @@ class ExceptionsWithStudentDataIT extends RealStackBase {
         sendText(USER_CLARA, CanaryStudent.GUARDIAN_NAME);
         sendText(USER_CLARA, CanaryStudent.GUARDIAN_PHONE_MASKED);
         sendText(USER_CLARA, CanaryStudent.GUARDIAN_EMAIL);
+        sendCallback(USER_CLARA, "v1:consent-yes:");
+        sendText(USER_CLARA, "Responsável Fictício");
+        sendCallback(USER_CLARA, "v1:consent-rel:MOTHER");
+        sendCallback(USER_CLARA, "v1:consent-date:today");
+        sendCallback(USER_CLARA, "v1:consent-method:DIGITAL");
         sendText(USER_CLARA, CanaryStudent.INSTRUMENT);
         List<String> labels = buttonLabels(lastMessage());
         String confirm = buttons(lastMessage()).get(labels.indexOf("Confirmar"));

@@ -17,7 +17,7 @@ A validação funcional completa está em
 | `.env.example` | modelo das variáveis; copie para `infra/.env` (**nunca versionado**) |
 | `seed/example.json` | carga fictícia; cargas reais ficam fora do Git (`infra/seed/*.json`) |
 | `seed/demo.json` | cadastros fictícios da massa de demonstração (`local.sh up --demo-data=true`) |
-| `scripts/local.sh` | ambiente local: up, seed, issue-code (alias obsoleto: code), rotate-cpf-key, database, status, logs, tests, stop, clean — passo a passo em [`scripts/README.md`](scripts/README.md) |
+| `scripts/local.sh` | ambiente local: up, seed, issue-code (alias obsoleto: code), consent-load, rotate-cpf-key, database, status, logs, tests, stop, clean — passo a passo em [`scripts/README.md`](scripts/README.md) |
 | `compose.database.yaml` | só local: publica o banco em `127.0.0.1` para ferramentas gráficas (`local.sh database-port`) |
 | `scripts/deploy.sh` | atualização e subida da pilha de produção na VPS |
 | `n8n/` | n8n, o transporte do Telegram: imagem fina, workflows como código e utilitários — leia [`n8n/CLAUDE.md`](n8n/CLAUDE.md) |
@@ -504,3 +504,17 @@ docker compose -f infra/compose.yaml -f infra/compose.prod.yaml exec -T postgres
 Guarde os backups fora da VPS, cifrados, junto com `CPF_ENCRYPTION_KEY` e `HMAC_SECRET` (sem eles o
 backup não serve). Áudios nunca são persistidos (FR-018): não há o que salvar de `/tmp/audios` nem
 do volume do `telegram-bot-api`.
+
+## Carga dos consentimentos já coletados (feature 007)
+
+Antes de liberar o uso com dados reais, registre o consentimento dos alunos menores já cadastrados (a escola já o coletou).
+O arquivo CSV **fica fora do repositório** (o comando recusa caminho dentro dele) e **não leva CPF nem nome do aluno**:
+
+```bash
+sh infra/scripts/local.sh consent-load /caminho/fora/do/repositorio/consentimentos.csv
+```
+
+Formato (UTF-8, separador `;`, cabeçalho obrigatório): `student_id;consenting_name;relationship;consented_on;term_version;collection_method`.
+O resumo mostra quantas linhas foram aceitas e, para as recusadas, só o número da linha e o código do erro. Ao final, imprime
+quantos alunos menores ainda estão sem consentimento válido (deve ser 0 antes de liberar o uso). Na VPS, copie o arquivo por SSH,
+rode o mesmo comando e **apague o arquivo da VPS** depois. Contrato: `specs/007-privacy-retention-operations/contracts/consent-load.md`.

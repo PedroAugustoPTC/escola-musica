@@ -124,7 +124,15 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
                     // feature 007: a trilha de auditoria é só da Web; o bot a trata como texto
                     // não reconhecido
                     Map.entry(Operation.AUDIT_TRAIL_QUERY, List.of("auditoria da escola", "trilha de auditoria")),
-                    Map.entry(Operation.AUDIT_TRAIL_VERIFY, List.of("verificar a trilha")));
+                    Map.entry(Operation.AUDIT_TRAIL_VERIFY, List.of("verificar a trilha")),
+                    // feature 007: o consentimento é do administrador na Web; o professor registra pelo
+                    // cadastro guiado (primeiro passo) e lê o termo no mesmo fluxo
+                    Map.entry(Operation.CONSENT_READ, List.of("consents of a student")),
+                    Map.entry(Operation.CONSENT_RECORD, List.of("cadastrar aluno")),
+                    Map.entry(Operation.CONSENT_REVOKE, List.of("revoke consent")),
+                    Map.entry(Operation.CONSENT_PENDING_READ, List.of("pending consents")),
+                    Map.entry(Operation.CONSENT_TERM_READ, List.of("cadastrar aluno")),
+                    Map.entry(Operation.CONSENT_TERM_PUBLISH, List.of("publish consent term")));
 
     private enum Outcome {
         REACHED,
@@ -231,6 +239,9 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
         variables.put("studentId", (pairOfBruno ? brunoStudent : claraStudent).id().toString());
         variables.put("teacherId", bruno.id().toString());
         variables.put("administratorId", second.administrator().id().toString());
+        variables.put(
+                "consentId",
+                jdbc.queryForObject("select id::text from student_consent limit 1", String.class));
 
         if (operation == Operation.ADMINISTRATOR_REACTIVATE) {
             jdbc.update(
@@ -548,6 +559,16 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
                             + "\"instrument\":\"Piano\"}";
             case "PATCH /admin/students/{studentId}", "PATCH /my-students/{studentId}" ->
                     "{\"instrument\":\"Violão\"}";
+            case "POST /admin/students/{studentId}/consents",
+                    "POST /my-students/{studentId}/consents" ->
+                    "{\"consentingName\":\"Maria Guardian\",\"relationship\":\"MOTHER\","
+                            + "\"consentedOn\":\"2026-09-01\",\"termVersion\":1,"
+                            + "\"collectionMethod\":\"SIGNED_PAPER\"}";
+            case "POST /admin/consents/{consentId}/revocation" ->
+                    "{\"revokedOn\":\"2026-09-10\",\"revokedBy\":\"MOTHER\"}";
+            case "POST /admin/consent-terms" ->
+                    "{\"publishedOn\":\"2026-09-01\",\"text\":\"Institutional text\","
+                            + "\"requiresNewConsent\":false}";
             default -> null;
         };
     }
@@ -626,6 +647,9 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
                 say(USER_CLARA, "meus alunos");
                 return tap(USER_CLARA, "v1:reg-open:0");
             case STUDENT_REGISTER:
+            case CONSENT_RECORD:
+            case CONSENT_TERM_READ:
+                // o professor registra e lê o termo dentro do cadastro guiado (primeiro passo)
                 return say(USER_CLARA, "cadastrar aluno");
             case STUDENT_UPDATE:
                 say(USER_CLARA, "meus alunos");

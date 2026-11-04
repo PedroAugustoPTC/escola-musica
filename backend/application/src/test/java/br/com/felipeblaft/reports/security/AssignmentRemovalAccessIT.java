@@ -40,6 +40,13 @@ class AssignmentRemovalAccessIT extends SecurityBase {
     void prepare() throws Exception {
         clara = scenario.clara();
         administrator = signInAdministrator();
+        jdbc.update(
+                "insert into consent_term_version (id, number, published_on, text,"
+                        + " requires_new_consent, created_by, created_at)"
+                        + " values (?, 1, date '2025-01-01', 'Institutional text', false, ?, now())"
+                        + " on conflict (number) do nothing",
+                UUID.randomUUID(),
+                UUID.randomUUID());
         // o administrador cadastra o aluno menor canário e associa a Clara
         MvcResult created =
                 call(
@@ -57,7 +64,10 @@ class AssignmentRemovalAccessIT extends SecurityBase {
                                 + CanaryStudent.GUARDIAN_PHONE_MASKED
                                 + "\",\"email\":\""
                                 + CanaryStudent.GUARDIAN_EMAIL
-                                + "\"},\"teacherIds\":[\""
+                                + "\"},\"consent\":{\"consentingName\":\"Responsável Fictício\","
+                                + "\"relationship\":\"MOTHER\",\"consentedOn\":\"2025-01-02\","
+                                + "\"termVersion\":1,\"collectionMethod\":\"SIGNED_PAPER\"},"
+                                + "\"teacherIds\":[\""
                                 + clara.id()
                                 + "\"]}",
                         administrator);

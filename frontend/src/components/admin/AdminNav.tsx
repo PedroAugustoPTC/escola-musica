@@ -7,6 +7,7 @@ export const ADMIN_NAV_ITEMS: { key: string; label: string; icon: string; route:
   { key: 'students', label: 'Alunos', icon: 'group', route: '/admin/students' },
   { key: 'history', label: msg('SCHOOL_HISTORY_NAV'), icon: 'history', route: '/admin/history' },
   { key: 'audit', label: msg('AUDIT_NAV'), icon: 'shield_person', route: '/admin/audit' },
+  { key: 'consents', label: msg('CONSENT_NAV'), icon: 'verified_user', route: '/admin/consents/pending' },
   {
     key: 'administrators',
     label: 'Administradores',
