@@ -7,9 +7,9 @@ import br.com.felipeblaft.reports.domain.history.ApprovedReportRow;
 import java.util.List;
 
 /**
- * Consulta única dos relatórios aprovados (aula e semestrais), de qualquer professor e aluno,
- * usada pelo histórico do professor e pela visão da escola. Só devolve relatório aprovado; os
- * filtros do critério são aplicados na própria consulta e a ordem é a de {@link
+ * Consulta única dos relatórios aprovados (aula e semestrais), de qualquer professor e aluno, usada
+ * pelo histórico do professor e pela visão da escola. Só devolve relatório aprovado; os filtros do
+ * critério são aplicados na própria consulta e a ordem é a de {@link
  * br.com.felipeblaft.reports.domain.history.HistoryOrder#NEWEST_FIRST}. Somente leitura.
  */
 public interface ApprovedReportQueryPort {

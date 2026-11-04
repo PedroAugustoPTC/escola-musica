@@ -120,7 +120,11 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
                             List.of("abrir o pdf de qualquer aluno da escola")),
                     Map.entry(
                             Operation.SCHOOL_REPORT_DOCUMENT_DOWNLOAD,
-                            List.of("baixar o pdf de qualquer aluno da escola")));
+                            List.of("baixar o pdf de qualquer aluno da escola")),
+                    // feature 007: a trilha de auditoria é só da Web; o bot a trata como texto
+                    // não reconhecido
+                    Map.entry(Operation.AUDIT_TRAIL_QUERY, List.of("auditoria da escola", "trilha de auditoria")),
+                    Map.entry(Operation.AUDIT_TRAIL_VERIFY, List.of("verificar a trilha")));
 
     private enum Outcome {
         REACHED,
@@ -277,8 +281,7 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
                     "{\"periodKey\":\"2026-1\"}",
                     claraCookie);
             scenario.processQueue();
-            String semesterId =
-                    jdbc.queryForObject("select id from semester_report", String.class);
+            String semesterId = jdbc.queryForObject("select id from semester_report", String.class);
             call(
                     HttpMethod.POST,
                     API + "/semester-reports/" + semesterId + "/approval",

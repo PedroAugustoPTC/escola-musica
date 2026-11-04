@@ -151,6 +151,10 @@ public final class PermissionMatrix {
         map.put(Operation.SCHOOL_HISTORY_QUERY, onlyAdministrator(Set.of()));
         map.put(Operation.SCHOOL_REPORT_DOCUMENT_OPEN, onlyAdministrator(Set.of()));
         map.put(Operation.SCHOOL_REPORT_DOCUMENT_DOWNLOAD, onlyAdministrator(Set.of()));
+        // trilha de auditoria (007): consulta só do administrador; a verificação também roda pela
+        // retenção
+        map.put(Operation.AUDIT_TRAIL_QUERY, onlyAdministrator(Set.of()));
+        map.put(Operation.AUDIT_TRAIL_VERIFY, onlyAdministrator(Set.of(ActionOrigin.RETENTION)));
         return map;
     }
 

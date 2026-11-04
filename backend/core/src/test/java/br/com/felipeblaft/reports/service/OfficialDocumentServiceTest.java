@@ -39,9 +39,7 @@ class OfficialDocumentServiceTest {
     void readsTheOfficialPdfOfTheApprovedLessonVersion() {
         LessonReport report = approvedLessonWithPdf();
 
-        assertThat(
-                        service.readOfficial(
-                                ReportType.LESSON, report.id(), report.approvedVersion()))
+        assertThat(service.readOfficial(ReportType.LESSON, report.id(), report.approvedVersion()))
                 .hasValueSatisfying(bytes -> assertThat(bytes).isNotEmpty());
     }
 
@@ -49,9 +47,7 @@ class OfficialDocumentServiceTest {
     void readsTheOfficialPdfOfTheApprovedSemesterVersion() {
         SemesterReport report = approvedSemesterWithPdf();
 
-        assertThat(
-                        service.readOfficial(
-                                ReportType.SEMESTER, report.id(), report.approvedVersion()))
+        assertThat(service.readOfficial(ReportType.SEMESTER, report.id(), report.approvedVersion()))
                 .hasValueSatisfying(bytes -> assertThat(bytes).isNotEmpty());
     }
 
@@ -62,9 +58,7 @@ class OfficialDocumentServiceTest {
         byte[] teacher =
                 c.getDocument.official(c.clara.id(), ReportType.LESSON, report.id()).content();
 
-        assertThat(
-                        service.readOfficial(
-                                ReportType.LESSON, report.id(), report.approvedVersion()))
+        assertThat(service.readOfficial(ReportType.LESSON, report.id(), report.approvedVersion()))
                 .hasValueSatisfying(bytes -> assertThat(bytes).isEqualTo(teacher));
     }
 
@@ -98,9 +92,7 @@ class OfficialDocumentServiceTest {
         LessonReport report = approvedLessonWithPdf();
         c.storage.files.clear();
 
-        assertThat(
-                        service.readOfficial(
-                                ReportType.LESSON, report.id(), report.approvedVersion()))
+        assertThat(service.readOfficial(ReportType.LESSON, report.id(), report.approvedVersion()))
                 .isEmpty();
     }
 }

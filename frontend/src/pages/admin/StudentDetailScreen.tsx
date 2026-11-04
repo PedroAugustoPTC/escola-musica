@@ -75,6 +75,10 @@ export function StudentDetailScreen() {
             <Icon name="history" size="medium" />
             {msg('SCHOOL_HISTORY_STUDENT_SHORTCUT')}
           </Link>
+          <Link to={`/admin/audit?targetId=${data.id}`} className="button button--secondary">
+            <Icon name="shield_person" size="medium" />
+            {msg('AUDIT_STUDENT_SHORTCUT')}
+          </Link>
         </div>
       </div>
 

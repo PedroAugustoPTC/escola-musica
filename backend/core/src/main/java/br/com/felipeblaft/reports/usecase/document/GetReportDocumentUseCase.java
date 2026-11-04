@@ -13,6 +13,7 @@ import br.com.felipeblaft.reports.port.ReportVersionRepository;
 import br.com.felipeblaft.reports.service.DocumentGenerationService;
 import br.com.felipeblaft.reports.service.OfficialDocumentService;
 import br.com.felipeblaft.reports.service.ReportAccessService;
+import br.com.felipeblaft.reports.service.TeacherReportAuditService;
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
@@ -41,6 +42,7 @@ public class GetReportDocumentUseCase {
     private final PdfDocumentRepository documents;
     private final DocumentGenerationService generation;
     private final OfficialDocumentService officialDocument;
+    private final TeacherReportAuditService audit;
     private DocumentSource semester;
 
     public GetReportDocumentUseCase(
@@ -49,13 +51,15 @@ public class GetReportDocumentUseCase {
             ReportVersionRepository versions,
             PdfDocumentRepository documents,
             DocumentGenerationService generation,
-            OfficialDocumentService officialDocument) {
+            OfficialDocumentService officialDocument,
+            TeacherReportAuditService audit) {
         this.access = Objects.requireNonNull(access);
         this.reports = Objects.requireNonNull(reports);
         this.versions = Objects.requireNonNull(versions);
         this.documents = Objects.requireNonNull(documents);
         this.generation = Objects.requireNonNull(generation);
         this.officialDocument = Objects.requireNonNull(officialDocument);
+        this.audit = Objects.requireNonNull(audit);
     }
 
     public void registerSemesterSource(DocumentSource font) {
@@ -63,6 +67,23 @@ public class GetReportDocumentUseCase {
     }
 
     public ObtainedDocument review(UUID teacherId, ReportType type, UUID reportId, int number) {
+        return review(teacherId, type, reportId, number, false);
+    }
+
+    /** {@code download} diferencia baixar de abrir na Web; no Telegram o evento é de envio. */
+    public ObtainedDocument review(
+            UUID teacherId, ReportType type, UUID reportId, int number, boolean download) {
+        ObtainedDocument document = prepareReview(teacherId, type, reportId, number);
+        audit.documentRead(teacherId, type, reportId, number, download);
+        return document;
+    }
+
+    /**
+     * Lê o PDF de conferência sem gravar evento: o Telegram o monta ao responder, mas só a entrega
+     * do documento (resgate do token) é o envio que a trilha registra, uma vez.
+     */
+    public ObtainedDocument prepareReview(
+            UUID teacherId, ReportType type, UUID reportId, int number) {
         if (type == ReportType.SEMESTER) {
             return semesterSource().review(teacherId, reportId, number);
         }
@@ -72,8 +93,27 @@ public class GetReportDocumentUseCase {
     }
 
     public ObtainedDocument official(UUID teacherId, ReportType type, UUID reportId) {
+        return official(teacherId, type, reportId, false);
+    }
+
+    /** {@code download} diferencia baixar de abrir na Web; no Telegram o evento é de envio. */
+    public ObtainedDocument official(
+            UUID teacherId, ReportType type, UUID reportId, boolean download) {
+        OfficialRead read = readOfficial(teacherId, type, reportId);
+        audit.documentRead(teacherId, type, reportId, read.version(), download);
+        return read.document();
+    }
+
+    /** Lê o PDF oficial sem gravar evento (ver {@link #prepareReview}). */
+    public ObtainedDocument prepareOfficial(UUID teacherId, ReportType type, UUID reportId) {
+        return readOfficial(teacherId, type, reportId).document();
+    }
+
+    private record OfficialRead(ObtainedDocument document, Integer version) {}
+
+    private OfficialRead readOfficial(UUID teacherId, ReportType type, UUID reportId) {
         if (type == ReportType.SEMESTER) {
-            return semesterSource().official(teacherId, reportId);
+            return new OfficialRead(semesterSource().official(teacherId, reportId), null);
         }
         LessonReport report = access.lessonReport(teacherId, reportId);
         if (report.status() != ReportStatus.APPROVED) {
@@ -84,7 +124,9 @@ public class GetReportDocumentUseCase {
                 officialDocument
                         .readOfficial(ReportType.LESSON, report.id(), report.approvedVersion())
                         .orElseThrow(GetReportDocumentUseCase::notFound);
-        return new ObtainedDocument(bytes, OfficialDocumentService.lessonFileName(lessonDate));
+        return new OfficialRead(
+                new ObtainedDocument(bytes, OfficialDocumentService.lessonFileName(lessonDate)),
+                report.approvedVersion());
     }
 
     private String lessonName(LessonReport report, String suffix) {

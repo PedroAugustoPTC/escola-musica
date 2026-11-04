@@ -1,5 +1,7 @@
 package br.com.felipeblaft.reports.domain.audit;
 
+import br.com.felipeblaft.reports.domain.access.AuthorshipReadDetail;
+import br.com.felipeblaft.reports.domain.access.AuthorshipRecord;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -7,6 +9,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.OptionalLong;
@@ -57,6 +60,39 @@ public final class AuditChain {
 
     /** Um evento já encadeado, como lido da trilha. */
     public record Link(Fields fields, String previousHash, String recordHash) {}
+
+    /**
+     * Os campos de hash de um registro de autoria, com a data truncada em microssegundos (a
+     * precisão do banco), de modo que o hash calculado na gravação é o mesmo da verificação.
+     */
+    public static Fields fieldsOf(AuthorshipRecord record, long sequence) {
+        AuthorshipReadDetail detail = record.readDetail();
+        return new Fields(
+                sequence,
+                record.occurredAt().truncatedTo(ChronoUnit.MICROS),
+                record.authorId(),
+                record.authorRole() == null ? null : record.authorRole().name(),
+                record.origin().name(),
+                record.operation(),
+                record.targetType() == null ? null : record.targetType().name(),
+                record.targetId(),
+                record.result().name(),
+                record.errorCode(),
+                record.originHash(),
+                record.correlationId(),
+                detail == null ? null : detail.filterTeacherId(),
+                detail == null || detail.filterReportType() == null
+                        ? null
+                        : detail.filterReportType().name(),
+                detail == null ? null : detail.filterPeriodStart(),
+                detail == null ? null : detail.filterPeriodEnd(),
+                detail == null ? null : detail.filterOperation(),
+                detail == null ? null : detail.filterActorId(),
+                detail == null ? null : detail.filterTargetId(),
+                detail == null ? null : detail.pageNumber(),
+                detail == null ? null : detail.documentVersion(),
+                detail == null ? null : detail.itemCount());
+    }
 
     public static String canonical(Fields f) {
         StringBuilder text = new StringBuilder();

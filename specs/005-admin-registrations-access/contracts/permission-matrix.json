@@ -50,6 +50,9 @@
 
     { "operation": "SCHOOL_HISTORY_QUERY", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/school-history"], "system": [], "note": "feature 006: somente leitura de aprovados" },
     { "operation": "SCHOOL_REPORT_DOCUMENT_OPEN", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/school-history/lesson-reports/{reportId}/pdf", "GET /admin/school-history/semester-reports/{reportId}/pdf"], "system": [], "note": "feature 006: PDF oficial da versão aprovada" },
-    { "operation": "SCHOOL_REPORT_DOCUMENT_DOWNLOAD", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/school-history/lesson-reports/{reportId}/pdf/download", "GET /admin/school-history/semester-reports/{reportId}/pdf/download"], "system": [], "note": "feature 006: PDF oficial da versão aprovada" }
+    { "operation": "SCHOOL_REPORT_DOCUMENT_DOWNLOAD", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/school-history/lesson-reports/{reportId}/pdf/download", "GET /admin/school-history/semester-reports/{reportId}/pdf/download"], "system": [], "note": "feature 006: PDF oficial da versão aprovada" },
+
+    { "operation": "AUDIT_TRAIL_QUERY", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/audit-trail"], "system": [], "note": "feature 007: consulta da trilha de auditoria; a própria consulta vira evento" },
+    { "operation": "AUDIT_TRAIL_VERIFY", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/audit-trail/integrity"], "system": ["RETENTION"], "note": "feature 007: verificação da cadeia; também ao fim de cada execução da retenção" }
   ]
 }

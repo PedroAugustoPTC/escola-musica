@@ -120,8 +120,7 @@ public class AdminSchoolHistoryController {
             @PathVariable UUID reportId,
             @RequestAttribute(CORRELATION) String correlationId) {
         return PdfResponses.attachment(
-                deliver(
-                        admin, ReportType.SEMESTER, reportId, Disposition.DOWNLOAD, correlationId));
+                deliver(admin, ReportType.SEMESTER, reportId, Disposition.DOWNLOAD, correlationId));
     }
 
     private ObtainedDocument deliver(

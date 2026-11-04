@@ -89,6 +89,19 @@ public class AuthorshipRecordEntity implements Persistable<UUID> {
     @Column(name = "document_version")
     private Integer documentVersion;
 
+    // trilha de auditoria (V17): filtros da consulta da trilha e quantidade de itens tratados
+    @Column(name = "filter_operation")
+    private String filterOperation;
+
+    @Column(name = "filter_actor_id")
+    private UUID filterActorId;
+
+    @Column(name = "filter_target_id")
+    private UUID filterTargetId;
+
+    @Column(name = "item_count")
+    private Integer itemCount;
+
     // trilha encadeada (V17): sequência, hash do evento anterior e hash do próprio evento
     @Column(name = "sequence", nullable = false)
     private long sequence;
@@ -125,6 +138,10 @@ public class AuthorshipRecordEntity implements Persistable<UUID> {
             this.filterPeriodEnd = detail.filterPeriodEnd();
             this.pageNumber = detail.pageNumber();
             this.documentVersion = detail.documentVersion();
+            this.filterOperation = detail.filterOperation();
+            this.filterActorId = detail.filterActorId();
+            this.filterTargetId = detail.filterTargetId();
+            this.itemCount = detail.itemCount();
         }
     }
 
@@ -147,12 +164,12 @@ public class AuthorshipRecordEntity implements Persistable<UUID> {
                 filterReportType == null ? null : filterReportType.name(),
                 filterPeriodStart,
                 filterPeriodEnd,
-                null,
-                null,
-                null,
+                filterOperation,
+                filterActorId,
+                filterTargetId,
                 pageNumber,
                 documentVersion,
-                null);
+                itemCount);
     }
 
     void chain(long sequenceNumber, String previous, String hash) {

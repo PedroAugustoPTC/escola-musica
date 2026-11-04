@@ -5,10 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import br.com.felipeblaft.reports.domain.access.ActionOrigin;
 import br.com.felipeblaft.reports.domain.access.Actor;
 import br.com.felipeblaft.reports.domain.common.Secret;
-import br.com.felipeblaft.reports.support.AdministrationStackBase;
-import br.com.felipeblaft.reports.support.CanaryCpf;
 import br.com.felipeblaft.reports.domain.registry.Student;
 import br.com.felipeblaft.reports.domain.registry.Teacher;
+import br.com.felipeblaft.reports.support.AdministrationStackBase;
+import br.com.felipeblaft.reports.support.CanaryCpf;
 import br.com.felipeblaft.reports.support.CanaryStudent;
 import br.com.felipeblaft.reports.support.ResponseSweeper;
 import br.com.felipeblaft.reports.support.ResponseSweeper.Place;
@@ -25,7 +25,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -116,8 +115,7 @@ class AuthorshipCoverageIT extends AdministrationStackBase {
     @Test
     void theScenarioCoversEveryOperationListedInTheDataModel() throws Exception {
         assertThat(operationsOfTheDataModel())
-                .containsExactlyInAnyOrderElementsOf(
-                        EXPECTED.keySet());
+                .containsExactlyInAnyOrderElementsOf(EXPECTED.keySet());
     }
 
     @Test
@@ -286,7 +284,9 @@ class AuthorshipCoverageIT extends AdministrationStackBase {
         String base = ADMIN + "/school-history";
 
         assertThat(call(HttpMethod.GET, base, admin).getStatus()).isEqualTo(200);
-        assertThat(call(HttpMethod.GET, base + "/lesson-reports/" + lesson + "/pdf", admin).getStatus())
+        assertThat(
+                        call(HttpMethod.GET, base + "/lesson-reports/" + lesson + "/pdf", admin)
+                                .getStatus())
                 .isEqualTo(200);
         assertThat(
                         call(
@@ -339,7 +339,9 @@ class AuthorshipCoverageIT extends AdministrationStackBase {
         assertThat(authorship()).hasSize(before);
     }
 
-    /** Feature 006: as três operações da visão da escola, com registro de sucesso do administrador. */
+    /**
+     * Feature 006: as três operações da visão da escola, com registro de sucesso do administrador.
+     */
     @Test
     void schoolHistoryOperationsLeaveARecordWithRoleChannelAndResult() throws Exception {
         var teacher = scenario.clara();

@@ -10,6 +10,7 @@ import { StudentsScreen } from '../pages/admin/StudentsScreen';
 import { StudentFormScreen } from '../pages/admin/StudentFormScreen';
 import { StudentDetailScreen } from '../pages/admin/StudentDetailScreen';
 import { SchoolHistoryScreen } from '../pages/admin/SchoolHistoryScreen';
+import { AuditTrailScreen } from '../pages/admin/AuditTrailScreen';
 import { AdministratorsScreen } from '../pages/admin/AdministratorsScreen';
 import { ActivateScreen } from '../pages/admin/ActivateScreen';
 import { ChangePasswordScreen } from '../pages/admin/ChangePasswordScreen';
@@ -48,6 +49,7 @@ export const adminRoutes: RouteObject[] = [
       { path: '/admin/students/new', element: <StudentFormScreen /> },
       { path: '/admin/students/:studentId', element: <StudentDetailScreen /> },
       { path: '/admin/history', element: <SchoolHistoryScreen /> },
+      { path: '/admin/audit', element: <AuditTrailScreen /> },
       { path: '/admin/*', element: <AdminPageNotFound /> },
     ],
   },

@@ -25,7 +25,8 @@ class QueryStudentHistoryUseCaseTest {
     private final QueryStudentHistoryUseCase history =
             new QueryStudentHistoryUseCase(
                     new GetStudentSummaryUseCase(c.students, c.open, c.authorization),
-                    new InMemoryApprovedReportQuery(c.reports, c.semester, c.students, c.teachers));
+                    new InMemoryApprovedReportQuery(c.reports, c.semester, c.students, c.teachers),
+                    c.reportAudit);
 
     @Test
     void onlyTeachersApprovedFromNewestToOldest() {

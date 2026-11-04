@@ -217,7 +217,8 @@ class ErrorHandlerIT extends ContractApiBase {
 
         var response =
                 handler.domain(
-                        new DomainException(ErrorCode.INTERNAL_ERROR, Map.of("name", "Matteo Mafra")),
+                        new DomainException(
+                                ErrorCode.INTERNAL_ERROR, Map.of("name", "Matteo Mafra")),
                         request);
 
         assertThat(response.getStatusCode().value()).isEqualTo(500);

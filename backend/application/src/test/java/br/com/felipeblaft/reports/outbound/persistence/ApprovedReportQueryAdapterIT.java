@@ -25,9 +25,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * Consulta única de relatórios aprovados com Postgres real (feature 006, R-01): só aprovados,
- * ordem do SQL igual à de {@link HistoryOrder}, filtros pela data de referência, paginação com
- * total e dados de aluno e professor (inclusive inativos e professor desassociado).
+ * Consulta única de relatórios aprovados com Postgres real (feature 006, R-01): só aprovados, ordem
+ * do SQL igual à de {@link HistoryOrder}, filtros pela data de referência, paginação com total e
+ * dados de aluno e professor (inclusive inativos e professor desassociado).
  */
 class ApprovedReportQueryAdapterIT extends RegistryPersistenceBase {
 
@@ -229,7 +229,8 @@ class ApprovedReportQueryAdapterIT extends RegistryPersistenceBase {
                         .map(ApprovedReportRow::reportId)
                         .toList();
 
-        assertThat(ids(ApprovedReportCriteria.unfiltered())).containsExactlyElementsOf(expectedOrder);
+        assertThat(ids(ApprovedReportCriteria.unfiltered()))
+                .containsExactlyElementsOf(expectedOrder);
         List<UUID> paged = new ArrayList<>();
         for (int page = 0; page * 7 < expectedOrder.size(); page++) {
             query.page(ApprovedReportCriteria.unfiltered(), new PageRequest(page, 7))
@@ -255,8 +256,7 @@ class ApprovedReportQueryAdapterIT extends RegistryPersistenceBase {
                 lessonReport(clara, sofia, LocalDate.of(2026, 6, 30), "APPROVED", BASE, 1);
         UUID claraMatteoFirstSemester =
                 semesterReport(clara, matteo, "2026-1", "APPROVED", BASE, 1);
-        UUID brunoSofiaSecondSemester =
-                semesterReport(bruno, sofia, "2026-2", "APPROVED", BASE, 1);
+        UUID brunoSofiaSecondSemester = semesterReport(bruno, sofia, "2026-2", "APPROVED", BASE, 1);
 
         assertThat(ids(criteria(matteo, null, null, null, null)))
                 .containsExactlyInAnyOrder(
@@ -366,7 +366,8 @@ class ApprovedReportQueryAdapterIT extends RegistryPersistenceBase {
         Student inactiveStudent = student("Matteo Ferreira");
         // nenhum dos dois tem associação: o histórico da escola não depende dela
         UUID lessonId =
-                lessonReport(active, inactiveStudent, LocalDate.of(2026, 5, 20), "APPROVED", BASE, 3);
+                lessonReport(
+                        active, inactiveStudent, LocalDate.of(2026, 5, 20), "APPROVED", BASE, 3);
         UUID semesterId = semesterReport(inactive, inactiveStudent, "2026-1", "APPROVED", BASE, 2);
         inactivate(inactive);
         inactiveStudent.inactivate(now());

@@ -96,6 +96,31 @@ public class AuthorshipService {
             AuthorshipResult result,
             String errorCode,
             String correlationId) {
+        recordEvent(
+                actor,
+                operation.name(),
+                targetType,
+                targetId,
+                detail,
+                result,
+                errorCode,
+                correlationId);
+    }
+
+    /**
+     * Como {@link #recordRead}, para um evento que não é uma {@link Operation} da matriz
+     * (relatórios do professor, trilha, retenção...). O nome é um código em maiúsculas validado
+     * aqui e no construtor de {@link AuthorshipRecord}.
+     */
+    public void recordEvent(
+            Actor actor,
+            String operation,
+            AuthorshipTargetType targetType,
+            UUID targetId,
+            AuthorshipReadDetail detail,
+            AuthorshipResult result,
+            String errorCode,
+            String correlationId) {
         write(
                 new AuthorshipRecord(
                         GeneratorId.create(),
@@ -103,7 +128,7 @@ public class AuthorshipService {
                         actor.id(),
                         actor.role(),
                         actor.origin(),
-                        checkedCode(operation.name()),
+                        checkedCode(operation),
                         targetType,
                         targetId,
                         result,

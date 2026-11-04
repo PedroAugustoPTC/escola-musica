@@ -178,13 +178,13 @@ export interface SeedOptions {
 export async function seed(options: SeedOptions = {}): Promise<Seeding> {
   return withDatabase(async (database) => {
     const tables = await database.query<{ tablename: string }>(
-      "select tablename from pg_tables where schemaname = 'public' and tablename not in ('flyway_schema_history', 'authorship_record')",
+      "select tablename from pg_tables where schemaname = 'public' and tablename not in ('flyway_schema_history', 'authorship_record', 'audit_chain_anchor', 'erased_student')",
     );
     await database.query(`truncate ${tables.rows.map((t) => `"${t.tablename}"`).join(', ')} cascade`);
     // O registro de autoria é somente de acréscimo (gatilhos da V10): o teste, dono do banco descartável,
     // suspende os gatilhos de usuário na mesma instrução composta (uma transação) só para limpá-lo.
     await database.query(
-      'alter table authorship_record disable trigger user; truncate table authorship_record; alter table authorship_record enable trigger user',
+      'alter table authorship_record disable trigger user; alter table audit_chain_anchor disable trigger user; alter table erased_student disable trigger user; truncate table authorship_record, audit_chain_anchor, erased_student; alter table authorship_record enable trigger user; alter table audit_chain_anchor enable trigger user; alter table erased_student enable trigger user',
     );
 
     const now = new Date();

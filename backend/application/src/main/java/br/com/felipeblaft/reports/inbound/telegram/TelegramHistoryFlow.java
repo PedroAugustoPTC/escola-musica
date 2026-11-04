@@ -152,7 +152,7 @@ public class TelegramHistoryFlow implements TelegramFlow {
                 String item = items.get(number);
                 ReportType type = item.charAt(0) == 'a' ? ReportType.LESSON : ReportType.SEMESTER;
                 ObtainedDocument document =
-                        getDocument.official(
+                        getDocument.prepareOfficial(
                                 context.teacher().id(), type, UUID.fromString(item.substring(1)));
                 context.answer(
                         new Document(

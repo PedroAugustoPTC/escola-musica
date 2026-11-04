@@ -175,25 +175,52 @@ class AuthorshipRecordTest {
     @Test
     void readDetailIsOnlyAcceptedInTheSchoolReadOperations() {
         AuthorshipReadDetail detail = AuthorshipReadDetail.ofQuery(null, null, null, null, 0);
-        for (String operation :
-                List.of(
-                        "SCHOOL_HISTORY_QUERY",
-                        "SCHOOL_REPORT_DOCUMENT_OPEN",
-                        "SCHOOL_REPORT_DOCUMENT_DOWNLOAD")) {
+        for (String operation : AuthorshipRecord.READ_DETAIL_OPERATIONS) {
             assertThatCode(() -> withDetail(operation, detail))
                     .as(operation)
                     .doesNotThrowAnyException();
         }
         assertThat(AuthorshipRecord.READ_DETAIL_OPERATIONS)
                 .containsExactlyInAnyOrder(
+                        // visão da escola (006)
                         "SCHOOL_HISTORY_QUERY",
                         "SCHOOL_REPORT_DOCUMENT_OPEN",
-                        "SCHOOL_REPORT_DOCUMENT_DOWNLOAD");
+                        "SCHOOL_REPORT_DOCUMENT_DOWNLOAD",
+                        // leituras e decisões do professor, consulta da trilha e consentimento
+                        // (007)
+                        "HISTORY_QUERY",
+                        "REPORT_DOCUMENT_OPEN",
+                        "REPORT_DOCUMENT_DOWNLOAD",
+                        "REPORT_DOCUMENT_SENT",
+                        "LESSON_REPORT_APPROVE",
+                        "LESSON_REPORT_CANCEL",
+                        "SEMESTER_REPORT_APPROVE",
+                        "SEMESTER_REPORT_CANCEL",
+                        "AUDIT_TRAIL_QUERY",
+                        "CONSENT_RECORD");
         for (String operation : List.of("STUDENT_REGISTER", "ADMIN_SIGN_IN", "TEACHER_LIST")) {
             assertThatThrownBy(() -> withDetail(operation, detail))
                     .as(operation)
                     .isInstanceOf(IllegalArgumentException.class);
         }
+    }
+
+    @Test
+    void itemCountIsOnlyAcceptedInTheOperationsThatCountItems() {
+        AuthorshipReadDetail count = AuthorshipReadDetail.ofCount(40);
+        for (String operation : AuthorshipRecord.ITEM_COUNT_OPERATIONS) {
+            assertThatCode(() -> withDetail(operation, count))
+                    .as(operation)
+                    .doesNotThrowAnyException();
+        }
+        assertThat(AuthorshipRecord.ITEM_COUNT_OPERATIONS)
+                .containsExactlyInAnyOrder(
+                        "RETENTION_RUN",
+                        "ERASURE_COMPLETED",
+                        "AUDIT_TRAIL_PURGED",
+                        "AUDIT_TRAIL_VERIFY");
+        assertThatThrownBy(() -> withDetail("STUDENT_REGISTER", count))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

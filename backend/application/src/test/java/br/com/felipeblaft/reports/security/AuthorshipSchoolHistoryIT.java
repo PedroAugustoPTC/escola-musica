@@ -24,8 +24,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
  *
  * <p>Desvio conhecido do E7: a credencial cruzada (professor nas rotas {@code /admin}) ainda não
  * grava {@code AUTHORIZATION_DENIED} (pendência aceita da feature 005); o teste confirma a resposta
- * de rota inexistente e que nenhuma operação da visão da escola é registrada, sem exigir o
- * registro que hoje não existe.
+ * de rota inexistente e que nenhuma operação da visão da escola é registrada, sem exigir o registro
+ * que hoje não existe.
  */
 class AuthorshipSchoolHistoryIT extends SchoolHistoryBase {
 
@@ -119,7 +119,8 @@ class AuthorshipSchoolHistoryIT extends SchoolHistoryBase {
         assertThat(rows).allMatch(row -> row.get("target_type") == null);
         assertThat(rows).allMatch(row -> row.get("target_id") == null);
         assertThat(rows).extracting(row -> row.get("page_number")).containsExactly(0, 1);
-        assertThat(rows.get(0).get("correlation_id")).isNotEqualTo(rows.get(1).get("correlation_id"));
+        assertThat(rows.get(0).get("correlation_id"))
+                .isNotEqualTo(rows.get(1).get("correlation_id"));
     }
 
     @Test
@@ -226,7 +227,9 @@ class AuthorshipSchoolHistoryIT extends SchoolHistoryBase {
 
     @Test
     void studentSearchAndTeacherListLeaveNoReadRecord() throws Exception {
-        assertThat(call(HttpMethod.GET, ADMIN + "/students?search=Matteo", administrator).getStatus())
+        assertThat(
+                        call(HttpMethod.GET, ADMIN + "/students?search=Matteo", administrator)
+                                .getStatus())
                 .isEqualTo(200);
         assertThat(call(HttpMethod.GET, ADMIN + "/teachers", administrator).getStatus())
                 .isEqualTo(200);

@@ -22,8 +22,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 /**
- * Acesso cruzado da visão da escola nos dois sentidos de credencial (feature 006, US2, SC-004):
- * o professor (inclusive o autor) não alcança nenhuma rota {@code /admin/school-history/**}; o
+ * Acesso cruzado da visão da escola nos dois sentidos de credencial (feature 006, US2, SC-004): o
+ * professor (inclusive o autor) não alcança nenhuma rota {@code /admin/school-history/**}; o
  * administrador, sozinho, não alcança nenhuma rota de relatório do professor; sem sessão, com
  * sessão expirada e depois de "Sair", tudo é 401; não existe rota por versão nem de escrita, e
  * nenhum relatório muda. Em todos os casos negados a resposta é igual à de rota inexistente. Pilha
@@ -49,8 +49,7 @@ class SchoolHistoryCrossAccessIT extends SchoolHistoryBase {
         Teacher teacher = scenario.clara();
         Student matteo = scenario.student(teacher, "Matteo Mafra", "Piano");
         student = matteo.id();
-        lesson =
-                scenario.approvedLesson(teacher, matteo, LocalDate.of(2026, 3, 10), "Sopro").id();
+        lesson = scenario.approvedLesson(teacher, matteo, LocalDate.of(2026, 3, 10), "Sopro").id();
         administrator = signInNewAdministrator();
         clara = signInTeacher(ScenarioIT.CODE_CLARA);
         semester = approvedSemester(clara, student, "2026-1");
@@ -117,7 +116,11 @@ class SchoolHistoryCrossAccessIT extends SchoolHistoryBase {
             if (!fingerprint(response).equals(unknown)) {
                 differences.add(route + " -> " + response.getStatus());
             }
-            assertThat(new String(response.getContentAsByteArray(), java.nio.charset.StandardCharsets.ISO_8859_1)).doesNotStartWith("%PDF");
+            assertThat(
+                            new String(
+                                    response.getContentAsByteArray(),
+                                    java.nio.charset.StandardCharsets.ISO_8859_1))
+                    .doesNotStartWith("%PDF");
         }
         assertThat(differences).as("rotas que diferem da rota inexistente").isEmpty();
     }
@@ -133,7 +136,11 @@ class SchoolHistoryCrossAccessIT extends SchoolHistoryBase {
             if (!fingerprint(response).equals(unknown)) {
                 differences.add(route + " -> " + response.getStatus());
             }
-            assertThat(new String(response.getContentAsByteArray(), java.nio.charset.StandardCharsets.ISO_8859_1)).doesNotStartWith("%PDF");
+            assertThat(
+                            new String(
+                                    response.getContentAsByteArray(),
+                                    java.nio.charset.StandardCharsets.ISO_8859_1))
+                    .doesNotStartWith("%PDF");
         }
         assertThat(differences).as("rotas do professor que diferem da inexistente").isEmpty();
     }
@@ -143,7 +150,11 @@ class SchoolHistoryCrossAccessIT extends SchoolHistoryBase {
         for (String route : schoolRoutes()) {
             MockHttpServletResponse response = get(route, null);
             assertThat(response.getStatus()).as(route).isEqualTo(401);
-            assertThat(new String(response.getContentAsByteArray(), java.nio.charset.StandardCharsets.ISO_8859_1)).doesNotStartWith("%PDF");
+            assertThat(
+                            new String(
+                                    response.getContentAsByteArray(),
+                                    java.nio.charset.StandardCharsets.ISO_8859_1))
+                    .doesNotStartWith("%PDF");
         }
     }
 
@@ -154,7 +165,11 @@ class SchoolHistoryCrossAccessIT extends SchoolHistoryBase {
         for (String route : schoolRoutes()) {
             MockHttpServletResponse response = get(route, administrator);
             assertThat(response.getStatus()).as(route).isEqualTo(401);
-            assertThat(new String(response.getContentAsByteArray(), java.nio.charset.StandardCharsets.ISO_8859_1)).doesNotStartWith("%PDF");
+            assertThat(
+                            new String(
+                                    response.getContentAsByteArray(),
+                                    java.nio.charset.StandardCharsets.ISO_8859_1))
+                    .doesNotStartWith("%PDF");
         }
     }
 
@@ -162,13 +177,18 @@ class SchoolHistoryCrossAccessIT extends SchoolHistoryBase {
     void afterSigningOutTheSameCookieIsUnauthorized() throws Exception {
         assertThat(get(lessonPdf(lesson), administrator).getStatus()).isEqualTo(200);
 
-        MockHttpServletResponse signOut = call(HttpMethod.DELETE, ADMIN + "/session", administrator);
+        MockHttpServletResponse signOut =
+                call(HttpMethod.DELETE, ADMIN + "/session", administrator);
         assertThat(signOut.getStatus()).isBetween(200, 204);
 
         for (String route : schoolRoutes()) {
             MockHttpServletResponse response = get(route, administrator);
             assertThat(response.getStatus()).as(route).isEqualTo(401);
-            assertThat(new String(response.getContentAsByteArray(), java.nio.charset.StandardCharsets.ISO_8859_1)).doesNotStartWith("%PDF");
+            assertThat(
+                            new String(
+                                    response.getContentAsByteArray(),
+                                    java.nio.charset.StandardCharsets.ISO_8859_1))
+                    .doesNotStartWith("%PDF");
         }
     }
 
@@ -181,7 +201,10 @@ class SchoolHistoryCrossAccessIT extends SchoolHistoryBase {
                 List.of(
                         SCHOOL_HISTORY + "/lesson-reports/" + lesson + "/versions/1/pdf",
                         SCHOOL_HISTORY + "/semester-reports/" + semester + "/versions/1/pdf",
-                        SCHOOL_HISTORY + "/lesson-reports/" + lesson + "/versions/1/pdf/download")) {
+                        SCHOOL_HISTORY
+                                + "/lesson-reports/"
+                                + lesson
+                                + "/versions/1/pdf/download")) {
             assertThat(fingerprint(get(route, administrator))).as(route).isEqualTo(unknown);
         }
     }
@@ -200,8 +223,7 @@ class SchoolHistoryCrossAccessIT extends SchoolHistoryBase {
                 assertThat(errorCode(response)).isEqualTo("RESOURCE_NOT_FOUND");
                 assertThat(response.getContentAsString())
                         .as(method + " " + route)
-                        .isEqualTo(
-                                get(UNKNOWN_ADMIN_ROUTE, administrator).getContentAsString());
+                        .isEqualTo(get(UNKNOWN_ADMIN_ROUTE, administrator).getContentAsString());
             }
         }
 

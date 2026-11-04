@@ -128,7 +128,8 @@ public class TelegramChannelController {
         UpdateTelegram update = read.get();
         // o update_id é a correlação da autoria no Telegram: vai a toda linha de log deste pedido
         // (FR-050)
-        try (CorrelationMdc scope = CorrelationMdc.open(Long.toString(update.updateId()))) {
+        try (CorrelationMdc scope =
+                CorrelationMdc.open(Long.toString(update.updateId()), "TELEGRAM")) {
             TelegramUpdateResult result = processor.processInternal(update);
             if (!result.repeated()) {
                 return ResponseEntity.ok(registerActions(update, result.outputs(), false));

@@ -3,6 +3,9 @@
 **Feature**: `005-admin-registrations-access` | Referências: FR-042, FR-049, Princípio VI;
 `specs/001-fluxo-relatorios/contracts/mensagens.md` (formato e regras do catálogo).
 
+> **Nota (feature 007)**: a feature 007 acrescenta operações à Matriz de permissões (trilha de auditoria, consentimento,
+> eliminação, custos e alertas). Ver [permission-matrix-additions.md](../../007-privacy-retention-operations/contracts/permission-matrix-additions.md).
+
 O núcleo devolve **código** e **dados estruturados**, nunca texto (R-18 da 001). O texto vem do catálogo único
 `backend/application/src/main/resources/messages/messages_pt_BR.properties`, usado pelos dois canais; o frontend gera
 `messages.json` a partir dele. O teste do catálogo reprova `ErrorCode` sem texto. Chaves e códigos em inglês; textos em

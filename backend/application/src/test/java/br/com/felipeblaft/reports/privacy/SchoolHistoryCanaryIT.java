@@ -74,7 +74,8 @@ class SchoolHistoryCanaryIT extends SchoolHistoryBase {
             assertThat(list.getStatus()).isEqualTo(200);
             Map<String, String> forbiddenInList = new LinkedHashMap<>(canaries());
             forbiddenInList.remove("nome do aluno canário");
-            ResponseSweeper.searching(forbiddenInList).assertClean(Place.BODY, list.getContentAsString());
+            ResponseSweeper.searching(forbiddenInList)
+                    .assertClean(Place.BODY, list.getContentAsString());
             assertThat(call(HttpMethod.GET, lessonPdf(lesson), administrator).getStatus())
                     .isEqualTo(200);
             assertThat(call(HttpMethod.GET, lessonDownload(lesson), administrator).getStatus())
@@ -84,7 +85,10 @@ class SchoolHistoryCanaryIT extends SchoolHistoryBase {
             MockHttpServletResponse validation =
                     call(
                             HttpMethod.GET,
-                            SCHOOL_HISTORY + "?studentId=" + studentId + "&from=2026-05-02&to=2026-05-01",
+                            SCHOOL_HISTORY
+                                    + "?studentId="
+                                    + studentId
+                                    + "&from=2026-05-02&to=2026-05-01",
                             administrator);
             assertThat(validation.getStatus()).isEqualTo(400);
             sweeper.assertClean(Place.BODY, validation.getContentAsString());
@@ -97,7 +101,8 @@ class SchoolHistoryCanaryIT extends SchoolHistoryBase {
                     call(HttpMethod.GET, SCHOOL_HISTORY + "?studentId=" + studentId, administrator);
             assertThat(forced.getStatus()).isEqualTo(500);
             sweeper.assertClean(Place.BODY, forced.getContentAsString());
-            MockHttpServletResponse forcedPdf = call(HttpMethod.GET, lessonPdf(lesson), administrator);
+            MockHttpServletResponse forcedPdf =
+                    call(HttpMethod.GET, lessonPdf(lesson), administrator);
             assertThat(forcedPdf.getStatus()).isEqualTo(500);
             sweeper.assertClean(Place.BODY, forcedPdf.getContentAsString());
 

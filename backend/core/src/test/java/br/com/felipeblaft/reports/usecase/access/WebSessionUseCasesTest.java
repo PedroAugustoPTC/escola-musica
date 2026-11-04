@@ -8,6 +8,7 @@ import br.com.felipeblaft.reports.domain.access.WebSession;
 import br.com.felipeblaft.reports.domain.common.DomainException;
 import br.com.felipeblaft.reports.domain.common.ErrorCode;
 import br.com.felipeblaft.reports.domain.registry.Teacher;
+import br.com.felipeblaft.reports.doubles.FixedRequestContext;
 import br.com.felipeblaft.reports.usecase.teacher.TeacherScenario;
 import java.time.Duration;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
@@ -30,7 +31,12 @@ class WebSessionUseCasesTest {
     private final ValidateSessionWebUseCase validate =
             new ValidateSessionWebUseCase(
                     c.sessions, c.teachers, c.renewal, c.protection, c.clock, c.parameters);
-    private final EndWebSessionUseCase end = new EndWebSessionUseCase(c.sessions, c.protection);
+    private final EndWebSessionUseCase end =
+            new EndWebSessionUseCase(
+                    c.sessions,
+                    c.protection,
+                    new br.com.felipeblaft.reports.service.TeacherReportAuditService(
+                            c.authorship, new FixedRequestContext()));
     private final Teacher clara = c.teacher("Clara Souza", "clara@example.test", "K7QM2XPA");
 
     private static void failWith(ThrowingCallable action, ErrorCode code) {

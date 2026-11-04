@@ -61,11 +61,13 @@ class AdminSchoolReportDocumentContractIT extends SchoolHistoryBase {
     @Test
     void lessonPdfOpensAndDownloadsWithTheTeachersBytesAndName() throws Exception {
         MockHttpServletResponse teacher =
-                call(HttpMethod.GET, "/api/v1/lesson-reports/" + lesson.id() + "/official-pdf", clara);
+                call(
+                        HttpMethod.GET,
+                        "/api/v1/lesson-reports/" + lesson.id() + "/official-pdf",
+                        clara);
         assertThat(teacher.getStatus()).isEqualTo(200);
 
-        MockHttpServletResponse open =
-                call(HttpMethod.GET, lessonPdf(lesson.id()), administrator);
+        MockHttpServletResponse open = call(HttpMethod.GET, lessonPdf(lesson.id()), administrator);
         MockHttpServletResponse download =
                 call(HttpMethod.GET, lessonDownload(lesson.id()), administrator);
 
@@ -118,6 +120,10 @@ class AdminSchoolReportDocumentContractIT extends SchoolHistoryBase {
         MockHttpServletResponse response = call(HttpMethod.GET, lessonPdf(lesson.id()), null);
 
         assertThat(response.getStatus()).isEqualTo(401);
-        assertThat(new String(response.getContentAsByteArray(), java.nio.charset.StandardCharsets.ISO_8859_1)).doesNotStartWith("%PDF");
+        assertThat(
+                        new String(
+                                response.getContentAsByteArray(),
+                                java.nio.charset.StandardCharsets.ISO_8859_1))
+                .doesNotStartWith("%PDF");
     }
 }

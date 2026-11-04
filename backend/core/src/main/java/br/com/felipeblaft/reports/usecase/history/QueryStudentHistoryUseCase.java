@@ -5,6 +5,7 @@ import br.com.felipeblaft.reports.domain.history.ApprovedReportCriteria;
 import br.com.felipeblaft.reports.domain.history.ApprovedReportRow;
 import br.com.felipeblaft.reports.domain.semester.SemesterPeriod;
 import br.com.felipeblaft.reports.port.ApprovedReportQueryPort;
+import br.com.felipeblaft.reports.service.TeacherReportAuditService;
 import br.com.felipeblaft.reports.usecase.home.GetStudentSummaryUseCase;
 import br.com.felipeblaft.reports.usecase.home.StudentSummary;
 import java.time.Instant;
@@ -33,11 +34,15 @@ public class QueryStudentHistoryUseCase {
 
     private final GetStudentSummaryUseCase studentSummary;
     private final ApprovedReportQueryPort approved;
+    private final TeacherReportAuditService audit;
 
     public QueryStudentHistoryUseCase(
-            GetStudentSummaryUseCase studentSummary, ApprovedReportQueryPort approved) {
+            GetStudentSummaryUseCase studentSummary,
+            ApprovedReportQueryPort approved,
+            TeacherReportAuditService audit) {
         this.studentSummary = Objects.requireNonNull(studentSummary);
         this.approved = Objects.requireNonNull(approved);
+        this.audit = Objects.requireNonNull(audit);
     }
 
     public History run(UUID teacherId, UUID studentId) {
@@ -46,6 +51,7 @@ public class QueryStudentHistoryUseCase {
                 approved.all(ApprovedReportCriteria.ofTeacherStudent(teacherId, studentId)).stream()
                         .map(QueryStudentHistoryUseCase::item)
                         .toList();
+        audit.historyQueried(teacherId, studentId);
         return new History(student, items);
     }
 

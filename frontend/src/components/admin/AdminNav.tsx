@@ -6,6 +6,7 @@ export const ADMIN_NAV_ITEMS: { key: string; label: string; icon: string; route:
   { key: 'teachers', label: 'Professores', icon: 'school', route: '/admin/teachers' },
   { key: 'students', label: 'Alunos', icon: 'group', route: '/admin/students' },
   { key: 'history', label: msg('SCHOOL_HISTORY_NAV'), icon: 'history', route: '/admin/history' },
+  { key: 'audit', label: msg('AUDIT_NAV'), icon: 'shield_person', route: '/admin/audit' },
   {
     key: 'administrators',
     label: 'Administradores',

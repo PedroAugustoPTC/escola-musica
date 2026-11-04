@@ -79,6 +79,14 @@ public class ReportScenario extends AccessScenario {
                     transaction,
                     clock);
 
+    public final FakeAuthorshipRecorder authorshipRecorder = new FakeAuthorshipRecorder();
+    public final FixedRequestContext requestContext = new FixedRequestContext();
+    public final br.com.felipeblaft.reports.service.TeacherReportAuditService reportAudit =
+            new br.com.felipeblaft.reports.service.TeacherReportAuditService(
+                    new br.com.felipeblaft.reports.service.AuthorshipService(
+                            authorshipRecorder, clock),
+                    requestContext);
+
     public final RegisterLessonByAudioUseCase register =
             new RegisterLessonByAudioUseCase(authorization, open, audioSending, queue, clock);
     public final AnswerQuestionsUseCase answer =
@@ -88,9 +96,10 @@ public class ReportScenario extends AccessScenario {
     public final RetryLessonReportUseCase retry =
             new RetryLessonReportUseCase(access, reports, queue, clock);
     public final ApproveLessonReportUseCase approve =
-            new ApproveLessonReportUseCase(access, reports, versions, documents, clock);
+            new ApproveLessonReportUseCase(
+                    access, reports, versions, documents, clock, reportAudit);
     public final CancelLessonReportUseCase cancel =
-            new CancelLessonReportUseCase(access, reports, queue, clock);
+            new CancelLessonReportUseCase(access, reports, queue, clock, reportAudit);
     public final GetLessonReportUseCase get =
             new GetLessonReportUseCase(
                     access,
@@ -117,7 +126,8 @@ public class ReportScenario extends AccessScenario {
                     pdfDocuments,
                     documents,
                     new br.com.felipeblaft.reports.service.OfficialDocumentService(
-                            versions, pdfDocuments, documents));
+                            versions, pdfDocuments, documents),
+                    reportAudit);
 
     // ---- Semestral (US4)
     public final ProcessingDoubles.InMemorySemesterReportRepository semester =
@@ -155,11 +165,11 @@ public class ReportScenario extends AccessScenario {
     public final br.com.felipeblaft.reports.usecase.semester.ApproveSemesterReportUseCase
             approveSemester =
                     new br.com.felipeblaft.reports.usecase.semester.ApproveSemesterReportUseCase(
-                            semesterAccess, semester, versions, documents, clock);
+                            semesterAccess, semester, versions, documents, clock, reportAudit);
     public final br.com.felipeblaft.reports.usecase.semester.CancelSemesterReportUseCase
             cancelSemester =
                     new br.com.felipeblaft.reports.usecase.semester.CancelSemesterReportUseCase(
-                            semesterAccess, semester, queue, clock);
+                            semesterAccess, semester, queue, clock, reportAudit);
     public final br.com.felipeblaft.reports.usecase.semester.GetSemesterReportUseCase getSemester =
             new br.com.felipeblaft.reports.usecase.semester.GetSemesterReportUseCase(
                     semesterAccess,

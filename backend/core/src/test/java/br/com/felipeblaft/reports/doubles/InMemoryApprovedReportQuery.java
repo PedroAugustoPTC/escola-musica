@@ -51,7 +51,8 @@ public class InMemoryApprovedReportQuery implements ApprovedReportQueryPort {
     }
 
     @Override
-    public PageResult<ApprovedReportRow> page(ApprovedReportCriteria criteria, PageRequest request) {
+    public PageResult<ApprovedReportRow> page(
+            ApprovedReportCriteria criteria, PageRequest request) {
         return PageResult.slice(all(criteria), request);
     }
 

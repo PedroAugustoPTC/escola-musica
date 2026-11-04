@@ -26,7 +26,9 @@ public class RequestCorrelationFilter extends OncePerRequestFilter {
             HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
         String id = RequestCorrelation.of(request);
-        try (CorrelationMdc scope = CorrelationMdc.open(id)) {
+        // a API interna do n8n é o canal do Telegram; o resto é a Web
+        String origin = request.getRequestURI().startsWith("/internal/") ? "TELEGRAM" : "WEB";
+        try (CorrelationMdc scope = CorrelationMdc.open(id, origin)) {
             chain.doFilter(request, response);
         }
     }

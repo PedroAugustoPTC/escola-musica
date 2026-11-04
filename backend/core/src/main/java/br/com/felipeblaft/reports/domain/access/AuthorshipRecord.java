@@ -58,7 +58,25 @@ public record AuthorshipRecord(
             Set.of(
                     Operation.SCHOOL_HISTORY_QUERY.name(),
                     Operation.SCHOOL_REPORT_DOCUMENT_OPEN.name(),
-                    Operation.SCHOOL_REPORT_DOCUMENT_DOWNLOAD.name());
+                    Operation.SCHOOL_REPORT_DOCUMENT_DOWNLOAD.name(),
+                    "HISTORY_QUERY",
+                    "REPORT_DOCUMENT_OPEN",
+                    "REPORT_DOCUMENT_DOWNLOAD",
+                    "REPORT_DOCUMENT_SENT",
+                    "LESSON_REPORT_APPROVE",
+                    "LESSON_REPORT_CANCEL",
+                    "SEMESTER_REPORT_APPROVE",
+                    "SEMESTER_REPORT_CANCEL",
+                    Operation.AUDIT_TRAIL_QUERY.name(),
+                    "CONSENT_RECORD");
+
+    /** Operações que podem levar a contagem de itens; espelha o CHECK da V17. */
+    public static final Set<String> ITEM_COUNT_OPERATIONS =
+            Set.of(
+                    "RETENTION_RUN",
+                    "ERASURE_COMPLETED",
+                    "AUDIT_TRAIL_PURGED",
+                    "AUDIT_TRAIL_VERIFY");
 
     /**
      * Operações e eventos que podem levar o resumo da origem; espelha, e o teste compara, o CHECK
@@ -111,8 +129,15 @@ public record AuthorshipRecord(
         if (!validCorrelation(correlationId)) {
             throw new IllegalArgumentException("identificador de correlação fora do formato");
         }
-        if (readDetail != null && !READ_DETAIL_OPERATIONS.contains(operation)) {
+        if (readDetail != null
+                && readDetail.hasReadFields()
+                && !READ_DETAIL_OPERATIONS.contains(operation)) {
             throw new IllegalArgumentException("operação não pode levar detalhe de leitura");
+        }
+        if (readDetail != null
+                && readDetail.itemCount() != null
+                && !ITEM_COUNT_OPERATIONS.contains(operation)) {
+            throw new IllegalArgumentException("operação não pode levar contagem de itens");
         }
     }
 

@@ -94,7 +94,11 @@ class UseCasePermissionMatrixTest {
                     Operation.SCHOOL_REPORT_DOCUMENT_OPEN,
                             "usecase.document.GetSchoolReportDocumentUseCase (feature 006)",
                     Operation.SCHOOL_REPORT_DOCUMENT_DOWNLOAD,
-                            "usecase.document.GetSchoolReportDocumentUseCase (feature 006)");
+                            "usecase.document.GetSchoolReportDocumentUseCase (feature 006)",
+                    Operation.AUDIT_TRAIL_QUERY,
+                            "usecase.audit.QueryAuditTrailUseCase (feature 007)",
+                    Operation.AUDIT_TRAIL_VERIFY,
+                            "usecase.audit.VerifyAuditChainUseCase (feature 007)");
 
     // ------------------------------------------------------------------ mapa caso de uso →
     // operação

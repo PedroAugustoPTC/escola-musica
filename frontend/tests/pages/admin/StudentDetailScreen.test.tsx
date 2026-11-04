@@ -29,6 +29,14 @@ describe('StudentDetailScreen (A12)', () => {
     expect(screen.getByRole('button', { name: 'Inativar' })).toBeInTheDocument();
   });
 
+  it('oferece o atalho da auditoria, que abre a trilha só com o identificador do aluno', async () => {
+    open();
+    expect(await screen.findByRole('link', { name: 'Quem acessou os relatórios deste aluno' })).toHaveAttribute(
+      'href',
+      `/admin/audit?targetId=${STUDENT.id}`,
+    );
+  });
+
   it('oferece "Ver histórico", que abre o histórico da escola só com o identificador do aluno', async () => {
     open();
     expect(await screen.findByRole('link', { name: 'Ver histórico' })).toHaveAttribute(

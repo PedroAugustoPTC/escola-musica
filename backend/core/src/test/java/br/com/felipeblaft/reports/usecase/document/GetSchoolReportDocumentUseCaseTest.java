@@ -183,10 +183,7 @@ class GetSchoolReportDocumentUseCaseTest {
                         () ->
                                 document.run(
                                         ActorFixtures.administratorWithProvisionalPassword(),
-                                        command(
-                                                ReportType.LESSON,
-                                                report.id(),
-                                                Disposition.OPEN)))
+                                        command(ReportType.LESSON, report.id(), Disposition.OPEN)))
                 .satisfies(e -> assertCode(e, ErrorCode.PASSWORD_CHANGE_REQUIRED));
         assertThat(recorder.isEmpty()).isTrue();
     }
@@ -200,10 +197,7 @@ class GetSchoolReportDocumentUseCaseTest {
                         () ->
                                 document.run(
                                         admin,
-                                        command(
-                                                ReportType.LESSON,
-                                                report.id(),
-                                                Disposition.OPEN)))
+                                        command(ReportType.LESSON, report.id(), Disposition.OPEN)))
                 .satisfies(e -> assertCode(e, ErrorCode.INTERNAL_ERROR));
 
         AuthorshipRecord record = recorder.independent().getLast();
@@ -222,7 +216,8 @@ class GetSchoolReportDocumentUseCaseTest {
         document.run(admin, command(ReportType.LESSON, lesson.id(), Disposition.OPEN));
         document.run(admin, command(ReportType.SEMESTER, semester.id(), Disposition.DOWNLOAD));
 
-        AuthorshipRecord open = recorder.ofOperation(Operation.SCHOOL_REPORT_DOCUMENT_OPEN).getFirst();
+        AuthorshipRecord open =
+                recorder.ofOperation(Operation.SCHOOL_REPORT_DOCUMENT_OPEN).getFirst();
         assertThat(open.targetType()).isEqualTo(AuthorshipTargetType.LESSON_REPORT);
         assertThat(open.targetId()).isEqualTo(lesson.id());
         assertThat(open.result()).isEqualTo(AuthorshipResult.SUCCESS);
@@ -251,8 +246,7 @@ class GetSchoolReportDocumentUseCaseTest {
                 .satisfies(e -> assertCode(e, ErrorCode.RESOURCE_NOT_FOUND));
 
         AuthorshipRecord record = recorder.independent().getFirst();
-        assertThat(record.operation())
-                .isEqualTo(Operation.SCHOOL_REPORT_DOCUMENT_DOWNLOAD.name());
+        assertThat(record.operation()).isEqualTo(Operation.SCHOOL_REPORT_DOCUMENT_DOWNLOAD.name());
         assertThat(record.targetType()).isEqualTo(AuthorshipTargetType.SEMESTER_REPORT);
         assertThat(record.targetId()).isEqualTo(missing);
         assertThat(record.result()).isEqualTo(AuthorshipResult.FAILURE);
@@ -269,10 +263,7 @@ class GetSchoolReportDocumentUseCaseTest {
                         () ->
                                 document.run(
                                         admin,
-                                        command(
-                                                ReportType.LESSON,
-                                                report.id(),
-                                                Disposition.OPEN)))
+                                        command(ReportType.LESSON, report.id(), Disposition.OPEN)))
                 .isInstanceOf(IllegalStateException.class);
     }
 
