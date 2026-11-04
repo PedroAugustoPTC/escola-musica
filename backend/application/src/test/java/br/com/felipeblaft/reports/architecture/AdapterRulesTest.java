@@ -236,6 +236,25 @@ class AdapterRulesTest {
     }
 
     @Test
+    void scheduledSystemActorsAreOnlyCreatedByTheirTasks() {
+        noClasses()
+                .that()
+                .doNotHaveFullyQualifiedName(Actor.class.getName())
+                .and()
+                .haveSimpleNameNotEndingWith("Task")
+                .should()
+                .callMethodWhere(
+                        DescribedPredicate.describe(
+                                "chamam Actor.retention ou Actor.alertEvaluation",
+                                (JavaMethodCall call) ->
+                                        call.getTargetOwner().isEquivalentTo(Actor.class)
+                                                && (call.getName().equals("retention")
+                                                        || call.getName()
+                                                                .equals("alertEvaluation"))))
+                .check(withCore);
+    }
+
+    @Test
     void systemActorCreatedOutsideTheAllowedPackagesIsCaught() {
         assertThat(
                         systemActorRule(
@@ -313,7 +332,9 @@ class AdapterRulesTest {
                         BASE + ".usecase.document.GetSchoolReportDocumentUseCase");
     }
 
-    /** O Telegram não ganhou acesso à visão da escola (feature 006): nem pela consulta nem pelo PDF. */
+    /**
+     * O Telegram não ganhou acesso à visão da escola (feature 006): nem pela consulta nem pelo PDF.
+     */
     @Test
     void telegramDoesNotDependOnTheSchoolHistoryPortsNorTheOfficialDocumentService() {
         noClasses()

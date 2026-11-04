@@ -55,6 +55,7 @@ class CostRecordPersistenceIT extends IntegrationBase {
         costs.register(
                 AiCall.create(
                         job.id(),
+                        job.requestChannel(),
                         report == null ? null : ReportType.LESSON,
                         report,
                         task,

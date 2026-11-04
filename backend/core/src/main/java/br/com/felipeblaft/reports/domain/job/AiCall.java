@@ -1,5 +1,6 @@
 package br.com.felipeblaft.reports.domain.job;
 
+import br.com.felipeblaft.reports.domain.common.Channel;
 import br.com.felipeblaft.reports.domain.common.GeneratorId;
 import br.com.felipeblaft.reports.domain.common.ReportType;
 import java.math.BigDecimal;
@@ -8,12 +9,14 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * Registro de custo e tempo de uma chamada de IA (FR-056, R-13). Não guarda prompt, resposta nem
- * transcrição (FR-055). Provedor e modelo vêm da configuração, opacos para o núcleo.
+ * Registro de custo e tempo de uma chamada de IA (FR-056, R-13). O canal é o do pedido que originou
+ * o trabalho (feature 007, FR-051). Não guarda prompt, resposta nem transcrição (FR-055). Provedor
+ * e modelo vêm da configuração, opacos para o núcleo.
  */
 public record AiCall(
         UUID id,
         UUID jobId,
+        Channel channel,
         ReportType reportType,
         UUID reportId,
         AiTask task,
@@ -30,6 +33,7 @@ public record AiCall(
     public AiCall {
         Objects.requireNonNull(id);
         Objects.requireNonNull(jobId);
+        Objects.requireNonNull(channel);
         Objects.requireNonNull(task);
         Objects.requireNonNull(createdAt);
     }
@@ -39,6 +43,7 @@ public record AiCall(
         return new AiCall(
                 id,
                 jobId,
+                channel,
                 type,
                 reportId,
                 task,
@@ -55,6 +60,7 @@ public record AiCall(
 
     public static AiCall create(
             UUID jobId,
+            Channel channel,
             ReportType reportType,
             UUID reportId,
             AiTask task,
@@ -70,6 +76,7 @@ public record AiCall(
         return new AiCall(
                 GeneratorId.create(),
                 jobId,
+                channel,
                 reportType,
                 reportId,
                 task,

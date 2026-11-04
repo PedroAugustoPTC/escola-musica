@@ -262,6 +262,36 @@ credencial padrão).
 | `ACCESS_CPF_LOOKUP_LOCK_MINUTES` | `60` | Duração do bloqueio |
 | `TELEGRAM_STUDENT_DRAFT_MINUTES` | `30` | Minutos de inatividade que descartam o cadastro de aluno em andamento no Telegram |
 
+### Variáveis de privacidade, retenção e operação (feature 007)
+
+Todas estão em `infra/.env.example`. Valor ausente, zero, negativo ou inválido **não impede a subida**: vale o padrão e o
+backend avisa no log o **nome da variável** (nunca o valor). Contrato: `specs/007-privacy-retention-operations/contracts/configuration.md`.
+
+| Variável | Padrão | Função |
+|---|---|---|
+| `DB_APP_PASSWORD` | nenhum (obrigatória) | Senha do papel de banco `reports_app`, usado pelo pool da aplicação (sem `UPDATE`/`DELETE` na trilha). Gere um valor novo e longo; `infra/scripts/lib/db-roles.sh` a aplica ao papel. O Flyway segue com `POSTGRES_PASSWORD` |
+| `DB_APP_USER` | `reports_app` | Nome do papel da aplicação |
+| `RETENTION_TRANSCRIPTION_DAYS` | `30` | Dias após aprovar ou cancelar até apagar a transcrição e o texto das interações |
+| `RETENTION_UNAPPROVED_PDF_DAYS` | `30` | Dias após aprovar até apagar os PDFs das versões não aprovadas |
+| `RETENTION_CANCELLED_REPORT_DAYS` | `90` | Dias após cancelar até anonimizar o relatório |
+| `RETENTION_AUDIT_TRAIL_DAYS` | `1826` | Dias de guarda da trilha de auditoria (o banco impõe piso de 365) |
+| `RETENTION_RUN_HISTORY_DAYS` | igual à trilha | Dias de guarda do histórico das execuções de retenção |
+| `RETENTION_CRON` | `0 41 3 * * *` | Horário da rotina diária (cron do Spring, fuso da escola) |
+| `PRIVACY_OFFICER_NAME` / `PRIVACY_OFFICER_CONTACT` | vazio | Responsável pela LGPD mostrado nas telas; vazio mostra "a definir pela escola" e gera aviso na subida |
+| `ALERT_PROVIDER_CONSECUTIVE_FAILURES` | `3` | Falhas seguidas de um provedor para abrir alerta |
+| `ALERT_PROVIDER_FAILURE_RATE_PERCENT` | `20` | Taxa de falha na janela para abrir alerta |
+| `ALERT_PROVIDER_WINDOW_MINUTES` | `15` | Janela dessa taxa |
+| `ALERT_QUEUE_MAX_AGE_MINUTES` | `5` | Idade máxima de item na fila do canal |
+| `ALERT_QUEUE_MAX_ITEMS` | `50` | Itens pendentes na fila do canal |
+| `ALERT_STORAGE_QUIET_MINUTES` | `15` | Minutos sem falha de armazenamento para normalizar o alerta |
+| `ALERT_EVALUATION_SECONDS` | `60` | Intervalo da apuração dos alertas |
+| `COSTS_INFRASTRUCTURE_MONTHLY_USD` / `COSTS_INFRASTRUCTURE_EFFECTIVE_FROM` | `0` / vazio | Custo fixo mensal de infraestrutura (USD) e a data de vigência |
+
+Os preços por provedor ficam em `reports.costs.prices` (lista com `provider`, `unit`, `value-usd`, `effective-from`); lista vazia
+reaproveita as propriedades de preço atuais.
+
+**Rotação de logs**: todo serviço do `compose.yaml` usa `json-file` com `max-size: 20m` e `max-file: 5`.
+
 `ROTATE_NEW_*` e `ROTATE_OLD_*` (rotação das chaves, abaixo) **não** vão para o `.env`: são variáveis do terminal.
 
 ### Subida com o primeiro administrador

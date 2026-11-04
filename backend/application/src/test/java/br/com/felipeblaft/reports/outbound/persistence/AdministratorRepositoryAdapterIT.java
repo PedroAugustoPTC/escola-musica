@@ -306,8 +306,9 @@ class AdministratorRepositoryAdapterIT extends IntegrationBase {
         if (hasAuthorship) {
             jdbc.update(
                     "insert into authorship_record (id, occurred_at, author_id, author_role, origin,"
-                            + " operation, result, correlation_id) values (?, now(), ?,"
-                            + " 'ADMINISTRATOR', 'WEB', 'ADMIN_SIGN_IN', 'SUCCESS', 'req-c1')",
+                            + " operation, result, correlation_id, previous_hash, record_hash)"
+                            + " values (?, now(), ?, 'ADMINISTRATOR', 'WEB', 'ADMIN_SIGN_IN',"
+                            + " 'SUCCESS', 'req-c1', repeat('0', 64), repeat('1', 64))",
                     UUID.randomUUID(),
                     admin.id());
         }

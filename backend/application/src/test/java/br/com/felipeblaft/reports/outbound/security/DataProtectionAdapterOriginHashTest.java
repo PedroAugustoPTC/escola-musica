@@ -44,6 +44,10 @@ class DataProtectionAdapterOriginHashTest {
                         null,
                         null,
                         null,
+                        null,
+                        null,
+                        null,
+                        null,
                         null));
     }
 

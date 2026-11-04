@@ -268,6 +268,9 @@ final class ReportEntities {
         @Column(name = "job_id", nullable = false)
         UUID jobId;
 
+        @Column(nullable = false)
+        String channel;
+
         @Column(name = "report_type")
         String reportType;
 

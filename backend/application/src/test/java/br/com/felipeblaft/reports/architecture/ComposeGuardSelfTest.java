@@ -20,12 +20,19 @@ class ComposeGuardSelfTest {
 
     private static final String BASE_YAML =
             """
+            x-logging: &default-logging
+              driver: json-file
+              options:
+                max-size: "20m"
+                max-file: "5"
             services:
               db:
                 image: postgres:18
+                logging: *default-logging
               n8n:
                 build: ./n8n
                 image: reports-n8n
+                logging: *default-logging
                 networks: [internal]
                 environment:
                   N8N_DISABLE_UI: "true"
@@ -176,6 +183,23 @@ class ComposeGuardSelfTest {
                         valid(),
                         "FROM docker.n8n.io/n8nio/n8n:latest\n",
                         "DOCKERFILE_FROM"),
+                Arguments.of(
+                        "serviço sem rotação de logs",
+                        mutate(
+                                ComposeGuard.BASE,
+                                y ->
+                                        y.replaceFirst(
+                                                "(image: postgres:18)\\n\\s+logging: \\*default-logging",
+                                                "$1")),
+                        DOCKERFILE,
+                        "LOG_ROTATION"),
+                Arguments.of(
+                        "rotação de logs sem limite de arquivos",
+                        mutate(
+                                ComposeGuard.BASE,
+                                y -> y.replace("max-file: \"5\"", "max-file: \"0\"")),
+                        DOCKERFILE,
+                        "LOG_ROTATION"),
                 Arguments.of(
                         "n8n ausente",
                         Map.of(ComposeGuard.BASE, "services:\n  db:\n    image: postgres:18\n"),

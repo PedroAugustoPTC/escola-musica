@@ -2,8 +2,16 @@
 #                                     Produção: compose.yaml + compose.prod.yaml (VPS)
 name: reports
 
+# Rotação de logs de todo serviço (feature 007, R-08): o disco da VPS não enche com o log dos contêineres.
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "20m"
+    max-file: "5"
+
 services:
   web:
+    logging: *default-logging
     build:
       context: ..
       dockerfile: frontend/Dockerfile
@@ -25,6 +33,7 @@ services:
       retries: 5
 
   backend:
+    logging: *default-logging
     build:
       context: ../backend
       dockerfile: application/Dockerfile
@@ -34,6 +43,9 @@ services:
       DATABASE_URL: jdbc:postgresql://postgres:5432/reports
       DATABASE_USER: reports
       DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      # Papel da aplicação (feature 007): infra/scripts/lib/db-roles.sh o prepara antes de o backend subir.
+      DB_APP_USER: ${DB_APP_USER:-reports_app}
+      DB_APP_PASSWORD: ${DB_APP_PASSWORD:-}
       TELEGRAM_API_URL: http://telegram-bot-api:8081
       # O n8n é o único transporte do Telegram (feature 004): as mensagens proativas vão da outbox ao webhook dele.
       # O webhook do Telegram é registrado por telegram-webhook.sh (apply), apontando para o n8n.
@@ -77,6 +89,7 @@ services:
       start_period: 30s
 
   postgres:
+    logging: *default-logging
     image: postgres:18
     environment:
       POSTGRES_DB: reports
@@ -96,6 +109,7 @@ services:
   # Versão fixada (nunca latest): o limite de 50 MB nos dois canais depende deste servidor. Para
   # atualizar, siga a seção "Versão do servidor local da API de bots" de infra/README.md.
   telegram-bot-api:
+    logging: *default-logging
     image: aiogram/telegram-bot-api:10.3
     environment:
       TELEGRAM_API_ID: ${TELEGRAM_API_ID}
@@ -112,6 +126,7 @@ services:
   # para atualizar, siga a seção "Versão do n8n" de infra/README.md.
   # Só recebe as variáveis abaixo (nunca o .env inteiro): os segredos chegam por ${...} e não existem no Git.
   n8n:
+    logging: *default-logging
     build:
       context: ./n8n
     image: reports-n8n

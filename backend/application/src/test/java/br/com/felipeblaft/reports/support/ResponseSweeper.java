@@ -42,7 +42,12 @@ public final class ResponseSweeper {
         EXCEPTION_TRACE,
         AUTHORSHIP,
         ACTION_PAYLOAD,
-        BOT_CARD
+        BOT_CARD,
+        // tabelas varridas pela feature 007 (PersonalDataSweep)
+        AI_CALL,
+        OPERATIONAL_ALERT,
+        RETENTION_ITEM,
+        ERASURE_REQUEST
     }
 
     /** Um valor canário achado em lugar não permitido; guarda o rótulo, nunca o valor. */

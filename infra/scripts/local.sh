@@ -45,7 +45,7 @@ require_env() {
     exit 1
   fi
   missing=""
-  for key in POSTGRES_PASSWORD CPF_ENCRYPTION_KEY HMAC_SECRET AUTH_HMAC_SECRET; do
+  for key in POSTGRES_PASSWORD DB_APP_PASSWORD CPF_ENCRYPTION_KEY HMAC_SECRET AUTH_HMAC_SECRET; do
     [ -n "$(value "$key")" ] || missing="$missing $key"
   done
   if [ "$(value TELEGRAM_ENABLED)" = "true" ]; then
@@ -97,6 +97,10 @@ ensure_local_credentials() {
   if [ -z "$(value AUTH_HMAC_SECRET)" ]; then
     set_env_value AUTH_HMAC_SECRET "$(random_text 48)"
     echo "AUTH_HMAC_SECRET local gerado em infra/.env."
+  fi
+  if [ -z "$(value DB_APP_PASSWORD)" ]; then
+    set_env_value DB_APP_PASSWORD "$(random_text 32)"
+    echo "DB_APP_PASSWORD local gerada em infra/.env."
   fi
   if [ -z "$(value ADMIN_BOOTSTRAP_NAME)" ] && [ -z "$(value ADMIN_BOOTSTRAP_EMAIL)" ] && [ -z "$(value ADMIN_BOOTSTRAP_PASSWORD)" ]; then
     password="$(random_text 20)"
@@ -175,6 +179,10 @@ case "$command" in
     ensure_local_credentials
     require_env
     [ -n "$demo_data" ] && reset_data
+    # o papel de banco da aplicação precisa existir (com senha) antes de o backend subir (feature 007)
+    $LOCAL up -d --wait postgres
+    . infra/scripts/lib/db-roles.sh
+    apply_database_roles "$LOCAL"
     # shellcheck disable=SC2046
     $LOCAL up -d --build --remove-orphans $(services)
     wait_until_healthy

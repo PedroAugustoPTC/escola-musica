@@ -532,6 +532,7 @@ public class JobProcessorService {
             costs.register(
                     AiCall.create(
                             job.id(),
+                            job.requestChannel(),
                             job.reportType(),
                             job.reportId(),
                             AiTask.TRANSCRIPTION,
@@ -568,6 +569,7 @@ public class JobProcessorService {
             costs.register(
                     AiCall.create(
                             job.id(),
+                            job.requestChannel(),
                             job.reportType(),
                             job.reportId(),
                             aiTask,
@@ -629,6 +631,7 @@ public class JobProcessorService {
         costs.register(
                 AiCall.create(
                         job.id(),
+                        job.requestChannel(),
                         job.reportType(),
                         job.reportId(),
                         task,

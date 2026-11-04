@@ -20,6 +20,10 @@ git pull --ff-only
 
 COMPOSE="docker compose -f infra/compose.yaml -f infra/compose.prod.yaml"
 $COMPOSE build --pull
+# o papel de banco da aplicação (reports_app) precisa existir, com senha, antes de o backend subir (feature 007)
+$COMPOSE up -d --wait postgres
+. infra/scripts/lib/db-roles.sh
+apply_database_roles "$COMPOSE"
 $COMPOSE up -d --remove-orphans
 docker image prune -f >/dev/null
 

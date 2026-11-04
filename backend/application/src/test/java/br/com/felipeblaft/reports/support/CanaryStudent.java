@@ -22,6 +22,20 @@ public final class CanaryStudent {
     public static final String GUARDIAN_EMAIL = "balburdia.cantarelli@example.test";
     public static final String INSTRUMENT = "Violão";
 
+    /**
+     * Trecho fictício de transcrição de aula (feature 007): não pode sobreviver à retenção nem a
+     * logs.
+     */
+    public static final String TRANSCRIPTION_SNIPPET =
+            "o pequeno Zeferino tocou a marcha do carrilhão sem errar a coda";
+
+    /**
+     * Trecho fictício de texto de relatório (feature 007): não pode estar em logs, métricas,
+     * alertas nem trilha.
+     */
+    public static final String REPORT_TEXT_SNIPPET =
+            "domínio notável do arpejo lunar na seção intermediária";
+
     private CanaryStudent() {}
 
     /** Rótulo e valor de cada dado pessoal do aluno e do responsável (sem o CPF). */
@@ -33,6 +47,8 @@ public final class CanaryStudent {
         values.put("nome do responsável canário", GUARDIAN_NAME);
         values.put("telefone do responsável canário", GUARDIAN_PHONE_DIGITS);
         values.put("e-mail do responsável canário", GUARDIAN_EMAIL);
+        values.put("trecho de transcrição canário", TRANSCRIPTION_SNIPPET);
+        values.put("trecho de texto de relatório canário", REPORT_TEXT_SNIPPET);
         return values;
     }
 

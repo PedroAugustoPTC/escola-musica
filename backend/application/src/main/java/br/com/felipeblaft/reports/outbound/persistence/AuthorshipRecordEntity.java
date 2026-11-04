@@ -1,11 +1,12 @@
 package br.com.felipeblaft.reports.outbound.persistence;
 
 import br.com.felipeblaft.reports.domain.access.ActionOrigin;
-import br.com.felipeblaft.reports.domain.access.AuthorshipRecord;
 import br.com.felipeblaft.reports.domain.access.AuthorshipReadDetail;
+import br.com.felipeblaft.reports.domain.access.AuthorshipRecord;
 import br.com.felipeblaft.reports.domain.access.AuthorshipResult;
 import br.com.felipeblaft.reports.domain.access.AuthorshipTargetType;
 import br.com.felipeblaft.reports.domain.access.Role;
+import br.com.felipeblaft.reports.domain.audit.AuditChain;
 import br.com.felipeblaft.reports.domain.common.ReportType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,6 +17,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 import org.springframework.data.domain.Persistable;
 
@@ -87,13 +89,24 @@ public class AuthorshipRecordEntity implements Persistable<UUID> {
     @Column(name = "document_version")
     private Integer documentVersion;
 
+    // trilha encadeada (V17): sequência, hash do evento anterior e hash do próprio evento
+    @Column(name = "sequence", nullable = false)
+    private long sequence;
+
+    @Column(name = "previous_hash", nullable = false)
+    private String previousHash;
+
+    @Column(name = "record_hash", nullable = false)
+    private String recordHash;
+
     @Transient private boolean inserted = true;
 
     protected AuthorshipRecordEntity() {}
 
     AuthorshipRecordEntity(AuthorshipRecord record) {
         this.id = record.id();
-        this.occurredAt = record.occurredAt();
+        // o banco guarda microssegundos (arredonda); o hash da cadeia usa o valor já truncado
+        this.occurredAt = record.occurredAt().truncatedTo(ChronoUnit.MICROS);
         this.authorId = record.authorId();
         this.authorRole = record.authorRole();
         this.origin = record.origin();
@@ -113,6 +126,39 @@ public class AuthorshipRecordEntity implements Persistable<UUID> {
             this.pageNumber = detail.pageNumber();
             this.documentVersion = detail.documentVersion();
         }
+    }
+
+    /** Campos que entram no hash do evento, na ordem da forma canônica do núcleo. */
+    AuditChain.Fields chainFields(long sequenceNumber) {
+        return new AuditChain.Fields(
+                sequenceNumber,
+                occurredAt,
+                authorId,
+                authorRole == null ? null : authorRole.name(),
+                origin.name(),
+                operation,
+                targetType == null ? null : targetType.name(),
+                targetId,
+                result.name(),
+                errorCode,
+                originHash,
+                correlationId,
+                filterTeacherId,
+                filterReportType == null ? null : filterReportType.name(),
+                filterPeriodStart,
+                filterPeriodEnd,
+                null,
+                null,
+                null,
+                pageNumber,
+                documentVersion,
+                null);
+    }
+
+    void chain(long sequenceNumber, String previous, String hash) {
+        this.sequence = sequenceNumber;
+        this.previousHash = previous;
+        this.recordHash = hash;
     }
 
     @Override

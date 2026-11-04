@@ -7,8 +7,10 @@ spring:
       enabled: true
   datasource:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/reports}
-    username: ${DATABASE_USER:reports}
-    password: ${DATABASE_PASSWORD:}
+    # Pool da aplicação (feature 007, R-03): papel reports_app, sem UPDATE/DELETE na trilha de auditoria. Sem
+    # DB_APP_USER/DB_APP_PASSWORD (ambiente de teste e execução fora do compose) cai no mesmo papel do Flyway.
+    username: ${DB_APP_USER:${DATABASE_USER:reports}}
+    password: ${DB_APP_PASSWORD:${DATABASE_PASSWORD:}}
     hikari:
       maximum-pool-size: ${DATABASE_POOL:10}
   jpa:
@@ -21,6 +23,9 @@ spring:
           time_zone: UTC
   flyway:
     enabled: true
+    # As migrações rodam com o dono do esquema, não com o papel da aplicação.
+    user: ${DATABASE_USER:reports}
+    password: ${DATABASE_PASSWORD:}
   jackson:
     default-property-inclusion: always
   servlet:
@@ -144,3 +149,27 @@ spring:
   main:
     web-application-type: none
     banner-mode: "off"
+  # Privacidade, retenção e operação (feature 007). Os valores chegam BRUTOS (texto): ausente, zero, negativo ou inválido
+  # vale o padrão do núcleo e sobe um aviso citando a variável (nunca o valor). Contrato: specs/007-.../contracts/configuration.md.
+  retention:
+    transcription-days: ${RETENTION_TRANSCRIPTION_DAYS:}
+    unapproved-pdf-days: ${RETENTION_UNAPPROVED_PDF_DAYS:}
+    cancelled-report-days: ${RETENTION_CANCELLED_REPORT_DAYS:}
+    audit-trail-days: ${RETENTION_AUDIT_TRAIL_DAYS:}
+    run-history-days: ${RETENTION_RUN_HISTORY_DAYS:}
+    cron: ${RETENTION_CRON:0 41 3 * * *}
+  alerts:
+    provider-consecutive-failures: ${ALERT_PROVIDER_CONSECUTIVE_FAILURES:}
+    provider-failure-rate-percent: ${ALERT_PROVIDER_FAILURE_RATE_PERCENT:}
+    provider-window-minutes: ${ALERT_PROVIDER_WINDOW_MINUTES:}
+    queue-max-age-minutes: ${ALERT_QUEUE_MAX_AGE_MINUTES:}
+    queue-max-items: ${ALERT_QUEUE_MAX_ITEMS:}
+    storage-quiet-minutes: ${ALERT_STORAGE_QUIET_MINUTES:}
+    evaluation-seconds: ${ALERT_EVALUATION_SECONDS:}
+  # A lista de preços (reports.costs.prices) vem de YAML ou de variáveis indexadas COSTS_PRICES_0_PROVIDER, ...
+  costs:
+    infrastructure-monthly-usd: ${COSTS_INFRASTRUCTURE_MONTHLY_USD:}
+    infrastructure-effective-from: ${COSTS_INFRASTRUCTURE_EFFECTIVE_FROM:}
+  privacy:
+    officer-name: ${PRIVACY_OFFICER_NAME:}
+    officer-contact: ${PRIVACY_OFFICER_CONTACT:}
