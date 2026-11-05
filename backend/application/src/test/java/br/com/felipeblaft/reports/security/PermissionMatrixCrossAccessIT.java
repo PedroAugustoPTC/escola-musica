@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.Set;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
@@ -132,7 +133,14 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
                     Map.entry(Operation.CONSENT_REVOKE, List.of("revoke consent")),
                     Map.entry(Operation.CONSENT_PENDING_READ, List.of("pending consents")),
                     Map.entry(Operation.CONSENT_TERM_READ, List.of("cadastrar aluno")),
-                    Map.entry(Operation.CONSENT_TERM_PUBLISH, List.of("publish consent term")));
+                    Map.entry(Operation.CONSENT_TERM_PUBLISH, List.of("publish consent term")),
+                    // feature 007: a eliminação é só do administrador na Web; o bot a trata como texto
+                    // não reconhecido
+                    Map.entry(Operation.ERASURE_REQUEST_REGISTER, List.of("apagar aluno")),
+                    Map.entry(Operation.ERASURE_REQUEST_READ, List.of("excluir dados")),
+                    Map.entry(Operation.ERASURE_PREVIEW, List.of("alcance da eliminação")),
+                    Map.entry(Operation.ERASURE_CONFIRM, List.of("eliminar aluno")),
+                    Map.entry(Operation.ERASURE_RECEIPT_READ, List.of("comprovante de eliminação")));
 
     private enum Outcome {
         REACHED,
@@ -242,6 +250,19 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
         variables.put(
                 "consentId",
                 jdbc.queryForObject("select id::text from student_consent limit 1", String.class));
+
+        UUID erasureRequestId = UUID.randomUUID();
+        jdbc.update(
+                "insert into erasure_request (id, student_id, requester_role, requested_on, received_via,"
+                        + " protocol_reference, status, registered_by, completed_at, scope_lesson_reports,"
+                        + " scope_semester_reports, scope_pdfs, scope_assignments, scope_consents,"
+                        + " created_at, lock_version)"
+                        + " values (?, ?, 'MOTHER', current_date, 'EMAIL', 'PROT-M', 'COMPLETED', ?,"
+                        + " now(), 0, 0, 0, 0, 0, now(), 0)",
+                erasureRequestId,
+                brunoStudent.id(),
+                second.administrator().id());
+        variables.put("requestId", erasureRequestId.toString());
 
         if (operation == Operation.ADMINISTRATOR_REACTIVATE) {
             jdbc.update(
@@ -566,6 +587,12 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
                             + "\"collectionMethod\":\"SIGNED_PAPER\"}";
             case "POST /admin/consents/{consentId}/revocation" ->
                     "{\"revokedOn\":\"2026-09-10\",\"revokedBy\":\"MOTHER\"}";
+            case "POST /admin/students/{studentId}/erasure-requests" ->
+                    "{\"requesterRole\":\"MOTHER\",\"requesterName\":\"Maria Guardian\","
+                            + "\"requestedOn\":\"2026-09-01\",\"receivedVia\":\"EMAIL\","
+                            + "\"protocolReference\":\"PROT-M2\"}";
+            case "POST /admin/erasure-requests/{requestId}/confirmation" ->
+                    "{\"confirmationToken\":\"" + "x".repeat(40) + "\",\"confirmationWord\":\"ELIMINAR\"}";
             case "POST /admin/consent-terms" ->
                     "{\"publishedOn\":\"2026-09-01\",\"text\":\"Institutional text\","
                             + "\"requiresNewConsent\":false}";
