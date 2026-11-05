@@ -149,6 +149,9 @@ export function StudentDetailScreen() {
               Reativar
             </Button>
           )}
+          <Button variant="secondary" icon="delete" onClick={() => navigate(`/admin/students/${data.id}/erasure`)}>
+            Eliminar dados
+          </Button>
         </div>
         {reactivate.isError ? (
           <div role="alert" className="alert alert--error">

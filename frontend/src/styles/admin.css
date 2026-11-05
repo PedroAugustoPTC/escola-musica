@@ -693,3 +693,41 @@
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   }
 }
+
+.erasure-receipt__data {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4px 16px;
+  margin: 16px 0;
+}
+
+.erasure-receipt__data dt {
+  font-weight: 600;
+}
+
+.erasure-receipt__data dd {
+  margin: 0 0 8px;
+}
+
+@media (min-width: 640px) {
+  .erasure-receipt__data {
+    grid-template-columns: max-content 1fr;
+  }
+
+  .erasure-receipt__data dd {
+    margin: 0;
+  }
+}
+
+@media print {
+  .admin-nav,
+  .admin-header,
+  .erasure-receipt__actions {
+    display: none !important;
+  }
+
+  .erasure-receipt {
+    max-width: none;
+    padding: 0;
+  }
+}

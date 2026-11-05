@@ -12,6 +12,9 @@ import { StudentDetailScreen } from '../pages/admin/StudentDetailScreen';
 import { SchoolHistoryScreen } from '../pages/admin/SchoolHistoryScreen';
 import { AuditTrailScreen } from '../pages/admin/AuditTrailScreen';
 import { ConsentTermsScreen } from '../pages/admin/ConsentTermsScreen';
+import { ErasureReceiptScreen } from '../pages/admin/ErasureReceiptScreen';
+import { ErasureRequestsScreen } from '../pages/admin/ErasureRequestsScreen';
+import { ErasureScreen } from '../pages/admin/ErasureScreen';
 import { PendingConsentsScreen } from '../pages/admin/PendingConsentsScreen';
 import { AdministratorsScreen } from '../pages/admin/AdministratorsScreen';
 import { ActivateScreen } from '../pages/admin/ActivateScreen';
@@ -54,6 +57,10 @@ export const adminRoutes: RouteObject[] = [
       { path: '/admin/audit', element: <AuditTrailScreen /> },
       { path: '/admin/consents/pending', element: <PendingConsentsScreen /> },
       { path: '/admin/consent-terms', element: <ConsentTermsScreen /> },
+      { path: '/admin/students/:studentId/erasure', element: <ErasureScreen /> },
+      { path: '/admin/erasure-requests', element: <ErasureRequestsScreen /> },
+      { path: '/admin/erasure-requests/:requestId/run', element: <ErasureScreen /> },
+      { path: '/admin/erasure-requests/:requestId/receipt', element: <ErasureReceiptScreen /> },
       { path: '/admin/*', element: <AdminPageNotFound /> },
     ],
   },
