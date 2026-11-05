@@ -163,6 +163,13 @@ public final class PermissionMatrix {
         map.put(Operation.CONSENT_PENDING_READ, onlyAdministrator(Set.of()));
         map.put(Operation.CONSENT_TERM_READ, new Rule(ALLOW, ALLOW, ALLOW, Set.of()));
         map.put(Operation.CONSENT_TERM_PUBLISH, onlyAdministrator(Set.of()));
+        // eliminação a pedido (007): só o administrador, só na Web; a retenção conclui remoções de
+        // arquivo que ficaram pendentes
+        map.put(Operation.ERASURE_REQUEST_REGISTER, onlyAdministrator(Set.of()));
+        map.put(Operation.ERASURE_REQUEST_READ, onlyAdministrator(Set.of()));
+        map.put(Operation.ERASURE_PREVIEW, onlyAdministrator(Set.of()));
+        map.put(Operation.ERASURE_CONFIRM, onlyAdministrator(Set.of(ActionOrigin.RETENTION)));
+        map.put(Operation.ERASURE_RECEIPT_READ, onlyAdministrator(Set.of()));
         return map;
     }
 

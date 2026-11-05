@@ -58,7 +58,10 @@ class RevokeConsentUseCaseTest {
         c.revoke.run(c.administrator(), command);
 
         assertThatThrownBy(() -> c.revoke.run(c.administrator(), command))
-                .satisfies(error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.CONSENT_ALREADY_REVOKED));
+                .satisfies(
+                        error ->
+                                assertThat(codeOf(error))
+                                        .isEqualTo(ErrorCode.CONSENT_ALREADY_REVOKED));
     }
 
     @Test
@@ -69,8 +72,13 @@ class RevokeConsentUseCaseTest {
                         () ->
                                 c.revoke.run(
                                         ActorFixtures.teacherWeb(clara.id()),
-                                        new Command(consentId, LocalDate.of(2026, 9, 10), "MOTHER", "req-1")))
-                .satisfies(error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND));
+                                        new Command(
+                                                consentId,
+                                                LocalDate.of(2026, 9, 10),
+                                                "MOTHER",
+                                                "req-1")))
+                .satisfies(
+                        error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND));
         assertThat(c.consents.findById(consentId).orElseThrow().revoked()).isFalse();
     }
 
@@ -80,8 +88,13 @@ class RevokeConsentUseCaseTest {
                         () ->
                                 c.revoke.run(
                                         c.administrator(),
-                                        new Command(UUID.randomUUID(), LocalDate.of(2026, 9, 10), "MOTHER", "req-1")))
-                .satisfies(error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND));
+                                        new Command(
+                                                UUID.randomUUID(),
+                                                LocalDate.of(2026, 9, 10),
+                                                "MOTHER",
+                                                "req-1")))
+                .satisfies(
+                        error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND));
     }
 
     @Test
@@ -92,8 +105,13 @@ class RevokeConsentUseCaseTest {
                         () ->
                                 c.revoke.run(
                                         c.administrator(),
-                                        new Command(consentId, LocalDate.of(2026, 9, 22), "NEIGHBOR", "req-1")))
-                .satisfies(error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.VALIDATION_FAILED));
+                                        new Command(
+                                                consentId,
+                                                LocalDate.of(2026, 9, 22),
+                                                "NEIGHBOR",
+                                                "req-1")))
+                .satisfies(
+                        error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.VALIDATION_FAILED));
         assertThat(c.consents.findById(consentId).orElseThrow().revoked()).isFalse();
     }
 

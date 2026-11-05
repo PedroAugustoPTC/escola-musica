@@ -10,8 +10,8 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 /**
- * Consentimento como o administrador o vê, com a situação derivada. O {@code toString} não revela
- * o nome de quem consentiu.
+ * Consentimento como o administrador o vê, com a situação derivada. O {@code toString} não revela o
+ * nome de quem consentiu.
  */
 public record ConsentView(
         UUID id,

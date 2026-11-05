@@ -26,7 +26,13 @@ class ConsentValueObjectsTest {
 
     private static ConsentTermVersion term(int number, boolean requiresNew) {
         return new ConsentTermVersion(
-                UUID.randomUUID(), number, LocalDate.of(2026, 1, 1), "Text", requiresNew, ADMIN, NOW);
+                UUID.randomUUID(),
+                number,
+                LocalDate.of(2026, 1, 1),
+                "Text",
+                requiresNew,
+                ADMIN,
+                NOW);
     }
 
     private static GuardianConsent record(ConsentInput input, List<ConsentTermVersion> terms) {
@@ -44,7 +50,9 @@ class ConsentValueObjectsTest {
     void validInputBecomesAConsentOfTheGivenTermVersion() {
         ConsentTermVersion one = term(1, false);
         GuardianConsent consent =
-                record(new ConsentInput("Maria Guardian", "MOTHER", "2026-09-01", 1, "DIGITAL"), List.of(one));
+                record(
+                        new ConsentInput("Maria Guardian", "MOTHER", "2026-09-01", 1, "DIGITAL"),
+                        List.of(one));
 
         assertThat(consent.consentingName()).isEqualTo("Maria Guardian");
         assertThat(consent.relationship()).isEqualTo(ConsentRelationship.MOTHER);
@@ -78,7 +86,11 @@ class ConsentValueObjectsTest {
 
     @Test
     void missingFieldsAreViolationsToo() {
-        assertThatThrownBy(() -> record(new ConsentInput(null, null, null, null, null), List.of(term(1, false))))
+        assertThatThrownBy(
+                        () ->
+                                record(
+                                        new ConsentInput(null, null, null, null, null),
+                                        List.of(term(1, false))))
                 .isInstanceOfSatisfying(
                         DomainException.class, error -> assertThat(fields(error)).hasSize(5));
     }
@@ -88,7 +100,12 @@ class ConsentValueObjectsTest {
         assertThatThrownBy(
                         () ->
                                 record(
-                                        new ConsentInput("Maria Guardian", "MOTHER", "31/02/2026", 1, "DIGITAL"),
+                                        new ConsentInput(
+                                                "Maria Guardian",
+                                                "MOTHER",
+                                                "31/02/2026",
+                                                1,
+                                                "DIGITAL"),
                                         List.of(term(1, false))))
                 .isInstanceOfSatisfying(
                         DomainException.class,
@@ -105,8 +122,16 @@ class ConsentValueObjectsTest {
     @Test
     void todayIsAcceptedAndTheTelegramDateFormatToo() {
         ConsentTermVersion one = term(1, false);
-        assertThat(record(new ConsentInput("Maria Guardian", "FATHER", "10/09/2026", 1, "OTHER"), List.of(one))
-                        .consentedOn())
+        assertThat(
+                        record(
+                                        new ConsentInput(
+                                                "Maria Guardian",
+                                                "FATHER",
+                                                "10/09/2026",
+                                                1,
+                                                "OTHER"),
+                                        List.of(one))
+                                .consentedOn())
                 .isEqualTo(TODAY);
     }
 
@@ -116,7 +141,12 @@ class ConsentValueObjectsTest {
         assertThatThrownBy(
                         () ->
                                 record(
-                                        new ConsentInput("Maria Guardian", "MOTHER", "2026-09-01", 1, "DIGITAL"),
+                                        new ConsentInput(
+                                                "Maria Guardian",
+                                                "MOTHER",
+                                                "2026-09-01",
+                                                1,
+                                                "DIGITAL"),
                                         terms))
                 .isInstanceOfSatisfying(
                         DomainException.class,
@@ -129,11 +159,25 @@ class ConsentValueObjectsTest {
                                                         "code",
                                                         "INVALID_DATA")));
         assertThat(
-                        record(new ConsentInput("Maria Guardian", "MOTHER", "2026-09-01", 2, "DIGITAL"), terms)
+                        record(
+                                        new ConsentInput(
+                                                "Maria Guardian",
+                                                "MOTHER",
+                                                "2026-09-01",
+                                                2,
+                                                "DIGITAL"),
+                                        terms)
                                 .termVersionNumber())
                 .isEqualTo(2);
         assertThat(
-                        record(new ConsentInput("Maria Guardian", "MOTHER", "2026-09-01", 3, "DIGITAL"), terms)
+                        record(
+                                        new ConsentInput(
+                                                "Maria Guardian",
+                                                "MOTHER",
+                                                "2026-09-01",
+                                                3,
+                                                "DIGITAL"),
+                                        terms)
                                 .termVersionNumber())
                 .isEqualTo(3);
     }
@@ -157,13 +201,16 @@ class ConsentValueObjectsTest {
     void revokingTwiceIsRefused() {
         GuardianConsent revoked =
                 record(
-                                new ConsentInput("Maria Guardian", "MOTHER", "2026-09-01", 1, "DIGITAL"),
+                                new ConsentInput(
+                                        "Maria Guardian", "MOTHER", "2026-09-01", 1, "DIGITAL"),
                                 List.of(term(1, false)))
                         .revoke(LocalDate.of(2026, 9, 5), "MOTHER", ADMIN, TODAY);
         assertThatThrownBy(() -> revoked.revoke(LocalDate.of(2026, 9, 6), "MOTHER", ADMIN, TODAY))
                 .isInstanceOfSatisfying(
                         DomainException.class,
-                        error -> assertThat(error.code()).isEqualTo(ErrorCode.CONSENT_ALREADY_REVOKED));
+                        error ->
+                                assertThat(error.code())
+                                        .isEqualTo(ErrorCode.CONSENT_ALREADY_REVOKED));
     }
 
     @Test
@@ -203,7 +250,13 @@ class ConsentValueObjectsTest {
         ConsentTermVersion current = term(4, false);
         assertThat(
                         ConsentTermVersion.publish(
-                                        Optional.of(current), TODAY, "Text", false, ADMIN, TODAY, NOW)
+                                        Optional.of(current),
+                                        TODAY,
+                                        "Text",
+                                        false,
+                                        ADMIN,
+                                        TODAY,
+                                        NOW)
                                 .number())
                 .isEqualTo(5);
     }
@@ -244,7 +297,13 @@ class ConsentValueObjectsTest {
                                         .containsExactly("publishedOn"));
         assertThat(
                         ConsentTermVersion.publish(
-                                        Optional.empty(), TODAY, "x".repeat(20_000), false, ADMIN, TODAY, NOW)
+                                        Optional.empty(),
+                                        TODAY,
+                                        "x".repeat(20_000),
+                                        false,
+                                        ADMIN,
+                                        TODAY,
+                                        NOW)
                                 .text())
                 .hasSize(20_000);
     }

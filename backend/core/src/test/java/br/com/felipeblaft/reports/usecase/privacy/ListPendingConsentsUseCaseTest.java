@@ -59,7 +59,8 @@ class ListPendingConsentsUseCaseTest {
                 .containsExactlyInAnyOrder(
                         org.assertj.core.groups.Tuple.tuple(missing.id(), ConsentStatus.MISSING),
                         org.assertj.core.groups.Tuple.tuple(revoked.id(), ConsentStatus.REVOKED),
-                        org.assertj.core.groups.Tuple.tuple(superseded.id(), ConsentStatus.SUPERSEDED));
+                        org.assertj.core.groups.Tuple.tuple(
+                                superseded.id(), ConsentStatus.SUPERSEDED));
     }
 
     @Test
@@ -124,6 +125,8 @@ class ListPendingConsentsUseCaseTest {
 
         List<ConsentView> history = c.listConsents.run(c.administrator(), student.id());
 
-        assertThat(history).extracting(ConsentView::status).containsExactly(ConsentStatus.SUPERSEDED);
+        assertThat(history)
+                .extracting(ConsentView::status)
+                .containsExactly(ConsentStatus.SUPERSEDED);
     }
 }

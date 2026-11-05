@@ -100,7 +100,8 @@ class ConsentBlocksAiTest {
                                         c.matteo.id(),
                                         ReportScenario.file("lesson.ogg", 1000),
                                         Channel.TELEGRAM))
-                .satisfies(error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.CONSENT_REQUIRED));
+                .satisfies(
+                        error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.CONSENT_REQUIRED));
 
         assertNoAiTouched();
         assertThat(c.queue.jobs).isEmpty();
@@ -119,8 +120,11 @@ class ConsentBlocksAiTest {
         enableGuard();
 
         assertThatThrownBy(
-                        () -> c.answer.answerText(c.clara.id(), report.id(), "Escalas", Channel.WEB))
-                .satisfies(error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.CONSENT_REQUIRED));
+                        () ->
+                                c.answer.answerText(
+                                        c.clara.id(), report.id(), "Escalas", Channel.WEB))
+                .satisfies(
+                        error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.CONSENT_REQUIRED));
         assertThatThrownBy(
                         () ->
                                 c.answer.answerAudio(
@@ -128,7 +132,8 @@ class ConsentBlocksAiTest {
                                         report.id(),
                                         ReportScenario.file("answer.ogg", 100),
                                         Channel.WEB))
-                .satisfies(error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.CONSENT_REQUIRED));
+                .satisfies(
+                        error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.CONSENT_REQUIRED));
 
         assertNoAiTouched();
         assertThat(c.authorshipRecorder.ofOperation("CONSENT_BLOCKED_AI")).hasSize(2);
@@ -145,7 +150,8 @@ class ConsentBlocksAiTest {
                         () ->
                                 c.change.changeByText(
                                         c.clara.id(), report.id(), "Mais detalhes", 1, Channel.WEB))
-                .satisfies(error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.CONSENT_REQUIRED));
+                .satisfies(
+                        error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.CONSENT_REQUIRED));
         assertThatThrownBy(
                         () ->
                                 c.change.changeByAudio(
@@ -154,7 +160,8 @@ class ConsentBlocksAiTest {
                                         ReportScenario.file("change.ogg", 100),
                                         1,
                                         Channel.WEB))
-                .satisfies(error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.CONSENT_REQUIRED));
+                .satisfies(
+                        error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.CONSENT_REQUIRED));
 
         assertNoAiTouched();
     }
@@ -168,12 +175,14 @@ class ConsentBlocksAiTest {
         enableGuard();
 
         assertThatThrownBy(() -> c.retry.run(c.clara.id(), report.id(), Channel.WEB))
-                .satisfies(error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.CONSENT_REQUIRED));
+                .satisfies(
+                        error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.CONSENT_REQUIRED));
         assertThatThrownBy(
                         () ->
                                 c.generateSemester.run(
                                         c.clara.id(), c.matteo.id(), "2026-1", false, Channel.WEB))
-                .satisfies(error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.CONSENT_REQUIRED));
+                .satisfies(
+                        error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.CONSENT_REQUIRED));
 
         assertNoAiTouched();
         assertThat(c.semester.reports).isEmpty();
@@ -188,7 +197,8 @@ class ConsentBlocksAiTest {
                         () ->
                                 c.changeSemester.changeByText(
                                         c.clara.id(), report.id(), "Mais detalhes", 1, Channel.WEB))
-                .satisfies(error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.CONSENT_REQUIRED));
+                .satisfies(
+                        error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.CONSENT_REQUIRED));
         assertThatThrownBy(
                         () ->
                                 c.changeSemester.changeByAudio(
@@ -197,7 +207,8 @@ class ConsentBlocksAiTest {
                                         ReportScenario.file("change.ogg", 100),
                                         1,
                                         Channel.WEB))
-                .satisfies(error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.CONSENT_REQUIRED));
+                .satisfies(
+                        error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.CONSENT_REQUIRED));
 
         assertNoAiTouched();
     }
@@ -216,8 +227,7 @@ class ConsentBlocksAiTest {
 
     @Test
     void secondBarrierEndsTheQueuedJobWithoutCallingAnyProvider() {
-        c.llm.schedule(
-                TaskLlm.LESSON_STRUCTURING, ReportScenario.output("Evoluiu.", List.of()));
+        c.llm.schedule(TaskLlm.LESSON_STRUCTURING, ReportScenario.output("Evoluiu.", List.of()));
         ProcessingJob job =
                 c.register.run(
                         c.clara.id(),
@@ -248,8 +258,7 @@ class ConsentBlocksAiTest {
                         c.clock.now());
         c.students.save(adult);
         c.assignments.assign(c.clara.id(), adult.id());
-        c.llm.schedule(
-                TaskLlm.LESSON_STRUCTURING, ReportScenario.output("Evoluiu.", List.of()));
+        c.llm.schedule(TaskLlm.LESSON_STRUCTURING, ReportScenario.output("Evoluiu.", List.of()));
 
         c.register.run(
                 c.clara.id(), adult.id(), ReportScenario.file("lesson.ogg", 1000), Channel.WEB);

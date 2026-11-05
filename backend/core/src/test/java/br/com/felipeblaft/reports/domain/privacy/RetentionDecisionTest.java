@@ -95,7 +95,8 @@ class RetentionDecisionTest {
     @Test
     void approvedLessonBoundaryAtThirtyDays() {
         LessonReport report = lesson(ReportStatus.APPROVED, BASE, null);
-        assertThat(report.retentionAction(POLICY, after(BASE, 29))).isEqualTo(RetentionDecision.KEEP);
+        assertThat(report.retentionAction(POLICY, after(BASE, 29)))
+                .isEqualTo(RetentionDecision.KEEP);
         assertThat(report.retentionAction(POLICY, after(BASE, 30)))
                 .isEqualTo(RetentionDecision.REMOVE_SOURCE);
         assertThat(report.retentionAction(POLICY, after(BASE, 31)))
@@ -105,7 +106,8 @@ class RetentionDecisionTest {
     @Test
     void cancelledLessonBoundaryAtNinetyDays() {
         LessonReport report = lesson(ReportStatus.CANCELLED, null, BASE);
-        assertThat(report.retentionAction(POLICY, after(BASE, 89))).isEqualTo(RetentionDecision.KEEP);
+        assertThat(report.retentionAction(POLICY, after(BASE, 89)))
+                .isEqualTo(RetentionDecision.KEEP);
         assertThat(report.retentionAction(POLICY, after(BASE, 90)))
                 .isEqualTo(RetentionDecision.ANONYMIZE);
         assertThat(report.retentionAction(POLICY, after(BASE, 91)))
@@ -176,25 +178,29 @@ class RetentionDecisionTest {
     @Test
     void approvedSemesterRemovesOnlySourceAndKeepsGeneralInformation() {
         SemesterReport report = semester(ReportStatus.APPROVED, BASE, null);
-        assertThat(report.retentionAction(POLICY, after(BASE, 29))).isEqualTo(RetentionDecision.KEEP);
+        assertThat(report.retentionAction(POLICY, after(BASE, 29)))
+                .isEqualTo(RetentionDecision.KEEP);
         assertThat(report.retentionAction(POLICY, after(BASE, 30)))
                 .isEqualTo(RetentionDecision.REMOVE_SOURCE);
         report.removeSource(after(BASE, 30));
         assertThat(report.generalInformation()).isNotNull();
         assertThat(report.sourceRemovedAt()).isNotNull();
-        assertThat(report.retentionAction(POLICY, after(BASE, 500))).isEqualTo(RetentionDecision.KEEP);
+        assertThat(report.retentionAction(POLICY, after(BASE, 500)))
+                .isEqualTo(RetentionDecision.KEEP);
     }
 
     @Test
     void cancelledSemesterIsAnonymizedAndClearsGeneralInformation() {
         SemesterReport report = semester(ReportStatus.CANCELLED, null, BASE);
-        assertThat(report.retentionAction(POLICY, after(BASE, 89))).isEqualTo(RetentionDecision.KEEP);
+        assertThat(report.retentionAction(POLICY, after(BASE, 89)))
+                .isEqualTo(RetentionDecision.KEEP);
         assertThat(report.retentionAction(POLICY, after(BASE, 90)))
                 .isEqualTo(RetentionDecision.ANONYMIZE);
         report.anonymize(after(BASE, 90));
         assertThat(report.generalInformation()).isNull();
         assertThat(report.anonymizedAt()).isNotNull();
-        assertThat(report.retentionAction(POLICY, after(BASE, 500))).isEqualTo(RetentionDecision.KEEP);
+        assertThat(report.retentionAction(POLICY, after(BASE, 500)))
+                .isEqualTo(RetentionDecision.KEEP);
     }
 
     @Test
@@ -237,14 +243,16 @@ class RetentionDecisionTest {
 
     @Test
     void pdfOfApprovedVersionIsNeverRemovable() {
-        PdfDocument pdf = PdfDocument.create(UUID.randomUUID(), DocumentType.OFFICIAL, "k", 1, "h", BASE);
+        PdfDocument pdf =
+                PdfDocument.create(UUID.randomUUID(), DocumentType.OFFICIAL, "k", 1, "h", BASE);
         assertThat(pdf.retentionAction(POLICY, after(BASE, 4000), true, BASE))
                 .isEqualTo(RetentionDecision.KEEP);
     }
 
     @Test
     void pdfOfOtherVersionBoundaryAtThirtyDays() {
-        PdfDocument pdf = PdfDocument.create(UUID.randomUUID(), DocumentType.OFFICIAL, "k", 1, "h", BASE);
+        PdfDocument pdf =
+                PdfDocument.create(UUID.randomUUID(), DocumentType.OFFICIAL, "k", 1, "h", BASE);
         assertThat(pdf.retentionAction(POLICY, after(BASE, 29), false, BASE))
                 .isEqualTo(RetentionDecision.KEEP);
         assertThat(pdf.retentionAction(POLICY, after(BASE, 30), false, BASE))
@@ -253,7 +261,8 @@ class RetentionDecisionTest {
 
     @Test
     void pdfOfOpenReportOrAlreadyRemovedIsKept() {
-        PdfDocument pdf = PdfDocument.create(UUID.randomUUID(), DocumentType.OFFICIAL, "k", 1, "h", BASE);
+        PdfDocument pdf =
+                PdfDocument.create(UUID.randomUUID(), DocumentType.OFFICIAL, "k", 1, "h", BASE);
         assertThat(pdf.retentionAction(POLICY, after(BASE, 4000), false, null))
                 .isEqualTo(RetentionDecision.KEEP);
         PdfDocument removed = pdf.withContentRemoved(after(BASE, 31));

@@ -31,7 +31,8 @@ class ConsentGuardServiceTest {
         c.context.define(ActionOrigin.TELEGRAM, "4711");
 
         assertThatThrownBy(() -> c.guard.requireForAi(clara.id(), student.id()))
-                .satisfies(error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.CONSENT_REQUIRED));
+                .satisfies(
+                        error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.CONSENT_REQUIRED));
 
         assertThat(c.recorder.independent()).hasSize(1);
         AuthorshipRecord event = c.recorder.ofOperation("CONSENT_BLOCKED_AI").getFirst();
@@ -60,7 +61,8 @@ class ConsentGuardServiceTest {
         c.context.deactivate();
 
         assertThatThrownBy(() -> c.guard.requireForAi(clara.id(), student.id()))
-                .satisfies(error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.CONSENT_REQUIRED));
+                .satisfies(
+                        error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.CONSENT_REQUIRED));
         assertThat(c.recorder.isEmpty()).isTrue();
     }
 
@@ -71,11 +73,19 @@ class ConsentGuardServiceTest {
         c.guard.requireForProcessing(student);
 
         UUID consentId = c.consents.findByStudent(student.id()).getFirst().id();
-        c.consents.save(c.consents.findById(consentId).orElseThrow().revoke(
-                ConsentScenario.TODAY, "MOTHER", UUID.randomUUID(), ConsentScenario.TODAY));
+        c.consents.save(
+                c.consents
+                        .findById(consentId)
+                        .orElseThrow()
+                        .revoke(
+                                ConsentScenario.TODAY,
+                                "MOTHER",
+                                UUID.randomUUID(),
+                                ConsentScenario.TODAY));
 
         assertThatThrownBy(() -> c.guard.requireForProcessing(student))
-                .satisfies(error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.CONSENT_REQUIRED));
+                .satisfies(
+                        error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.CONSENT_REQUIRED));
     }
 
     @Test

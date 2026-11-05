@@ -48,7 +48,12 @@ class InMemoryConsentRepositoriesTest {
         consents.save(newer);
 
         assertThat(consents.findByStudent(student)).containsExactly(newer, older);
-        GuardianConsent revoked = older.revoke(LocalDate.of(2026, 9, 5), "MOTHER", UUID.randomUUID(), LocalDate.of(2026, 9, 21));
+        GuardianConsent revoked =
+                older.revoke(
+                        LocalDate.of(2026, 9, 5),
+                        "MOTHER",
+                        UUID.randomUUID(),
+                        LocalDate.of(2026, 9, 21));
         consents.save(revoked);
 
         assertThat(consents.size()).isEqualTo(2);
@@ -69,8 +74,12 @@ class InMemoryConsentRepositoriesTest {
     @Test
     void termsComeFromTheNewestToTheOldest() {
         UUID admin = UUID.randomUUID();
-        terms.save(new ConsentTermVersion(UUID.randomUUID(), 1, LocalDate.of(2026, 1, 1), "A", false, admin, NOW));
-        terms.save(new ConsentTermVersion(UUID.randomUUID(), 2, LocalDate.of(2026, 2, 1), "B", true, admin, NOW));
+        terms.save(
+                new ConsentTermVersion(
+                        UUID.randomUUID(), 1, LocalDate.of(2026, 1, 1), "A", false, admin, NOW));
+        terms.save(
+                new ConsentTermVersion(
+                        UUID.randomUUID(), 2, LocalDate.of(2026, 2, 1), "B", true, admin, NOW));
 
         assertThat(terms.listAll()).extracting(ConsentTermVersion::number).containsExactly(2, 1);
     }

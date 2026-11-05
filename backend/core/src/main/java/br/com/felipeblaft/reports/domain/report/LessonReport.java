@@ -340,8 +340,8 @@ public class LessonReport {
     }
 
     /**
-     * Decisão da retenção (FR-010 a FR-013): o aprovado perde a fonte após o prazo da transcrição; o
-     * cancelado é anonimizado após o prazo próprio; relatório em aberto nunca é tocado.
+     * Decisão da retenção (FR-010 a FR-013): o aprovado perde a fonte após o prazo da transcrição;
+     * o cancelado é anonimizado após o prazo próprio; relatório em aberto nunca é tocado.
      */
     public RetentionDecision retentionAction(RetentionPolicy policy, Instant now) {
         if (anonymizedAt != null) {
@@ -354,8 +354,7 @@ public class LessonReport {
         }
         if (status == ReportStatus.APPROVED
                 && sourceRemovedAt == null
-                && RetentionDecision.expired(
-                        approvedAt, policy.transcriptionDays().value(), now)) {
+                && RetentionDecision.expired(approvedAt, policy.transcriptionDays().value(), now)) {
             return RetentionDecision.REMOVE_SOURCE;
         }
         return RetentionDecision.KEEP;

@@ -31,7 +31,9 @@ class UpdateStudentConsentTest {
     }
 
     private UpdateStudentUseCase.Command command(
-            Student student, StudentInput input, br.com.felipeblaft.reports.domain.privacy.ConsentInput consent) {
+            Student student,
+            StudentInput input,
+            br.com.felipeblaft.reports.domain.privacy.ConsentInput consent) {
         return new UpdateStudentUseCase.Command(
                 student.id(), input, ConsentRegistryScenario.CORRELATION, consent);
     }
@@ -49,7 +51,8 @@ class UpdateStudentConsentTest {
             assertThatThrownBy(
                             () ->
                                     c.update.run(
-                                            actor, command(adult, birthDateOnly("2014-05-10"), null)))
+                                            actor,
+                                            command(adult, birthDateOnly("2014-05-10"), null)))
                     .satisfies(
                             error ->
                                     assertThat(((DomainException) error).code())
@@ -80,7 +83,8 @@ class UpdateStudentConsentTest {
                 c.register.run(
                         ConsentRegistryScenario.administrator(),
                         c.registration(
-                                ConsentRegistryScenario.minor("Matteo Mafra", ConsentRegistryScenario.CPF_A),
+                                ConsentRegistryScenario.minor(
+                                        "Matteo Mafra", ConsentRegistryScenario.CPF_A),
                                 ConsentRegistryScenario.consent(),
                                 clara.id()));
         Student student = c.base.students.searchById(view.id()).orElseThrow();
@@ -126,7 +130,8 @@ class UpdateStudentConsentTest {
                                         command(
                                                 adult,
                                                 birthDateOnly("2014-05-10"),
-                                                new br.com.felipeblaft.reports.domain.privacy.ConsentInput(
+                                                new br.com.felipeblaft.reports.domain.privacy
+                                                        .ConsentInput(
                                                         "A", "X", "2099-01-01", 9, "Y"))))
                 .isInstanceOf(DomainException.class);
         assertThat(c.base.consents.size()).isZero();
@@ -134,7 +139,8 @@ class UpdateStudentConsentTest {
 
     @Test
     void studentWhoTurnsEighteenStopsBeingBlocked() {
-        Student almost = c.base.students.searchById(c.base.minor("Almost Adult", clara).id()).orElseThrow();
+        Student almost =
+                c.base.students.searchById(c.base.minor("Almost Adult", clara).id()).orElseThrow();
         assertThat(c.base.guard.blocks(almost.id())).isTrue();
 
         c.base.clock.define(java.time.Instant.parse("2032-06-01T13:00:00Z"));

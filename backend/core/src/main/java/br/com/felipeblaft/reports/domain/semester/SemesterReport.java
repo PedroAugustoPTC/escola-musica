@@ -90,7 +90,9 @@ public class SemesterReport {
                 null);
     }
 
-    /** Reidratação: {@code generalInformation} só falta com {@code anonymizedAt} (CHECK do banco). */
+    /**
+     * Reidratação: {@code generalInformation} só falta com {@code anonymizedAt} (CHECK do banco).
+     */
     @SuppressWarnings("java:S107")
     public SemesterReport(
             UUID id,
@@ -269,8 +271,7 @@ public class SemesterReport {
         }
         if (status == ReportStatus.APPROVED
                 && sourceRemovedAt == null
-                && RetentionDecision.expired(
-                        approvedAt, policy.transcriptionDays().value(), now)) {
+                && RetentionDecision.expired(approvedAt, policy.transcriptionDays().value(), now)) {
             return RetentionDecision.REMOVE_SOURCE;
         }
         return RetentionDecision.KEEP;

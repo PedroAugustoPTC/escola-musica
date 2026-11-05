@@ -63,6 +63,13 @@ public class InMemoryAssignmentRepository implements AssignmentRepository {
     }
 
     @Override
+    public int deleteAllByStudent(UUID studentId) {
+        int before = data.size();
+        data.removeIf(a -> a.studentId().equals(studentId));
+        return before - data.size();
+    }
+
+    @Override
     public List<UUID> listTeachersOfStudent(UUID studentId) {
         return data.stream()
                 .filter(a -> a.studentId().equals(studentId))

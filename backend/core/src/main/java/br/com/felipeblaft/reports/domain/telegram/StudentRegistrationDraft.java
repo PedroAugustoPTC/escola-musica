@@ -394,7 +394,8 @@ public record StudentRegistrationDraft(
     /** Grava o consentimento em coleta; o campo {@code CONSENT} só consta com os cinco passos. */
     public StudentRegistrationDraft withConsent(
             ConsentDraft value, Instant now, Duration validity) {
-        Set<Field> fields = value.nextPart() == null ? provided(Field.CONSENT) : without(Field.CONSENT);
+        Set<Field> fields =
+                value.nextPart() == null ? provided(Field.CONSENT) : without(Field.CONSENT);
         return new StudentRegistrationDraft(
                 linkId,
                 kind,

@@ -46,15 +46,20 @@ class PublishConsentTermUseCaseTest {
     @Test
     void textLimitsAndFutureDateAreRefused() {
         assertThatThrownBy(() -> c.publish.run(c.administrator(), command("  ", false)))
-                .satisfies(error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.VALIDATION_FAILED));
-        assertThatThrownBy(() -> c.publish.run(c.administrator(), command("x".repeat(20_001), false)))
-                .satisfies(error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.VALIDATION_FAILED));
+                .satisfies(
+                        error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.VALIDATION_FAILED));
+        assertThatThrownBy(
+                        () -> c.publish.run(c.administrator(), command("x".repeat(20_001), false)))
+                .satisfies(
+                        error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.VALIDATION_FAILED));
         assertThatThrownBy(
                         () ->
                                 c.publish.run(
                                         c.administrator(),
-                                        new Command(LocalDate.of(2026, 9, 22), "Text", false, "req-1")))
-                .satisfies(error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.VALIDATION_FAILED));
+                                        new Command(
+                                                LocalDate.of(2026, 9, 22), "Text", false, "req-1")))
+                .satisfies(
+                        error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.VALIDATION_FAILED));
         assertThat(c.terms.listAll()).isEmpty();
         assertThat(c.recorder.isEmpty()).isTrue();
     }
@@ -64,7 +69,8 @@ class PublishConsentTermUseCaseTest {
         c.term(1, false);
 
         assertThatThrownBy(() -> c.publish.run(ActorFixtures.teacherWeb(), command("Text", false)))
-                .satisfies(error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND));
+                .satisfies(
+                        error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND));
         assertThat(c.currentTerm.run(ActorFixtures.teacherWeb()).number()).isEqualTo(1);
         assertThat(c.currentTerm.run(ActorFixtures.teacherTelegram()).number()).isEqualTo(1);
     }
@@ -72,7 +78,8 @@ class PublishConsentTermUseCaseTest {
     @Test
     void currentTermWithoutAnyVersionIsNotFound() {
         assertThatThrownBy(() -> c.currentTerm.run(c.administrator()))
-                .satisfies(error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND));
+                .satisfies(
+                        error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND));
     }
 
     @Test

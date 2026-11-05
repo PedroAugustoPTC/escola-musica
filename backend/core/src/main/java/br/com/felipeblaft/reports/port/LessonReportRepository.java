@@ -1,9 +1,9 @@
 package br.com.felipeblaft.reports.port;
 
+import br.com.felipeblaft.reports.domain.privacy.RetentionPolicy;
 import br.com.felipeblaft.reports.domain.report.Lesson;
 import br.com.felipeblaft.reports.domain.report.LessonReport;
 import br.com.felipeblaft.reports.domain.report.LessonReportContent;
-import br.com.felipeblaft.reports.domain.privacy.RetentionPolicy;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -49,6 +49,12 @@ public interface LessonReportRepository {
      */
     List<UUID> findRetentionCandidates(
             RetentionPolicy policy, Instant now, int limit, UUID afterId);
+
+    /** Ids dos relatórios do aluno, de todos os professores e situações, em ordem de id. */
+    List<UUID> findIdsByStudent(UUID studentId);
+
+    /** Quantidade de relatórios do aluno por situação (nome do estado), só números. */
+    java.util.Map<String, Integer> countByStudentAndStatus(UUID studentId);
 
     /** Data da primeira aula do aluno com o professor, se houver. */
     Optional<LocalDate> lessonFirstDate(UUID teacherId, UUID studentId);

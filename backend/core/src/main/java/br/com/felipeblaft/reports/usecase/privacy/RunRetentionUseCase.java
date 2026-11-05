@@ -54,6 +54,7 @@ import java.util.function.Function;
 public class RunRetentionUseCase {
 
     public static final int BATCH_SIZE = 200;
+
     /** Execução {@code RUNNING} mais velha que isto é dada como interrompida. */
     public static final Duration STALE_AFTER = Duration.ofHours(6);
 
@@ -326,7 +327,8 @@ public class RunRetentionUseCase {
     // ------------------------------------------------------------ expurgos
 
     private void purgeTrail(Execution execution, Instant now) {
-        int removed = trail.purgeOlderThan(now.minus(Duration.ofDays(policy.auditTrailDays().value())));
+        int removed =
+                trail.purgeOlderThan(now.minus(Duration.ofDays(policy.auditTrailDays().value())));
         if (removed > 0) {
             execution.count(RetentionItemType.AUDIT_EVENTS, removed);
             runs.addItem(execution.runId, RetentionItemType.AUDIT_EVENTS, null, removed);
@@ -335,12 +337,12 @@ public class RunRetentionUseCase {
                             authorship.recordEvent(
                                     execution.actor,
                                     "AUDIT_TRAIL_PURGED",
-                    AuthorshipTargetType.AUDIT_TRAIL,
-                    null,
-                    AuthorshipReadDetail.ofCount(removed),
-                    AuthorshipResult.SUCCESS,
-                    null,
-                    execution.correlationId));
+                                    AuthorshipTargetType.AUDIT_TRAIL,
+                                    null,
+                                    AuthorshipReadDetail.ofCount(removed),
+                                    AuthorshipResult.SUCCESS,
+                                    null,
+                                    execution.correlationId));
         }
     }
 

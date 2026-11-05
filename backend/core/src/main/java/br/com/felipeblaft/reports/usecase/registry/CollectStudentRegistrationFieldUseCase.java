@@ -71,8 +71,7 @@ public class CollectStudentRegistrationFieldUseCase {
             Integer consentTermVersion,
             LocalDate consentedOn) {
 
-        public Summary(
-                String name, LocalDate birthDate, String instrument, String guardianName) {
+        public Summary(String name, LocalDate birthDate, String instrument, String guardianName) {
             this(name, birthDate, instrument, guardianName, null, null);
         }
 
@@ -241,7 +240,8 @@ public class CollectStudentRegistrationFieldUseCase {
         ConsentDraft current = draft.consent();
         ConsentDraft.Part part = current.nextPart();
         if (part == null) {
-            // consentimento já completo e o professor volta a ele (ou o termo mudou): recomeça pelo C1
+            // consentimento já completo e o professor volta a ele (ou o termo mudou): recomeça pelo
+            // C1
             return draft.withConsent(ConsentDraft.EMPTY, now, draftValidity);
         }
         ConsentDraft next =

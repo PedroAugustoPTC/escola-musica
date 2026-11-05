@@ -227,9 +227,7 @@ class RunRetentionUseCaseTest {
     }
 
     private List<AuthorshipRecord> retentionEvents() {
-        return trail.records().stream()
-                .filter(r -> r.operation().equals("RETENTION_RUN"))
-                .toList();
+        return trail.records().stream().filter(r -> r.operation().equals("RETENTION_RUN")).toList();
     }
 
     @Test
@@ -373,7 +371,8 @@ class RunRetentionUseCaseTest {
 
     @Test
     void concurrentRunIsRefusedAndStaleOneIsInterrupted() {
-        UUID running = runs.start(BASE.minus(Duration.ofMinutes(5)), Map.of(), Duration.ofHours(6)).get();
+        UUID running =
+                runs.start(BASE.minus(Duration.ofMinutes(5)), Map.of(), Duration.ofHours(6)).get();
 
         Result refused = useCase.run(actor, "req-i");
 
@@ -407,8 +406,7 @@ class RunRetentionUseCaseTest {
         assertThat(alerts.reported())
                 .extracting(RecordingAlertService.Reported::type)
                 .contains(AlertType.STORAGE_FAILED, AlertType.RETENTION_FAILED);
-        assertThat(retentionEvents())
-                .anyMatch(e -> e.result() == AuthorshipResult.FAILURE);
+        assertThat(retentionEvents()).anyMatch(e -> e.result() == AuthorshipResult.FAILURE);
 
         storage.failingDeletes.clear();
         Result second = useCase.run(actor, "req-l");
@@ -469,10 +467,9 @@ class RunRetentionUseCaseTest {
                 UUID.randomUUID(),
                 "req-old");
         clock.define(BASE);
-        runs.start(daysAgo(2000), Map.of(), Duration.ofHours(6)).ifPresent(
-                id ->
-                        runs.finish(
-                                id, daysAgo(2000), RetentionRunStatus.SUCCEEDED, null));
+        runs.start(daysAgo(2000), Map.of(), Duration.ofHours(6))
+                .ifPresent(
+                        id -> runs.finish(id, daysAgo(2000), RetentionRunStatus.SUCCEEDED, null));
         alertHistory.toPurge = 4;
 
         Result result = useCase.run(actor, "req-o");

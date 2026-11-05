@@ -37,4 +37,12 @@ public interface StudentRepository {
      * tem em {@code details} ("name"); a transação do chamador deve ser desfeita.
      */
     void save(Student student);
+
+    /**
+     * Elimina os dados pessoais do aluno (nome, nascimento, CPF cifrado e resumo, responsável e
+     * instrumento ficam nulos, inativo, {@code erased_at} preenchido), liberando o CPF para novo
+     * cadastro (FR-022, FR-024). Devolve {@code false} se o aluno não existe ou já foi eliminado.
+     * Depois disso nenhuma consulta desta porta devolve o aluno.
+     */
+    boolean erase(UUID id, java.time.Instant now);
 }

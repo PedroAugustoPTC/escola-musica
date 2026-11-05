@@ -62,8 +62,8 @@ public class ListPendingConsentsUseCase {
     }
 
     /**
-     * Quantos alunos menores ativos têm consentimento válido hoje: são os que ficam pendentes se for
-     * publicado um termo que exige novo consentimento (mostrado na confirmação da publicação).
+     * Quantos alunos menores ativos têm consentimento válido hoje: são os que ficam pendentes se
+     * for publicado um termo que exige novo consentimento (mostrado na confirmação da publicação).
      */
     public int countValid(Actor actor) {
         authorization.require(actor, Operation.CONSENT_PENDING_READ);

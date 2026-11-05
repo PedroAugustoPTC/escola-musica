@@ -48,6 +48,18 @@ public class InMemoryConsentRepository implements ConsentRepository {
         return result;
     }
 
+    @Override
+    public int removeNamesByStudent(UUID studentId) {
+        int treated = 0;
+        for (GuardianConsent consent : List.copyOf(data.values())) {
+            if (consent.studentId().equals(studentId)) {
+                data.put(consent.id(), consent.withoutName());
+                treated++;
+            }
+        }
+        return treated;
+    }
+
     public int size() {
         return data.size();
     }

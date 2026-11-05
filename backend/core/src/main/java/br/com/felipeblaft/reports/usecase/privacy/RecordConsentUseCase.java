@@ -71,8 +71,8 @@ public class RecordConsentUseCase {
     }
 
     /**
-     * Situação do consentimento do aluno para quem pode registrá-lo (mesma autorização e mesmo escopo
-     * de {@link #run}); vazio quando o aluno não exige consentimento.
+     * Situação do consentimento do aluno para quem pode registrá-lo (mesma autorização e mesmo
+     * escopo de {@link #run}); vazio quando o aluno não exige consentimento.
      */
     public java.util.Optional<ConsentStatus> statusOf(
             Actor actor, UUID studentId, String correlationId) {

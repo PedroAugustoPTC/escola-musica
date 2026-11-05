@@ -85,8 +85,7 @@ final class ConsentRegistryScenario {
 
     RegisterStudentUseCase.Command registration(
             StudentInput input, ConsentInput consent, UUID... teacherIds) {
-        return new RegisterStudentUseCase.Command(
-                input, List.of(teacherIds), CORRELATION, consent);
+        return new RegisterStudentUseCase.Command(input, List.of(teacherIds), CORRELATION, consent);
     }
 
     /** Aluno adulto já cadastrado, associado aos professores dados. */

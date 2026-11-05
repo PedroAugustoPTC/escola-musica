@@ -39,7 +39,8 @@ public record ErasureRequest(
     private static final Pattern PROTOCOL = Pattern.compile("^[A-Za-z0-9./-]{1,40}$");
     private static final Set<String> ROLES =
             Set.of("STUDENT", "MOTHER", "FATHER", "LEGAL_GUARDIAN", "OTHER");
-    private static final Set<String> VIAS = Set.of("IN_PERSON", "EMAIL", "PHONE", "LETTER", "OTHER");
+    private static final Set<String> VIAS =
+            Set.of("IN_PERSON", "EMAIL", "PHONE", "LETTER", "OTHER");
 
     /** Cria o pedido em {@code RECEIVED}, validando a entrada. */
     public static ErasureRequest register(
@@ -97,7 +98,9 @@ public record ErasureRequest(
         return Optional.ofNullable(recordedScope);
     }
 
-    /** Emite novo token; o anterior deixa de valer. Também serve para retomar {@code IN_PROGRESS}. */
+    /**
+     * Emite novo token; o anterior deixa de valer. Também serve para retomar {@code IN_PROGRESS}.
+     */
     public ErasureRequest withPreview(String tokenHash, Instant now) {
         requireNotCompleted();
         return copy(

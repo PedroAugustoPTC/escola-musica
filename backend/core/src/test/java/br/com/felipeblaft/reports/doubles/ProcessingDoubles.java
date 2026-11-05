@@ -466,6 +466,24 @@ public final class ProcessingDoubles {
         }
 
         @Override
+        public List<UUID> findIdsByStudent(UUID studentId) {
+            return reports.values().stream()
+                    .filter(r -> r.studentId().equals(studentId))
+                    .map(LessonReport::id)
+                    .sorted()
+                    .toList();
+        }
+
+        @Override
+        public Map<String, Integer> countByStudentAndStatus(UUID studentId) {
+            Map<String, Integer> counts = new java.util.TreeMap<>();
+            reports.values().stream()
+                    .filter(r -> r.studentId().equals(studentId))
+                    .forEach(r -> counts.merge(r.status().name(), 1, Integer::sum));
+            return counts;
+        }
+
+        @Override
         public Optional<java.time.LocalDate> lessonFirstDate(UUID teacherId, UUID studentId) {
             return lessons.values().stream()
                     .filter(a -> a.teacherId().equals(teacherId) && a.studentId().equals(studentId))
@@ -530,6 +548,24 @@ public final class ProcessingDoubles {
                     .filter(r -> r.period().key().equals(periodKey))
                     .filter(r -> status.test(r.status()))
                     .findFirst();
+        }
+
+        @Override
+        public List<UUID> findIdsByStudent(UUID studentId) {
+            return reports.values().stream()
+                    .filter(r -> r.studentId().equals(studentId))
+                    .map(br.com.felipeblaft.reports.domain.semester.SemesterReport::id)
+                    .sorted()
+                    .toList();
+        }
+
+        @Override
+        public Map<String, Integer> countByStudentAndStatus(UUID studentId) {
+            Map<String, Integer> counts = new java.util.TreeMap<>();
+            reports.values().stream()
+                    .filter(r -> r.studentId().equals(studentId))
+                    .forEach(r -> counts.merge(r.status().name(), 1, Integer::sum));
+            return counts;
         }
 
         @Override
@@ -755,6 +791,14 @@ public final class ProcessingDoubles {
                 }
             }
             return count;
+        }
+
+        @Override
+        public int countByReport(ReportType type, UUID reportId) {
+            return (int)
+                    contexts.values().stream()
+                            .filter(c -> c.reportType() == type && c.reportId().equals(reportId))
+                            .count();
         }
 
         @Override

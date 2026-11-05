@@ -18,7 +18,9 @@ import br.com.felipeblaft.reports.usecase.privacy.RecordConsentUseCase.Command;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
-/** Registrar consentimento: administrador em qualquer aluno, professor nos próprios, carga inicial. */
+/**
+ * Registrar consentimento: administrador em qualquer aluno, professor nos próprios, carga inicial.
+ */
 class RecordConsentUseCaseTest {
 
     private final ConsentScenario c = new ConsentScenario();
@@ -76,13 +78,15 @@ class RecordConsentUseCaseTest {
         UUID unknown = UUID.randomUUID();
 
         assertThatThrownBy(() -> c.record.run(ActorFixtures.teacherWeb(clara.id()), command(other)))
-                .satisfies(error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND));
+                .satisfies(
+                        error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND));
         assertThatThrownBy(
                         () ->
                                 c.record.run(
                                         ActorFixtures.teacherWeb(clara.id()),
                                         new Command(unknown, ConsentScenario.input(1), "req-1")))
-                .satisfies(error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND));
+                .satisfies(
+                        error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND));
 
         assertThat(c.consents.size()).isZero();
         assertThat(c.recorder.ofOperation("AUTHORIZATION_DENIED")).hasSize(2);
@@ -115,7 +119,8 @@ class RecordConsentUseCaseTest {
                                                 student.id(),
                                                 new ConsentInput("A", "X", "2099-01-01", 7, "Y"),
                                                 "req-1")))
-                .satisfies(error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.VALIDATION_FAILED));
+                .satisfies(
+                        error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.VALIDATION_FAILED));
 
         assertThat(c.consents.size()).isZero();
         assertThat(c.recorder.isEmpty()).isTrue();
@@ -138,7 +143,8 @@ class RecordConsentUseCaseTest {
                         () ->
                                 c.record.statusOf(
                                         ActorFixtures.teacherWeb(bruno.id()), minor.id(), "req-4"))
-                .satisfies(error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND));
+                .satisfies(
+                        error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND));
     }
 
     @Test

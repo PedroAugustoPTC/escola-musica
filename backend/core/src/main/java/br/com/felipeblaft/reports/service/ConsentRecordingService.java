@@ -19,8 +19,8 @@ import java.util.UUID;
 
 /**
  * Valida e grava um consentimento e o evento {@code CONSENT_RECORD}, na mesma transação de quem o
- * chamou. É o único caminho de gravação: o cadastro, a edição, o registro avulso e a carga
- * inicial usam o mesmo, nos dois canais (FR-031, FR-081).
+ * chamou. É o único caminho de gravação: o cadastro, a edição, o registro avulso e a carga inicial
+ * usam o mesmo, nos dois canais (FR-031, FR-081).
  */
 public class ConsentRecordingService {
 

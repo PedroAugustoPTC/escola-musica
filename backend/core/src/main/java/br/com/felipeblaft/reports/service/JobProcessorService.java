@@ -147,6 +147,7 @@ public class JobProcessorService {
     private final ClockPort clock;
     private ComplementProcessor complement;
     private ConsentGuardService consentGuard;
+    private java.util.function.Predicate<UUID> erasedStudent;
 
     public JobProcessorService(
             JobQueuePort queue,
@@ -181,6 +182,14 @@ public class JobProcessorService {
         this.consentGuard = guard;
     }
 
+    /**
+     * Liga a verificação de aluno eliminado (FR-022): um trabalho que sai da fila depois da
+     * eliminação é descartado sem chamar provedor, e nada é gravado.
+     */
+    public void useErasureCheck(java.util.function.Predicate<UUID> erasedStudent) {
+        this.erasedStudent = erasedStudent;
+    }
+
     public void registerComplement(ComplementProcessor processor) {
         this.complement = processor;
     }
@@ -191,6 +200,11 @@ public class JobProcessorService {
      */
     public void process(ProcessingJob job) {
         try {
+            if (erasedStudent != null && erasedStudent.test(job.studentId())) {
+                job.discard(clock.now());
+                queue.update(job);
+                return;
+            }
             if (consentGuard != null && consentGuard.blocks(job.studentId())) {
                 // revogação entre enfileirar e processar: nenhuma chamada a provedor (SC-005)
                 abandon(job, JobResult.CONSENT_REQUIRED);
@@ -754,6 +768,7 @@ public class JobProcessorService {
                                 reports.searchForUpdate(job.reportId()).orElseThrow();
                         if (current.status() == ReportStatus.CANCELLED
                                 || current.status() == ReportStatus.APPROVED
+                                || current.anonymizedAt() != null
                                 || isDiscarded(job)) {
                             return false;
                         }

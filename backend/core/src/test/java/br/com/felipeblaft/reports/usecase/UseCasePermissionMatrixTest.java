@@ -123,7 +123,22 @@ class UseCasePermissionMatrixTest {
                             "usecase.privacy.GetCurrentConsentTermUseCase (feature 007)"),
                     Map.entry(
                             Operation.CONSENT_TERM_PUBLISH,
-                            "usecase.privacy.PublishConsentTermUseCase (feature 007)"));
+                            "usecase.privacy.PublishConsentTermUseCase (feature 007)"),
+                    Map.entry(
+                            Operation.ERASURE_REQUEST_REGISTER,
+                            "usecase.privacy.RegisterErasureRequestUseCase (feature 007)"),
+                    Map.entry(
+                            Operation.ERASURE_REQUEST_READ,
+                            "usecase.privacy.ListErasureRequestsUseCase (feature 007)"),
+                    Map.entry(
+                            Operation.ERASURE_PREVIEW,
+                            "usecase.privacy.PreviewErasureUseCase (feature 007)"),
+                    Map.entry(
+                            Operation.ERASURE_CONFIRM,
+                            "usecase.privacy.ConfirmErasureUseCase (feature 007)"),
+                    Map.entry(
+                            Operation.ERASURE_RECEIPT_READ,
+                            "usecase.privacy.GetErasureReceiptUseCase (feature 007)"));
 
     // ------------------------------------------------------------------ mapa caso de uso →
     // operação

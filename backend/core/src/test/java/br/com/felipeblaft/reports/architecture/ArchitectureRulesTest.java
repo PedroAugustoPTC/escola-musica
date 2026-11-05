@@ -227,6 +227,12 @@ class ArchitectureRulesTest {
                     Map.entry("ListConsentTermsUseCase", Operation.CONSENT_TERM_READ),
                     Map.entry("ListPendingConsentsUseCase", Operation.CONSENT_PENDING_READ),
                     Map.entry("ListStudentConsentsUseCase", Operation.CONSENT_READ),
+                    // feature 007: eliminação a pedido, só do administrador na Web
+                    Map.entry("RegisterErasureRequestUseCase", Operation.ERASURE_REQUEST_REGISTER),
+                    Map.entry("ListErasureRequestsUseCase", Operation.ERASURE_REQUEST_READ),
+                    Map.entry("PreviewErasureUseCase", Operation.ERASURE_PREVIEW),
+                    Map.entry("ConfirmErasureUseCase", Operation.ERASURE_CONFIRM),
+                    Map.entry("GetErasureReceiptUseCase", Operation.ERASURE_RECEIPT_READ),
                     Map.entry(
                             "GetSchoolReportDocumentUseCase",
                             Operation.SCHOOL_REPORT_DOCUMENT_OPEN));
@@ -244,7 +250,12 @@ class ArchitectureRulesTest {
                     "GetCurrentConsentTermUseCase",
                     "ListConsentTermsUseCase",
                     "ListPendingConsentsUseCase",
-                    "ListStudentConsentsUseCase");
+                    "ListStudentConsentsUseCase",
+                    "RegisterErasureRequestUseCase",
+                    "ListErasureRequestsUseCase",
+                    "PreviewErasureUseCase",
+                    "ConfirmErasureUseCase",
+                    "GetErasureReceiptUseCase");
 
     /** Casos de uso desses pacotes sem operação na matriz (validam a credencial, não um ator). */
     private static final Set<String> WITHOUT_OPERATION =

@@ -55,14 +55,18 @@ public class ConsentGuardService {
         return ConsentPolicy.status(consents.findByStudent(studentId), floor);
     }
 
-    /** Situação do consentimento exigido hoje do aluno; vazio quando ele não exige (maior de idade). */
+    /**
+     * Situação do consentimento exigido hoje do aluno; vazio quando ele não exige (maior de idade).
+     */
     public java.util.Optional<ConsentStatus> statusIfRequired(Student student) {
         return ConsentPolicy.required(student.birthDate(), clock.todayInSchoolTimezone())
                 ? java.util.Optional.of(statusOf(student.id()))
                 : java.util.Optional.empty();
     }
 
-    /** A IA está bloqueada para este aluno? Aluno desconhecido não bloqueia (a autorização decide). */
+    /**
+     * A IA está bloqueada para este aluno? Aluno desconhecido não bloqueia (a autorização decide).
+     */
     public boolean blocks(UUID studentId) {
         return students.searchById(studentId)
                 .map(

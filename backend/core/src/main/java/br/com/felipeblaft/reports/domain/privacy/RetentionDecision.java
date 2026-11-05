@@ -10,7 +10,10 @@ public enum RetentionDecision {
     REMOVE_UNAPPROVED_PDFS,
     ANONYMIZE;
 
-    /** Verdadeiro quando o prazo, contado a partir de {@code reference}, já se esgotou em {@code now}. */
+    /**
+     * Verdadeiro quando o prazo, contado a partir de {@code reference}, já se esgotou em {@code
+     * now}.
+     */
     public static boolean expired(Instant reference, int days, Instant now) {
         return reference != null && !now.isBefore(reference.plus(Duration.ofDays(days)));
     }

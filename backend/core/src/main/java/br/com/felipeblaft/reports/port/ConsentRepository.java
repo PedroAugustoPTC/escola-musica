@@ -20,4 +20,10 @@ public interface ConsentRepository {
 
     /** Histórico de vários alunos numa só consulta; aluno sem registro não aparece no mapa. */
     Map<UUID, List<GuardianConsent>> findByStudents(Collection<UUID> studentIds);
+
+    /**
+     * Apaga o nome de quem consentiu em todos os registros do aluno; ficam identificador, data e
+     * versão do termo (FR-023). Devolve quantos registros foram tratados.
+     */
+    int removeNamesByStudent(UUID studentId);
 }

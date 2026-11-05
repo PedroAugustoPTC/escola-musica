@@ -144,7 +144,10 @@ class ConsentPolicyTest {
         assertThatThrownBy(
                         () ->
                                 ConsentPolicy.requireOnRegistration(
-                                        LocalDate.of(2015, 1, 1), TODAY, ConsentStatus.MISSING, null))
+                                        LocalDate.of(2015, 1, 1),
+                                        TODAY,
+                                        ConsentStatus.MISSING,
+                                        null))
                 .isInstanceOfSatisfying(
                         DomainException.class,
                         error -> {

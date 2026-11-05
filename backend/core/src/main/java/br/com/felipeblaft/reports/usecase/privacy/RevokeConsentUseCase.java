@@ -19,8 +19,8 @@ import java.util.UUID;
 
 /**
  * Registra a revogação de um consentimento ({@code CONSENT_REVOKE}, FR-033): só o administrador.
- * Daí em diante, o aluno menor fica sem consentimento válido e a IA, bloqueada. O registro
- * continua no histórico; quem revogou entra só por papel, sem nome.
+ * Daí em diante, o aluno menor fica sem consentimento válido e a IA, bloqueada. O registro continua
+ * no histórico; quem revogou entra só por papel, sem nome.
  */
 public class RevokeConsentUseCase {
 

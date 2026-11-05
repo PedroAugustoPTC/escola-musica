@@ -66,6 +66,11 @@ class StudentAccessServiceTest {
         public void save(Student student) {
             throw new AssertionError("fora do escopo");
         }
+
+        @Override
+        public boolean erase(UUID id, Instant now) {
+            throw new AssertionError("fora do escopo");
+        }
     }
 
     private final Students students = new Students();

@@ -45,13 +45,15 @@ class RegisterStudentConsentTest {
     void minorWithoutConsentIsRefusedOnTheConsentFieldForEveryActorAndNothingIsSaved() {
         int index = 0;
         for (Actor actor : actors()) {
-            String cpf = index++ == 0 ? ConsentRegistryScenario.CPF_A : ConsentRegistryScenario.CPF_B;
+            String cpf =
+                    index++ == 0 ? ConsentRegistryScenario.CPF_A : ConsentRegistryScenario.CPF_B;
             assertThatThrownBy(
                             () ->
                                     c.register.run(
                                             actor,
                                             c.registration(
-                                                    ConsentRegistryScenario.minor("Matteo Mafra", cpf),
+                                                    ConsentRegistryScenario.minor(
+                                                            "Matteo Mafra", cpf),
                                                     null,
                                                     clara.id())))
                     .satisfies(
@@ -64,9 +66,10 @@ class RegisterStudentConsentTest {
                                                             "code",
                                                             "CONSENT_REQUIRED")));
         }
-        assertThat(c.base.students.list(
-                        br.com.felipeblaft.reports.domain.registry.StudentScope.all(),
-                        br.com.felipeblaft.reports.domain.registry.StudentStatusFilter.ALL))
+        assertThat(
+                        c.base.students.list(
+                                br.com.felipeblaft.reports.domain.registry.StudentScope.all(),
+                                br.com.felipeblaft.reports.domain.registry.StudentStatusFilter.ALL))
                 .isEmpty();
         assertThat(c.base.consents.size()).isZero();
         assertThat(c.base.recorder.ofOperation("STUDENT_REGISTER")).isEmpty();
@@ -80,7 +83,8 @@ class RegisterStudentConsentTest {
                 c.register.run(
                         ActorFixtures.administratorWeb(adminId),
                         c.registration(
-                                ConsentRegistryScenario.minor("Matteo Mafra", ConsentRegistryScenario.CPF_A),
+                                ConsentRegistryScenario.minor(
+                                        "Matteo Mafra", ConsentRegistryScenario.CPF_A),
                                 ConsentRegistryScenario.consent(),
                                 clara.id()));
 
@@ -99,13 +103,15 @@ class RegisterStudentConsentTest {
                 c.register.run(
                         ActorFixtures.teacherWeb(clara.id()),
                         c.registration(
-                                ConsentRegistryScenario.minor("Matteo Mafra", ConsentRegistryScenario.CPF_A),
+                                ConsentRegistryScenario.minor(
+                                        "Matteo Mafra", ConsentRegistryScenario.CPF_A),
                                 ConsentRegistryScenario.consent()));
         StudentView telegram =
                 c.register.run(
                         ActorFixtures.teacherTelegram(clara.id()),
                         c.registration(
-                                ConsentRegistryScenario.minor("Lia Souza", ConsentRegistryScenario.CPF_B),
+                                ConsentRegistryScenario.minor(
+                                        "Lia Souza", ConsentRegistryScenario.CPF_B),
                                 ConsentRegistryScenario.consent()));
 
         assertThat(c.base.consents.findByStudent(web.id())).hasSize(1);
@@ -122,14 +128,16 @@ class RegisterStudentConsentTest {
                 c.register.run(
                         ConsentRegistryScenario.administrator(),
                         c.registration(
-                                ConsentRegistryScenario.adult("Adult Souza", ConsentRegistryScenario.CPF_A),
+                                ConsentRegistryScenario.adult(
+                                        "Adult Souza", ConsentRegistryScenario.CPF_A),
                                 null,
                                 clara.id()));
         StudentView adultWithConsent =
                 c.register.run(
                         ConsentRegistryScenario.administrator(),
                         c.registration(
-                                ConsentRegistryScenario.adult("Second Adult", ConsentRegistryScenario.CPF_B),
+                                ConsentRegistryScenario.adult(
+                                        "Second Adult", ConsentRegistryScenario.CPF_B),
                                 ConsentRegistryScenario.consent(),
                                 clara.id()));
 
@@ -147,7 +155,9 @@ class RegisterStudentConsentTest {
                                 c.register.run(
                                         ConsentRegistryScenario.administrator(),
                                         c.registration(
-                                                ConsentRegistryScenario.minor("Matteo Mafra", ConsentRegistryScenario.CPF_A),
+                                                ConsentRegistryScenario.minor(
+                                                        "Matteo Mafra",
+                                                        ConsentRegistryScenario.CPF_A),
                                                 invalid,
                                                 clara.id())))
                 .satisfies(
@@ -161,9 +171,11 @@ class RegisterStudentConsentTest {
                                                 "consent.termVersion",
                                                 "consent.collectionMethod"));
 
-        assertThat(c.base.students.searchByCpfHash(
-                        c.protection.hashCpf(
-                                br.com.felipeblaft.reports.domain.registry.Cpf.of(ConsentRegistryScenario.CPF_A))))
+        assertThat(
+                        c.base.students.searchByCpfHash(
+                                c.protection.hashCpf(
+                                        br.com.felipeblaft.reports.domain.registry.Cpf.of(
+                                                ConsentRegistryScenario.CPF_A))))
                 .isEmpty();
         assertThat(c.base.consents.size()).isZero();
     }
@@ -174,7 +186,8 @@ class RegisterStudentConsentTest {
                 c.register.run(
                         ActorFixtures.initialLoad(),
                         c.registration(
-                                ConsentRegistryScenario.minor("Matteo Mafra", ConsentRegistryScenario.CPF_A),
+                                ConsentRegistryScenario.minor(
+                                        "Matteo Mafra", ConsentRegistryScenario.CPF_A),
                                 null));
 
         assertThat(c.base.recording.status(view.id())).isEqualTo(ConsentStatus.MISSING);
@@ -190,7 +203,9 @@ class RegisterStudentConsentTest {
                                 c.register.run(
                                         ConsentRegistryScenario.administrator(),
                                         c.registration(
-                                                ConsentRegistryScenario.minor("Matteo Mafra", ConsentRegistryScenario.CPF_A),
+                                                ConsentRegistryScenario.minor(
+                                                        "Matteo Mafra",
+                                                        ConsentRegistryScenario.CPF_A),
                                                 ConsentRegistryScenario.consent(),
                                                 clara.id())))
                 .satisfies(

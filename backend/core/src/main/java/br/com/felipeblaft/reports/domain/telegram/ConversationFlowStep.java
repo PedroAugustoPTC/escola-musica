@@ -28,7 +28,10 @@ public enum ConversationFlowStep {
     REGISTRY_ASK_GUARDIAN_PHONE,
     REGISTRY_ASK_GUARDIAN_EMAIL,
     REGISTRY_ASK_INSTRUMENT,
-    /** Consentimento do responsável (feature 007, telegram-consent.md): C1 mostra o termo e pergunta se o responsável consentiu. */
+    /**
+     * Consentimento do responsável (feature 007, telegram-consent.md): C1 mostra o termo e pergunta
+     * se o responsável consentiu.
+     */
     REGISTRY_ASK_CONSENT,
     REGISTRY_ASK_CONSENT_NAME,
     REGISTRY_ASK_CONSENT_RELATIONSHIP,

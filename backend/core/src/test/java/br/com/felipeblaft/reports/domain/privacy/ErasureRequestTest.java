@@ -103,7 +103,8 @@ class ErasureRequestTest {
 
     @Test
     void tokenIsValidForTenMinutes() {
-        ErasureConfirmation confirmation = received().withPreview(HASH_A, NOW).confirmation().orElseThrow();
+        ErasureConfirmation confirmation =
+                received().withPreview(HASH_A, NOW).confirmation().orElseThrow();
 
         assertThat(confirmation.expiresAt()).isEqualTo(NOW.plus(Duration.ofMinutes(10)));
         assertThat(confirmation.matches(HASH_A, NOW.plus(Duration.ofMinutes(10)).minusMillis(1)))
@@ -114,7 +115,8 @@ class ErasureRequestTest {
     @Test
     void confirmationWordMustBeExactlyEliminar() {
         assertThat(ErasureConfirmation.isConfirmationWord("ELIMINAR")).isTrue();
-        for (String word : new String[] {"eliminar", "Eliminar", " ELIMINAR", "ELIMINAR ", "", null}) {
+        for (String word :
+                new String[] {"eliminar", "Eliminar", " ELIMINAR", "ELIMINAR ", "", null}) {
             assertThat(ErasureConfirmation.isConfirmationWord(word)).isFalse();
         }
     }
@@ -136,7 +138,10 @@ class ErasureRequestTest {
     void confirmWithExpiredOrWrongTokenFailsWithConfirmationExpired() {
         ErasureRequest request = received().withPreview(HASH_A, NOW);
 
-        assertThatThrownBy(() -> request.confirm(HASH_A, ADMIN, scope(), NOW.plus(Duration.ofMinutes(11))))
+        assertThatThrownBy(
+                        () ->
+                                request.confirm(
+                                        HASH_A, ADMIN, scope(), NOW.plus(Duration.ofMinutes(11))))
                 .isInstanceOf(DomainException.class)
                 .extracting(e -> ((DomainException) e).code())
                 .isEqualTo(ErrorCode.CONFIRMATION_EXPIRED);
@@ -153,7 +158,9 @@ class ErasureRequestTest {
     @Test
     void completeClearsRequesterNameAndStampsCompletion() {
         ErasureRequest inProgress =
-                received().withPreview(HASH_A, NOW).confirm(HASH_A, ADMIN, scope(), NOW.plusSeconds(5));
+                received()
+                        .withPreview(HASH_A, NOW)
+                        .confirm(HASH_A, ADMIN, scope(), NOW.plusSeconds(5));
 
         ErasureRequest completed = inProgress.complete(NOW.plusSeconds(9));
 

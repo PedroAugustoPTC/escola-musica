@@ -8,8 +8,8 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * PDF de uma versão (data-model.md §12). A chave de armazenamento nunca é exposta (R-11).
- * {@code contentRemovedAt} marca o arquivo removido pela retenção; a linha permanece.
+ * PDF de uma versão (data-model.md §12). A chave de armazenamento nunca é exposta (R-11). {@code
+ * contentRemovedAt} marca o arquivo removido pela retenção; a linha permanece.
  */
 public record PdfDocument(
         UUID id,
@@ -47,11 +47,12 @@ public record PdfDocument(
     }
 
     /**
-     * PDF de versão que não é a aprovada vigente, de relatório aprovado há mais que o prazo: removível
-     * (FR-012). O PDF da versão aprovada nunca é (FR-011).
+     * PDF de versão que não é a aprovada vigente, de relatório aprovado há mais que o prazo:
+     * removível (FR-012). O PDF da versão aprovada nunca é (FR-011).
      *
      * @param approvedVersionPdf este é o PDF da versão aprovada vigente
-     * @param reportApprovedAt aprovação do relatório; {@code null} se não aprovado (em aberto: fica)
+     * @param reportApprovedAt aprovação do relatório; {@code null} se não aprovado (em aberto:
+     *     fica)
      */
     public RetentionDecision retentionAction(
             RetentionPolicy policy,
@@ -67,6 +68,7 @@ public record PdfDocument(
     }
 
     public PdfDocument withContentRemoved(Instant now) {
-        return new PdfDocument(id, versionId, type, storageKey, sizeBytes, sha256, generatedAt, now);
+        return new PdfDocument(
+                id, versionId, type, storageKey, sizeBytes, sha256, generatedAt, now);
     }
 }

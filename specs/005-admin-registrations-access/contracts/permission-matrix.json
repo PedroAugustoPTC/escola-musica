@@ -60,6 +60,12 @@
     { "operation": "CONSENT_REVOKE", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["POST /admin/consents/{consentId}/revocation"], "system": [], "note": "feature 007" },
     { "operation": "CONSENT_PENDING_READ", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/consents/pending"], "system": [], "note": "feature 007" },
     { "operation": "CONSENT_TERM_READ", "administratorWeb": "ALLOW", "teacherWeb": "ALLOW", "teacherTelegram": "ALLOW", "webRoutes": ["GET /admin/consent-terms", "GET /my-students/consent-term"], "system": [], "note": "feature 007: texto institucional, sem dado de aluno" },
-    { "operation": "CONSENT_TERM_PUBLISH", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["POST /admin/consent-terms"], "system": [], "note": "feature 007" }
+    { "operation": "CONSENT_TERM_PUBLISH", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["POST /admin/consent-terms"], "system": [], "note": "feature 007" },
+
+    { "operation": "ERASURE_REQUEST_REGISTER", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["POST /admin/students/{studentId}/erasure-requests"], "system": [], "note": "feature 007" },
+    { "operation": "ERASURE_REQUEST_READ", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/erasure-requests", "GET /admin/erasure-requests/{requestId}"], "system": [], "note": "feature 007" },
+    { "operation": "ERASURE_PREVIEW", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["POST /admin/erasure-requests/{requestId}/preview"], "system": [], "note": "feature 007" },
+    { "operation": "ERASURE_CONFIRM", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["POST /admin/erasure-requests/{requestId}/confirmation"], "system": ["RETENTION"], "note": "feature 007: a retenção termina remoções de arquivo pendentes" },
+    { "operation": "ERASURE_RECEIPT_READ", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/erasure-requests/{requestId}/receipt"], "system": [], "note": "feature 007" }
   ]
 }
