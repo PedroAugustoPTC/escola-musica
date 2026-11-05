@@ -10,9 +10,9 @@ description: "Tarefas da feature 007 — privacidade, retenção e operação (L
 > **Branch** `feat/007-privacy-retention-operations`. Commits: setup/fundação, US1, US2 (fechada em `a37b6d9`), US3 (`0064a3c`).
 > Suítes verificadas antes do commit da US2: backend 977 testes, frontend 457, e2e 114, todos verdes.
 >
-> **Estado**: Setup, Fundação, US1, US2, US3 e US4 prontas (US4 sem a suíte backend completa e sem teste de falha no meio da transação do banco; ver `evidence/us4-erasure.md`). Falta US5, US6 e o fechamento (T130–T136).
+> **Estado**: Setup, Fundação, US1, US2, US3 e US4 prontas (suíte backend completa verde após a US4; falta só o teste de integração de falha no meio da transação do banco; ver `evidence/us4-erasure.md`). Falta US5, US6 e o fechamento (T130–T136).
 >
-> **Próximo passo**: rodar a suíte backend completa; depois US5 (T110–T124), começando pelos testes.
+> **Próximo passo**: US5 (T110–T124), começando pelos testes.
 >
 > **Armadilhas**: a V17 foi editada várias vezes; quem tiver banco antigo faz `docker compose -f infra/compose.test.yaml down -v`.
 > Heredoc/perl longos quebram no shell: use Write/Edit ou scripts `.mjs`. Guardião de idioma reprova literais como "falha" em
