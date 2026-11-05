@@ -32,7 +32,13 @@ public class GetErasureReceiptUseCase {
             LocalDate requestedOn,
             Instant completedAt,
             ErasureScope scope,
-            PrivacyOfficer privacyContact) {}
+            PrivacyOfficer privacyContact) {
+
+        @Override
+        public String toString() {
+            return "GetErasureReceiptUseCase.Receipt";
+        }
+    }
 
     private final ActorAuthorizationService authorization;
     private final ErasureRequestRepository erasures;

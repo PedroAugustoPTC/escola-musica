@@ -22,7 +22,13 @@ import java.util.UUID;
 public class ListErasureRequestsUseCase {
 
     /** Pedido com o rótulo do aluno resolvido na exibição. */
-    public record RequestView(ErasureRequest request, String studentLabel) {}
+    public record RequestView(ErasureRequest request, String studentLabel) {
+
+        @Override
+        public String toString() {
+            return "ListErasureRequestsUseCase.RequestView";
+        }
+    }
 
     private final ActorAuthorizationService authorization;
     private final ErasureRequestRepository erasures;

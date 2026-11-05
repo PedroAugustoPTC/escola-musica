@@ -16,8 +16,8 @@ public record ErasureScope(
         int consents) {
 
     public ErasureScope {
-        lessonReports = Map.copyOf(lessonReports);
-        semesterReports = Map.copyOf(semesterReports);
+        lessonReports = lessonReports == null ? Map.of() : Map.copyOf(lessonReports);
+        semesterReports = semesterReports == null ? Map.of() : Map.copyOf(semesterReports);
     }
 
     public int totalLessonReports() {

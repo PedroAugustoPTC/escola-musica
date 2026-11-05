@@ -31,7 +31,13 @@ import java.util.UUID;
 public class PreviewErasureUseCase {
 
     /** Professor associado, mostrado ao administrador (nome da escola, não dado do aluno). */
-    public record TeacherView(UUID id, String name) {}
+    public record TeacherView(UUID id, String name) {
+
+        @Override
+        public String toString() {
+            return "PreviewErasureUseCase.TeacherView";
+        }
+    }
 
     /** O token só existe aqui, em claro; o {@code toString} não o revela. */
     public record Preview(
