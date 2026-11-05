@@ -6,6 +6,8 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import br.com.felipeblaft.reports.support.ConversationState;
 import br.com.felipeblaft.reports.usecase.audit.QueryAuditTrailUseCase;
 import br.com.felipeblaft.reports.usecase.audit.VerifyAuditChainUseCase;
+import br.com.felipeblaft.reports.usecase.privacy.ConfirmErasureUseCase;
+import br.com.felipeblaft.reports.usecase.privacy.RegisterErasureRequestUseCase;
 import java.util.List;
 import java.util.Locale;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,13 +21,22 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
  */
 class AdminRequestsNeutralDenialIT extends RegistryConversationBase {
 
-    private static final List<String> ATTEMPTS = List.of("audit", "audit trail", "/audit");
+    private static final List<String> ATTEMPTS = List.of(
+                    "audit",
+                    "audit trail",
+                    "/audit",
+                    "apagar aluno",
+                    "eliminar",
+                    "excluir dados");
 
     private static final List<String> FORBIDDEN =
             List.of("web", "administra" + "dor", "administrativa", "portal", "secre" + "taria");
 
     @MockitoSpyBean QueryAuditTrailUseCase queryAuditTrail;
     @MockitoSpyBean VerifyAuditChainUseCase verifyAuditChain;
+
+    @MockitoSpyBean RegisterErasureRequestUseCase registerErasure;
+    @MockitoSpyBean ConfirmErasureUseCase confirmErasure;
 
     @BeforeEach
     void students() {
@@ -43,6 +54,6 @@ class AdminRequestsNeutralDenialIT extends RegistryConversationBase {
                     .doesNotContain(FORBIDDEN.toArray(String[]::new));
             assertThat(buttonData(lastMessage())).contains("v1:home:");
         }
-        verifyNoInteractions(queryAuditTrail, verifyAuditChain);
+        verifyNoInteractions(queryAuditTrail, verifyAuditChain, registerErasure, confirmErasure);
     }
 }
