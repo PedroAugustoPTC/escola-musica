@@ -3,6 +3,7 @@ package br.com.felipeblaft.reports.port;
 import br.com.felipeblaft.reports.domain.report.Lesson;
 import br.com.felipeblaft.reports.domain.report.LessonReport;
 import br.com.felipeblaft.reports.domain.report.LessonReportContent;
+import br.com.felipeblaft.reports.domain.privacy.RetentionPolicy;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -41,6 +42,13 @@ public interface LessonReportRepository {
 
     /** Todos os relatórios de aula aprovados do par (histórico), em qualquer ordem. */
     List<ApprovedLesson> listApproved(UUID teacherId, UUID studentId);
+
+    /**
+     * Ids de relatórios com algo a tratar pela retenção, em ordem de id, depois de {@code afterId}
+     * (nulo = do início). Seleção grossa: o caso de uso reavalia cada um sob bloqueio (FR-011).
+     */
+    List<UUID> findRetentionCandidates(
+            RetentionPolicy policy, Instant now, int limit, UUID afterId);
 
     /** Data da primeira aula do aluno com o professor, se houver. */
     Optional<LocalDate> lessonFirstDate(UUID teacherId, UUID studentId);

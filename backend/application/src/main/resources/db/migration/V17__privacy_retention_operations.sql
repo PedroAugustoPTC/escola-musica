@@ -49,14 +49,17 @@ ALTER TABLE report_interaction
     ADD COLUMN text_removed_at timestamptz;
 
 ALTER TABLE report_version ADD COLUMN content_removed_at timestamptz;
-ALTER TABLE pdf_document ADD COLUMN content_removed_at timestamptz;
+ALTER TABLE pdf_document
+    ADD COLUMN content_removed_at timestamptz,
+    ADD COLUMN file_removed_at timestamptz;
 
 -- Candidatos da rotina de retenção (lotes por id; só o que ainda não foi tratado).
 CREATE INDEX ix_lesson_report_retention ON lesson_report (approved_at, cancelled_at)
     WHERE source_removed_at IS NULL OR anonymized_at IS NULL;
 CREATE INDEX ix_semester_report_retention ON semester_report (approved_at, cancelled_at)
     WHERE source_removed_at IS NULL OR anonymized_at IS NULL;
-CREATE INDEX ix_pdf_document_removal ON pdf_document (content_removed_at) WHERE content_removed_at IS NOT NULL;
+CREATE INDEX ix_pdf_document_removal ON pdf_document (content_removed_at)
+    WHERE content_removed_at IS NOT NULL AND file_removed_at IS NULL;
 
 -- ---------------------------------------------------------------------------------------------------------
 -- 1.3 ai_call (métricas, FR-051): canal da chamada, herdado do trabalho de processamento.

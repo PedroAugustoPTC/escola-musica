@@ -425,6 +425,23 @@ class ArchitectureRulesTest {
                 .callMethodWhere(calls(StudentRepository.class, "findVisible", "list"));
     }
 
+    // -- retenção: só a rotina expurga a trilha
+
+    @Test
+    void onlyTheRetentionUseCaseDependsOnTheAuditTrailRetentionPort() {
+        noClasses()
+                .that()
+                .doNotHaveFullyQualifiedName(BASE + ".usecase.privacy.RunRetentionUseCase")
+                .should()
+                .dependOnClassesThat()
+                .haveFullyQualifiedName(BASE + ".port.AuditTrailRetentionPort")
+                .check(
+                        core.that(
+                                com.tngtech.archunit.base.DescribedPredicate.not(
+                                        com.tngtech.archunit.core.domain.JavaClass.Predicates
+                                                .simpleName("AuditTrailRetentionPort"))));
+    }
+
     // -- autoria: o registro só recebe inserção
 
     @Test

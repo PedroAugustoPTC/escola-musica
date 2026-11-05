@@ -199,6 +199,17 @@ public final class ProcessingDoubles {
         public boolean exists(String key) {
             return files.containsKey(key);
         }
+
+        /** Chaves cuja remoção deve falhar (simula falha de E/S). */
+        public final java.util.Set<String> failingDeletes = new java.util.HashSet<>();
+
+        @Override
+        public void delete(String key) {
+            if (failingDeletes.contains(key)) {
+                throw new IllegalStateException("falha simulada de remoção");
+            }
+            files.remove(key);
+        }
     }
 
     public static class RecordingNotification implements TeacherNotificationPort {
@@ -436,6 +447,25 @@ public final class ProcessingDoubles {
         }
 
         @Override
+        public List<UUID> findRetentionCandidates(
+                br.com.felipeblaft.reports.domain.privacy.RetentionPolicy policy,
+                Instant now,
+                int limit,
+                UUID afterId) {
+            return reports.values().stream()
+                    .filter(
+                            r ->
+                                    r.retentionAction(policy, now)
+                                            != br.com.felipeblaft.reports.domain.privacy
+                                                    .RetentionDecision.KEEP)
+                    .map(LessonReport::id)
+                    .filter(id -> afterId == null || id.compareTo(afterId) > 0)
+                    .sorted()
+                    .limit(limit)
+                    .toList();
+        }
+
+        @Override
         public Optional<java.time.LocalDate> lessonFirstDate(UUID teacherId, UUID studentId) {
             return lessons.values().stream()
                     .filter(a -> a.teacherId().equals(teacherId) && a.studentId().equals(studentId))
@@ -513,6 +543,25 @@ public final class ProcessingDoubles {
         }
 
         @Override
+        public List<UUID> findRetentionCandidates(
+                br.com.felipeblaft.reports.domain.privacy.RetentionPolicy policy,
+                Instant now,
+                int limit,
+                UUID afterId) {
+            return reports.values().stream()
+                    .filter(
+                            r ->
+                                    r.retentionAction(policy, now)
+                                            != br.com.felipeblaft.reports.domain.privacy
+                                                    .RetentionDecision.KEEP)
+                    .map(br.com.felipeblaft.reports.domain.semester.SemesterReport::id)
+                    .filter(id -> afterId == null || id.compareTo(afterId) > 0)
+                    .sorted()
+                    .limit(limit)
+                    .toList();
+        }
+
+        @Override
         public Optional<br.com.felipeblaft.reports.domain.semester.SemesterReport> searchOpen(
                 UUID teacherId, UUID studentId, String periodKey) {
             return doTrio(
@@ -557,6 +606,19 @@ public final class ProcessingDoubles {
                                             && v.number() == number)
                     .findFirst();
         }
+
+        @Override
+        public int markContentRemoved(ReportType type, UUID reportId, Instant now) {
+            int count = 0;
+            for (int i = 0; i < versions.size(); i++) {
+                ReportVersion v = versions.get(i);
+                if (v.reportType() == type && v.reportId().equals(reportId)) {
+                    versions.set(i, v.withContentRemoved(now));
+                    count++;
+                }
+            }
+            return count;
+        }
     }
 
     public static class InMemoryReportInteractionRepository implements ReportInteractionRepository {
@@ -570,6 +632,19 @@ public final class ProcessingDoubles {
         @Override
         public Optional<ReportInteraction> searchById(UUID id) {
             return interactions.stream().filter(i -> i.id().equals(id)).findFirst();
+        }
+
+        @Override
+        public int removeText(ReportType type, UUID reportId, Instant now) {
+            int count = 0;
+            for (int i = 0; i < interactions.size(); i++) {
+                ReportInteraction x = interactions.get(i);
+                if (x.reportType() == type && x.reportId().equals(reportId) && x.text() != null) {
+                    interactions.set(i, x.withTextRemoved(now));
+                    count++;
+                }
+            }
+            return count;
         }
 
         @Override
@@ -593,6 +668,112 @@ public final class ProcessingDoubles {
         @Override
         public Optional<PdfDocument> search(UUID versionId, DocumentType type) {
             return Optional.ofNullable(documents.get(versionId + ":" + type));
+        }
+
+        /** Contexto de relatório de cada PDF, registrado pelo teste (o banco faz o join). */
+        public record Context(
+                ReportType reportType,
+                UUID reportId,
+                boolean approvedVersion,
+                Instant reportApprovedAt) {}
+
+        public final Map<UUID, Context> contexts = new HashMap<>();
+        public final java.util.Set<UUID> filesRemoved = new java.util.HashSet<>();
+
+        public void link(
+                PdfDocument pdf,
+                ReportType type,
+                UUID reportId,
+                boolean approvedVersion,
+                Instant reportApprovedAt) {
+            save(pdf);
+            contexts.put(pdf.id(), new Context(type, reportId, approvedVersion, reportApprovedAt));
+        }
+
+        private PdfDocument byId(UUID id) {
+            return documents.values().stream()
+                    .filter(d -> d.id().equals(id))
+                    .findFirst()
+                    .orElseThrow();
+        }
+
+        @Override
+        public List<UUID> findRetentionCandidates(
+                br.com.felipeblaft.reports.domain.privacy.RetentionPolicy policy,
+                Instant now,
+                int limit,
+                UUID afterId) {
+            return contexts.entrySet().stream()
+                    .filter(
+                            e -> {
+                                PdfDocument pdf = byId(e.getKey());
+                                return pdf.retentionAction(
+                                                policy,
+                                                now,
+                                                e.getValue().approvedVersion(),
+                                                e.getValue().reportApprovedAt())
+                                        != br.com.felipeblaft.reports.domain.privacy
+                                                .RetentionDecision.KEEP;
+                            })
+                    .map(Map.Entry::getKey)
+                    .filter(id -> afterId == null || id.compareTo(afterId) > 0)
+                    .sorted()
+                    .limit(limit)
+                    .toList();
+        }
+
+        @Override
+        public Optional<br.com.felipeblaft.reports.port.RetentionPdfCandidate> findForRetention(
+                UUID pdfId) {
+            Context c = contexts.get(pdfId);
+            return c == null
+                    ? Optional.empty()
+                    : Optional.of(
+                            new br.com.felipeblaft.reports.port.RetentionPdfCandidate(
+                                    byId(pdfId), c.approvedVersion(), c.reportApprovedAt()));
+        }
+
+        private void replace(PdfDocument updated) {
+            documents.replaceAll((k, v) -> v.id().equals(updated.id()) ? updated : v);
+        }
+
+        @Override
+        public void markContentRemoved(UUID pdfId, Instant now) {
+            replace(byId(pdfId).withContentRemoved(now));
+        }
+
+        @Override
+        public int markContentRemovedForReport(ReportType type, UUID reportId, Instant now) {
+            int count = 0;
+            for (Map.Entry<UUID, Context> e : contexts.entrySet()) {
+                Context c = e.getValue();
+                if (c.reportType() == type
+                        && c.reportId().equals(reportId)
+                        && byId(e.getKey()).contentRemovedAt() == null) {
+                    markContentRemoved(e.getKey(), now);
+                    count++;
+                }
+            }
+            return count;
+        }
+
+        @Override
+        public List<br.com.felipeblaft.reports.port.PendingFileRemoval> findPendingFileRemovals(
+                int limit) {
+            return documents.values().stream()
+                    .filter(d -> d.contentRemovedAt() != null && !filesRemoved.contains(d.id()))
+                    .sorted(java.util.Comparator.comparing(PdfDocument::id))
+                    .limit(limit)
+                    .map(
+                            d ->
+                                    new br.com.felipeblaft.reports.port.PendingFileRemoval(
+                                            d.id(), d.storageKey()))
+                    .toList();
+        }
+
+        @Override
+        public void markFileRemoved(UUID pdfId, Instant now) {
+            filesRemoved.add(pdfId);
         }
     }
 }

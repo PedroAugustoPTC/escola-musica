@@ -10,4 +10,7 @@ public interface DocumentStoragePort {
     Optional<byte[]> open(String key);
 
     boolean exists(String key);
+
+    /** Remove o arquivo; chave ausente não é erro (idempotente). Falha de E/S vira exceção. */
+    void delete(String key);
 }

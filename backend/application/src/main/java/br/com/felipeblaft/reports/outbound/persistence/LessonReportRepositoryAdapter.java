@@ -1,15 +1,18 @@
 package br.com.felipeblaft.reports.outbound.persistence;
 
+import br.com.felipeblaft.reports.domain.privacy.RetentionPolicy;
 import br.com.felipeblaft.reports.domain.report.Lesson;
 import br.com.felipeblaft.reports.domain.report.LessonReport;
 import br.com.felipeblaft.reports.outbound.persistence.ReportEntities.LessonReportEntity;
 import br.com.felipeblaft.reports.port.ConcurrencyConflictException;
 import br.com.felipeblaft.reports.port.LessonReportRepository;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Repository;
 
@@ -18,10 +21,18 @@ class LessonReportRepositoryAdapter implements LessonReportRepository {
 
     private final LessonJpa lessons;
     private final LessonReportJpa reports;
+    private final JdbcTemplate jdbc;
 
-    LessonReportRepositoryAdapter(LessonJpa lessons, LessonReportJpa reports) {
+    LessonReportRepositoryAdapter(LessonJpa lessons, LessonReportJpa reports, JdbcTemplate jdbc) {
         this.lessons = lessons;
         this.reports = reports;
+        this.jdbc = jdbc;
+    }
+
+    @Override
+    public List<UUID> findRetentionCandidates(
+            RetentionPolicy policy, Instant now, int limit, UUID afterId) {
+        return RetentionCandidates.reportIds(jdbc, "lesson_report", policy, now, limit, afterId);
     }
 
     @Override

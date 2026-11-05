@@ -73,6 +73,15 @@ public class FileSystemDocumentStorageAdapter implements DocumentStoragePort {
         return Files.isRegularFile(path(key));
     }
 
+    @Override
+    public void delete(String key) {
+        try {
+            Files.deleteIfExists(path(key));
+        } catch (IOException error) {
+            throw new UncheckedIOException(error);
+        }
+    }
+
     Path path(String key) {
         if (key == null || !VALID_KEY.matcher(key).matches() || key.contains("..")) {
             throw new IllegalArgumentException("chave de documento inválida");

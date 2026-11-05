@@ -36,9 +36,15 @@ class SemesterReportEntity {
     @Column(name = "open_report_count", nullable = false)
     int openReportCount;
 
-    @Column(name = "general_information", nullable = false, columnDefinition = "jsonb")
+    @Column(name = "general_information", columnDefinition = "jsonb")
     @ColumnTransformer(write = "?::jsonb")
     String generalInformation;
+
+    @Column(name = "source_removed_at")
+    Instant sourceRemovedAt;
+
+    @Column(name = "anonymized_at")
+    Instant anonymizedAt;
 
     @Column(nullable = false, columnDefinition = "jsonb")
     @ColumnTransformer(write = "?::jsonb")

@@ -1,6 +1,17 @@
 package br.com.felipeblaft.reports.config;
 
 import br.com.felipeblaft.reports.domain.operations.AlertType;
+import br.com.felipeblaft.reports.domain.privacy.RetentionPolicy;
+import br.com.felipeblaft.reports.port.AlertHistoryRetentionPort;
+import br.com.felipeblaft.reports.port.AuditTrailRetentionPort;
+import br.com.felipeblaft.reports.port.DocumentStoragePort;
+import br.com.felipeblaft.reports.port.LessonReportRepository;
+import br.com.felipeblaft.reports.port.PdfDocumentRepository;
+import br.com.felipeblaft.reports.port.ReportInteractionRepository;
+import br.com.felipeblaft.reports.port.ReportVersionRepository;
+import br.com.felipeblaft.reports.port.RetentionRunRepository;
+import br.com.felipeblaft.reports.port.SemesterReportRepository;
+import br.com.felipeblaft.reports.usecase.privacy.RunRetentionUseCase;
 import br.com.felipeblaft.reports.port.AuditTrailQueryPort;
 import br.com.felipeblaft.reports.port.ClockPort;
 import br.com.felipeblaft.reports.port.ConsentRepository;
@@ -90,6 +101,43 @@ public class PrivacyUseCaseConfig {
                 authorship,
                 alerts,
                 VerifyAuditChainUseCase.DEFAULT_BATCH_SIZE);
+    }
+
+    // ---- Retenção automática (US3)
+
+    @Bean
+    RunRetentionUseCase runRetentionUseCase(
+            AuthorshipService authorship,
+            ClockPort clock,
+            TransactionPort transaction,
+            RetentionPolicy policy,
+            LessonReportRepository lessons,
+            SemesterReportRepository semesters,
+            ReportVersionRepository versions,
+            ReportInteractionRepository interactions,
+            PdfDocumentRepository pdfs,
+            DocumentStoragePort storage,
+            RetentionRunRepository runs,
+            AuditTrailRetentionPort trail,
+            AlertHistoryRetentionPort alertHistory,
+            OperationalAlertService alerts,
+            VerifyAuditChainUseCase verifyChain) {
+        return new RunRetentionUseCase(
+                authorship,
+                clock,
+                transaction,
+                policy,
+                lessons,
+                semesters,
+                versions,
+                interactions,
+                pdfs,
+                storage,
+                runs,
+                trail,
+                alertHistory,
+                alerts,
+                verifyChain);
     }
 
     // ---- Consentimento do responsável (US2)
