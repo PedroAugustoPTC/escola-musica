@@ -86,6 +86,11 @@ public enum ErrorCode {
     CONSENT_REQUIRED,
     CONSENT_ALREADY_REVOKED,
 
+    // Eliminação a pedido (feature 007)
+    ERASURE_ALREADY_OPEN,
+    STUDENT_ALREADY_ERASED,
+    ERASURE_ALREADY_COMPLETED,
+
     // Genéricos
     INVALID_DATA,
     INTERNAL_ERROR,

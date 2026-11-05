@@ -5,24 +5,18 @@ description: "Tarefas da feature 007 — privacidade, retenção e operação (L
 
 # Tasks: Privacidade, retenção e operação (LGPD)
 
-> ## CHECKPOINT (2026-11-05, sessão interrompida pelo usuário)
+> ## CHECKPOINT (2026-11-05, segunda sessão)
 >
-> **Branch** `feat/007-privacy-retention-operations`. Commits: setup/fundação, US1, US2 (parcial), US3 (`0064a3c`).
-> **Há ~40 arquivos NÃO commitados**: fechamento da US2 (botão de consentimento Web/Telegram, `consent-status`,
-> `consent-terms/impact`, `ConsentParityScriptIT`, `AuditEventCoverageIT`) + `toString` de `ConsentState`/`TermImpact`.
+> **Branch** `feat/007-privacy-retention-operations`. Commits: setup/fundação, US1, US2 (fechada em `a37b6d9`), US3 (`0064a3c`).
+> Suítes verificadas antes do commit da US2: backend 977 testes, frontend 457, e2e 114, todos verdes.
 >
-> **Estado**: Setup, Fundação, US1, US2 (T053–T079) e US3 (T080–T094) implementadas e marcadas `[x]`. US4 (T095+), US5, US6 e o
-> fechamento (T130–T136) **não começaram**.
+> **Estado**: Setup, Fundação, US1, US2 (T053–T079) e US3 (T080–T094) prontas. **US4 em andamento**: T095 (teste do domínio) e
+> T104 (`ErasureRequest`, `ErasureStatus`, `ErasureScope`, `ErasureConfirmation`, `ErasedStudent` + 3 códigos de erro no
+> `ErrorCode`) prontos. Falta o resto da US4 (T096–T103, T105–T109), US5, US6 e o fechamento (T130–T136).
 >
-> **Próximo passo, nesta ordem**:
-> 1. Rodar a suíte completa do backend (`sh infra/scripts/local.sh tests backend`); a última rodada parou em
->    `InboundPersonalDataToStringTest` (já corrigido, **não reverificado**) e a rodada seguinte foi interrompida. Conferir os
->    resultados pelos XML de `backend/application/target/{surefire,failsafe}-reports` (o filtro do wrapper chegou a dizer
->    "passou" com `exit=1`); relatórios antigos podem estar misturados, pois não consegui apagá-los.
-> 2. Rodar `tests frontend` completo (lint, typecheck, vitest) e `tests e2e` — **nenhum dos dois foi rodado depois das mudanças da
->    US2** (só os arquivos `MyStudentDetailScreen`, `LessonRegistration`, `ConsentScreens`, que passaram). Nunca junto do backend
->    (derruba o `postgres-test`).
-> 3. Commitar (mensagem em português, com a linha `Co-Authored-By`) e seguir para a **US4**.
+> **Próximo passo**: T105 (porta `ErasureRequestRepository` e métodos de remoção/`erase` nos repositórios, com dublês), depois
+> os testes de caso de uso T096–T098, os casos de uso (T106), os adaptadores (T107) e o controller (T108). Os 3 códigos novos
+> ainda precisam entrar no catálogo `messages_pt_BR.properties` e no `ErrorHandlerController` (T108).
 >
 > **Armadilhas**: a V17 foi editada várias vezes; quem tiver banco antigo faz `docker compose -f infra/compose.test.yaml down -v`.
 > Heredoc/perl longos quebram no shell: use Write/Edit ou scripts `.mjs`. Guardião de idioma reprova literais como "falha" em
@@ -260,7 +254,7 @@ valores no banco, no armazenamento, nas telas, no bot, nos logs e na trilha: zer
 
 ### Testes da US4 (escrever primeiro; devem falhar)
 
-- [ ] T095 [P] [US4] Teste de unidade do domínio em `CORE_T/domain/privacy/ErasureRequestTest.java`: transições `RECEIVED → IN_PROGRESS → COMPLETED`, prévia emite token novo e invalida o anterior, validade de 10 min, palavra exatamente `ELIMINAR`, protocolo `^[A-Za-z0-9./-]{1,40}$`, `requesterName` nulo após concluir, um pedido aberto por aluno.
+- [x] T095 [P] [US4] Teste de unidade do domínio em `CORE_T/domain/privacy/ErasureRequestTest.java`: transições `RECEIVED → IN_PROGRESS → COMPLETED`, prévia emite token novo e invalida o anterior, validade de 10 min, palavra exatamente `ELIMINAR`, protocolo `^[A-Za-z0-9./-]{1,40}$`, `requesterName` nulo após concluir, um pedido aberto por aluno.
 - [ ] T096 [P] [US4] Testes de unidade em `CORE_T/usecase/privacy/`: `RegisterErasureRequestUseCaseTest.java` (só administrador; aluno eliminado → `STUDENT_ALREADY_ERASED`; aberto → `ERASURE_ALREADY_OPEN`), `PreviewErasureUseCaseTest.java` (alcance por situação, PDFs, professores, consentimentos; token como HMAC), `ConfirmErasureUseCaseTest.java` (token vencido/usado → `CONFIRMATION_EXPIRED`; numa transação: anonimiza aluno, cancela em aberto e trabalhos, remove fonte, conteúdo de todas as versões e marca PDFs de **todos** os relatórios de **todos** os professores, inclusive aprovados; remove associações e `channel_document`; limpa `payload` de `channel_action` finalizadas; apaga o nome de quem consentiu; grava `erased_student`; eventos `ERASURE_CONFIRM`; depois do commit remove arquivos e conclui com `ERASURE_COMPLETED` e `item_count`; falha de arquivo → `IN_PROGRESS` + `STORAGE_FAILED`; repetir conclui), `GetErasureReceiptUseCaseTest.java` (só `COMPLETED`, sem dado do aluno).
 - [ ] T097 [P] [US4] Teste de unidade em `CORE_T/usecase/registry/ErasedStudentVisibilityTest.java`: `findVisible`, buscas, listas, histórico e "Meus alunos" não retornam aluno eliminado; CPF antigo aceito em novo cadastro (FR-024).
 - [ ] T098 [P] [US4] Teste de unidade em `CORE_T/service/JobProcessorErasureTest.java`: resultado de IA que chega após a eliminação é descartado (aluno `erased_at` preenchido / trabalho cancelado / `lock_version`), nada é gravado.
@@ -272,7 +266,7 @@ valores no banco, no armazenamento, nas telas, no bot, nos logs e na trilha: zer
 
 ### Implementação da US4
 
-- [ ] T104 [P] [US4] Criar `CORE/domain/privacy/ErasureRequest.java`, `ErasureStatus.java`, `ErasureScope.java`, `ErasureConfirmation.java`, `ErasedStudent.java` (passa T095).
+- [x] T104 [P] [US4] Criar `CORE/domain/privacy/ErasureRequest.java`, `ErasureStatus.java`, `ErasureScope.java`, `ErasureConfirmation.java`, `ErasedStudent.java` (passa T095).
 - [ ] T105 [P] [US4] Criar `CORE/port/ErasureRequestRepository.java`; acrescentar `erase`, `findAllByStudent` e remoções por aluno/relatório a `StudentRepository`, `AssignmentRepository`, `ChannelDocumentRepository`, `ChannelActionRepository`, `ConsentRepository` e aos repositórios de relatório; dublês em `CORE_T/doubles/`.
 - [ ] T106 [US4] Implementar `CORE/usecase/privacy/RegisterErasureRequestUseCase.java`, `PreviewErasureUseCase.java`, `ConfirmErasureUseCase.java` (reaproveitando as remoções da US3), `GetErasureReceiptUseCase.java`, `ListErasureRequestsUseCase.java`; filtrar eliminados no `StudentAccessService` e nas consultas; descarte tardio no `JobProcessorService`/`SemesterProcessorService` (passam T096, T097, T098).
 - [ ] T107 [US4] Implementar os adaptadores em `APP/outbound/persistence/` (`ErasureRequestRepositoryAdapter.java`, `erase` no adaptador de aluno com colunas a `NULL`, consultas com `erased_at IS NULL`, limpeza de `payload` da outbox) e permitir que `RunRetentionUseCase` conclua remoções de arquivo pendentes de eliminação (`ERASURE_CONFIRM` para o ator `RETENTION`).
