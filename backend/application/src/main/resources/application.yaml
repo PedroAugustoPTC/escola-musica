@@ -140,15 +140,6 @@ reports:
       name: ${ADMIN_BOOTSTRAP_NAME:}
       email: ${ADMIN_BOOTSTRAP_EMAIL:}
       password: ${ADMIN_BOOTSTRAP_PASSWORD:}
-
----
-spring:
-  config:
-    activate:
-      on-profile: seed
-  main:
-    web-application-type: none
-    banner-mode: "off"
   # Privacidade, retenção e operação (feature 007). Os valores chegam BRUTOS (texto): ausente, zero, negativo ou inválido
   # vale o padrão do núcleo e sobe um aviso citando a variável (nunca o valor). Contrato: specs/007-.../contracts/configuration.md.
   retention:
@@ -173,3 +164,12 @@ spring:
   privacy:
     officer-name: ${PRIVACY_OFFICER_NAME:}
     officer-contact: ${PRIVACY_OFFICER_CONTACT:}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: seed
+  main:
+    web-application-type: none
+    banner-mode: "off"

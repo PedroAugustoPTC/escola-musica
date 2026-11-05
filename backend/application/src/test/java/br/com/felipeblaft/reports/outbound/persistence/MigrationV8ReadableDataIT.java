@@ -242,6 +242,27 @@ class MigrationV8ReadableDataIT {
                 .target("8")
                 .load()
                 .migrate();
+
+        // as entidades atuais leem colunas de retenção da V17; aqui só interessam os dados da V8
+        for (String table : new String[] {"lesson_report", "semester_report"}) {
+            update(
+                    "alter table "
+                            + SCHEMA
+                            + "."
+                            + table
+                            + " add column source_removed_at timestamptz,"
+                            + " add column anonymized_at timestamptz");
+        }
+        update(
+                "alter table "
+                        + SCHEMA
+                        + ".report_interaction add column text_removed_at timestamptz");
+        update("alter table " + SCHEMA + ".report_version add column content_removed_at timestamptz");
+        update(
+                "alter table "
+                        + SCHEMA
+                        + ".pdf_document add column content_removed_at timestamptz,"
+                        + " add column file_removed_at timestamptz");
     }
 
     @Test
