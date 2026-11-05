@@ -28,7 +28,7 @@ Ações de botão em inglês (Princípio VI); textos em português, no catálogo
 
 ## Consentimento fora do cadastro
 
-A mensagem de bloqueio (abaixo) traz o botão `consent:record:{studentId}`, que abre os passos C2–C5 (com C1 só para
+A mensagem de bloqueio (abaixo) traz o botão `consent-record` (argumento: o `studentId`), que abre os passos C2–C5 (com C1 só para
 mostrar o termo) e chama `RecordConsentUseCase` para o próprio aluno do professor (escopo da 005).
 
 ## Bloqueio por falta de consentimento (FR-034)

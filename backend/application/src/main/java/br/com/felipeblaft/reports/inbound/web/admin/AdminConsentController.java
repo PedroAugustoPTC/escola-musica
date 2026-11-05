@@ -140,6 +140,14 @@ public class AdminConsentController {
                                 .toList()));
     }
 
+    @GetMapping("/consent-terms/impact")
+    public ResponseEntity<AdminConsentDtos.TermImpact> termImpact(
+            @AuthenticationPrincipal AuthenticatedAdministrator admin) {
+        return noStore(
+                ResponseEntity.ok(
+                        new AdminConsentDtos.TermImpact(pending.countValid(admin.actor()))));
+    }
+
     @PostMapping("/consent-terms")
     public ResponseEntity<ConsentTerm> publishTerm(
             @AuthenticationPrincipal AuthenticatedAdministrator admin,

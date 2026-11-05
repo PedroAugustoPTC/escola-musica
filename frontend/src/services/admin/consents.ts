@@ -106,3 +106,13 @@ export function usePublishConsentTerm() {
     onSuccess: refresh,
   });
 }
+
+/** Quantos alunos menores ficam pendentes se um termo que exige novo consentimento for publicado. */
+export function useConsentTermImpact(enabled: boolean) {
+  return useQuery<{ studentsAffected: number }>({
+    queryKey: [...CONSENT_TERMS_KEY, 'impact'],
+    queryFn: ({ signal }) => api.get<{ studentsAffected: number }>('/admin/consent-terms/impact', signal),
+    enabled,
+    gcTime: 0,
+  });
+}

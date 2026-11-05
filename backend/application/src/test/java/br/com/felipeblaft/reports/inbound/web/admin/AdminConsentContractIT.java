@@ -179,6 +179,16 @@ class AdminConsentContractIT extends AdminWebBase {
     }
 
     @Test
+    void termImpactCountsTheStudentsWhoWouldBecomePending() throws Exception {
+        given(listPendingConsents.countValid(any())).willReturn(7);
+
+        mvc.perform(get(BASE + "/consent-terms/impact").cookie(adminCookie(ADMIN_TOKEN)))
+                .andExpect(status().isOk())
+                .andExpect(followsPrivacyContract())
+                .andExpect(jsonPath("$.studentsAffected").value(7));
+    }
+
+    @Test
     void termsAreListedNewestFirstWithTheCurrentOneMarkedAndPublishedWith201() throws Exception {
         ConsentTermVersion second = term(2, true);
         ConsentTermVersion first = term(1, false);

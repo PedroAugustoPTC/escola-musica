@@ -84,6 +84,28 @@ public class TelegramPresenter {
                 Keyboard.NONE);
     }
 
+    /**
+     * Aviso de bloqueio por falta de consentimento (FR-034), com o botão que abre o registro do
+     * consentimento do aluno. Sem o aluno, só o texto.
+     */
+    public Message consentBlocked(long chatId, String studentId) {
+        Message text = error(chatId, ErrorCode.CONSENT_REQUIRED, Map.of());
+        if (studentId == null || !CallbackDataCodec.fits("consent-record", studentId)) {
+            return text;
+        }
+        return new Message(
+                chatId,
+                text.text(),
+                new Keyboard(
+                        List.of(
+                                List.of(
+                                        button(
+                                                "CONSENT_RECORD_BUTTON",
+                                                Map.of(),
+                                                "consent-record",
+                                                studentId)))));
+    }
+
     public Button button(String labelCode, String action) {
         return new Button(label(labelCode), CallbackDataCodec.encode(action));
     }

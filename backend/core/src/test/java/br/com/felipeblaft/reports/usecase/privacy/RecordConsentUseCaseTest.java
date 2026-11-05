@@ -122,6 +122,26 @@ class RecordConsentUseCaseTest {
     }
 
     @Test
+    void statusOfFollowsTheSameScopeAndIsEmptyForAdults() {
+        c.term(1, false);
+        Student minor = c.minor("Matteo Mafra", clara);
+        Student adult = c.adult("Adult Souza", clara);
+
+        assertThat(c.record.statusOf(ActorFixtures.teacherWeb(clara.id()), minor.id(), "req-1"))
+                .contains(ConsentStatus.MISSING);
+        c.record.run(ActorFixtures.teacherWeb(clara.id()), command(minor));
+        assertThat(c.record.statusOf(ActorFixtures.teacherWeb(clara.id()), minor.id(), "req-2"))
+                .contains(ConsentStatus.VALID);
+        assertThat(c.record.statusOf(ActorFixtures.teacherWeb(clara.id()), adult.id(), "req-3"))
+                .isEmpty();
+        assertThatThrownBy(
+                        () ->
+                                c.record.statusOf(
+                                        ActorFixtures.teacherWeb(bruno.id()), minor.id(), "req-4"))
+                .satisfies(error -> assertThat(codeOf(error)).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND));
+    }
+
+    @Test
     void everyNewRecordKeepsThePreviousOneAsHistory() {
         c.term(1, false);
         Student student = c.minor("Matteo Mafra", clara);

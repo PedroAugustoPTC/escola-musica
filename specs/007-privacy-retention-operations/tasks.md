@@ -5,6 +5,33 @@ description: "Tarefas da feature 007 — privacidade, retenção e operação (L
 
 # Tasks: Privacidade, retenção e operação (LGPD)
 
+> ## CHECKPOINT (2026-11-05, sessão interrompida pelo usuário)
+>
+> **Branch** `feat/007-privacy-retention-operations`. Commits: setup/fundação, US1, US2 (parcial), US3 (`0064a3c`).
+> **Há ~40 arquivos NÃO commitados**: fechamento da US2 (botão de consentimento Web/Telegram, `consent-status`,
+> `consent-terms/impact`, `ConsentParityScriptIT`, `AuditEventCoverageIT`) + `toString` de `ConsentState`/`TermImpact`.
+>
+> **Estado**: Setup, Fundação, US1, US2 (T053–T079) e US3 (T080–T094) implementadas e marcadas `[x]`. US4 (T095+), US5, US6 e o
+> fechamento (T130–T136) **não começaram**.
+>
+> **Próximo passo, nesta ordem**:
+> 1. Rodar a suíte completa do backend (`sh infra/scripts/local.sh tests backend`); a última rodada parou em
+>    `InboundPersonalDataToStringTest` (já corrigido, **não reverificado**) e a rodada seguinte foi interrompida. Conferir os
+>    resultados pelos XML de `backend/application/target/{surefire,failsafe}-reports` (o filtro do wrapper chegou a dizer
+>    "passou" com `exit=1`); relatórios antigos podem estar misturados, pois não consegui apagá-los.
+> 2. Rodar `tests frontend` completo (lint, typecheck, vitest) e `tests e2e` — **nenhum dos dois foi rodado depois das mudanças da
+>    US2** (só os arquivos `MyStudentDetailScreen`, `LessonRegistration`, `ConsentScreens`, que passaram). Nunca junto do backend
+>    (derruba o `postgres-test`).
+> 3. Commitar (mensagem em português, com a linha `Co-Authored-By`) e seguir para a **US4**.
+>
+> **Armadilhas**: a V17 foi editada várias vezes; quem tiver banco antigo faz `docker compose -f infra/compose.test.yaml down -v`.
+> Heredoc/perl longos quebram no shell: use Write/Edit ou scripts `.mjs`. Guardião de idioma reprova literais como "falha" em
+> testes. Records de borda precisam de `toString` sem dado pessoal. Não editar fonte enquanto o Maven compila.
+>
+> **Pendências menores**: contagem por tipo da retenção numa massa de demonstração (`us3-retention.md`); hash da cabeça da cadeia no
+> log da `RetentionTask`; tela de processamento sem atalho de consentimento; `OperationalAlertService` ainda é o provisório de log
+> (US5 troca por persistente).
+
 **Input**: `specs/007-privacy-retention-operations/` — [spec.md](./spec.md), [plan.md](./plan.md),
 [research.md](./research.md), [data-model.md](./data-model.md), [contracts/](./contracts/), [quickstart.md](./quickstart.md)
 
@@ -162,12 +189,12 @@ enviar áudio nos dois canais (bloqueado, zero chamadas de IA), registrar de nov
 - [x] T057 [P] [US2] Teste de unidade de `ConsentGuardService` em `CORE_T/service/ConsentGuardServiceTest.java` e dos casos de uso que chamam IA (`RegisterLessonByAudioUseCase`, `AnswerQuestionsUseCase`, `RequestLessonReportChangeUseCase`, `RetryLessonReportUseCase`, `GenerateSemesterReportUseCase`, `RequestSemesterReportChangeUseCase`): sem consentimento → `CONSENT_REQUIRED`, dublês de `TranscriptionPort`/`LlmPort` com **zero** chamadas, áudio temporário fechado, evento `CONSENT_BLOCKED_AI`; aprovar e cancelar continuam permitidos.
 - [x] T058 [P] [US2] Teste de unidade da segunda barreira em `CORE_T/service/JobProcessorConsentTest.java` e `SemesterProcessorConsentTest.java`: revogação entre enfileirar e processar → trabalho encerra com `CONSENT_REQUIRED` sem chamar provedor.
 - [x] T059 [P] [US2] Regra ArchUnit em `CORE_T/architecture/ArchitectureRulesTest.java`: todo caso de uso que alcança `TranscriptionPort` ou `LlmPort` (direto ou via `JobProcessorService`/`SemesterProcessorService`) depende de `ConsentGuardService`.
-- [x] T060 [P] [US2] Teste de contrato `APP_T/inbound/web/admin/AdminConsentContractIT.java`: rotas de consentimento, revogação, pendências e termos de `api-privacy-operations.openapi.yaml`; e estender `APP_T/inbound/web/admin/AdminStudentContractIT.java` e `APP_T/inbound/web/MyStudentContractIT.java` com `consent` (`ConsentInput`) no cadastro e na edição, `POST /my-students/{id}/consents`, `GET /my-students/consent-term` e o erro `CONSENT_REQUIRED` nas rotas de gravação de aula e semestral. **(parcial: ver evidence/us2-consent.md)**
-- [ ] T061 [P] [US2] Teste de paridade `APP_T/parity/ConsentParityScriptIT.java` (Web ≡ Telegram): cadastro de menor sem consentimento recusado; com consentimento aceito; bloqueio após revogação com o mesmo código e o mesmo evento; registro pelo botão do aviso; aluno adulto sem bloqueio (SC-005). **(pendente: roteiro completo; ver evidence/us2-consent.md)**
+- [x] T060 [P] [US2] Teste de contrato `APP_T/inbound/web/admin/AdminConsentContractIT.java`: rotas de consentimento, revogação, pendências e termos de `api-privacy-operations.openapi.yaml`; e estender `APP_T/inbound/web/admin/AdminStudentContractIT.java` e `APP_T/inbound/web/MyStudentContractIT.java` com `consent` (`ConsentInput`) no cadastro e na edição, `POST /my-students/{id}/consents`, `GET /my-students/consent-term` e o erro `CONSENT_REQUIRED` nas rotas de gravação de aula e semestral.
+- [x] T061 [P] [US2] Teste de paridade `APP_T/parity/ConsentParityScriptIT.java` (Web ≡ Telegram): cadastro de menor sem consentimento recusado; com consentimento aceito; bloqueio após revogação com o mesmo código e o mesmo evento; registro pelo botão do aviso; aluno adulto sem bloqueio (SC-005).
 - [x] T062 [P] [US2] Teste do cadastro guiado em `APP_T/inbound/telegram/TelegramConsentFlowIT.java`: passos C1–C5 de [telegram-consent.md](./contracts/telegram-consent.md), só para menor; `consent:no` descarta o rascunho; termo publicado no meio → reapresenta C1; resumo final sem o nome de quem consentiu; data futura repete a pergunta.
 - [x] T063 [P] [US2] Teste `APP_T/privacy/ConsentNoAiCallIT.java` (SC-005): com dublês que contam chamadas, percorre todas as entradas de IA nos dois canais para menor sem consentimento e exige zero chamadas e zero linhas em `ai_call`; varredura `PersonalDataSweep` com o aluno canário e o nome do responsável canário como quem consentiu (zero achados em logs, `ai_call`, trilha).
 - [x] T064 [P] [US2] Teste do comando em `APP_T/inbound/seed/ConsentLoadCommandIT.java`: CSV de [consent-load.md](./contracts/consent-load.md) com linhas válidas, inválidas e repetidas; resumo só com número da linha e código; caminho dentro de `/work` recusado; evento `CONSENT_RECORD` com `INITIAL_LOAD`; contagem final de pendentes; nada do arquivo em log.
-- [x] T065 [P] [US2] Testes de tela: `FE_T/pages/MyStudentFormScreen.test.tsx` (seção obrigatória quando menor, termo vigente, erros por campo), `FE_T/pages/MyStudentDetailScreen.test.tsx` (situação e botão), `FE_T/pages/LessonRegistration.test.tsx` (aviso `CONSENT_REQUIRED` sem envio), `FE_T/pages/admin/ConsentScreens.test.tsx` (seção no detalhe do aluno, A16b, A16c, A16d com confirmação que mostra quantos ficarão pendentes). **(parcial: ver evidence/us2-consent.md)**
+- [x] T065 [P] [US2] Testes de tela: `FE_T/pages/MyStudentFormScreen.test.tsx` (seção obrigatória quando menor, termo vigente, erros por campo), `FE_T/pages/MyStudentDetailScreen.test.tsx` (situação e botão), `FE_T/pages/LessonRegistration.test.tsx` (aviso `CONSENT_REQUIRED` sem envio), `FE_T/pages/admin/ConsentScreens.test.tsx` (seção no detalhe do aluno, A16b, A16c, A16d com confirmação que mostra quantos ficarão pendentes).
 
 ### Implementação da US2
 
@@ -179,10 +206,10 @@ enviar áudio nos dois canais (bloqueado, zero chamadas de IA), registrar de nov
 - [x] T071 [US2] Implementar `APP/outbound/persistence/ConsentRepositoryAdapter.java` e `ConsentTermRepositoryAdapter.java` (+ entidades JPA `*Entity`), com `ListPendingConsents` por consulta no banco.
 - [x] T072 [US2] Implementar `APP/inbound/web/admin/AdminConsentController.java` (+ `AdminConsentDtos.java`) e estender `AdminStudentController`, `MyStudentController` e o controlador de "Meus alunos" com `consent`, `POST /my-students/{id}/consents` e `GET /my-students/consent-term`; mapear `CONSENT_REQUIRED` no `ErrorHandlerController` (passa T060).
 - [x] T073 [US2] Emendar `SPEC005/contracts/api-administration.openapi.yaml` e `SPEC005/contracts/telegram-student-registry.md` com `> **Nota (feature 007)**` e a referência a `ConsentInput`/[telegram-consent.md](./contracts/telegram-consent.md) (contrato antes do código, regra de `specs/CLAUDE.md`).
-- [x] T074 [US2] Implementar os passos C1–C5, o botão `consent:record:{studentId}` e a mensagem de bloqueio em `APP/inbound/telegram/TelegramStudentRegistryFlow.java` e no fluxo de registro de aula, guardando o consentimento no rascunho existente (`student_registration_draft`, coluna `jsonb` nova se preciso na `V17`) (passa T061, T062). **(parcial: ver evidence/us2-consent.md)**
+- [x] T074 [US2] Implementar os passos C1–C5, o botão `consent:record:{studentId}` e a mensagem de bloqueio em `APP/inbound/telegram/TelegramStudentRegistryFlow.java` e no fluxo de registro de aula, guardando o consentimento no rascunho existente (`student_registration_draft`, coluna `jsonb` nova se preciso na `V17`) (passa T061, T062).
 - [x] T075 [US2] Implementar `APP/inbound/seed/ConsentLoadCommand.java` (perfil `seed`) e o subcomando `consent-load` em `infra/scripts/local.sh` e `infra/scripts/deploy.sh`; documentar em `infra/README.md` o passo de carga e de apagar o arquivo da VPS (passa T064).
 - [x] T076 [P] [US2] Textos `telegram.consent.*`, `consent.*` e do bloqueio em `RES/messages/messages_pt_BR.properties` e `FE/messages/` (mesmo conteúdo nos dois canais, sem idade nem motivo).
-- [x] T077 [US2] Implementar no frontend: seção de consentimento em `FE/pages/MyStudentFormScreen.tsx` e `FE/pages/admin/StudentFormScreen.tsx`; situação em `FE/pages/MyStudentDetailScreen.tsx`; seção A16 em `FE/pages/admin/StudentDetailScreen.tsx`; `FE/pages/admin/PendingConsentsScreen.tsx`, `FE/pages/admin/ConsentTermsScreen.tsx`; aviso `CONSENT_REQUIRED` em `RecordingScreen`, `QuestionsScreen`, `ReviewScreen`, `SemesterScreen`; `FE/services/` com as chamadas (passa T065). **(parcial: ver evidence/us2-consent.md)**
+- [x] T077 [US2] Implementar no frontend: seção de consentimento em `FE/pages/MyStudentFormScreen.tsx` e `FE/pages/admin/StudentFormScreen.tsx`; situação em `FE/pages/MyStudentDetailScreen.tsx`; seção A16 em `FE/pages/admin/StudentDetailScreen.tsx`; `FE/pages/admin/PendingConsentsScreen.tsx`, `FE/pages/admin/ConsentTermsScreen.tsx`; aviso `CONSENT_REQUIRED` em `RecordingScreen`, `QuestionsScreen`, `ReviewScreen`, `SemesterScreen`; `FE/services/` com as chamadas (passa T065).
 - [x] T078 [P] [US2] E2E em `FE_T/e2e/consent.spec.ts` e `FE_T/e2e/admin-consent.a11y.spec.ts` (390 e 1440 px, dois temas).
 - [x] T079 [US2] Registrar o termo inicial na massa local (`demo-data`) e no `seed` de exemplo (`infra/seed/`, só dados fictícios); rodar as suítes; T061, T063 verdes; registrar em `SPEC/evidence/us2-consent.md`.
 

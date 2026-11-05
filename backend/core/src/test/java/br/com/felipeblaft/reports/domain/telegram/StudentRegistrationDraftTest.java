@@ -644,4 +644,22 @@ class StudentRegistrationDraftTest {
                                         T0))
                 .isInstanceOf(NullPointerException.class);
     }
+
+    @Test
+    void consentKindAsksOnlyForTheConsentAndIsReadyOnceItIsComplete() {
+        StudentRegistrationDraft draft =
+                StudentRegistrationDraft.start(link, Kind.CONSENT, UUID.randomUUID(), T0, VALIDITY);
+
+        assertThat(Kind.CONSENT.targetsExistingStudent()).isTrue();
+        assertThat(Kind.CONSENT.confirmationOnly()).isFalse();
+        assertThat(draft.nextField(TODAY)).isEqualTo(Field.CONSENT);
+        assertThat(draft.readyToConfirm(TODAY)).isFalse();
+
+        ConsentDraft complete =
+                new ConsentDraft(1, "Maria Souza", "MOTHER", "2026-09-21", "DIGITAL");
+        StudentRegistrationDraft done = draft.withConsent(complete, T0, VALIDITY);
+
+        assertThat(done.nextField(TODAY)).isNull();
+        assertThat(done.readyToConfirm(TODAY)).isTrue();
+    }
 }

@@ -2,23 +2,34 @@ package br.com.felipeblaft.reports.privacy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+
+import br.com.felipeblaft.reports.domain.access.Actor;
 import br.com.felipeblaft.reports.domain.registry.Student;
 import br.com.felipeblaft.reports.domain.registry.Teacher;
+import br.com.felipeblaft.reports.support.AdjustableClock;
+import br.com.felipeblaft.reports.support.AudioNormalizationTest;
 import br.com.felipeblaft.reports.support.ScenarioIT;
 import br.com.felipeblaft.reports.support.SchoolHistoryBase;
+import br.com.felipeblaft.reports.usecase.privacy.RunRetentionUseCase;
 import jakarta.servlet.http.Cookie;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
+import org.springframework.mock.web.MockMultipartFile;
 
 /**
  * Cobertura da trilha (SC-002): a lista de {@code contracts/audit-events.md} é a fonte. Toda
@@ -28,6 +39,8 @@ import org.springframework.http.HttpMethod;
  * papel, alvo e resultado esperados.
  */
 class AuditEventCoverageIT extends SchoolHistoryBase {
+
+    @Autowired RunRetentionUseCase retention;
 
     private static final Path TABLE =
             Path.of("..", "..", "specs", "007-privacy-retention-operations", "contracts", "audit-events.md");
@@ -94,17 +107,6 @@ class AuditEventCoverageIT extends SchoolHistoryBase {
         Map<String, String> pending = new LinkedHashMap<>();
         for (String operation :
                 List.of(
-                        "CONSENT_RECORD",
-                        "CONSENT_REVOKE",
-                        "CONSENT_TERM_PUBLISH",
-                        "CONSENT_BLOCKED_AI")) {
-            pending.put(operation, "US2");
-        }
-        for (String operation : List.of("RETENTION_RUN", "AUDIT_TRAIL_PURGED")) {
-            pending.put(operation, "US3");
-        }
-        for (String operation :
-                List.of(
                         "ERASURE_REQUEST_REGISTER",
                         "ERASURE_PREVIEW",
                         "ERASURE_CONFIRM",
@@ -152,6 +154,15 @@ class AuditEventCoverageIT extends SchoolHistoryBase {
         Set<String> known = new LinkedHashSet<>(COVERED_ELSEWHERE.keySet());
         known.addAll(DEFERRED.keySet());
         known.addAll(List.of("HISTORY_QUERY", "REPORT_DOCUMENT_SENT", "AUDIT_TRAIL_QUERY", "AUDIT_TRAIL_VERIFY"));
+        // cenários executados neste teste: consentimento (US2) e retenção (US3)
+        known.addAll(
+                List.of(
+                        "CONSENT_RECORD",
+                        "CONSENT_REVOKE",
+                        "CONSENT_TERM_PUBLISH",
+                        "CONSENT_BLOCKED_AI",
+                        "RETENTION_RUN",
+                        "AUDIT_TRAIL_PURGED"));
 
         assertThat(table).as("operação da tabela sem cenário").isSubsetOf(known);
         assertThat(known).as("cenário de operação que não está na tabela").isSubsetOf(table);
@@ -194,6 +205,123 @@ class AuditEventCoverageIT extends SchoolHistoryBase {
         assertThat(verify.get("author_role")).isEqualTo("ADMINISTRATOR");
         assertThat(verify.get("target_type")).isEqualTo("AUDIT_TRAIL");
         assertThat(verify.get("item_count")).isNotNull();
+    }
+
+    @Test
+    void consentOperationsLeaveExactlyOneEventEachOnTheWeb() throws Exception {
+        Cookie administrator = signInNewAdministrator();
+        Teacher clara = scenario.clara();
+        Student minor = scenario.studentWithoutConsent(clara, "Matteo Ferreira", "Piano");
+        Cookie teacher = signInTeacher(ScenarioIT.CODE_CLARA);
+        clearAuthorship();
+
+        assertThat(
+                        call(
+                                        HttpMethod.POST,
+                                        ADMIN + "/consent-terms",
+                                        administrator,
+                                        Map.of(
+                                                "publishedOn", "2026-09-01",
+                                                "text", "Institutional text",
+                                                "requiresNewConsent", false))
+                                .getStatus())
+                .isEqualTo(201);
+        // sem consentimento: a IA é bloqueada para o menor
+        assertThat(
+                        mvc.perform(
+                                        multipart(
+                                                        "/api/v1/students/{id}/lesson-reports",
+                                                        minor.id())
+                                                .file(
+                                                        new MockMultipartFile(
+                                                                "audio",
+                                                                "lesson.webm",
+                                                                "audio/webm",
+                                                                AudioNormalizationTest
+                                                                        .AUDIO_WITH_SPEECH))
+                                                .cookie(teacher)
+                                                .with(csrf().asHeader()))
+                                .andReturn()
+                                .getResponse()
+                                .getStatus())
+                .isEqualTo(409);
+        assertThat(
+                        call(
+                                        HttpMethod.POST,
+                                        ADMIN + "/students/" + minor.id() + "/consents",
+                                        administrator,
+                                        Map.of(
+                                                "consentingName", "Maria Responsável",
+                                                "relationship", "MOTHER",
+                                                "consentedOn", "2026-09-01",
+                                                "termVersion", 1,
+                                                "collectionMethod", "DIGITAL"))
+                                .getStatus())
+                .isEqualTo(201);
+        UUID consent =
+                jdbc.queryForObject(
+                        "select id from student_consent where student_id = ?",
+                        UUID.class,
+                        minor.id());
+        assertThat(
+                        call(
+                                        HttpMethod.POST,
+                                        ADMIN + "/consents/" + consent + "/revocation",
+                                        administrator,
+                                        Map.of("revokedOn", "2026-09-10", "revokedBy", "MOTHER"))
+                                .getStatus())
+                .isEqualTo(200);
+
+        Map<String, Object> publish = onlyEvent("CONSENT_TERM_PUBLISH");
+        assertThat(publish.get("origin")).isEqualTo("WEB");
+        assertThat(publish.get("author_role")).isEqualTo("ADMINISTRATOR");
+        assertThat(publish.get("target_type")).isEqualTo("CONSENT_TERM");
+        assertThat(publish.get("result")).isEqualTo("SUCCESS");
+
+        Map<String, Object> blocked = onlyEvent("CONSENT_BLOCKED_AI");
+        assertThat(blocked.get("origin")).isEqualTo("WEB");
+        assertThat(blocked.get("author_role")).isEqualTo("TEACHER");
+        assertThat(blocked.get("target_type")).isEqualTo("STUDENT");
+        assertThat(blocked.get("target_id")).isEqualTo(minor.id());
+        assertThat(blocked.get("result")).isEqualTo("BLOCKED");
+        assertThat(blocked.get("error_code")).isEqualTo("CONSENT_REQUIRED");
+
+        Map<String, Object> recorded = onlyEvent("CONSENT_RECORD");
+        assertThat(recorded.get("origin")).isEqualTo("WEB");
+        assertThat(recorded.get("author_role")).isEqualTo("ADMINISTRATOR");
+        assertThat(recorded.get("target_type")).isEqualTo("CONSENT");
+        assertThat(recorded.get("result")).isEqualTo("SUCCESS");
+
+        Map<String, Object> revoked = onlyEvent("CONSENT_REVOKE");
+        assertThat(revoked.get("origin")).isEqualTo("WEB");
+        assertThat(revoked.get("author_role")).isEqualTo("ADMINISTRATOR");
+        assertThat(revoked.get("target_type")).isEqualTo("CONSENT");
+        assertThat(revoked.get("target_id")).isEqualTo(consent);
+        assertThat(revoked.get("result")).isEqualTo("SUCCESS");
+    }
+
+    @Test
+    void retentionRunAndTrailPurgeLeaveOneEventEachWithTheRetentionOrigin() throws Exception {
+        // um evento muito antigo, para o expurgo da trilha ter o que remover
+        clock.define(Instant.parse("2020-01-01T12:00:00Z"));
+        signInNewAdministrator();
+        clock.define(AdjustableClock.DEFAULT);
+
+        RunRetentionUseCase.Result result =
+                retention.run(Actor.retention(), UUID.randomUUID().toString());
+        assertThat(result.status().name()).isEqualTo("SUCCEEDED");
+
+        Map<String, Object> run = onlyEvent("RETENTION_RUN");
+        assertThat(run.get("origin")).isEqualTo("RETENTION");
+        assertThat(run.get("author_id")).isNull();
+        assertThat(run.get("target_type")).isEqualTo("RETENTION_RUN");
+        assertThat(run.get("result")).isEqualTo("SUCCESS");
+        assertThat(run.get("item_count")).isNotNull();
+
+        Map<String, Object> purge = onlyEvent("AUDIT_TRAIL_PURGED");
+        assertThat(purge.get("origin")).isEqualTo("RETENTION");
+        assertThat(purge.get("target_type")).isEqualTo("AUDIT_TRAIL");
+        assertThat(((Number) purge.get("item_count")).intValue()).isPositive();
     }
 
     @Test

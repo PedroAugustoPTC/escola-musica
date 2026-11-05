@@ -34,6 +34,24 @@ export function useRecordOwnConsent(studentId: string) {
     gcTime: 0,
     onSuccess: () => {
       void client.invalidateQueries({ queryKey: MY_STUDENTS_KEY });
+      void client.invalidateQueries({ queryKey: consentStatusKey(studentId) });
     },
+  });
+}
+
+/** Situação do consentimento exigido do aluno; `status` ausente quando ele não exige (maior de idade). */
+export interface ConsentState {
+  required: boolean;
+  status?: 'VALID' | 'REVOKED' | 'SUPERSEDED' | 'MISSING' | null;
+}
+
+export const consentStatusKey = (studentId: string) => ['consent-status', studentId] as const;
+
+export function useOwnConsentStatus(studentId: string | undefined) {
+  return useQuery<ConsentState>({
+    queryKey: consentStatusKey(studentId ?? ''),
+    queryFn: ({ signal }) => api.get<ConsentState>(`/my-students/${studentId}/consent-status`, signal),
+    enabled: Boolean(studentId),
+    retry: false,
   });
 }

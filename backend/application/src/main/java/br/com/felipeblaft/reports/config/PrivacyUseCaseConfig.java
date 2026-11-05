@@ -41,6 +41,7 @@ import br.com.felipeblaft.reports.usecase.privacy.PublishConsentTermUseCase;
 import br.com.felipeblaft.reports.usecase.privacy.RecordConsentUseCase;
 import br.com.felipeblaft.reports.usecase.privacy.RevokeConsentUseCase;
 import br.com.felipeblaft.reports.usecase.registry.CollectStudentRegistrationFieldUseCase;
+import br.com.felipeblaft.reports.usecase.registry.ConfirmStudentRegistrationUseCase;
 import br.com.felipeblaft.reports.usecase.semester.GenerateSemesterReportUseCase;
 import br.com.felipeblaft.reports.usecase.semester.RequestSemesterReportChangeUseCase;
 import org.slf4j.Logger;
@@ -178,9 +179,12 @@ public class PrivacyUseCaseConfig {
             RequestSemesterReportChangeUseCase changeSemester,
             JobProcessorService processor,
             CollectStudentRegistrationFieldUseCase collectRegistration,
+            ConfirmStudentRegistrationUseCase confirmRegistration,
+            RecordConsentUseCase recordConsent,
             ConsentTermRepository terms) {
         return () -> {
             collectRegistration.useConsentTerms(terms);
+            confirmRegistration.useConsentRecording(recordConsent);
             register.useConsentGuard(guard);
             answer.useConsentGuard(guard);
             change.useConsentGuard(guard);
@@ -197,8 +201,10 @@ public class PrivacyUseCaseConfig {
             StudentAccessService access,
             ConsentRecordingService recording,
             ConsentTermRepository terms,
-            AuthorshipService authorship) {
-        return new RecordConsentUseCase(authorization, access, recording, terms, authorship);
+            AuthorshipService authorship,
+            ConsentGuardService guard) {
+        return new RecordConsentUseCase(
+                authorization, access, recording, terms, authorship, guard);
     }
 
     @Bean

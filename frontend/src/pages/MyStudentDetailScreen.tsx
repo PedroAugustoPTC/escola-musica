@@ -8,11 +8,13 @@ import { Layout } from '../components/Layout';
 import { LoadingState } from '../components/LoadingState';
 import { SituationBadge } from '../components/student/SituationBadge';
 import { StudentForm } from '../components/student/StudentForm';
+import { ConsentRecordPanel } from '../components/student/ConsentRecordPanel';
 import { useTeacherConsentTerm } from '../components/student/useConsentTerm';
 import type { StudentFormFieldError } from '../components/student/studentFormTypes';
 import { buildStudentUpdate } from '../components/student/studentPayload';
 import { useBlockedCountdown } from '../components/student/useBlockedCountdown';
 import { msg } from '../messages/messages';
+import { useOwnConsentStatus } from '../services/consent';
 import {
   fieldErrorsOf,
   useChangeMyStudentSituation,
@@ -30,6 +32,8 @@ export function MyStudentDetailScreen() {
   const navigate = useNavigate();
   const consentTerm = useTeacherConsentTerm();
   const student = useMyStudent(studentId);
+  const consentStatus = useOwnConsentStatus(studentId);
+  const [showConsentPanel, setShowConsentPanel] = useState(false);
   const update = useUpdateMyStudent(studentId);
   const situation = useChangeMyStudentSituation(studentId);
   const countdown = useBlockedCountdown();
@@ -120,6 +124,37 @@ export function MyStudentDetailScreen() {
           }}
           onCancel={() => navigate('/my-students')}
         />
+        {consentStatus.data?.required ? (
+          <section className="card" aria-labelledby={`${guidanceId}-consent`}>
+            <h2 id={`${guidanceId}-consent`} className="section-label">
+              {msg('CONSENT_STATUS_LABEL')}
+            </h2>
+            <p>
+              <strong>
+                {consentStatus.data.status === 'VALID' ? msg('CONSENT_STATUS_VALID') : msg('CONSENT_STATUS_PENDING')}
+              </strong>
+            </p>
+            {consentStatus.data.status !== 'VALID' ? (
+              <>
+                <p className="support-text">{msg('CONSENT_STATUS_PENDING_HELP')}</p>
+                {showConsentPanel ? (
+                  <ConsentRecordPanel
+                    studentId={data.id}
+                    term={consentTerm}
+                    onRecorded={() => {
+                      setShowConsentPanel(false);
+                      setNotice(msg('CONSENT_RECORDED_NOTICE'));
+                    }}
+                  />
+                ) : (
+                  <Button icon="verified_user" onClick={() => setShowConsentPanel(true)}>
+                    {msg('CONSENT_RECORD_BUTTON')}
+                  </Button>
+                )}
+              </>
+            ) : null}
+          </section>
+        ) : null}
         <section className="card" aria-labelledby={`${guidanceId}-title`}>
           <h2 id={`${guidanceId}-title`} className="section-label">
             Situação do aluno

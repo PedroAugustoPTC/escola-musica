@@ -58,6 +58,19 @@ public class ListPendingConsentsUseCase {
 
     public PageResult<Pending> run(Actor actor, PageRequest page) {
         authorization.require(actor, Operation.CONSENT_PENDING_READ);
+        return PageResult.slice(statusOfMinors(actor, false), page);
+    }
+
+    /**
+     * Quantos alunos menores ativos têm consentimento válido hoje: são os que ficam pendentes se for
+     * publicado um termo que exige novo consentimento (mostrado na confirmação da publicação).
+     */
+    public int countValid(Actor actor) {
+        authorization.require(actor, Operation.CONSENT_PENDING_READ);
+        return statusOfMinors(actor, true).size();
+    }
+
+    private List<Pending> statusOfMinors(Actor actor, boolean valid) {
         LocalDate today = clock.todayInSchoolTimezone();
         List<Student> minors =
                 access.list(actor, StudentStatusFilter.ACTIVE).stream()
@@ -70,10 +83,10 @@ public class ListPendingConsentsUseCase {
         for (Student student : minors) {
             ConsentStatus status =
                     ConsentPolicy.status(history.getOrDefault(student.id(), List.of()), floor);
-            if (status != ConsentStatus.VALID) {
+            if ((status == ConsentStatus.VALID) == valid) {
                 pending.add(new Pending(student.id(), student.name(), status));
             }
         }
-        return PageResult.slice(pending, page);
+        return pending;
     }
 }

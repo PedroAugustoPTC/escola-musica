@@ -317,6 +317,26 @@ paths:
           content: { application/json: { schema: { $ref: "#/components/schemas/ConsentTerm" } } }
         "400": { $ref: "#/components/responses/ValidationFailed" }
 
+  /admin/consent-terms/impact:
+    get:
+      tags: [AdminConsent]
+      operationId: getConsentTermImpact
+      summary: Quantos alunos ficam pendentes se um termo que exige novo consentimento for publicado (CONSENT_PENDING_READ)
+      description: >
+        Alunos menores ativos com consentimento válido hoje. A confirmação da publicação mostra este número
+        antes de enviar o termo (FR-032).
+      security: [{ adminSession: [] }]
+      responses:
+        "200":
+          description: Quantidade.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [studentsAffected]
+                properties:
+                  studentsAffected: { type: integer, minimum: 0 }
+
   /my-students/consent-term:
     get:
       tags: [TeacherConsent]
@@ -328,6 +348,29 @@ paths:
           description: Versão vigente e contato do responsável pela LGPD.
           content: { application/json: { schema: { $ref: "#/components/schemas/ConsentTermSummary" } } }
         "401": { $ref: "#/components/responses/NotAuthenticated" }
+
+  /my-students/{studentId}/consent-status:
+    get:
+      tags: [TeacherConsent]
+      operationId: getConsentStatusOfOwnStudent
+      summary: Situação do consentimento do aluno do professor (CONSENT_RECORD, ALLOW_OWN_STUDENTS)
+      security: [{ teacherSession: [] }]
+      parameters: [{ $ref: "#/components/parameters/StudentId" }]
+      responses:
+        "200":
+          description: >
+            Aluno maior de idade não exige consentimento (`required` falso, `status` ausente). A resposta não leva
+            dado do responsável.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [required]
+                properties:
+                  required: { type: boolean }
+                  status: { type: [string, "null"], enum: [VALID, REVOKED, SUPERSEDED, MISSING, null] }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "404": { $ref: "#/components/responses/NotFound" }
 
   /my-students/{studentId}/consents:
     post:

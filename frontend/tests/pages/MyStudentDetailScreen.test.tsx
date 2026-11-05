@@ -331,6 +331,84 @@ describe('P03 Aluno', () => {
     ).not.toContain(TEST_CPF);
   });
 
+  it('pendente mostra a situação e o botão; registrado mostra só a situação; adulto não mostra a seção', async () => {
+    const id = MY_STUDENT_ACTIVE.id;
+    const status = `GET /api/v1/my-students/${id}/consent-status`;
+
+    const pending = renderAsTeacher(
+      routes,
+      `/my-students/${id}`,
+      detail(MY_STUDENT_ACTIVE, { [status]: { body: { required: true, status: 'MISSING' } } }),
+    );
+    await screen.findByText(msg('CONSENT_STATUS_PENDING'));
+    expect(screen.getByRole('button', { name: msg('CONSENT_RECORD_BUTTON') })).toBeInTheDocument();
+    pending.unmount();
+
+    const valid = renderAsTeacher(
+      routes,
+      `/my-students/${id}`,
+      detail(MY_STUDENT_ACTIVE, { [status]: { body: { required: true, status: 'VALID' } } }),
+    );
+    await screen.findByText(msg('CONSENT_STATUS_VALID'));
+    expect(screen.queryByRole('button', { name: msg('CONSENT_RECORD_BUTTON') })).not.toBeInTheDocument();
+    valid.unmount();
+
+    renderAsTeacher(
+      routes,
+      `/my-students/${id}`,
+      detail(MY_STUDENT_ACTIVE, { [status]: { body: { required: false } } }),
+    );
+    await screen.findByRole('heading', { level: 1, name: 'Olavo Torrente' });
+    expect(screen.queryByText(msg('CONSENT_STATUS_LABEL'))).not.toBeInTheDocument();
+  });
+
+  it('registrar o consentimento pelo botão envia o termo vigente e avisa o sucesso', async () => {
+    const user = userEvent.setup();
+    const id = MY_STUDENT_ACTIVE.id;
+    const api = renderAsTeacher(
+      routes,
+      `/my-students/${id}`,
+      detail(MY_STUDENT_ACTIVE, {
+        [`GET /api/v1/my-students/${id}/consent-status`]: { body: { required: true, status: 'MISSING' } },
+        'GET /api/v1/my-students/consent-term': {
+          body: {
+            number: 3,
+            publishedOn: '2026-09-01',
+            text: 'Institutional text',
+            privacyContact: { name: 'Officer', contact: 'officer@example.test' },
+          },
+        },
+        [`POST /api/v1/my-students/${id}/consents`]: {
+          status: 201,
+          body: { status: 'VALID', termVersion: 3, consentedOn: '2026-09-21' },
+        },
+      }),
+    );
+    await user.click(await screen.findByRole('button', { name: msg('CONSENT_RECORD_BUTTON') }));
+    const panel = within(screen.getByRole('form', { name: msg('CONSENT_RECORD_TITLE') }));
+    await user.type(panel.getByLabelText('Nome de quem consentiu'), 'Maria Guardian');
+    await user.selectOptions(panel.getByLabelText('Relação com o aluno'), 'MOTHER');
+    await user.selectOptions(panel.getByLabelText('Forma de coleta'), 'SIGNED_PAPER');
+    await user.click(panel.getByRole('button', { name: msg('CONSENT_RECORD_BUTTON') }));
+
+    expect(await screen.findByText(msg('CONSENT_RECORDED_NOTICE'))).toBeInTheDocument();
+    const post = api.calls.find((c) => c.method === 'POST')!;
+    expect(bodyOf(post)).toMatchObject({
+      consentingName: 'Maria Guardian',
+      relationship: 'MOTHER',
+      termVersion: 3,
+      collectionMethod: 'SIGNED_PAPER',
+    });
+    expect(
+      JSON.stringify(
+        api.client
+          .getMutationCache()
+          .getAll()
+          .map((m) => m.state.variables ?? null),
+      ),
+    ).not.toContain('Maria Guardian');
+  });
+
   it('gravação com sucesso também zera a mutação (o CPF não fica nas variáveis em memória)', async () => {
     const user = userEvent.setup();
     const api = renderAsTeacher(

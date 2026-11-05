@@ -52,7 +52,7 @@ public final class ConsentScenario {
             new ConsentGuardService(students, consents, terms, clock, authorship, context);
 
     public final RecordConsentUseCase record =
-            new RecordConsentUseCase(authorization, access, recording, terms, authorship);
+            new RecordConsentUseCase(authorization, access, recording, terms, authorship, guard);
     public final RevokeConsentUseCase revoke =
             new RevokeConsentUseCase(authorization, consents, terms, authorship, clock);
     public final PublishConsentTermUseCase publish =

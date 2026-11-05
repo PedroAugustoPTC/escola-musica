@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ConsentTermsScreen } from '../../../src/pages/admin/ConsentTermsScreen';
 import { PendingConsentsScreen } from '../../../src/pages/admin/PendingConsentsScreen';
@@ -93,6 +93,7 @@ describe('ConsentTermsScreen (A16d)', () => {
     let published: unknown = null;
     openTerms({
       [TERMS]: { body: [term(1, { current: true })] },
+      'GET /api/v1/admin/consent-terms/impact': { body: { studentsAffected: 3 } },
       [PUBLISH]: (_url, init) => {
         published = JSON.parse(init.body as string);
         return { status: 201, body: term(2, { current: true, requiresNewConsent: true }) };
@@ -104,6 +105,7 @@ describe('ConsentTermsScreen (A16d)', () => {
     await user.click(screen.getByRole('button', { name: 'Publicar versão' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('deixam de valer');
+    await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('3 alunos ficarão pendentes'));
     expect(published).toBeNull();
 
     await user.click(screen.getByRole('button', { name: 'Confirmar publicação' }));

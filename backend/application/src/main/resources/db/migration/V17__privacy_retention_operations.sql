@@ -358,6 +358,10 @@ CREATE INDEX ix_operational_alert_seen ON operational_alert (last_seen_at);
 
 -- Cadastro guiado do Telegram: o consentimento coletado fica no rascunho até a confirmação (sem nome em log).
 ALTER TABLE student_registration_draft ADD COLUMN consent jsonb;
+-- rascunho só do consentimento (aviso de bloqueio, FR-034): tipo novo, com aluno existente
+ALTER TABLE student_registration_draft DROP CONSTRAINT ck_student_registration_draft_kind;
+ALTER TABLE student_registration_draft ADD CONSTRAINT ck_student_registration_draft_kind
+    CHECK (kind IN ('CREATE', 'UPDATE', 'INACTIVATE', 'REACTIVATE', 'CONSENT'));
 
 -- ---------------------------------------------------------------------------------------------------------
 -- 3. Gatilhos de só acréscimo e expurgo da trilha.

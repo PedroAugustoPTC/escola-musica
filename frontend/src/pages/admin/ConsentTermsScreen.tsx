@@ -3,7 +3,7 @@ import { Button } from '../../components/Button';
 import { ErrorAlert, ErrorState } from '../../components/ErrorState';
 import { LoadingState } from '../../components/LoadingState';
 import { errorOfField, fieldErrorText, fieldErrorsOf } from '../../components/admin/fieldErrors';
-import { useConsentTerms, usePublishConsentTerm } from '../../services/admin/consents';
+import { useConsentTermImpact, useConsentTerms, usePublishConsentTerm } from '../../services/admin/consents';
 import { todayAtSchool } from '../../services/formatting';
 
 /** A16d — Versões do termo de consentimento; publicar uma versão nova exige confirmação. */
@@ -14,7 +14,9 @@ export function ConsentTermsScreen() {
   const [text, setText] = useState('');
   const [requiresNew, setRequiresNew] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const impact = useConsentTermImpact(confirming && requiresNew);
   const fieldErrors = fieldErrorsOf(publish.error);
+  const affected = impact.data?.studentsAffected;
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
@@ -98,7 +100,11 @@ export function ConsentTermsScreen() {
           <div role="alert" className="alert alert--notice">
             <div className="alert__text">
               {requiresNew
-                ? 'Ao publicar, os consentimentos de versões anteriores deixam de valer e os alunos menores ficam pendentes até um novo registro. Confirme para publicar.'
+                ? `Ao publicar, os consentimentos de versões anteriores deixam de valer e os alunos menores ficam pendentes até um novo registro${
+                    affected === undefined
+                      ? ''
+                      : ` (${affected} ${affected === 1 ? 'aluno ficará pendente' : 'alunos ficarão pendentes'})`
+                  }. Confirme para publicar.`
                 : 'Esta versão é compatível com as anteriores: os consentimentos já registrados continuam válidos. Confirme para publicar.'}
             </div>
           </div>

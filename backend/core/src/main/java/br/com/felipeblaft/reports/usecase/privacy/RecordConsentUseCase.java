@@ -17,6 +17,7 @@ import br.com.felipeblaft.reports.domain.registry.Student;
 import br.com.felipeblaft.reports.port.ConsentTermRepository;
 import br.com.felipeblaft.reports.service.ActorAuthorizationService;
 import br.com.felipeblaft.reports.service.AuthorshipService;
+import br.com.felipeblaft.reports.service.ConsentGuardService;
 import br.com.felipeblaft.reports.service.ConsentRecordingService;
 import br.com.felipeblaft.reports.service.StudentAccessService;
 import java.util.Objects;
@@ -42,13 +43,16 @@ public class RecordConsentUseCase {
     private final ConsentRecordingService recording;
     private final ConsentTermRepository terms;
     private final AuthorshipService authorship;
+    private final ConsentGuardService guard;
 
     public RecordConsentUseCase(
             ActorAuthorizationService authorization,
             StudentAccessService access,
             ConsentRecordingService recording,
             ConsentTermRepository terms,
-            AuthorshipService authorship) {
+            AuthorshipService authorship,
+            ConsentGuardService guard) {
+        this.guard = Objects.requireNonNull(guard);
         this.authorization = Objects.requireNonNull(authorization);
         this.access = Objects.requireNonNull(access);
         this.recording = Objects.requireNonNull(recording);
@@ -64,6 +68,17 @@ public class RecordConsentUseCase {
         int floor = ConsentTermVersion.compatibleFrom(terms.listAll());
         ConsentStatus status = ConsentPolicy.recordStatus(consent, floor);
         return ConsentView.of(consent, status);
+    }
+
+    /**
+     * Situação do consentimento do aluno para quem pode registrá-lo (mesma autorização e mesmo escopo
+     * de {@link #run}); vazio quando o aluno não exige consentimento.
+     */
+    public java.util.Optional<ConsentStatus> statusOf(
+            Actor actor, UUID studentId, String correlationId) {
+        authorization.require(actor, Operation.CONSENT_RECORD);
+        Student student = findVisible(actor, new Command(studentId, null, correlationId));
+        return guard.statusIfRequired(student);
     }
 
     private Student findVisible(Actor actor, Command command) {

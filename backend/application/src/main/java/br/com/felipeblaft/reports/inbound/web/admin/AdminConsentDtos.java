@@ -94,6 +94,15 @@ public final class AdminConsentDtos {
         }
     }
 
+    /** Quantos alunos ficam pendentes se um termo que exige novo consentimento for publicado. */
+    public record TermImpact(int studentsAffected) {
+
+        @Override
+        public String toString() {
+            return "TermImpact";
+        }
+    }
+
     public record PendingPage(List<PendingItem> items, int page, int size, long total) {
 
         @Override

@@ -169,6 +169,28 @@ public class MyStudentController {
                 .body(new ConsentRecorded(view.status().name(), view.termVersion(), view.consentedOn()));
     }
 
+    /** Situação do consentimento do aluno do professor; {@code status} nulo quando não é exigido. */
+    @GetMapping("/{studentId}/consent-status")
+    public ResponseEntity<ConsentState> consentStatus(
+            @AuthenticationPrincipal AuthenticatedTeacher teacher,
+            @PathVariable UUID studentId,
+            HttpServletRequest http) {
+        var status =
+                recordConsent.statusOf(actor(teacher), studentId, RequestCorrelation.of(http));
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.noStore().cachePrivate())
+                .body(new ConsentState(status.isPresent(), status.map(Enum::name).orElse(null)));
+    }
+
+    /** Exigido (menor) e situação; a resposta não leva dado do responsável. */
+    public record ConsentState(boolean required, String status) {
+
+        @Override
+        public String toString() {
+            return "ConsentState";
+        }
+    }
+
     /** A resposta não devolve o nome de quem consentiu. */
     public record ConsentRecorded(String status, int termVersion, java.time.LocalDate consentedOn) {
 

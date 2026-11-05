@@ -96,6 +96,18 @@ class ListPendingConsentsUseCaseTest {
     }
 
     @Test
+    void countValidCountsOnlyMinorsWhoWouldBecomePending() {
+        Student valid = c.minor("Valid Student", clara);
+        c.consentTo(valid);
+        c.minor("Missing Student", clara);
+        c.adult("Adult Souza", clara);
+
+        assertThat(c.pending.countValid(c.administrator())).isOne();
+        assertThatThrownBy(() -> c.pending.countValid(ActorFixtures.teacherWeb()))
+                .isInstanceOf(DomainException.class);
+    }
+
+    @Test
     void onlyTheAdministratorReadsTheList() {
         assertThatThrownBy(() -> c.pending.run(ActorFixtures.teacherWeb(), PageRequest.first()))
                 .satisfies(

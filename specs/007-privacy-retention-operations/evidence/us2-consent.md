@@ -23,10 +23,21 @@ Decisões e achados:
   reapresenta o C1; "não" descarta o rascunho; o resumo mostra só versão e data.
 - **Contrato × código.** O texto de orientação não cita "secretaria" (teste do catálogo); fala em "administrador".
 
-Pendências desta história (não feitas):
 
-- Botão "Registrar consentimento" no aviso de bloqueio (Telegram e Web) e `Kind` de rascunho só para consentimento.
-- Situação ("Registrado"/"Pendente") no detalhe do aluno do professor.
-- `ConsentParityScriptIT` completo (roteiro Web × Telegram do bloqueio por revogação); hoje a paridade do cadastro é coberta por
-  `StudentRegistryParityScriptIT` (ajustado) e a do bloqueio, pelos ITs de cada canal.
-- Confirmação do termo informando quantos alunos ficarão pendentes (hoje a confirmação explica o efeito, sem o número).
+Fechamento da US2 (pendências resolvidas):
+
+- **Botão "Registrar consentimento" no aviso de bloqueio.** Web: o `ErrorAlert` mostra o atalho para `/my-students/{id}` quando o erro é
+  `CONSENT_REQUIRED` (gravação de aula, perguntas, conferência e semestral). Telegram: o botão `consent-record` abre um rascunho do tipo
+  `CONSENT` (só os passos C1–C5, em `student_registration_draft`; a V17 amplia o CHECK do tipo) e a confirmação chama
+  `RecordConsentUseCase`. O `CONSENT_REQUIRED` agora leva o `studentId` nos detalhes.
+- **Situação do consentimento no detalhe do aluno do professor.** `GET /my-students/{id}/consent-status` (contrato 007) e a seção
+  "Consentimento do responsável" em `MyStudentDetailScreen` (Registrado / Pendente, com o painel de registro).
+- **Contagem na confirmação do termo.** `GET /admin/consent-terms/impact` informa quantos menores com consentimento válido ficam
+  pendentes; a tela A16d mostra o número antes de confirmar.
+- **`ConsentParityScriptIT`** (Web ≡ Telegram): menor sem consentimento recusado, com consentimento aceito, adulto sem bloqueio, bloqueio
+  com o mesmo código e o mesmo evento, registro pelo botão, nova liberação e bloqueio depois da revogação.
+- **`AuditEventCoverageIT`:** `CONSENT_RECORD/REVOKE/TERM_PUBLISH/BLOCKED_AI` (e `RETENTION_RUN/AUDIT_TRAIL_PURGED`, da US3) saíram da lista
+  de adiadas e têm cenário real.
+- **Contrato de `/my-students`:** `MyStudentConsentContractIT` valida o termo vigente, a situação e o registro avulso contra o contrato 007.
+
+Limite conhecido: a tela de processamento (resultado `CONSENT_REQUIRED` de trabalho já enfileirado) segue só com o texto, sem o atalho.

@@ -42,6 +42,8 @@ class TelegramConsentFlowIT extends RegistryConversationBase {
 
     @MockitoBean GetCurrentConsentTermUseCase currentTerm;
 
+    @org.springframework.beans.factory.annotation.Autowired TelegramPresenter presenter;
+
     @BeforeEach
     void prepare() {
         when(start.run(any(), any())).thenReturn(started(Kind.CREATE, null));
@@ -248,5 +250,74 @@ class TelegramConsentFlowIT extends RegistryConversationBase {
 
         assertThat(lastText()).isNotBlank();
         verify(collect, never()).run(any(), any());
+    }
+
+    @Test
+    void blockNoticeButtonOpensOnlyTheConsentStepsAndConfirmationRecordsIt() {
+        UUID student = UUID.randomUUID();
+        when(start.run(any(), any())).thenReturn(started(Kind.CONSENT, null));
+        when(get.run(any(), any())).thenReturn(view("Davi Lima", 12, "Piano", true, null));
+
+        tap("v1:consent-record:" + student);
+
+        ArgumentCaptor<br.com.felipeblaft.reports.usecase.registry.StartStudentRegistrationUseCase.Command>
+                started =
+                        ArgumentCaptor.forClass(
+                                br.com.felipeblaft.reports.usecase.registry
+                                        .StartStudentRegistrationUseCase.Command.class);
+        verify(start).run(any(), started.capture());
+        assertThat(started.getValue().kind()).isEqualTo(Kind.CONSENT);
+        assertThat(started.getValue().studentId()).isEqualTo(student);
+        assertThat(persistedStep()).isEqualTo("REGISTRY_ASK_CONSENT");
+        assertThat(lastText()).contains("versão 2", "O responsável consentiu?");
+
+        when(collect.run(any(), any())).thenReturn(consentStep(ConsentDraft.Part.NAME));
+        tap("v1:consent-yes:");
+        when(collect.run(any(), any())).thenReturn(consentStep(ConsentDraft.Part.RELATIONSHIP));
+        send(CONSENTING_NAME);
+        when(collect.run(any(), any())).thenReturn(consentStep(ConsentDraft.Part.DATE));
+        tap("v1:consent-rel:MOTHER");
+        when(collect.run(any(), any())).thenReturn(consentStep(ConsentDraft.Part.METHOD));
+        tap("v1:consent-date:today");
+        when(collect.run(any(), any()))
+                .thenReturn(
+                        new Result(
+                                null,
+                                false,
+                                new Summary(
+                                        null, null, null, null, 2, LocalDate.of(2026, 9, 21)),
+                                TOKEN,
+                                null));
+        tap("v1:consent-method:DIGITAL");
+        assertThat(lastText())
+                .contains("Consentimento: registrado (termo v2, 21/09/2026)")
+                .doesNotContain(CONSENTING_NAME);
+
+        tap("v1:reg-confirm:" + TOKEN);
+
+        assertThat(lastText()).contains("Consentimento registrado");
+        assertThat(persistedFlow()).isNotEqualTo("STUDENT_REGISTRY");
+        assertThat(persistedData()).doesNotContain(CONSENTING_NAME);
+    }
+
+    @Test
+    void blockNoticeButtonForSomeoneElsesStudentGetsTheNeutralDenialAndNoFlow() {
+        when(start.run(any(), any())).thenThrow(error(ErrorCode.RESOURCE_NOT_FOUND));
+
+        tap("v1:consent-record:" + UUID.randomUUID());
+
+        assertThat(persistedFlow()).isNotEqualTo("STUDENT_REGISTRY");
+        verify(collect, never()).run(any(), any());
+    }
+
+    @Test
+    void blockNoticeCarriesTheRecordButtonOnlyWhenTheStudentIsKnown() {
+        UUID student = UUID.randomUUID();
+
+        assertThat(buttonData(presenter.consentBlocked(10L, student.toString())))
+                .containsExactly("v1:consent-record:" + student);
+        assertThat(buttonData(presenter.consentBlocked(10L, null))).isEmpty();
+        assertThat(presenter.consentBlocked(10L, null).text())
+                .contains("consentimento do responsável");
     }
 }

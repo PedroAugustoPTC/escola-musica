@@ -56,7 +56,9 @@ public record StudentRegistrationDraft(
         CREATE,
         UPDATE,
         INACTIVATE,
-        REACTIVATE;
+        REACTIVATE,
+        /** Só o consentimento do responsável de um aluno existente (aviso de bloqueio, FR-034). */
+        CONSENT;
 
         /** Os tipos que operam sobre um aluno já existente. */
         public boolean targetsExistingStudent() {
@@ -204,6 +206,9 @@ public record StudentRegistrationDraft(
     public Field nextField(LocalDate today) {
         if (kind.confirmationOnly()) {
             return null;
+        }
+        if (kind == Kind.CONSENT) {
+            return providedFields.contains(Field.CONSENT) ? null : Field.CONSENT;
         }
         if (kind == Kind.UPDATE) {
             boolean guardianMissing =
