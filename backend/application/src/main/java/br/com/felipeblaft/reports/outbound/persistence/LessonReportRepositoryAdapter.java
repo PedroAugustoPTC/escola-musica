@@ -108,4 +108,22 @@ class LessonReportRepositoryAdapter implements LessonReportRepository {
     public Optional<LocalDate> lessonFirstDate(UUID teacherId, UUID studentId) {
         return reports.firstLesson(teacherId, studentId);
     }
+
+    @Override
+    public List<UUID> findIdsByStudent(UUID studentId) {
+        return jdbc.queryForList(
+                "SELECT id FROM lesson_report WHERE student_id = ? ORDER BY id", UUID.class, studentId);
+    }
+
+    @Override
+    public java.util.Map<String, Integer> countByStudentAndStatus(UUID studentId) {
+        java.util.Map<String, Integer> counts = new java.util.TreeMap<>();
+        jdbc.query(
+                "SELECT status, count(*) AS total FROM lesson_report WHERE student_id = ? GROUP BY status",
+                rs -> {
+                    counts.put(rs.getString("status"), rs.getInt("total"));
+                },
+                studentId);
+        return counts;
+    }
 }

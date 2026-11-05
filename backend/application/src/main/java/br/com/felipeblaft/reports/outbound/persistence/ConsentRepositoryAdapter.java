@@ -14,6 +14,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import br.com.felipeblaft.reports.port.ConsentRepository;
 
 /**
@@ -59,6 +60,12 @@ class ConsentRepositoryAdapter implements ConsentRepository {
                     .add(toDomain(entity, numbers));
         }
         return result;
+    }
+
+    @Override
+    @Transactional
+    public int removeNamesByStudent(UUID studentId) {
+        return jpa.removeNamesByStudent(studentId);
     }
 
     private Map<UUID, Integer> numbers() {

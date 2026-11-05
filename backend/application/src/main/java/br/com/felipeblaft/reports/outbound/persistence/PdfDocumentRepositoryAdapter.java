@@ -137,4 +137,16 @@ class PdfDocumentRepositoryAdapter implements PdfDocumentRepository {
                 Timestamp.from(now),
                 pdfId);
     }
+
+    @Override
+    public int countByReport(ReportType type, UUID reportId) {
+        Integer total =
+                jdbc.queryForObject(
+                        "SELECT count(*) FROM pdf_document WHERE version_id IN"
+                                + " (SELECT id FROM report_version WHERE report_type = ? AND report_id = ?)",
+                        Integer.class,
+                        type.name(),
+                        reportId);
+        return total == null ? 0 : total;
+    }
 }

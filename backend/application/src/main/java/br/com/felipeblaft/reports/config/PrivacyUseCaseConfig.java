@@ -44,6 +44,18 @@ import br.com.felipeblaft.reports.usecase.registry.CollectStudentRegistrationFie
 import br.com.felipeblaft.reports.usecase.registry.ConfirmStudentRegistrationUseCase;
 import br.com.felipeblaft.reports.usecase.semester.GenerateSemesterReportUseCase;
 import br.com.felipeblaft.reports.usecase.semester.RequestSemesterReportChangeUseCase;
+import br.com.felipeblaft.reports.domain.privacy.PrivacyOfficer;
+import br.com.felipeblaft.reports.port.AssignmentRepository;
+import br.com.felipeblaft.reports.port.DataProtectionPort;
+import br.com.felipeblaft.reports.port.ErasureRequestRepository;
+import br.com.felipeblaft.reports.port.JobQueuePort;
+import br.com.felipeblaft.reports.port.TeacherRepository;
+import br.com.felipeblaft.reports.service.ErasureScopeService;
+import br.com.felipeblaft.reports.usecase.privacy.ConfirmErasureUseCase;
+import br.com.felipeblaft.reports.usecase.privacy.GetErasureReceiptUseCase;
+import br.com.felipeblaft.reports.usecase.privacy.ListErasureRequestsUseCase;
+import br.com.felipeblaft.reports.usecase.privacy.PreviewErasureUseCase;
+import br.com.felipeblaft.reports.usecase.privacy.RegisterErasureRequestUseCase;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
 import org.slf4j.LoggerFactory;
@@ -255,5 +267,111 @@ public class PrivacyUseCaseConfig {
             ConsentTermRepository terms,
             ClockPort clock) {
         return new ListPendingConsentsUseCase(authorization, access, consents, terms, clock);
+    }
+
+    // ---- Eliminação a pedido (US4)
+
+    @Bean
+    ErasureScopeService erasureScopeService(
+            LessonReportRepository lessons,
+            SemesterReportRepository semesters,
+            PdfDocumentRepository pdfs,
+            AssignmentRepository assignments,
+            ConsentRepository consents) {
+        return new ErasureScopeService(lessons, semesters, pdfs, assignments, consents);
+    }
+
+    @Bean
+    RegisterErasureRequestUseCase registerErasureRequestUseCase(
+            ActorAuthorizationService authorization,
+            StudentRepository students,
+            ErasureRequestRepository erasures,
+            AuthorshipService authorship,
+            ClockPort clock) {
+        return new RegisterErasureRequestUseCase(authorization, students, erasures, authorship, clock);
+    }
+
+    @Bean
+    PreviewErasureUseCase previewErasureUseCase(
+            ActorAuthorizationService authorization,
+            ErasureRequestRepository erasures,
+            ErasureScopeService scopes,
+            AssignmentRepository assignments,
+            TeacherRepository teachers,
+            DataProtectionPort protection,
+            PrivacyOfficer privacyContact,
+            AuthorshipService authorship,
+            TransactionPort transaction,
+            ClockPort clock) {
+        return new PreviewErasureUseCase(
+                authorization,
+                erasures,
+                scopes,
+                assignments,
+                teachers,
+                protection,
+                privacyContact,
+                authorship,
+                transaction,
+                clock);
+    }
+
+    @Bean
+    @SuppressWarnings("java:S107")
+    ConfirmErasureUseCase confirmErasureUseCase(
+            ActorAuthorizationService authorization,
+            ErasureRequestRepository erasures,
+            ErasureScopeService scopes,
+            LessonReportRepository lessons,
+            SemesterReportRepository semesters,
+            ReportVersionRepository versions,
+            ReportInteractionRepository interactions,
+            PdfDocumentRepository pdfs,
+            AssignmentRepository assignments,
+            ConsentRepository consents,
+            StudentRepository students,
+            JobQueuePort queue,
+            DocumentStoragePort storage,
+            DataProtectionPort protection,
+            OperationalAlertService alerts,
+            AuthorshipService authorship,
+            TransactionPort transaction,
+            ClockPort clock) {
+        return new ConfirmErasureUseCase(
+                authorization,
+                erasures,
+                scopes,
+                lessons,
+                semesters,
+                versions,
+                interactions,
+                pdfs,
+                assignments,
+                consents,
+                students,
+                queue,
+                storage,
+                protection,
+                alerts,
+                authorship,
+                transaction,
+                clock);
+    }
+
+    @Bean
+    GetErasureReceiptUseCase getErasureReceiptUseCase(
+            ActorAuthorizationService authorization,
+            ErasureRequestRepository erasures,
+            PrivacyOfficer privacyContact,
+            AuthorshipService authorship) {
+        return new GetErasureReceiptUseCase(authorization, erasures, privacyContact, authorship);
+    }
+
+    @Bean
+    ListErasureRequestsUseCase listErasureRequestsUseCase(
+            ActorAuthorizationService authorization,
+            ErasureRequestRepository erasures,
+            StudentRepository students) {
+        return new ListErasureRequestsUseCase(authorization, erasures, students);
     }
 }

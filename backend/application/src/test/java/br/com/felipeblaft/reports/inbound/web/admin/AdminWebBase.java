@@ -134,6 +134,11 @@ public abstract class AdminWebBase extends IntegrationBase {
     @MockitoBean protected br.com.felipeblaft.reports.usecase.privacy.ListConsentTermsUseCase listConsentTerms;
     @MockitoBean protected br.com.felipeblaft.reports.usecase.privacy.ListPendingConsentsUseCase listPendingConsents;
     @MockitoBean protected br.com.felipeblaft.reports.usecase.privacy.ListStudentConsentsUseCase listStudentConsents;
+    @MockitoBean protected br.com.felipeblaft.reports.usecase.privacy.RegisterErasureRequestUseCase registerErasure;
+    @MockitoBean protected br.com.felipeblaft.reports.usecase.privacy.ListErasureRequestsUseCase listErasures;
+    @MockitoBean protected br.com.felipeblaft.reports.usecase.privacy.PreviewErasureUseCase previewErasure;
+    @MockitoBean protected br.com.felipeblaft.reports.usecase.privacy.ConfirmErasureUseCase confirmErasure;
+    @MockitoBean protected br.com.felipeblaft.reports.usecase.privacy.GetErasureReceiptUseCase getErasureReceipt;
 
     protected final UUID administratorId = UUID.fromString("00000000-0000-4000-8000-0000000000a1");
     protected Instant sessionExpiry;
