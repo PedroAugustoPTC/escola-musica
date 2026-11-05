@@ -10,13 +10,9 @@ description: "Tarefas da feature 007 — privacidade, retenção e operação (L
 > **Branch** `feat/007-privacy-retention-operations`. Commits: setup/fundação, US1, US2 (fechada em `a37b6d9`), US3 (`0064a3c`).
 > Suítes verificadas antes do commit da US2: backend 977 testes, frontend 457, e2e 114, todos verdes.
 >
-> **Estado**: Setup, Fundação, US1, US2 (T053–T079) e US3 (T080–T094) prontas. **US4 em andamento**: T095 (teste do domínio) e
-> T104 (`ErasureRequest`, `ErasureStatus`, `ErasureScope`, `ErasureConfirmation`, `ErasedStudent` + 3 códigos de erro no
-> `ErrorCode`) prontos. Falta o resto da US4 (T096–T103, T105–T109), US5, US6 e o fechamento (T130–T136).
+> **Estado**: Setup, Fundação, US1, US2, US3 e US4 prontas (US4 sem a suíte backend completa e sem teste de falha no meio da transação do banco; ver `evidence/us4-erasure.md`). Falta US5, US6 e o fechamento (T130–T136).
 >
-> **Próximo passo**: T105 (porta `ErasureRequestRepository` e métodos de remoção/`erase` nos repositórios, com dublês), depois
-> os testes de caso de uso T096–T098, os casos de uso (T106), os adaptadores (T107) e o controller (T108). Os 3 códigos novos
-> ainda precisam entrar no catálogo `messages_pt_BR.properties` e no `ErrorHandlerController` (T108).
+> **Próximo passo**: rodar a suíte backend completa; depois US5 (T110–T124), começando pelos testes.
 >
 > **Armadilhas**: a V17 foi editada várias vezes; quem tiver banco antigo faz `docker compose -f infra/compose.test.yaml down -v`.
 > Heredoc/perl longos quebram no shell: use Write/Edit ou scripts `.mjs`. Guardião de idioma reprova literais como "falha" em
@@ -271,7 +267,7 @@ valores no banco, no armazenamento, nas telas, no bot, nos logs e na trilha: zer
 - [x] T106 [US4] Implementar `CORE/usecase/privacy/RegisterErasureRequestUseCase.java`, `PreviewErasureUseCase.java`, `ConfirmErasureUseCase.java` (reaproveitando as remoções da US3), `GetErasureReceiptUseCase.java`, `ListErasureRequestsUseCase.java`; filtrar eliminados no `StudentAccessService` e nas consultas; descarte tardio no `JobProcessorService`/`SemesterProcessorService` (passam T096, T097, T098).
 - [x] T107 [US4] Implementar os adaptadores em `APP/outbound/persistence/` (`ErasureRequestRepositoryAdapter.java`, `erase` no adaptador de aluno com colunas a `NULL`, consultas com `erased_at IS NULL`, limpeza de `payload` da outbox) e permitir que `RunRetentionUseCase` conclua remoções de arquivo pendentes de eliminação (`ERASURE_CONFIRM` para o ator `RETENTION`).
 - [x] T108 [US4] Implementar `APP/inbound/web/admin/AdminErasureController.java` (+ `AdminErasureDtos.java`), códigos `ERASURE_ALREADY_OPEN`, `STUDENT_ALREADY_ERASED`, `ERASURE_ALREADY_COMPLETED`, `CONFIRMATION_EXPIRED` no catálogo e no `ErrorHandlerController`; rótulo "Aluno removido · #XXXXXX" no catálogo, aplicado na exibição pela Web e pelo bot (passa T099, T100, T101, T102).
-- [ ] T109 [US4] Implementar `FE/pages/admin/ErasureScreen.tsx`, `ErasureReceiptScreen.tsx` (impressão) e `ErasureRequestsScreen.tsx`; botão "Eliminar dados" separado de "Inativar" em `FE/pages/admin/StudentDetailScreen.tsx`; E2E em `FE_T/e2e/admin-erasure.spec.ts` e `admin-erasure.a11y.spec.ts`; rodar as suítes e registrar em `SPEC/evidence/us4-erasure.md` (passa T103).
+- [x] T109 [US4] Implementar `FE/pages/admin/ErasureScreen.tsx`, `ErasureReceiptScreen.tsx` (impressão) e `ErasureRequestsScreen.tsx`; botão "Eliminar dados" separado de "Inativar" em `FE/pages/admin/StudentDetailScreen.tsx`; E2E em `FE_T/e2e/admin-erasure.spec.ts` e `admin-erasure.a11y.spec.ts`; rodar as suítes e registrar em `SPEC/evidence/us4-erasure.md` (passa T103).
 
 **Checkpoint**: eliminação completa, atômica no banco, retomável nos arquivos e comprovada.
 
