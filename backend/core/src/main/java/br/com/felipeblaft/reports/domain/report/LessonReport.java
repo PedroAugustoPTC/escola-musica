@@ -4,6 +4,8 @@ import br.com.felipeblaft.reports.domain.common.Channel;
 import br.com.felipeblaft.reports.domain.common.DomainException;
 import br.com.felipeblaft.reports.domain.common.ErrorCode;
 import br.com.felipeblaft.reports.domain.common.GeneratorId;
+import br.com.felipeblaft.reports.domain.privacy.RetentionDecision;
+import br.com.felipeblaft.reports.domain.privacy.RetentionPolicy;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +28,9 @@ public class LessonReport {
     private final UUID lessonId;
     private final UUID teacherId;
     private final UUID studentId;
-    private final String transcription;
+    private String transcription;
+    private Instant sourceRemovedAt;
+    private Instant anonymizedAt;
     private LessonReportContent content;
     private List<String> pendingQuestions;
     private int questionRounds;
@@ -67,11 +71,68 @@ public class LessonReport {
             Instant cancelledAt,
             long processingTimeMs,
             long version) {
+        this(
+                id,
+                lessonId,
+                teacherId,
+                studentId,
+                Objects.requireNonNull(transcription),
+                content,
+                pendingQuestions,
+                questionRounds,
+                status,
+                step,
+                currentVersion,
+                originChannel,
+                failureReason,
+                createdAt,
+                updatedAt,
+                approvedAt,
+                approvedVersion,
+                approvalChannel,
+                cancelledAt,
+                processingTimeMs,
+                version,
+                null,
+                null);
+    }
+
+    /** Construtor de reidratação: a fonte pode já ter sido removida pela retenção (FR-010). */
+    @SuppressWarnings("java:S107")
+    public LessonReport(
+            UUID id,
+            UUID lessonId,
+            UUID teacherId,
+            UUID studentId,
+            String transcription,
+            LessonReportContent content,
+            List<String> pendingQuestions,
+            int questionRounds,
+            ReportStatus status,
+            ReportStep step,
+            int currentVersion,
+            Channel originChannel,
+            String failureReason,
+            Instant createdAt,
+            Instant updatedAt,
+            Instant approvedAt,
+            Integer approvedVersion,
+            Channel approvalChannel,
+            Instant cancelledAt,
+            long processingTimeMs,
+            long version,
+            Instant sourceRemovedAt,
+            Instant anonymizedAt) {
         this.id = Objects.requireNonNull(id);
         this.lessonId = Objects.requireNonNull(lessonId);
         this.teacherId = Objects.requireNonNull(teacherId);
         this.studentId = Objects.requireNonNull(studentId);
-        this.transcription = Objects.requireNonNull(transcription);
+        this.transcription = transcription;
+        this.sourceRemovedAt = sourceRemovedAt;
+        this.anonymizedAt = anonymizedAt;
+        if (transcription == null && sourceRemovedAt == null && anonymizedAt == null) {
+            throw new IllegalArgumentException("transcrição ausente exige remoção registrada");
+        }
         this.content = content == null ? LessonReportContent.empty() : content;
         this.pendingQuestions =
                 pendingQuestions == null ? List.of() : List.copyOf(pendingQuestions);
@@ -276,6 +337,50 @@ public class LessonReport {
         cancelledAt = now;
         step = null;
         updatedAt = now;
+    }
+
+    /**
+     * Decisão da retenção (FR-010 a FR-013): o aprovado perde a fonte após o prazo da transcrição; o
+     * cancelado é anonimizado após o prazo próprio; relatório em aberto nunca é tocado.
+     */
+    public RetentionDecision retentionAction(RetentionPolicy policy, Instant now) {
+        if (anonymizedAt != null) {
+            return RetentionDecision.KEEP;
+        }
+        if (status == ReportStatus.CANCELLED
+                && RetentionDecision.expired(
+                        cancelledAt, policy.cancelledReportDays().value(), now)) {
+            return RetentionDecision.ANONYMIZE;
+        }
+        if (status == ReportStatus.APPROVED
+                && sourceRemovedAt == null
+                && RetentionDecision.expired(
+                        approvedAt, policy.transcriptionDays().value(), now)) {
+            return RetentionDecision.REMOVE_SOURCE;
+        }
+        return RetentionDecision.KEEP;
+    }
+
+    /** Remove a fonte (transcrição); o conteúdo das versões fica (FR-010). */
+    public void removeSource(Instant now) {
+        transcription = null;
+        if (sourceRemovedAt == null) {
+            sourceRemovedAt = now;
+        }
+    }
+
+    /** Anonimiza o cancelado vencido: fonte removida e marca de anonimização (FR-013). */
+    public void anonymize(Instant now) {
+        removeSource(now);
+        anonymizedAt = now;
+    }
+
+    public Instant sourceRemovedAt() {
+        return sourceRemovedAt;
+    }
+
+    public Instant anonymizedAt() {
+        return anonymizedAt;
     }
 
     public void addProcessingTime(long milliseconds) {
