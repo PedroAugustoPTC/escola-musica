@@ -68,5 +68,6 @@ Rotas da SPA em inglês: `/sign-in`, `/students…`, `/my-students…`, `/jobs/:
   (por exemplo as chaves do relatório semestral) é contrato do backend, não renomeie. O guardião de idioma
   (`tests/language-guard.test.ts`, ver `.specify/CLAUDE.md`) reprova palavra em português em identificador,
   classe CSS e nome de arquivo.
+- Telas administrativas da feature 007 (rotas em `app/adminRoutes.tsx`): trilha (`/admin/audit`), consentimentos pendentes e termos (`/admin/consents/pending`, `/admin/consent-terms`), eliminação (`/admin/students/:studentId/erasure`, `/admin/erasure-requests`, comprovante), custos e alertas (`/admin/operations/costs`, `/admin/operations/alerts`) e o indicador de alertas na navegação (`AlertIndicator`). Só chamam a API; nenhuma regra de retenção, consentimento ou custo mora aqui.
 - Comandos: `npm run dev`, `lint`, `typecheck`, `test`, `e2e`, `format`. Em CI e na validação final,
   rode via contêiner: `sh infra/scripts/local.sh tests frontend|e2e`.

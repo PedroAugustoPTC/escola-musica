@@ -10,9 +10,9 @@ description: "Tarefas da feature 007 — privacidade, retenção e operação (L
 > **Branch** `feat/007-privacy-retention-operations`. Commits: setup/fundação, US1, US2 (fechada em `a37b6d9`), US3 (`0064a3c`).
 > Suítes verificadas antes do commit da US2: backend 977 testes, frontend 457, e2e 114, todos verdes.
 >
-> **Estado**: Setup, Fundação e US1–US6 prontas (US5: `evidence/us5-operations.md`; US6: inventário em `privacy/`). Falta só o teste de integração de falha no meio da transação da eliminação (T101 parcial) e o fecho (T130–T136), incluindo a suíte backend completa.
+> **Estado**: Setup, Fundação, US1–US6, T130 (`PrivacyCanaryIT`), T131 e T132 (documentação) e o teste de falha no meio da transação da eliminação (`ErasureMidTransactionFailureIT`) prontos. Falta T133–T136 (quickstart manual, suítes completas, revisão e PR).
 >
-> **Próximo passo**: fecho (T130–T136). Rodar as suítes por partes e com `timeout` dentro do contêiner.
+> **Próximo passo**: T134 (suítes completas, por partes e com timeout), T133, T135, T136. Rodar as suítes por partes e com `timeout` dentro do contêiner.
 >
 > **Armadilhas**: a V17 foi editada várias vezes; quem tiver banco antigo faz `docker compose -f infra/compose.test.yaml down -v`.
 > Heredoc/perl longos quebram no shell: use Write/Edit ou scripts `.mjs`. Guardião de idioma reprova literais como "falha" em
@@ -330,9 +330,9 @@ enviado sem estar listado.
 
 ## Phase 9: Polish & Cross-Cutting Concerns
 
-- [ ] T130 Varredura completa `APP_T/privacy/PrivacyCanaryIT.java` (SC-001): com o aluno canário e o responsável canário, percorre **todos** os fluxos das seis histórias nos dois canais (cadastro com consentimento, aula e semestral com transcrição e texto de relatório canário, revisão, aprovação, leituras, revogação e bloqueio, retenção com relógio avançado, eliminação, alertas forçados, consulta de trilha e de custo) e roda `PersonalDataSweep` em **logs, métricas (`ai_call`), alertas e trilha** procurando CPF, nome do aluno, transcrição e texto de relatório (e os demais valores canário); exige zero achados e lista todos de uma vez se houver.
-- [ ] T131 [P] Atualizar `backend/core/CLAUDE.md` (pacotes `privacy`, `audit`, `operations`; regras do guarda de consentimento e da porta de guarda da trilha), `backend/application/CLAUDE.md` (`V17`, `RetentionTask`, `OperationalAlertTask`, `consent-load`, papel `reports_app`), `infra/CLAUDE.md` (papel de banco, `db-roles.sh`, rotação de logs) e `frontend/CLAUDE.md` (telas A14–A18).
-- [ ] T132 [P] Atualizar `infra/README.md`: segunda credencial do banco, carga de consentimentos, prazos e alertas, e a nota de que o backup automático segue manual (seção 5) até a próxima fase, devendo reaplicar `erased_student` após restaurar.
+- [X] T130 Varredura completa `APP_T/privacy/PrivacyCanaryIT.java` (SC-001): com o aluno canário e o responsável canário, percorre **todos** os fluxos das seis histórias nos dois canais (cadastro com consentimento, aula e semestral com transcrição e texto de relatório canário, revisão, aprovação, leituras, revogação e bloqueio, retenção com relógio avançado, eliminação, alertas forçados, consulta de trilha e de custo) e roda `PersonalDataSweep` em **logs, métricas (`ai_call`), alertas e trilha** procurando CPF, nome do aluno, transcrição e texto de relatório (e os demais valores canário); exige zero achados e lista todos de uma vez se houver.
+- [X] T131 [P] Atualizar `backend/core/CLAUDE.md` (pacotes `privacy`, `audit`, `operations`; regras do guarda de consentimento e da porta de guarda da trilha), `backend/application/CLAUDE.md` (`V17`, `RetentionTask`, `OperationalAlertTask`, `consent-load`, papel `reports_app`), `infra/CLAUDE.md` (papel de banco, `db-roles.sh`, rotação de logs) e `frontend/CLAUDE.md` (telas A14–A18).
+- [X] T132 [P] Atualizar `infra/README.md`: segunda credencial do banco, carga de consentimentos, prazos e alertas, e a nota de que o backup automático segue manual (seção 5) até a próxima fase, devendo reaplicar `erased_student` após restaurar.
 - [ ] T133 Rodar o roteiro manual de [quickstart.md](./quickstart.md) completo no ambiente local e registrar o resultado em `SPEC/evidence/quickstart-run.md` (sem dado pessoal).
 - [ ] T134 Rodar `sh infra/scripts/local.sh tests backend`, `tests frontend` e `tests e2e`; conferir cobertura do núcleo ≥ 90% (linha e branch) e guardiões de idioma verdes; comparar com `SPEC/evidence/baseline.md`.
 - [ ] T135 Rodar a skill `pre-pr-review` (backend-reviewer, frontend-reviewer, infra-security-auditor, contract-drift-checker, privacy-auditor, constitution-auditor) e corrigir os achados.

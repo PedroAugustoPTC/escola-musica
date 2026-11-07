@@ -501,6 +501,8 @@ Os dados persistentes estão nos volumes `pgdata` (banco) e `documents` (PDFs), 
 docker compose -f infra/compose.yaml -f infra/compose.prod.yaml exec -T postgres pg_dump -U reports -Fc reports > backup.dump
 ```
 
+> **Feature 007**: o backup automático fica para a próxima fase; continua manual, como abaixo. A tabela `erased_student` (alunos eliminados a pedido) existe para que um aluno eliminado **não volte** ao restaurar um backup antigo: depois de restaurar, reaplique as eliminações listadas em `erased_student` (a rotina de verificação acusa a divergência) antes de abrir o sistema.
+
 Guarde os backups fora da VPS, cifrados, junto com `CPF_ENCRYPTION_KEY` e `HMAC_SECRET` (sem eles o
 backup não serve). Áudios nunca são persistidos (FR-018): não há o que salvar de `/tmp/audios` nem
 do volume do `telegram-bot-api`.

@@ -39,5 +39,6 @@ Regras:
 - Quem tem `infra/.env` ou volumes anteriores à feature 003 precisa regerar o `.env` e migrar os dados: o `local.sh up`
   recusa o arquivo antigo e a seção "Se você tem um ambiente anterior à feature 003" de `README.md` explica como.
 - O n8n (`n8n/`, tem `CLAUDE.md` próprio) usa imagem de versão fixada e workflows versionados como código, sem segredo nem ID de credencial nos JSON; nunca publica porta (só o editor em `127.0.0.1`, no ambiente local) e não tem rota no Caddy.
+- **Feature 007 (privacidade)**: o banco tem dois papéis. `POSTGRES_USER` é dono do esquema e roda o Flyway; `reports_app` (`DB_APP_USER`, `DB_APP_PASSWORD` obrigatória) é o do pool da aplicação e não pode alterar nem apagar a trilha. `scripts/lib/db-roles.sh` aplica a senha ao papel no `up` e no `deploy`. Os logs dos contêineres rodam com rotação (`x-logging` do `compose.yaml`, 20 MB): não habilite log persistente sem rotação. O backup automático segue manual (`README.md`, seção 5) e, depois de restaurar, é preciso reaplicar `erased_student`.
 - Dado pessoal real nunca em `seed/` versionada.
 - Mudou serviço, variável ou comando? Atualize `README.md` e `scripts/README.md`.

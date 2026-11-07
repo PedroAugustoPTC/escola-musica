@@ -45,6 +45,16 @@ Migração da feature 006 (aditiva):
 Migração nova começa na `V17`. A consulta de aprovados da escola (`ApprovedReportQueryAdapter`) e as rotas de leitura do
 administrador (`AdminSchoolHistoryController`) seguem `specs/006-admin-report-history/contracts/`.
 
+Privacidade, retenção e consentimento (feature 007; migração `V17`, imutável depois de aplicada: banco antigo exige `docker compose -f infra/compose.test.yaml down -v`):
+
+| Peça | O que é |
+|---|---|
+| `V17` | trilha encadeada e só de acréscimo, consentimento, retenção (`retention_run`, `retention_run_item`), eliminação (`erasure_request`, `erased_student`) e `operational_alert` |
+| papel `reports_app` | o pool da aplicação usa o papel sem `UPDATE`/`DELETE` na trilha; o Flyway segue com o dono do banco (`infra/scripts/lib/db-roles.sh`, `DB_APP_USER`/`DB_APP_PASSWORD`) |
+| `outbound/persistence/RetentionTask` | agenda a rotina de retenção e só chama `RunRetentionUseCase`; perfil `!seed` |
+| `inbound/seed/ConsentLoadCommand` | comando `consent-load` (perfil `seed`): carga dos consentimentos já coletados, contrato em `specs/007-privacy-retention-operations/contracts/consent-load.md` |
+| `inbound/web/admin` | controladores de trilha, consentimento, eliminação e operação (`/api/v1/admin/audit-trail`, `/consents`, `/erasure-requests`, `/operations`) |
+
 Custo e alertas de operação (feature 007, US5; sem migração nova, usa a V17):
 
 | Peça | O que é |
