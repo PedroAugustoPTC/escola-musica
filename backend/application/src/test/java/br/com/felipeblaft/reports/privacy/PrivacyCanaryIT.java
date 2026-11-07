@@ -87,7 +87,7 @@ class PrivacyCanaryIT extends SchoolHistoryBase {
                                     CanaryStudent.GUARDIAN_EMAIL),
                             clara.id());
             Student student = students.searchById(studentId).orElseThrow();
-            sweep.sweep(audit, "cadastro", logs);
+            sweep.sweep(audit, "registration", logs);
 
             // 2. aulas e semestral, com transcrição e texto de relatório canário
             UUID report =
@@ -109,7 +109,7 @@ class PrivacyCanaryIT extends SchoolHistoryBase {
                     Timestamp.from(clock.now()));
             Cookie teacher = signInTeacher(ScenarioIT.CODE_CLARA);
             approvedSemester(teacher, studentId, "2026-1");
-            sweep.sweep(audit, "aulas e semestral", logs);
+            sweep.sweep(audit, "lessons and semester", logs);
 
             // 3. custo e alertas forçados nos dois canais
             ProcessingJob web = job(clara, student, Channel.WEB);
@@ -122,24 +122,24 @@ class PrivacyCanaryIT extends SchoolHistoryBase {
             alerts.report(AlertType.STORAGE_FAILED, "pdf-storage", "WRITE_FAILED");
             evaluation.run();
             sweepResponse(
-                    audit, "custo", get("/operations/costs?month=2026-09", administrator), false);
-            sweepResponse(audit, "alertas", get("/operations/alerts", administrator), true);
-            sweepResponse(audit, "trilha", get(trailPath(), administrator), false);
-            sweep.sweep(audit, "custo, alertas e trilha", logs);
+                    audit, "cost", get("/operations/costs?month=2026-09", administrator), false);
+            sweepResponse(audit, "alerts", get("/operations/alerts", administrator), true);
+            sweepResponse(audit, "trail", get(trailPath(), administrator), false);
+            sweep.sweep(audit, "cost, alerts and trail", logs);
 
             // 4. retenção com o relógio adiantado
             clock.advance(Duration.ofDays(31));
             assertThat(retention.run(Actor.retention(), UUID.randomUUID().toString()).failures())
                     .isZero();
-            sweep.sweep(audit, "retenção", logs);
+            sweep.sweep(audit, "retention", logs);
 
             // 5. eliminação a pedido
             eliminate(admin, studentId);
             assertThat(erasures.isErased(studentId)).isTrue();
             // a sessão venceu com o relógio adiantado: entra de novo
             Cookie renewed = signInAdministrator(fixture, "198.51.100.11");
-            sweepResponse(audit, "trilha após eliminação", get(trailPath(), renewed), true);
-            sweep.sweep(audit, "eliminação", logs);
+            sweepResponse(audit, "trail after erasure", get(trailPath(), renewed), true);
+            sweep.sweep(audit, "erasure", logs);
         }
 
         assertThat(audit.sweeps()).isPositive();

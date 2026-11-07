@@ -75,7 +75,12 @@ class AuditTrailTamperIT extends IntegrationBase {
 
             assertThat(result.status()).isEqualTo(VerifyAuditChainUseCase.Status.BROKEN);
             assertThat(result.firstBrokenSequence()).isNotNull();
-            assertThat(log.text()).contains("AUDIT_CHAIN_BROKEN");
+            assertThat(
+                            jdbc.queryForObject(
+                                    "select count(*) from operational_alert where type = 'AUDIT_CHAIN_BROKEN' and status = 'ACTIVE'",
+                                    Integer.class))
+                    .as("alerta persistente da cadeia quebrada")
+                    .isOne();
         }
     }
 

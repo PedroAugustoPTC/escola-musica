@@ -10,9 +10,9 @@ description: "Tarefas da feature 007 — privacidade, retenção e operação (L
 > **Branch** `feat/007-privacy-retention-operations`. Commits: setup/fundação, US1, US2 (fechada em `a37b6d9`), US3 (`0064a3c`).
 > Suítes verificadas antes do commit da US2: backend 977 testes, frontend 457, e2e 114, todos verdes.
 >
-> **Estado**: Setup, Fundação, US1–US6, T130 (`PrivacyCanaryIT`), T131 e T132 (documentação) e o teste de falha no meio da transação da eliminação (`ErasureMidTransactionFailureIT`) prontos. Falta T133–T136 (quickstart manual, suítes completas, revisão e PR).
+> **Estado** (2026-11-07, sessão interrompida no T134): Setup, Fundação, US1–US6, T130 (`PrivacyCanaryIT`), T131/T132 (docs) e `ErasureMidTransactionFailureIT` prontos e commitados. **T134 em andamento**: a suíte backend completa falhou 2x e a 3ª execução (com as correções abaixo) foi abortada a pedido, sem resultado. Falta T133, T134, T135, T136.
 >
-> **Próximo passo**: T134 (suítes completas, por partes e com timeout), T133, T135, T136. Rodar as suítes por partes e com `timeout` dentro do contêiner.
+> **Próximo passo**: rodar a suíte backend completa (~30 min, `timeout 2700` dentro do contêiner) e conferir se os 6 erros de `truncate` (deadlock) e o `AuditTrailTamperIT` sumiram. Causa provável dos deadlocks e das execuções longas: a `OperationalAlertTask` (US5) rodava a cada 60 s em cada contexto de teste em cache e disputava trava com o `truncate`; corrigido com `reports.alerts.evaluation-seconds: 86400` em `application-test.yaml`. `AuditTrailTamperIT` procurava o log antigo do alerta; agora confere a linha `ACTIVE` em `operational_alert`. Depois: frontend, e2e, cobertura do núcleo ≥ 90%, T133, T135 (`pre-pr-review`) e T136 (PR sem merge).
 >
 > **Armadilhas**: a V17 foi editada várias vezes; quem tiver banco antigo faz `docker compose -f infra/compose.test.yaml down -v`.
 > Heredoc/perl longos quebram no shell: use Write/Edit ou scripts `.mjs`. Guardião de idioma reprova literais como "falha" em
