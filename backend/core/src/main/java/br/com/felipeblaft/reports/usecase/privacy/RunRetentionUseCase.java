@@ -174,6 +174,9 @@ public class RunRetentionUseCase {
         }
         boolean clean = execution.failures == 0;
         String errorCode = clean ? null : ITEM_FAILED;
+        if (clean) {
+            alerts.resolve(AlertType.RETENTION_FAILED, COMPONENT);
+        }
         runs.finish(
                 execution.runId,
                 clock.now(),
@@ -315,6 +318,7 @@ public class RunRetentionUseCase {
                                 pdfs.markFileRemoved(file.pdfId(), clock.now());
                                 add(execution, RetentionItemType.PDF_FILE, file.pdfId(), 1);
                             });
+                    alerts.resolve(AlertType.STORAGE_FAILED, "pdf-storage");
                 } catch (RuntimeException failure) {
                     failed.add(file.pdfId());
                     registerFailure(execution, file.pdfId(), AuthorshipTargetType.LESSON_REPORT);

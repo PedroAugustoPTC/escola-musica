@@ -43,6 +43,7 @@ import br.com.felipeblaft.reports.service.CodeAuthenticationService;
 import br.com.felipeblaft.reports.service.DocumentGenerationService;
 import br.com.felipeblaft.reports.service.JobProcessorService;
 import br.com.felipeblaft.reports.service.OfficialDocumentService;
+import br.com.felipeblaft.reports.service.OperationalAlertService;
 import br.com.felipeblaft.reports.service.ReportAccessService;
 import br.com.felipeblaft.reports.service.ReportEligibilityService;
 import br.com.felipeblaft.reports.service.SemesterAccessService;
@@ -361,9 +362,10 @@ public class UseCaseConfig {
             LessonReportRepository reports,
             StudentRepository students,
             TeacherRepository teachers,
-            ClockPort clock) {
+            ClockPort clock,
+            OperationalAlertService alerts) {
         return new DocumentGenerationService(
-                pdfGeneration, storage, documents, reports, students, teachers, clock);
+                pdfGeneration, storage, documents, reports, students, teachers, clock, alerts);
     }
 
     @Bean

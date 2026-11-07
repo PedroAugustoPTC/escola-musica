@@ -1,6 +1,9 @@
 package br.com.felipeblaft.reports.outbound.ai;
 
 import br.com.felipeblaft.reports.config.ApplicationProperties;
+import br.com.felipeblaft.reports.domain.operations.PriceTable;
+import br.com.felipeblaft.reports.domain.operations.PriceUnit;
+import br.com.felipeblaft.reports.port.ClockPort;
 import br.com.felipeblaft.reports.port.InvalidAiOutputException;
 import br.com.felipeblaft.reports.port.LlmPort;
 import br.com.felipeblaft.reports.port.ProviderUnavailableException;
@@ -68,6 +71,7 @@ public class LlmOpenAiCompatibleAdapter implements LlmPort {
 
     private final ApplicationProperties.Llm config;
     private final AiHttpClient http;
+    private final AiPricing pricing;
     private final Map<String, String> prompts = new ConcurrentHashMap<>();
     private final Map<String, Schema> schemas = new ConcurrentHashMap<>();
 
@@ -75,9 +79,29 @@ public class LlmOpenAiCompatibleAdapter implements LlmPort {
         this(config, new AiHttpClient(Duration.ofSeconds(1)));
     }
 
+    /** Preço pela tabela com vigência (FR-052); o das propriedades vale como reserva. */
+    public LlmOpenAiCompatibleAdapter(
+            ApplicationProperties.Llm config, PriceTable prices, ClockPort clock) {
+        this(
+                config,
+                new AiHttpClient(Duration.ofSeconds(1)),
+                new AiPricing(prices, clock, String.valueOf(config.model())));
+    }
+
     LlmOpenAiCompatibleAdapter(ApplicationProperties.Llm config, AiHttpClient http) {
+        this(config, http, null);
+    }
+
+    LlmOpenAiCompatibleAdapter(
+            ApplicationProperties.Llm config, AiHttpClient http, AiPricing pricing) {
         this.config = Objects.requireNonNull(config);
         this.http = http;
+        this.pricing = pricing;
+    }
+
+    @Override
+    public String providerName() {
+        return AiHttpClient.modelProvider(config.url(), config.model());
     }
 
     private record Call(String content, int inputTokens, int outputTokens) {}
@@ -237,9 +261,17 @@ public class LlmOpenAiCompatibleAdapter implements LlmPort {
 
     private BigDecimal cost(int input, int output) {
         BigDecimal inputPrice =
-                Objects.requireNonNullElse(config.priceUsdPerMillionInput(), BigDecimal.ZERO);
+                pricing == null
+                        ? Objects.requireNonNullElse(
+                                config.priceUsdPerMillionInput(), BigDecimal.ZERO)
+                        : pricing.price(
+                                PriceUnit.INPUT_MILLION_TOKENS, config.priceUsdPerMillionInput());
         BigDecimal outputPrice =
-                Objects.requireNonNullElse(config.priceUsdPerMillionOutput(), BigDecimal.ZERO);
+                pricing == null
+                        ? Objects.requireNonNullElse(
+                                config.priceUsdPerMillionOutput(), BigDecimal.ZERO)
+                        : pricing.price(
+                                PriceUnit.OUTPUT_MILLION_TOKENS, config.priceUsdPerMillionOutput());
         return BigDecimal.valueOf(input)
                 .multiply(inputPrice)
                 .add(BigDecimal.valueOf(output).multiply(outputPrice))

@@ -233,6 +233,10 @@ class ArchitectureRulesTest {
                     Map.entry("PreviewErasureUseCase", Operation.ERASURE_PREVIEW),
                     Map.entry("ConfirmErasureUseCase", Operation.ERASURE_CONFIRM),
                     Map.entry("GetErasureReceiptUseCase", Operation.ERASURE_RECEIPT_READ),
+                    // feature 007: custo e alertas de operação, só do administrador na Web
+                    Map.entry("GetMonthlyCostReportUseCase", Operation.OPERATIONS_COST_READ),
+                    Map.entry("ListOperationalAlertsUseCase", Operation.OPERATIONS_ALERT_READ),
+                    Map.entry("AcknowledgeOperationalAlertUseCase", Operation.OPERATIONS_ALERT_ACK),
                     Map.entry(
                             "GetSchoolReportDocumentUseCase",
                             Operation.SCHOOL_REPORT_DOCUMENT_OPEN));
@@ -255,7 +259,10 @@ class ArchitectureRulesTest {
                     "ListErasureRequestsUseCase",
                     "PreviewErasureUseCase",
                     "ConfirmErasureUseCase",
-                    "GetErasureReceiptUseCase");
+                    "GetErasureReceiptUseCase",
+                    "GetMonthlyCostReportUseCase",
+                    "ListOperationalAlertsUseCase",
+                    "AcknowledgeOperationalAlertUseCase");
 
     /** Casos de uso desses pacotes sem operação na matriz (validam a credencial, não um ator). */
     private static final Set<String> WITHOUT_OPERATION =

@@ -18,8 +18,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -124,9 +124,12 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
                             List.of("baixar o pdf de qualquer aluno da escola")),
                     // feature 007: a trilha de auditoria é só da Web; o bot a trata como texto
                     // não reconhecido
-                    Map.entry(Operation.AUDIT_TRAIL_QUERY, List.of("auditoria da escola", "trilha de auditoria")),
+                    Map.entry(
+                            Operation.AUDIT_TRAIL_QUERY,
+                            List.of("auditoria da escola", "trilha de auditoria")),
                     Map.entry(Operation.AUDIT_TRAIL_VERIFY, List.of("verificar a trilha")),
-                    // feature 007: o consentimento é do administrador na Web; o professor registra pelo
+                    // feature 007: o consentimento é do administrador na Web; o professor registra
+                    // pelo
                     // cadastro guiado (primeiro passo) e lê o termo no mesmo fluxo
                     Map.entry(Operation.CONSENT_READ, List.of("consents of a student")),
                     Map.entry(Operation.CONSENT_RECORD, List.of("cadastrar aluno")),
@@ -134,13 +137,18 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
                     Map.entry(Operation.CONSENT_PENDING_READ, List.of("pending consents")),
                     Map.entry(Operation.CONSENT_TERM_READ, List.of("cadastrar aluno")),
                     Map.entry(Operation.CONSENT_TERM_PUBLISH, List.of("publish consent term")),
-                    // feature 007: a eliminação é só do administrador na Web; o bot a trata como texto
+                    // feature 007: a eliminação é só do administrador na Web; o bot a trata como
+                    // texto
                     // não reconhecido
                     Map.entry(Operation.ERASURE_REQUEST_REGISTER, List.of("apagar aluno")),
                     Map.entry(Operation.ERASURE_REQUEST_READ, List.of("excluir dados")),
                     Map.entry(Operation.ERASURE_PREVIEW, List.of("alcance da eliminação")),
                     Map.entry(Operation.ERASURE_CONFIRM, List.of("eliminar aluno")),
-                    Map.entry(Operation.ERASURE_RECEIPT_READ, List.of("comprovante de eliminação")));
+                    Map.entry(Operation.ERASURE_RECEIPT_READ, List.of("comprovante de eliminação")),
+                    // feature 007: custo e alertas de operação são só do administrador na Web
+                    Map.entry(Operation.OPERATIONS_COST_READ, List.of("custo do mês")),
+                    Map.entry(Operation.OPERATIONS_ALERT_READ, List.of("alertas de operação")),
+                    Map.entry(Operation.OPERATIONS_ALERT_ACK, List.of("reconhecer alerta")));
 
     private enum Outcome {
         REACHED,
@@ -263,6 +271,13 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
                 brunoStudent.id(),
                 second.administrator().id());
         variables.put("requestId", erasureRequestId.toString());
+        UUID alertId = UUID.randomUUID();
+        jdbc.update(
+                "insert into operational_alert (id, type, component, detail_code, status, started_at,"
+                        + " last_seen_at, occurrences) values (?, 'AUDIT_CHAIN_BROKEN', 'audit-trail',"
+                        + " 'CHAIN_BROKEN', 'ACTIVE', now(), now(), 1)",
+                alertId);
+        variables.put("alertId", alertId.toString());
 
         if (operation == Operation.ADMINISTRATOR_REACTIVATE) {
             jdbc.update(
@@ -592,7 +607,9 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
                             + "\"requestedOn\":\"2026-09-01\",\"receivedVia\":\"EMAIL\","
                             + "\"protocolReference\":\"PROT-M2\"}";
             case "POST /admin/erasure-requests/{requestId}/confirmation" ->
-                    "{\"confirmationToken\":\"" + "x".repeat(40) + "\",\"confirmationWord\":\"ELIMINAR\"}";
+                    "{\"confirmationToken\":\""
+                            + "x".repeat(40)
+                            + "\",\"confirmationWord\":\"ELIMINAR\"}";
             case "POST /admin/consent-terms" ->
                     "{\"publishedOn\":\"2026-09-01\",\"text\":\"Institutional text\","
                             + "\"requiresNewConsent\":false}";

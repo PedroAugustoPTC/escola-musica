@@ -93,7 +93,6 @@ public class VerifyAuditChainUseCase {
     }
 
     private Result broken(Actor actor, String correlationId, long checked, long sequence) {
-        alerts.report(AlertType.AUDIT_CHAIN_BROKEN, "audit-trail", "CHAIN_BROKEN");
         authorship.recordRead(
                 actor,
                 Operation.AUDIT_TRAIL_VERIFY,
@@ -103,6 +102,9 @@ public class VerifyAuditChainUseCase {
                 AuthorshipResult.FAILURE,
                 BROKEN_CODE,
                 correlationId);
+        // depois do registro independente: o alerta grava na transação externa e, se tomasse a trava
+        // da cadeia antes, o registro independente (transação própria) esperaria por ela para sempre
+        alerts.report(AlertType.AUDIT_CHAIN_BROKEN, "audit-trail", "CHAIN_BROKEN");
         return new Result(Status.BROKEN, checked, sequence);
     }
 }

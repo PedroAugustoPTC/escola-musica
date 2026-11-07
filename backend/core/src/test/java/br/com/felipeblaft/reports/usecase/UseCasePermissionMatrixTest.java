@@ -138,7 +138,16 @@ class UseCasePermissionMatrixTest {
                             "usecase.privacy.ConfirmErasureUseCase (feature 007)"),
                     Map.entry(
                             Operation.ERASURE_RECEIPT_READ,
-                            "usecase.privacy.GetErasureReceiptUseCase (feature 007)"));
+                            "usecase.privacy.GetErasureReceiptUseCase (feature 007)"),
+                    Map.entry(
+                            Operation.OPERATIONS_COST_READ,
+                            "usecase.operations.GetMonthlyCostReportUseCase (feature 007)"),
+                    Map.entry(
+                            Operation.OPERATIONS_ALERT_READ,
+                            "usecase.operations.ListOperationalAlertsUseCase (feature 007)"),
+                    Map.entry(
+                            Operation.OPERATIONS_ALERT_ACK,
+                            "usecase.operations.AcknowledgeOperationalAlertUseCase (feature 007)"));
 
     // ------------------------------------------------------------------ mapa caso de uso →
     // operação

@@ -11,6 +11,8 @@ import { StudentFormScreen } from '../pages/admin/StudentFormScreen';
 import { StudentDetailScreen } from '../pages/admin/StudentDetailScreen';
 import { SchoolHistoryScreen } from '../pages/admin/SchoolHistoryScreen';
 import { AuditTrailScreen } from '../pages/admin/AuditTrailScreen';
+import { AlertsScreen } from '../pages/admin/AlertsScreen';
+import { CostsScreen } from '../pages/admin/CostsScreen';
 import { ConsentTermsScreen } from '../pages/admin/ConsentTermsScreen';
 import { ErasureReceiptScreen } from '../pages/admin/ErasureReceiptScreen';
 import { ErasureRequestsScreen } from '../pages/admin/ErasureRequestsScreen';
@@ -55,6 +57,8 @@ export const adminRoutes: RouteObject[] = [
       { path: '/admin/students/:studentId', element: <StudentDetailScreen /> },
       { path: '/admin/history', element: <SchoolHistoryScreen /> },
       { path: '/admin/audit', element: <AuditTrailScreen /> },
+      { path: '/admin/operations/costs', element: <CostsScreen /> },
+      { path: '/admin/operations/alerts', element: <AlertsScreen /> },
       { path: '/admin/consents/pending', element: <PendingConsentsScreen /> },
       { path: '/admin/consent-terms', element: <ConsentTermsScreen /> },
       { path: '/admin/students/:studentId/erasure', element: <ErasureScreen /> },

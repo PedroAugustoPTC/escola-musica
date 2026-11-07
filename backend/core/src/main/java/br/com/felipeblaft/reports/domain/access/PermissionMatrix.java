@@ -170,6 +170,10 @@ public final class PermissionMatrix {
         map.put(Operation.ERASURE_PREVIEW, onlyAdministrator(Set.of()));
         map.put(Operation.ERASURE_CONFIRM, onlyAdministrator(Set.of(ActionOrigin.RETENTION)));
         map.put(Operation.ERASURE_RECEIPT_READ, onlyAdministrator(Set.of()));
+        // custo e alertas de operação (007): só o administrador na Web; a apuração é do sistema
+        map.put(Operation.OPERATIONS_COST_READ, onlyAdministrator(Set.of()));
+        map.put(Operation.OPERATIONS_ALERT_READ, onlyAdministrator(Set.of()));
+        map.put(Operation.OPERATIONS_ALERT_ACK, onlyAdministrator(Set.of()));
         return map;
     }
 

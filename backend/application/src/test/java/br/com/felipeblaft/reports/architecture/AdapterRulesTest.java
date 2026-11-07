@@ -250,6 +250,10 @@ class AdapterRulesTest {
                 .doNotHaveFullyQualifiedName(Actor.class.getName())
                 .and()
                 .haveSimpleNameNotEndingWith("Task")
+                .and()
+                // o serviço de alertas assina com o ator de apuração os eventos de abertura e
+                // normalização, venham de onde vierem (tarefa, retenção, geração de PDF)
+                .doNotHaveSimpleName("PersistentOperationalAlertService")
                 .should()
                 .callMethodWhere(
                         DescribedPredicate.describe(

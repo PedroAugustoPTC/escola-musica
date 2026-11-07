@@ -1,31 +1,42 @@
 package br.com.felipeblaft.reports.config;
 
-import br.com.felipeblaft.reports.domain.operations.AlertType;
+import br.com.felipeblaft.reports.domain.operations.AlertThresholds;
+import br.com.felipeblaft.reports.domain.operations.PriceTable;
+import br.com.felipeblaft.reports.domain.privacy.PrivacyOfficer;
 import br.com.felipeblaft.reports.domain.privacy.RetentionPolicy;
 import br.com.felipeblaft.reports.port.AlertHistoryRetentionPort;
-import br.com.felipeblaft.reports.port.AuditTrailRetentionPort;
-import br.com.felipeblaft.reports.port.DocumentStoragePort;
-import br.com.felipeblaft.reports.port.LessonReportRepository;
-import br.com.felipeblaft.reports.port.PdfDocumentRepository;
-import br.com.felipeblaft.reports.port.ReportInteractionRepository;
-import br.com.felipeblaft.reports.port.ReportVersionRepository;
-import br.com.felipeblaft.reports.port.RetentionRunRepository;
-import br.com.felipeblaft.reports.port.SemesterReportRepository;
-import br.com.felipeblaft.reports.usecase.privacy.RunRetentionUseCase;
+import br.com.felipeblaft.reports.port.AssignmentRepository;
 import br.com.felipeblaft.reports.port.AuditTrailQueryPort;
+import br.com.felipeblaft.reports.port.AuditTrailRetentionPort;
 import br.com.felipeblaft.reports.port.ClockPort;
 import br.com.felipeblaft.reports.port.ConsentRepository;
 import br.com.felipeblaft.reports.port.ConsentTermRepository;
-import br.com.felipeblaft.reports.port.StudentRepository;
+import br.com.felipeblaft.reports.port.CostReportQueryPort;
+import br.com.felipeblaft.reports.port.DataProtectionPort;
+import br.com.felipeblaft.reports.port.DocumentStoragePort;
+import br.com.felipeblaft.reports.port.ErasureRequestRepository;
+import br.com.felipeblaft.reports.port.JobQueuePort;
+import br.com.felipeblaft.reports.port.LessonReportRepository;
+import br.com.felipeblaft.reports.port.OperationalAlertRepository;
+import br.com.felipeblaft.reports.port.OperationalSignalQueryPort;
+import br.com.felipeblaft.reports.port.PdfDocumentRepository;
+import br.com.felipeblaft.reports.port.ReportInteractionRepository;
+import br.com.felipeblaft.reports.port.ReportVersionRepository;
 import br.com.felipeblaft.reports.port.RequestContextPort;
+import br.com.felipeblaft.reports.port.RetentionRunRepository;
+import br.com.felipeblaft.reports.port.SemesterReportRepository;
+import br.com.felipeblaft.reports.port.StudentRepository;
+import br.com.felipeblaft.reports.port.TeacherRepository;
 import br.com.felipeblaft.reports.port.TransactionPort;
 import br.com.felipeblaft.reports.service.ActorAuthorizationService;
 import br.com.felipeblaft.reports.service.AuthorshipService;
 import br.com.felipeblaft.reports.service.ConsentGuardService;
 import br.com.felipeblaft.reports.service.ConsentRecordingService;
+import br.com.felipeblaft.reports.service.ErasureScopeService;
 import br.com.felipeblaft.reports.service.JobProcessorService;
-import br.com.felipeblaft.reports.service.StudentAccessService;
 import br.com.felipeblaft.reports.service.OperationalAlertService;
+import br.com.felipeblaft.reports.service.PersistentOperationalAlertService;
+import br.com.felipeblaft.reports.service.StudentAccessService;
 import br.com.felipeblaft.reports.service.TeacherReportAuditService;
 import br.com.felipeblaft.reports.usecase.audit.QueryAuditTrailUseCase;
 import br.com.felipeblaft.reports.usecase.audit.VerifyAuditChainUseCase;
@@ -33,33 +44,28 @@ import br.com.felipeblaft.reports.usecase.lesson.AnswerQuestionsUseCase;
 import br.com.felipeblaft.reports.usecase.lesson.RegisterLessonByAudioUseCase;
 import br.com.felipeblaft.reports.usecase.lesson.RequestLessonReportChangeUseCase;
 import br.com.felipeblaft.reports.usecase.lesson.RetryLessonReportUseCase;
+import br.com.felipeblaft.reports.usecase.operations.AcknowledgeOperationalAlertUseCase;
+import br.com.felipeblaft.reports.usecase.operations.EvaluateOperationalAlertsUseCase;
+import br.com.felipeblaft.reports.usecase.operations.GetMonthlyCostReportUseCase;
+import br.com.felipeblaft.reports.usecase.operations.ListOperationalAlertsUseCase;
+import br.com.felipeblaft.reports.usecase.privacy.ConfirmErasureUseCase;
 import br.com.felipeblaft.reports.usecase.privacy.GetCurrentConsentTermUseCase;
+import br.com.felipeblaft.reports.usecase.privacy.GetErasureReceiptUseCase;
 import br.com.felipeblaft.reports.usecase.privacy.ListConsentTermsUseCase;
+import br.com.felipeblaft.reports.usecase.privacy.ListErasureRequestsUseCase;
 import br.com.felipeblaft.reports.usecase.privacy.ListPendingConsentsUseCase;
 import br.com.felipeblaft.reports.usecase.privacy.ListStudentConsentsUseCase;
+import br.com.felipeblaft.reports.usecase.privacy.PreviewErasureUseCase;
 import br.com.felipeblaft.reports.usecase.privacy.PublishConsentTermUseCase;
 import br.com.felipeblaft.reports.usecase.privacy.RecordConsentUseCase;
+import br.com.felipeblaft.reports.usecase.privacy.RegisterErasureRequestUseCase;
 import br.com.felipeblaft.reports.usecase.privacy.RevokeConsentUseCase;
+import br.com.felipeblaft.reports.usecase.privacy.RunRetentionUseCase;
 import br.com.felipeblaft.reports.usecase.registry.CollectStudentRegistrationFieldUseCase;
 import br.com.felipeblaft.reports.usecase.registry.ConfirmStudentRegistrationUseCase;
 import br.com.felipeblaft.reports.usecase.semester.GenerateSemesterReportUseCase;
 import br.com.felipeblaft.reports.usecase.semester.RequestSemesterReportChangeUseCase;
-import br.com.felipeblaft.reports.domain.privacy.PrivacyOfficer;
-import br.com.felipeblaft.reports.port.AssignmentRepository;
-import br.com.felipeblaft.reports.port.DataProtectionPort;
-import br.com.felipeblaft.reports.port.ErasureRequestRepository;
-import br.com.felipeblaft.reports.port.JobQueuePort;
-import br.com.felipeblaft.reports.port.TeacherRepository;
-import br.com.felipeblaft.reports.service.ErasureScopeService;
-import br.com.felipeblaft.reports.usecase.privacy.ConfirmErasureUseCase;
-import br.com.felipeblaft.reports.usecase.privacy.GetErasureReceiptUseCase;
-import br.com.felipeblaft.reports.usecase.privacy.ListErasureRequestsUseCase;
-import br.com.felipeblaft.reports.usecase.privacy.PreviewErasureUseCase;
-import br.com.felipeblaft.reports.usecase.privacy.RegisterErasureRequestUseCase;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -70,27 +76,62 @@ import org.springframework.context.annotation.Configuration;
 @Configuration(proxyBeanMethods = false)
 public class PrivacyUseCaseConfig {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PrivacyUseCaseConfig.class);
-
     @Bean
     TeacherReportAuditService teacherReportAuditService(
             AuthorshipService authorship, RequestContextPort context) {
         return new TeacherReportAuditService(authorship, context);
     }
 
-    /**
-     * Alerta operacional provisório: registra no log, sem dado pessoal. A história de custos e
-     * alertas troca por quem persiste e normaliza.
-     */
+    /** Alertas operacionais persistentes: um ativo por tipo e componente (FR-055, FR-056). */
     @Bean
-    @ConditionalOnMissingBean(OperationalAlertService.class)
-    OperationalAlertService loggingOperationalAlertService() {
-        return (AlertType type, String component, String detailCode) ->
-                LOG.error(
-                        "Alerta operacional {} no componente {} (motivo {}).",
-                        type,
-                        component,
-                        detailCode);
+    OperationalAlertService operationalAlertService(
+            OperationalAlertRepository alerts,
+            AuthorshipService authorship,
+            TransactionPort transaction,
+            ClockPort clock) {
+        return new PersistentOperationalAlertService(alerts, authorship, transaction, clock);
+    }
+
+    @Bean
+    EvaluateOperationalAlertsUseCase evaluateOperationalAlertsUseCase(
+            OperationalSignalQueryPort signals,
+            OperationalAlertRepository repository,
+            OperationalAlertService alerts,
+            AlertThresholds thresholds,
+            ClockPort clock) {
+        return new EvaluateOperationalAlertsUseCase(signals, repository, alerts, thresholds, clock);
+    }
+
+    @Bean
+    ListOperationalAlertsUseCase listOperationalAlertsUseCase(
+            ActorAuthorizationService authorization,
+            OperationalAlertRepository alerts,
+            AuthorshipService authorship,
+            TransactionPort transaction) {
+        return new ListOperationalAlertsUseCase(authorization, alerts, authorship, transaction);
+    }
+
+    @Bean
+    AcknowledgeOperationalAlertUseCase acknowledgeOperationalAlertUseCase(
+            ActorAuthorizationService authorization,
+            OperationalAlertRepository alerts,
+            OperationalAlertService alertService,
+            AuthorshipService authorship,
+            TransactionPort transaction) {
+        return new AcknowledgeOperationalAlertUseCase(
+                authorization, alerts, alertService, authorship, transaction);
+    }
+
+    @Bean
+    GetMonthlyCostReportUseCase getMonthlyCostReportUseCase(
+            ActorAuthorizationService authorization,
+            CostReportQueryPort costs,
+            PriceTable prices,
+            ClockPort clock,
+            AuthorshipService authorship,
+            TransactionPort transaction) {
+        return new GetMonthlyCostReportUseCase(
+                authorization, costs, prices, clock, authorship, transaction);
     }
 
     @Bean
@@ -176,8 +217,8 @@ public class PrivacyUseCaseConfig {
     }
 
     /**
-     * Liga a barreira de consentimento nos casos de uso que alcançam a IA e no processador
-     * (FR-034, SC-005). Sem ela, o menor sem consentimento chegaria ao provedor.
+     * Liga a barreira de consentimento nos casos de uso que alcançam a IA e no processador (FR-034,
+     * SC-005). Sem ela, o menor sem consentimento chegaria ao provedor.
      */
     @Bean
     @SuppressWarnings("java:S107")
@@ -215,8 +256,7 @@ public class PrivacyUseCaseConfig {
             ConsentTermRepository terms,
             AuthorshipService authorship,
             ConsentGuardService guard) {
-        return new RecordConsentUseCase(
-                authorization, access, recording, terms, authorship, guard);
+        return new RecordConsentUseCase(authorization, access, recording, terms, authorship, guard);
     }
 
     @Bean
@@ -288,7 +328,8 @@ public class PrivacyUseCaseConfig {
             ErasureRequestRepository erasures,
             AuthorshipService authorship,
             ClockPort clock) {
-        return new RegisterErasureRequestUseCase(authorization, students, erasures, authorship, clock);
+        return new RegisterErasureRequestUseCase(
+                authorization, students, erasures, authorship, clock);
     }
 
     @Bean

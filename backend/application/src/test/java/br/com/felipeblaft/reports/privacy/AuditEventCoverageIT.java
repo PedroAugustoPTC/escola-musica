@@ -1,11 +1,11 @@
 package br.com.felipeblaft.reports.privacy;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 
 import br.com.felipeblaft.reports.domain.access.Actor;
+import br.com.felipeblaft.reports.domain.operations.AlertType;
 import br.com.felipeblaft.reports.domain.registry.Student;
 import br.com.felipeblaft.reports.domain.registry.Teacher;
 import br.com.felipeblaft.reports.support.AdjustableClock;
@@ -33,17 +33,24 @@ import org.springframework.mock.web.MockMultipartFile;
 
 /**
  * Cobertura da trilha (SC-002): a lista de {@code contracts/audit-events.md} é a fonte. Toda
- * operação da tabela tem um cenário (executado aqui, coberto por outro teste da trilha ou
- * adiado para a história que a implementa); operação nova na tabela sem cenário reprova o teste.
- * Os cenários executados aqui conferem que cada operação gera exatamente um evento com origem,
- * papel, alvo e resultado esperados.
+ * operação da tabela tem um cenário (executado aqui, coberto por outro teste da trilha ou adiado
+ * para a história que a implementa); operação nova na tabela sem cenário reprova o teste. Os
+ * cenários executados aqui conferem que cada operação gera exatamente um evento com origem, papel,
+ * alvo e resultado esperados.
  */
 class AuditEventCoverageIT extends SchoolHistoryBase {
 
     @Autowired RunRetentionUseCase retention;
+    @Autowired br.com.felipeblaft.reports.service.OperationalAlertService alerts;
 
     private static final Path TABLE =
-            Path.of("..", "..", "specs", "007-privacy-retention-operations", "contracts", "audit-events.md");
+            Path.of(
+                    "..",
+                    "..",
+                    "specs",
+                    "007-privacy-retention-operations",
+                    "contracts",
+                    "audit-events.md");
 
     private static final Pattern OPERATION = Pattern.compile("`([A-Z][A-Z_]+)`");
 
@@ -114,15 +121,6 @@ class AuditEventCoverageIT extends SchoolHistoryBase {
                         "ERASURE_RECEIPT_READ")) {
             pending.put(operation, "US4");
         }
-        for (String operation :
-                List.of(
-                        "OPERATIONS_COST_READ",
-                        "OPERATIONS_ALERT_READ",
-                        "OPERATIONS_ALERT_ACK",
-                        "ALERT_OPENED",
-                        "ALERT_NORMALIZED")) {
-            pending.put(operation, "US5");
-        }
         return pending;
     }
 
@@ -153,7 +151,12 @@ class AuditEventCoverageIT extends SchoolHistoryBase {
 
         Set<String> known = new LinkedHashSet<>(COVERED_ELSEWHERE.keySet());
         known.addAll(DEFERRED.keySet());
-        known.addAll(List.of("HISTORY_QUERY", "REPORT_DOCUMENT_SENT", "AUDIT_TRAIL_QUERY", "AUDIT_TRAIL_VERIFY"));
+        known.addAll(
+                List.of(
+                        "HISTORY_QUERY",
+                        "REPORT_DOCUMENT_SENT",
+                        "AUDIT_TRAIL_QUERY",
+                        "AUDIT_TRAIL_VERIFY"));
         // cenários executados neste teste: consentimento (US2) e retenção (US3)
         known.addAll(
                 List.of(
@@ -162,7 +165,12 @@ class AuditEventCoverageIT extends SchoolHistoryBase {
                         "CONSENT_TERM_PUBLISH",
                         "CONSENT_BLOCKED_AI",
                         "RETENTION_RUN",
-                        "AUDIT_TRAIL_PURGED"));
+                        "AUDIT_TRAIL_PURGED",
+                        "OPERATIONS_COST_READ",
+                        "OPERATIONS_ALERT_READ",
+                        "OPERATIONS_ALERT_ACK",
+                        "ALERT_OPENED",
+                        "ALERT_NORMALIZED"));
 
         assertThat(table).as("operação da tabela sem cenário").isSubsetOf(known);
         assertThat(known).as("cenário de operação que não está na tabela").isSubsetOf(table);
@@ -184,11 +192,18 @@ class AuditEventCoverageIT extends SchoolHistoryBase {
         Cookie administrator = signInNewAdministrator();
         clearAuthorship();
 
-        assertThat(call(HttpMethod.GET, ADMIN + "/audit-trail?from=2026-09-01&to=2026-09-30", administrator)
+        assertThat(
+                        call(
+                                        HttpMethod.GET,
+                                        ADMIN + "/audit-trail?from=2026-09-01&to=2026-09-30",
+                                        administrator)
                                 .getStatus())
                 .isEqualTo(200);
         assertThat(
-                        call(HttpMethod.GET, ADMIN + "/audit-trail/integrity?verifyNow=true", administrator)
+                        call(
+                                        HttpMethod.GET,
+                                        ADMIN + "/audit-trail/integrity?verifyNow=true",
+                                        administrator)
                                 .getStatus())
                 .isEqualTo(200);
 
@@ -205,6 +220,57 @@ class AuditEventCoverageIT extends SchoolHistoryBase {
         assertThat(verify.get("author_role")).isEqualTo("ADMINISTRATOR");
         assertThat(verify.get("target_type")).isEqualTo("AUDIT_TRAIL");
         assertThat(verify.get("item_count")).isNotNull();
+    }
+
+    @Test
+    void operationsReadsAndAlertEventsLeaveExactlyOneEventEach() throws Exception {
+        Cookie administrator = signInNewAdministrator();
+        alerts.report(AlertType.AUDIT_CHAIN_BROKEN, "audit-trail", "CHAIN_BROKEN");
+        UUID alert = jdbc.queryForObject("select id from operational_alert", UUID.class);
+        clearAuthorship();
+
+        assertThat(
+                        call(
+                                        HttpMethod.GET,
+                                        ADMIN + "/operations/costs?month=2026-09",
+                                        administrator)
+                                .getStatus())
+                .isEqualTo(200);
+        assertThat(call(HttpMethod.GET, ADMIN + "/operations/alerts", administrator).getStatus())
+                .isEqualTo(200);
+        assertThat(
+                        call(HttpMethod.GET, ADMIN + "/operations/alerts/summary", administrator)
+                                .getStatus())
+                .isEqualTo(200);
+        assertThat(
+                        call(
+                                        HttpMethod.POST,
+                                        ADMIN + "/operations/alerts/" + alert + "/acknowledgement",
+                                        administrator,
+                                        "{}")
+                                .getStatus())
+                .isEqualTo(200);
+
+        Map<String, Object> cost = onlyEvent("OPERATIONS_COST_READ");
+        assertThat(cost.get("origin")).isEqualTo("WEB");
+        assertThat(cost.get("author_role")).isEqualTo("ADMINISTRATOR");
+        assertThat(cost.get("result")).isEqualTo("SUCCESS");
+        Map<String, Object> read = onlyEvent("OPERATIONS_ALERT_READ");
+        assertThat(read.get("target_type")).isEqualTo("ALERT");
+        assertThat(read.get("origin")).isEqualTo("WEB");
+        Map<String, Object> ack = onlyEvent("OPERATIONS_ALERT_ACK");
+        assertThat(ack.get("target_id")).isEqualTo(alert);
+        assertThat(ack.get("result")).isEqualTo("SUCCESS");
+        Map<String, Object> normalized = onlyEvent("ALERT_NORMALIZED");
+        assertThat(normalized.get("origin")).isEqualTo("ALERT_EVALUATION");
+        assertThat(normalized.get("target_id")).isEqualTo(alert);
+        assertThat(events("ALERT_OPENED")).as("o resumo e as leituras não abrem alerta").isEmpty();
+
+        clearAuthorship();
+        alerts.report(AlertType.STORAGE_FAILED, "pdf-storage", "WRITE_FAILED");
+        Map<String, Object> opened = onlyEvent("ALERT_OPENED");
+        assertThat(opened.get("origin")).isEqualTo("ALERT_EVALUATION");
+        assertThat(opened.get("target_type")).isEqualTo("ALERT");
     }
 
     @Test

@@ -66,6 +66,9 @@
     { "operation": "ERASURE_REQUEST_READ", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/erasure-requests", "GET /admin/erasure-requests/{requestId}"], "system": [], "note": "feature 007" },
     { "operation": "ERASURE_PREVIEW", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["POST /admin/erasure-requests/{requestId}/preview"], "system": [], "note": "feature 007" },
     { "operation": "ERASURE_CONFIRM", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["POST /admin/erasure-requests/{requestId}/confirmation"], "system": ["RETENTION"], "note": "feature 007: a retenção termina remoções de arquivo pendentes" },
-    { "operation": "ERASURE_RECEIPT_READ", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/erasure-requests/{requestId}/receipt"], "system": [], "note": "feature 007" }
+    { "operation": "ERASURE_RECEIPT_READ", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/erasure-requests/{requestId}/receipt"], "system": [], "note": "feature 007" },
+    { "operation": "OPERATIONS_COST_READ", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/operations/costs"], "system": [], "note": "feature 007" },
+    { "operation": "OPERATIONS_ALERT_READ", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/operations/alerts", "GET /admin/operations/alerts/summary"], "system": [], "note": "feature 007" },
+    { "operation": "OPERATIONS_ALERT_ACK", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["POST /admin/operations/alerts/{alertId}/acknowledgement"], "system": [], "note": "feature 007" }
   ]
 }

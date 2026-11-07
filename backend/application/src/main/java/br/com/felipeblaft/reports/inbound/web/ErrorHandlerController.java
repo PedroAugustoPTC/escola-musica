@@ -114,6 +114,7 @@ public class ErrorHandlerController {
         STATUS.put(ErrorCode.ERASURE_ALREADY_OPEN, HttpStatus.CONFLICT);
         STATUS.put(ErrorCode.STUDENT_ALREADY_ERASED, HttpStatus.CONFLICT);
         STATUS.put(ErrorCode.ERASURE_ALREADY_COMPLETED, HttpStatus.CONFLICT);
+        STATUS.put(ErrorCode.ALERT_NOT_ACKNOWLEDGEABLE, HttpStatus.CONFLICT);
     }
 
     private final MessageCatalog catalog;

@@ -45,8 +45,17 @@ describe('AdminLayout', () => {
     expect(screen.getByText('Área administrativa')).toBeInTheDocument();
     const nav = screen.getByRole('navigation', { name: 'Área administrativa' });
     const links = within(nav).getAllByRole('link');
-    expect(links).toHaveLength(6);
-    ['Professores', 'Alunos', 'Histórico', 'Auditoria', 'Consentimentos', 'Administradores'].forEach((name, index) =>
+    expect(links).toHaveLength(8);
+    [
+      'Professores',
+      'Alunos',
+      'Histórico',
+      'Auditoria',
+      'Custos',
+      'Alertas',
+      'Consentimentos',
+      'Administradores',
+    ].forEach((name, index) =>
       expect(links[index]).toHaveAccessibleName(name),
     );
     expect(within(nav).getByRole('link', { name: 'Professores' })).toHaveAttribute('href', '/admin/teachers');

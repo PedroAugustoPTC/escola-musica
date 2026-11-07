@@ -663,7 +663,7 @@ public class JobProcessorService {
                         job.reportType(),
                         job.reportId(),
                         task,
-                        null,
+                        task == AiTask.TRANSCRIPTION ? audio.providerName() : llm.providerName(),
                         null,
                         inputTokens,
                         outputTokens,

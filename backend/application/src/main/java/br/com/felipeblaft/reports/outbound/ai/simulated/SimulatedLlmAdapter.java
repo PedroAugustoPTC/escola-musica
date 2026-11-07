@@ -30,6 +30,11 @@ public class SimulatedLlmAdapter implements LlmPort {
 
     public static final String PROVIDER = "simulated/llm";
 
+    @Override
+    public String providerName() {
+        return PROVIDER;
+    }
+
     private static final JsonMapper JSON =
             JsonMapper.builder().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).build();
 

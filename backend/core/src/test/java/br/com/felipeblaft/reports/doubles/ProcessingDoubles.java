@@ -61,6 +61,11 @@ public final class ProcessingDoubles {
         private final Deque<Object> script = new ArrayDeque<>();
         public final List<NormalizedAudio> received = new ArrayList<>();
 
+        @Override
+        public String providerName() {
+            return "provider/model";
+        }
+
         public ScriptedTranscription schedule(Object... responses) {
             script.addAll(List.of(responses));
             return this;
@@ -129,6 +134,11 @@ public final class ProcessingDoubles {
     public static class ScriptedLlm implements LlmPort {
         private final Map<TaskLlm, Deque<Object>> script = new EnumMap<>(TaskLlm.class);
         public final List<TaskInput> inputs = new ArrayList<>();
+
+        @Override
+        public String providerName() {
+            return "provider/model";
+        }
 
         public ScriptedLlm schedule(TaskLlm task, Object... responses) {
             script.computeIfAbsent(task, t -> new ArrayDeque<>()).addAll(List.of(responses));

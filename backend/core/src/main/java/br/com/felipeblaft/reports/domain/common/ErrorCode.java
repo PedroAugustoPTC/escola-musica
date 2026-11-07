@@ -91,6 +91,9 @@ public enum ErrorCode {
     STUDENT_ALREADY_ERASED,
     ERASURE_ALREADY_COMPLETED,
 
+    // Alertas operacionais (feature 007)
+    ALERT_NOT_ACKNOWLEDGEABLE,
+
     // Genéricos
     INVALID_DATA,
     INTERNAL_ERROR,
