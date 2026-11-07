@@ -10,6 +10,9 @@ Automação do GitHub, versionada no repositório (Princípio VIII).
 - `workflows/deploy.yml` — implantação manual na VPS (usa `infra/scripts/deploy.sh`); ambiente `production` e segredos
   `VPS_HOST`, `VPS_USER`, `VPS_DIRECTORY`, `VPS_SSH_KEY` e `VPS_KNOWN_HOST`.
 
+- `pull_request_template.md` — modelo de PR; traz o item do inventário de tratamento (`privacy/processing-inventory.md`).
+- O job Backend roda `infra/scripts/check-inventory-review.sh` em modo aviso (anotação, nunca reprova).
+
 Regras:
 
 - O CI é a fonte de verdade e bloqueia o merge se a cobertura cair abaixo de 90% ou qualquer teste falhar.

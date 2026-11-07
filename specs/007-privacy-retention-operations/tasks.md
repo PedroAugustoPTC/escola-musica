@@ -10,9 +10,9 @@ description: "Tarefas da feature 007 — privacidade, retenção e operação (L
 > **Branch** `feat/007-privacy-retention-operations`. Commits: setup/fundação, US1, US2 (fechada em `a37b6d9`), US3 (`0064a3c`).
 > Suítes verificadas antes do commit da US2: backend 977 testes, frontend 457, e2e 114, todos verdes.
 >
-> **Estado**: Setup, Fundação, US1–US5 prontas (US5: ver `evidence/us5-operations.md`; suítes rodadas por partes, com timeout) (suíte backend completa verde após a US4; falta só o teste de integração de falha no meio da transação do banco; ver `evidence/us4-erasure.md`). Falta US5, US6 e o fechamento (T130–T136).
+> **Estado**: Setup, Fundação e US1–US6 prontas (US5: `evidence/us5-operations.md`; US6: inventário em `privacy/`). Falta só o teste de integração de falha no meio da transação da eliminação (T101 parcial) e o fecho (T130–T136), incluindo a suíte backend completa.
 >
-> **Próximo passo**: US6 (T125–T129), depois o fecho (T130–T136).
+> **Próximo passo**: fecho (T130–T136). Rodar as suítes por partes e com `timeout` dentro do contêiner.
 >
 > **Armadilhas**: a V17 foi editada várias vezes; quem tiver banco antigo faz `docker compose -f infra/compose.test.yaml down -v`.
 > Heredoc/perl longos quebram no shell: use Write/Edit ou scripts `.mjs`. Guardião de idioma reprova literais como "falha" em
@@ -315,14 +315,14 @@ enviado sem estar listado.
 
 ### Testes da US6 (escrever primeiro; devem falhar)
 
-- [ ] T125 [P] [US6] Teste `APP_T/privacy/ProcessingInventoryConsistencyTest.java`: lê `privacy/processing-inventory.md` e exige uma seção por porta de provedor configurada (`TranscriptionPort`, `LlmPort`, `ChannelOrchestratorPort`/mensageria, `DocumentStoragePort`), os prazos padrão iguais aos de `RetentionPolicy` e a declaração de não envio de nome, CPF, data de nascimento e dados do responsável; cruza com `StudentDataNotSentToAiIT` (os campos enviados ao LLM listados no inventário).
-- [ ] T126 [P] [US6] Teste do guardião de revisão em `APP_T/architecture/InventoryReviewGuardTest.java` (ou verificação equivalente no `ci.yml`): diff que toca `APP/outbound/ai/**` ou `RES/prompts/**` sem tocar `privacy/processing-inventory.md` é sinalizado (modo aviso no CI, com mensagem em português).
+- [X] T125 [P] [US6] Teste `APP_T/privacy/ProcessingInventoryConsistencyTest.java`: lê `privacy/processing-inventory.md` e exige uma seção por porta de provedor configurada (`TranscriptionPort`, `LlmPort`, `ChannelOrchestratorPort`/mensageria, `DocumentStoragePort`), os prazos padrão iguais aos de `RetentionPolicy` e a declaração de não envio de nome, CPF, data de nascimento e dados do responsável; cruza com `StudentDataNotSentToAiIT` (os campos enviados ao LLM listados no inventário).
+- [X] T126 [P] [US6] Teste do guardião de revisão em `APP_T/architecture/InventoryReviewGuardTest.java` (ou verificação equivalente no `ci.yml`): diff que toca `APP/outbound/ai/**` ou `RES/prompts/**` sem tocar `privacy/processing-inventory.md` é sinalizado (modo aviso no CI, com mensagem em português).
 
 ### Implementação da US6
 
-- [ ] T127 [US6] Criar `privacy/CLAUDE.md` (o que é a pasta, regra do FR-071) e `privacy/processing-inventory.md` (FR-070: por provedor, dados enviados, finalidade, base legal proposta a validar, local e região, prazo no provedor, uso para treinamento, referência aos termos; pelo sistema, dados guardados, prazos de FR-002 e contato do responsável pela LGPD; aviso de que não é parecer jurídico) (passa T125).
-- [ ] T128 [US6] Acrescentar a linha de `privacy/` na tabela do `CLAUDE.md` da raiz; criar `.github/pull_request_template.md` com o item "mudou o que vai a um provedor? atualizei `privacy/processing-inventory.md`"; atualizar `.github/CLAUDE.md`.
-- [ ] T129 [US6] Acrescentar ao agente `.claude/agents/privacy-auditor.md` a checagem do inventário e ajustar o roteamento em `.claude/skills/pre-pr-review/SKILL.md` se preciso; implementar o aviso de T126 (passa T126).
+- [X] T127 [US6] Criar `privacy/CLAUDE.md` (o que é a pasta, regra do FR-071) e `privacy/processing-inventory.md` (FR-070: por provedor, dados enviados, finalidade, base legal proposta a validar, local e região, prazo no provedor, uso para treinamento, referência aos termos; pelo sistema, dados guardados, prazos de FR-002 e contato do responsável pela LGPD; aviso de que não é parecer jurídico) (passa T125).
+- [X] T128 [US6] Acrescentar a linha de `privacy/` na tabela do `CLAUDE.md` da raiz; criar `.github/pull_request_template.md` com o item "mudou o que vai a um provedor? atualizei `privacy/processing-inventory.md`"; atualizar `.github/CLAUDE.md`.
+- [X] T129 [US6] Acrescentar ao agente `.claude/agents/privacy-auditor.md` a checagem do inventário e ajustar o roteamento em `.claude/skills/pre-pr-review/SKILL.md` se preciso; implementar o aviso de T126 (passa T126).
 
 **Checkpoint**: inventário publicado e protegido por revisão.
 

@@ -35,6 +35,7 @@ subprojeto, como um novo módulo do `backend/`). No mesmo PR que a cria:
 | `.github/` | CI (`ci.yml`) e workflow de implantação (`deploy.yml`) |
 | `.claude/` | Skills (Spec Kit, grafo e do projeto) e agentes revisores do Claude Code, versionados e revisados por PR |
 | `portal-do-professor-design-system/` | Protótipos HTML da identidade visual (referência, não código de produção) |
+| `privacy/` | Inventário de tratamento de dados (LGPD): o que vai a cada provedor, por quê e por quanto tempo; revisado a cada mudança de provedor |
 | `assets/` | Material de referência do cliente |
 
 `.claude/` guarda as skills do Spec Kit, os hooks do grafo, as skills do projeto e os agentes revisores. As

@@ -18,6 +18,7 @@ Ignore `.claude/worktrees/`. Use as ferramentas do `code-review-graph` antes de 
 - Relatório de IA só vira oficial com aprovação de versão vigente; alteração cria nova versão.
 - Segredos fora do código; HTTPS em toda comunicação externa; serviço interno não exposto.
 - Seed, fixtures e testes sem dado pessoal real.
+- Inventário: mudança em `outbound/ai/**`, prompts ou portas de IA/mensageria exige `privacy/processing-inventory.md` revisado (FR-071).
 
 ## Saída
 
