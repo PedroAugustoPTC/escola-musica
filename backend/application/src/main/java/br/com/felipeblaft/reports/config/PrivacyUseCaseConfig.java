@@ -25,6 +25,7 @@ import br.com.felipeblaft.reports.port.ReportVersionRepository;
 import br.com.felipeblaft.reports.port.RequestContextPort;
 import br.com.felipeblaft.reports.port.RetentionRunRepository;
 import br.com.felipeblaft.reports.port.SemesterReportRepository;
+import br.com.felipeblaft.reports.port.StudentRegistrationDraftRepository;
 import br.com.felipeblaft.reports.port.StudentRepository;
 import br.com.felipeblaft.reports.port.TeacherRepository;
 import br.com.felipeblaft.reports.port.TransactionPort;
@@ -371,6 +372,7 @@ public class PrivacyUseCaseConfig {
             AssignmentRepository assignments,
             ConsentRepository consents,
             StudentRepository students,
+            StudentRegistrationDraftRepository drafts,
             JobQueuePort queue,
             DocumentStoragePort storage,
             DataProtectionPort protection,
@@ -390,6 +392,7 @@ public class PrivacyUseCaseConfig {
                 assignments,
                 consents,
                 students,
+                drafts,
                 queue,
                 storage,
                 protection,

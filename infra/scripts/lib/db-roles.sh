@@ -10,7 +10,7 @@
 
 apply_database_roles() {
   compose="$1"
-  password="$(sed -n 's/^DB_APP_PASSWORD=//p' infra/.env | tail -n 1)"
+  password="$(sed -n 's/^DB_APP_PASSWORD=//p' infra/.env | tail -n 1 | tr -d '\r')"
   if [ -z "$password" ]; then
     echo "✘ DB_APP_PASSWORD vazia em infra/.env; gere um valor longo e aleatório [DB_APP_PASSWORD_MISSING]" >&2
     return 1

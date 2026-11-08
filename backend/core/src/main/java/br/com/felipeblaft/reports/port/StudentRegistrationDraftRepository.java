@@ -18,6 +18,9 @@ public interface StudentRegistrationDraftRepository {
 
     void removeByLinkId(UUID linkId);
 
+    /** Apaga os rascunhos que citam o aluno (eliminação a pedido). */
+    void removeByStudent(UUID studentId);
+
     /** Varredura de rascunhos vencidos; devolve quantos foram apagados. */
     int removeExpired(Instant now);
 }

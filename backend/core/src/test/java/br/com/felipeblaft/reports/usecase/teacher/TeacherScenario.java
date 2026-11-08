@@ -57,6 +57,11 @@ public class TeacherScenario extends AccessScenario {
         }
 
         @Override
+        public void removeByStudent(UUID studentId) {
+            data.values().removeIf(draft -> studentId.equals(draft.studentId()));
+        }
+
+        @Override
         public int removeExpired(Instant now) {
             int before = data.size();
             data.values().removeIf(draft -> !draft.expiresAt().isAfter(now));

@@ -50,6 +50,12 @@ class StudentRegistrationDraftRepositoryAdapter implements StudentRegistrationDr
 
     @Override
     @Transactional
+    public void removeByStudent(UUID studentId) {
+        jpa.deleteByStudentId(studentId);
+    }
+
+    @Override
+    @Transactional
     public int removeExpired(Instant now) {
         return jpa.deleteExpired(now);
     }

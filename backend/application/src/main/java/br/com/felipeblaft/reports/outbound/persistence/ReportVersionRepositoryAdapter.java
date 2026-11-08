@@ -10,7 +10,11 @@ import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-/** Versões imutáveis: só inserção (Princípio III). */
+/**
+ * Versões imutáveis: só inserção (Princípio III). Única exceção: {@code markContentRemoved} esvazia o
+ * conteúdo na eliminação a pedido e na retenção de relatório cancelado (direito do titular, decisão
+ * D7 do plano da feature 007).
+ */
 @Repository
 class ReportVersionRepositoryAdapter implements ReportVersionRepository {
 

@@ -34,6 +34,7 @@ import br.com.felipeblaft.reports.doubles.FixedClock;
 import br.com.felipeblaft.reports.doubles.InMemoryAssignmentRepository;
 import br.com.felipeblaft.reports.doubles.InMemoryConsentRepository;
 import br.com.felipeblaft.reports.doubles.InMemoryErasureRequestRepository;
+import br.com.felipeblaft.reports.doubles.InMemoryStudentRegistrationDraftRepository;
 import br.com.felipeblaft.reports.doubles.InMemoryStudentRepository;
 import br.com.felipeblaft.reports.doubles.InMemoryTeacherRepository;
 import br.com.felipeblaft.reports.doubles.ProcessingDoubles.ImmediateTransaction;
@@ -67,6 +68,8 @@ public final class ErasureScenario {
     public final InMemoryAssignmentRepository assignments =
             new InMemoryAssignmentRepository(teachers);
     public final InMemoryStudentRepository students = new InMemoryStudentRepository(assignments);
+    public final InMemoryStudentRegistrationDraftRepository drafts =
+            new InMemoryStudentRegistrationDraftRepository();
     public final InMemoryConsentRepository consents = new InMemoryConsentRepository();
     public final InMemoryErasureRequestRepository erasures = new InMemoryErasureRequestRepository();
     public final InMemoryLessonReportRepository lessons = new InMemoryLessonReportRepository();
@@ -116,6 +119,7 @@ public final class ErasureScenario {
                     assignments,
                     consents,
                     students,
+                    drafts,
                     queue,
                     storage,
                     protection,

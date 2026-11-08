@@ -335,7 +335,7 @@ enviado sem estar listado.
 - [X] T132 [P] Atualizar `infra/README.md`: segunda credencial do banco, carga de consentimentos, prazos e alertas, e a nota de que o backup automático segue manual (seção 5) até a próxima fase, devendo reaplicar `erased_student` após restaurar.
 - [ ] T133 Rodar o roteiro manual de [quickstart.md](./quickstart.md) completo no ambiente local e registrar o resultado em `SPEC/evidence/quickstart-run.md` (sem dado pessoal).
 - [x] T134 Rodar `sh infra/scripts/local.sh tests backend`, `tests frontend` e `tests e2e`; conferir cobertura do núcleo ≥ 90% (linha e branch) e guardiões de idioma verdes; comparar com `SPEC/evidence/baseline.md`.
-- [ ] T135 Rodar a skill `pre-pr-review` (backend-reviewer, frontend-reviewer, infra-security-auditor, contract-drift-checker, privacy-auditor, constitution-auditor) e corrigir os achados.
+- [x] T135 Rodar a skill `pre-pr-review` (backend-reviewer, frontend-reviewer, infra-security-auditor, contract-drift-checker, privacy-auditor, constitution-auditor) e corrigir os achados.
 - [ ] T136 Commitar, abrir o PR para a `main` com a skill `open-pr` (sem merge e sem merge automático; descrição em português citando a segunda credencial do banco e os passos de implantação) e rodar `code-review-graph build`.
 
 ---

@@ -16,6 +16,12 @@ interface StudentRegistrationDraftJpa extends JpaRepository<StudentRegistrationD
 
     @Modifying
     @Query(
+            value = "delete from student_registration_draft where student_id = :studentId",
+            nativeQuery = true)
+    int deleteByStudentId(UUID studentId);
+
+    @Modifying
+    @Query(
             value = "delete from student_registration_draft where expires_at <= :now",
             nativeQuery = true)
     int deleteExpired(Instant now);

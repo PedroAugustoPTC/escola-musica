@@ -17,10 +17,12 @@ import br.com.felipeblaft.reports.domain.report.LessonReport;
 import br.com.felipeblaft.reports.domain.report.PdfDocument;
 import br.com.felipeblaft.reports.domain.report.ReportStatus;
 import br.com.felipeblaft.reports.domain.semester.SemesterReport;
+import br.com.felipeblaft.reports.domain.telegram.StudentRegistrationDraft;
 import br.com.felipeblaft.reports.doubles.ActorFixtures;
 import br.com.felipeblaft.reports.usecase.privacy.ConfirmErasureUseCase.Command;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 /** Confirmar a eliminação: token, palavra, alcance completo e retomada (FR-021 a FR-026). */
@@ -121,6 +123,25 @@ class ConfirmErasureUseCaseTest {
                         error ->
                                 assertThat(codeOf(error))
                                         .isEqualTo(ErrorCode.ERASURE_ALREADY_COMPLETED));
+    }
+
+    @Test
+    void registrationDraftsOfTheStudentAreRemovedAndOthersKept() {
+        Student other = c.student("Helena Prado", clara);
+        Instant now = Instant.parse("2026-01-10T10:00:00Z");
+        UUID mine = UUID.randomUUID();
+        UUID theirs = UUID.randomUUID();
+        c.drafts.save(
+                StudentRegistrationDraft.start(
+                        mine, StudentRegistrationDraft.Kind.CONSENT, student.id(), now, Duration.ofHours(1)));
+        c.drafts.save(
+                StudentRegistrationDraft.start(
+                        theirs, StudentRegistrationDraft.Kind.CONSENT, other.id(), now, Duration.ofHours(1)));
+
+        c.erase(student);
+
+        assertThat(c.drafts.searchByLinkId(mine)).isEmpty();
+        assertThat(c.drafts.searchByLinkId(theirs)).isPresent();
     }
 
     @Test

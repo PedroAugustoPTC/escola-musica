@@ -27,6 +27,7 @@ import br.com.felipeblaft.reports.port.PendingFileRemoval;
 import br.com.felipeblaft.reports.port.ReportInteractionRepository;
 import br.com.felipeblaft.reports.port.ReportVersionRepository;
 import br.com.felipeblaft.reports.port.SemesterReportRepository;
+import br.com.felipeblaft.reports.port.StudentRegistrationDraftRepository;
 import br.com.felipeblaft.reports.port.StudentRepository;
 import br.com.felipeblaft.reports.port.TransactionPort;
 import br.com.felipeblaft.reports.service.ActorAuthorizationService;
@@ -78,6 +79,7 @@ public class ConfirmErasureUseCase {
     private final AssignmentRepository assignments;
     private final ConsentRepository consents;
     private final StudentRepository students;
+    private final StudentRegistrationDraftRepository drafts;
     private final JobQueuePort queue;
     private final DocumentStoragePort storage;
     private final DataProtectionPort protection;
@@ -99,6 +101,7 @@ public class ConfirmErasureUseCase {
             AssignmentRepository assignments,
             ConsentRepository consents,
             StudentRepository students,
+            StudentRegistrationDraftRepository drafts,
             JobQueuePort queue,
             DocumentStoragePort storage,
             DataProtectionPort protection,
@@ -117,6 +120,7 @@ public class ConfirmErasureUseCase {
         this.assignments = Objects.requireNonNull(assignments);
         this.consents = Objects.requireNonNull(consents);
         this.students = Objects.requireNonNull(students);
+        this.drafts = Objects.requireNonNull(drafts);
         this.queue = Objects.requireNonNull(queue);
         this.storage = Objects.requireNonNull(storage);
         this.protection = Objects.requireNonNull(protection);
@@ -216,6 +220,7 @@ public class ConfirmErasureUseCase {
         }
         assignments.deleteAllByStudent(studentId);
         consents.removeNamesByStudent(studentId);
+        drafts.removeByStudent(studentId);
         students.erase(studentId, now);
         erasures.recordErased(new ErasedStudent(studentId, now));
     }
