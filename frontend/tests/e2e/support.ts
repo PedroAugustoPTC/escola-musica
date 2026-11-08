@@ -523,6 +523,9 @@ export async function linkTelegram(teacherId: string): Promise<void> {
 export async function fillConsent(page: Page, consentingName = 'Sandra Lopes'): Promise<void> {
   await page.getByLabel('Nome de quem consentiu').fill(consentingName);
   await page.getByLabel('Relação com o aluno').selectOption('MOTHER');
-  await page.getByLabel('Data do consentimento').fill(new Date().toISOString().slice(0, 10));
+  await page.getByLabel('Data do consentimento').fill(
+    // data de São Paulo, a mesma do servidor (UTC já pode ser o dia seguinte à noite)
+    new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date()),
+  );
   await page.getByLabel('Forma de coleta').selectOption('SIGNED_PAPER');
 }
