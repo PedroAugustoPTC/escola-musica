@@ -1,0 +1,729 @@
+openapi: 3.1.0
+info:
+  title: API de privacidade, retenção e operação — Relatórios Pedagógicos por Voz
+  version: 1.0.0
+  description: |
+    Contrato da feature 007-privacy-retention-operations, no mesmo estilo dos contratos da 005 e da 006.
+    Todas as rotas são do **Administrador**, **somente Web** (constituição v2.2.0, Princípio I). O que é do Professor
+    nesta feature (consentimento no cadastro e na edição dos próprios alunos, e o erro `CONSENT_REQUIRED`) entra no
+    contrato da 005 por nota de emenda, referenciando os esquemas `ConsentInput`, `ConsentSummary` e
+    `ConsentTermSummary` deste arquivo, e na rota `GET /my-students/consent-term` abaixo.
+
+    Regras comuns:
+
+    - Credencial: cookie `admin_session` da 005 (validado em toda requisição). Sem credencial: 401. Credencial de
+      professor, rota inexistente e recurso inexistente: **a mesma** resposta 404 `RESOURCE_NOT_FOUND`. Senha
+      provisória: 403 `PASSWORD_CHANGE_REQUIRED`.
+    - Todas as respostas levam `Cache-Control: no-store, private`.
+    - Toda operação gera evento na trilha (`contracts/audit-events.md`) na mesma transação; sem evento, 500
+      `INTERNAL_ERROR` com `reference` e nada é gravado nem entregue (FR-044).
+    - Parâmetros de consulta só levam identificadores, enumerações, datas e números; nunca nome ou CPF.
+    - Erros seguem o schema `Error` da 001/005; violações de campo em `details.fields`.
+servers:
+  - url: /api/v1
+tags:
+  - name: AdminAuditTrail
+  - name: AdminErasure
+  - name: AdminConsent
+  - name: AdminOperations
+  - name: TeacherConsent
+
+paths:
+  /admin/audit-trail:
+    get:
+      tags: [AdminAuditTrail]
+      operationId: queryAuditTrail
+      summary: Consulta a trilha (FR-045; operação AUDIT_TRAIL_QUERY, que também vira evento)
+      security: [{ adminSession: [] }]
+      parameters:
+        - { name: from, in: query, required: true, schema: { type: string, format: date } }
+        - { name: to, in: query, required: true, schema: { type: string, format: date }, description: "Inclusive; to - from ≤ 89 dias, senão 400 VALIDATION_FAILED (field period)" }
+        - { name: actorId, in: query, schema: { type: string, format: uuid } }
+        - { name: actorRole, in: query, schema: { $ref: "#/components/schemas/ActorRole" } }
+        - { name: origin, in: query, schema: { $ref: "#/components/schemas/Origin" } }
+        - { name: operation, in: query, schema: { type: string, pattern: "^[A-Z][A-Z0-9_]{0,47}$" } }
+        - { name: result, in: query, schema: { type: string, enum: [SUCCESS, FAILURE, DENIED, BLOCKED] } }
+        - { name: targetId, in: query, schema: { type: string, format: uuid }, description: "Aluno, relatório, professor etc. Filtrar por aluno inclui os eventos dos relatórios dele (SC-007)." }
+        - { $ref: "#/components/parameters/Page" }
+        - { $ref: "#/components/parameters/Size" }
+      responses:
+        "200":
+          description: Página, do mais recente ao mais antigo.
+          headers: { Cache-Control: { $ref: "#/components/headers/NoStore" } }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuditEventPage" }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /admin/audit-trail/integrity:
+    get:
+      tags: [AdminAuditTrail]
+      operationId: getAuditTrailIntegrity
+      summary: Resultado da última verificação da cadeia e verificação sob demanda (operação AUDIT_TRAIL_VERIFY)
+      security: [{ adminSession: [] }]
+      parameters:
+        - { name: verifyNow, in: query, schema: { type: boolean, default: false } }
+      responses:
+        "200":
+          description: Situação da cadeia.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuditIntegrity" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /admin/students/{studentId}/erasure-requests:
+    post:
+      tags: [AdminErasure]
+      operationId: registerErasureRequest
+      summary: Registra pedido de eliminação (FR-020; ERASURE_REQUEST_REGISTER)
+      security: [{ adminSession: [] }]
+      parameters: [{ $ref: "#/components/parameters/StudentId" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ErasureRequestInput" }
+      responses:
+        "201":
+          description: Pedido criado em RECEIVED.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErasureRequest" }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: "`ERASURE_ALREADY_OPEN` (já existe pedido não concluído) ou `STUDENT_ALREADY_ERASED`."
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /admin/erasure-requests:
+    get:
+      tags: [AdminErasure]
+      operationId: listErasureRequests
+      summary: Lista pedidos por situação (ERASURE_REQUEST_READ)
+      security: [{ adminSession: [] }]
+      parameters:
+        - { name: status, in: query, schema: { $ref: "#/components/schemas/ErasureStatus" } }
+        - { $ref: "#/components/parameters/Page" }
+        - { $ref: "#/components/parameters/Size" }
+      responses:
+        "200":
+          description: Página de pedidos.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items, page, size, total]
+                properties:
+                  items: { type: array, items: { $ref: "#/components/schemas/ErasureRequest" } }
+                  page: { type: integer }
+                  size: { type: integer }
+                  total: { type: integer }
+
+  /admin/erasure-requests/{requestId}:
+    get:
+      tags: [AdminErasure]
+      operationId: getErasureRequest
+      summary: Detalhe do pedido (ERASURE_REQUEST_READ)
+      security: [{ adminSession: [] }]
+      parameters: [{ $ref: "#/components/parameters/RequestId" }]
+      responses:
+        "200":
+          description: Pedido.
+          content: { application/json: { schema: { $ref: "#/components/schemas/ErasureRequest" } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /admin/erasure-requests/{requestId}/preview:
+    post:
+      tags: [AdminErasure]
+      operationId: previewErasure
+      summary: Mostra o alcance e emite token de confirmação válido por 10 min (FR-021; ERASURE_PREVIEW)
+      security: [{ adminSession: [] }]
+      parameters: [{ $ref: "#/components/parameters/RequestId" }]
+      responses:
+        "200":
+          description: Alcance e token (o token anterior deixa de valer).
+          content: { application/json: { schema: { $ref: "#/components/schemas/ErasurePreview" } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: "`ERASURE_ALREADY_COMPLETED`."
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /admin/erasure-requests/{requestId}/confirmation:
+    post:
+      tags: [AdminErasure]
+      operationId: confirmErasure
+      summary: Confirma e executa a eliminação (FR-022 a FR-026; ERASURE_CONFIRM). Repetível enquanto IN_PROGRESS.
+      security: [{ adminSession: [] }]
+      parameters: [{ $ref: "#/components/parameters/RequestId" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [confirmationToken, confirmationWord]
+              additionalProperties: false
+              properties:
+                confirmationToken: { type: string, minLength: 32, maxLength: 64 }
+                confirmationWord: { type: string, description: "Deve ser exatamente ELIMINAR (texto do usuário, em português)." }
+      responses:
+        "200":
+          description: Pedido em IN_PROGRESS (arquivos pendentes) ou COMPLETED.
+          content: { application/json: { schema: { $ref: "#/components/schemas/ErasureRequest" } } }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: "`CONFIRMATION_EXPIRED` (token vencido ou já usado: refaça a prévia) ou `ERASURE_ALREADY_COMPLETED`."
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /admin/erasure-requests/{requestId}/receipt:
+    get:
+      tags: [AdminErasure]
+      operationId: getErasureReceipt
+      summary: Dados do comprovante, sem dado pessoal do aluno (FR-025; ERASURE_RECEIPT_READ). Só COMPLETED.
+      security: [{ adminSession: [] }]
+      parameters: [{ $ref: "#/components/parameters/RequestId" }]
+      responses:
+        "200":
+          description: Comprovante.
+          content: { application/json: { schema: { $ref: "#/components/schemas/ErasureReceipt" } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /admin/students/{studentId}/consents:
+    get:
+      tags: [AdminConsent]
+      operationId: listStudentConsents
+      summary: Histórico de consentimentos do aluno (CONSENT_READ)
+      security: [{ adminSession: [] }]
+      parameters: [{ $ref: "#/components/parameters/StudentId" }]
+      responses:
+        "200":
+          description: Do mais recente ao mais antigo, com a situação derivada.
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/ConsentSummary" } }
+        "404": { $ref: "#/components/responses/NotFound" }
+    post:
+      tags: [AdminConsent]
+      operationId: recordStudentConsent
+      summary: Registra novo consentimento (FR-031; CONSENT_RECORD)
+      security: [{ adminSession: [] }]
+      parameters: [{ $ref: "#/components/parameters/StudentId" }]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: "#/components/schemas/ConsentInput" } } }
+      responses:
+        "201":
+          description: Registrado.
+          content: { application/json: { schema: { $ref: "#/components/schemas/ConsentSummary" } } }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /admin/consents/{consentId}/revocation:
+    post:
+      tags: [AdminConsent]
+      operationId: revokeConsent
+      summary: Registra revogação (FR-033; CONSENT_REVOKE)
+      security: [{ adminSession: [] }]
+      parameters:
+        - { name: consentId, in: path, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [revokedOn, revokedBy]
+              additionalProperties: false
+              properties:
+                revokedOn: { type: string, format: date }
+                revokedBy: { $ref: "#/components/schemas/RequesterRole" }
+      responses:
+        "200":
+          description: Revogado; novas gerações de IA ficam bloqueadas.
+          content: { application/json: { schema: { $ref: "#/components/schemas/ConsentSummary" } } }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: "`CONSENT_ALREADY_REVOKED`."
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+  /admin/consents/pending:
+    get:
+      tags: [AdminConsent]
+      operationId: listPendingConsents
+      summary: Alunos menores sem consentimento válido (FR-035; CONSENT_PENDING_READ)
+      security: [{ adminSession: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/Page" }
+        - { $ref: "#/components/parameters/Size" }
+      responses:
+        "200":
+          description: Página (vazia em operação normal).
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items, page, size, total]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      required: [studentId, studentName, reason]
+                      properties:
+                        studentId: { type: string, format: uuid }
+                        studentName: { type: string, description: "Resolvido na exibição (só nesta tela do administrador)." }
+                        reason: { type: string, enum: [MISSING, REVOKED, SUPERSEDED] }
+                  page: { type: integer }
+                  size: { type: integer }
+                  total: { type: integer }
+
+  /admin/consent-terms:
+    get:
+      tags: [AdminConsent]
+      operationId: listConsentTerms
+      summary: Versões do termo (CONSENT_TERM_READ)
+      security: [{ adminSession: [] }]
+      responses:
+        "200":
+          description: Da mais recente à mais antiga.
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/ConsentTerm" } }
+    post:
+      tags: [AdminConsent]
+      operationId: publishConsentTerm
+      summary: Publica nova versão do termo (FR-032; CONSENT_TERM_PUBLISH)
+      security: [{ adminSession: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [publishedOn, text, requiresNewConsent]
+              additionalProperties: false
+              properties:
+                publishedOn: { type: string, format: date }
+                text: { type: string, minLength: 1, maxLength: 20000 }
+                requiresNewConsent: { type: boolean }
+      responses:
+        "201":
+          description: Publicada (número = anterior + 1).
+          content: { application/json: { schema: { $ref: "#/components/schemas/ConsentTerm" } } }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
+
+  /admin/consent-terms/impact:
+    get:
+      tags: [AdminConsent]
+      operationId: getConsentTermImpact
+      summary: Quantos alunos ficam pendentes se um termo que exige novo consentimento for publicado (CONSENT_PENDING_READ)
+      description: >
+        Alunos menores ativos com consentimento válido hoje. A confirmação da publicação mostra este número
+        antes de enviar o termo (FR-032).
+      security: [{ adminSession: [] }]
+      responses:
+        "200":
+          description: Quantidade.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [studentsAffected]
+                properties:
+                  studentsAffected: { type: integer, minimum: 0 }
+
+  /my-students/consent-term:
+    get:
+      tags: [TeacherConsent]
+      operationId: getCurrentConsentTermForTeacher
+      summary: Versão vigente do termo para o formulário do professor (CONSENT_TERM_READ; cookie session do professor)
+      security: [{ teacherSession: [] }]
+      responses:
+        "200":
+          description: Versão vigente e contato do responsável pela LGPD.
+          content: { application/json: { schema: { $ref: "#/components/schemas/ConsentTermSummary" } } }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+
+  /my-students/{studentId}/consent-status:
+    get:
+      tags: [TeacherConsent]
+      operationId: getConsentStatusOfOwnStudent
+      summary: Situação do consentimento do aluno do professor (CONSENT_RECORD, ALLOW_OWN_STUDENTS)
+      security: [{ teacherSession: [] }]
+      parameters: [{ $ref: "#/components/parameters/StudentId" }]
+      responses:
+        "200":
+          description: >
+            Aluno maior de idade não exige consentimento (`required` falso, `status` ausente). A resposta não leva
+            dado do responsável.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [required]
+                properties:
+                  required: { type: boolean }
+                  status: { type: [string, "null"], enum: [VALID, REVOKED, SUPERSEDED, MISSING, null] }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /my-students/{studentId}/consents:
+    post:
+      tags: [TeacherConsent]
+      operationId: recordConsentForOwnStudent
+      summary: Professor registra consentimento do próprio aluno, a partir do aviso de bloqueio (CONSENT_RECORD, ALLOW_OWN_STUDENTS)
+      security: [{ teacherSession: [] }]
+      parameters: [{ $ref: "#/components/parameters/StudentId" }]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: "#/components/schemas/ConsentInput" } } }
+      responses:
+        "201":
+          description: Registrado; a resposta não devolve o nome de quem consentiu.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, termVersion, consentedOn]
+                properties:
+                  status: { type: string, enum: [VALID] }
+                  termVersion: { type: integer }
+                  consentedOn: { type: string, format: date }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
+        "401": { $ref: "#/components/responses/NotAuthenticated" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /admin/operations/costs:
+    get:
+      tags: [AdminOperations]
+      operationId: getMonthlyCosts
+      summary: Tempo e custo do mês (FR-053; OPERATIONS_COST_READ)
+      security: [{ adminSession: [] }]
+      parameters:
+        - { name: month, in: query, required: true, schema: { type: string, pattern: "^[0-9]{4}-(0[1-9]|1[0-2])$" }, description: "Mês no fuso da escola." }
+      responses:
+        "200":
+          description: Relatório do mês (vazio se não houve chamada).
+          content: { application/json: { schema: { $ref: "#/components/schemas/MonthlyCostReport" } } }
+        "400": { $ref: "#/components/responses/ValidationFailed" }
+
+  /admin/operations/alerts:
+    get:
+      tags: [AdminOperations]
+      operationId: listOperationalAlerts
+      summary: Alertas ativos e histórico (FR-056; OPERATIONS_ALERT_READ)
+      security: [{ adminSession: [] }]
+      parameters:
+        - { name: status, in: query, schema: { type: string, enum: [ACTIVE, NORMALIZED] } }
+        - { $ref: "#/components/parameters/Page" }
+        - { $ref: "#/components/parameters/Size" }
+      responses:
+        "200":
+          description: Ativos primeiro, depois por `lastSeenAt` decrescente; inclui os prazos e limites efetivos.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items, page, size, total, effectivePolicy]
+                properties:
+                  items: { type: array, items: { $ref: "#/components/schemas/OperationalAlert" } }
+                  page: { type: integer }
+                  size: { type: integer }
+                  total: { type: integer }
+                  effectivePolicy: { $ref: "#/components/schemas/EffectivePolicy" }
+
+  /admin/operations/alerts/summary:
+    get:
+      tags: [AdminOperations]
+      operationId: getOperationalAlertSummary
+      summary: Contagem de alertas ativos para o indicador do cabeçalho (OPERATIONS_ALERT_READ; não gera evento na trilha)
+      security: [{ adminSession: [] }]
+      responses:
+        "200":
+          description: Contagem.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [activeCount]
+                properties:
+                  activeCount: { type: integer, minimum: 0 }
+
+  /admin/operations/alerts/{alertId}/acknowledgement:
+    post:
+      tags: [AdminOperations]
+      operationId: acknowledgeAuditChainAlert
+      summary: Normaliza manualmente um AUDIT_CHAIN_BROKEN após apuração (OPERATIONS_ALERT_ACK); outros tipos normalizam sozinhos
+      security: [{ adminSession: [] }]
+      parameters:
+        - { name: alertId, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        "200":
+          description: Normalizado.
+          content: { application/json: { schema: { $ref: "#/components/schemas/OperationalAlert" } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: "`ALERT_NOT_ACKNOWLEDGEABLE` (tipo que normaliza sozinho ou já normalizado)."
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+components:
+  securitySchemes:
+    adminSession: { type: apiKey, in: cookie, name: admin_session }
+    teacherSession: { type: apiKey, in: cookie, name: session }
+  headers:
+    NoStore:
+      schema: { type: string, const: "no-store, private" }
+  parameters:
+    Page: { name: page, in: query, schema: { type: integer, minimum: 0, default: 0 } }
+    Size: { name: size, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 25 } }
+    StudentId: { name: studentId, in: path, required: true, schema: { type: string, format: uuid } }
+    RequestId: { name: requestId, in: path, required: true, schema: { type: string, format: uuid } }
+  responses:
+    ValidationFailed:
+      description: "`VALIDATION_FAILED` com `details.fields`."
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    NotAuthenticated:
+      description: "`NOT_AUTHENTICATED`, `SESSION_EXPIRED` ou `ACCESS_ENDED`."
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    NotFound:
+      description: "`RESOURCE_NOT_FOUND` (inexistente, sem permissão ou credencial de outro papel: indistinguíveis)."
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+  schemas:
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string, pattern: "^[A-Z][A-Z0-9_]*$" }
+        message: { type: string, description: "Texto em português do catálogo; sem detalhe interno." }
+        reference: { type: string, description: "Só em INTERNAL_ERROR." }
+        details:
+          type: object
+          properties:
+            fields:
+              type: array
+              items:
+                type: object
+                required: [field, code]
+                properties:
+                  field: { type: string }
+                  code: { type: string }
+    ActorRole: { type: string, enum: [ADMINISTRATOR, TEACHER, SYSTEM] }
+    Origin: { type: string, enum: [WEB, TELEGRAM, SYSTEM_STARTUP, INITIAL_LOAD, RETENTION, ALERT_EVALUATION] }
+    RequesterRole: { type: string, enum: [STUDENT, MOTHER, FATHER, LEGAL_GUARDIAN, OTHER] }
+    ErasureStatus: { type: string, enum: [RECEIVED, IN_PROGRESS, COMPLETED] }
+
+    AuditEvent:
+      type: object
+      required: [id, sequence, occurredAt, origin, operation, result]
+      properties:
+        id: { type: string, format: uuid }
+        sequence: { type: integer, format: int64 }
+        occurredAt: { type: string, format: date-time }
+        actorId: { type: [string, "null"], format: uuid }
+        actorRole: { $ref: "#/components/schemas/ActorRole" }
+        actorLabel: { type: [string, "null"], description: "Nome atual resolvido na exibição; nunca gravado na trilha." }
+        origin: { $ref: "#/components/schemas/Origin" }
+        operation: { type: string }
+        targetType: { type: [string, "null"] }
+        targetId: { type: [string, "null"], format: uuid }
+        targetLabel: { type: [string, "null"], description: "Resolvido na exibição; aluno eliminado = \"Aluno removido · #XXXXXX\"." }
+        documentVersion: { type: [integer, "null"] }
+        itemCount: { type: [integer, "null"] }
+        result: { type: string, enum: [SUCCESS, FAILURE, DENIED, BLOCKED] }
+        errorCode: { type: [string, "null"] }
+        hasOriginHash: { type: boolean, description: "O resumo da origem nunca é devolvido; só se existe." }
+    AuditEventPage:
+      type: object
+      required: [items, page, size, total]
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/AuditEvent" } }
+        page: { type: integer }
+        size: { type: integer }
+        total: { type: integer }
+    AuditIntegrity:
+      type: object
+      required: [status, verifiedAt, checkedEvents]
+      properties:
+        status: { type: string, enum: [INTACT, BROKEN, NEVER_VERIFIED] }
+        verifiedAt: { type: [string, "null"], format: date-time }
+        checkedEvents: { type: integer, format: int64 }
+        firstBrokenSequence: { type: [integer, "null"], format: int64 }
+
+    ErasureRequestInput:
+      type: object
+      required: [requesterRole, requesterName, requestedOn, receivedVia, protocolReference]
+      additionalProperties: false
+      properties:
+        requesterRole: { $ref: "#/components/schemas/RequesterRole" }
+        requesterName: { type: string, minLength: 2, maxLength: 255 }
+        requestedOn: { type: string, format: date }
+        receivedVia: { type: string, enum: [IN_PERSON, EMAIL, PHONE, LETTER, OTHER] }
+        protocolReference: { type: string, pattern: "^[A-Za-z0-9./-]{1,40}$" }
+    ErasureRequest:
+      type: object
+      required: [id, studentId, status, requesterRole, requestedOn, receivedVia, protocolReference, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        studentId: { type: string, format: uuid }
+        studentLabel: { type: string, description: "Nome atual ou \"Aluno removido · #XXXXXX\"." }
+        status: { $ref: "#/components/schemas/ErasureStatus" }
+        requesterRole: { $ref: "#/components/schemas/RequesterRole" }
+        requesterName: { type: [string, "null"], description: "null depois de COMPLETED." }
+        requestedOn: { type: string, format: date }
+        receivedVia: { type: string }
+        protocolReference: { type: string }
+        createdAt: { type: string, format: date-time }
+        confirmedAt: { type: [string, "null"], format: date-time }
+        completedAt: { type: [string, "null"], format: date-time }
+        scope: { oneOf: [{ $ref: "#/components/schemas/ErasureScope" }, { type: "null" }] }
+    ErasureScope:
+      type: object
+      required: [lessonReports, semesterReports, pdfs, assignments, consents]
+      properties:
+        lessonReports: { type: object, additionalProperties: { type: integer }, description: "Quantidade por situação." }
+        semesterReports: { type: object, additionalProperties: { type: integer } }
+        pdfs: { type: integer }
+        assignments: { type: integer }
+        consents: { type: integer }
+    ErasurePreview:
+      type: object
+      required: [scope, confirmationToken, expiresAt, privacyContact]
+      properties:
+        scope: { $ref: "#/components/schemas/ErasureScope" }
+        teachers: { type: array, items: { type: object, properties: { id: { type: string, format: uuid }, name: { type: string } } } }
+        confirmationToken: { type: string }
+        expiresAt: { type: string, format: date-time }
+        privacyContact: { $ref: "#/components/schemas/PrivacyContact" }
+    ErasureReceipt:
+      type: object
+      required: [requestId, protocolReference, requestedOn, completedAt, scope, privacyContact, studentShortId]
+      properties:
+        requestId: { type: string, format: uuid }
+        studentShortId: { type: string, pattern: "^[0-9a-f]{6}$" }
+        protocolReference: { type: string }
+        requestedOn: { type: string, format: date }
+        completedAt: { type: string, format: date-time }
+        scope: { $ref: "#/components/schemas/ErasureScope" }
+        privacyContact: { $ref: "#/components/schemas/PrivacyContact" }
+    PrivacyContact:
+      type: object
+      required: [name, contact]
+      properties:
+        name: { type: string }
+        contact: { type: string }
+
+    ConsentInput:
+      type: object
+      description: Obrigatório no cadastro/edição de aluno menor (FR-030). Mesmo esquema na Web e no Telegram.
+      required: [consentingName, relationship, consentedOn, termVersion, collectionMethod]
+      additionalProperties: false
+      properties:
+        consentingName: { type: string, minLength: 2, maxLength: 255 }
+        relationship: { type: string, enum: [MOTHER, FATHER, LEGAL_GUARDIAN, OTHER] }
+        consentedOn: { type: string, format: date, description: "Não futura." }
+        termVersion: { type: integer, minimum: 1, description: "Precisa ser vigente ou compatível." }
+        collectionMethod: { type: string, enum: [SIGNED_PAPER, DIGITAL, OTHER] }
+    ConsentSummary:
+      type: object
+      required: [id, status, relationship, consentedOn, termVersion, collectionMethod, recordedAt, recordedOrigin]
+      properties:
+        id: { type: string, format: uuid }
+        status: { type: string, enum: [VALID, REVOKED, SUPERSEDED] }
+        consentingName: { type: [string, "null"] }
+        relationship: { type: string }
+        consentedOn: { type: string, format: date }
+        termVersion: { type: integer }
+        collectionMethod: { type: string }
+        recordedAt: { type: string, format: date-time }
+        recordedOrigin: { type: string, enum: [WEB, TELEGRAM, INITIAL_LOAD] }
+        revokedOn: { type: [string, "null"], format: date }
+    ConsentTerm:
+      type: object
+      required: [number, publishedOn, text, requiresNewConsent, current]
+      properties:
+        number: { type: integer }
+        publishedOn: { type: string, format: date }
+        text: { type: string }
+        requiresNewConsent: { type: boolean }
+        current: { type: boolean }
+    ConsentTermSummary:
+      type: object
+      required: [number, publishedOn, text, privacyContact]
+      properties:
+        number: { type: integer }
+        publishedOn: { type: string, format: date }
+        text: { type: string }
+        privacyContact: { $ref: "#/components/schemas/PrivacyContact" }
+
+    MonthlyCostReport:
+      type: object
+      required: [month, currency, totals, perAudio, perLesson, perSemesterReport, perStudent, byChannel, byProvider, infrastructureUsd, grandTotalUsd]
+      properties:
+        month: { type: string }
+        currency: { type: string, const: USD }
+        infrastructureUsd: { type: number }
+        grandTotalUsd: { type: number, description: "Chamadas de IA do mês mais o custo fixo de infraestrutura." }
+        totals: { $ref: "#/components/schemas/CostAggregate" }
+        perAudio: { $ref: "#/components/schemas/CostAggregate" }
+        perLesson: { $ref: "#/components/schemas/CostAggregate" }
+        perSemesterReport: { $ref: "#/components/schemas/CostAggregate" }
+        perStudent:
+          type: array
+          items: { $ref: "#/components/schemas/StudentCost" }
+        byChannel:
+          type: object
+          additionalProperties: { $ref: "#/components/schemas/CostAggregate" }
+        byProvider:
+          type: object
+          additionalProperties: { $ref: "#/components/schemas/CostAggregate" }
+    StudentCost:
+      type: object
+      description: Os campos de CostAggregate, direto no item, mais o aluno. O nome é só para a tela do administrador.
+      required: [studentId, count, totalCostUsd, averageCostUsd, totalDurationMs, averageDurationMs]
+      properties:
+        studentId: { type: string, format: uuid }
+        studentLabel: { type: [string, "null"], description: "Resolvido na exibição; ausente se o aluno foi eliminado." }
+        count: { type: integer }
+        totalCostUsd: { type: number }
+        averageCostUsd: { type: number }
+        totalDurationMs: { type: integer, format: int64 }
+        averageDurationMs: { type: integer, format: int64 }
+        failedCalls: { type: integer }
+    CostAggregate:
+      type: object
+      required: [count, totalCostUsd, averageCostUsd, totalDurationMs, averageDurationMs]
+      properties:
+        count: { type: integer }
+        totalCostUsd: { type: number }
+        averageCostUsd: { type: number }
+        totalDurationMs: { type: integer, format: int64 }
+        averageDurationMs: { type: integer, format: int64 }
+        failedCalls: { type: integer }
+
+    OperationalAlert:
+      type: object
+      required: [id, type, component, status, startedAt, lastSeenAt, occurrences]
+      properties:
+        id: { type: string, format: uuid }
+        type: { type: string, enum: [AI_PROVIDER_FAILING, CHANNEL_QUEUE_BACKLOG, STORAGE_FAILED, RETENTION_FAILED, AUDIT_CHAIN_BROKEN] }
+        component: { type: string }
+        detailCode: { type: [string, "null"] }
+        status: { type: string, enum: [ACTIVE, NORMALIZED] }
+        startedAt: { type: string, format: date-time }
+        lastSeenAt: { type: string, format: date-time }
+        normalizedAt: { type: [string, "null"], format: date-time }
+        occurrences: { type: integer }
+    EffectivePolicy:
+      type: object
+      description: Valores efetivos e origem (DEFAULT ou CONFIGURED) de prazos e limites (FR-001).
+      additionalProperties:
+        type: object
+        required: [value, source]
+        properties:
+          value: { type: number }
+          source: { type: string, enum: [DEFAULT, CONFIGURED] }

@@ -16,6 +16,9 @@ public interface AssignmentRepository {
     /** Ids dos professores associados ao aluno. */
     List<UUID> listTeachersOfStudent(UUID studentId);
 
+    /** Retira todas as associações do aluno (eliminação); devolve quantas saíram. */
+    int deleteAllByStudent(UUID studentId);
+
     /** Quantos professores ativos estão associados ao aluno (regra do único professor, FR-026). */
     int countActiveTeachers(UUID studentId);
 }

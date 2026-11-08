@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.ColumnTransformer;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -50,6 +51,11 @@ public class StudentRegistrationDraftEntity {
 
     @Column(name = "guardian_email")
     String guardianEmail;
+
+    /** Consentimento do responsável em coleta (V17), JSON sem o nome em log. */
+    @Column(columnDefinition = "jsonb")
+    @ColumnTransformer(write = "?::jsonb")
+    String consent;
 
     @Column(name = "confirmation_token")
     String confirmationToken;

@@ -135,6 +135,13 @@ public class TelegramConversationInterpreter {
             context.markEndedLink();
             return;
         }
+        if (code == ErrorCode.CONSENT_REQUIRED) {
+            Object student = error.details().get("studentId");
+            context.answer(
+                    presenter.consentBlocked(
+                            context.chatId(), student == null ? null : student.toString()));
+            return;
+        }
         context.answer(presenter.error(context.chatId(), code, error.details()));
     }
 

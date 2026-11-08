@@ -15,6 +15,7 @@ Schema, mensagens) e `checklists/`.
 | `004-n8n-telegram-transport` | n8n como único transporte do canal Telegram (workflows como código, registro do webhook e remoção do caminho antigo, feita após a paridade) |
 | `005-admin-registrations-access` | Administração: acesso do administrador e cadastros de professores, alunos, associações e administradores (somente Web); o professor cadastra os próprios alunos na Web e no Telegram |
 | `006-admin-report-history` | Administração: visão da escola, com histórico de relatórios aprovados de qualquer aluno e PDFs, somente leitura (somente Web) |
+| `007-privacy-retention-operations` | Privacidade, retenção e operação (LGPD): retenção, eliminação a pedido, consentimento, trilha de auditoria, custo e alertas e inventário de tratamento (backup automático adiado para a próxima fase) |
 
 Regras:
 

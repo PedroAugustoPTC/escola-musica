@@ -1,12 +1,14 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, type ApiError } from '../apiClient';
 import type { components } from '../administration-api-types';
+import type { components as PrivacyComponents } from '../privacy-api-types';
 import { looksLikeCpf, searchTermOf } from '../../components/student/cpfShape';
 import type { StudentFormValues } from '../../components/student/studentFormTypes';
 import { ADMIN_QUERY_ROOT } from './session';
 import { DEFAULT_PAGE_SIZE, queryString } from './query';
 
 type Schemas = components['schemas'];
+type ConsentInput = PrivacyComponents['schemas']['ConsentInput'];
 
 export type AdminStudent = Schemas['Student'];
 export type AdminStudentPage = Schemas['StudentPage'];
@@ -62,6 +64,19 @@ function filled(value: string): string | undefined {
 }
 
 /** Responsável só segue se algum dos três campos foi preenchido (o servidor decide se é obrigatório). */
+function consentOf(values: StudentFormValues): ConsentInput | undefined {
+  const consentingName = values.consentingName.trim();
+  const any = consentingName || values.consentRelationship || values.consentedOn || values.consentMethod;
+  if (!any || values.consentTermVersion === null) return undefined;
+  return {
+    consentingName,
+    relationship: values.consentRelationship as ConsentInput['relationship'],
+    consentedOn: values.consentedOn,
+    termVersion: values.consentTermVersion,
+    collectionMethod: values.consentMethod as ConsentInput['collectionMethod'],
+  };
+}
+
 function guardianOf(values: StudentFormValues): Schemas['GuardianInput'] | undefined {
   if (!filled(values.guardianName) && !filled(values.guardianPhone) && !filled(values.guardianEmail)) {
     return undefined;
@@ -76,6 +91,7 @@ function guardianOf(values: StudentFormValues): Schemas['GuardianInput'] | undef
 /** Corpo do cadastro a partir do formulário; formato apenas, sem regra (a validação é do servidor). */
 export function toStudentInput(values: StudentFormValues): AdminStudentInput {
   const guardian = guardianOf(values);
+  const consent = consentOf(values);
   const instrument = filled(values.instrument);
   return {
     name: values.name.trim(),
@@ -83,6 +99,7 @@ export function toStudentInput(values: StudentFormValues): AdminStudentInput {
     cpf: values.cpf.trim(),
     ...(instrument ? { instrument } : {}),
     ...(guardian ? { guardian } : {}),
+    ...(consent ? { consent } : {}),
     teacherIds: values.teacherIds,
   };
 }
@@ -90,6 +107,7 @@ export function toStudentInput(values: StudentFormValues): AdminStudentInput {
 /** Corpo da edição: CPF em branco não é enviado (mantém o atual). */
 export function toStudentUpdate(values: StudentFormValues): AdminStudentUpdate {
   const guardian = guardianOf(values);
+  const consent = consentOf(values);
   const instrument = filled(values.instrument);
   const cpf = filled(values.cpf);
   return {
@@ -98,6 +116,7 @@ export function toStudentUpdate(values: StudentFormValues): AdminStudentUpdate {
     ...(cpf ? { cpf } : {}),
     ...(instrument ? { instrument } : {}),
     ...(guardian ? { guardian } : {}),
+    ...(consent ? { consent } : {}),
   };
 }
 

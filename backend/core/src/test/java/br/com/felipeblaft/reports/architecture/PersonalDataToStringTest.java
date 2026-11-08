@@ -57,6 +57,9 @@ class PersonalDataToStringTest {
                     BASE + ".usecase.seed",
                     BASE + ".domain.access",
                     BASE + ".domain.registry",
+                    BASE + ".domain.privacy.Consent",
+                    BASE + ".domain.privacy.GuardianConsent",
+                    BASE + ".usecase.privacy",
                     BASE + ".domain.telegram.StudentRegistrationDraft",
                     BASE + ".service.ActivationCodeIssuanceService");
 

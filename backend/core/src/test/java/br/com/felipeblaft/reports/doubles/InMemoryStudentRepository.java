@@ -5,6 +5,7 @@ import br.com.felipeblaft.reports.domain.registry.StudentScope;
 import br.com.felipeblaft.reports.domain.registry.StudentSearch;
 import br.com.felipeblaft.reports.domain.registry.StudentStatusFilter;
 import br.com.felipeblaft.reports.port.StudentRepository;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -23,6 +24,7 @@ import java.util.UUID;
 public class InMemoryStudentRepository implements StudentRepository {
 
     private final Map<UUID, Student> data = new LinkedHashMap<>();
+    private final Map<UUID, Instant> erasedAt = new LinkedHashMap<>();
     private final InMemoryAssignmentRepository assignments;
 
     public InMemoryStudentRepository(InMemoryAssignmentRepository assignments) {
@@ -88,6 +90,25 @@ public class InMemoryStudentRepository implements StudentRepository {
     @Override
     public void save(Student student) {
         data.put(student.id(), student);
+    }
+
+    /**
+     * Elimina o aluno: some de toda consulta e o CPF antigo fica livre (FR-024). O dublê guarda só
+     * o instante, como o banco guarda {@code erased_at}.
+     */
+    @Override
+    public boolean erase(UUID id, Instant now) {
+        if (!data.containsKey(id)) {
+            return false;
+        }
+        data.remove(id);
+        erasedAt.put(id, now);
+        assignments.deleteAllByStudent(id);
+        return true;
+    }
+
+    public boolean wasErased(UUID id) {
+        return erasedAt.containsKey(id);
     }
 
     public List<Student> all() {

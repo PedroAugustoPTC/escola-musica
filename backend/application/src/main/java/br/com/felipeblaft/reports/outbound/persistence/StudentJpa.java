@@ -16,6 +16,7 @@ interface StudentJpa extends JpaRepository<StudentEntity, UUID> {
             """
             select a from StudentEntity a
             where a.id in (select pa.studentId from TeacherStudentEntity pa where pa.teacherId = :teacherId)
+              and a.erasedAt is null
             order by lower(a.name), a.id
             """)
     List<StudentEntity> listByTeacher(UUID teacherId);
@@ -24,22 +25,35 @@ interface StudentJpa extends JpaRepository<StudentEntity, UUID> {
             """
             select a from StudentEntity a
             where a.id = :id
+              and a.erasedAt is null
               and exists (select 1 from TeacherStudentEntity pa
                           where pa.studentId = a.id and pa.teacherId = :teacherId)
             """)
     Optional<StudentEntity> findVisibleToTeacher(UUID id, UUID teacherId);
 
-    @Query("select a from StudentEntity a where a.active in :states order by lower(a.name), a.id")
+    @Query("select a from StudentEntity a where a.active in :states and a.erasedAt is null order by lower(a.name), a.id")
     List<StudentEntity> listByState(Collection<Boolean> states);
 
     @Query(
             """
             select a from StudentEntity a
             where a.active in :states
+              and a.erasedAt is null
               and a.id in (select pa.studentId from TeacherStudentEntity pa where pa.teacherId = :teacherId)
             order by lower(a.name), a.id
             """)
     List<StudentEntity> listByTeacherAndState(UUID teacherId, Collection<Boolean> states);
+
+    @Modifying
+    @Query(
+            value =
+                    "update student set name = null, birth_date = null, cpf_encrypted = null,"
+                            + " cpf_hash = null, guardian_name = null, guardian_phone = null,"
+                            + " guardian_email = null, instrument = null, active = false,"
+                            + " erased_at = :now, updated_at = :now"
+                            + " where id = :id and erased_at is null",
+            nativeQuery = true)
+    int erase(UUID id, java.time.Instant now);
 
     /**
      * Insere sem abortar a transação quando o resumo do CPF já existe; devolve as linhas inseridas.

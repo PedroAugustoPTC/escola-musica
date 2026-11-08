@@ -26,8 +26,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
  * Indistinguibilidade do PDF da visão da escola (feature 006, FR-018, SC-003): relatório
  * inexistente, relatório em cada estado não aprovado e rota inexistente devolvem o mesmo status, o
  * mesmo corpo e os mesmos cabeçalhos relevantes, e o tempo não separa o inexistente do não aprovado
- * (razão das medianas em [0,5; 2,0]; o teste imprime a razão). Medição em processo, com
- * aquecimento e semente fixa, no molde de {@code IndistinguishableStudentResponseIT}.
+ * (razão das medianas em [0,5; 2,0]; o teste imprime a razão). Medição em processo, com aquecimento
+ * e semente fixa, no molde de {@code IndistinguishableStudentResponseIT}.
  */
 class SchoolReportDocumentIndistinguishableIT extends SchoolHistoryBase {
 
@@ -124,7 +124,11 @@ class SchoolReportDocumentIndistinguishableIT extends SchoolHistoryBase {
 
         assertThat(response.getStatus()).isEqualTo(404);
         assertThat(errorCode(response)).isEqualTo("RESOURCE_NOT_FOUND");
-        assertThat(new String(response.getContentAsByteArray(), java.nio.charset.StandardCharsets.ISO_8859_1)).doesNotStartWith("%PDF");
+        assertThat(
+                        new String(
+                                response.getContentAsByteArray(),
+                                java.nio.charset.StandardCharsets.ISO_8859_1))
+                .doesNotStartWith("%PDF");
         assertThat(response.getContentAsString())
                 .doesNotContain("Matteo")
                 .doesNotContain("Sopro")
@@ -157,7 +161,8 @@ class SchoolReportDocumentIndistinguishableIT extends SchoolHistoryBase {
         }
 
         double ratio = (double) median(notApprovedTimes) / median(missingTimes);
-        System.out.printf(Locale.ROOT, "razão das medianas (não aprovado ÷ inexistente): %.2f%n", ratio);
+        System.out.printf(
+                Locale.ROOT, "razão das medianas (não aprovado ÷ inexistente): %.2f%n", ratio);
         assertThat(ratio).isBetween(0.5, 2.0);
     }
 

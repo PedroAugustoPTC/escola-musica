@@ -178,13 +178,13 @@ export interface SeedOptions {
 export async function seed(options: SeedOptions = {}): Promise<Seeding> {
   return withDatabase(async (database) => {
     const tables = await database.query<{ tablename: string }>(
-      "select tablename from pg_tables where schemaname = 'public' and tablename not in ('flyway_schema_history', 'authorship_record')",
+      "select tablename from pg_tables where schemaname = 'public' and tablename not in ('flyway_schema_history', 'authorship_record', 'audit_chain_anchor', 'erased_student')",
     );
     await database.query(`truncate ${tables.rows.map((t) => `"${t.tablename}"`).join(', ')} cascade`);
     // O registro de autoria é somente de acréscimo (gatilhos da V10): o teste, dono do banco descartável,
     // suspende os gatilhos de usuário na mesma instrução composta (uma transação) só para limpá-lo.
     await database.query(
-      'alter table authorship_record disable trigger user; truncate table authorship_record; alter table authorship_record enable trigger user',
+      'alter table authorship_record disable trigger user; alter table audit_chain_anchor disable trigger user; alter table erased_student disable trigger user; truncate table authorship_record, audit_chain_anchor, erased_student; alter table authorship_record enable trigger user; alter table audit_chain_anchor enable trigger user; alter table erased_student enable trigger user',
     );
 
     const now = new Date();
@@ -208,6 +208,14 @@ export async function seed(options: SeedOptions = {}): Promise<Seeding> {
         now,
       ],
     );
+    // termo de consentimento vigente e consentimento válido dos alunos semeados (feature 007): sem ele a IA
+    // fica bloqueada para menor
+    const term = randomUUID();
+    await database.query(
+      `insert into consent_term_version (id, number, published_on, text, requires_new_consent, created_by, created_at)
+       values ($1, 1, current_date - 30, $2, false, $3, $4)`,
+      [term, 'Termo de teste.', administrator, now],
+    );
     const teacher = (name: string, email: string, code: string) =>
       insertTeacher(database, name, email, code, now, validity);
     const student = async (teacherId: string, name: string, cpf: string, instrument: string) => {
@@ -220,6 +228,11 @@ export async function seed(options: SeedOptions = {}): Promise<Seeding> {
       await database.query(
         'insert into teacher_student_assignment (id, teacher_id, student_id, created_at) values ($1, $2, $3, $4)',
         [randomUUID(), teacherId, id, now],
+      );
+      await database.query(
+        `insert into student_consent (id, student_id, consenting_name, relationship, consented_on, term_version_id,
+           collection_method, recorded_origin, recorded_at) values ($1, $2, 'Responsável de Teste', 'MOTHER', current_date - 20, $3, 'SIGNED_PAPER', 'INITIAL_LOAD', $4)`,
+        [randomUUID(), id, term, now],
       );
       return id;
     };
@@ -504,4 +517,15 @@ export async function linkTelegram(teacherId: string): Promise<void> {
       [randomUUID(), teacherId, 700_000_001 + Math.floor(Math.random() * 1_000_000)],
     ),
   );
+}
+
+/** Preenche a seção "Consentimento do responsável" (aparece quando a data de nascimento indica menor de 18 anos). */
+export async function fillConsent(page: Page, consentingName = 'Sandra Lopes'): Promise<void> {
+  await page.getByLabel('Nome de quem consentiu').fill(consentingName);
+  await page.getByLabel('Relação com o aluno').selectOption('MOTHER');
+  await page.getByLabel('Data do consentimento').fill(
+    // data de São Paulo, a mesma do servidor (UTC já pode ser o dia seguinte à noite)
+    new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date()),
+  );
+  await page.getByLabel('Forma de coleta').selectOption('SIGNED_PAPER');
 }

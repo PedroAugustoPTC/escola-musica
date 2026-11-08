@@ -193,17 +193,38 @@ final class DraftScenario {
                 authorization, access, links, drafts, clock, VALIDITY);
     }
 
+    /** Termo 1 já publicado: o consentimento do menor é coletado nos passos C1 a C5. */
+    final br.com.felipeblaft.reports.doubles.InMemoryConsentTermRepository consentTerms =
+            consentTerms();
+
+    private br.com.felipeblaft.reports.doubles.InMemoryConsentTermRepository consentTerms() {
+        var repository = new br.com.felipeblaft.reports.doubles.InMemoryConsentTermRepository();
+        repository.save(
+                new br.com.felipeblaft.reports.domain.privacy.ConsentTermVersion(
+                        UUID.randomUUID(),
+                        1,
+                        java.time.LocalDate.of(2026, 1, 1),
+                        "Institutional text",
+                        false,
+                        UUID.randomUUID(),
+                        java.time.Instant.parse("2026-01-01T12:00:00Z")));
+        return repository;
+    }
+
     CollectStudentRegistrationFieldUseCase collect() {
-        return new CollectStudentRegistrationFieldUseCase(
-                authorization,
-                drafts,
-                students,
-                assignments,
-                protection,
-                attempts,
-                authorship,
-                clock,
-                VALIDITY);
+        CollectStudentRegistrationFieldUseCase useCase =
+                new CollectStudentRegistrationFieldUseCase(
+                        authorization,
+                        drafts,
+                        students,
+                        assignments,
+                        protection,
+                        attempts,
+                        authorship,
+                        clock,
+                        VALIDITY);
+        useCase.useConsentTerms(consentTerms);
+        return useCase;
     }
 
     ConfirmStudentRegistrationUseCase confirm() {

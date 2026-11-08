@@ -28,8 +28,8 @@ import java.util.UUID;
  * ({@code SCHOOL_REPORT_DOCUMENT_OPEN} e {@code _DOWNLOAD}). A autorização é a primeira instrução;
  * o relatório é carregado por uma consulta só pelo identificador, e ausente ou não aprovado dão o
  * mesmo {@code RESOURCE_NOT_FOUND} (FR-018). Não existe pedido por número de versão. O sucesso é
- * gravado em transação própria, depois da leitura e antes da entrega (se o registro falhar, nada é entregue); a negativa e o
- * PDF indisponível, em transação independente.
+ * gravado em transação própria, depois da leitura e antes da entrega (se o registro falhar, nada é
+ * entregue); a negativa e o PDF indisponível, em transação independente.
  */
 public class GetSchoolReportDocumentUseCase {
 

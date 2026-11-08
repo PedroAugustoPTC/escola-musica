@@ -82,12 +82,12 @@ class AdminSchoolHistoryContractIT extends AdminWebBase {
 
     @Test
     void listsApprovedItemsOfAllTeachersFollowingTheContract() throws Exception {
-        given(querySchoolHistory.run(any(), any())).willReturn(result(true, lessonRow(), semesterRow()));
+        given(querySchoolHistory.run(any(), any()))
+                .willReturn(result(true, lessonRow(), semesterRow()));
 
         MvcResult mvcResult =
                 mvc.perform(
-                                get(URL)
-                                        .cookie(adminCookie(ADMIN_TOKEN))
+                                get(URL).cookie(adminCookie(ADMIN_TOKEN))
                                         .param("studentId", STUDENT.toString()))
                         .andExpect(status().isOk())
                         .andExpect(followsSchoolHistoryContract())
@@ -143,8 +143,7 @@ class AdminSchoolHistoryContractIT extends AdminWebBase {
         given(querySchoolHistory.run(any(), any())).willReturn(result(false));
 
         mvc.perform(
-                        get(URL)
-                                .cookie(adminCookie(ADMIN_TOKEN))
+                        get(URL).cookie(adminCookie(ADMIN_TOKEN))
                                 .param("studentId", UUID.randomUUID().toString()))
                 .andExpect(status().isOk())
                 .andExpect(followsSchoolHistoryContract())
@@ -158,8 +157,7 @@ class AdminSchoolHistoryContractIT extends AdminWebBase {
         given(querySchoolHistory.run(any(), any())).willReturn(result(false));
 
         mvc.perform(
-                        get(URL)
-                                .cookie(adminCookie(ADMIN_TOKEN))
+                        get(URL).cookie(adminCookie(ADMIN_TOKEN))
                                 .param("page", "2")
                                 .param("size", "50"))
                 .andExpect(status().isOk());

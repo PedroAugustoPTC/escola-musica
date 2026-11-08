@@ -45,6 +45,26 @@ Migração da feature 006 (aditiva):
 Migração nova começa na `V17`. A consulta de aprovados da escola (`ApprovedReportQueryAdapter`) e as rotas de leitura do
 administrador (`AdminSchoolHistoryController`) seguem `specs/006-admin-report-history/contracts/`.
 
+Privacidade, retenção e consentimento (feature 007; migração `V17`, imutável depois de aplicada: banco antigo exige `docker compose -f infra/compose.test.yaml down -v`):
+
+| Peça | O que é |
+|---|---|
+| `V17` | trilha encadeada e só de acréscimo, consentimento, retenção (`retention_run`, `retention_run_item`), eliminação (`erasure_request`, `erased_student`) e `operational_alert` |
+| papel `reports_app` | o pool da aplicação usa o papel sem `UPDATE`/`DELETE` na trilha; o Flyway segue com o dono do banco (`infra/scripts/lib/db-roles.sh`, `DB_APP_USER`/`DB_APP_PASSWORD`) |
+| `outbound/persistence/RetentionTask` | agenda a rotina de retenção e só chama `RunRetentionUseCase`; perfil `!seed` |
+| `inbound/seed/ConsentLoadCommand` | comando `consent-load` (perfil `seed`): carga dos consentimentos já coletados, contrato em `specs/007-privacy-retention-operations/contracts/consent-load.md` |
+| `inbound/web/admin` | controladores de trilha, consentimento, eliminação e operação (`/api/v1/admin/audit-trail`, `/consents`, `/erasure-requests`, `/operations`) |
+
+Custo e alertas de operação (feature 007, US5; sem migração nova, usa a V17):
+
+| Peça | O que é |
+|---|---|
+| `outbound/persistence/OperationalAlertRepositoryAdapter` | `INSERT ... ON CONFLICT` sobre o índice único parcial dos ativos: nunca há dois alertas ativos iguais sob concorrência |
+| `OperationalSignalQueryAdapter`, `CostReportQueryAdapter` | sinais de `ai_call` e `channel_action` e as linhas de custo do mês (só contagens e identificadores; o nome do aluno só em `studentNames`) |
+| `OperationalAlertTask` | `fixedDelay` de `reports.alerts.evaluation-seconds`, perfil `!seed`; só chama `EvaluateOperationalAlertsUseCase` |
+| `inbound/web/admin/AdminOperationsController` | `/api/v1/admin/operations/{costs,alerts,alerts/summary,alerts/{id}/acknowledgement}`; o resumo não grava evento |
+| `outbound/ai/AiPricing` | os adaptadores de IA leem o preço da `PriceTable` pela data de hoje no fuso da escola (o das propriedades é reserva); custo já gravado nunca muda |
+
 ## Cadeia de segurança
 
 Há **três** `SecurityFilterChain`, avaliadas por `@Order`; cada uma só aceita o seu cookie ou token:

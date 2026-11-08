@@ -149,3 +149,8 @@ contra o estado persistido; botão de mensagem antiga ou de outro estado respond
 Diferenças **intencionais** (declaradas na spec, Assumptions): confirmação em toda gravação do Telegram (sem
 formulário de revisão); vínculo sem expiração por inatividade; bloqueio por conta (Telegram) × por origem (Web).
 O resultado de negócio é o mesmo. Nenhum desvio de paridade do Professor foi encontrado (ver `plan.md`, Constitution Check I).
+
+> **Nota (feature 007)**: para aluno menor de 18 anos, o cadastro e a edição ganham os passos C1 a C5 (consentimento do
+> responsável) depois da data de nascimento, e o bloqueio de IA por falta de consentimento ganha mensagem e botão próprios.
+> Contrato em [`007-privacy-retention-operations/contracts/telegram-consent.md`](../../007-privacy-retention-operations/contracts/telegram-consent.md);
+> o `ConsentInput` é o mesmo da Web. Para adulto, o fluxo desta seção segue igual.

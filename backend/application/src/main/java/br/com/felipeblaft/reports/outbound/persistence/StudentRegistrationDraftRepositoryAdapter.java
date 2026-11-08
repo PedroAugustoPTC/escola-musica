@@ -1,5 +1,6 @@
 package br.com.felipeblaft.reports.outbound.persistence;
 
+import br.com.felipeblaft.reports.domain.telegram.ConsentDraft;
 import br.com.felipeblaft.reports.domain.telegram.StudentRegistrationDraft;
 import br.com.felipeblaft.reports.domain.telegram.StudentRegistrationDraft.Field;
 import br.com.felipeblaft.reports.domain.telegram.StudentRegistrationDraft.Kind;
@@ -49,6 +50,12 @@ class StudentRegistrationDraftRepositoryAdapter implements StudentRegistrationDr
 
     @Override
     @Transactional
+    public void removeByStudent(UUID studentId) {
+        jpa.deleteByStudentId(studentId);
+    }
+
+    @Override
+    @Transactional
     public int removeExpired(Instant now) {
         return jpa.deleteExpired(now);
     }
@@ -75,6 +82,7 @@ class StudentRegistrationDraftRepositoryAdapter implements StudentRegistrationDr
         e.createdAt = d.createdAt();
         e.updatedAt = d.updatedAt();
         e.expiresAt = d.expiresAt();
+        e.consent = d.consent().equals(ConsentDraft.EMPTY) ? null : JsonPersistence.write(d.consent());
         return e;
     }
 
@@ -99,6 +107,7 @@ class StudentRegistrationDraftRepositoryAdapter implements StudentRegistrationDr
                 e.confirmationToken,
                 e.createdAt,
                 e.updatedAt,
-                e.expiresAt);
+                e.expiresAt,
+                e.consent == null ? ConsentDraft.EMPTY : JsonPersistence.read(e.consent, ConsentDraft.class));
     }
 }

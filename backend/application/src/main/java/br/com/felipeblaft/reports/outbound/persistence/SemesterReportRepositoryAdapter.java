@@ -1,6 +1,7 @@
 package br.com.felipeblaft.reports.outbound.persistence;
 
 import br.com.felipeblaft.reports.domain.common.Channel;
+import br.com.felipeblaft.reports.domain.privacy.RetentionPolicy;
 import br.com.felipeblaft.reports.domain.report.ReportStatus;
 import br.com.felipeblaft.reports.domain.report.ReportStep;
 import br.com.felipeblaft.reports.domain.semester.GeneralInformation;
@@ -9,11 +10,13 @@ import br.com.felipeblaft.reports.domain.semester.SemesterReport;
 import br.com.felipeblaft.reports.domain.semester.SemesterReportContent;
 import br.com.felipeblaft.reports.port.ConcurrencyConflictException;
 import br.com.felipeblaft.reports.port.SemesterReportRepository;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 /** Relatórios semestrais (Informações Gerais e seções 2 a 10 em jsonb). */
@@ -21,9 +24,17 @@ import org.springframework.stereotype.Repository;
 class SemesterReportRepositoryAdapter implements SemesterReportRepository {
 
     private final SemesterReportJpa jpa;
+    private final JdbcTemplate jdbc;
 
-    SemesterReportRepositoryAdapter(SemesterReportJpa jpa) {
+    SemesterReportRepositoryAdapter(SemesterReportJpa jpa, JdbcTemplate jdbc) {
         this.jpa = jpa;
+        this.jdbc = jdbc;
+    }
+
+    @Override
+    public List<UUID> findRetentionCandidates(
+            RetentionPolicy policy, Instant now, int limit, UUID afterId) {
+        return RetentionCandidates.reportIds(jdbc, "semester_report", policy, now, limit, afterId);
     }
 
     @Override
@@ -82,7 +93,10 @@ class SemesterReportRepositoryAdapter implements SemesterReportRepository {
         e.periodEnd = r.period().end();
         e.consideredLessonCount = r.consideredLessonCount();
         e.openReportCount = r.openReportCount();
-        e.generalInformation = JsonPersistence.write(r.generalInformation());
+        e.generalInformation =
+                r.generalInformation() == null ? null : JsonPersistence.write(r.generalInformation());
+        e.sourceRemovedAt = r.sourceRemovedAt();
+        e.anonymizedAt = r.anonymizedAt();
         e.content = JsonPersistence.write(r.content());
         e.status = r.status().name();
         e.processingStep = r.step() == null ? null : r.step().name();
@@ -107,7 +121,9 @@ class SemesterReportRepositoryAdapter implements SemesterReportRepository {
                 SemesterPeriod.of(e.periodKey),
                 e.consideredLessonCount,
                 e.openReportCount,
-                JsonPersistence.read(e.generalInformation, GeneralInformation.class),
+                e.generalInformation == null
+                        ? null
+                        : JsonPersistence.read(e.generalInformation, GeneralInformation.class),
                 JsonPersistence.read(e.content, SemesterReportContent.class),
                 ReportStatus.valueOf(e.status),
                 e.processingStep == null ? null : ReportStep.valueOf(e.processingStep),
@@ -120,6 +136,26 @@ class SemesterReportRepositoryAdapter implements SemesterReportRepository {
                 e.approvalChannel == null ? null : Channel.valueOf(e.approvalChannel),
                 e.cancelledAt,
                 e.processingTimeMs,
-                e.lockVersion);
+                e.lockVersion,
+                e.sourceRemovedAt,
+                e.anonymizedAt);
+    }
+
+    @Override
+    public List<UUID> findIdsByStudent(UUID studentId) {
+        return jdbc.queryForList(
+                "SELECT id FROM semester_report WHERE student_id = ? ORDER BY id", UUID.class, studentId);
+    }
+
+    @Override
+    public java.util.Map<String, Integer> countByStudentAndStatus(UUID studentId) {
+        java.util.Map<String, Integer> counts = new java.util.TreeMap<>();
+        jdbc.query(
+                "SELECT status, count(*) AS total FROM semester_report WHERE student_id = ? GROUP BY status",
+                rs -> {
+                    counts.put(rs.getString("status"), rs.getInt("total"));
+                },
+                studentId);
+        return counts;
     }
 }

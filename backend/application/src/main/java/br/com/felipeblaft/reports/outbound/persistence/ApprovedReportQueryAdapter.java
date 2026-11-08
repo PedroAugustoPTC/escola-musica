@@ -21,8 +21,8 @@ import org.springframework.stereotype.Repository;
  * lesson_report} (com a data da aula) e {@code semester_report}, sempre {@code status =
  * 'APPROVED'}, junto de {@code teacher} e {@code student} (só {@code id}, {@code name} e {@code
  * active}). A ordem é {@code reference_date DESC, approved_at DESC, report_id DESC}, a tradução em
- * SQL de {@code HistoryOrder.NEWEST_FIRST}. Os parâmetros são sempre ligados, nunca concatenados;
- * o único texto montado é a escolha de cláusulas fixas. Somente leitura.
+ * SQL de {@code HistoryOrder.NEWEST_FIRST}. Os parâmetros são sempre ligados, nunca concatenados; o
+ * único texto montado é a escolha de cláusulas fixas. Somente leitura.
  */
 @Repository
 class ApprovedReportQueryAdapter implements ApprovedReportQueryPort {
@@ -152,7 +152,9 @@ class ApprovedReportQueryAdapter implements ApprovedReportQueryPort {
                 rows.getString("teacher_name"),
                 rows.getBoolean("teacher_active"),
                 type == ReportType.LESSON ? lessonDate : null,
-                type == ReportType.SEMESTER ? SemesterPeriod.of(rows.getString("period_key")) : null,
+                type == ReportType.SEMESTER
+                        ? SemesterPeriod.of(rows.getString("period_key"))
+                        : null,
                 rows.getTimestamp("approved_at").toInstant(),
                 rows.getInt("approved_version"));
     }

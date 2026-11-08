@@ -82,6 +82,18 @@ public enum ErrorCode {
     CALLBACK_EXPIRED,
     OPERATION_NOT_SAVED,
 
+    // Consentimento do responsável (feature 007)
+    CONSENT_REQUIRED,
+    CONSENT_ALREADY_REVOKED,
+
+    // Eliminação a pedido (feature 007)
+    ERASURE_ALREADY_OPEN,
+    STUDENT_ALREADY_ERASED,
+    ERASURE_ALREADY_COMPLETED,
+
+    // Alertas operacionais (feature 007)
+    ALERT_NOT_ACKNOWLEDGEABLE,
+
     // Genéricos
     INVALID_DATA,
     INTERNAL_ERROR,

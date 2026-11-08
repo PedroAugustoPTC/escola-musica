@@ -9,6 +9,8 @@ import { FormErrorSummary, StatusBadge } from '../../components/admin/ui';
 import { apiErrorText, fieldErrorsOf } from '../../components/admin/fieldErrors';
 import { StudentAssociationsSection } from './StudentAssociationsSection';
 import { StudentForm } from '../../components/student/StudentForm';
+import { StudentConsentSection } from '../../components/admin/StudentConsentSection';
+import { useAdminConsentTerm } from '../../components/student/useConsentTerm';
 import { msg } from '../../messages/messages';
 import {
   useAdminStudent,
@@ -22,6 +24,7 @@ export function StudentDetailScreen() {
   const { studentId = '' } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const consentTerm = useAdminConsentTerm();
   const student = useAdminStudent(studentId);
   const update = useUpdateAdminStudent(studentId);
   const inactivate = useInactivateAdminStudent(studentId);
@@ -75,6 +78,10 @@ export function StudentDetailScreen() {
             <Icon name="history" size="medium" />
             {msg('SCHOOL_HISTORY_STUDENT_SHORTCUT')}
           </Link>
+          <Link to={`/admin/audit?targetId=${data.id}`} className="button button--secondary">
+            <Icon name="shield_person" size="medium" />
+            {msg('AUDIT_STUDENT_SHORTCUT')}
+          </Link>
         </div>
       </div>
 
@@ -95,6 +102,7 @@ export function StudentDetailScreen() {
           <FormErrorSummary messages={[apiErrorText(update.error)]} />
         ) : null}
         <StudentForm
+            consentTerm={consentTerm}
           variant="admin"
           mode="edit"
           student={data}
@@ -116,6 +124,8 @@ export function StudentDetailScreen() {
       </section>
 
       <StudentAssociationsSection student={data} />
+
+      <StudentConsentSection studentId={data.id} />
 
       <section className="admin-section" aria-labelledby="student-status">
         <h2 id="student-status" className="card-title">
@@ -139,6 +149,9 @@ export function StudentDetailScreen() {
               Reativar
             </Button>
           )}
+          <Button variant="secondary" icon="delete" onClick={() => navigate(`/admin/students/${data.id}/erasure`)}>
+            Eliminar dados
+          </Button>
         </div>
         {reactivate.isError ? (
           <div role="alert" className="alert alert--error">

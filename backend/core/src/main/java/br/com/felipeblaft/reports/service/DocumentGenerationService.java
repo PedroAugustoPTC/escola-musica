@@ -1,6 +1,7 @@
 package br.com.felipeblaft.reports.service;
 
 import br.com.felipeblaft.reports.domain.common.ReportType;
+import br.com.felipeblaft.reports.domain.operations.AlertType;
 import br.com.felipeblaft.reports.domain.registry.Student;
 import br.com.felipeblaft.reports.domain.registry.Teacher;
 import br.com.felipeblaft.reports.domain.report.DocumentType;
@@ -34,6 +35,8 @@ import java.util.UUID;
  */
 public class DocumentGenerationService {
 
+    private static final String STORAGE_COMPONENT = "pdf-storage";
+
     private final PdfGenerationPort pdfGeneration;
     private final DocumentStoragePort storage;
     private final PdfDocumentRepository documents;
@@ -41,6 +44,7 @@ public class DocumentGenerationService {
     private final StudentRepository students;
     private final TeacherRepository teachers;
     private final ClockPort clock;
+    private final OperationalAlertService alerts;
 
     public DocumentGenerationService(
             PdfGenerationPort pdfGeneration,
@@ -50,6 +54,28 @@ public class DocumentGenerationService {
             StudentRepository students,
             TeacherRepository teachers,
             ClockPort clock) {
+        this(
+                pdfGeneration,
+                storage,
+                documents,
+                reports,
+                students,
+                teachers,
+                clock,
+                (type, component, detailCode) -> {});
+    }
+
+    @SuppressWarnings("java:S107")
+    public DocumentGenerationService(
+            PdfGenerationPort pdfGeneration,
+            DocumentStoragePort storage,
+            PdfDocumentRepository documents,
+            LessonReportRepository reports,
+            StudentRepository students,
+            TeacherRepository teachers,
+            ClockPort clock,
+            OperationalAlertService alerts) {
+        this.alerts = Objects.requireNonNull(alerts);
         this.pdfGeneration = Objects.requireNonNull(pdfGeneration);
         this.storage = Objects.requireNonNull(storage);
         this.documents = Objects.requireNonNull(documents);
@@ -136,7 +162,12 @@ public class DocumentGenerationService {
             GeneratedDocument generated,
             String file) {
         String key = key(type, reportId, file);
-        storage.save(key, generated.bytes());
+        try {
+            storage.save(key, generated.bytes());
+        } catch (RuntimeException failure) {
+            alerts.report(AlertType.STORAGE_FAILED, STORAGE_COMPONENT, "WRITE_FAILED");
+            throw failure;
+        }
         PdfDocument document =
                 PdfDocument.create(
                         version.id(),
@@ -152,7 +183,12 @@ public class DocumentGenerationService {
     }
 
     public Optional<byte[]> open(PdfDocument document) {
-        return storage.open(document.storageKey());
+        try {
+            return storage.open(document.storageKey());
+        } catch (RuntimeException failure) {
+            alerts.report(AlertType.STORAGE_FAILED, STORAGE_COMPONENT, "READ_FAILED");
+            throw failure;
+        }
     }
 
     private Teacher teacher(UUID id) {

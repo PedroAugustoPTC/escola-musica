@@ -8,4 +8,9 @@ package br.com.felipeblaft.reports.port;
 public interface TranscriptionPort {
 
     TranscriptionResult transcribe(NormalizedAudio audio);
+
+    /** Nome opaco do provedor, usado nas chamadas que falham (a resposta não existe). */
+    default String providerName() {
+        return "unknown";
+    }
 }

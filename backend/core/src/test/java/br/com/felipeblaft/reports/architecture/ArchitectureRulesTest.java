@@ -215,13 +215,54 @@ class ArchitectureRulesTest {
                     Map.entry("CancelStudentRegistrationUseCase", Operation.STUDENT_REGISTER),
                     // feature 006: visão da escola, só do administrador na Web
                     Map.entry("QuerySchoolHistoryUseCase", Operation.SCHOOL_HISTORY_QUERY),
+                    // feature 007: trilha de auditoria, só do administrador (a retenção também
+                    // verifica)
+                    Map.entry("QueryAuditTrailUseCase", Operation.AUDIT_TRAIL_QUERY),
+                    Map.entry("VerifyAuditChainUseCase", Operation.AUDIT_TRAIL_VERIFY),
+                    // feature 007: consentimento do responsável
+                    Map.entry("RecordConsentUseCase", Operation.CONSENT_RECORD),
+                    Map.entry("RevokeConsentUseCase", Operation.CONSENT_REVOKE),
+                    Map.entry("PublishConsentTermUseCase", Operation.CONSENT_TERM_PUBLISH),
+                    Map.entry("GetCurrentConsentTermUseCase", Operation.CONSENT_TERM_READ),
+                    Map.entry("ListConsentTermsUseCase", Operation.CONSENT_TERM_READ),
+                    Map.entry("ListPendingConsentsUseCase", Operation.CONSENT_PENDING_READ),
+                    Map.entry("ListStudentConsentsUseCase", Operation.CONSENT_READ),
+                    // feature 007: eliminação a pedido, só do administrador na Web
+                    Map.entry("RegisterErasureRequestUseCase", Operation.ERASURE_REQUEST_REGISTER),
+                    Map.entry("ListErasureRequestsUseCase", Operation.ERASURE_REQUEST_READ),
+                    Map.entry("PreviewErasureUseCase", Operation.ERASURE_PREVIEW),
+                    Map.entry("ConfirmErasureUseCase", Operation.ERASURE_CONFIRM),
+                    Map.entry("GetErasureReceiptUseCase", Operation.ERASURE_RECEIPT_READ),
+                    // feature 007: custo e alertas de operação, só do administrador na Web
+                    Map.entry("GetMonthlyCostReportUseCase", Operation.OPERATIONS_COST_READ),
+                    Map.entry("ListOperationalAlertsUseCase", Operation.OPERATIONS_ALERT_READ),
+                    Map.entry("AcknowledgeOperationalAlertUseCase", Operation.OPERATIONS_ALERT_ACK),
                     Map.entry(
                             "GetSchoolReportDocumentUseCase",
                             Operation.SCHOOL_REPORT_DOCUMENT_OPEN));
 
     /** Casos de uso da visão da escola (feature 006), fora dos pacotes de administração. */
     private static final Set<String> SCHOOL_USE_CASES =
-            Set.of("QuerySchoolHistoryUseCase", "GetSchoolReportDocumentUseCase");
+            Set.of(
+                    "QuerySchoolHistoryUseCase",
+                    "GetSchoolReportDocumentUseCase",
+                    "QueryAuditTrailUseCase",
+                    "VerifyAuditChainUseCase",
+                    "RecordConsentUseCase",
+                    "RevokeConsentUseCase",
+                    "PublishConsentTermUseCase",
+                    "GetCurrentConsentTermUseCase",
+                    "ListConsentTermsUseCase",
+                    "ListPendingConsentsUseCase",
+                    "ListStudentConsentsUseCase",
+                    "RegisterErasureRequestUseCase",
+                    "ListErasureRequestsUseCase",
+                    "PreviewErasureUseCase",
+                    "ConfirmErasureUseCase",
+                    "GetErasureReceiptUseCase",
+                    "GetMonthlyCostReportUseCase",
+                    "ListOperationalAlertsUseCase",
+                    "AcknowledgeOperationalAlertUseCase");
 
     /** Casos de uso desses pacotes sem operação na matriz (validam a credencial, não um ator). */
     private static final Set<String> WITHOUT_OPERATION =
@@ -402,6 +443,23 @@ class ArchitectureRulesTest {
                 .callMethodWhere(calls(StudentRepository.class, "findVisible", "list"));
     }
 
+    // -- retenção: só a rotina expurga a trilha
+
+    @Test
+    void onlyTheRetentionUseCaseDependsOnTheAuditTrailRetentionPort() {
+        noClasses()
+                .that()
+                .doNotHaveFullyQualifiedName(BASE + ".usecase.privacy.RunRetentionUseCase")
+                .should()
+                .dependOnClassesThat()
+                .haveFullyQualifiedName(BASE + ".port.AuditTrailRetentionPort")
+                .check(
+                        core.that(
+                                com.tngtech.archunit.base.DescribedPredicate.not(
+                                        com.tngtech.archunit.core.domain.JavaClass.Predicates
+                                                .simpleName("AuditTrailRetentionPort"))));
+    }
+
     // -- autoria: o registro só recebe inserção
 
     @Test
@@ -515,5 +573,46 @@ class ArchitectureRulesTest {
                                                                 + target)));
             }
         };
+    }
+
+    /**
+     * FR-034, SC-005: todo caso de uso que enfileira trabalho de IA depende da barreira de
+     * consentimento. Quem enfileira trabalho sem IA entra na lista, com o motivo.
+     */
+    private static final Set<String> ENQUEUE_WITHOUT_AI = Set.of();
+
+    @Test
+    void everyUseCaseThatEnqueuesAiWorkDependsOnTheConsentGuard() {
+        List<String> missing =
+                core.stream()
+                        .filter(c -> c.getPackageName().startsWith(BASE + ".usecase"))
+                        .filter(c -> c.isTopLevelClass() && c.getSimpleName().endsWith("UseCase"))
+                        .filter(
+                                c ->
+                                        c.getMethodCallsFromSelf().stream()
+                                                .anyMatch(
+                                                        call ->
+                                                                call.getTargetOwner()
+                                                                                .getName()
+                                                                                .equals(
+                                                                                        BASE
+                                                                                                + ".port.JobQueuePort")
+                                                                        && call.getName()
+                                                                                .equals("enqueue")))
+                        .filter(
+                                c ->
+                                        c.getDirectDependenciesFromSelf().stream()
+                                                .noneMatch(
+                                                        d ->
+                                                                d.getTargetClass()
+                                                                        .getName()
+                                                                        .equals(
+                                                                                BASE
+                                                                                        + ".service.ConsentGuardService")))
+                        .map(JavaClass::getSimpleName)
+                        .filter(name -> !ENQUEUE_WITHOUT_AI.contains(name))
+                        .sorted()
+                        .toList();
+        assertThat(missing).as("casos de uso que enfileiram IA sem a barreira").isEmpty();
     }
 }

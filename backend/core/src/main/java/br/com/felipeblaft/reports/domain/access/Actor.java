@@ -44,6 +44,16 @@ public record Actor(Role role, UUID id, ActionOrigin origin, boolean passwordCha
         return new Actor(null, null, origin, false);
     }
 
+    /** Ator da rotina diária de retenção; só {@code RetentionTask} o cria (regra ArchUnit). */
+    public static Actor retention() {
+        return system(ActionOrigin.RETENTION);
+    }
+
+    /** Ator da apuração periódica de alertas; só {@code OperationalAlertTask} o cria. */
+    public static Actor alertEvaluation() {
+        return system(ActionOrigin.ALERT_EVALUATION);
+    }
+
     public boolean isSystem() {
         return role == null;
     }

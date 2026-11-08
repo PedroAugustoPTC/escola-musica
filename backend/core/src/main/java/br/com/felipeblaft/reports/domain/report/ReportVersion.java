@@ -21,7 +21,8 @@ public record ReportVersion(
         UUID interactionId,
         Channel channel,
         String promptVersion,
-        Instant createdAt) {
+        Instant createdAt,
+        Instant contentRemovedAt) {
 
     public ReportVersion {
         Objects.requireNonNull(id);
@@ -34,6 +35,46 @@ public record ReportVersion(
         if (number < 1) {
             throw new IllegalArgumentException("versão começa em 1");
         }
+    }
+
+    public ReportVersion(
+            UUID id,
+            ReportType reportType,
+            UUID reportId,
+            int number,
+            VersionContent content,
+            VersionOrigin origin,
+            UUID interactionId,
+            Channel channel,
+            String promptVersion,
+            Instant createdAt) {
+        this(
+                id,
+                reportType,
+                reportId,
+                number,
+                content,
+                origin,
+                interactionId,
+                channel,
+                promptVersion,
+                createdAt,
+                null);
+    }
+
+    public ReportVersion withContentRemoved(Instant now) {
+        return new ReportVersion(
+                id,
+                reportType,
+                reportId,
+                number,
+                content,
+                origin,
+                interactionId,
+                channel,
+                promptVersion,
+                createdAt,
+                now);
     }
 
     public static ReportVersion create(

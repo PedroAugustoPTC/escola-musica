@@ -27,6 +27,7 @@ export function resultDestination(job: JobDto): string | null {
       return `${base}/questions`;
     case 'STRUCTURING_FAILED':
     case 'CONSOLIDATION_FAILED':
+    case 'CONSENT_REQUIRED':
     case 'AUDIO_NOT_PROCESSABLE':
       return null;
     default:

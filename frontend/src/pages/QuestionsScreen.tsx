@@ -179,7 +179,7 @@ export function QuestionsScreen() {
           onChange={setAudio}
           disabled={uploading}
         />
-        {error ? <ErrorAlert error={error} /> : null}
+        {error ? <ErrorAlert error={error} consentStudentId={data?.studentId} /> : null}
       </div>
       <ConfirmationDialog
         open={confirmCancellation}

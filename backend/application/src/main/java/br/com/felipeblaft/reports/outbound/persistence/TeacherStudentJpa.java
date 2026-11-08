@@ -27,4 +27,10 @@ interface TeacherStudentJpa extends JpaRepository<TeacherStudentEntity, UUID> {
                             + " where a.student_id = :studentId and t.active",
             nativeQuery = true)
     int countActiveTeachers(UUID studentId);
+
+    @Modifying
+    @Query(
+            value = "delete from teacher_student_assignment where student_id = :studentId",
+            nativeQuery = true)
+    int deleteAllByStudent(UUID studentId);
 }

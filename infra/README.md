@@ -17,7 +17,7 @@ A validação funcional completa está em
 | `.env.example` | modelo das variáveis; copie para `infra/.env` (**nunca versionado**) |
 | `seed/example.json` | carga fictícia; cargas reais ficam fora do Git (`infra/seed/*.json`) |
 | `seed/demo.json` | cadastros fictícios da massa de demonstração (`local.sh up --demo-data=true`) |
-| `scripts/local.sh` | ambiente local: up, seed, issue-code (alias obsoleto: code), rotate-cpf-key, database, status, logs, tests, stop, clean — passo a passo em [`scripts/README.md`](scripts/README.md) |
+| `scripts/local.sh` | ambiente local: up, seed, issue-code (alias obsoleto: code), consent-load, rotate-cpf-key, database, status, logs, tests, stop, clean — passo a passo em [`scripts/README.md`](scripts/README.md) |
 | `compose.database.yaml` | só local: publica o banco em `127.0.0.1` para ferramentas gráficas (`local.sh database-port`) |
 | `scripts/deploy.sh` | atualização e subida da pilha de produção na VPS |
 | `n8n/` | n8n, o transporte do Telegram: imagem fina, workflows como código e utilitários — leia [`n8n/CLAUDE.md`](n8n/CLAUDE.md) |
@@ -262,6 +262,35 @@ credencial padrão).
 | `ACCESS_CPF_LOOKUP_LOCK_MINUTES` | `60` | Duração do bloqueio |
 | `TELEGRAM_STUDENT_DRAFT_MINUTES` | `30` | Minutos de inatividade que descartam o cadastro de aluno em andamento no Telegram |
 
+### Variáveis de privacidade, retenção e operação (feature 007)
+
+Todas estão em `infra/.env.example`. Valor ausente, zero, negativo ou inválido **não impede a subida**: vale o padrão e o
+backend avisa no log o **nome da variável** (nunca o valor). Contrato: `specs/007-privacy-retention-operations/contracts/configuration.md`.
+
+| Variável | Padrão | Função |
+|---|---|---|
+| `DB_APP_PASSWORD` | nenhum (obrigatória) | Senha do papel de banco `reports_app`, usado pelo pool da aplicação (sem `UPDATE`/`DELETE` na trilha). Gere um valor novo e longo; `infra/scripts/lib/db-roles.sh` a aplica ao papel. O Flyway segue com `POSTGRES_PASSWORD` |
+| `RETENTION_TRANSCRIPTION_DAYS` | `30` | Dias após aprovar ou cancelar até apagar a transcrição e o texto das interações |
+| `RETENTION_UNAPPROVED_PDF_DAYS` | `30` | Dias após aprovar até apagar os PDFs das versões não aprovadas |
+| `RETENTION_CANCELLED_REPORT_DAYS` | `90` | Dias após cancelar até anonimizar o relatório |
+| `RETENTION_AUDIT_TRAIL_DAYS` | `1826` | Dias de guarda da trilha de auditoria (o banco impõe piso de 365) |
+| `RETENTION_RUN_HISTORY_DAYS` | igual à trilha | Dias de guarda do histórico das execuções de retenção |
+| `RETENTION_CRON` | `0 41 3 * * *` | Horário da rotina diária (cron do Spring, fuso da escola) |
+| `PRIVACY_OFFICER_NAME` / `PRIVACY_OFFICER_CONTACT` | vazio | Responsável pela LGPD mostrado nas telas; vazio mostra "a definir pela escola" e gera aviso na subida |
+| `ALERT_PROVIDER_CONSECUTIVE_FAILURES` | `3` | Falhas seguidas de um provedor para abrir alerta |
+| `ALERT_PROVIDER_FAILURE_RATE_PERCENT` | `20` | Taxa de falha na janela para abrir alerta |
+| `ALERT_PROVIDER_WINDOW_MINUTES` | `15` | Janela dessa taxa |
+| `ALERT_QUEUE_MAX_AGE_MINUTES` | `5` | Idade máxima de item na fila do canal |
+| `ALERT_QUEUE_MAX_ITEMS` | `50` | Itens pendentes na fila do canal |
+| `ALERT_STORAGE_QUIET_MINUTES` | `15` | Minutos sem falha de armazenamento para normalizar o alerta |
+| `ALERT_EVALUATION_SECONDS` | `60` | Intervalo da apuração dos alertas |
+| `COSTS_INFRASTRUCTURE_MONTHLY_USD` / `COSTS_INFRASTRUCTURE_EFFECTIVE_FROM` | `0` / vazio | Custo fixo mensal de infraestrutura (USD) e a data de vigência |
+
+Os preços por provedor ficam em `reports.costs.prices` (lista com `provider`, `unit`, `value-usd`, `effective-from`); lista vazia
+reaproveita as propriedades de preço atuais.
+
+**Rotação de logs**: todo serviço do `compose.yaml` usa `json-file` com `max-size: 20m` e `max-file: 5`.
+
 `ROTATE_NEW_*` e `ROTATE_OLD_*` (rotação das chaves, abaixo) **não** vão para o `.env`: são variáveis do terminal.
 
 ### Subida com o primeiro administrador
@@ -471,6 +500,22 @@ Os dados persistentes estão nos volumes `pgdata` (banco) e `documents` (PDFs), 
 docker compose -f infra/compose.yaml -f infra/compose.prod.yaml exec -T postgres pg_dump -U reports -Fc reports > backup.dump
 ```
 
+> **Feature 007**: o backup automático fica para a próxima fase; continua manual, como abaixo. A tabela `erased_student` (alunos eliminados a pedido) existe para que um aluno eliminado **não volte** ao restaurar um backup antigo: depois de restaurar, reaplique as eliminações listadas em `erased_student` (a rotina de verificação acusa a divergência) antes de abrir o sistema.
+
 Guarde os backups fora da VPS, cifrados, junto com `CPF_ENCRYPTION_KEY` e `HMAC_SECRET` (sem eles o
 backup não serve). Áudios nunca são persistidos (FR-018): não há o que salvar de `/tmp/audios` nem
 do volume do `telegram-bot-api`.
+
+## Carga dos consentimentos já coletados (feature 007)
+
+Antes de liberar o uso com dados reais, registre o consentimento dos alunos menores já cadastrados (a escola já o coletou).
+O arquivo CSV **fica fora do repositório** (o comando recusa caminho dentro dele) e **não leva CPF nem nome do aluno**:
+
+```bash
+sh infra/scripts/local.sh consent-load /caminho/fora/do/repositorio/consentimentos.csv
+```
+
+Formato (UTF-8, separador `;`, cabeçalho obrigatório): `student_id;consenting_name;relationship;consented_on;term_version;collection_method`.
+O resumo mostra quantas linhas foram aceitas e, para as recusadas, só o número da linha e o código do erro. Ao final, imprime
+quantos alunos menores ainda estão sem consentimento válido (deve ser 0 antes de liberar o uso). Na VPS, copie o arquivo por SSH,
+rode o mesmo comando e **apague o arquivo da VPS** depois. Contrato: `specs/007-privacy-retention-operations/contracts/consent-load.md`.

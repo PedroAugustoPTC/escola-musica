@@ -41,4 +41,10 @@ class AssignmentRepositoryAdapter implements AssignmentRepository {
     public int countActiveTeachers(UUID studentId) {
         return jpa.countActiveTeachers(studentId);
     }
+
+    @Override
+    @Transactional
+    public int deleteAllByStudent(UUID studentId) {
+        return jpa.deleteAllByStudent(studentId);
+    }
 }

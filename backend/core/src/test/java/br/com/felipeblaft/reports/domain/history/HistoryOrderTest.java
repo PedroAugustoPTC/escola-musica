@@ -93,8 +93,7 @@ class HistoryOrderTest {
 
         assertThat(semesterRow.reference()).isEqualTo(LocalDate.of(2026, 1, 1));
         assertThat(lessonRow.reference()).isEqualTo(LocalDate.of(2026, 2, 15));
-        assertThat(sorted(List.of(semesterRow, lessonRow)))
-                .containsExactly(lessonRow, semesterRow);
+        assertThat(sorted(List.of(semesterRow, lessonRow))).containsExactly(lessonRow, semesterRow);
     }
 
     @Test
@@ -103,8 +102,7 @@ class HistoryOrderTest {
         ApprovedReportRow semesterRow = semester(id(1), second, T0.plusSeconds(10));
         ApprovedReportRow lessonRow = lesson(id(2), LocalDate.of(2026, 7, 1), T0);
 
-        assertThat(sorted(List.of(lessonRow, semesterRow)))
-                .containsExactly(semesterRow, lessonRow);
+        assertThat(sorted(List.of(lessonRow, semesterRow))).containsExactly(semesterRow, lessonRow);
     }
 
     @Test

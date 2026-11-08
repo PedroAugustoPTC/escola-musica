@@ -69,7 +69,7 @@ public class AdminSessionFilter extends OncePerRequestFilter {
     protected void doFilterInternal(
             HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        RequestCorrelation.assign(request);
+        RequestCorrelation.of(request);
         if (isPublic(request)) {
             chain.doFilter(request, response);
             return;

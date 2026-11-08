@@ -6,6 +6,7 @@ frontend/src/messages/messages.json
 frontend/src/services/api-types.ts
 frontend/src/services/administration-api-types.ts
 frontend/src/services/school-history-api-types.ts
+frontend/src/services/privacy-api-types.ts
 frontend/test-results/
 frontend/playwright-report/
 coverage/

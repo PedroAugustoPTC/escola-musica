@@ -45,9 +45,20 @@ class MigrationV16IT {
 
     private int insert(String operation, String targetType, String detailColumns, String values)
             throws SQLException {
+        // a V17 acrescenta e exige os hashes da cadeia; antes dela as colunas não existem
+        boolean chained =
+                "1"
+                        .equals(
+                                db.single(
+                                        "select count(*) from information_schema.columns where"
+                                                + " table_schema = '"
+                                                + SCHEMA
+                                                + "' and table_name = 'authorship_record' and"
+                                                + " column_name = 'previous_hash'"));
         return db.update(
                 "insert into authorship_record (id, occurred_at, origin, operation, target_type,"
                         + " result, correlation_id"
+                        + (chained ? ", previous_hash, record_hash" : "")
                         + (detailColumns.isEmpty() ? "" : ", " + detailColumns)
                         + ") values ('"
                         + UUID.randomUUID()
@@ -56,6 +67,7 @@ class MigrationV16IT {
                         + "', "
                         + (targetType == null ? "null" : "'" + targetType + "'")
                         + ", 'SUCCESS', 'req-1'"
+                        + (chained ? ", repeat('0', 64), repeat('1', 64)" : "")
                         + (values.isEmpty() ? "" : ", " + values)
                         + ")");
     }
@@ -191,8 +203,7 @@ class MigrationV16IT {
         db.flyway(null).migrate();
 
         assertThat(insert("SCHOOL_REPORT_DOCUMENT_OPEN", "LESSON_REPORT", "", "")).isEqualTo(1);
-        assertThat(insert("SCHOOL_REPORT_DOCUMENT_OPEN", "SEMESTER_REPORT", "", ""))
-                .isEqualTo(1);
+        assertThat(insert("SCHOOL_REPORT_DOCUMENT_OPEN", "SEMESTER_REPORT", "", "")).isEqualTo(1);
         for (String previous : List.of("TEACHER", "ADMINISTRATOR", "STUDENT", "ASSIGNMENT")) {
             assertThat(insert("TEACHER_LIST", previous, "", "")).as(previous).isEqualTo(1);
         }
@@ -237,7 +248,9 @@ class MigrationV16IT {
 
         db.flyway(null).migrate();
 
-        assertThat(Integer.parseInt(db.single("select max(version::int) from flyway_schema_history")))
+        assertThat(
+                        Integer.parseInt(
+                                db.single("select max(version::int) from flyway_schema_history")))
                 .isGreaterThanOrEqualTo(16);
     }
 }

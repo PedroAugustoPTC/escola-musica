@@ -34,6 +34,9 @@ reports:
     mode: simulated
   jobs:
     workers: 0
+  # a apuração periódica de alertas disputaria trava com o truncate de cada teste: os testes chamam o caso de uso direto
+  alerts:
+    evaluation-seconds: 86400
 
 logging:
   level:

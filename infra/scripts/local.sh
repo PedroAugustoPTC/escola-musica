@@ -8,6 +8,7 @@
 #   sh infra/scripts/local.sh seed [file] [--simulate]  # carga inicial (padrão: infra/seed/example.json) e códigos;
 #                                             #   --simulate roda tudo numa transação desfeita (nada é gravado)
 #   sh infra/scripts/local.sh issue-code <email>  # emergência: reemite o código de um professor (alias: code)
+#   sh infra/scripts/local.sh consent-load <arquivo.csv>  # registra os consentimentos já coletados (CSV fora do repositório)
 #   sh infra/scripts/local.sh rotate-cpf-key [--simulate] [--confirm-invalidate-codes]
 #                                             # rotação das chaves do CPF; chaves novas por variáveis de ambiente
 #   sh infra/scripts/local.sh status          # estado dos serviços
@@ -45,7 +46,7 @@ require_env() {
     exit 1
   fi
   missing=""
-  for key in POSTGRES_PASSWORD CPF_ENCRYPTION_KEY HMAC_SECRET AUTH_HMAC_SECRET; do
+  for key in POSTGRES_PASSWORD DB_APP_PASSWORD CPF_ENCRYPTION_KEY HMAC_SECRET AUTH_HMAC_SECRET; do
     [ -n "$(value "$key")" ] || missing="$missing $key"
   done
   if [ "$(value TELEGRAM_ENABLED)" = "true" ]; then
@@ -97,6 +98,10 @@ ensure_local_credentials() {
   if [ -z "$(value AUTH_HMAC_SECRET)" ]; then
     set_env_value AUTH_HMAC_SECRET "$(random_text 48)"
     echo "AUTH_HMAC_SECRET local gerado em infra/.env."
+  fi
+  if [ -z "$(value DB_APP_PASSWORD)" ]; then
+    set_env_value DB_APP_PASSWORD "$(random_text 32)"
+    echo "DB_APP_PASSWORD local gerada em infra/.env."
   fi
   if [ -z "$(value ADMIN_BOOTSTRAP_NAME)" ] && [ -z "$(value ADMIN_BOOTSTRAP_EMAIL)" ] && [ -z "$(value ADMIN_BOOTSTRAP_PASSWORD)" ]; then
     password="$(random_text 20)"
@@ -175,6 +180,10 @@ case "$command" in
     ensure_local_credentials
     require_env
     [ -n "$demo_data" ] && reset_data
+    # o papel de banco da aplicação precisa existir (com senha) antes de o backend subir (feature 007)
+    $LOCAL up -d --wait postgres
+    . infra/scripts/lib/db-roles.sh
+    apply_database_roles "$LOCAL"
     # shellcheck disable=SC2046
     $LOCAL up -d --build --remove-orphans $(services)
     wait_until_healthy
@@ -224,6 +233,17 @@ case "$command" in
     [ "$#" -ge 1 ] || { echo "Uso: sh infra/scripts/local.sh issue-code <email-do-professor>" >&2; exit 2; }
     echo "Atenção: este comando é de emergência. O caminho normal é o administrador reemitir o código na área administrativa."
     $LOCAL run --rm backend issue-code --email "$1"
+    ;;
+  consent-load)
+    require_env
+    # Carga dos consentimentos já coletados (feature 007). O CSV fica FORA do repositório e é montado só leitura.
+    [ "$#" -eq 1 ] || { echo "Uso: sh infra/scripts/local.sh consent-load /caminho/fora/do/repositorio/consentimentos.csv" >&2; exit 2; }
+    [ -f "$1" ] || { echo "Arquivo não encontrado." >&2; exit 2; }
+    consent_dir="$(cd "$(dirname "$1")" && pwd -P)"
+    case "$consent_dir/" in
+      "$ROOT"/*) echo "O arquivo de consentimentos não pode ficar dentro do repositório." >&2; exit 2 ;;
+    esac
+    $LOCAL run --rm -v "$consent_dir/$(basename "$1"):/consent/consents.csv:ro" backend consent-load --file /consent/consents.csv
     ;;
   rotate-cpf-key)
     require_env

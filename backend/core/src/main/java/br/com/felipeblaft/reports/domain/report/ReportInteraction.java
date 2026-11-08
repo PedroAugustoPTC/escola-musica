@@ -24,7 +24,8 @@ public record ReportInteraction(
         Integer round,
         InteractionResult result,
         Integer resultingVersion,
-        Instant createdAt) {
+        Instant createdAt,
+        Instant textRemovedAt) {
 
     public ReportInteraction {
         Objects.requireNonNull(id);
@@ -33,9 +34,58 @@ public record ReportInteraction(
         Objects.requireNonNull(type);
         Objects.requireNonNull(channel);
         Objects.requireNonNull(medium);
-        Objects.requireNonNull(text);
         Objects.requireNonNull(result);
         Objects.requireNonNull(createdAt);
+        if (text == null && textRemovedAt == null) {
+            throw new NullPointerException("text");
+        }
+    }
+
+    public ReportInteraction(
+            UUID id,
+            ReportType reportType,
+            UUID reportId,
+            InteractionType type,
+            Channel channel,
+            Medium medium,
+            String text,
+            int baseVersion,
+            Integer round,
+            InteractionResult result,
+            Integer resultingVersion,
+            Instant createdAt) {
+        this(
+                id,
+                reportType,
+                reportId,
+                type,
+                channel,
+                medium,
+                text,
+                baseVersion,
+                round,
+                result,
+                resultingVersion,
+                createdAt,
+                null);
+    }
+
+    /** Texto removido pela retenção: a linha fica, sem o texto. */
+    public ReportInteraction withTextRemoved(Instant now) {
+        return new ReportInteraction(
+                id,
+                reportType,
+                reportId,
+                type,
+                channel,
+                medium,
+                null,
+                baseVersion,
+                round,
+                result,
+                resultingVersion,
+                createdAt,
+                now);
     }
 
     public static ReportInteraction create(

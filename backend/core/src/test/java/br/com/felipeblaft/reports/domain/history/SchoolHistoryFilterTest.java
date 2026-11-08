@@ -19,7 +19,9 @@ class SchoolHistoryFilterTest {
 
     private static final LocalDate MARCH_10 = LocalDate.of(2026, 3, 10);
 
-    /** O mesmo caminho da produção: forma na borda (parseSyntax), ordem do período no construtor. */
+    /**
+     * O mesmo caminho da produção: forma na borda (parseSyntax), ordem do período no construtor.
+     */
     private static SchoolHistoryFilter parse(
             UUID studentId,
             UUID teacherId,
@@ -83,11 +85,9 @@ class SchoolHistoryFilterTest {
         UUID student = UUID.randomUUID();
         UUID teacher = UUID.randomUUID();
 
-        SchoolHistoryFilter open =
-                parse(null, null, null, null, null, null, null);
+        SchoolHistoryFilter open = parse(null, null, null, null, null, null, null);
         SchoolHistoryFilter full =
-                parse(
-                        student, teacher, "SEMESTER", "2026-01-01", "2026-06-30", 2, 50);
+                parse(student, teacher, "SEMESTER", "2026-01-01", "2026-06-30", 2, 50);
 
         assertThat(open.criteria()).isEqualTo(ApprovedReportCriteria.unfiltered());
         assertThat(open.page()).isEqualTo(PageRequest.first());
@@ -104,8 +104,7 @@ class SchoolHistoryFilterTest {
 
     @Test
     void blankValuesCountAsAbsent() {
-        SchoolHistoryFilter filter =
-                parse(null, null, " ", "", "  ", null, null);
+        SchoolHistoryFilter filter = parse(null, null, " ", "", "  ", null, null);
 
         assertThat(filter.criteria()).isEqualTo(ApprovedReportCriteria.unfiltered());
     }
@@ -113,15 +112,7 @@ class SchoolHistoryFilterTest {
     @Test
     void malformedDatesAndUnknownTypeAreReportedTogetherWithoutTheValue() {
         assertThatThrownBy(
-                        () ->
-                                parse(
-                                        null,
-                                        null,
-                                        "ANNUAL",
-                                        "10/03/2026",
-                                        "2026-02-30",
-                                        null,
-                                        null))
+                        () -> parse(null, null, "ANNUAL", "10/03/2026", "2026-02-30", null, null))
                 .satisfies(
                         e -> {
                             assertThat(fieldsOf(e))
@@ -136,10 +127,7 @@ class SchoolHistoryFilterTest {
 
     @Test
     void parseRefusesPeriodStartAfterEnd() {
-        assertThatThrownBy(
-                        () ->
-                                parse(
-                                        null, null, null, "2026-05-02", "2026-05-01", null, null))
+        assertThatThrownBy(() -> parse(null, null, null, "2026-05-02", "2026-05-01", null, null))
                 .satisfies(
                         e ->
                                 assertThat(fieldsOf(e))

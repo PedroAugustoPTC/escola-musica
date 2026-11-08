@@ -17,6 +17,12 @@ import java.nio.charset.StandardCharsets;
 public class SimulatedTranscriptionAdapter implements TranscriptionPort {
 
     public static final String PROVIDER = "simulated/transcription";
+
+    @Override
+    public String providerName() {
+        return PROVIDER;
+    }
+
     static final double MINIMUM_WITH_SPEECH = 2.0;
 
     @Override

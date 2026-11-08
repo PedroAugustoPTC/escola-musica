@@ -236,7 +236,7 @@ export function SemesterScreen() {
                 ) : null}
               </>
             )}
-            {error ? <ErrorAlert error={error} /> : null}
+            {error ? <ErrorAlert error={error} consentStudentId={studentId} /> : null}
           </>
         )}
       </div>

@@ -11,8 +11,9 @@ import org.yaml.snakeyaml.Yaml;
 
 /**
  * Regras estáticas do compose e do {@code Dockerfile} do n8n (feature 004, R-11, restrição de
- * contêiner da constituição): imagem fixada, sem porta pública, só na rede interna, reinício em
- * produção, editor desligado fora do ambiente local e nenhum segredo com valor literal.
+ * contêiner da constituição): rotação de logs em todo serviço da base, imagem fixada, sem porta
+ * pública, só na rede interna, reinício em produção, editor desligado fora do ambiente local e
+ * nenhum segredo com valor literal.
  *
  * <p>Cada violação começa por um código estável entre colchetes; nunca traz o valor encontrado.
  */
@@ -44,6 +45,7 @@ final class ComposeGuard {
             services.put(file.getKey(), declared);
             checkImages(file.getKey(), declared, violations);
         }
+        checkLogRotation(services, violations);
         checkN8n(files, services, violations);
         if (dockerfile != null) {
             checkDockerfile(dockerfile, violations);
@@ -69,6 +71,37 @@ final class ComposeGuard {
                 violations.add(
                         message("IMAGE_FLOATING", where, "tag flutuante (latest, stable, next)"));
             }
+        }
+    }
+
+    /**
+     * Todo serviço da base roda com rotação de logs (feature 007, R-08): driver, tamanho e
+     * arquivos.
+     */
+    private static void checkLogRotation(
+            Map<String, Map<String, Object>> services, List<String> violations) {
+        for (Map.Entry<String, Object> entry : services.getOrDefault(BASE, Map.of()).entrySet()) {
+            Map<String, Object> logging = map(map(entry.getValue()).get("logging"));
+            Map<String, Object> options = map(logging.get("options"));
+            boolean valid =
+                    "json-file".equals(String.valueOf(logging.get("driver")))
+                            && options.get("max-size") != null
+                            && positive(options.get("max-file"));
+            if (!valid) {
+                violations.add(
+                        message(
+                                "LOG_ROTATION",
+                                BASE + " serviço '" + entry.getKey() + "'",
+                                "falta logging json-file com max-size e max-file maior que zero"));
+            }
+        }
+    }
+
+    private static boolean positive(Object value) {
+        try {
+            return value != null && Integer.parseInt(value.toString()) > 0;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 

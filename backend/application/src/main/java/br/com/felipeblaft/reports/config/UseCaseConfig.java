@@ -43,11 +43,13 @@ import br.com.felipeblaft.reports.service.CodeAuthenticationService;
 import br.com.felipeblaft.reports.service.DocumentGenerationService;
 import br.com.felipeblaft.reports.service.JobProcessorService;
 import br.com.felipeblaft.reports.service.OfficialDocumentService;
+import br.com.felipeblaft.reports.service.OperationalAlertService;
 import br.com.felipeblaft.reports.service.ReportAccessService;
 import br.com.felipeblaft.reports.service.ReportEligibilityService;
 import br.com.felipeblaft.reports.service.SemesterAccessService;
 import br.com.felipeblaft.reports.service.SemesterProcessorService;
 import br.com.felipeblaft.reports.service.TeacherAccessAuditService;
+import br.com.felipeblaft.reports.service.TeacherReportAuditService;
 import br.com.felipeblaft.reports.service.TelegramLinkTerminationService;
 import br.com.felipeblaft.reports.service.TemporaryAudioService;
 import br.com.felipeblaft.reports.usecase.access.EndTelegramLinkUseCase;
@@ -257,8 +259,10 @@ public class UseCaseConfig {
 
     @Bean
     EndWebSessionUseCase endWebSessionUseCase(
-            WebSessionRepository sessions, DataProtectionPort protection) {
-        return new EndWebSessionUseCase(sessions, protection);
+            WebSessionRepository sessions,
+            DataProtectionPort protection,
+            TeacherReportAuditService audit) {
+        return new EndWebSessionUseCase(sessions, protection, audit);
     }
 
     @Bean
@@ -358,9 +362,10 @@ public class UseCaseConfig {
             LessonReportRepository reports,
             StudentRepository students,
             TeacherRepository teachers,
-            ClockPort clock) {
+            ClockPort clock,
+            OperationalAlertService alerts) {
         return new DocumentGenerationService(
-                pdfGeneration, storage, documents, reports, students, teachers, clock);
+                pdfGeneration, storage, documents, reports, students, teachers, clock, alerts);
     }
 
     @Bean
@@ -440,8 +445,9 @@ public class UseCaseConfig {
             LessonReportRepository reports,
             ReportVersionRepository versions,
             DocumentGenerationService documents,
-            ClockPort clock) {
-        return new ApproveLessonReportUseCase(access, reports, versions, documents, clock);
+            ClockPort clock,
+            TeacherReportAuditService audit) {
+        return new ApproveLessonReportUseCase(access, reports, versions, documents, clock, audit);
     }
 
     @Bean
@@ -449,8 +455,9 @@ public class UseCaseConfig {
             ReportAccessService access,
             LessonReportRepository reports,
             JobQueuePort queue,
-            ClockPort clock) {
-        return new CancelLessonReportUseCase(access, reports, queue, clock);
+            ClockPort clock,
+            TeacherReportAuditService audit) {
+        return new CancelLessonReportUseCase(access, reports, queue, clock, audit);
     }
 
     @Bean
@@ -481,9 +488,10 @@ public class UseCaseConfig {
             ReportVersionRepository versions,
             PdfDocumentRepository documents,
             DocumentGenerationService generation,
-            OfficialDocumentService officialDocument) {
+            OfficialDocumentService officialDocument,
+            TeacherReportAuditService audit) {
         return new GetReportDocumentUseCase(
-                access, reports, versions, documents, generation, officialDocument);
+                access, reports, versions, documents, generation, officialDocument, audit);
     }
 
     // ---- Retomada entre canais (US3)
@@ -587,9 +595,10 @@ public class UseCaseConfig {
             SemesterReportRepository semesterReports,
             ReportVersionRepository versions,
             DocumentGenerationService documents,
-            ClockPort clock) {
+            ClockPort clock,
+            TeacherReportAuditService audit) {
         return new ApproveSemesterReportUseCase(
-                access, semesterReports, versions, documents, clock);
+                access, semesterReports, versions, documents, clock, audit);
     }
 
     @Bean
@@ -597,8 +606,9 @@ public class UseCaseConfig {
             SemesterAccessService access,
             SemesterReportRepository semesterReports,
             JobQueuePort queue,
-            ClockPort clock) {
-        return new CancelSemesterReportUseCase(access, semesterReports, queue, clock);
+            ClockPort clock,
+            TeacherReportAuditService audit) {
+        return new CancelSemesterReportUseCase(access, semesterReports, queue, clock, audit);
     }
 
     @Bean
@@ -718,7 +728,9 @@ public class UseCaseConfig {
 
     @Bean
     QueryStudentHistoryUseCase queryStudentHistoryUseCase(
-            GetStudentSummaryUseCase studentSummary, ApprovedReportQueryPort approvedReports) {
-        return new QueryStudentHistoryUseCase(studentSummary, approvedReports);
+            GetStudentSummaryUseCase studentSummary,
+            ApprovedReportQueryPort approvedReports,
+            TeacherReportAuditService audit) {
+        return new QueryStudentHistoryUseCase(studentSummary, approvedReports, audit);
     }
 }

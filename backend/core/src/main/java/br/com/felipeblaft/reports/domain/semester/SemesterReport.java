@@ -4,6 +4,8 @@ import br.com.felipeblaft.reports.domain.common.Channel;
 import br.com.felipeblaft.reports.domain.common.DomainException;
 import br.com.felipeblaft.reports.domain.common.ErrorCode;
 import br.com.felipeblaft.reports.domain.common.GeneratorId;
+import br.com.felipeblaft.reports.domain.privacy.RetentionDecision;
+import br.com.felipeblaft.reports.domain.privacy.RetentionPolicy;
 import br.com.felipeblaft.reports.domain.report.ReportStatus;
 import br.com.felipeblaft.reports.domain.report.ReportStep;
 import java.time.Instant;
@@ -24,7 +26,9 @@ public class SemesterReport {
     private final SemesterPeriod period;
     private final int consideredLessonCount;
     private final int openReportCount;
-    private final GeneralInformation generalInformation;
+    private GeneralInformation generalInformation;
+    private Instant sourceRemovedAt;
+    private Instant anonymizedAt;
     private SemesterReportContent content;
     private ReportStatus status;
     private ReportStep step;
@@ -61,6 +65,58 @@ public class SemesterReport {
             Instant cancelledAt,
             long processingTimeMs,
             long version) {
+        this(
+                id,
+                teacherId,
+                studentId,
+                period,
+                consideredLessonCount,
+                openReportCount,
+                Objects.requireNonNull(generalInformation),
+                content,
+                status,
+                step,
+                currentVersion,
+                originChannel,
+                createdAt,
+                updatedAt,
+                approvedAt,
+                approvedVersion,
+                approvalChannel,
+                cancelledAt,
+                processingTimeMs,
+                version,
+                null,
+                null);
+    }
+
+    /**
+     * Reidratação: {@code generalInformation} só falta com {@code anonymizedAt} (CHECK do banco).
+     */
+    @SuppressWarnings("java:S107")
+    public SemesterReport(
+            UUID id,
+            UUID teacherId,
+            UUID studentId,
+            SemesterPeriod period,
+            int consideredLessonCount,
+            int openReportCount,
+            GeneralInformation generalInformation,
+            SemesterReportContent content,
+            ReportStatus status,
+            ReportStep step,
+            int currentVersion,
+            Channel originChannel,
+            Instant createdAt,
+            Instant updatedAt,
+            Instant approvedAt,
+            Integer approvedVersion,
+            Channel approvalChannel,
+            Instant cancelledAt,
+            long processingTimeMs,
+            long version,
+            Instant sourceRemovedAt,
+            Instant anonymizedAt) {
         this.id = Objects.requireNonNull(id);
         this.teacherId = Objects.requireNonNull(teacherId);
         this.studentId = Objects.requireNonNull(studentId);
@@ -70,7 +126,12 @@ public class SemesterReport {
         }
         this.consideredLessonCount = consideredLessonCount;
         this.openReportCount = Math.max(0, openReportCount);
-        this.generalInformation = Objects.requireNonNull(generalInformation);
+        if (generalInformation == null && anonymizedAt == null) {
+            throw new IllegalArgumentException("informações gerais só faltam após anonimização");
+        }
+        this.generalInformation = generalInformation;
+        this.sourceRemovedAt = sourceRemovedAt;
+        this.anonymizedAt = anonymizedAt;
         this.content = content == null ? SemesterReportContent.empty() : content;
         this.status = Objects.requireNonNull(status);
         this.step = step;
@@ -193,6 +254,49 @@ public class SemesterReport {
         cancelledAt = now;
         step = null;
         updatedAt = now;
+    }
+
+    /**
+     * Decisão da retenção. O semestral aprovado perde só o texto das interações; as informações
+     * gerais fazem parte do documento oficial e nunca saem (research R-01).
+     */
+    public RetentionDecision retentionAction(RetentionPolicy policy, Instant now) {
+        if (anonymizedAt != null) {
+            return RetentionDecision.KEEP;
+        }
+        if (status == ReportStatus.CANCELLED
+                && RetentionDecision.expired(
+                        cancelledAt, policy.cancelledReportDays().value(), now)) {
+            return RetentionDecision.ANONYMIZE;
+        }
+        if (status == ReportStatus.APPROVED
+                && sourceRemovedAt == null
+                && RetentionDecision.expired(approvedAt, policy.transcriptionDays().value(), now)) {
+            return RetentionDecision.REMOVE_SOURCE;
+        }
+        return RetentionDecision.KEEP;
+    }
+
+    /** Remove o texto das interações; {@code generalInformation} não é tocada. */
+    public void removeSource(Instant now) {
+        if (sourceRemovedAt == null) {
+            sourceRemovedAt = now;
+        }
+    }
+
+    /** Só o cancelado vencido (ou a eliminação) anula as informações gerais. */
+    public void anonymize(Instant now) {
+        removeSource(now);
+        generalInformation = null;
+        anonymizedAt = now;
+    }
+
+    public Instant sourceRemovedAt() {
+        return sourceRemovedAt;
+    }
+
+    public Instant anonymizedAt() {
+        return anonymizedAt;
     }
 
     public void addProcessingTime(long milliseconds) {

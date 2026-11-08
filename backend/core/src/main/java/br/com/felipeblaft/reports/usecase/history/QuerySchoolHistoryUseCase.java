@@ -26,8 +26,8 @@ import java.util.UUID;
  * Visão da escola ({@code SCHOOL_HISTORY_QUERY}): relatórios aprovados de qualquer professor e
  * aluno, na ordem única de {@link br.com.felipeblaft.reports.domain.history.HistoryOrder}. Somente
  * leitura: nada é gravado sobre relatórios. A autorização é a primeira instrução; a leitura e o
- * registro de autoria de sucesso valem na mesma transação, de modo que, se o registro falhar,
- * nada é entregue (FR-023).
+ * registro de autoria de sucesso valem na mesma transação, de modo que, se o registro falhar, nada
+ * é entregue (FR-023).
  */
 public class QuerySchoolHistoryUseCase {
 

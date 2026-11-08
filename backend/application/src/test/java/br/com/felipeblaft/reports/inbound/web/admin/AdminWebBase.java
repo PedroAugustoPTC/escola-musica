@@ -21,6 +21,8 @@ import br.com.felipeblaft.reports.usecase.administrator.ReactivateAdministratorU
 import br.com.felipeblaft.reports.usecase.administrator.SignInAdministratorUseCase;
 import br.com.felipeblaft.reports.usecase.administrator.SignOutAdministratorUseCase;
 import br.com.felipeblaft.reports.usecase.administrator.ValidateAdministratorSessionUseCase;
+import br.com.felipeblaft.reports.usecase.audit.QueryAuditTrailUseCase;
+import br.com.felipeblaft.reports.usecase.audit.VerifyAuditChainUseCase;
 import br.com.felipeblaft.reports.usecase.document.GetSchoolReportDocumentUseCase;
 import br.com.felipeblaft.reports.usecase.history.QuerySchoolHistoryUseCase;
 import br.com.felipeblaft.reports.usecase.registry.AssignTeacherToStudentUseCase;
@@ -74,11 +76,15 @@ public abstract class AdminWebBase extends IntegrationBase {
     public static final String ADMIN_TOKEN = "admin-token-1";
     public static final String SCHOOL_HISTORY_CONTRACT_RELATIVE =
             "specs/006-admin-report-history/contracts/api-school-history.openapi.yaml";
+    public static final String PRIVACY_CONTRACT_RELATIVE =
+            "specs/007-privacy-retention-operations/contracts/api-privacy-operations.openapi.yaml";
     public static final String BASE = "/api/v1/admin";
 
     private static final OpenApiInteractionValidator VALIDATOR = createValidator();
     private static final OpenApiInteractionValidator SCHOOL_HISTORY_VALIDATOR =
             createSchoolHistoryValidator();
+    private static final OpenApiInteractionValidator PRIVACY_VALIDATOR =
+            createRelaxedValidator(PRIVACY_CONTRACT_RELATIVE);
 
     @Autowired protected MockMvc mvc;
     @Autowired protected ScenarioIT scenario;
@@ -116,6 +122,59 @@ public abstract class AdminWebBase extends IntegrationBase {
     // feature 006: visão da escola
     @MockitoBean protected QuerySchoolHistoryUseCase querySchoolHistory;
     @MockitoBean protected GetSchoolReportDocumentUseCase getSchoolReportDocument;
+
+    // feature 007: trilha de auditoria
+    @MockitoBean protected QueryAuditTrailUseCase queryAuditTrail;
+    @MockitoBean protected VerifyAuditChainUseCase verifyAuditChain;
+
+    // feature 007: consentimento do responsável
+    @MockitoBean
+    protected br.com.felipeblaft.reports.usecase.privacy.RecordConsentUseCase recordConsent;
+
+    @MockitoBean
+    protected br.com.felipeblaft.reports.usecase.privacy.RevokeConsentUseCase revokeConsent;
+
+    @MockitoBean
+    protected br.com.felipeblaft.reports.usecase.privacy.PublishConsentTermUseCase
+            publishConsentTerm;
+
+    @MockitoBean
+    protected br.com.felipeblaft.reports.usecase.privacy.ListConsentTermsUseCase listConsentTerms;
+
+    @MockitoBean
+    protected br.com.felipeblaft.reports.usecase.privacy.ListPendingConsentsUseCase
+            listPendingConsents;
+
+    @MockitoBean
+    protected br.com.felipeblaft.reports.usecase.privacy.ListStudentConsentsUseCase
+            listStudentConsents;
+
+    @MockitoBean
+    protected br.com.felipeblaft.reports.usecase.privacy.RegisterErasureRequestUseCase
+            registerErasure;
+
+    @MockitoBean
+    protected br.com.felipeblaft.reports.usecase.privacy.ListErasureRequestsUseCase listErasures;
+
+    @MockitoBean
+    protected br.com.felipeblaft.reports.usecase.privacy.PreviewErasureUseCase previewErasure;
+
+    @MockitoBean
+    protected br.com.felipeblaft.reports.usecase.privacy.ConfirmErasureUseCase confirmErasure;
+
+    @MockitoBean
+    protected br.com.felipeblaft.reports.usecase.privacy.GetErasureReceiptUseCase getErasureReceipt;
+
+    @MockitoBean
+    protected br.com.felipeblaft.reports.usecase.operations.GetMonthlyCostReportUseCase
+            getMonthlyCost;
+
+    @MockitoBean
+    protected br.com.felipeblaft.reports.usecase.operations.ListOperationalAlertsUseCase listAlerts;
+
+    @MockitoBean
+    protected br.com.felipeblaft.reports.usecase.operations.AcknowledgeOperationalAlertUseCase
+            acknowledgeAlert;
 
     protected final UUID administratorId = UUID.fromString("00000000-0000-4000-8000-0000000000a1");
     protected Instant sessionExpiry;
@@ -161,16 +220,29 @@ public abstract class AdminWebBase extends IntegrationBase {
         return OpenApiValidationMatchers.openApi().isValid(SCHOOL_HISTORY_VALIDATOR);
     }
 
+    /** Valida contra o contrato de privacidade e operação (feature 007). */
+    protected static ResultMatcher followsPrivacyContract() {
+        return OpenApiValidationMatchers.openApi().isValid(PRIVACY_VALIDATOR);
+    }
+
     private static OpenApiInteractionValidator createSchoolHistoryValidator() {
-        Path path = Path.of("../..", SCHOOL_HISTORY_CONTRACT_RELATIVE).toAbsolutePath().normalize();
-        String configured = System.getenv("CONTRACT_SCHOOL_HISTORY_API");
+        return createRelaxedValidator(SCHOOL_HISTORY_CONTRACT_RELATIVE);
+    }
+
+    private static OpenApiInteractionValidator createRelaxedValidator(String relative) {
+        Path path = Path.of("../..", relative).toAbsolutePath().normalize();
+        String configured =
+                relative.equals(SCHOOL_HISTORY_CONTRACT_RELATIVE)
+                        ? System.getenv("CONTRACT_SCHOOL_HISTORY_API")
+                        : null;
         if (configured != null && Files.exists(Path.of(configured))) {
             path = Path.of(configured);
         }
         return OpenApiInteractionValidator.createForSpecificationUrl(path.toUri().toString())
                 .withLevelResolver(
                         LevelResolver.create()
-                                // os testes de recusa enviam de propósito parâmetros fora do contrato
+                                // os testes de recusa enviam de propósito parâmetros fora do
+                                // contrato
                                 .withLevel(
                                         "validation.request.parameter.schema",
                                         ValidationReport.Level.IGNORE)

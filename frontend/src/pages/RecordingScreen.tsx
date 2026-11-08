@@ -88,7 +88,7 @@ export function RecordingScreen() {
           <h1 className="page-title">{student.data.name}</h1>
           <p className="subtitle">Aula de {formatDate(todayAtSchool())}</p>
         </div>
-        {error ? <ErrorAlert error={error} /> : null}
+        {error ? <ErrorAlert error={error} consentStudentId={studentId} /> : null}
         <AudioRecorder
           limitMb={limitMb}
           onChange={setAudio}

@@ -343,7 +343,7 @@ export function ReviewScreen() {
                 onChange={setAudio}
                 disabled={applying || uploadingAdjustment}
               />
-              {adjustmentError ? <ErrorAlert error={adjustmentError} /> : null}
+              {adjustmentError ? <ErrorAlert error={adjustmentError} consentStudentId={data.studentId} /> : null}
               <Button
                 variant="secondary"
                 icon="edit"

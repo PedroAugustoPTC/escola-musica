@@ -32,6 +32,10 @@ public class TemporaryAudioService {
         this.transcription = Objects.requireNonNull(transcription);
     }
 
+    public String providerName() {
+        return transcription.providerName();
+    }
+
     public TranscriptionResult transcribe(AudioInput input) {
         TemporaryFile original = null;
         NormalizedAudio normalized = null;

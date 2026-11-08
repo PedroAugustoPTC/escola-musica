@@ -38,6 +38,10 @@ class DataProtectionStoredFormatTest {
                             null,
                             null,
                             null,
+                            null,
+                            null,
+                            null,
+                            null,
                             null));
 
     private static String hmac(String text) throws Exception {

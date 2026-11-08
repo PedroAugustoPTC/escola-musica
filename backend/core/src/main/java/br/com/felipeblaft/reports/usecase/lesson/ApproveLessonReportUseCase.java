@@ -1,5 +1,6 @@
 package br.com.felipeblaft.reports.usecase.lesson;
 
+import br.com.felipeblaft.reports.domain.audit.AuditEventType;
 import br.com.felipeblaft.reports.domain.common.Channel;
 import br.com.felipeblaft.reports.domain.common.ReportType;
 import br.com.felipeblaft.reports.domain.report.LessonReport;
@@ -9,6 +10,7 @@ import br.com.felipeblaft.reports.port.LessonReportRepository;
 import br.com.felipeblaft.reports.port.ReportVersionRepository;
 import br.com.felipeblaft.reports.service.DocumentGenerationService;
 import br.com.felipeblaft.reports.service.ReportAccessService;
+import br.com.felipeblaft.reports.service.TeacherReportAuditService;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
@@ -27,18 +29,21 @@ public class ApproveLessonReportUseCase {
     private final ReportVersionRepository versions;
     private final DocumentGenerationService documents;
     private final ClockPort clock;
+    private final TeacherReportAuditService audit;
 
     public ApproveLessonReportUseCase(
             ReportAccessService access,
             LessonReportRepository reports,
             ReportVersionRepository versions,
             DocumentGenerationService documents,
-            ClockPort clock) {
+            ClockPort clock,
+            TeacherReportAuditService audit) {
         this.access = Objects.requireNonNull(access);
         this.reports = Objects.requireNonNull(reports);
         this.versions = Objects.requireNonNull(versions);
         this.documents = Objects.requireNonNull(documents);
         this.clock = Objects.requireNonNull(clock);
+        this.audit = Objects.requireNonNull(audit);
     }
 
     public Approval run(UUID teacherId, UUID reportId, int confirmedVersion, Channel channel) {
@@ -49,6 +54,12 @@ public class ApproveLessonReportUseCase {
                 versions.search(ReportType.LESSON, report.id(), report.approvedVersion())
                         .orElseThrow();
         documents.generateOfficial(report, version);
+        audit.reportDecided(
+                teacherId,
+                AuditEventType.LESSON_REPORT_APPROVE,
+                ReportType.LESSON,
+                report.id(),
+                report.approvedVersion());
         return new Approval(report.id(), report.approvedVersion(), report.approvedAt());
     }
 }

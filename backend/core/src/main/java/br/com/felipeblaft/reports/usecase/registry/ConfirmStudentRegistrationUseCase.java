@@ -12,6 +12,7 @@ import br.com.felipeblaft.reports.port.StudentRegistrationDraftRepository;
 import br.com.felipeblaft.reports.port.TransactionPort;
 import br.com.felipeblaft.reports.service.ActorAuthorizationService;
 import br.com.felipeblaft.reports.service.TelegramRegistrationAccessService;
+import br.com.felipeblaft.reports.usecase.privacy.RecordConsentUseCase;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
@@ -46,6 +47,7 @@ public class ConfirmStudentRegistrationUseCase {
     private final CpfDecryptionPort cpfDecryption;
     private final TransactionPort transaction;
     private final ClockPort clock;
+    private RecordConsentUseCase recordConsent;
 
     @SuppressWarnings("java:S107")
     public ConfirmStudentRegistrationUseCase(
@@ -67,6 +69,11 @@ public class ConfirmStudentRegistrationUseCase {
         this.cpfDecryption = Objects.requireNonNull(cpfDecryption);
         this.transaction = Objects.requireNonNull(transaction);
         this.clock = Objects.requireNonNull(clock);
+    }
+
+    /** Liga o registro de consentimento avulso (rascunho do tipo {@code CONSENT}). */
+    public void useConsentRecording(RecordConsentUseCase recording) {
+        this.recordConsent = recording;
     }
 
     /** Resultado da confirmação: o tipo do rascunho consumido e o aluno gravado. */
@@ -116,12 +123,20 @@ public class ConfirmStudentRegistrationUseCase {
                     register.run(
                             actor,
                             new RegisterStudentUseCase.Command(
-                                    inputOf(draft), List.of(), correlationId, true));
+                                    inputOf(draft),
+                                    List.of(),
+                                    correlationId,
+                                    true,
+                                    draft.consent().toInput()));
             case UPDATE ->
                     update.run(
                             actor,
                             new UpdateStudentUseCase.Command(
-                                    draft.studentId(), inputOf(draft), correlationId, true));
+                                    draft.studentId(),
+                                    inputOf(draft),
+                                    correlationId,
+                                    true,
+                                    draft.consent().toInput()));
             case INACTIVATE ->
                     inactivate.run(
                             actor,
@@ -130,6 +145,17 @@ public class ConfirmStudentRegistrationUseCase {
                     reactivate.run(
                             actor,
                             new ReactivateStudentUseCase.Command(draft.studentId(), correlationId));
+            case CONSENT -> {
+                if (recordConsent == null) {
+                    throw new DomainException(ErrorCode.CALLBACK_EXPIRED);
+                }
+                recordConsent.run(
+                        actor,
+                        new RecordConsentUseCase.Command(
+                                draft.studentId(), draft.consent().toInput(), correlationId));
+                // o consentimento não devolve aluno: o canal diz o que foi feito pelo tipo
+                yield null;
+            }
         };
     }
 

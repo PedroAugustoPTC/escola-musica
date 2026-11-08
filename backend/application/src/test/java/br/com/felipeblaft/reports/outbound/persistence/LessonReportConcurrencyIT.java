@@ -3,6 +3,7 @@ package br.com.felipeblaft.reports.outbound.persistence;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import br.com.felipeblaft.reports.config.log.CorrelationMdc;
 import br.com.felipeblaft.reports.domain.common.Channel;
 import br.com.felipeblaft.reports.domain.common.DomainException;
 import br.com.felipeblaft.reports.domain.common.ErrorCode;
@@ -74,7 +75,9 @@ class LessonReportConcurrencyIT extends IntegrationBase {
             Callable<String> attempt =
                     () -> {
                         start.await();
-                        try {
+                        // cada thread simula uma requisição: a trilha exige canal e correlação
+                        try (CorrelationMdc scope =
+                                CorrelationMdc.open(java.util.UUID.randomUUID().toString(), channel.name())) {
                             approve.run(clara.id(), reportId, 1, channel);
                             return "APPROVED";
                         } catch (DomainException refuses) {
@@ -108,6 +111,13 @@ class LessonReportConcurrencyIT extends IntegrationBase {
 
     @Test
     void secondApprovalAfterFirstIsRefused() {
+        // as chamadas diretas ao caso de uso simulam uma requisição Web
+        try (CorrelationMdc scope = CorrelationMdc.open(java.util.UUID.randomUUID().toString(), "WEB")) {
+            assertSecondApprovalRefused();
+        }
+    }
+
+    private void assertSecondApprovalRefused() {
         approve.run(clara.id(), reportId, 1, Channel.WEB);
 
         assertThatThrownBy(() -> approve.run(clara.id(), reportId, 1, Channel.TELEGRAM))

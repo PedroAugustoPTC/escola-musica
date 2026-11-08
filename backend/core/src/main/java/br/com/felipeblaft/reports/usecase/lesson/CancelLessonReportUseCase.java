@@ -1,11 +1,13 @@
 package br.com.felipeblaft.reports.usecase.lesson;
 
+import br.com.felipeblaft.reports.domain.audit.AuditEventType;
 import br.com.felipeblaft.reports.domain.common.ReportType;
 import br.com.felipeblaft.reports.domain.report.LessonReport;
 import br.com.felipeblaft.reports.port.ClockPort;
 import br.com.felipeblaft.reports.port.JobQueuePort;
 import br.com.felipeblaft.reports.port.LessonReportRepository;
 import br.com.felipeblaft.reports.service.ReportAccessService;
+import br.com.felipeblaft.reports.service.TeacherReportAuditService;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
@@ -20,16 +22,19 @@ public class CancelLessonReportUseCase {
     private final LessonReportRepository reports;
     private final JobQueuePort queue;
     private final ClockPort clock;
+    private final TeacherReportAuditService audit;
 
     public CancelLessonReportUseCase(
             ReportAccessService access,
             LessonReportRepository reports,
             JobQueuePort queue,
-            ClockPort clock) {
+            ClockPort clock,
+            TeacherReportAuditService audit) {
         this.access = Objects.requireNonNull(access);
         this.reports = Objects.requireNonNull(reports);
         this.queue = Objects.requireNonNull(queue);
         this.clock = Objects.requireNonNull(clock);
+        this.audit = Objects.requireNonNull(audit);
     }
 
     public void cancel(UUID teacherId, UUID reportId) {
@@ -52,5 +57,7 @@ public class CancelLessonReportUseCase {
                             job.discard(now);
                             queue.update(job);
                         });
+        audit.reportDecided(
+                teacherId, AuditEventType.LESSON_REPORT_CANCEL, ReportType.LESSON, reportId, null);
     }
 }

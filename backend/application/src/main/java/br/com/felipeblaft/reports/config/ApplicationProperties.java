@@ -19,7 +19,11 @@ public record ApplicationProperties(
         TelegramChannel telegramChannel,
         Providers providers,
         Jobs jobs,
-        Administrator administrator) {
+        Administrator administrator,
+        Retention retention,
+        Alerts alerts,
+        Costs costs,
+        Privacy privacy) {
 
     public record School(ZoneId timezone) {}
 
@@ -152,4 +156,40 @@ public record ApplicationProperties(
             return "Bootstrap[***]";
         }
     }
+
+    /**
+     * Retenção (feature 007, FR-001): prazos em dias e horário da rotina. Os valores chegam BRUTOS
+     * (texto): o núcleo decide o efetivo e valor inválido vira o padrão com aviso, nunca falha de
+     * subida.
+     */
+    public record Retention(
+            String transcriptionDays,
+            String unapprovedPdfDays,
+            String cancelledReportDays,
+            String auditTrailDays,
+            String runHistoryDays,
+            String cron) {}
+
+    /** Limites dos alertas operacionais (FR-055), também brutos. */
+    public record Alerts(
+            String providerConsecutiveFailures,
+            String providerFailureRatePercent,
+            String providerWindowMinutes,
+            String queueMaxAgeMinutes,
+            String queueMaxItems,
+            String storageQuietMinutes,
+            String evaluationSeconds) {}
+
+    /** Preços por provedor com vigência e custo fixo mensal de infraestrutura (FR-052). */
+    public record Costs(
+            java.util.List<PriceProperty> prices,
+            String infrastructureMonthlyUsd,
+            String infrastructureEffectiveFrom) {}
+
+    /** Uma entrada da tabela de preços, ainda como texto. */
+    public record PriceProperty(
+            String provider, String unit, String valueUsd, String effectiveFrom) {}
+
+    /** Responsável pela LGPD mostrado nas telas (D11). */
+    public record Privacy(String officerName, String officerContact) {}
 }

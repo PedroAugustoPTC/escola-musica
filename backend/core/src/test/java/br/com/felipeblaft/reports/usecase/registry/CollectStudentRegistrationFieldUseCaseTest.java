@@ -7,6 +7,7 @@ import br.com.felipeblaft.reports.domain.access.Actor;
 import br.com.felipeblaft.reports.domain.common.DomainException;
 import br.com.felipeblaft.reports.domain.common.ErrorCode;
 import br.com.felipeblaft.reports.domain.registry.Cpf;
+import br.com.felipeblaft.reports.domain.telegram.ConsentDraft;
 import br.com.felipeblaft.reports.domain.telegram.StudentRegistrationDraft;
 import br.com.felipeblaft.reports.domain.telegram.StudentRegistrationDraft.Field;
 import br.com.felipeblaft.reports.domain.telegram.StudentRegistrationDraft.Kind;
@@ -56,6 +57,15 @@ class CollectStudentRegistrationFieldUseCaseTest {
         collect(Field.GUARDIAN, name);
         collect(Field.GUARDIAN, phone);
         collect(Field.GUARDIAN, email);
+    }
+
+    /** Os cinco passos do consentimento do responsável (C1 a C5); devolve o resultado do último. */
+    private CollectStudentRegistrationFieldUseCase.Result consent() {
+        collect(Field.CONSENT, "");
+        collect(Field.CONSENT, "Maria Souza");
+        collect(Field.CONSENT, "MOTHER");
+        collect(Field.CONSENT, "2026-09-01");
+        return collect(Field.CONSENT, "DIGITAL");
     }
 
     // ---- Roteiro de cadastro
@@ -108,8 +118,10 @@ class CollectStudentRegistrationFieldUseCaseTest {
         assertThat(collect(Field.GUARDIAN, "(11) 91234-5678").nextField())
                 .isEqualTo(Field.GUARDIAN);
         var email = collect(Field.GUARDIAN, "Maria@Example.com");
-        assertThat(email.nextField()).isEqualTo(Field.INSTRUMENT);
+        assertThat(email.nextField()).isEqualTo(Field.CONSENT);
         assertThat(email.guardianRequired()).isTrue();
+
+        assertThat(consent().nextField()).isEqualTo(Field.INSTRUMENT);
 
         var instrument = collect(Field.INSTRUMENT, "Piano");
         assertThat(instrument.nextField()).isNull();
@@ -183,6 +195,7 @@ class CollectStudentRegistrationFieldUseCaseTest {
         collect(Field.BIRTH_DATE, MINOR_BIRTH);
         collect(Field.CPF, DraftScenario.CPF);
         guardian("Maria Souza", "(11) 91234-5678", "maria@example.com");
+        consent();
         var done = collect(Field.INSTRUMENT, "Piano");
 
         assertThat(
@@ -190,7 +203,13 @@ class CollectStudentRegistrationFieldUseCaseTest {
                                         CollectStudentRegistrationFieldUseCase.Summary.class
                                                 .getRecordComponents())
                                 .map(c -> c.getName()))
-                .containsExactly("name", "birthDate", "instrument", "guardianName");
+                .containsExactly(
+                        "name",
+                        "birthDate",
+                        "instrument",
+                        "guardianName",
+                        "consentTermVersion",
+                        "consentedOn");
         assertThat(done.toString())
                 .doesNotContain("Pedro")
                 .doesNotContain(done.confirmationToken());
@@ -402,7 +421,9 @@ class CollectStudentRegistrationFieldUseCaseTest {
 
         collect(Field.GUARDIAN, "Maria Souza");
         collect(Field.GUARDIAN, "11912345678");
-        var done = collect(Field.GUARDIAN, "maria@example.com");
+        assertThat(collect(Field.GUARDIAN, "maria@example.com").nextField())
+                .isEqualTo(Field.CONSENT);
+        var done = consent();
 
         assertThat(done.nextField()).isNull();
         assertThat(done.summary().guardianName()).isEqualTo("Maria Souza");
@@ -578,5 +599,80 @@ class CollectStudentRegistrationFieldUseCaseTest {
                         UUID.randomUUID(), Field.CPF, "52998224725", "1");
 
         assertThat(command.toString()).doesNotContain("52998224725");
+    }
+
+    // ---- Consentimento do responsável (C1 a C5, feature 007)
+
+    private void reachConsent() {
+        startCreate();
+        collect(Field.NAME, "Pedro");
+        collect(Field.BIRTH_DATE, MINOR_BIRTH);
+        collect(Field.CPF, DraftScenario.CPF);
+        guardian("Maria Souza", "(11) 91234-5678", "maria@example.com");
+    }
+
+    @Test
+    void consentStepsFixTheCurrentTermVersionAndFillTheDraftInOrder() {
+        reachConsent();
+
+        var acknowledged = collect(Field.CONSENT, "");
+        assertThat(acknowledged.nextField()).isEqualTo(Field.CONSENT);
+        assertThat(acknowledged.nextConsentPart()).isEqualTo(ConsentDraft.Part.NAME);
+        assertThat(draft().consent().termVersion()).isEqualTo(1);
+
+        assertThat(collect(Field.CONSENT, "Maria Souza").nextConsentPart())
+                .isEqualTo(ConsentDraft.Part.RELATIONSHIP);
+        assertThat(collect(Field.CONSENT, "MOTHER").nextConsentPart())
+                .isEqualTo(ConsentDraft.Part.DATE);
+        assertThat(collect(Field.CONSENT, "today").nextConsentPart())
+                .isEqualTo(ConsentDraft.Part.METHOD);
+        var done = collect(Field.CONSENT, "SIGNED_PAPER");
+
+        assertThat(done.nextField()).isEqualTo(Field.INSTRUMENT);
+        assertThat(draft().consent().toInput()).isNotNull();
+        assertThat(draft().consent().date()).isEqualTo("2026-09-21");
+        assertThat(draft().toString()).doesNotContain("Maria");
+    }
+
+    @Test
+    void invalidConsentAnswersAreRefusedOnTheirOwnFieldWithoutChangingTheDraft() {
+        reachConsent();
+        collect(Field.CONSENT, "");
+        collect(Field.CONSENT, "Maria Souza");
+
+        assertThat(refused(Field.CONSENT, "AUNT").details().toString())
+                .contains("consent.relationship");
+        collect(Field.CONSENT, "MOTHER");
+        assertThat(refused(Field.CONSENT, "31/12/2099").details().toString())
+                .contains("consent.consentedOn");
+        assertThat(refused(Field.CONSENT, "not-a-date").details().toString())
+                .contains("consent.consentedOn");
+        assertThat(draft().consent().nextPart()).isEqualTo(ConsentDraft.Part.DATE);
+        collect(Field.CONSENT, "01/09/2026");
+        assertThat(refused(Field.CONSENT, "FAX").details().toString())
+                .contains("consent.collectionMethod");
+    }
+
+    @Test
+    void changingTheBirthDateToAnAdultDropsTheGuardianAndTheConsent() {
+        reachConsent();
+        collect(Field.CONSENT, "");
+        assertThat(draft().consent().termVersion()).isNotNull();
+
+        collect(Field.BIRTH_DATE, ADULT_BIRTH);
+
+        assertThat(draft().consent()).isEqualTo(ConsentDraft.EMPTY);
+        assertThat(draft().guardianName()).isNull();
+    }
+
+    @Test
+    void returningToTheConsentOnceCompleteRestartsAtTheFirstQuestion() {
+        reachConsent();
+        consent();
+
+        var restarted = collect(Field.CONSENT, "");
+
+        assertThat(restarted.nextConsentPart()).isEqualTo(ConsentDraft.Part.ACKNOWLEDGE);
+        assertThat(draft().consent()).isEqualTo(ConsentDraft.EMPTY);
     }
 }

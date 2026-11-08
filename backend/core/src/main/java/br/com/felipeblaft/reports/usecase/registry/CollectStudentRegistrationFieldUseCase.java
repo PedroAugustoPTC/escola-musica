@@ -3,15 +3,21 @@ package br.com.felipeblaft.reports.usecase.registry;
 import br.com.felipeblaft.reports.domain.access.Actor;
 import br.com.felipeblaft.reports.domain.common.DomainException;
 import br.com.felipeblaft.reports.domain.common.ErrorCode;
+import br.com.felipeblaft.reports.domain.privacy.ConsentCollectionMethod;
+import br.com.felipeblaft.reports.domain.privacy.ConsentDates;
+import br.com.felipeblaft.reports.domain.privacy.ConsentRelationship;
+import br.com.felipeblaft.reports.domain.privacy.ConsentTermVersion;
 import br.com.felipeblaft.reports.domain.registry.BirthDate;
 import br.com.felipeblaft.reports.domain.registry.BrazilianPhone;
 import br.com.felipeblaft.reports.domain.registry.Cpf;
 import br.com.felipeblaft.reports.domain.registry.EmailAddress;
 import br.com.felipeblaft.reports.domain.registry.Instrument;
 import br.com.felipeblaft.reports.domain.registry.PersonName;
+import br.com.felipeblaft.reports.domain.telegram.ConsentDraft;
 import br.com.felipeblaft.reports.domain.telegram.StudentRegistrationDraft;
 import br.com.felipeblaft.reports.port.AssignmentRepository;
 import br.com.felipeblaft.reports.port.ClockPort;
+import br.com.felipeblaft.reports.port.ConsentTermRepository;
 import br.com.felipeblaft.reports.port.DataProtectionPort;
 import br.com.felipeblaft.reports.port.StudentRegistrationDraftRepository;
 import br.com.felipeblaft.reports.port.StudentRepository;
@@ -58,7 +64,16 @@ public class CollectStudentRegistrationFieldUseCase {
 
     /** Resumo mostrado ao professor na confirmação: nunca traz CPF, telefone nem e-mail. */
     public record Summary(
-            String name, LocalDate birthDate, String instrument, String guardianName) {
+            String name,
+            LocalDate birthDate,
+            String instrument,
+            String guardianName,
+            Integer consentTermVersion,
+            LocalDate consentedOn) {
+
+        public Summary(String name, LocalDate birthDate, String instrument, String guardianName) {
+            this(name, birthDate, instrument, guardianName, null, null);
+        }
 
         @Override
         public String toString() {
@@ -76,7 +91,17 @@ public class CollectStudentRegistrationFieldUseCase {
             StudentRegistrationDraft.Field nextField,
             boolean guardianRequired,
             Summary summary,
-            String confirmationToken) {
+            String confirmationToken,
+            ConsentDraft.Part nextConsentPart) {
+
+        /** Resultado sem passo de consentimento em andamento. */
+        public Result(
+                StudentRegistrationDraft.Field nextField,
+                boolean guardianRequired,
+                Summary summary,
+                String confirmationToken) {
+            this(nextField, guardianRequired, summary, confirmationToken, null);
+        }
 
         @Override
         public String toString() {
@@ -91,6 +116,7 @@ public class CollectStudentRegistrationFieldUseCase {
     private final RegisterStudentUseCase.TeacherCpfGuard cpfGuard;
     private final ClockPort clock;
     private final Duration draftValidity;
+    private ConsentTermRepository consentTerms;
 
     @SuppressWarnings("java:S107")
     public CollectStudentRegistrationFieldUseCase(
@@ -111,6 +137,11 @@ public class CollectStudentRegistrationFieldUseCase {
         this.protection = Objects.requireNonNull(protection);
         this.clock = Objects.requireNonNull(clock);
         this.draftValidity = Objects.requireNonNull(draftValidity);
+    }
+
+    /** Liga o consentimento do responsável (C1 a C5) ao cadastro guiado. */
+    public void useConsentTerms(ConsentTermRepository terms) {
+        this.consentTerms = terms;
     }
 
     public Result run(Actor actor, Command command) {
@@ -143,11 +174,22 @@ public class CollectStudentRegistrationFieldUseCase {
                             updated.name(),
                             updated.birthDate(),
                             updated.instrument(),
-                            updated.guardianName());
+                            updated.guardianName(),
+                            updated.consent().termVersion(),
+                            updated.consent().date() == null
+                                    ? null
+                                    : LocalDate.parse(updated.consent().date()));
         }
         drafts.save(updated);
+        StudentRegistrationDraft.Field next = updated.nextField(today);
         return new Result(
-                updated.nextField(today), updated.guardianRequired(today), summary, token);
+                next,
+                updated.guardianRequired(today),
+                summary,
+                token,
+                next == StudentRegistrationDraft.Field.CONSENT
+                        ? updated.consent().nextPart()
+                        : null);
     }
 
     private StudentRegistrationDraft apply(
@@ -169,7 +211,9 @@ public class CollectStudentRegistrationFieldUseCase {
                 // adulto não leva responsável: o que foi informado antes (como menor) é descartado
                 yield withBirth.guardianRequired(today)
                         ? withBirth
-                        : withBirth.withoutGuardian(now, draftValidity);
+                        : withBirth
+                                .withoutGuardian(now, draftValidity)
+                                .withoutConsent(now, draftValidity);
             }
             case CPF -> {
                 Cpf cpf = validate("cpf", () -> Cpf.of(text));
@@ -179,7 +223,78 @@ public class CollectStudentRegistrationFieldUseCase {
             }
             case INSTRUMENT -> draft.withInstrument(instrument(draft, text), now, draftValidity);
             case GUARDIAN -> guardianPart(draft, text, now);
+            case CONSENT -> consentPart(draft, text, today, now);
         };
+    }
+
+    /**
+     * Um passo do consentimento do responsável (C1 a C5). O C1 só confirma que o professor viu a
+     * versão vigente do termo (o "não" cancela o cadastro no canal); o texto dos demais passos é
+     * validado com as regras do cadastro da Web e o valor digitado nunca volta na falha.
+     */
+    private StudentRegistrationDraft consentPart(
+            StudentRegistrationDraft draft, String text, LocalDate today, Instant now) {
+        if (consentTerms == null) {
+            throw new DomainException(ErrorCode.CALLBACK_EXPIRED);
+        }
+        ConsentDraft current = draft.consent();
+        ConsentDraft.Part part = current.nextPart();
+        if (part == null) {
+            // consentimento já completo e o professor volta a ele (ou o termo mudou): recomeça pelo
+            // C1
+            return draft.withConsent(ConsentDraft.EMPTY, now, draftValidity);
+        }
+        ConsentDraft next =
+                switch (part) {
+                    case ACKNOWLEDGE ->
+                            current.withTermVersion(
+                                    ConsentTermVersion.current(consentTerms.listAll())
+                                            .orElseThrow(
+                                                    () ->
+                                                            new DomainException(
+                                                                    ErrorCode.RESOURCE_NOT_FOUND))
+                                            .number());
+                    case NAME ->
+                            current.withName(
+                                    validate(
+                                            "consent.consentingName",
+                                            () -> PersonName.of(text).value()));
+                    case RELATIONSHIP ->
+                            current.withRelationship(
+                                    validate(
+                                            "consent.relationship",
+                                            () -> enumName(ConsentRelationship.class, text)));
+                    case DATE ->
+                            current.withDate(
+                                    validate(
+                                            "consent.consentedOn",
+                                            () -> {
+                                                LocalDate date =
+                                                        "today".equals(text.strip())
+                                                                ? today
+                                                                : ConsentDates.parsePast(
+                                                                        text, today);
+                                                if (date == null) {
+                                                    throw new DomainException(
+                                                            ErrorCode.INVALID_DATA);
+                                                }
+                                                return date.toString();
+                                            }));
+                    case METHOD ->
+                            current.withMethod(
+                                    validate(
+                                            "consent.collectionMethod",
+                                            () -> enumName(ConsentCollectionMethod.class, text)));
+                };
+        return draft.withConsent(next, now, draftValidity);
+    }
+
+    private static <E extends Enum<E>> String enumName(Class<E> type, String text) {
+        try {
+            return Enum.valueOf(type, text.strip()).name();
+        } catch (IllegalArgumentException error) {
+            throw new DomainException(ErrorCode.INVALID_DATA);
+        }
     }
 
     /**

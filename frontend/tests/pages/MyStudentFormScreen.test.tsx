@@ -316,3 +316,69 @@ describe('P02 Cadastrar aluno', () => {
     ).not.toContain(TEST_CPF);
   });
 });
+
+describe('P02 Cadastrar aluno — consentimento do responsável (feature 007)', () => {
+  const TERM = {
+    number: 3,
+    publishedOn: '2026-09-01',
+    text: 'Institutional consent text',
+    privacyContact: { name: 'Officer Name', contact: 'privacy@example.test' },
+  };
+
+  it('para menor mostra a seção, a versão vigente do termo e o contato da LGPD', async () => {
+    const user = userEvent.setup();
+    renderAsTeacher(routes, '/my-students/new', { ...LIST, 'GET /api/v1/my-students/consent-term': { body: TERM } });
+    await screen.findByRole('heading', { level: 1, name: 'Cadastrar aluno' });
+    expect(screen.queryByRole('group', { name: msg('CONSENT_SECTION') })).not.toBeInTheDocument();
+
+    await user.type(screen.getByLabelText('Data de nascimento'), '2018-03-22');
+
+    expect(await screen.findByRole('group', { name: msg('CONSENT_SECTION') })).toBeInTheDocument();
+    expect(await screen.findByText(/versão 3/i)).toBeInTheDocument();
+    expect(screen.getByText(/privacy@example\.test/)).toBeInTheDocument();
+  });
+
+  it('envia o consentimento no corpo com a versão vigente do termo', async () => {
+    const user = userEvent.setup();
+    const api = renderAsTeacher(routes, '/my-students/new', {
+      ...LIST,
+      'GET /api/v1/my-students/consent-term': { body: TERM },
+      'POST /api/v1/my-students': { status: 201, body: { ...MY_STUDENT_ACTIVE } },
+      [`GET /api/v1/my-students/${MY_STUDENT_ACTIVE.id}`]: { body: MY_STUDENT_ACTIVE },
+    });
+    await screen.findByRole('heading', { level: 1, name: 'Cadastrar aluno' });
+    await fillValidForm(user);
+    await screen.findByText(/versão 3/i);
+    await user.type(screen.getByLabelText('Nome de quem consentiu'), 'Sônia Torrente');
+    await user.selectOptions(screen.getByLabelText('Relação com o aluno'), 'MOTHER');
+    await user.type(screen.getByLabelText('Data do consentimento'), '2026-09-10');
+    await user.selectOptions(screen.getByLabelText('Forma de coleta'), 'SIGNED_PAPER');
+    await user.click(screen.getByRole('button', { name: 'Cadastrar aluno' }));
+
+    await waitFor(() => expect(sentBody(api.calls).consent).toBeDefined());
+    expect(sentBody(api.calls).consent).toEqual({
+      consentingName: 'Sônia Torrente',
+      relationship: 'MOTHER',
+      consentedOn: '2026-09-10',
+      termVersion: 3,
+      collectionMethod: 'SIGNED_PAPER',
+    });
+  });
+
+  it('mostra o erro do servidor junto ao campo do consentimento', async () => {
+    const user = userEvent.setup();
+    renderAsTeacher(routes, '/my-students/new', {
+      ...LIST,
+      'GET /api/v1/my-students/consent-term': { body: TERM },
+      'POST /api/v1/my-students': {
+        status: 400,
+        body: validationError([{ field: 'consent', code: 'CONSENT_REQUIRED' }]),
+      },
+    });
+    await screen.findByRole('heading', { level: 1, name: 'Cadastrar aluno' });
+    await fillValidForm(user);
+    await user.click(screen.getByRole('button', { name: 'Cadastrar aluno' }));
+
+    expect(await screen.findAllByText(msg('CONSENT_REQUIRED'))).not.toHaveLength(0);
+  });
+});

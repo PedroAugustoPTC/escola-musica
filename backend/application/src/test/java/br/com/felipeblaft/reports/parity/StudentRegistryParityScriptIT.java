@@ -31,6 +31,13 @@ class StudentRegistryParityScriptIT extends AdministrationStackBase {
 
     /** Ponto de partida: Clara com um aluno compartilhado com Bruno, que tem outro aluno. */
     private String seed() throws Exception {
+        jdbc.update(
+                "insert into consent_term_version (id, number, published_on, text,"
+                        + " requires_new_consent, created_by, created_at)"
+                        + " values (?, 1, date '2025-01-01', 'Institutional text', false, ?, now())"
+                        + " on conflict (number) do nothing",
+                java.util.UUID.randomUUID(),
+                java.util.UUID.randomUUID());
         Cookie admin = signInAdministrator(insertAdministrator());
         TeacherAccount clara = createTeacher(admin, "Clara Souza", "clara@example.test");
         TeacherAccount bruno = createTeacher(admin, "Bruno Lima", "bruno@example.test");

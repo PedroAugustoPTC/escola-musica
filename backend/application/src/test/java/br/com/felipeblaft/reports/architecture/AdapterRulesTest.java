@@ -201,13 +201,21 @@ class AdapterRulesTest {
                     Map.entry("CancelStudentRegistrationUseCase", Operation.STUDENT_REGISTER),
                     // feature 006: visão da escola, só do administrador na Web
                     Map.entry("QuerySchoolHistoryUseCase", Operation.SCHOOL_HISTORY_QUERY),
+                    // feature 007: trilha de auditoria, só do administrador (a retenção também
+                    // verifica)
+                    Map.entry("QueryAuditTrailUseCase", Operation.AUDIT_TRAIL_QUERY),
+                    Map.entry("VerifyAuditChainUseCase", Operation.AUDIT_TRAIL_VERIFY),
                     Map.entry(
                             "GetSchoolReportDocumentUseCase",
                             Operation.SCHOOL_REPORT_DOCUMENT_OPEN));
 
     /** Casos de uso da visão da escola (feature 006), fora dos pacotes de administração. */
     private static final Set<String> SCHOOL_USE_CASES =
-            Set.of("QuerySchoolHistoryUseCase", "GetSchoolReportDocumentUseCase");
+            Set.of(
+                    "QuerySchoolHistoryUseCase",
+                    "GetSchoolReportDocumentUseCase",
+                    "QueryAuditTrailUseCase",
+                    "VerifyAuditChainUseCase");
 
     /**
      * Casos de uso desses pacotes sem operação na matriz: validam a credencial do administrador.
@@ -232,6 +240,29 @@ class AdapterRulesTest {
                                                 && !javaClass
                                                         .getPackageName()
                                                         .startsWith(BASE + ".inbound.bootstrap")))
+                .check(withCore);
+    }
+
+    @Test
+    void scheduledSystemActorsAreOnlyCreatedByTheirTasks() {
+        noClasses()
+                .that()
+                .doNotHaveFullyQualifiedName(Actor.class.getName())
+                .and()
+                .haveSimpleNameNotEndingWith("Task")
+                .and()
+                // o serviço de alertas assina com o ator de apuração os eventos de abertura e
+                // normalização, venham de onde vierem (tarefa, retenção, geração de PDF)
+                .doNotHaveSimpleName("PersistentOperationalAlertService")
+                .should()
+                .callMethodWhere(
+                        DescribedPredicate.describe(
+                                "chamam Actor.retention ou Actor.alertEvaluation",
+                                (JavaMethodCall call) ->
+                                        call.getTargetOwner().isEquivalentTo(Actor.class)
+                                                && (call.getName().equals("retention")
+                                                        || call.getName()
+                                                                .equals("alertEvaluation"))))
                 .check(withCore);
     }
 
@@ -313,7 +344,9 @@ class AdapterRulesTest {
                         BASE + ".usecase.document.GetSchoolReportDocumentUseCase");
     }
 
-    /** O Telegram não ganhou acesso à visão da escola (feature 006): nem pela consulta nem pelo PDF. */
+    /**
+     * O Telegram não ganhou acesso à visão da escola (feature 006): nem pela consulta nem pelo PDF.
+     */
     @Test
     void telegramDoesNotDependOnTheSchoolHistoryPortsNorTheOfficialDocumentService() {
         noClasses()

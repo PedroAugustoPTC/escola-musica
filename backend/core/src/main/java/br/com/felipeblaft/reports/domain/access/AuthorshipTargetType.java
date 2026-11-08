@@ -7,5 +7,11 @@ public enum AuthorshipTargetType {
     STUDENT,
     ASSIGNMENT,
     LESSON_REPORT,
-    SEMESTER_REPORT
+    SEMESTER_REPORT,
+    CONSENT,
+    CONSENT_TERM,
+    ERASURE_REQUEST,
+    RETENTION_RUN,
+    AUDIT_TRAIL,
+    ALERT
 }

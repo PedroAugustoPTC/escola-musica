@@ -11,6 +11,7 @@ import br.com.felipeblaft.reports.domain.job.ProcessingJob;
 import br.com.felipeblaft.reports.port.ClockPort;
 import br.com.felipeblaft.reports.port.ConcurrencyConflictException;
 import br.com.felipeblaft.reports.port.JobQueuePort;
+import br.com.felipeblaft.reports.service.ConsentGuardService;
 import br.com.felipeblaft.reports.service.ReportEligibilityService;
 import br.com.felipeblaft.reports.usecase.semester.GetSemesterPreviewUseCase.Preview;
 import java.util.Map;
@@ -23,6 +24,7 @@ import java.util.UUID;
  */
 public class GenerateSemesterReportUseCase {
 
+    private ConsentGuardService consent;
     private final GetSemesterPreviewUseCase preview;
     private final JobQueuePort queue;
     private final ClockPort clock;
@@ -61,6 +63,7 @@ public class GenerateSemesterReportUseCase {
         if (eligibility != null) {
             eligibility.requireActiveStudent(studentId);
         }
+        requireConsent(teacherId, studentId);
         requireCanGenerate(current, confirmEvenWithOpen);
         ProcessingJob job =
                 ProcessingJob.create(
@@ -101,6 +104,21 @@ public class GenerateSemesterReportUseCase {
         if (preview.openLessonReports() > 0 && !confirmEvenWithOpen) {
             throw new DomainException(
                     ErrorCode.OPEN_REPORTS_EXIST, Map.of("quantity", preview.openLessonReports()));
+        }
+    }
+
+    /**
+     * Liga a barreira de consentimento (FR-034): aluno menor sem consentimento válido não chega a
+     * nenhum provedor de IA. A montagem de produção a liga; cenários anteriores à feature 007
+     * seguem sem ela.
+     */
+    public void useConsentGuard(ConsentGuardService guard) {
+        this.consent = guard;
+    }
+
+    private void requireConsent(UUID teacherId, UUID studentId) {
+        if (consent != null) {
+            consent.requireForAi(teacherId, studentId);
         }
     }
 }

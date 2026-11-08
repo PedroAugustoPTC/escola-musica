@@ -299,6 +299,12 @@ class StudentCpfCanaryTeacherIT extends RealStackBase {
                 "telefone do responsável",
                 () -> sendText(USER_CLARA, CanaryStudent.GUARDIAN_PHONE_MASKED));
         strict("e-mail do responsável", () -> sendText(USER_CLARA, CanaryStudent.GUARDIAN_EMAIL));
+        // consentimento do responsável (C1 a C5), com um nome que não é o do canário
+        strict("consentimento C1", () -> sendCallback(USER_CLARA, "v1:consent-yes:"));
+        strict("consentimento nome", () -> sendText(USER_CLARA, "Responsável Fictício"));
+        strict("consentimento relação", () -> sendCallback(USER_CLARA, "v1:consent-rel:MOTHER"));
+        strict("consentimento data", () -> sendCallback(USER_CLARA, "v1:consent-date:today"));
+        strict("consentimento forma", () -> sendCallback(USER_CLARA, "v1:consent-method:DIGITAL"));
         card("resumo do cadastro", () -> sendText(USER_CLARA, CanaryStudent.INSTRUMENT));
         String confirm = lastButtonWith("Confirmar");
         TelegramStep saved =

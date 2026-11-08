@@ -6,6 +6,9 @@ import br.com.felipeblaft.reports.domain.access.Operation;
 import br.com.felipeblaft.reports.domain.access.Permission;
 import br.com.felipeblaft.reports.domain.common.DomainException;
 import br.com.felipeblaft.reports.domain.common.ErrorCode;
+import br.com.felipeblaft.reports.domain.privacy.ConsentInput;
+import br.com.felipeblaft.reports.domain.privacy.ConsentPolicy;
+import br.com.felipeblaft.reports.domain.privacy.ConsentStatus;
 import br.com.felipeblaft.reports.domain.registry.Cpf;
 import br.com.felipeblaft.reports.domain.registry.ProtectedCpf;
 import br.com.felipeblaft.reports.domain.registry.Student;
@@ -18,8 +21,10 @@ import br.com.felipeblaft.reports.port.TeacherRepository;
 import br.com.felipeblaft.reports.service.AccessAttemptsControlService;
 import br.com.felipeblaft.reports.service.ActorAuthorizationService;
 import br.com.felipeblaft.reports.service.AuthorshipService;
+import br.com.felipeblaft.reports.service.ConsentRecordingService;
 import br.com.felipeblaft.reports.service.StudentAccessService;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -40,10 +45,25 @@ public class UpdateStudentUseCase {
             UUID studentId,
             StudentInput input,
             String correlationId,
-            boolean lookupAlreadyCounted) {
+            boolean lookupAlreadyCounted,
+            ConsentInput consent) {
 
         public Command(UUID studentId, StudentInput input, String correlationId) {
-            this(studentId, input, correlationId, false);
+            this(studentId, input, correlationId, false, null);
+        }
+
+        public Command(
+                UUID studentId,
+                StudentInput input,
+                String correlationId,
+                boolean lookupAlreadyCounted) {
+            this(studentId, input, correlationId, lookupAlreadyCounted, null);
+        }
+
+        /** Edição com o consentimento do responsável (exigido se o aluno passa a ser menor). */
+        public Command(
+                UUID studentId, StudentInput input, String correlationId, ConsentInput consent) {
+            this(studentId, input, correlationId, false, consent);
         }
 
         @Override
@@ -61,7 +81,12 @@ public class UpdateStudentUseCase {
     private final TeacherRepository teachers;
     private final GetStudentUseCase.Views views;
     private final RegisterStudentUseCase.TeacherCpfGuard guard;
+    private final ConsentRecordingService consents;
 
+    /**
+     * Sem a verificação do consentimento: só para os cenários anteriores à feature 007. A montagem
+     * de produção usa o construtor completo.
+     */
     public UpdateStudentUseCase(
             ActorAuthorizationService authorization,
             StudentAccessService access,
@@ -72,6 +97,31 @@ public class UpdateStudentUseCase {
             AccessAttemptsControlService attempts,
             AuthorshipService authorship,
             ClockPort clock) {
+        this(
+                authorization,
+                access,
+                students,
+                assignments,
+                teachers,
+                protection,
+                attempts,
+                authorship,
+                clock,
+                null);
+    }
+
+    public UpdateStudentUseCase(
+            ActorAuthorizationService authorization,
+            StudentAccessService access,
+            StudentRepository students,
+            AssignmentRepository assignments,
+            TeacherRepository teachers,
+            DataProtectionPort protection,
+            AccessAttemptsControlService attempts,
+            AuthorshipService authorship,
+            ClockPort clock,
+            ConsentRecordingService consents) {
+        this.consents = consents;
         this.authorization = Objects.requireNonNull(authorization);
         this.access = Objects.requireNonNull(access);
         this.students = Objects.requireNonNull(students);
@@ -92,6 +142,7 @@ public class UpdateStudentUseCase {
                         access, authorship, actor, command.studentId(), command.correlationId());
         Instant now = clock.now();
         StudentData data = merge(student, command.input());
+        boolean recordConsent = checkConsent(actor, student, data, command.consent());
 
         ProtectedCpf newCpf = null;
         if (data.cpf() != null) {
@@ -109,7 +160,33 @@ public class UpdateStudentUseCase {
                     student.id(),
                     command.correlationId());
         }
+        if (recordConsent) {
+            consents.record(actor, student.id(), command.consent(), command.correlationId());
+        }
         return views.of(student, byTeacher);
+    }
+
+    /**
+     * Antes de gravar: a edição que torna o aluno menor exige o {@link ConsentInput} ({@code
+     * VALIDATION_FAILED} em {@code consent}). Devolve se o consentimento enviado deve ser gravado.
+     */
+    private boolean checkConsent(
+            Actor actor, Student student, StudentData data, ConsentInput input) {
+        if (consents == null || actor.isSystem()) {
+            return false;
+        }
+        LocalDate today = clock.todayInSchoolTimezone();
+        LocalDate birth = data.birthDate().value();
+        if (!ConsentPolicy.required(student.birthDate(), today)) {
+            // só a edição que torna o aluno menor exige o consentimento; o menor já cadastrado sem
+            // ele aparece nas pendências e fica com a IA bloqueada
+            ConsentPolicy.requireOnRegistration(birth, today, ConsentStatus.MISSING, input);
+        }
+        if (input != null && ConsentPolicy.required(birth, today)) {
+            consents.check(input);
+            return true;
+        }
+        return false;
     }
 
     /**

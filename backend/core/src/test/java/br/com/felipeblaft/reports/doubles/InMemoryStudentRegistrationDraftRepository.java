@@ -42,6 +42,17 @@ public class InMemoryStudentRegistrationDraftRepository
     }
 
     @Override
+    public void removeByStudent(UUID studentId) {
+        List<UUID> found =
+                data.values().stream()
+                        .filter(d -> studentId.equals(d.studentId()))
+                        .map(d -> d.linkId())
+                        .toList();
+        found.forEach(data::remove);
+        removals += found.size();
+    }
+
+    @Override
     public int removeExpired(Instant now) {
         List<UUID> expired =
                 data.values().stream().filter(d -> d.expired(now)).map(d -> d.linkId()).toList();

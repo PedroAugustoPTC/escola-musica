@@ -84,17 +84,70 @@ class UseCasePermissionMatrixTest {
 
     /** Operações da matriz que não têm caso de uso nestes pacotes, e onde moram. */
     private static final Map<Operation, String> OPERATIONS_ELSEWHERE =
-            Map.of(
-                    Operation.TEACHER_SIGN_IN,
-                            "usecase.access.SignInPortalUseCase (entrada pública)",
-                    Operation.LESSON_AND_SEMESTER_REPORTS,
-                            "usecase.lesson, semester, history, home, job e document (feature 001)",
-                    Operation.SCHOOL_HISTORY_QUERY,
-                            "usecase.history.QuerySchoolHistoryUseCase (feature 006)",
-                    Operation.SCHOOL_REPORT_DOCUMENT_OPEN,
-                            "usecase.document.GetSchoolReportDocumentUseCase (feature 006)",
-                    Operation.SCHOOL_REPORT_DOCUMENT_DOWNLOAD,
-                            "usecase.document.GetSchoolReportDocumentUseCase (feature 006)");
+            Map.ofEntries(
+                    Map.entry(
+                            Operation.TEACHER_SIGN_IN,
+                            "usecase.access.SignInPortalUseCase (entrada pública)"),
+                    Map.entry(
+                            Operation.LESSON_AND_SEMESTER_REPORTS,
+                            "usecase.lesson, semester, history, home, job e document (feature 001)"),
+                    Map.entry(
+                            Operation.SCHOOL_HISTORY_QUERY,
+                            "usecase.history.QuerySchoolHistoryUseCase (feature 006)"),
+                    Map.entry(
+                            Operation.SCHOOL_REPORT_DOCUMENT_OPEN,
+                            "usecase.document.GetSchoolReportDocumentUseCase (feature 006)"),
+                    Map.entry(
+                            Operation.SCHOOL_REPORT_DOCUMENT_DOWNLOAD,
+                            "usecase.document.GetSchoolReportDocumentUseCase (feature 006)"),
+                    Map.entry(
+                            Operation.AUDIT_TRAIL_QUERY,
+                            "usecase.audit.QueryAuditTrailUseCase (feature 007)"),
+                    Map.entry(
+                            Operation.AUDIT_TRAIL_VERIFY,
+                            "usecase.audit.VerifyAuditChainUseCase (feature 007)"),
+                    Map.entry(
+                            Operation.CONSENT_READ,
+                            "usecase.privacy.ListStudentConsentsUseCase (feature 007)"),
+                    Map.entry(
+                            Operation.CONSENT_RECORD,
+                            "usecase.privacy.RecordConsentUseCase (feature 007)"),
+                    Map.entry(
+                            Operation.CONSENT_REVOKE,
+                            "usecase.privacy.RevokeConsentUseCase (feature 007)"),
+                    Map.entry(
+                            Operation.CONSENT_PENDING_READ,
+                            "usecase.privacy.ListPendingConsentsUseCase (feature 007)"),
+                    Map.entry(
+                            Operation.CONSENT_TERM_READ,
+                            "usecase.privacy.GetCurrentConsentTermUseCase (feature 007)"),
+                    Map.entry(
+                            Operation.CONSENT_TERM_PUBLISH,
+                            "usecase.privacy.PublishConsentTermUseCase (feature 007)"),
+                    Map.entry(
+                            Operation.ERASURE_REQUEST_REGISTER,
+                            "usecase.privacy.RegisterErasureRequestUseCase (feature 007)"),
+                    Map.entry(
+                            Operation.ERASURE_REQUEST_READ,
+                            "usecase.privacy.ListErasureRequestsUseCase (feature 007)"),
+                    Map.entry(
+                            Operation.ERASURE_PREVIEW,
+                            "usecase.privacy.PreviewErasureUseCase (feature 007)"),
+                    Map.entry(
+                            Operation.ERASURE_CONFIRM,
+                            "usecase.privacy.ConfirmErasureUseCase (feature 007)"),
+                    Map.entry(
+                            Operation.ERASURE_RECEIPT_READ,
+                            "usecase.privacy.GetErasureReceiptUseCase (feature 007)"),
+                    Map.entry(
+                            Operation.OPERATIONS_COST_READ,
+                            "usecase.operations.GetMonthlyCostReportUseCase (feature 007)"),
+                    Map.entry(
+                            Operation.OPERATIONS_ALERT_READ,
+                            "usecase.operations.ListOperationalAlertsUseCase (feature 007)"),
+                    Map.entry(
+                            Operation.OPERATIONS_ALERT_ACK,
+                            "usecase.operations.AcknowledgeOperationalAlertUseCase (feature 007)"));
 
     // ------------------------------------------------------------------ mapa caso de uso →
     // operação

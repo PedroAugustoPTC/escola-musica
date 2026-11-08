@@ -8,4 +8,9 @@ package br.com.felipeblaft.reports.port;
 public interface LlmPort {
 
     <T> ResponseLlm<T> generateJson(TaskLlm task, TaskInput input, Class<T> outputType);
+
+    /** Nome opaco do provedor, usado nas chamadas que falham (a resposta não existe). */
+    default String providerName() {
+        return "unknown";
+    }
 }

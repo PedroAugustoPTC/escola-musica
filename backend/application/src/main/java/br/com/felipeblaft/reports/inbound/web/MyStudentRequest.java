@@ -10,7 +10,8 @@ public record MyStudentRequest(
         String birthDate,
         String cpf,
         MyStudentGuardianRequest guardian,
-        String instrument) {
+        String instrument,
+        ConsentRequest consent) {
 
     @Override
     public String toString() {

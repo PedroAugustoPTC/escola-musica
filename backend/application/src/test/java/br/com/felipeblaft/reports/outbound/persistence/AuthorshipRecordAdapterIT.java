@@ -326,10 +326,11 @@ class AuthorshipRecordAdapterIT extends IntegrationBase {
                         () ->
                                 jdbc.update(
                                         "insert into authorship_record (id, occurred_at, origin,"
-                                                + " operation, result, origin_hash, correlation_id)"
+                                                + " operation, result, origin_hash, correlation_id,"
+                                                + " previous_hash, record_hash)"
                                                 + " values (gen_random_uuid(), now(), 'WEB',"
                                                 + " 'STUDENT_REGISTER', 'SUCCESS', ?,"
-                                                + " 'req-ab12cd')",
+                                                + " 'req-ab12cd', repeat('0', 64), repeat('1', 64))",
                                         HASH))
                 .isInstanceOf(DataAccessException.class);
 
@@ -393,8 +394,9 @@ class AuthorshipRecordAdapterIT extends IntegrationBase {
 
         String insert =
                 "insert into authorship_record (id, occurred_at, origin, operation, result,"
-                        + " error_code, origin_hash, correlation_id) values (gen_random_uuid(),"
-                        + " now(), 'WEB', ?, 'FAILURE', ?, ?, ?)";
+                        + " error_code, origin_hash, correlation_id, previous_hash, record_hash)"
+                        + " values (gen_random_uuid(), now(), 'WEB', ?, 'FAILURE', ?, ?, ?,"
+                        + " repeat('0', 64), repeat('1', 64))";
         String ok = "TEACHER_REGISTER";
         assertThatThrownBy(() -> jdbc.update(insert, CPF, null, null, "req-ab12cd"))
                 .isInstanceOf(DataAccessException.class);
@@ -415,8 +417,9 @@ class AuthorshipRecordAdapterIT extends IntegrationBase {
     void checksRejectInvalidEnumerationsAndAnAuthorWithoutRole() {
         String insert =
                 "insert into authorship_record (id, occurred_at, author_id, author_role, origin,"
-                        + " operation, result, correlation_id) values (gen_random_uuid(), now(),"
-                        + " ?, ?, ?, 'TEACHER_UPDATE', ?, '123')";
+                        + " operation, result, correlation_id, previous_hash, record_hash)"
+                        + " values (gen_random_uuid(), now(), ?, ?, ?, 'TEACHER_UPDATE', ?, '123',"
+                        + " repeat('0', 64), repeat('1', 64))";
         UUID author = UUID.randomUUID();
         assertThatThrownBy(() -> jdbc.update(insert, author, null, "WEB", "SUCCESS"))
                 .isInstanceOf(DataAccessException.class);

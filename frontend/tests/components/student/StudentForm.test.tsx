@@ -134,6 +134,11 @@ describe('StudentForm — envio', () => {
       guardianPhone: '(11) 91234-5678',
       guardianEmail: 'sonia@example.test',
       teacherIds: [],
+      consentingName: '',
+      consentRelationship: '',
+      consentedOn: '',
+      consentMethod: '',
+      consentTermVersion: null,
     });
   });
 

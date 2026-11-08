@@ -24,6 +24,11 @@ function defaultValues(props: StudentFormProps): StudentFormValues {
     guardianPhone: student?.guardian?.phone ?? '(11) 98765-4321',
     guardianEmail: student?.guardian?.email ?? 'livia@example.test',
     teacherIds: props.mode === 'create' ? [TEACHER_ACTIVE.id] : [],
+    consentingName: '',
+    consentRelationship: '',
+    consentedOn: '',
+    consentMethod: '',
+    consentTermVersion: null,
     ...stub.values,
   };
 }

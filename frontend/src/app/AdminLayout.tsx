@@ -5,6 +5,7 @@ import { useAdminSession, useAdminSignOut } from '../services/admin/session';
 import { msg } from '../messages/messages';
 import { AdminNav } from '../components/admin/AdminNav';
 import { SessionClock } from '../components/admin/SessionClock';
+import { AlertIndicator } from '../components/AlertIndicator';
 import { Icon } from '../components/Icon';
 import { errorText } from '../components/ErrorState';
 import { useIsMobile } from './useIsMobile';
@@ -70,6 +71,7 @@ export function AdminLayout() {
         {msg('ADMIN_AREA_TITLE')}
       </span>
       {data ? <span className="admin-layout__name">{data.administrator.name}</span> : null}
+      {restricted ? null : <AlertIndicator />}
     </div>
   );
 

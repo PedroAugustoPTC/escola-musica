@@ -41,6 +41,21 @@ class ActorTest {
     }
 
     @Test
+    void retentionAndAlertEvaluationActorsAreSystemActors() {
+        Actor retention = Actor.retention();
+        Actor alerts = Actor.alertEvaluation();
+
+        assertThat(retention.isSystem()).isTrue();
+        assertThat(retention.origin()).isEqualTo(ActionOrigin.RETENTION);
+        assertThat(alerts.isSystem()).isTrue();
+        assertThat(alerts.origin()).isEqualTo(ActionOrigin.ALERT_EVALUATION);
+        assertThat(ActionOrigin.RETENTION.system()).isTrue();
+        assertThat(ActionOrigin.ALERT_EVALUATION.system()).isTrue();
+        assertThatThrownBy(() -> new Actor(Role.TEACHER, id, ActionOrigin.RETENTION, false))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
     void rejectsInconsistentCombinations() {
         assertThatThrownBy(() -> new Actor(Role.TEACHER, null, ActionOrigin.WEB, false))
                 .isInstanceOf(IllegalArgumentException.class);

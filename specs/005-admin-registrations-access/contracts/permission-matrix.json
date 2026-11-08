@@ -50,6 +50,25 @@
 
     { "operation": "SCHOOL_HISTORY_QUERY", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/school-history"], "system": [], "note": "feature 006: somente leitura de aprovados" },
     { "operation": "SCHOOL_REPORT_DOCUMENT_OPEN", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/school-history/lesson-reports/{reportId}/pdf", "GET /admin/school-history/semester-reports/{reportId}/pdf"], "system": [], "note": "feature 006: PDF oficial da versão aprovada" },
-    { "operation": "SCHOOL_REPORT_DOCUMENT_DOWNLOAD", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/school-history/lesson-reports/{reportId}/pdf/download", "GET /admin/school-history/semester-reports/{reportId}/pdf/download"], "system": [], "note": "feature 006: PDF oficial da versão aprovada" }
+    { "operation": "SCHOOL_REPORT_DOCUMENT_DOWNLOAD", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/school-history/lesson-reports/{reportId}/pdf/download", "GET /admin/school-history/semester-reports/{reportId}/pdf/download"], "system": [], "note": "feature 006: PDF oficial da versão aprovada" },
+
+    { "operation": "AUDIT_TRAIL_QUERY", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/audit-trail"], "system": [], "note": "feature 007: consulta da trilha de auditoria; a própria consulta vira evento" },
+    { "operation": "AUDIT_TRAIL_VERIFY", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/audit-trail/integrity"], "system": ["RETENTION"], "note": "feature 007: verificação da cadeia; também ao fim de cada execução da retenção" },
+
+    { "operation": "CONSENT_READ", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/students/{studentId}/consents"], "system": [], "note": "feature 007: o professor vê só a situação no próprio aluno, pela leitura do aluno" },
+    { "operation": "CONSENT_RECORD", "administratorWeb": "ALLOW", "teacherWeb": "ALLOW_OWN_STUDENTS", "teacherTelegram": "ALLOW_OWN_STUDENTS", "webRoutes": ["POST /admin/students/{studentId}/consents", "POST /my-students/{studentId}/consents"], "system": ["INITIAL_LOAD"], "note": "feature 007: paridade do professor; o cadastro e a edição de aluno também gravam o consentimento" },
+    { "operation": "CONSENT_REVOKE", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["POST /admin/consents/{consentId}/revocation"], "system": [], "note": "feature 007" },
+    { "operation": "CONSENT_PENDING_READ", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/consents/pending"], "system": [], "note": "feature 007" },
+    { "operation": "CONSENT_TERM_READ", "administratorWeb": "ALLOW", "teacherWeb": "ALLOW", "teacherTelegram": "ALLOW", "webRoutes": ["GET /admin/consent-terms", "GET /my-students/consent-term"], "system": [], "note": "feature 007: texto institucional, sem dado de aluno" },
+    { "operation": "CONSENT_TERM_PUBLISH", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["POST /admin/consent-terms"], "system": [], "note": "feature 007" },
+
+    { "operation": "ERASURE_REQUEST_REGISTER", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["POST /admin/students/{studentId}/erasure-requests"], "system": [], "note": "feature 007" },
+    { "operation": "ERASURE_REQUEST_READ", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/erasure-requests", "GET /admin/erasure-requests/{requestId}"], "system": [], "note": "feature 007" },
+    { "operation": "ERASURE_PREVIEW", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["POST /admin/erasure-requests/{requestId}/preview"], "system": [], "note": "feature 007" },
+    { "operation": "ERASURE_CONFIRM", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["POST /admin/erasure-requests/{requestId}/confirmation"], "system": ["RETENTION"], "note": "feature 007: a retenção termina remoções de arquivo pendentes" },
+    { "operation": "ERASURE_RECEIPT_READ", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/erasure-requests/{requestId}/receipt"], "system": [], "note": "feature 007" },
+    { "operation": "OPERATIONS_COST_READ", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/operations/costs"], "system": [], "note": "feature 007" },
+    { "operation": "OPERATIONS_ALERT_READ", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["GET /admin/operations/alerts", "GET /admin/operations/alerts/summary"], "system": [], "note": "feature 007" },
+    { "operation": "OPERATIONS_ALERT_ACK", "administratorWeb": "ALLOW", "teacherWeb": "DENY", "teacherTelegram": "DENY", "webRoutes": ["POST /admin/operations/alerts/{alertId}/acknowledgement"], "system": [], "note": "feature 007" }
   ]
 }

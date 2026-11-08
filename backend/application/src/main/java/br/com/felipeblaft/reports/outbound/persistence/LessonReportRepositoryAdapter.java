@@ -1,15 +1,18 @@
 package br.com.felipeblaft.reports.outbound.persistence;
 
+import br.com.felipeblaft.reports.domain.privacy.RetentionPolicy;
 import br.com.felipeblaft.reports.domain.report.Lesson;
 import br.com.felipeblaft.reports.domain.report.LessonReport;
 import br.com.felipeblaft.reports.outbound.persistence.ReportEntities.LessonReportEntity;
 import br.com.felipeblaft.reports.port.ConcurrencyConflictException;
 import br.com.felipeblaft.reports.port.LessonReportRepository;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Repository;
 
@@ -18,10 +21,18 @@ class LessonReportRepositoryAdapter implements LessonReportRepository {
 
     private final LessonJpa lessons;
     private final LessonReportJpa reports;
+    private final JdbcTemplate jdbc;
 
-    LessonReportRepositoryAdapter(LessonJpa lessons, LessonReportJpa reports) {
+    LessonReportRepositoryAdapter(LessonJpa lessons, LessonReportJpa reports, JdbcTemplate jdbc) {
         this.lessons = lessons;
         this.reports = reports;
+        this.jdbc = jdbc;
+    }
+
+    @Override
+    public List<UUID> findRetentionCandidates(
+            RetentionPolicy policy, Instant now, int limit, UUID afterId) {
+        return RetentionCandidates.reportIds(jdbc, "lesson_report", policy, now, limit, afterId);
     }
 
     @Override
@@ -96,5 +107,23 @@ class LessonReportRepositoryAdapter implements LessonReportRepository {
     @Override
     public Optional<LocalDate> lessonFirstDate(UUID teacherId, UUID studentId) {
         return reports.firstLesson(teacherId, studentId);
+    }
+
+    @Override
+    public List<UUID> findIdsByStudent(UUID studentId) {
+        return jdbc.queryForList(
+                "SELECT id FROM lesson_report WHERE student_id = ? ORDER BY id", UUID.class, studentId);
+    }
+
+    @Override
+    public java.util.Map<String, Integer> countByStudentAndStatus(UUID studentId) {
+        java.util.Map<String, Integer> counts = new java.util.TreeMap<>();
+        jdbc.query(
+                "SELECT status, count(*) AS total FROM lesson_report WHERE student_id = ? GROUP BY status",
+                rs -> {
+                    counts.put(rs.getString("status"), rs.getInt("total"));
+                },
+                studentId);
+        return counts;
     }
 }

@@ -115,6 +115,7 @@ class StudentIsolationTelegramIT extends SecurityBase {
         say(USER_CLARA, "meus alunos");
         jdbc.update(
                 "delete from teacher_student_assignment where student_id = ?", claraStudent.id());
+        jdbc.update("delete from student_consent where student_id = ?", claraStudent.id());
         jdbc.update("delete from student where id = ?", claraStudent.id());
         Reply stale = tap(USER_CLARA, "v1:reg-open:0");
         assertThat(fingerprints.getFirst()).isEqualTo(stale.fingerprint());

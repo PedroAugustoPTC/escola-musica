@@ -15,6 +15,7 @@ import br.com.felipeblaft.reports.port.ClockPort;
 import br.com.felipeblaft.reports.port.JobQueuePort;
 import br.com.felipeblaft.reports.port.SemesterReportRepository;
 import br.com.felipeblaft.reports.service.AudioSendingService;
+import br.com.felipeblaft.reports.service.ConsentGuardService;
 import br.com.felipeblaft.reports.service.SemesterAccessService;
 import java.util.Objects;
 import java.util.UUID;
@@ -26,6 +27,7 @@ import java.util.UUID;
  */
 public class RequestSemesterReportChangeUseCase {
 
+    private ConsentGuardService consent;
     private final SemesterAccessService access;
     private final SemesterReportRepository semester;
     private final AudioSendingService audioSending;
@@ -49,6 +51,7 @@ public class RequestSemesterReportChangeUseCase {
             UUID teacherId, UUID reportId, String text, int baseVersion, Channel channel) {
         SemesterReport report = access.reportForUpdate(teacherId, reportId);
         report.requireCanChange(baseVersion);
+        requireConsent(teacherId, report.studentId());
         if (text == null || text.isBlank()) {
             throw new DomainException(ErrorCode.EMPTY_CHANGE);
         }
@@ -63,6 +66,7 @@ public class RequestSemesterReportChangeUseCase {
         try {
             SemesterReport report = access.reportForUpdate(teacherId, reportId);
             report.requireCanChange(baseVersion);
+            requireConsent(teacherId, report.studentId());
             audioSending.requireWithinLimit(audio);
             ProcessingJob job = start(report, channel, Medium.AUDIO, baseVersion);
             audioSending.attach(job, audio);
@@ -97,5 +101,20 @@ public class RequestSemesterReportChangeUseCase {
                         clock.now());
         job.defineParameter(ProcessingJob.BASE_VERSION, Integer.toString(baseVersion));
         return job;
+    }
+
+    /**
+     * Liga a barreira de consentimento (FR-034): aluno menor sem consentimento válido não chega a
+     * nenhum provedor de IA. A montagem de produção a liga; cenários anteriores à feature 007
+     * seguem sem ela.
+     */
+    public void useConsentGuard(ConsentGuardService guard) {
+        this.consent = guard;
+    }
+
+    private void requireConsent(UUID teacherId, UUID studentId) {
+        if (consent != null) {
+            consent.requireForAi(teacherId, studentId);
+        }
     }
 }

@@ -431,6 +431,8 @@ class StudentRegistrationDraftTest {
         draft = draft.withCpf(new byte[] {1}, "h", T0, VALIDITY);
         assertThat(draft.nextField(TODAY)).isEqualTo(Field.GUARDIAN);
         draft = withGuardian(draft);
+        assertThat(draft.nextField(TODAY)).isEqualTo(Field.CONSENT);
+        draft = draft.withConsent(completeConsent(), T0, VALIDITY);
         assertThat(draft.nextField(TODAY)).isEqualTo(Field.INSTRUMENT);
         assertThat(draft.readyToConfirm(TODAY)).isFalse();
         draft = draft.withInstrument("Violão", T0, VALIDITY);
@@ -463,8 +465,17 @@ class StudentRegistrationDraftTest {
         assertThat(draft.readyToConfirm(TODAY)).isFalse();
 
         draft = withGuardian(draft);
+        assertThat(draft.nextField(TODAY)).isEqualTo(Field.CONSENT);
+        assertThat(draft.readyToConfirm(TODAY)).isFalse();
+
+        draft = draft.withConsent(completeConsent(), T0, VALIDITY);
         assertThat(draft.nextField(TODAY)).isNull();
         assertThat(draft.readyToConfirm(TODAY)).isTrue();
+    }
+
+    private static br.com.felipeblaft.reports.domain.telegram.ConsentDraft completeConsent() {
+        return new br.com.felipeblaft.reports.domain.telegram.ConsentDraft(
+                1, "Maria Guardian", "MOTHER", "2026-09-01", "DIGITAL");
     }
 
     @Test
@@ -632,5 +643,23 @@ class StudentRegistrationDraftTest {
                                         T0,
                                         T0))
                 .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    void consentKindAsksOnlyForTheConsentAndIsReadyOnceItIsComplete() {
+        StudentRegistrationDraft draft =
+                StudentRegistrationDraft.start(link, Kind.CONSENT, UUID.randomUUID(), T0, VALIDITY);
+
+        assertThat(Kind.CONSENT.targetsExistingStudent()).isTrue();
+        assertThat(Kind.CONSENT.confirmationOnly()).isFalse();
+        assertThat(draft.nextField(TODAY)).isEqualTo(Field.CONSENT);
+        assertThat(draft.readyToConfirm(TODAY)).isFalse();
+
+        ConsentDraft complete =
+                new ConsentDraft(1, "Maria Souza", "MOTHER", "2026-09-21", "DIGITAL");
+        StudentRegistrationDraft done = draft.withConsent(complete, T0, VALIDITY);
+
+        assertThat(done.nextField(TODAY)).isNull();
+        assertThat(done.readyToConfirm(TODAY)).isTrue();
     }
 }

@@ -41,8 +41,7 @@ class AdminSchoolHistoryFiltersContractIT extends AdminWebBase {
         given(querySchoolHistory.run(any(), any())).willReturn(emptyResult());
 
         mvc.perform(
-                        get(URL)
-                                .cookie(adminCookie(ADMIN_TOKEN))
+                        get(URL).cookie(adminCookie(ADMIN_TOKEN))
                                 .param("teacherId", TEACHER.toString())
                                 .param("type", "SEMESTER")
                                 .param("from", "2026-01-01")
@@ -115,8 +114,7 @@ class AdminSchoolHistoryFiltersContractIT extends AdminWebBase {
                                                         "PERIOD_START_AFTER_END")))));
 
         mvc.perform(
-                        get(URL)
-                                .cookie(adminCookie(ADMIN_TOKEN))
+                        get(URL).cookie(adminCookie(ADMIN_TOKEN))
                                 .param("from", "2026-05-02")
                                 .param("to", "2026-05-01"))
                 .andExpect(status().isBadRequest())

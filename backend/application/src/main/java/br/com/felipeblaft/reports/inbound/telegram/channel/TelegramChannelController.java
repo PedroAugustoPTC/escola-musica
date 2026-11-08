@@ -1,6 +1,7 @@
 package br.com.felipeblaft.reports.inbound.telegram.channel;
 
 import br.com.felipeblaft.reports.config.ApplicationProperties;
+import br.com.felipeblaft.reports.config.log.CorrelationMdc;
 import br.com.felipeblaft.reports.domain.channel.ChannelAction;
 import br.com.felipeblaft.reports.domain.channel.ChannelActionOrigin;
 import br.com.felipeblaft.reports.inbound.internal.security.SecretComparator;
@@ -125,11 +126,16 @@ public class TelegramChannelController {
             return ResponseEntity.ok(UpdateResponse.empty());
         }
         UpdateTelegram update = read.get();
-        TelegramUpdateResult result = processor.processInternal(update);
-        if (!result.repeated()) {
-            return ResponseEntity.ok(registerActions(update, result.outputs(), false));
+        // o update_id é a correlação da autoria no Telegram: vai a toda linha de log deste pedido
+        // (FR-050)
+        try (CorrelationMdc scope =
+                CorrelationMdc.open(Long.toString(update.updateId()), "TELEGRAM")) {
+            TelegramUpdateResult result = processor.processInternal(update);
+            if (!result.repeated()) {
+                return ResponseEntity.ok(registerActions(update, result.outputs(), false));
+            }
+            return redeliver(update);
         }
-        return redeliver(update);
     }
 
     /** Mapeia, grava na outbox e marca o update como concluído, tudo na mesma transação. */

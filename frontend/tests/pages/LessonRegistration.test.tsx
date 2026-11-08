@@ -101,6 +101,31 @@ describe('TelaGravacao (05)', () => {
     expect((sending.init.body as FormData).get('audio')).toBeInstanceOf(Blob);
   });
 
+  it('bloqueio por falta de consentimento avisa sem enviar e oferece registrar o consentimento', async () => {
+    mockApi({
+      ...BASE,
+      [`GET /api/v1/students/${STUDENT.id}`]: { body: STUDENT },
+      [`POST /api/v1/students/${STUDENT.id}/lesson-reports`]: {
+        status: 409,
+        body: { code: 'CONSENT_REQUIRED', message: 'x' },
+      },
+    });
+    const user = userEvent.setup();
+    const { router } = renderRoutes(routes, `/students/${STUDENT.id}/new-lesson`);
+
+    await screen.findByRole('heading', { name: 'Matteo Mafra' });
+    await user.upload(
+      screen.getByLabelText('Arquivo de áudio'),
+      new File(['a'], 'lesson.m4a', { type: 'audio/mp4' }),
+    );
+    await user.click(screen.getByRole('button', { name: 'Enviar áudio e gerar relatório' }));
+
+    const link = await screen.findByRole('link', { name: 'Registrar consentimento' });
+    expect(link.closest('[role="alert"]')).not.toBeNull();
+    expect(link).toHaveAttribute('href', `/my-students/${STUDENT.id}`);
+    expect(router.state.location.pathname).toBe(`/students/${STUDENT.id}/new-lesson`);
+  });
+
   it('relatório em aberto (409) leva à tela 04', async () => {
     mockApi({
       ...BASE,

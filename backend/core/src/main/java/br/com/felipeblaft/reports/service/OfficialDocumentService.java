@@ -10,10 +10,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Leitura do PDF {@code OFFICIAL} da versão aprovada (aula e semestral) e montagem do nome sugerido,
- * sem checar quem pede: a checagem de acesso (dono, no caminho do professor; relatório aprovado, no
- * da escola) é de quem chama. Nunca troca de versão: se o documento da versão pedida não existe ou
- * não pode ser lido, devolve vazio.
+ * Leitura do PDF {@code OFFICIAL} da versão aprovada (aula e semestral) e montagem do nome
+ * sugerido, sem checar quem pede: a checagem de acesso (dono, no caminho do professor; relatório
+ * aprovado, no da escola) é de quem chama. Nunca troca de versão: se o documento da versão pedida
+ * não existe ou não pode ser lido, devolve vazio.
  */
 public class OfficialDocumentService {
 

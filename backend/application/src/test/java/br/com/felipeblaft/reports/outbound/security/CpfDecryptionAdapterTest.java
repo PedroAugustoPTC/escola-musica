@@ -27,6 +27,10 @@ class CpfDecryptionAdapterTest {
                 null,
                 null,
                 null,
+                null,
+                null,
+                null,
+                null,
                 null);
     }
 

@@ -47,8 +47,7 @@ class QuerySchoolHistoryUseCaseTest {
     private final Actor admin = ActorFixtures.administratorWeb();
 
     private static Command forStudent(UUID studentId) {
-        return new Command(
-                studentId, null, null, null, null, PageRequest.first(), CORRELATION);
+        return new Command(studentId, null, null, null, null, PageRequest.first(), CORRELATION);
     }
 
     private ApprovedReportRow lessonOf(
@@ -185,13 +184,7 @@ class QuerySchoolHistoryUseCaseTest {
         history.run(
                 admin,
                 new Command(
-                        c.matteo.id(),
-                        null,
-                        null,
-                        null,
-                        null,
-                        new PageRequest(1, 2),
-                        CORRELATION));
+                        c.matteo.id(), null, null, null, null, new PageRequest(1, 2), CORRELATION));
 
         assertThat(recorder.records()).hasSize(1);
         AuthorshipRecord record = recorder.inTransaction().getFirst();
@@ -208,8 +201,7 @@ class QuerySchoolHistoryUseCaseTest {
     @Test
     void withoutStudentFilterTheTargetIsNull() {
         history.run(
-                admin,
-                new Command(null, null, null, null, null, PageRequest.first(), CORRELATION));
+                admin, new Command(null, null, null, null, null, PageRequest.first(), CORRELATION));
 
         AuthorshipRecord record = recorder.records().getFirst();
         assertThat(record.targetType()).isNull();

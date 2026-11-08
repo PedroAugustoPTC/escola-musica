@@ -52,6 +52,16 @@ Regras de autorização, escopo e autoria (todas no núcleo; nenhuma na Web nem 
   fica sem administrador ativo (`LAST_ADMINISTRATOR`, com bloqueio em ordem fixa sob concorrência).
 - O núcleo devolve **código de erro** e dados estruturados, nunca texto; o texto vem do catálogo da aplicação.
 
+## Custo e alertas de operação (feature 007, US5)
+
+- `domain/privacy` (feature 007): consentimento (`StudentConsent`, versão do termo), retenção (`RetentionPolicy` com prazos padrão e valor inválido que cai no padrão com aviso) e eliminação (`ErasureRequest`, `ErasedStudent`, prévia de alcance e confirmação por `ELIMINAR`). O **guarda de consentimento** impede enviar à IA aula de aluno sem consentimento vigente; a eliminação reaproveita as remoções da retenção.
+- `domain/audit` (feature 007): trilha encadeada por hash (`AuditEvent`, âncora). A **porta de guarda da trilha** (`AuditTrailRetentionPort`) é a única que pode apagar eventos vencidos e só com a cadeia íntegra; `VerifyAuditChainUseCase` confere a cadeia e abre `AUDIT_CHAIN_BROKEN`. Todo caso de uso que lê ou altera dado de aluno grava o evento pelo mesmo ator que autorizou.
+- `domain/operations`: `OperationalAlert` (só tipo, componente e código do motivo; nunca aluno nem texto livre), `AlertType`, `AlertStatus`, `AlertThresholds`, `PriceTable` (preço com vigência) e `MonthlyCostReport`/`CostAggregate`.
+- `OperationalAlertService` abre (`report`) e normaliza (`resolve`) alertas; a implementação `PersistentOperationalAlertService` mantém um ativo por tipo e componente, soma a ocorrência e grava `ALERT_OPENED`/`ALERT_NORMALIZED` com o ator de apuração. Quem reporta: `RunRetentionUseCase`, `ConfirmErasureUseCase`, `DocumentGenerationService` (`STORAGE_FAILED`), `VerifyAuditChainUseCase`.
+- `EvaluateOperationalAlertsUseCase` (só a tarefa agendada chama; sem autorização): provedor de IA (falhas seguidas **ou** taxa na janela), fila do canal (item antigo **ou** itens demais) e normalização do armazenamento após o silêncio. `AUDIT_CHAIN_BROKEN` só normaliza por `AcknowledgeOperationalAlertUseCase` (`OPERATIONS_ALERT_ACK`); `RETENTION_FAILED` normaliza na próxima execução boa.
+- `GetMonthlyCostReportUseCase` (`OPERATIONS_COST_READ`): mês no fuso da escola; agrega as `CostLine` por áudio, aula, semestral, aluno, canal e provedor. O nome do aluno só vem de `CostReportQueryPort.studentNames`, para a tela do administrador.
+- `TranscriptionPort.providerName()` e `LlmPort.providerName()` dão o provedor das chamadas que falham, para o alerta por provedor.
+
 ## Regras
 
 - `domain` não depende de `usecase`, `port` nem de nada externo; `usecase` não depende de adaptadores.

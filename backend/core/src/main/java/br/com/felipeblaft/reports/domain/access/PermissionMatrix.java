@@ -151,6 +151,29 @@ public final class PermissionMatrix {
         map.put(Operation.SCHOOL_HISTORY_QUERY, onlyAdministrator(Set.of()));
         map.put(Operation.SCHOOL_REPORT_DOCUMENT_OPEN, onlyAdministrator(Set.of()));
         map.put(Operation.SCHOOL_REPORT_DOCUMENT_DOWNLOAD, onlyAdministrator(Set.of()));
+        // trilha de auditoria (007): consulta só do administrador; a verificação também roda pela
+        // retenção
+        map.put(Operation.AUDIT_TRAIL_QUERY, onlyAdministrator(Set.of()));
+        map.put(Operation.AUDIT_TRAIL_VERIFY, onlyAdministrator(Set.of(ActionOrigin.RETENTION)));
+        // consentimento do responsável (007): o professor registra só os próprios alunos; o termo
+        // vigente é texto institucional, legível pelos dois papéis
+        map.put(Operation.CONSENT_READ, onlyAdministrator(Set.of()));
+        map.put(Operation.CONSENT_RECORD, ownStudents(load));
+        map.put(Operation.CONSENT_REVOKE, onlyAdministrator(Set.of()));
+        map.put(Operation.CONSENT_PENDING_READ, onlyAdministrator(Set.of()));
+        map.put(Operation.CONSENT_TERM_READ, new Rule(ALLOW, ALLOW, ALLOW, Set.of()));
+        map.put(Operation.CONSENT_TERM_PUBLISH, onlyAdministrator(Set.of()));
+        // eliminação a pedido (007): só o administrador, só na Web; a retenção conclui remoções de
+        // arquivo que ficaram pendentes
+        map.put(Operation.ERASURE_REQUEST_REGISTER, onlyAdministrator(Set.of()));
+        map.put(Operation.ERASURE_REQUEST_READ, onlyAdministrator(Set.of()));
+        map.put(Operation.ERASURE_PREVIEW, onlyAdministrator(Set.of()));
+        map.put(Operation.ERASURE_CONFIRM, onlyAdministrator(Set.of(ActionOrigin.RETENTION)));
+        map.put(Operation.ERASURE_RECEIPT_READ, onlyAdministrator(Set.of()));
+        // custo e alertas de operação (007): só o administrador na Web; a apuração é do sistema
+        map.put(Operation.OPERATIONS_COST_READ, onlyAdministrator(Set.of()));
+        map.put(Operation.OPERATIONS_ALERT_READ, onlyAdministrator(Set.of()));
+        map.put(Operation.OPERATIONS_ALERT_ACK, onlyAdministrator(Set.of()));
         return map;
     }
 

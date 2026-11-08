@@ -70,6 +70,8 @@ final class LessonReportMapper {
         e.teacherId = r.teacherId();
         e.studentId = r.studentId();
         e.transcription = r.transcription();
+        e.sourceRemovedAt = r.sourceRemovedAt();
+        e.anonymizedAt = r.anonymizedAt();
         e.content = JsonPersistence.write(r.content());
         e.pendingQuestions = JsonPersistence.write(r.pendingQuestions());
         e.questionRounds = r.questionRounds();
@@ -111,7 +113,16 @@ final class LessonReportMapper {
                 e.approvalChannel == null ? null : Channel.valueOf(e.approvalChannel),
                 e.cancelledAt,
                 e.processingTimeMs,
-                e.lockVersion);
+                e.lockVersion,
+                e.sourceRemovedAt,
+                e.anonymizedAt);
+    }
+
+    /** Conteúdo esvaziado pela retenção: o banco guarda {} e o domínio recebe o conteúdo vazio. */
+    private static VersionContent removedContent(ReportType type) {
+        return type == ReportType.LESSON
+                ? LessonReportContent.empty()
+                : br.com.felipeblaft.reports.domain.semester.SemesterReportContent.empty();
     }
 
     static ReportVersionEntity toEntity(ReportVersion v) {
@@ -126,6 +137,7 @@ final class LessonReportMapper {
         e.channel = v.channel().name();
         e.promptVersion = v.promptVersion();
         e.createdAt = v.createdAt();
+        e.contentRemovedAt = v.contentRemovedAt();
         return e;
     }
 
@@ -136,12 +148,15 @@ final class LessonReportMapper {
                 type,
                 e.reportId,
                 e.number,
-                READERS.get(type).apply(e.content),
+                e.contentRemovedAt == null
+                        ? READERS.get(type).apply(e.content)
+                        : removedContent(type),
                 VersionOrigin.valueOf(e.origin),
                 e.interactionId,
                 Channel.valueOf(e.channel),
                 e.promptVersion,
-                e.createdAt);
+                e.createdAt,
+                e.contentRemovedAt);
     }
 
     static ReportInteractionEntity toEntity(ReportInteraction i) {
@@ -153,6 +168,7 @@ final class LessonReportMapper {
         e.channel = i.channel().name();
         e.medium = i.medium().name();
         e.text = i.text();
+        e.textRemovedAt = i.textRemovedAt();
         e.baseVersion = i.baseVersion();
         e.round = i.round();
         e.result = i.result().name();
@@ -174,7 +190,8 @@ final class LessonReportMapper {
                 e.round,
                 InteractionResult.valueOf(e.result),
                 e.resultingVersion,
-                e.createdAt);
+                e.createdAt,
+                e.textRemovedAt);
     }
 
     static PdfDocumentEntity toEntity(PdfDocument d) {
@@ -186,6 +203,7 @@ final class LessonReportMapper {
         e.sizeBytes = d.sizeBytes();
         e.sha256 = d.sha256();
         e.generatedAt = d.generatedAt();
+        e.contentRemovedAt = d.contentRemovedAt();
         return e;
     }
 
@@ -197,6 +215,7 @@ final class LessonReportMapper {
                 e.storageKey,
                 e.sizeBytes,
                 e.sha256,
-                e.generatedAt);
+                e.generatedAt,
+                e.contentRemovedAt);
     }
 }

@@ -1,7 +1,10 @@
 package br.com.felipeblaft.reports.outbound.ai;
 
 import br.com.felipeblaft.reports.config.ApplicationProperties;
+import br.com.felipeblaft.reports.domain.operations.PriceTable;
+import br.com.felipeblaft.reports.domain.operations.PriceUnit;
 import br.com.felipeblaft.reports.port.AudioNotProcessableException;
+import br.com.felipeblaft.reports.port.ClockPort;
 import br.com.felipeblaft.reports.port.NormalizedAudio;
 import br.com.felipeblaft.reports.port.ProviderUnavailableException;
 import br.com.felipeblaft.reports.port.TranscriptionPort;
@@ -33,15 +36,36 @@ public class TranscriptionOpenAiCompatibleAdapter implements TranscriptionPort {
 
     private final ApplicationProperties.Transcription config;
     private final AiHttpClient http;
+    private final AiPricing pricing;
 
     public TranscriptionOpenAiCompatibleAdapter(ApplicationProperties.Transcription config) {
         this(config, new AiHttpClient(Duration.ofSeconds(1)));
     }
 
+    /** Preço pela tabela com vigência (FR-052); o das propriedades vale como reserva. */
+    public TranscriptionOpenAiCompatibleAdapter(
+            ApplicationProperties.Transcription config, PriceTable prices, ClockPort clock) {
+        this(
+                config,
+                new AiHttpClient(Duration.ofSeconds(1)),
+                new AiPricing(prices, clock, String.valueOf(config.model())));
+    }
+
     TranscriptionOpenAiCompatibleAdapter(
             ApplicationProperties.Transcription config, AiHttpClient http) {
+        this(config, http, null);
+    }
+
+    TranscriptionOpenAiCompatibleAdapter(
+            ApplicationProperties.Transcription config, AiHttpClient http, AiPricing pricing) {
         this.config = Objects.requireNonNull(config);
         this.http = http;
+        this.pricing = pricing;
+    }
+
+    @Override
+    public String providerName() {
+        return AiHttpClient.modelProvider(config.url(), config.model());
     }
 
     @Override
@@ -81,7 +105,10 @@ public class TranscriptionOpenAiCompatibleAdapter implements TranscriptionPort {
         if (text.isBlank()) {
             throw new AudioNotProcessableException(AudioNotProcessableException.Reason.NO_SPEECH);
         }
-        BigDecimal price = Objects.requireNonNullElse(config.priceUsdPerHour(), BigDecimal.ZERO);
+        BigDecimal price =
+                pricing == null
+                        ? Objects.requireNonNullElse(config.priceUsdPerHour(), BigDecimal.ZERO)
+                        : pricing.price(PriceUnit.AUDIO_HOUR, config.priceUsdPerHour());
         BigDecimal cost =
                 BigDecimal.valueOf(audio.durationSeconds())
                         .multiply(price)

@@ -25,6 +25,7 @@ class CostRecordAdapter implements CostRecordPort {
         AiCallEntity e = new AiCallEntity();
         e.id = c.id();
         e.jobId = c.jobId();
+        e.channel = c.channel().name();
         e.reportType = c.reportType() == null ? null : c.reportType().name();
         e.reportId = c.reportId();
         e.task = c.task().name();

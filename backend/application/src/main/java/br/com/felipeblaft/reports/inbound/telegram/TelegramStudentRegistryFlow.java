@@ -6,7 +6,9 @@ import br.com.felipeblaft.reports.domain.common.DomainException;
 import br.com.felipeblaft.reports.domain.common.ErrorCode;
 import br.com.felipeblaft.reports.domain.common.PageRequest;
 import br.com.felipeblaft.reports.domain.common.PageResult;
+import br.com.felipeblaft.reports.domain.privacy.PrivacyOfficer;
 import br.com.felipeblaft.reports.domain.registry.StudentStatusFilter;
+import br.com.felipeblaft.reports.domain.telegram.ConsentDraft;
 import br.com.felipeblaft.reports.domain.telegram.ConversationFlow;
 import br.com.felipeblaft.reports.domain.telegram.ConversationFlowStep;
 import br.com.felipeblaft.reports.domain.telegram.StudentRegistrationDraft.Field;
@@ -16,6 +18,7 @@ import br.com.felipeblaft.reports.inbound.telegram.TelegramKeywords.Command;
 import br.com.felipeblaft.reports.inbound.telegram.TelegramOutput.Button;
 import br.com.felipeblaft.reports.inbound.telegram.TelegramOutput.Keyboard;
 import br.com.felipeblaft.reports.inbound.telegram.TelegramOutput.Message;
+import br.com.felipeblaft.reports.usecase.privacy.GetCurrentConsentTermUseCase;
 import br.com.felipeblaft.reports.usecase.registry.CancelStudentRegistrationUseCase;
 import br.com.felipeblaft.reports.usecase.registry.CollectStudentRegistrationFieldUseCase;
 import br.com.felipeblaft.reports.usecase.registry.ConfirmStudentRegistrationUseCase;
@@ -65,6 +68,11 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
                     ConversationFlowStep.REGISTRY_ASK_GUARDIAN_PHONE,
                     ConversationFlowStep.REGISTRY_ASK_GUARDIAN_EMAIL,
                     ConversationFlowStep.REGISTRY_ASK_INSTRUMENT,
+                    ConversationFlowStep.REGISTRY_ASK_CONSENT,
+                    ConversationFlowStep.REGISTRY_ASK_CONSENT_NAME,
+                    ConversationFlowStep.REGISTRY_ASK_CONSENT_RELATIONSHIP,
+                    ConversationFlowStep.REGISTRY_ASK_CONSENT_DATE,
+                    ConversationFlowStep.REGISTRY_ASK_CONSENT_METHOD,
                     ConversationFlowStep.REGISTRY_EDIT_FIELD,
                     ConversationFlowStep.REGISTRY_CONFIRM);
 
@@ -83,6 +91,8 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
     private final GetStudentUseCase get;
     private final TelegramConversationInterpreter interpreter;
     private final TelegramPresenter presenter;
+    private final GetCurrentConsentTermUseCase currentTerm;
+    private final PrivacyOfficer privacyOfficer;
 
     @SuppressWarnings("java:S107")
     public TelegramStudentRegistryFlow(
@@ -93,7 +103,11 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
             ListStudentsUseCase list,
             GetStudentUseCase get,
             TelegramConversationInterpreter interpreter,
-            TelegramPresenter presenter) {
+            TelegramPresenter presenter,
+            GetCurrentConsentTermUseCase currentTerm,
+            PrivacyOfficer privacyOfficer) {
+        this.currentTerm = currentTerm;
+        this.privacyOfficer = privacyOfficer;
         this.start = start;
         this.collect = collect;
         this.confirm = confirm;
@@ -172,6 +186,13 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
             case REGISTRY_ASK_GUARDIAN_NAME, REGISTRY_ASK_GUARDIAN_EMAIL ->
                     collectField(context, Field.GUARDIAN, text);
             case REGISTRY_ASK_INSTRUMENT -> collectField(context, Field.INSTRUMENT, text);
+            case REGISTRY_ASK_CONSENT_NAME, REGISTRY_ASK_CONSENT_DATE ->
+                    collectField(context, Field.CONSENT, text);
+            case REGISTRY_ASK_CONSENT,
+                    REGISTRY_ASK_CONSENT_RELATIONSHIP,
+                    REGISTRY_ASK_CONSENT_METHOD ->
+                    // essas perguntas só aceitam os botões; o texto volta à mesma pergunta
+                    ask(context, step, null);
             case REGISTRY_LIST -> search(context, text);
             case REGISTRY_CONFIRM -> confirmByText(context, text);
             default ->
@@ -219,6 +240,16 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
 
     @Override
     public boolean aoCallback(TelegramContext context, String action, String argument) {
+        if ("consent-record".equals(action)) {
+            startConsentRecord(context, argument);
+            return true;
+        }
+        if (action.startsWith("consent")) {
+            if (!active(context) || !consentButton(context, action, argument)) {
+                expired(context);
+            }
+            return true;
+        }
         if (!action.startsWith("reg-")) {
             return false;
         }
@@ -492,6 +523,34 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
         ask(context, ConversationFlowStep.REGISTRY_ASK_NAME, null);
     }
 
+    /**
+     * Botão do aviso de bloqueio (FR-034): abre só os passos do consentimento (C1 a C5) do aluno do
+     * professor, num rascunho do tipo {@code CONSENT}. Aluno alheio ou inexistente recebe a mesma
+     * negativa do recurso inexistente (o núcleo decide).
+     */
+    private void startConsentRecord(TelegramContext context, String argument) {
+        UUID studentId;
+        try {
+            studentId = UUID.fromString(argument);
+        } catch (IllegalArgumentException invalid) {
+            expired(context);
+            return;
+        }
+        TelegramConversation conversation = context.conversation();
+        start.run(
+                actor(context),
+                new StartStudentRegistrationUseCase.Command(
+                        linkId(context), Kind.CONSENT, studentId));
+        conversation.cleanFocus();
+        conversation.discardAudio();
+        conversation.startFlow(
+                ConversationFlow.STUDENT_REGISTRY, ConversationFlowStep.REGISTRY_ASK_CONSENT);
+        conversation.store(KIND, Kind.CONSENT.name());
+        conversation.store(STUDENT, studentId.toString());
+        conversation.store(EDITED, Field.CONSENT.name());
+        ask(context, ConversationFlowStep.REGISTRY_ASK_CONSENT, null);
+    }
+
     private void startEdit(TelegramContext context) {
         TelegramConversation conversation = context.conversation();
         UUID studentId = UUID.fromString(conversation.data(STUDENT).orElseThrow());
@@ -573,14 +632,156 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
     /** Pergunta de uma etapa; {@code prefix} traz o motivo do erro anterior, se houver. */
     private void ask(TelegramContext context, ConversationFlowStep step, String prefix) {
         context.conversation().defineStep(step);
-        String question = presenter.text(questionKey(step));
+        String question = questionText(context, step);
         String text = prefix == null ? question : prefix + "\n\n" + question;
         List<List<Button>> rows = new ArrayList<>();
         if (step == ConversationFlowStep.REGISTRY_ASK_INSTRUMENT) {
             rows.add(List.of(presenter.button("SKIP_BUTTON", "reg-skip")));
         }
+        rows.addAll(consentButtons(step));
         rows.add(List.of(presenter.button("CANCEL_BUTTON", "reg-cancel")));
         context.answer(new Message(context.chatId(), text, new Keyboard(rows)));
+    }
+
+    /**
+     * Texto da pergunta. O C1 apresenta a versão vigente do termo (número e data), o texto e o
+     * contato do responsável pela LGPD; nada do aluno nem da idade (telegram-consent.md).
+     */
+    private String questionText(TelegramContext context, ConversationFlowStep step) {
+        if (step != ConversationFlowStep.REGISTRY_ASK_CONSENT) {
+            return presenter.text(questionKey(step));
+        }
+        var term = currentTerm.run(actor(context));
+        return presenter.text(
+                "CONSENT_ASK",
+                Map.of(
+                        "number",
+                        term.number(),
+                        "date",
+                        presenter.formatting().data(term.publishedOn()),
+                        "text",
+                        term.text().length() > 600
+                                ? term.text().substring(0, 600) + "…"
+                                : term.text(),
+                        "contact",
+                        privacyOfficer.defined()
+                                ? privacyOfficer.name() + ", " + privacyOfficer.contact()
+                                : presenter.text("CONSENT_OFFICER_UNDEFINED")));
+    }
+
+    /** Botões das perguntas fechadas do consentimento (C1, C3, C4 e C5). */
+    private List<List<Button>> consentButtons(ConversationFlowStep step) {
+        List<List<Button>> rows = new ArrayList<>();
+        switch (step) {
+            case REGISTRY_ASK_CONSENT -> {
+                rows.add(
+                        List.of(
+                                presenter.button("CONSENT_YES_BUTTON", "consent-yes"),
+                                presenter.button("CONSENT_NO_BUTTON", "consent-no")));
+            }
+            case REGISTRY_ASK_CONSENT_RELATIONSHIP -> {
+                for (String relation : List.of("MOTHER", "FATHER", "LEGAL_GUARDIAN", "OTHER")) {
+                    rows.add(
+                            List.of(
+                                    presenter.button(
+                                            "CONSENT_RELATION_" + relation,
+                                            Map.of(),
+                                            "consent-rel",
+                                            relation)));
+                }
+            }
+            case REGISTRY_ASK_CONSENT_DATE -> {
+                rows.add(
+                        List.of(
+                                presenter.button(
+                                        "CONSENT_DATE_TODAY",
+                                        Map.of(),
+                                        "consent-date",
+                                        "today")));
+            }
+            case REGISTRY_ASK_CONSENT_METHOD -> {
+                for (String method : List.of("SIGNED_PAPER", "DIGITAL", "OTHER")) {
+                    rows.add(
+                            List.of(
+                                    presenter.button(
+                                            "CONSENT_METHOD_" + method,
+                                            Map.of(),
+                                            "consent-method",
+                                            method)));
+                }
+            }
+            default -> {
+                // as demais perguntas não têm botão próprio
+            }
+        }
+        return rows;
+    }
+
+    /**
+     * Botões do consentimento: só valem no passo correspondente. "Não" no C1 descarta o rascunho
+     * (igual ao cancelar) e orienta o professor; o cadastro não é concluído.
+     */
+    private boolean consentButton(TelegramContext context, String action, String argument) {
+        ConversationFlowStep step = context.conversation().step();
+        switch (action) {
+            case "consent-yes" -> {
+                if (step != ConversationFlowStep.REGISTRY_ASK_CONSENT) {
+                    return false;
+                }
+                collectField(context, Field.CONSENT, "");
+                return true;
+            }
+            case "consent-no" -> {
+                if (step != ConversationFlowStep.REGISTRY_ASK_CONSENT) {
+                    return false;
+                }
+                cancel.run(
+                        actor(context),
+                        new CancelStudentRegistrationUseCase.Command(linkId(context)));
+                context.conversation().endFlow();
+                context.answer(
+                        new Message(
+                                context.chatId(),
+                                presenter.text("CONSENT_DECLINED"),
+                                presenter.homeActions()));
+                return true;
+            }
+            case "consent-rel" -> {
+                if (step != ConversationFlowStep.REGISTRY_ASK_CONSENT_RELATIONSHIP) {
+                    return false;
+                }
+                collectField(context, Field.CONSENT, argument);
+                return true;
+            }
+            case "consent-date" -> {
+                if (step != ConversationFlowStep.REGISTRY_ASK_CONSENT_DATE
+                        || !"today".equals(argument)) {
+                    return false;
+                }
+                collectField(context, Field.CONSENT, argument);
+                return true;
+            }
+            case "consent-method" -> {
+                if (step != ConversationFlowStep.REGISTRY_ASK_CONSENT_METHOD) {
+                    return false;
+                }
+                collectField(context, Field.CONSENT, argument);
+                return true;
+            }
+            default -> {
+                return false;
+            }
+        }
+    }
+
+    private static ConversationFlowStep consentStep(ConsentDraft.Part part) {
+        return switch (part) {
+            case ACKNOWLEDGE -> ConversationFlowStep.REGISTRY_ASK_CONSENT;
+            case NAME -> ConversationFlowStep.REGISTRY_ASK_CONSENT_NAME;
+            case RELATIONSHIP -> ConversationFlowStep.REGISTRY_ASK_CONSENT_RELATIONSHIP;
+            case DATE -> ConversationFlowStep.REGISTRY_ASK_CONSENT_DATE;
+            case METHOD -> ConversationFlowStep.REGISTRY_ASK_CONSENT_METHOD;
+        };
     }
 
     private static String questionKey(ConversationFlowStep step) {
@@ -592,6 +793,10 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
             case REGISTRY_ASK_GUARDIAN_PHONE -> "REGISTRY_ASK_GUARDIAN_PHONE";
             case REGISTRY_ASK_GUARDIAN_EMAIL -> "REGISTRY_ASK_GUARDIAN_EMAIL";
             case REGISTRY_ASK_INSTRUMENT -> "REGISTRY_ASK_INSTRUMENT";
+            case REGISTRY_ASK_CONSENT_NAME -> "CONSENT_ASK_NAME";
+            case REGISTRY_ASK_CONSENT_RELATIONSHIP -> "CONSENT_ASK_RELATIONSHIP";
+            case REGISTRY_ASK_CONSENT_DATE -> "CONSENT_ASK_DATE";
+            case REGISTRY_ASK_CONSENT_METHOD -> "CONSENT_ASK_METHOD";
             default -> throw new IllegalArgumentException("etapa sem pergunta: " + step);
         };
     }
@@ -622,7 +827,12 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
                     && Kind.UPDATE.name().equals(conversation.data(KIND).orElse(null))) {
                 markEdited(conversation, Field.GUARDIAN);
             }
-            ask(context, stepOf(result.nextField()), null);
+            ask(
+                    context,
+                    result.nextField() == Field.CONSENT && result.nextConsentPart() != null
+                            ? consentStep(result.nextConsentPart())
+                            : stepOf(result.nextField()),
+                    null);
         } else {
             showSummary(context, result);
         }
@@ -634,6 +844,7 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
             case BIRTH_DATE -> ConversationFlowStep.REGISTRY_ASK_BIRTH_DATE;
             case CPF -> ConversationFlowStep.REGISTRY_ASK_CPF;
             case GUARDIAN -> ConversationFlowStep.REGISTRY_ASK_GUARDIAN_NAME;
+            case CONSENT -> ConversationFlowStep.REGISTRY_ASK_CONSENT;
             case INSTRUMENT -> ConversationFlowStep.REGISTRY_ASK_INSTRUMENT;
         };
     }
@@ -698,7 +909,10 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
         if (summary == null || result.confirmationToken() == null) {
             throw new IllegalStateException("cadastro completo sem resumo nem token");
         }
-        boolean update = Kind.UPDATE.name().equals(conversation.data(KIND).orElse(null));
+        // o consentimento avulso mostra só a linha do consentimento, como uma edição
+        boolean update =
+                Kind.UPDATE.name().equals(conversation.data(KIND).orElse(null))
+                        || Kind.CONSENT.name().equals(conversation.data(KIND).orElse(null));
         Set<String> edited = new LinkedHashSet<>();
         conversation
                 .data(EDITED)
@@ -732,6 +946,22 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
                 Field.GUARDIAN,
                 "REGISTRY_FIELD_GUARDIAN",
                 summary.guardianName());
+        // nunca repete o nome de quem consentiu: só a versão do termo e a data
+        addLine(
+                lines,
+                update,
+                edited,
+                Field.CONSENT,
+                "REGISTRY_FIELD_CONSENT",
+                summary.consentTermVersion() == null || summary.consentedOn() == null
+                        ? null
+                        : presenter.text(
+                                "CONSENT_REGISTERED",
+                                Map.of(
+                                        "number",
+                                        summary.consentTermVersion(),
+                                        "date",
+                                        presenter.formatting().data(summary.consentedOn()))));
         String joined = String.join("\n", lines);
 
         conversation.store(TOKEN, result.confirmationToken());
@@ -805,6 +1035,12 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
                 context.answer(presenter.error(context.chatId(), error.code(), error.details()));
                 return;
             }
+            if (isStaleConsentTerm(error)) {
+                // um termo que exige novo consentimento foi publicado no meio do cadastro: nada foi
+                // gravado, o rascunho fica e o bot reapresenta o C1 (telegram-consent.md)
+                collectField(context, Field.CONSENT, "");
+                return;
+            }
             // qualquer outra recusa encerra o cadastro: descarta o rascunho e nada fica gravado
             discardQuietly(context);
             conversation.endFlow();
@@ -817,12 +1053,26 @@ public class TelegramStudentRegistryFlow implements TelegramFlow {
                     case UPDATE -> "REGISTRY_UPDATED";
                     case INACTIVATE -> "STUDENT_INACTIVATED";
                     case REACTIVATE -> "STUDENT_REACTIVATED";
+                    case CONSENT -> "CONSENT_SAVED";
                 };
+        Map<String, Object> parameters =
+                outcome.student() == null
+                        ? Map.of()
+                        : Map.of("name", outcome.student().name());
         context.answer(
                 new Message(
-                        context.chatId(),
-                        presenter.text(key, Map.of("name", outcome.student().name())),
-                        presenter.homeActions()));
+                        context.chatId(), presenter.text(key, parameters), presenter.homeActions()));
+    }
+
+    /** A versão do termo do rascunho deixou de valer ({@code consent.termVersion} recusado). */
+    private static boolean isStaleConsentTerm(DomainException error) {
+        return error.code() == ErrorCode.VALIDATION_FAILED
+                && error.details().get("fields") instanceof List<?> fields
+                && fields.stream()
+                        .anyMatch(
+                                f ->
+                                        f instanceof Map<?, ?> m
+                                                && "consent.termVersion".equals(m.get("field")));
     }
 
     private void cancelDraft(TelegramContext context) {

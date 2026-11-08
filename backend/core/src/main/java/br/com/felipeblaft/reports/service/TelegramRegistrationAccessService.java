@@ -31,6 +31,7 @@ public final class TelegramRegistrationAccessService {
             case UPDATE -> Operation.STUDENT_UPDATE;
             case INACTIVATE -> Operation.STUDENT_INACTIVATE;
             case REACTIVATE -> Operation.STUDENT_REACTIVATE;
+            case CONSENT -> Operation.CONSENT_RECORD;
         };
     }
 

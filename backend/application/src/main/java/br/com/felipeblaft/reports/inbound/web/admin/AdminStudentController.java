@@ -87,7 +87,11 @@ public class AdminStudentController {
                 register.run(
                         admin.actor(),
                         new RegisterStudentUseCase.Command(
-                                AdminStudentDtos.input(request), teacherIds, correlationId));
+                                AdminStudentDtos.input(request),
+                                teacherIds,
+                                correlationId,
+                                br.com.felipeblaft.reports.inbound.web.ConsentRequest.input(
+                                        request.consent())));
         return ResponseEntity.status(HttpStatus.CREATED).body(AdminStudentDtos.student(student));
     }
 
@@ -110,7 +114,11 @@ public class AdminStudentController {
                 update.run(
                         admin.actor(),
                         new UpdateStudentUseCase.Command(
-                                studentId, AdminStudentDtos.input(request), correlationId)));
+                                studentId,
+                                AdminStudentDtos.input(request),
+                                correlationId,
+                                br.com.felipeblaft.reports.inbound.web.ConsentRequest.input(
+                                        request.consent()))));
     }
 
     @PostMapping("/{studentId}/inactivation")

@@ -46,6 +46,9 @@ public class StudentEntity {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    @Column(name = "erased_at")
+    private Instant erasedAt;
+
     protected StudentEntity() {}
 
     StudentEntity(
@@ -121,5 +124,9 @@ public class StudentEntity {
 
     Instant getUpdatedAt() {
         return updatedAt;
+    }
+
+    Instant getErasedAt() {
+        return erasedAt;
     }
 }

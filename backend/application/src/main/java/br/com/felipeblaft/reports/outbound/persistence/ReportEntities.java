@@ -48,8 +48,13 @@ final class ReportEntities {
         @Column(name = "student_id", nullable = false)
         UUID studentId;
 
-        @Column(nullable = false)
         String transcription;
+
+        @Column(name = "source_removed_at")
+        Instant sourceRemovedAt;
+
+        @Column(name = "anonymized_at")
+        Instant anonymizedAt;
 
         @Column(nullable = false, columnDefinition = "jsonb")
         @ColumnTransformer(write = "?::jsonb")
@@ -133,6 +138,9 @@ final class ReportEntities {
         @Column(name = "prompt_version")
         String promptVersion;
 
+        @Column(name = "content_removed_at")
+        Instant contentRemovedAt;
+
         @Column(name = "created_at", nullable = false)
         Instant createdAt;
     }
@@ -157,8 +165,10 @@ final class ReportEntities {
         @Column(nullable = false)
         String medium;
 
-        @Column(nullable = false)
         String text;
+
+        @Column(name = "text_removed_at")
+        Instant textRemovedAt;
 
         @Column(name = "base_version", nullable = false)
         int baseVersion;
@@ -197,6 +207,12 @@ final class ReportEntities {
 
         @Column(name = "generated_at", nullable = false)
         Instant generatedAt;
+
+        @Column(name = "content_removed_at")
+        Instant contentRemovedAt;
+
+        @Column(name = "file_removed_at")
+        Instant fileRemovedAt;
     }
 
     @Entity(name = "ProcessingJobEntity")
@@ -267,6 +283,9 @@ final class ReportEntities {
 
         @Column(name = "job_id", nullable = false)
         UUID jobId;
+
+        @Column(nullable = false)
+        String channel;
 
         @Column(name = "report_type")
         String reportType;

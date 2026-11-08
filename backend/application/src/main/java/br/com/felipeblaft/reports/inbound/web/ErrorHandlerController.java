@@ -109,6 +109,12 @@ public class ErrorHandlerController {
         }
         STATUS.put(ErrorCode.OPERATION_TEMPORARILY_BLOCKED, HttpStatus.TOO_MANY_REQUESTS);
         STATUS.put(ErrorCode.OPERATION_NOT_SAVED, HttpStatus.INTERNAL_SERVER_ERROR);
+        STATUS.put(ErrorCode.CONSENT_REQUIRED, HttpStatus.CONFLICT);
+        STATUS.put(ErrorCode.CONSENT_ALREADY_REVOKED, HttpStatus.CONFLICT);
+        STATUS.put(ErrorCode.ERASURE_ALREADY_OPEN, HttpStatus.CONFLICT);
+        STATUS.put(ErrorCode.STUDENT_ALREADY_ERASED, HttpStatus.CONFLICT);
+        STATUS.put(ErrorCode.ERASURE_ALREADY_COMPLETED, HttpStatus.CONFLICT);
+        STATUS.put(ErrorCode.ALERT_NOT_ACKNOWLEDGEABLE, HttpStatus.CONFLICT);
     }
 
     private final MessageCatalog catalog;

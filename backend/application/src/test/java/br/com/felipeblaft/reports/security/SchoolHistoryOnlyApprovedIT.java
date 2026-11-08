@@ -57,9 +57,11 @@ class SchoolHistoryOnlyApprovedIT extends SchoolHistoryBase {
                 "PROCESSING_FAILED",
                 scenario.teacher("Evandro Nunes", "evandro@example.test", "EVAN2XPA"));
         others.put(
-                "AWAITING_ANSWERS", scenario.teacher("Fabia Reis", "fabia@example.test", "FABK2XPA"));
+                "AWAITING_ANSWERS",
+                scenario.teacher("Fabia Reis", "fabia@example.test", "FABK2XPA"));
         others.put(
-                "AWAITING_REVIEW", scenario.teacher("Gilda Rocha", "gilda@example.test", "GLRK2XPA"));
+                "AWAITING_REVIEW",
+                scenario.teacher("Gilda Rocha", "gilda@example.test", "GLRK2XPA"));
         int day = 1;
         for (Map.Entry<String, Teacher> entry : others.entrySet()) {
             assign(entry.getValue(), student);

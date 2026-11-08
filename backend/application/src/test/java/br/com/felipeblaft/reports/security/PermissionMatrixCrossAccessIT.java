@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -120,7 +121,34 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
                             List.of("abrir o pdf de qualquer aluno da escola")),
                     Map.entry(
                             Operation.SCHOOL_REPORT_DOCUMENT_DOWNLOAD,
-                            List.of("baixar o pdf de qualquer aluno da escola")));
+                            List.of("baixar o pdf de qualquer aluno da escola")),
+                    // feature 007: a trilha de auditoria é só da Web; o bot a trata como texto
+                    // não reconhecido
+                    Map.entry(
+                            Operation.AUDIT_TRAIL_QUERY,
+                            List.of("auditoria da escola", "trilha de auditoria")),
+                    Map.entry(Operation.AUDIT_TRAIL_VERIFY, List.of("verificar a trilha")),
+                    // feature 007: o consentimento é do administrador na Web; o professor registra
+                    // pelo
+                    // cadastro guiado (primeiro passo) e lê o termo no mesmo fluxo
+                    Map.entry(Operation.CONSENT_READ, List.of("consents of a student")),
+                    Map.entry(Operation.CONSENT_RECORD, List.of("cadastrar aluno")),
+                    Map.entry(Operation.CONSENT_REVOKE, List.of("revoke consent")),
+                    Map.entry(Operation.CONSENT_PENDING_READ, List.of("pending consents")),
+                    Map.entry(Operation.CONSENT_TERM_READ, List.of("cadastrar aluno")),
+                    Map.entry(Operation.CONSENT_TERM_PUBLISH, List.of("publish consent term")),
+                    // feature 007: a eliminação é só do administrador na Web; o bot a trata como
+                    // texto
+                    // não reconhecido
+                    Map.entry(Operation.ERASURE_REQUEST_REGISTER, List.of("apagar aluno")),
+                    Map.entry(Operation.ERASURE_REQUEST_READ, List.of("excluir dados")),
+                    Map.entry(Operation.ERASURE_PREVIEW, List.of("alcance da eliminação")),
+                    Map.entry(Operation.ERASURE_CONFIRM, List.of("eliminar aluno")),
+                    Map.entry(Operation.ERASURE_RECEIPT_READ, List.of("comprovante de eliminação")),
+                    // feature 007: custo e alertas de operação são só do administrador na Web
+                    Map.entry(Operation.OPERATIONS_COST_READ, List.of("custo do mês")),
+                    Map.entry(Operation.OPERATIONS_ALERT_READ, List.of("alertas de operação")),
+                    Map.entry(Operation.OPERATIONS_ALERT_ACK, List.of("reconhecer alerta")));
 
     private enum Outcome {
         REACHED,
@@ -227,6 +255,29 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
         variables.put("studentId", (pairOfBruno ? brunoStudent : claraStudent).id().toString());
         variables.put("teacherId", bruno.id().toString());
         variables.put("administratorId", second.administrator().id().toString());
+        variables.put(
+                "consentId",
+                jdbc.queryForObject("select id::text from student_consent limit 1", String.class));
+
+        UUID erasureRequestId = UUID.randomUUID();
+        jdbc.update(
+                "insert into erasure_request (id, student_id, requester_role, requested_on, received_via,"
+                        + " protocol_reference, status, registered_by, completed_at, scope_lesson_reports,"
+                        + " scope_semester_reports, scope_pdfs, scope_assignments, scope_consents,"
+                        + " created_at, lock_version)"
+                        + " values (?, ?, 'MOTHER', current_date, 'EMAIL', 'PROT-M', 'COMPLETED', ?,"
+                        + " now(), 0, 0, 0, 0, 0, now(), 0)",
+                erasureRequestId,
+                brunoStudent.id(),
+                second.administrator().id());
+        variables.put("requestId", erasureRequestId.toString());
+        UUID alertId = UUID.randomUUID();
+        jdbc.update(
+                "insert into operational_alert (id, type, component, detail_code, status, started_at,"
+                        + " last_seen_at, occurrences) values (?, 'AUDIT_CHAIN_BROKEN', 'audit-trail',"
+                        + " 'CHAIN_BROKEN', 'ACTIVE', now(), now(), 1)",
+                alertId);
+        variables.put("alertId", alertId.toString());
 
         if (operation == Operation.ADMINISTRATOR_REACTIVATE) {
             jdbc.update(
@@ -277,8 +328,7 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
                     "{\"periodKey\":\"2026-1\"}",
                     claraCookie);
             scenario.processQueue();
-            String semesterId =
-                    jdbc.queryForObject("select id from semester_report", String.class);
+            String semesterId = jdbc.queryForObject("select id from semester_report", String.class);
             call(
                     HttpMethod.POST,
                     API + "/semester-reports/" + semesterId + "/approval",
@@ -545,6 +595,24 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
                             + "\"instrument\":\"Piano\"}";
             case "PATCH /admin/students/{studentId}", "PATCH /my-students/{studentId}" ->
                     "{\"instrument\":\"Violão\"}";
+            case "POST /admin/students/{studentId}/consents",
+                    "POST /my-students/{studentId}/consents" ->
+                    "{\"consentingName\":\"Maria Guardian\",\"relationship\":\"MOTHER\","
+                            + "\"consentedOn\":\"2026-09-01\",\"termVersion\":1,"
+                            + "\"collectionMethod\":\"SIGNED_PAPER\"}";
+            case "POST /admin/consents/{consentId}/revocation" ->
+                    "{\"revokedOn\":\"2026-09-10\",\"revokedBy\":\"MOTHER\"}";
+            case "POST /admin/students/{studentId}/erasure-requests" ->
+                    "{\"requesterRole\":\"MOTHER\",\"requesterName\":\"Maria Guardian\","
+                            + "\"requestedOn\":\"2026-09-01\",\"receivedVia\":\"EMAIL\","
+                            + "\"protocolReference\":\"PROT-M2\"}";
+            case "POST /admin/erasure-requests/{requestId}/confirmation" ->
+                    "{\"confirmationToken\":\""
+                            + "x".repeat(40)
+                            + "\",\"confirmationWord\":\"ELIMINAR\"}";
+            case "POST /admin/consent-terms" ->
+                    "{\"publishedOn\":\"2026-09-01\",\"text\":\"Institutional text\","
+                            + "\"requiresNewConsent\":false}";
             default -> null;
         };
     }
@@ -623,6 +691,9 @@ class PermissionMatrixCrossAccessIT extends SecurityBase {
                 say(USER_CLARA, "meus alunos");
                 return tap(USER_CLARA, "v1:reg-open:0");
             case STUDENT_REGISTER:
+            case CONSENT_RECORD:
+            case CONSENT_TERM_READ:
+                // o professor registra e lê o termo dentro do cadastro guiado (primeiro passo)
                 return say(USER_CLARA, "cadastrar aluno");
             case STUDENT_UPDATE:
                 say(USER_CLARA, "meus alunos");

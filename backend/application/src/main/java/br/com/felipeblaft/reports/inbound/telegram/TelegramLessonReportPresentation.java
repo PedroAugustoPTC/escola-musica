@@ -141,7 +141,7 @@ public class TelegramLessonReportPresentation {
             long chatId, UUID teacherId, LessonReport report) {
         try {
             GetReportDocumentUseCase.ObtainedDocument document =
-                    getDocument.review(
+                    getDocument.prepareReview(
                             teacherId, ReportType.LESSON, report.id(), report.currentVersion());
             return Optional.of(
                     new Document(

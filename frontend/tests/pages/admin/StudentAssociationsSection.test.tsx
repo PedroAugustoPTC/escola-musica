@@ -29,6 +29,8 @@ function open(apiRoutes: Parameters<typeof renderAdminArea>[1] = {}) {
     [`GET ${STUDENT_PATH}`]: { body: STUDENT },
     'GET /api/v1/admin/teachers': { body: pageOf([TEACHER_ACTIVE, DORA, TEACHER_INACTIVE]) },
     [`GET ${ASSOCIATION}/removal-preview`]: { body: REMOVAL_PREVIEW },
+    [`GET ${STUDENT_PATH}/consents`]: { body: [] },
+    'GET /api/v1/admin/consent-terms': { body: [] },
     ...apiRoutes,
   });
 }

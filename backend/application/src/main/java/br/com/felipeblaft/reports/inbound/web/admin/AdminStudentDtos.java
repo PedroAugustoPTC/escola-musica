@@ -37,7 +37,8 @@ public final class AdminStudentDtos {
             String cpf,
             AdminGuardianRequest guardian,
             String instrument,
-            List<UUID> teacherIds) {
+            List<UUID> teacherIds,
+            br.com.felipeblaft.reports.inbound.web.ConsentRequest consent) {
 
         @Override
         public String toString() {

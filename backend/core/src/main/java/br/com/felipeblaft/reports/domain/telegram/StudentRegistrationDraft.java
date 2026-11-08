@@ -42,7 +42,8 @@ public record StudentRegistrationDraft(
         String confirmationToken,
         Instant createdAt,
         Instant updatedAt,
-        Instant expiresAt) {
+        Instant expiresAt,
+        ConsentDraft consent) {
 
     /** Alfabeto do token: sem caracteres ambíguos e seguro para o {@code callback_data}. */
     private static final String TOKEN_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -55,7 +56,9 @@ public record StudentRegistrationDraft(
         CREATE,
         UPDATE,
         INACTIVATE,
-        REACTIVATE;
+        REACTIVATE,
+        /** Só o consentimento do responsável de um aluno existente (aviso de bloqueio, FR-034). */
+        CONSENT;
 
         /** Os tipos que operam sobre um aluno já existente. */
         public boolean targetsExistingStudent() {
@@ -74,6 +77,7 @@ public record StudentRegistrationDraft(
         BIRTH_DATE,
         CPF,
         GUARDIAN,
+        CONSENT,
         INSTRUMENT
     }
 
@@ -84,6 +88,44 @@ public record StudentRegistrationDraft(
         EMAIL
     }
 
+    /** Sem consentimento em coleta (cadastros anteriores à feature 007 e os de adulto). */
+    public StudentRegistrationDraft(
+            UUID linkId,
+            Kind kind,
+            UUID studentId,
+            Set<Field> providedFields,
+            String name,
+            String instrument,
+            LocalDate birthDate,
+            byte[] cpfEncrypted,
+            String cpfHash,
+            String guardianName,
+            String guardianPhone,
+            String guardianEmail,
+            String confirmationToken,
+            Instant createdAt,
+            Instant updatedAt,
+            Instant expiresAt) {
+        this(
+                linkId,
+                kind,
+                studentId,
+                providedFields,
+                name,
+                instrument,
+                birthDate,
+                cpfEncrypted,
+                cpfHash,
+                guardianName,
+                guardianPhone,
+                guardianEmail,
+                confirmationToken,
+                createdAt,
+                updatedAt,
+                expiresAt,
+                ConsentDraft.EMPTY);
+    }
+
     public StudentRegistrationDraft {
         Objects.requireNonNull(linkId);
         Objects.requireNonNull(kind);
@@ -92,6 +134,7 @@ public record StudentRegistrationDraft(
         Objects.requireNonNull(updatedAt);
         Objects.requireNonNull(expiresAt);
         providedFields = Set.copyOf(providedFields);
+        consent = consent == null ? ConsentDraft.EMPTY : consent;
         cpfEncrypted = cpfEncrypted == null ? null : cpfEncrypted.clone();
     }
 
@@ -121,7 +164,8 @@ public record StudentRegistrationDraft(
                 null,
                 now,
                 now,
-                now.plus(validity));
+                now.plus(validity),
+                ConsentDraft.EMPTY);
     }
 
     /** Novo token de confirmação: 8 caracteres aleatórios, de uso único. */
@@ -163,13 +207,22 @@ public record StudentRegistrationDraft(
         if (kind.confirmationOnly()) {
             return null;
         }
+        if (kind == Kind.CONSENT) {
+            return providedFields.contains(Field.CONSENT) ? null : Field.CONSENT;
+        }
         if (kind == Kind.UPDATE) {
             boolean guardianMissing =
                     guardianRequired(today) && !providedFields.contains(Field.GUARDIAN);
-            return guardianMissing ? Field.GUARDIAN : null;
+            if (guardianMissing) {
+                return Field.GUARDIAN;
+            }
+            return consentMissing(today) ? Field.CONSENT : null;
         }
         for (Field field : Field.values()) {
             if (field == Field.GUARDIAN && !guardianRequired(today)) {
+                continue;
+            }
+            if (field == Field.CONSENT && !guardianRequired(today)) {
                 continue;
             }
             if (!providedFields.contains(field)) {
@@ -333,6 +386,44 @@ public record StudentRegistrationDraft(
                 validity);
     }
 
+    /** O consentimento do responsável é exigido (menor) e ainda não foi coletado por inteiro. */
+    private boolean consentMissing(LocalDate today) {
+        return guardianRequired(today) && !providedFields.contains(Field.CONSENT);
+    }
+
+    /** Grava o consentimento em coleta; o campo {@code CONSENT} só consta com os cinco passos. */
+    public StudentRegistrationDraft withConsent(
+            ConsentDraft value, Instant now, Duration validity) {
+        Set<Field> fields =
+                value.nextPart() == null ? provided(Field.CONSENT) : without(Field.CONSENT);
+        return new StudentRegistrationDraft(
+                linkId,
+                kind,
+                studentId,
+                fields,
+                name,
+                instrument,
+                birthDate,
+                cpfEncrypted,
+                cpfHash,
+                guardianName,
+                guardianPhone,
+                guardianEmail,
+                null,
+                createdAt,
+                now,
+                now.plus(validity),
+                value);
+    }
+
+    /** Descarta o consentimento (o aluno informado é adulto, ou o professor recomeça). */
+    public StudentRegistrationDraft withoutConsent(Instant now, Duration validity) {
+        if (consent.equals(ConsentDraft.EMPTY) && !providedFields.contains(Field.CONSENT)) {
+            return this;
+        }
+        return withConsent(ConsentDraft.EMPTY, now, validity);
+    }
+
     /** Guarda o token do resumo mostrado agora; o anterior deixa de valer. */
     public StudentRegistrationDraft withConfirmationToken(
             String token, Instant now, Duration validity) {
@@ -352,7 +443,8 @@ public record StudentRegistrationDraft(
                 Objects.requireNonNull(token),
                 createdAt,
                 now,
-                now.plus(validity));
+                now.plus(validity),
+                consent);
     }
 
     private StudentRegistrationDraft next(
@@ -383,7 +475,8 @@ public record StudentRegistrationDraft(
                 null,
                 createdAt,
                 now,
-                now.plus(validity));
+                now.plus(validity),
+                consent);
     }
 
     private Set<Field> provided(Field field) {
@@ -427,7 +520,8 @@ public record StudentRegistrationDraft(
                 && Objects.equals(confirmationToken, that.confirmationToken)
                 && Objects.equals(createdAt, that.createdAt)
                 && Objects.equals(updatedAt, that.updatedAt)
-                && Objects.equals(expiresAt, that.expiresAt);
+                && Objects.equals(expiresAt, that.expiresAt)
+                && Objects.equals(consent, that.consent);
     }
 
     @Override
@@ -448,7 +542,8 @@ public record StudentRegistrationDraft(
                         confirmationToken,
                         createdAt,
                         updatedAt,
-                        expiresAt);
+                        expiresAt,
+                        consent);
         return 31 * result + Arrays.hashCode(cpfEncrypted);
     }
 

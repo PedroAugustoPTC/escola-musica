@@ -283,6 +283,9 @@ public class TelegramNotificationAdapter implements TeacherNotificationPort {
             case CONSOLIDATION_FAILED -> {
                 return List.of(presenter.simple(chatId, "CONSOLIDATION_FAILED"));
             }
+            case CONSENT_REQUIRED -> {
+                return List.of(presenter.consentBlocked(chatId, job.studentId().toString()));
+            }
             default -> {
                 // demais resultados têm relatório de aula
             }

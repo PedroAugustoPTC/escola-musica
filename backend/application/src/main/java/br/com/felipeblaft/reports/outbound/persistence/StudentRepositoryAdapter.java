@@ -34,7 +34,7 @@ class StudentRepositoryAdapter implements StudentRepository {
 
     @Override
     public Optional<Student> searchById(UUID id) {
-        return jpa.findById(id).map(RegistryMapper::toDomain);
+        return jpa.findById(id).filter(e -> e.getErasedAt() == null).map(RegistryMapper::toDomain);
     }
 
     @Override
@@ -91,7 +91,7 @@ class StudentRepositoryAdapter implements StudentRepository {
     public Optional<Student> findVisible(StudentScope scope, UUID id) {
         Optional<StudentEntity> found =
                 scope.unrestricted()
-                        ? jpa.findById(id)
+                        ? jpa.findById(id).filter(e -> e.getErasedAt() == null)
                         : jpa.findVisibleToTeacher(id, scope.teacherId());
         return found.map(RegistryMapper::toDomain);
     }
@@ -128,5 +128,11 @@ class StudentRepositoryAdapter implements StudentRepository {
                         student.createdAt(),
                         student.updatedAt())
                 > 0;
+    }
+
+    @Override
+    @Transactional
+    public boolean erase(UUID id, java.time.Instant now) {
+        return jpa.erase(id, now) > 0;
     }
 }
