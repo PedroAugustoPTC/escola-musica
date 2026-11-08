@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
  * valor recebido.
  *
  * @param actorRole papel do autor; {@code null} no filtro "qualquer"
+ * @param systemActor {@code true} filtra os eventos do sistema (sem papel de autor)
  * @param targetId aluno, relatório, professor etc.; filtrar por aluno inclui os eventos dos
  *     relatórios e consentimentos dele (a junção é da consulta)
  */
@@ -33,7 +34,21 @@ public record AuditTrailFilter(
         String operation,
         AuthorshipResult result,
         UUID targetId,
-        PageRequest page) {
+        PageRequest page,
+        boolean systemActor) {
+
+    public AuditTrailFilter(
+            LocalDate from,
+            LocalDate to,
+            UUID actorId,
+            Role actorRole,
+            ActionOrigin origin,
+            String operation,
+            AuthorshipResult result,
+            UUID targetId,
+            PageRequest page) {
+        this(from, to, actorId, actorRole, origin, operation, result, targetId, page, false);
+    }
 
     /** Maior distância entre as duas datas do período (período de 90 dias, inclusive). */
     public static final int MAX_DAYS_BETWEEN = 89;

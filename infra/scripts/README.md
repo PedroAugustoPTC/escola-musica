@@ -149,6 +149,7 @@ relatório de exemplo, com duas perguntas pendentes. Serve para testar o fluxo c
 | `sh infra/scripts/local.sh seed [file] [--simulate]` | carga inicial de professores e alunos (`--simulate` valida e desfaz) |
 | `sh infra/scripts/local.sh issue-code <email>` | emergência: novo código de acesso para um professor (`code` é alias obsoleto) |
 | `sh infra/scripts/local.sh rotate-cpf-key` | rotação das chaves do CPF; veja [Credenciais locais](#credenciais-locais-código-de-emergência-e-rotação-das-chaves) |
+| `sh infra/scripts/local.sh consent-load <csv>` | carga dos consentimentos já coletados (feature 007); o CSV fica **fora** do repositório e é montado só leitura. Contrato: `specs/007-privacy-retention-operations/contracts/consent-load.md` |
 | `sh infra/scripts/local.sh database` | abre o `psql` no banco local |
 | `sh infra/scripts/local.sh database-port` / `database-close` | publica / fecha o banco em `127.0.0.1` para DBeaver ou pgAdmin |
 | `sh infra/scripts/local.sh tests [suite]` | roda os testes em contêiner: `backend`, `frontend`, `e2e`, `real-ai` ou `all` |
@@ -242,6 +243,16 @@ falhar depois disso, nada foi gravado e a mensagem diz como religar o ambiente (
 cópia de segurança recente do banco (ela não inclui as chaves). Termine sempre com o `unset` das
 variáveis. Na VPS (sem `local.sh`), o mesmo comando roda por `docker compose ... run --rm -e ROTATE_NEW_CPF_ENCRYPTION_KEY
 backend rotate-cpf-key`: veja [`infra/README.md`](../README.md#rotação-das-chaves-do-cpf).
+
+## Papel de banco da aplicação (feature 007)
+
+O `up` (e o `deploy.sh`, na VPS) chama `apply_database_roles` (`infra/scripts/lib/db-roles.sh`) antes de subir o backend: garante que o papel `reports_app`
+existe com `LOGIN` e a senha de `DB_APP_PASSWORD`. Esse papel é o do pool da aplicação e não altera nem apaga a trilha de
+auditoria; o Flyway segue com o dono do banco. O `up` gera a `DB_APP_PASSWORD` no `infra/.env` quando está vazia; o `deploy.sh`
+recusa subir sem ela. A senha viaja por variável de ambiente e nunca é impressa. O nome do papel é fixo (`reports_app`).
+
+O CI chama `infra/scripts/check-inventory-review.sh`: avisa (nunca reprova) quando muda o que vai a um provedor de IA sem revisar
+`privacy/processing-inventory.md`.
 
 ## Privacidade do CPF no ambiente local e na operação
 

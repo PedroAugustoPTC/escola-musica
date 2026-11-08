@@ -270,7 +270,6 @@ backend avisa no log o **nome da variável** (nunca o valor). Contrato: `specs/0
 | Variável | Padrão | Função |
 |---|---|---|
 | `DB_APP_PASSWORD` | nenhum (obrigatória) | Senha do papel de banco `reports_app`, usado pelo pool da aplicação (sem `UPDATE`/`DELETE` na trilha). Gere um valor novo e longo; `infra/scripts/lib/db-roles.sh` a aplica ao papel. O Flyway segue com `POSTGRES_PASSWORD` |
-| `DB_APP_USER` | `reports_app` | Nome do papel da aplicação |
 | `RETENTION_TRANSCRIPTION_DAYS` | `30` | Dias após aprovar ou cancelar até apagar a transcrição e o texto das interações |
 | `RETENTION_UNAPPROVED_PDF_DAYS` | `30` | Dias após aprovar até apagar os PDFs das versões não aprovadas |
 | `RETENTION_CANCELLED_REPORT_DAYS` | `90` | Dias após cancelar até anonimizar o relatório |

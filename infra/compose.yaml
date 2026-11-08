@@ -44,7 +44,8 @@ services:
       DATABASE_USER: reports
       DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
       # Papel da aplicação (feature 007): infra/scripts/lib/db-roles.sh o prepara antes de o backend subir.
-      DB_APP_USER: ${DB_APP_USER:-reports_app}
+      # Nome fixo: a migração V17 e o db-roles.sh tratam o papel reports_app.
+      DB_APP_USER: reports_app
       DB_APP_PASSWORD: ${DB_APP_PASSWORD:-}
       TELEGRAM_API_URL: http://telegram-bot-api:8081
       # O n8n é o único transporte do Telegram (feature 004): as mensagens proativas vão da outbox ao webhook dele.

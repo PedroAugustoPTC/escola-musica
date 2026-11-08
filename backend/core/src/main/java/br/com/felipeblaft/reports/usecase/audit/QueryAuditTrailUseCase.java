@@ -40,7 +40,22 @@ public class QueryAuditTrailUseCase {
             AuthorshipResult result,
             UUID targetId,
             PageRequest page,
-            String correlationId) {
+            String correlationId,
+            boolean systemActor) {
+
+        public Command(
+                LocalDate from,
+                LocalDate to,
+                UUID actorId,
+                Role actorRole,
+                ActionOrigin origin,
+                String operation,
+                AuthorshipResult result,
+                UUID targetId,
+                PageRequest page,
+                String correlationId) {
+            this(from, to, actorId, actorRole, origin, operation, result, targetId, page, correlationId, false);
+        }
 
         public Command {
             Objects.requireNonNull(page);
@@ -94,7 +109,8 @@ public class QueryAuditTrailUseCase {
                     command.operation(),
                     command.result(),
                     command.targetId(),
-                    command.page());
+                    command.page(),
+                    command.systemActor());
         } catch (DomainException refusal) {
             authorship.recordRead(
                     actor,

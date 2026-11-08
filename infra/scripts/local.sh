@@ -239,7 +239,7 @@ case "$command" in
     # Carga dos consentimentos já coletados (feature 007). O CSV fica FORA do repositório e é montado só leitura.
     [ "$#" -eq 1 ] || { echo "Uso: sh infra/scripts/local.sh consent-load /caminho/fora/do/repositorio/consentimentos.csv" >&2; exit 2; }
     [ -f "$1" ] || { echo "Arquivo não encontrado." >&2; exit 2; }
-    consent_dir="$(cd "$(dirname "$1")" && pwd)"
+    consent_dir="$(cd "$(dirname "$1")" && pwd -P)"
     case "$consent_dir/" in
       "$ROOT"/*) echo "O arquivo de consentimentos não pode ficar dentro do repositório." >&2; exit 2 ;;
     esac

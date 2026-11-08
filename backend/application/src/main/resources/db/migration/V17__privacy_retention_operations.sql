@@ -414,16 +414,16 @@ BEGIN
         RAISE EXCEPTION 'corte da trilha abaixo do piso de 365 dias'
             USING ERRCODE = 'check_violation';
     END IF;
-    -- Só o prefixo contínuo da cadeia pode sair: até a linha anterior à primeira ainda dentro do prazo.
-    SELECT coalesce(min(sequence) - 1, (SELECT max(sequence) FROM authorship_record))
-    INTO last_sequence
+    -- Só o prefixo da cadeia pode sair: as linhas anteriores à primeira ainda dentro do prazo. Não depende de a
+    -- sequência ser contígua (transação revertida deixa buraco).
+    SELECT sequence, record_hash
+    INTO last_sequence, last_hash
     FROM authorship_record
-    WHERE occurred_at >= cutoff;
-    IF last_sequence IS NULL THEN
-        RETURN 0;
-    END IF;
-    SELECT record_hash INTO last_hash FROM authorship_record WHERE sequence = last_sequence;
-    IF last_hash IS NULL THEN
+    WHERE sequence < coalesce((SELECT min(sequence) FROM authorship_record WHERE occurred_at >= cutoff),
+                              9223372036854775807)
+    ORDER BY sequence DESC
+    LIMIT 1;
+    IF last_sequence IS NULL OR last_hash IS NULL THEN
         RETURN 0;
     END IF;
     PERFORM set_config('reports.audit_purge', 'on', true);

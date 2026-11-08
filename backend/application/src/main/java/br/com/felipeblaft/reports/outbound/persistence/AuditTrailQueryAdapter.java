@@ -86,6 +86,9 @@ class AuditTrailQueryAdapter implements AuditTrailQueryPort {
             where.append(" AND r.author_id = ?");
             parameters.add(filter.actorId());
         }
+        if (filter.systemActor()) {
+            where.append(" AND r.author_role IS NULL");
+        }
         if (filter.actorRole() != null) {
             where.append(" AND r.author_role = ?");
             parameters.add(filter.actorRole().name());

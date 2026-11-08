@@ -18,6 +18,8 @@ jobs:
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
       # FR-035 (feature 003): o guardião de idioma não aceita lista de exclusões temporárias. A migração terminou e o
       # arquivo foi apagado; este passo reprova qualquer PR que o traga de volta.
       - name: Garantir que não há exclusões temporárias do guardião
@@ -25,7 +27,6 @@ jobs:
       # FR-071 (feature 007): aviso, nunca reprova.
       - name: Avisar se o inventário de tratamento precisa de revisão
         run: |
-          git fetch --no-tags origin main --depth=200 || true
           sh infra/scripts/check-inventory-review.sh origin/main
       - name: Testes do backend
         run: docker compose -f infra/compose.test.yaml run --rm tests-backend

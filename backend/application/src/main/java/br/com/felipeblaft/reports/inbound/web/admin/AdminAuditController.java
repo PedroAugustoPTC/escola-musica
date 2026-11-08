@@ -81,13 +81,16 @@ public class AdminAuditController {
                                 date(from),
                                 date(to),
                                 actorId,
-                                enumeration("actorRole", actorRole, Role::valueOf),
+                                isSystem(actorRole)
+                                        ? null
+                                        : enumeration("actorRole", actorRole, Role::valueOf),
                                 enumeration("origin", origin, ActionOrigin::valueOf),
                                 operation,
                                 enumeration("result", result, AuthorshipResult::valueOf),
                                 targetId,
                                 pageRequest(page, size),
-                                correlationId));
+                                correlationId,
+                                isSystem(actorRole)));
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.noStore().cachePrivate())
                 .body(AdminAuditDtos.page(found, catalog));
@@ -127,6 +130,10 @@ public class AdminAuditController {
         } catch (DateTimeParseException invalid) {
             return null;
         }
+    }
+
+    private static boolean isSystem(String actorRole) {
+        return actorRole != null && "SYSTEM".equals(actorRole.strip());
     }
 
     private static <T> T enumeration(String field, String text, Function<String, T> parse) {
