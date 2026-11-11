@@ -8,7 +8,8 @@ máquina só precisa de Docker Engine 27+ com Compose v2 (constituição, "Conta
   O projeto do compose, o banco e o usuário do PostgreSQL chamam-se `reports`; os volumes são `pgdata`,
   `documents`, `telegram-bot-api-data`, `n8n-data`, `caddy-data` e `caddy-config`, e a rede é `internal`.
 - `n8n/`: imagem fina do n8n, workflows (`workflows/*.json`), utilitários (`ops/`) e `entrypoint.sh`. Leia `n8n/CLAUDE.md` antes de mexer.
-- `tests/n8n/`: `Dockerfile` do `tests-n8n` (Maven + `docker` CLI; o socket do Docker só é montado em `compose.test.yaml`).
+- `compose.security.yaml` + `tests/security/`: avaliação de segurança em contêiner (`sh infra/scripts/local.sh tests security`, fora do `all`); ataca só a pilha e2e isolada. Leia `tests/security/CLAUDE.md`.
+- `tests/n8n/`: `Dockerfile` do `tests-n8n` (Maven + `docker` CLI; o socket do Docker só é montado em `compose.test.yaml` e no serviço `security-images` de `compose.security.yaml`).
 - `caddy/Caddyfile`: HTTPS, cabeçalhos de segurança e proxy de `/api/*`. Só a entrada HTTPS é pública.
 - `scripts/telegram-webhook.sh` (`status`, `verify`, `apply`) é o único dono do registro do webhook, que aponta para o n8n (o
   único transporte do Telegram; não há `switch` nem `rollback`: reverter é reimplantar a versão anterior).

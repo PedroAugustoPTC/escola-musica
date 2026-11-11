@@ -1,0 +1,15 @@
+# Regras padrão do gitleaks mais a lista de exceções das credenciais FIXAS de teste (compose.test.yaml e semeadura do e2e).
+title = "Avaliação de segurança - gitleaks"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Credenciais fictícias fixas das pilhas de teste (não protegem dado real)"
+paths = [
+  '''infra/compose\.test\.yaml''',
+  '''frontend/tests/e2e/.*''',
+  '''infra/tests/rehearsal/.*''',
+  '''infra/compose\.security\.yaml''',
+  '''infra/tests/security/.*''',
+]

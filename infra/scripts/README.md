@@ -444,6 +444,7 @@ sh infra/scripts/local.sh tests
 | `n8n` | o n8n real em contêiner: utilitários, contrato dos workflows e a suíte de conversa e de paridade pelo n8n (com duplicidade, queda, privacidade e latência) |
 | `rehearsal` | ensaio do registro do webhook e da rotação do token de serviço, com o Telegram simulado |
 | `all` | `backend`, `frontend`, `e2e`, `n8n` e `rehearsal` |
+| `security` | avaliação de segurança (gitleaks, Semgrep, Trivy, testssl.sh, ZAP e sondas) contra a pilha e2e isolada; **fora do `all`** |
 
 Os testes usam bancos e contêineres próprios (`infra/compose.test.yaml`): não tocam nos dados da
 pilha local.

@@ -29,6 +29,7 @@ subprojeto, como um novo módulo do `backend/`). No mesmo PR que a cria:
 | `frontend/` | Portal do Professor (SPA React + TypeScript) |
 | `infra/` | Contêineres, ambiente local, proxy HTTPS e implantação na VPS |
 | `infra/n8n/` | n8n, o transporte do canal Telegram: imagem fina, workflows como código e utilitários (só transporta) |
+| `security/` | Relatórios técnicos de avaliação de segurança (saídas brutas fora do Git); ferramental em `infra/tests/security/` |
 | `infra/telegram-simulator/` | Simulador do Telegram, só para os ensaios de registro do webhook e de rotação (nunca em produção) |
 | `specs/` | Specs, planos, contratos e tarefas de cada feature (Spec Kit) |
 | `.specify/` | Constituição, templates e scripts do Spec Kit |

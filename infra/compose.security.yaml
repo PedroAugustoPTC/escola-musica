@@ -1,0 +1,162 @@
+# Avaliação de segurança em contêiner (SAST, SCA, IaC, segredos, TLS, DAST e sondas). Camada sobre o compose.test.yaml:
+#   sh infra/scripts/local.sh tests security
+# Os serviços de varredura estática não dependem da pilha; TLS, DAST e sondas usam a pilha isolada de testes
+# (postgres-e2e, backend-e2e e web-e2e), nunca o ambiente local de uso nem a VPS. Saídas brutas: security/out/.
+name: reports-tests
+
+x-scanner: &scanner
+  working_dir: /work
+  volumes:
+    - ..:/work:ro
+    - ../security/out:/out
+
+services:
+  # O ZAP (Java) não envia SNI para nomes sem ponto e o Caddy então recusa o handshake: o proxy de teste também responde
+  # por um nome com ponto (alias de rede, só neste overlay).
+  web-e2e:
+    environment:
+      DOMAIN: "web-e2e, web-e2e.test"
+    networks:
+      default:
+        aliases:
+          - web-e2e.test
+
+  security-secrets:
+    <<: *scanner
+    image: zricethezav/gitleaks:v8.28.0@sha256:cdbb7c955abce02001a9f6c9f602fb195b7fadc1e812065883f695d1eeaba854
+    entrypoint: ["sh", "-c"]
+    command:
+      - >-
+        mkdir -p /out/secrets &&
+        git config --global --add safe.directory /work &&
+        gitleaks git /work --config /work/infra/tests/security/gitleaks.toml --redact --no-banner --exit-code 0
+        --report-format json --report-path /out/secrets/history.json &&
+        gitleaks dir /work --config /work/infra/tests/security/gitleaks.toml --redact --no-banner --exit-code 0
+        --report-format json --report-path /out/secrets/worktree.json
+
+  security-sast:
+    <<: *scanner
+    image: semgrep/semgrep:1.130.0@sha256:7674a72a8bd5beaa4591b728e5950c04c58b27b82803901f36e7f9d70b828906
+    environment:
+      SEMGREP_ENABLE_VERSION_CHECK: "0"
+      SEMGREP_SEND_METRICS: "off"
+    command:
+      - sh
+      - -c
+      - >-
+        mkdir -p /out/sast &&
+        semgrep scan --metrics=off --no-git-ignore --json --output /out/sast/semgrep.json
+        --config p/java --config p/typescript --config p/react --config p/owasp-top-ten --config p/secrets
+        --config p/dockerfile --config p/github-actions
+        backend/core/src/main backend/application/src/main frontend/src infra .github || true
+
+  security-sca:
+    <<: *scanner
+    image: aquasec/trivy:0.65.0@sha256:a22415a38938a56c379387a8163fcb0ce38b10ace73e593475d3658d578b2436
+    volumes:
+      - ..:/work:ro
+      - ../security/out:/out
+      - trivy-cache:/root/.cache/trivy
+    entrypoint: ["sh", "-c"]
+    command:
+      - >-
+        mkdir -p /out/sca &&
+        trivy fs --scanners vuln,license --timeout 20m --skip-dirs node_modules --skip-dirs target --skip-dirs .claude
+        --skip-dirs specs --skip-dirs "portal-*"
+        --format json --output /out/sca/trivy-fs.json /work
+
+  security-sca-npm:
+    image: node:24-alpine
+    working_dir: /work/frontend
+    volumes:
+      - ..:/work:ro
+      - ../security/out:/out
+    command: ["sh", "-c", "mkdir -p /out/sca && npm audit --package-lock-only --json > /out/sca/npm-audit.json; true"]
+
+  security-iac:
+    <<: *scanner
+    image: aquasec/trivy:0.65.0@sha256:a22415a38938a56c379387a8163fcb0ce38b10ace73e593475d3658d578b2436
+    volumes:
+      - ..:/work:ro
+      - ../security/out:/out
+      - trivy-cache:/root/.cache/trivy
+    entrypoint: ["sh", "-c"]
+    command:
+      - >-
+        mkdir -p /out/iac &&
+        trivy config --timeout 20m --skip-dirs specs --skip-dirs "portal-*" --skip-dirs node_modules --skip-dirs target --skip-dirs .claude
+        --format json --output /out/iac/trivy-config.json /work
+
+  security-images:
+    image: aquasec/trivy:0.65.0@sha256:a22415a38938a56c379387a8163fcb0ce38b10ace73e593475d3658d578b2436
+    volumes:
+      - ../security/out:/out
+      - trivy-cache:/root/.cache/trivy
+      - /var/run/docker.sock:/var/run/docker.sock
+    entrypoint: ["sh", "-c"]
+    command:
+      - >-
+        mkdir -p /out/images &&
+        for image in reports-web reports-backend reports-n8n; do
+        trivy image --scanners vuln --format json --output /out/images/$$image.json $$image; done
+
+  security-tls:
+    image: drwetter/testssl.sh:3.2@sha256:64bab3c1fd8eee440f68d5e020dd633c1f2d375fe0ae593bdfec2725110a7e29
+    user: root
+    volumes:
+      - ../security/out:/out
+    entrypoint: ["sh", "-c"]
+    command: ["mkdir -p /out/tls && rm -f /out/tls/testssl.json && /home/testssl/testssl.sh --quiet --jsonfile /out/tls/testssl.json web-e2e:443; true"]
+    depends_on:
+      web-e2e:
+        condition: service_started
+
+  security-seed:
+    image: node:24-alpine
+    working_dir: /work/frontend
+    environment:
+      E2E_DATABASE_URL: postgres://reports:e2e@postgres-e2e:5432/reports
+      E2E_CPF_KEY: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+      E2E_HMAC_SECRET: hmac-secret-for-e2e-tests-with-more-than-32-bytes
+      E2E_ADMIN_PASSWORD: ${SECURITY_ADMIN_PASSWORD:-}
+    volumes:
+      - ..:/work
+      - node-modules-e2e:/work/frontend/node_modules
+    command: ["sh", "-c", "npm ci --silent && node /work/infra/tests/security/seed.mjs"]
+    depends_on:
+      web-e2e:
+        condition: service_started
+
+  security-probes:
+    image: alpine:3.22
+    working_dir: /work
+    environment:
+      TARGET: https://web-e2e
+      BACKEND_DIRECT: http://backend:8080
+      ADMIN_EMAIL: admin@example.test
+      ADMIN_PASSWORD: ${SECURITY_ADMIN_PASSWORD:-}
+    volumes:
+      - ..:/work:ro
+      - ../security/out:/out
+    command: ["sh", "-c", "apk add -q --no-cache curl jq && sh /work/infra/tests/security/probes.sh"]
+    depends_on:
+      web-e2e:
+        condition: service_started
+
+  security-dast:
+    image: ghcr.io/zaproxy/zaproxy:2.16.1@sha256:7840969c7c9fead565bf9734b12f49f6886db90b1d35b1f74d79710bbd081dab
+    user: root
+    environment:
+      ADMIN_EMAIL: admin@example.test
+      ADMIN_PASSWORD: ${SECURITY_ADMIN_PASSWORD:-}
+    volumes:
+      - ..:/work:ro
+      - ../security/out:/out
+    entrypoint: ["sh", "-c"]
+    command: ["sh /work/infra/tests/security/zap-auth.sh"]
+    depends_on:
+      web-e2e:
+        condition: service_started
+
+volumes:
+  trivy-cache:

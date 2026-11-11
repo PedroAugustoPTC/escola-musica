@@ -16,7 +16,7 @@
 #   sh infra/scripts/local.sh database        # abre o psql no banco local (como administrador)
 #   sh infra/scripts/local.sh database-port   # publica o banco em 127.0.0.1 para DBeaver/pgAdmin
 #   sh infra/scripts/local.sh database-close  # volta a deixar o banco só na rede interna
-#   sh infra/scripts/local.sh tests [suite]   # backend | frontend | e2e | n8n | rehearsal | real-ai | all (padrão: all)
+#   sh infra/scripts/local.sh tests [suite]   # backend | frontend | e2e | n8n | rehearsal | real-ai | security | all (padrão: all; security fica fora do all)
 #   sh infra/scripts/local.sh stop            # para a pilha local (mantém os dados)
 #   sh infra/scripts/local.sh clean           # para e APAGA os dados locais (banco, PDFs, certificados)
 #
@@ -354,6 +354,11 @@ case "$command" in
           $TESTS run --rm -e TRANSCRIPTION_API_KEY -e LLM_API_KEY tests-real-ai
         echo "Relatório: backend/application/target/real-ai/report.md"
         ;;
+      security)
+        # avaliação de segurança (SAST, SCA, IaC, segredos, TLS, DAST e sondas) em contêiner; fora do `all`
+        sh infra/tests/security/run.sh
+        exit $?
+        ;;
       all)
         $TESTS run --rm tests-backend
         $TESTS run --rm tests-frontend
@@ -363,7 +368,7 @@ case "$command" in
         $TESTS run --rm --build --use-aliases tests-n8n
         sh "$0" tests rehearsal
         ;;
-      *) echo "Use: backend | frontend | e2e | n8n | rehearsal | real-ai | all" >&2; exit 2 ;;
+      *) echo "Use: backend | frontend | e2e | n8n | rehearsal | real-ai | security | all" >&2; exit 2 ;;
     esac
     $TESTS down -v >/dev/null 2>&1 || true
     ;;

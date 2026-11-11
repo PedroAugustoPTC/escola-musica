@@ -42,3 +42,4 @@ frontend/tsconfig.tsbuildinfo
 infra/.env.previous
 infra/tests/rehearsal/rehearsal.env
 infra/tests/rehearsal/rehearsal.env.previous
+security/out/
