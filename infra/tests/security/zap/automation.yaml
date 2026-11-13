@@ -1,0 +1,49 @@
+# Plano do ZAP Automation Framework. Os marcadores __COOKIE__, __CSRF__ e __CONTEXT__ são trocados pelo zap-auth.sh.
+env:
+  contexts:
+    - name: target
+      urls: ["https://web-e2e.test"]
+      includePaths: ["https://web-e2e.test/.*"]
+      excludePaths:
+        - "https://web-e2e.test/api/v1/admin/erasure-requests/.*/confirmation"
+        - "https://web-e2e.test/api/v1/session"
+        - "https://web-e2e.test/api/v1/admin/session"
+  parameters:
+    failOnError: false
+    progressToStdout: true
+jobs:
+  - type: replacer
+    rules:
+      - description: cookie
+        matchType: REQ_HEADER
+        matchString: Cookie
+        replacementString: "__COOKIE__"
+        initiators: []
+      - description: csrf
+        matchType: REQ_HEADER
+        matchString: X-CSRF-TOKEN
+        replacementString: "__CSRF__"
+        initiators: []
+  - type: openapi
+    parameters:
+      apiFile: __PORTAL_CONTRACT__
+      targetUrl: https://web-e2e.test/api/v1
+  - type: openapi
+    parameters:
+      apiFile: /work/specs/005-admin-registrations-access/contracts/api-administration.openapi.yaml
+      targetUrl: https://web-e2e.test/api/v1
+  - type: spider
+    parameters:
+      maxDuration: 3
+  - type: passiveScan-wait
+    parameters:
+      maxDuration: 5
+  - type: activeScan
+    parameters:
+      maxRuleDurationInMins: 2
+      maxScanDurationInMins: 15
+  - type: report
+    parameters:
+      template: traditional-json
+      reportDir: /out/dast
+      reportFile: zap-__CONTEXT__

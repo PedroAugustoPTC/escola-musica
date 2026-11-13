@@ -413,6 +413,8 @@ docker compose -f infra/compose.test.yaml run --rm --build tests-e2e
   Rode com `sh infra/scripts/local.sh tests n8n`.
 - `tests-rehearsal`: o ensaio do registro do webhook e da rotação do token, com o Telegram simulado
   (`sh infra/scripts/local.sh tests rehearsal`).
+- `security-*` (`compose.security.yaml`): varreduras de segurança em contêiner (segredos, SAST, SCA, IaC, imagens, TLS, DAST e sondas);
+  `sh infra/scripts/local.sh tests security`. Saídas em `security/out/` (ignorado pelo Git); relatórios em `security/reports/`.
 - `tests-e2e`: Playwright + axe contra a pilha completa com IA simulada. A semeadura grava dados
   fictícios direto no banco de testes. Relatório em `frontend/playwright-report/`.
 - `tests-real-ai` (opcional, fora da cobertura): precisa de `TRANSCRIPTION_API_KEY` e `LLM_API_KEY` no
