@@ -56,6 +56,10 @@ public class N8nOrchestratorAdapter implements ChannelOrchestratorPort {
         this.responseTimeout = Duration.ofMillis(channel.responseTimeoutMs());
         this.client =
                 HttpClient.newBuilder()
+                        // HTTP/1.1 fixo: o padrão (HTTP/2) tenta o upgrade h2c em texto claro, que o
+                        // webhook do n8n nunca responde — a chamada trava até o timeout de resposta
+                        // (reproduzido com curl --http2 puro, sem nenhum código deste projeto).
+                        .version(HttpClient.Version.HTTP_1_1)
                         .connectTimeout(Duration.ofMillis(channel.connectionTimeoutMs()))
                         .followRedirects(HttpClient.Redirect.NEVER)
                         .build();
