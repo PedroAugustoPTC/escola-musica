@@ -427,7 +427,7 @@ há troca nem `rollback` (reverter é reimplantar a versão anterior). O passo a
 
 ## Imagem base do n8n no CI
 
-`sh infra/scripts/ci-n8n-image.sh [cache.tar]` deixa a imagem base do n8n (tag e digest fixados em `infra/n8n/Dockerfile`) no Docker local antes do build: carrega do cache ou baixa por digest do `docker.n8n.io`, do `ghcr.io` e do Docker Hub, nessa ordem. É o que o job `n8n` do CI usa para não depender de um registro só.
+`sh infra/scripts/ci-n8n-image.sh [cache.tar]` deixa a imagem base do n8n (tag e digest fixados em `infra/n8n/Dockerfile`) no Docker local antes do build: carrega do cache ou baixa por digest do `docker.n8n.io`, do `ghcr.io` e do Docker Hub, nessa ordem. É o que o job `n8n` do CI usa para não depender de um registro só. Se a imagem já está no Docker local com o digest fixado, o script não baixa nada; o `deploy.sh` o chama antes de construir o n8n (sem `--pull`), e constrói `web` e `backend` com `--pull` dentro de `retry-rate-limit.sh`.
 
 ## Testes
 
