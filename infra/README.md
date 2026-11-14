@@ -457,7 +457,10 @@ sh infra/scripts/deploy.sh main
 ```
 
 O script faz `git pull --ff-only`, `build` e `up -d` com `compose.yaml` + `compose.prod.yaml` e
-espera os serviços ficarem saudáveis.
+espera os serviços ficarem saudáveis. O `docker.n8n.io` responde `429` de vez em quando: por isso o build de
+`web` e `backend` repete nesse caso (`retry-rate-limit.sh`) e a imagem base do n8n, fixada por digest, é garantida no
+Docker local por `ci-n8n-image.sh` (que a baixa do `docker.n8n.io`, do `ghcr.io` ou do Docker Hub) antes do build do
+n8n, feito sem `--pull`. Se a imagem já está na VPS com o digest certo, nada é baixado.
 
 Pelo GitHub: workflow **Implantar** (`.github/workflows/deploy.yml`, disparo manual). Configure
 o ambiente `production` com aprovação obrigatória (Settings → Environments → Required reviewers) e os

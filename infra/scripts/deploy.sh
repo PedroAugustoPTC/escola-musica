@@ -19,7 +19,12 @@ fi
 git pull --ff-only
 
 COMPOSE="docker compose -f infra/compose.yaml -f infra/compose.prod.yaml"
-$COMPOSE build --pull
+# O docker.n8n.io limita a taxa (429) de vez em quando. A imagem base do n8n é fixada por digest e vem do Docker local ou,
+# sem ela, de uma origem alternativa (ci-n8n-image.sh); o build do n8n, sem --pull, não consulta o registro. Os demais serviços
+# seguem com --pull (tags flutuantes), repetindo só se vier 429 (retry-rate-limit.sh).
+sh infra/scripts/retry-rate-limit.sh $COMPOSE build --pull web backend
+sh infra/scripts/ci-n8n-image.sh
+$COMPOSE build n8n
 # o papel de banco da aplicação (reports_app) precisa existir, com senha, antes de o backend subir (feature 007)
 $COMPOSE up -d --wait postgres
 . infra/scripts/lib/db-roles.sh

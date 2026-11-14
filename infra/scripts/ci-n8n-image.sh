@@ -22,6 +22,11 @@ if [ -z "$image" ] || [ -z "$tag" ] || [ -z "$digest" ]; then
 fi
 target="$image:$tag"
 
+if docker image inspect "$target" --format '{{join .RepoDigests " "}}' 2>/dev/null | grep -q "$digest"; then
+  echo "ci-n8n-image: $target já está no Docker local (digest conferido)."
+  exit 0
+fi
+
 if [ -n "$cache" ] && [ -s "$cache" ]; then
   echo "ci-n8n-image: carregando $target do cache."
   docker load -i "$cache"
