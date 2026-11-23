@@ -16,3 +16,7 @@ RUN npm run build
 FROM caddy:2
 COPY infra/caddy/Caddyfile /etc/caddy/Caddyfile
 COPY --from=build /repo/frontend/dist /srv
+# SEC-004: o Caddy roda sem root. As portas 80/443 abrem pelo sysctl ip_unprivileged_port_start=0 do compose;
+# volumes já existentes trocam de dono em infra/scripts/lib/web-volumes.sh.
+RUN chown -R 1000:1000 /data /config
+USER 1000:1000

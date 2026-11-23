@@ -47,6 +47,10 @@ server:
     max-swallow-size: -1
 
 management:
+  # SEC-002: o actuator só responde dentro do próprio contêiner (healthcheck); outros contêineres da rede não alcançam
+  server:
+    port: ${MANAGEMENT_PORT:8081}
+    address: 127.0.0.1
   endpoints:
     web:
       exposure:

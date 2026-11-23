@@ -18,10 +18,10 @@ import java.util.UUID;
  */
 public class AudioNormalizationTest implements AudioNormalizationPort {
 
-    public static final String SILENCE = "SILENCE";
-    public static final String INVALID = "INVALID";
+    public static final String SILENCE = "OggS-SILENCE";
+    public static final String INVALID = "OggS-INVALID";
     public static final byte[] AUDIO_WITH_SPEECH =
-            "FICTITIOUS-LESSON-AUDIO".getBytes(StandardCharsets.UTF_8);
+            "OggS-FICTITIOUS-LESSON-AUDIO".getBytes(StandardCharsets.UTF_8);
 
     @Override
     public NormalizedAudio normalize(TemporaryFile original) {

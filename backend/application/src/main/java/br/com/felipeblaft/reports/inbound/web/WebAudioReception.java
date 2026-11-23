@@ -3,6 +3,7 @@ package br.com.felipeblaft.reports.inbound.web;
 import br.com.felipeblaft.reports.config.ApplicationProperties;
 import br.com.felipeblaft.reports.domain.common.DomainException;
 import br.com.felipeblaft.reports.domain.common.ErrorCode;
+import br.com.felipeblaft.reports.port.AudioSignature;
 import br.com.felipeblaft.reports.port.TemporaryFile;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,7 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Recebe o áudio da Web (FR-014): confere o limite de tamanho (413 {@code AUDIO_MUITO_GRANDE}) e a
- * lista de tipos aceitos (415 {@code FORMATO_NAO_SUPORTADO}) e grava o arquivo em streaming no
+ * lista de tipos aceitos e a assinatura do arquivo (415 {@code FORMATO_NAO_SUPORTADO}) e grava o arquivo em streaming no
  * diretório temporário, de onde o processamento o apaga (FR-018).
  */
 @Component
@@ -77,6 +78,10 @@ public class WebAudioReception {
             Files.createDirectories(directory);
             try (InputStream input = file.getInputStream()) {
                 Files.copy(input, destination, StandardCopyOption.REPLACE_EXISTING);
+            }
+            if (!AudioSignature.isAudio(destination)) {
+                delete(destination);
+                throw new DomainException(ErrorCode.UNSUPPORTED_FORMAT);
             }
             return new TemporaryFile(destination, Files.size(destination), mime);
         } catch (IOException error) {

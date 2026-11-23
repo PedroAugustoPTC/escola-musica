@@ -139,7 +139,7 @@ implantar.
 
 ### Versão do n8n
 
-O n8n usa a imagem `docker.n8n.io/n8nio/n8n:2.43.6`, fixada **só** em `infra/n8n/Dockerfile` (com o *digest* em
+O n8n usa a imagem `docker.n8n.io/n8nio/n8n:2.49.5`, fixada **só** em `infra/n8n/Dockerfile` (com o *digest* em
 comentário). Nunca use `latest`, `stable` nem `next`. Para atualizar: leia as notas de versão do n8n, troque a tag no
 `Dockerfile`, suba no ambiente local, rode `sh infra/scripts/local.sh tests n8n` e `tests rehearsal` e só então
 abra o PR. A imagem já traz os workflows do repositório; nada é baixado em tempo de execução.

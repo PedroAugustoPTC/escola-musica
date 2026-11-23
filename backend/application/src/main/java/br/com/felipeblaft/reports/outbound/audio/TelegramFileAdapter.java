@@ -2,10 +2,12 @@ package br.com.felipeblaft.reports.outbound.audio;
 
 import br.com.felipeblaft.reports.config.ApplicationProperties;
 import br.com.felipeblaft.reports.outbound.telegram.TelegramMessagingAdapter;
+import br.com.felipeblaft.reports.port.AudioSignature;
 import br.com.felipeblaft.reports.port.ChannelFilePort;
 import br.com.felipeblaft.reports.port.ChannelFileReference;
 import br.com.felipeblaft.reports.port.ProviderUnavailableException;
 import br.com.felipeblaft.reports.port.TemporaryFile;
+import br.com.felipeblaft.reports.port.UnsupportedFormatException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -51,6 +53,10 @@ public class TelegramFileAdapter implements ChannelFilePort {
             Files.createDirectories(temporaries);
             Files.copy(original, destination, StandardCopyOption.REPLACE_EXISTING);
             Files.deleteIfExists(original);
+            if (!AudioSignature.isAudio(destination)) {
+                Files.deleteIfExists(destination);
+                throw new UnsupportedFormatException();
+            }
             return new TemporaryFile(destination, Files.size(destination), reference.mime());
         } catch (IOException error) {
             try {

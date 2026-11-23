@@ -18,21 +18,29 @@ fi
 
 # Cada chamada da CLI inicia o aplicativo inteiro (cerca de 5 s) e a CLI não publica vários de uma vez; as
 # publicações rodam em paralelo para caber no orçamento de 60 s do reinício (FR-003).
+# Desde o n8n 2.49 um workflow só publica se os sub-workflows que ele chama já estiverem publicados: primeiro a
+# leva dos sub-workflows (os que têm o gatilho executeWorkflowTrigger), depois a dos demais.
 ids=""
-pids=""
-for file in "$WORKFLOWS_DIR"/*.json; do
-  id="$(node -e 'process.stdout.write(JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")).id)' "$file")"
-  echo "n8n: publicando o workflow $id..."
-  n8n publish:workflow --id="$id" >/dev/null &
-  pids="$pids $!"
-  ids="$ids $id"
-done
-for pid in $pids; do
-  if ! wait "$pid"; then
-    echo "n8n: falha ao publicar um workflow; a subida foi interrompida." >&2
-    exit 1
-  fi
-done
+publish_batch() {
+  pids=""
+  for file in "$@"; do
+    id="$(node -e 'process.stdout.write(JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")).id)' "$file")"
+    echo "n8n: publicando o workflow $id..."
+    n8n publish:workflow --id="$id" >/dev/null &
+    pids="$pids $!"
+    ids="$ids $id"
+  done
+  for pid in $pids; do
+    if ! wait "$pid"; then
+      echo "n8n: falha ao publicar um workflow; a subida foi interrompida." >&2
+      exit 1
+    fi
+  done
+}
+# shellcheck disable=SC2046
+publish_batch $(grep -l 'n8n-nodes-base.executeWorkflowTrigger' "$WORKFLOWS_DIR"/*.json)
+# shellcheck disable=SC2046
+publish_batch $(grep -L 'n8n-nodes-base.executeWorkflowTrigger' "$WORKFLOWS_DIR"/*.json)
 
 # Workflow que existe só na instância (removido do repositório, ou criado à mão) não pode ficar ativo.
 # shellcheck disable=SC2086

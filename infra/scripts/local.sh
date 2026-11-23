@@ -184,6 +184,8 @@ case "$command" in
     $LOCAL up -d --wait postgres
     . infra/scripts/lib/db-roles.sh
     apply_database_roles "$LOCAL"
+    . infra/scripts/lib/web-volumes.sh
+    fix_web_volume_owner "$LOCAL"
     # shellcheck disable=SC2046
     $LOCAL up -d --build --remove-orphans $(services)
     wait_until_healthy
