@@ -26,8 +26,8 @@ services:
   postgres-test:
     image: postgres:18
     # cada contexto de teste em cache abre o próprio pool (10 conexões); os testes com @MockitoSpyBean
-    # criam contextos distintos, e o limite padrão de 100 conexões já não basta
-    command: ["postgres", "-c", "max_connections=300"]
+    # criam contextos distintos (o cache do Spring guarda até 32), e 300 conexões já ficaram no limite
+    command: ["postgres", "-c", "max_connections=400"]
     environment:
       POSTGRES_DB: reports_test
       POSTGRES_USER: reports
