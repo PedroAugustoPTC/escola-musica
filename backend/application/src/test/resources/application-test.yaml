@@ -8,6 +8,10 @@ spring:
     multipart:
       location: ${java.io.tmpdir}
 
+management:
+  server:
+    port: 0
+
 reports:
   audio:
     limit-mb: 50

@@ -120,6 +120,22 @@ class LessonReportContractIT extends ContractApiBase {
                 .andExpect(status().isUnsupportedMediaType())
                 .andExpect(replyFollowsContract())
                 .andExpect(jsonPath("$.code").value("UNSUPPORTED_FORMAT"));
+        // SEC-003: tipo declarado de áudio não basta; a assinatura do arquivo decide
+        mvc.perform(
+                        authenticated(
+                                multipart("/api/v1/students/{id}/lesson-reports", matteo.id())
+                                        .file(
+                                                audio(
+                                                        "audio/mpeg",
+                                                        "<!doctype html><script>alert(1)</script>"
+                                                                .getBytes(
+                                                                        java.nio.charset
+                                                                                .StandardCharsets
+                                                                                .UTF_8))),
+                                session))
+                .andExpect(status().isUnsupportedMediaType())
+                .andExpect(replyFollowsContract())
+                .andExpect(jsonPath("$.code").value("UNSUPPORTED_FORMAT"));
         mvc.perform(
                         authenticated(
                                 multipart("/api/v1/students/{id}/lesson-reports", matteo.id())

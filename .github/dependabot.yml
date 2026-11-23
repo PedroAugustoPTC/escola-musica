@@ -1,0 +1,7 @@
+# SEC-005: as Actions ficam fixadas por SHA; o Dependabot abre PR semanal com o SHA novo (o merge continua do usuário).
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

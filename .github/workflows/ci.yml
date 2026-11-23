@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           fetch-depth: 0
       # FR-035 (feature 003): o guardião de idioma não aceita lista de exclusões temporárias. A migração terminou e o
@@ -32,7 +32,7 @@ jobs:
         run: docker compose -f infra/compose.test.yaml run --rm tests-backend
       - name: Relatório de cobertura do núcleo
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: jacoco-core
           path: backend/core/target/site/jacoco/
@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
       - name: Testes do frontend
         run: docker compose -f infra/compose.test.yaml run --rm tests-frontend
 
@@ -56,12 +56,12 @@ jobs:
     timeout-minutes: 40
     needs: [backend, frontend]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
       - name: Testes ponta a ponta
         run: docker compose -f infra/compose.test.yaml run --rm --build tests-e2e
       - name: Relatório do Playwright
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: playwright-report
           path: frontend/playwright-report/
@@ -81,9 +81,9 @@ jobs:
     timeout-minutes: 60
     needs: [backend, frontend]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
       - name: Cache da imagem base do n8n
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: /tmp/n8n-image.tar
           key: n8n-image-${{ hashFiles('infra/n8n/Dockerfile') }}

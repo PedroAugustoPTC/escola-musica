@@ -29,6 +29,8 @@ $COMPOSE build n8n
 $COMPOSE up -d --wait postgres
 . infra/scripts/lib/db-roles.sh
 apply_database_roles "$COMPOSE"
+. infra/scripts/lib/web-volumes.sh
+fix_web_volume_owner "$COMPOSE"
 $COMPOSE up -d --remove-orphans
 docker image prune -f >/dev/null
 
